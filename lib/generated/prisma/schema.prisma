@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id         String      @id @default(uuid())
+  clerkId    String      @unique
+  email      String      @unique
+  name       String?
+  imageUrl   String?
+  phone      String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  role       UserRole    @default(USER)
+  savedCars  SavedCar[]
+  testDrives TestDrive[]
+}
+
+model Car {
+  id           String      @id @default(uuid())
+  make         String
+  model        String
+  year         Int
+  price        Decimal
+  mileage      Int
+  fuelType     String
+  transmission String
+  color        String
+  seats        Int?
+  bodyType     String
+  featured     Boolean     @default(false)
+  status       CarStatus   @default(AVAILABLE)
+  images       String[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  title        String?
+  description  String?
+  location     String?
+  features     String[]
+  savedBy      SavedCar[]
+  testDrive    TestDrive[]
+
+  @@index([make, model])
+  @@index([price])
+  @@index([year])
+  @@index([fuelType])
+  @@index([status])
+  @@index([color])
+  @@index([featured])
+  @@index([bodyType])
+}
+
+model Dealership {
+  id           String         @id @default(uuid())
+  name         String         @default("AutoMe")
+  address      String         @default("Cairo, Egypt")
+  phone        String         @default("+201012345678")
+  email        String         @default("autome@gmail.com")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  workingHours WorkingHours[]
+}
+
+model WorkingHours {
+  id           String      @id @default(uuid())
+  dayOfWeek    DayOfWeek[]
+  openTime     String
+  closeTime    String
+  isOpen       Boolean     @default(false)
+  dealershipId String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  dealership   Dealership  @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+
+  @@unique([dayOfWeek, dealershipId])
+  @@index([dealershipId])
+  @@index([isOpen])
+  @@index([dayOfWeek])
+}
+
+model SavedCar {
+  id        String   @id @default(uuid())
+  userId    String
+  carId     String
+  createdAt DateTime @default(now())
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, carId])
+  @@index([userId])
+  @@index([carId])
+}
+
+model TestDrive {
+  id        String          @id @default(uuid())
+  status    TestDriveStatus @default(PENDING)
+  date      DateTime        @db.Date
+  startTime String
+  endTime   String
+  notes     String?
+  userId    String
+  carId     String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  car       Car             @relation(fields: [carId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([carId])
+  @@index([status])
+  @@index([date])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum CarStatus {
+  AVAILABLE
+  UNAVAILABLE
+  SOLD
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum TestDriveStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
