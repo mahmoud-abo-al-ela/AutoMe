@@ -26,10 +26,10 @@ const AIUploadSection = ({ onDrop, isProcessing, error, isDragActive }) => {
                 <Brain className="h-10 w-10 text-purple-600 animate-pulse" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                AI Processing Images
+                AI Processing Image
               </h3>
               <p className="text-gray-600 mb-6">
-                Our AI is analyzing your images and extracting car details...
+                Our AI is analyzing your image and extracting car details...
               </p>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
                 <div
@@ -58,19 +58,19 @@ const AIUploadSection = ({ onDrop, isProcessing, error, isDragActive }) => {
                   <FileImage className="h-8 w-8 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Upload Car Images
+                  Upload Car Image
                 </h3>
                 <p className="text-gray-600 mb-6">
                   {isDragActive
                     ? "Drop your car image here..."
-                    : "Drop your car images here or click to browse. Our AI will automatically extract car details."}
+                    : "Drop your car image here or click to browse. Our AI will automatically extract car details."}
                 </p>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 mb-4"
                   disabled={isProcessing}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Choose Images
+                  Choose Image
                 </Button>
                 <p className="text-sm text-gray-500">
                   Supports JPG, PNG, WEBP up to 10MB each

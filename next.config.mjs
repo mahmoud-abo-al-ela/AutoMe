@@ -12,6 +12,19 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: "/embed",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-src 'self' https://roadsidecoder.created.app;",
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config) => {
     config.plugins.push(
       new MiniCssExtractPlugin({
@@ -19,7 +32,6 @@ const nextConfig = {
         chunkFilename: "[id].css",
       })
     );
-
     return config;
   },
 };

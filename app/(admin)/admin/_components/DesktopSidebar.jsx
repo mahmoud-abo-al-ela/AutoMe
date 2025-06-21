@@ -31,7 +31,7 @@ export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out relative",
+        "hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out fixed top-0 left-0 h-screen z-30",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -66,7 +66,7 @@ export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4 px-3 space-y-1">
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-hidden">
         {sidebarItems.map((item, index) => {
           const ItemIcon = iconMap[item.icon];
           const isActive = pathname === item.path;

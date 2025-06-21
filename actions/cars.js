@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
 
-async function fileToBase64(file) {
+export async function fileToBase64(file) {
   const arrayBuffer = await file.arrayBuffer();
   const base64 = Buffer.from(arrayBuffer).toString("base64");
   return base64;

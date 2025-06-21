@@ -11,7 +11,10 @@ export default async function AdminLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
-      <main className="flex-1 transition-all duration-300 ease-in-out">
+      <main
+        className="flex-1 transition-all duration-300 ease-in-out"
+        style={{ marginLeft: "var(--sidebar-width, 0)" }}
+      >
         <div className="md:hidden h-16" />
         <div className="p-4 md:p-6 animate-in fade-in duration-500">
           {children}

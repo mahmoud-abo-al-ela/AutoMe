@@ -29,6 +29,30 @@ export default function AdminSidebar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Update CSS variable when collapsed state changes
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const updateSidebarWidth = () => {
+        // Only apply sidebar width on non-mobile devices
+        if (window.innerWidth >= 768) {
+          document.documentElement.style.setProperty(
+            "--sidebar-width",
+            collapsed ? "64px" : "256px"
+          );
+        } else {
+          // Remove the property on mobile
+          document.documentElement.style.removeProperty("--sidebar-width");
+        }
+      };
+
+      updateSidebarWidth();
+
+      // Update on resize
+      window.addEventListener("resize", updateSidebarWidth);
+      return () => window.removeEventListener("resize", updateSidebarWidth);
+    }
+  }, [collapsed]);
+
   if (!mounted) {
     return null;
   }
