@@ -5,12 +5,16 @@ import { getCars } from "@/actions/cars-listing";
 import CarCard from "@/components/CarCard";
 import CarCardSkeleton from "@/components/CarCardSkeleton";
 import useFetch from "@/hooks/use-fetch";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useSearchParams } from "next/navigation";
 
 const BrowseCarsPage = () => {
+  const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: undefined,
     make: undefined,
@@ -29,11 +33,43 @@ const BrowseCarsPage = () => {
     fn: fetchCars,
   } = useFetch(getCars, true);
 
+  // Read URL parameters when component mounts
+  useEffect(() => {
+    const initialFilters = {
+      search: searchParams.get("search") || undefined,
+      make: searchParams.get("make") || undefined,
+      bodyType: searchParams.get("bodyType") || undefined,
+      fuelType: searchParams.get("fuelType") || undefined,
+      transmission: searchParams.get("transmission") || undefined,
+      minPrice: searchParams.get("minPrice")
+        ? Number(searchParams.get("minPrice"))
+        : undefined,
+      maxPrice: searchParams.get("maxPrice")
+        ? Number(searchParams.get("maxPrice"))
+        : undefined,
+      sortBy: searchParams.get("sortBy") || "newest",
+      page: 1,
+    };
+
+    // Only update if we have at least one filter parameter
+    const hasFilters = Object.values(initialFilters).some(
+      (value) => value !== undefined
+    );
+
+    if (hasFilters) {
+      setFilters(initialFilters);
+      fetchCars(initialFilters);
+    } else {
+      fetchCars({ ...filters, page });
+    }
+  }, []);
+
   const handleFilterChange = (newFilters) => {
     setPage(1);
     const updatedFilters = { ...newFilters, page: 1 };
     setFilters(updatedFilters);
     fetchCars(updatedFilters);
+    setIsFilterOpen(false); // Close filter panel on mobile after applying filters
   };
 
   const handlePageChange = (newPage) => {
@@ -45,10 +81,6 @@ const BrowseCarsPage = () => {
       behavior: "smooth",
     });
   };
-
-  useEffect(() => {
-    fetchCars({ ...filters, page });
-  }, []);
 
   const cars = carsData?.success ? carsData.data.cars : [];
   const pagination = carsData?.success
@@ -98,7 +130,7 @@ const BrowseCarsPage = () => {
       variant={pagination.page === pageNum ? "default" : "outline"}
       size="sm"
       onClick={() => handlePageChange(pageNum)}
-      className="w-10 h-10 cursor-pointer"
+      className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer"
     >
       {pageNum}
     </Button>
@@ -134,19 +166,95 @@ const BrowseCarsPage = () => {
     return pageNumbers;
   };
 
+  const clearFilter = (filterType) => {
+    const updatedFilters = { ...filters };
+
+    switch (filterType) {
+      case "search":
+        updatedFilters.search = undefined;
+        break;
+      case "make":
+        updatedFilters.make = undefined;
+        break;
+      case "bodyType":
+        updatedFilters.bodyType = undefined;
+        break;
+      case "fuelType":
+        updatedFilters.fuelType = undefined;
+        break;
+      case "transmission":
+        updatedFilters.transmission = undefined;
+        break;
+      case "price":
+        updatedFilters.minPrice = undefined;
+        updatedFilters.maxPrice = undefined;
+        break;
+      case "sort":
+        updatedFilters.sortBy = "newest";
+        break;
+      default:
+        break;
+    }
+
+    setPage(1);
+    setFilters(updatedFilters);
+    fetchCars({ ...updatedFilters, page: 1 });
+  };
+
   return (
-    <div className="container mx-auto py-4 px-4 mt-20">
-      <h1 className="text-3xl font-bold mb-10">Browse Available Cars</h1>
+    <div className="container mx-auto py-4 px-4 mt-18">
+      <h1 className="text-xl sm:text-3xl font-bold mb-6 sm:mb-10">
+        Browse Available Cars
+      </h1>
+
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden mb-4">
+        <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              <span>
+                Filters {hasActiveFilters && `(${activeFilters.length})`}
+              </span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="w-[85%] sm:w-[350px] p-0 overflow-y-auto"
+          >
+            <div className="p-4 pb-24">
+              <FilterPanel
+                onFilter={handleFilterChange}
+                isLoading={isLoading}
+                initialFilters={filters}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-1/4 ">
-          <FilterPanel onFilter={handleFilterChange} isLoading={isLoading} />
+        {/* Desktop Filter Panel */}
+        <div className="hidden lg:block w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
+          <FilterPanel
+            onFilter={handleFilterChange}
+            isLoading={isLoading}
+            initialFilters={filters}
+          />
         </div>
 
         <div className="w-full lg:w-3/4">
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-2 mb-6">
               {activeFilters.map((filter, index) => (
-                <Badge key={index} variant="outline" className="bg-primary/5">
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className="bg-primary/5 flex items-center gap-1 py-1 px-2"
+                >
                   {filter.type === "search"
                     ? `Search: ${filter.value}`
                     : filter.type === "make"
@@ -162,13 +270,17 @@ const BrowseCarsPage = () => {
                     : filter.type === "sort"
                     ? `Sort: ${filter.value}`
                     : filter.value}
+                  <X
+                    className="h-3 w-3 ml-1 cursor-pointer"
+                    onClick={() => clearFilter(filter.type)}
+                  />
                 </Badge>
               ))}
             </div>
           )}
 
           {isLoading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {Array.from({ length: 6 }).map((_, index) => (
                 <CarCardSkeleton key={index} />
               ))}
@@ -185,7 +297,7 @@ const BrowseCarsPage = () => {
             </div>
           )}
           {!isLoading && !error && cars.length === 0 && carsData && (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 sm:p-8 text-center">
               <h3 className="text-xl font-semibold mb-2">No cars found</h3>
               <p className="text-slate-600 mb-4">
                 We couldn't find any cars matching your current filters.
@@ -211,33 +323,35 @@ const BrowseCarsPage = () => {
           )}
           {!isLoading && !error && cars.length > 0 && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {cars.map((car) => (
                   <CarCard key={car.id} car={car} />
                 ))}
               </div>
 
               {pagination.totalPages > 1 && (
-                <div className="flex justify-center mt-8">
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-center mt-6 sm:mt-8">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() => handlePageChange(pagination.page - 1)}
                       disabled={pagination.page === 1}
-                      className="cursor-pointer"
+                      className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
 
-                    {getPageNumbers().map(renderPaginationButton)}
+                    <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto px-1">
+                      {getPageNumbers().map(renderPaginationButton)}
+                    </div>
 
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() => handlePageChange(pagination.page + 1)}
                       disabled={pagination.page === pagination.totalPages}
-                      className="cursor-pointer"
+                      className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>

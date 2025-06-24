@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import MainHeader from "@/components/Header/MainHeader";
 import Footer from "@/components/Footer";
 import { checkUser } from "@/lib/checkUser";
+import BackToTop from "@/components/BackToTop";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -27,6 +28,7 @@ export default async function SiteLayout({ children }) {
         {children}
       </main>
       <Footer />
+      <BackToTop />
     </>
   );
 }

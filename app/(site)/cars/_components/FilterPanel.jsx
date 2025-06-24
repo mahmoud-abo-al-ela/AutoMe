@@ -19,15 +19,26 @@ import {
   FilterBtn,
 } from "./filter-components";
 
-const FilterPanel = ({ onFilter, isLoading = false }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMakes, setSelectedMakes] = useState([]);
-  const [selectedBodyTypes, setSelectedBodyTypes] = useState([]);
-  const [selectedFuelTypes, setSelectedFuelTypes] = useState([]);
-  const [selectedTransmissions, setSelectedTransmissions] = useState([]);
-  const [priceRange, setPriceRange] = useState([0, 0]);
+const FilterPanel = ({ onFilter, isLoading = false, initialFilters = {} }) => {
+  const [searchQuery, setSearchQuery] = useState(initialFilters.search || "");
+  const [selectedMakes, setSelectedMakes] = useState(
+    initialFilters.make ? [initialFilters.make] : []
+  );
+  const [selectedBodyTypes, setSelectedBodyTypes] = useState(
+    initialFilters.bodyType ? [initialFilters.bodyType] : []
+  );
+  const [selectedFuelTypes, setSelectedFuelTypes] = useState(
+    initialFilters.fuelType ? [initialFilters.fuelType] : []
+  );
+  const [selectedTransmissions, setSelectedTransmissions] = useState(
+    initialFilters.transmission ? [initialFilters.transmission] : []
+  );
+  const [priceRange, setPriceRange] = useState([
+    initialFilters.minPrice || 0,
+    initialFilters.maxPrice || 0,
+  ]);
   const [maxPriceValue, setMaxPriceValue] = useState(0);
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState(initialFilters.sortBy || "newest");
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [availableMakes, setAvailableMakes] = useState([]);
   const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
@@ -39,6 +50,30 @@ const FilterPanel = ({ onFilter, isLoading = false }) => {
     loading: filtersLoading,
     fn: fetchFilters,
   } = useFetch(getCarsFilters);
+
+  // Update component state when initialFilters prop changes
+  useEffect(() => {
+    if (initialFilters.search) setSearchQuery(initialFilters.search);
+    if (initialFilters.make) setSelectedMakes([initialFilters.make]);
+    if (initialFilters.bodyType)
+      setSelectedBodyTypes([initialFilters.bodyType]);
+    if (initialFilters.fuelType)
+      setSelectedFuelTypes([initialFilters.fuelType]);
+    if (initialFilters.transmission)
+      setSelectedTransmissions([initialFilters.transmission]);
+    if (initialFilters.sortBy) setSortBy(initialFilters.sortBy);
+
+    // Only update price range if we have min or max price and maxPriceValue is set
+    if (
+      (initialFilters.minPrice || initialFilters.maxPrice) &&
+      maxPriceValue > 0
+    ) {
+      setPriceRange([
+        initialFilters.minPrice || 0,
+        initialFilters.maxPrice || maxPriceValue,
+      ]);
+    }
+  }, [initialFilters, maxPriceValue]);
 
   useEffect(() => {
     fetchFilters();
@@ -56,10 +91,16 @@ const FilterPanel = ({ onFilter, isLoading = false }) => {
 
       if (priceRanges?.max) {
         setMaxPriceValue(priceRanges.max);
-        setPriceRange([0, priceRanges.max]);
+        // Only set the price range if it hasn't been set by initialFilters
+        if (priceRange[1] === 0) {
+          setPriceRange([
+            initialFilters.minPrice || 0,
+            initialFilters.maxPrice || priceRanges.max,
+          ]);
+        }
       }
     }
-  }, [filtersData]);
+  }, [filtersData, initialFilters]);
 
   useEffect(() => {
     const count = [
@@ -161,13 +202,16 @@ const FilterPanel = ({ onFilter, isLoading = false }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-lg flex items-center">
-          <Filter className="mr-2 h-5 w-5" /> Filters
+    <div className="bg-white rounded-lg md:shadow-md p-3 sm:p-4 w-full">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h2 className="font-semibold text-base sm:text-lg flex items-center">
+          <Filter className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Filters
         </h2>
         {activeFiltersCount > 0 && (
-          <Badge variant="secondary" className="bg-primary/10 text-primary">
+          <Badge
+            variant="secondary"
+            className="bg-primary/10 text-primary text-xs sm:text-sm"
+          >
             {activeFiltersCount} active
           </Badge>
         )}
@@ -180,7 +224,7 @@ const FilterPanel = ({ onFilter, isLoading = false }) => {
         isLoading={isLoading}
       />
 
-      <Accordion type="multiple" className="space-y-2">
+      <Accordion type="multiple" className="space-y-1 sm:space-y-2">
         <MakesFilter
           selectedMakes={selectedMakes}
           availableMakes={availableMakes}
@@ -228,7 +272,7 @@ const FilterPanel = ({ onFilter, isLoading = false }) => {
         />
       </Accordion>
 
-      <Separator className="my-4" />
+      <Separator className="my-3 sm:my-4" />
 
       <FilterBtn
         applyFilters={applyFilters}

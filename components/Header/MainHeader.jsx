@@ -72,28 +72,6 @@ export default function MainHeader({ user }) {
   const isAdmin = user?.role === "ADMIN";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    handleScroll();
-
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      document.body.style.overflow = "unset";
-    };
-  }, [isMenuOpen]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -101,13 +79,8 @@ export default function MainHeader({ user }) {
 
   return (
     <header
-      className={`fixed top-0 z-50 w-full border-b transition-all duration-300 ease-in-out
+      className={`fixed top-0 z-50 w-full border-b transition-all duration-300 ease-in-out bg-background
           ${isMenuOpen ? "border-transparent" : ""}
-          ${
-            isScrolled
-              ? "bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 shadow-sm"
-              : "bg-background"
-          }
         `}
     >
       <>
@@ -118,7 +91,7 @@ export default function MainHeader({ user }) {
             title="Home"
             aria-label="Home"
           >
-            <span className="text-2xl font-bold text-primary">
+            <span className="text-2xl font-bold text-primary ml-4 md:ml-0">
               Auto<span className="text-black dark:text-white">Me</span>
             </span>
           </Link>

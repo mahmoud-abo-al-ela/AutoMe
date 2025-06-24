@@ -6,7 +6,7 @@ const layout = ({ children }) => {
   return (
     <>
       <MainHeader />
-      <main className="flex justify-center  py-40">{children}</main>
+      <main className="flex justify-center py-30">{children}</main>
       <Footer />
     </>
   );

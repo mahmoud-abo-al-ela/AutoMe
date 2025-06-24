@@ -280,7 +280,9 @@ export async function toggleWishlist(carId) {
       });
     }
 
-    revalidatePath("/saved-cars");
+    // Revalidate both paths
+    revalidatePath("/wishlist");
+    revalidatePath("/cars");
 
     return {
       success: true,
@@ -291,6 +293,82 @@ export async function toggleWishlist(carId) {
     return {
       success: false,
       error: "Error toggling wishlist",
+    };
+  }
+}
+
+export async function getWishlist({ page = 1, limit = 6 } = {}) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
+    }
+
+    const userDB = await db.user.findUnique({
+      where: {
+        clerkId: userId,
+      },
+    });
+
+    if (!userDB) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Calculate pagination values
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const totalCount = await db.savedCar.count({
+      where: {
+        userId: userDB.id,
+      },
+    });
+
+    const savedCars = await db.savedCar.findMany({
+      where: {
+        userId: userDB.id,
+      },
+      include: {
+        car: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limit,
+    });
+
+    const cars = savedCars.map((savedCar) => ({
+      ...savedCar.car,
+      price: parseFloat(savedCar.car.price.toString()),
+      createdAt: savedCar.car.createdAt.toISOString(),
+      updatedAt: savedCar.car.updatedAt.toISOString(),
+      isWishlisted: true,
+    }));
+
+    return {
+      success: true,
+      data: {
+        cars,
+        pagination: {
+          total: totalCount,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(totalCount / limit),
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching saved cars", error);
+    return {
+      success: false,
+      error: "Error fetching saved cars",
     };
   }
 }

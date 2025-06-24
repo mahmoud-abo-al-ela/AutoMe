@@ -4,13 +4,13 @@ import { Button } from "./ui/button";
 
 function CTA() {
   return (
-    <section className="py-16 bg-[#1A1F2C] text-white">
-      <div className="container mx-auto">
+    <section className="py-10 sm:py-16 bg-[#1A1F2C] text-white">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
             Ready to find your perfect car?
           </h2>
-          <p className="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-2 sm:px-0">
             Let's Discover Your Dream Car, and Make Your Driving Experience
             Unforgettable!
           </p>
@@ -18,7 +18,7 @@ function CTA() {
             <Button
               asChild
               size="lg"
-              className="bg-[#0532a3] hover:bg-[#0532a3]/90"
+              className="bg-[#0532a3] hover:bg-[#0532a3]/90 w-full sm:w-auto"
             >
               <Link href="/cars">Browse All Vehicles</Link>
             </Button>

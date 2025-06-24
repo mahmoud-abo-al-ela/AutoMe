@@ -14,6 +14,7 @@ import { Badge } from "./ui/badge";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { toggleWishlist } from "@/actions/cars-listing";
+import { usePathname } from "next/navigation";
 import {
   Tooltip,
   TooltipContent,
@@ -21,12 +22,13 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 
-const CarCard = ({ car }) => {
+const CarCard = ({ car, onWishlistChange }) => {
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
   const [isLoading, setIsLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const pathname = usePathname();
+  const isWishlistPage = pathname === "/wishlist";
 
-  // Handle wishlist toggling
   const handleToggleFavorite = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,6 +40,9 @@ const CarCard = ({ car }) => {
       const response = await toggleWishlist(car.id);
       if (response.success) {
         setIsFavorite(!isFavorite);
+        if (isWishlistPage && isFavorite && onWishlistChange) {
+          onWishlistChange(car.id);
+        }
       }
     } catch (error) {
       console.error("Failed to toggle wishlist", error);
@@ -95,7 +100,7 @@ const CarCard = ({ car }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="absolute cursor-pointer top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm hover:shadow-md z-10"
+                  className="absolute cursor-pointer top-2 right-2 p-1 sm:p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm hover:shadow-md z-10"
                   onClick={handleToggleFavorite}
                   disabled={isLoading}
                   size="icon"
@@ -105,7 +110,7 @@ const CarCard = ({ car }) => {
                   }
                 >
                   <Heart
-                    className={`h-5 w-5 transition-colors duration-300 ${
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${
                       isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"
                     } ${isLoading ? "opacity-50" : ""}`}
                   />
@@ -115,58 +120,58 @@ const CarCard = ({ car }) => {
                 {isFavorite ? "Remove from favorites" : "Add to favorites"}
               </TooltipContent>
             </Tooltip>
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent h-16"></div>
-            <div className="absolute bottom-3 left-3">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent h-10"></div>
+            <div className="absolute bottom-2 left-2">
               <Badge
                 variant="secondary"
-                className="bg-white/90 text-black font-bold"
+                className="bg-white/90 text-black font-bold text-xs px-2 py-0.5 sm:py-1"
               >
                 {formatPrice(car.price)}
               </Badge>
             </div>
           </div>
 
-          <div className="p-4 flex flex-col flex-grow">
-            <div className="mb-3">
-              <h3 className="font-semibold text-lg tracking-tight line-clamp-1">
+          <div className="p-2 sm:p-3 flex flex-col flex-grow">
+            <div className="mb-1.5 sm:mb-2">
+              <h3 className="font-semibold text-sm sm:text-base tracking-tight line-clamp-1">
                 {carTitle}
               </h3>
-              <p className="text-sm text-muted-foreground line-clamp-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1">
                 {car.trim && `${car.trim} • `}
                 {car.engine || ""}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-y-2 text-sm text-muted-foreground mb-4">
+            <div className="grid grid-cols-2 gap-x-1 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-xs text-muted-foreground mb-2 sm:mb-3">
               <div className="flex items-center">
-                <Calendar className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
+                <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 text-gray-400" />
                 <span>{car.year}</span>
               </div>
               {car.mileage !== undefined && car.mileage !== null && (
                 <div className="flex items-center">
-                  <Gauge className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
-                  <span>{formatMileage(car.mileage)}</span>
+                  <Gauge className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 text-gray-400" />
+                  <span className="truncate">{formatMileage(car.mileage)}</span>
                 </div>
               )}
               {car.fuelType && (
                 <div className="flex items-center">
-                  <Fuel className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
-                  <span>{car.fuelType}</span>
+                  <Fuel className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 text-gray-400" />
+                  <span className="truncate">{car.fuelType}</span>
                 </div>
               )}
               {car.location && (
                 <div className="flex items-center">
-                  <MapPin className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
+                  <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 text-gray-400" />
                   <span className="truncate">{car.location}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-1.5 mb-5">
+            <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
               {car.bodyType && (
                 <Badge
                   variant="outline"
-                  className="text-xs bg-slate-50 hover:bg-slate-100"
+                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 px-1 sm:px-1.5 py-0 sm:py-0.5"
                 >
                   {car.bodyType}
                 </Badge>
@@ -174,7 +179,7 @@ const CarCard = ({ car }) => {
               {car.transmission && (
                 <Badge
                   variant="outline"
-                  className="text-xs bg-slate-50 hover:bg-slate-100"
+                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 px-1 sm:px-1.5 py-0 sm:py-0.5"
                 >
                   {car.transmission}
                 </Badge>
@@ -182,10 +187,10 @@ const CarCard = ({ car }) => {
               {car.color && (
                 <Badge
                   variant="outline"
-                  className="text-xs bg-slate-50 hover:bg-slate-100 flex items-center gap-1"
+                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 flex items-center gap-1 px-1 sm:px-1.5 py-0 sm:py-0.5"
                 >
                   <span
-                    className="w-2 h-2 rounded-full inline-block"
+                    className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full inline-block"
                     style={{
                       backgroundColor: car.color
                         .toLowerCase()
@@ -200,10 +205,10 @@ const CarCard = ({ car }) => {
             <div className="mt-auto">
               <Button
                 size="sm"
-                className="w-full bg-primary hover:bg-primary/90 text-white gap-1 rounded-md cursor-pointer group"
+                className="w-full bg-primary hover:bg-primary/90 text-white gap-1 rounded-md cursor-pointer group text-[10px] sm:text-xs py-1 sm:py-1.5 h-7 sm:h-8"
               >
                 View Details
-                <ExternalLink className="h-3.5 w-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+                <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3 ml-1 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </div>
           </div>
