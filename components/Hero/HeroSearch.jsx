@@ -210,7 +210,7 @@ const HeroSearch = () => {
                     Change
                   </Button>
                   <Button
-                    className="text-xs w-full sm:ml-auto bg-primary text-white hover:bg-primary/90 hover:text-white cursor-pointer h-8 sm:h-9"
+                    className="text-xs sm:ml-auto bg-primary text-white hover:bg-primary/90 hover:text-white cursor-pointer h-8 sm:h-9"
                     size="sm"
                     onClick={handleImageSearch}
                     type="button"

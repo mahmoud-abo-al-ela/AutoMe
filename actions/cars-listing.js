@@ -116,6 +116,63 @@ export async function getCars({
   }
 }
 
+export async function getCarById(id) {
+  try {
+    const { userId } = await auth();
+    let userDB = null;
+    if (userId) {
+      userDB = await db.user.findUnique({
+        where: {
+          clerkId: userId,
+        },
+      });
+    }
+    const car = await db.car.findUnique({
+      where: { id },
+    });
+
+    if (!car) {
+      return {
+        success: false,
+        error: "Car not found",
+      };
+    }
+
+    const carData = {
+      ...car,
+      price: parseFloat(car.price.toString()),
+      createdAt: car.createdAt.toISOString(),
+      updatedAt: car.updatedAt.toISOString(),
+      isWishlisted: userDB
+        ? await db.savedCar.findUnique({
+            where: {
+              userId_carId: {
+                userId: userDB.id,
+                carId: id,
+              },
+            },
+          })
+        : false,
+    };
+
+    return {
+      success: true,
+      data: {
+        ...carData,
+        images: carData.images.map((image) => ({
+          url: image,
+        })),
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching car by id", error);
+    return {
+      success: false,
+      error: "Error fetching car by id",
+    };
+  }
+}
+
 export async function getCarsFilters({
   search,
   make,

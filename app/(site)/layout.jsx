@@ -3,6 +3,7 @@ import MainHeader from "@/components/Header/MainHeader";
 import Footer from "@/components/Footer";
 import { checkUser } from "@/lib/checkUser";
 import BackToTop from "@/components/BackToTop";
+import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -29,6 +30,7 @@ export default async function SiteLayout({ children }) {
       </main>
       <Footer />
       <BackToTop />
+      <Toaster position="top-right" richColors />
     </>
   );
 }

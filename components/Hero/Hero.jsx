@@ -76,18 +76,6 @@ const Hero = () => {
               Sedans
             </Link>
             <Link
-              href="/cars?bodyType=Hatchback"
-              className="bg-white/10 hidden md:block hover:bg-white/20 backdrop-blur-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full font-medium transition-all duration-300 hover:shadow-md hover:scale-105"
-            >
-              Hatchbacks
-            </Link>
-            <Link
-              href="/cars?fuelType=Hybrid"
-              className="bg-white/10 hidden md:block hover:bg-white/20 backdrop-blur-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full font-medium transition-all duration-300 hover:shadow-md hover:scale-105"
-            >
-              Hybrids
-            </Link>
-            <Link
               href="/cars?transmission=Automatic"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full font-medium transition-all duration-300 hover:shadow-md hover:scale-105"
             >
