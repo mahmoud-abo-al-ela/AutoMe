@@ -9,7 +9,6 @@ import Image from "next/image";
 import { processImagesSearch } from "@/actions/home";
 import useFetch from "@/hooks/use-fetch";
 import { toast } from "sonner";
-import { Toaster } from "../ui/sonner";
 import { useRouter } from "next/navigation";
 
 const HeroSearch = () => {
@@ -106,7 +105,6 @@ const HeroSearch = () => {
 
   return (
     <div className="relative w-full max-w-xl mx-auto">
-      <Toaster position="bottom-right" richColors />
       {!isActive && (
         <motion.form
           initial={{ opacity: 0, y: 10 }}

@@ -429,3 +429,48 @@ export async function getWishlist({ page = 1, limit = 6 } = {}) {
     };
   }
 }
+
+export async function getCarsByIds(carIds) {
+  try {
+    if (!carIds || !Array.isArray(carIds) || carIds.length === 0) {
+      return {
+        success: false,
+        error: "No car IDs provided",
+      };
+    }
+
+    const cars = await db.car.findMany({
+      where: {
+        id: {
+          in: carIds,
+        },
+      },
+    });
+
+    if (!cars || cars.length === 0) {
+      return {
+        success: false,
+        error: "No cars found with the provided IDs",
+      };
+    }
+
+    return {
+      success: true,
+      data: cars.map((car) => ({
+        ...car,
+        price: parseFloat(car.price.toString()),
+        createdAt: car.createdAt.toISOString(),
+        updatedAt: car.updatedAt.toISOString(),
+        images: car.images.map((image) => ({
+          url: image,
+        })),
+      })),
+    };
+  } catch (error) {
+    console.error("Error fetching cars by IDs", error);
+    return {
+      success: false,
+      error: "Error fetching cars by IDs",
+    };
+  }
+}

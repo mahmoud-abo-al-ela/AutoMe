@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,41 @@ import {
   Phone,
   Calendar,
   MessageCircle,
+  Scale,
 } from "lucide-react";
 import { toggleWishlist } from "@/actions/cars-listing";
 import CarSpecifications from "./CarSpecifications";
 import ShareDialog from "./ShareDialog";
 import { toast } from "sonner";
+import { compareUtils } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const CarInfoCard = ({ car }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
+  const [isInCompare, setIsInCompare] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const router = useRouter();
+
+  // Check if car is in compare list on component mount
+  useEffect(() => {
+    const compareList = compareUtils.getCompareList();
+    setIsInCompare(compareList.includes(car.id));
+
+    // Add event listener for compare list updates
+    const handleStorageChange = () => {
+      const updatedList = compareUtils.getCompareList();
+      setIsInCompare(updatedList.includes(car.id));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("compareListUpdated", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("compareListUpdated", handleStorageChange);
+    };
+  }, [car.id]);
 
   const handleToggleFavorite = async (e) => {
     e.preventDefault();
@@ -47,8 +72,30 @@ const CarInfoCard = ({ car }) => {
     }
   };
 
+  const handleToggleCompare = () => {
+    if (isInCompare) {
+      compareUtils.removeFromCompare(car.id);
+      setIsInCompare(false);
+      toast.info("Removed from comparison");
+      window.dispatchEvent(new Event("compareListUpdated"));
+    } else {
+      const added = compareUtils.addToCompare(car.id);
+      if (added) {
+        setIsInCompare(true);
+        toast.success("Added to comparison");
+        window.dispatchEvent(new Event("compareListUpdated"));
+      } else {
+        toast.warning("You can compare up to 3 cars at a time");
+      }
+    }
+  };
+
   const handleShare = () => {
     setIsShareDialogOpen(true);
+  };
+
+  const handleGoToCompare = () => {
+    router.push("/compare");
   };
 
   const formatPrice = (price) => {
@@ -120,6 +167,22 @@ const CarInfoCard = ({ car }) => {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={handleToggleCompare}
+                className={`hover:scale-110 transition-transform cursor-pointer ${
+                  isInCompare
+                    ? "text-blue-500 border-blue-200 bg-blue-50"
+                    : "hover:text-blue-500"
+                }`}
+              >
+                <Scale
+                  className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                    isInCompare ? "fill-current" : ""
+                  }`}
+                />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleShare}
                 className="hover:scale-110 transition-transform cursor-pointer"
               >
@@ -128,7 +191,6 @@ const CarInfoCard = ({ car }) => {
             </div>
           </div>
 
-          {/* Car Title and Price */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
               {car.title || `${car.year} ${car.make} ${car.model}`}
@@ -145,12 +207,10 @@ const CarInfoCard = ({ car }) => {
             </div>
           </div>
 
-          {/* Car Specifications */}
           <CarSpecifications car={car} />
 
           <Separator className="my-6 sm:my-8" />
 
-          {/* Action Buttons */}
           <div className="space-y-3 sm:space-y-4">
             <Button className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
               <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
@@ -172,6 +232,16 @@ const CarInfoCard = ({ car }) => {
                 <span className="hidden xs:inline">Chat</span> Now
               </Button>
             </div>
+            {isInCompare && (
+              <Button
+                variant="secondary"
+                onClick={handleGoToCompare}
+                className="w-full py-2 sm:py-3 rounded-xl hover:scale-105 transition-transform cursor-pointer text-xs sm:text-sm"
+              >
+                <Scale className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                Go to Compare
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

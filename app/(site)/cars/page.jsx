@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FilterPanel from "./_components/FilterPanel";
 import { getCars } from "@/actions/cars-listing";
 import CarCard from "@/components/CarCard";
@@ -9,10 +9,11 @@ import { ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const BrowseCarsPage = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -25,6 +26,7 @@ const BrowseCarsPage = () => {
     maxPrice: undefined,
     sortBy: "newest",
   });
+  const filterPanelRef = useRef(null);
 
   const {
     data: carsData,
@@ -33,7 +35,6 @@ const BrowseCarsPage = () => {
     fn: fetchCars,
   } = useFetch(getCars, true);
 
-  // Read URL parameters when component mounts
   useEffect(() => {
     const initialFilters = {
       search: searchParams.get("search") || undefined,
@@ -51,7 +52,6 @@ const BrowseCarsPage = () => {
       page: 1,
     };
 
-    // Only update if we have at least one filter parameter
     const hasFilters = Object.values(initialFilters).some(
       (value) => value !== undefined
     );
@@ -69,7 +69,7 @@ const BrowseCarsPage = () => {
     const updatedFilters = { ...newFilters, page: 1 };
     setFilters(updatedFilters);
     fetchCars(updatedFilters);
-    setIsFilterOpen(false); // Close filter panel on mobile after applying filters
+    setIsFilterOpen(false);
   };
 
   const handlePageChange = (newPage) => {
@@ -80,6 +80,12 @@ const BrowseCarsPage = () => {
       top: 0,
       behavior: "smooth",
     });
+
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage.toString());
+
+    const queryString = params.toString();
+    router.push(`/cars?${queryString}`);
   };
 
   const cars = carsData?.success ? carsData.data.cars : [];
@@ -123,7 +129,6 @@ const BrowseCarsPage = () => {
   const activeFilters = getActiveFilters();
   const hasActiveFilters = activeFilters.length > 0;
 
-  // Helper function to render pagination buttons
   const renderPaginationButton = (pageNum) => (
     <Button
       key={pageNum}
@@ -136,28 +141,23 @@ const BrowseCarsPage = () => {
     </Button>
   );
 
-  // Calculate page numbers for pagination
   const getPageNumbers = () => {
     const { page, totalPages } = pagination;
     const pageNumbers = [];
 
     if (totalPages <= 5) {
-      // Show all pages if there are 5 or fewer
       for (let i = 1; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else if (page <= 3) {
-      // Near the start
       for (let i = 1; i <= 5; i++) {
         pageNumbers.push(i);
       }
     } else if (page >= totalPages - 2) {
-      // Near the end
       for (let i = totalPages - 4; i <= totalPages; i++) {
         pageNumbers.push(i);
       }
     } else {
-      // In the middle
       for (let i = page - 2; i <= page + 2; i++) {
         pageNumbers.push(i);
       }
@@ -199,6 +199,50 @@ const BrowseCarsPage = () => {
     setPage(1);
     setFilters(updatedFilters);
     fetchCars({ ...updatedFilters, page: 1 });
+
+    const params = new URLSearchParams();
+
+    if (updatedFilters.search) params.set("search", updatedFilters.search);
+    if (updatedFilters.make) params.set("make", updatedFilters.make);
+    if (updatedFilters.bodyType)
+      params.set("bodyType", updatedFilters.bodyType);
+    if (updatedFilters.fuelType)
+      params.set("fuelType", updatedFilters.fuelType);
+    if (updatedFilters.transmission)
+      params.set("transmission", updatedFilters.transmission);
+    if (updatedFilters.minPrice)
+      params.set("minPrice", updatedFilters.minPrice.toString());
+    if (updatedFilters.maxPrice)
+      params.set("maxPrice", updatedFilters.maxPrice.toString());
+    if (updatedFilters.sortBy && updatedFilters.sortBy !== "newest")
+      params.set("sortBy", updatedFilters.sortBy);
+
+    const queryString = params.toString();
+    const url = queryString ? `/cars?${queryString}` : "/cars";
+    router.push(url);
+  };
+
+  const resetAllFilters = () => {
+    const resetFilters = {
+      search: undefined,
+      make: undefined,
+      bodyType: undefined,
+      fuelType: undefined,
+      transmission: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      sortBy: "newest",
+    };
+
+    setPage(1);
+    setFilters(resetFilters);
+    fetchCars({ ...resetFilters, page: 1 });
+
+    if (filterPanelRef.current) {
+      filterPanelRef.current.resetFilters();
+    }
+
+    router.push("/cars");
   };
 
   return (
@@ -207,7 +251,6 @@ const BrowseCarsPage = () => {
         Browse Available Cars
       </h1>
 
-      {/* Mobile Filter Button */}
       <div className="lg:hidden mb-4">
         <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <SheetTrigger asChild>
@@ -227,6 +270,7 @@ const BrowseCarsPage = () => {
           >
             <div className="p-4 pb-24">
               <FilterPanel
+                ref={filterPanelRef}
                 onFilter={handleFilterChange}
                 isLoading={isLoading}
                 initialFilters={filters}
@@ -237,9 +281,9 @@ const BrowseCarsPage = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Desktop Filter Panel */}
         <div className="hidden lg:block w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
           <FilterPanel
+            ref={filterPanelRef}
             onFilter={handleFilterChange}
             isLoading={isLoading}
             initialFilters={filters}
@@ -302,21 +346,7 @@ const BrowseCarsPage = () => {
               <p className="text-slate-600 mb-4">
                 We couldn't find any cars matching your current filters.
               </p>
-              <Button
-                onClick={() =>
-                  handleFilterChange({
-                    search: undefined,
-                    make: undefined,
-                    bodyType: undefined,
-                    fuelType: undefined,
-                    transmission: undefined,
-                    minPrice: undefined,
-                    maxPrice: undefined,
-                    sortBy: "newest",
-                  })
-                }
-                className="cursor-pointer"
-              >
+              <Button onClick={resetAllFilters} className="cursor-pointer">
                 Reset Filters
               </Button>
             </div>

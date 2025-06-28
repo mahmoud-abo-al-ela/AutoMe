@@ -6,15 +6,18 @@ import {
   MapPin,
   Fuel,
   Gauge,
+  Scale,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { toggleWishlist } from "@/actions/cars-listing";
 import { usePathname } from "next/navigation";
+import { compareUtils } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   Tooltip,
   TooltipContent,
@@ -24,10 +27,16 @@ import {
 
 const CarCard = ({ car, onWishlistChange }) => {
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
+  const [isInCompare, setIsInCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
+
+  useEffect(() => {
+    const compareList = compareUtils.getCompareList();
+    setIsInCompare(compareList.includes(car.id));
+  }, [car.id]);
 
   const handleToggleFavorite = async (e) => {
     e.preventDefault();
@@ -48,6 +57,27 @@ const CarCard = ({ car, onWishlistChange }) => {
       console.error("Failed to toggle wishlist", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToggleCompare = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isInCompare) {
+      compareUtils.removeFromCompare(car.id);
+      setIsInCompare(false);
+      toast.info("Removed from comparison");
+      window.dispatchEvent(new Event("compareListUpdated"));
+    } else {
+      const added = compareUtils.addToCompare(car.id);
+      if (added) {
+        setIsInCompare(true);
+        toast.success("Added to comparison");
+        window.dispatchEvent(new Event("compareListUpdated"));
+      } else {
+        toast.warning("You can compare up to 3 cars at a time");
+      }
     }
   };
 
@@ -97,29 +127,58 @@ const CarCard = ({ car, onWishlistChange }) => {
                 priority={false}
               />
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="absolute cursor-pointer top-2 right-2 p-1 sm:p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm hover:shadow-md z-10"
-                  onClick={handleToggleFavorite}
-                  disabled={isLoading}
-                  size="icon"
-                  variant="ghost"
-                  aria-label={
-                    isFavorite ? "Remove from favorites" : "Add to favorites"
-                  }
-                >
-                  <Heart
-                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${
-                      isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"
-                    } ${isLoading ? "opacity-50" : ""}`}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isFavorite ? "Remove from favorites" : "Add to favorites"}
-              </TooltipContent>
-            </Tooltip>
+            <div className="absolute top-2 right-2 flex gap-2 z-10">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="cursor-pointer p-1 sm:p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm hover:shadow-md"
+                    onClick={handleToggleFavorite}
+                    disabled={isLoading}
+                    size="icon"
+                    variant="ghost"
+                    aria-label={
+                      isFavorite ? "Remove from favorites" : "Add to favorites"
+                    }
+                  >
+                    <Heart
+                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${
+                        isFavorite
+                          ? "fill-red-500 text-red-500"
+                          : "text-gray-500"
+                      } ${isLoading ? "opacity-50" : ""}`}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isFavorite ? "Remove from favorites" : "Add to favorites"}
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="cursor-pointer p-1 sm:p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm hover:shadow-md"
+                    onClick={handleToggleCompare}
+                    size="icon"
+                    variant="ghost"
+                    aria-label={
+                      isInCompare ? "Remove from compare" : "Add to compare"
+                    }
+                  >
+                    <Scale
+                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${
+                        isInCompare
+                          ? "fill-blue-500 text-blue-500"
+                          : "text-gray-500"
+                      }`}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isInCompare ? "Remove from compare" : "Add to compare"}
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent h-10"></div>
             <div className="absolute bottom-2 left-2">
               <Badge
