@@ -63,6 +63,15 @@ const AICarForm = () => {
     setUploadedImage(null);
     setError(null);
   };
+
+  // Normalize bodyType value
+  const normalizeBodyType = (bodyType) => {
+    if (bodyType === "Sport Utility Vehicle (SUV)") {
+      return "SUV";
+    }
+    return bodyType;
+  };
+
   // Prepare initial data for the form
   const initialData = carData
     ? {
@@ -71,7 +80,7 @@ const AICarForm = () => {
         year: carData.year || "",
         price: carData.price || "",
         mileage: carData.mileage || "",
-        bodyType: carData.bodyType || "",
+        bodyType: normalizeBodyType(carData.bodyType) || "",
         fuelType: carData.fuelType || "",
         transmission: carData.transmission || "",
         color: carData.color || "",

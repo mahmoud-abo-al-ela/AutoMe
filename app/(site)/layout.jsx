@@ -4,6 +4,9 @@ import Footer from "@/components/Footer";
 import { checkUser } from "@/lib/checkUser";
 import BackToTop from "@/components/BackToTop";
 import { Toaster } from "sonner";
+import { Suspense } from "react";
+import Loading from "@/components/Loading";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -26,9 +29,17 @@ export default async function SiteLayout({ children }) {
       <main
         className={`flex-1 animate-in fade-in duration-500 ${inter.className}`}
       >
-        {children}
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <Loading />
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
       </main>
-      <Footer />
+      <Footer user={user} />
       <BackToTop />
       <Toaster position="top-right" richColors />
     </>

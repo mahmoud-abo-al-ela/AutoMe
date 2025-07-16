@@ -84,7 +84,7 @@ export default function MainHeader({ user }) {
         `}
     >
       <>
-        <div className="container flex h-16 items-center mx-auto">
+        <div className="container flex h-12 md:h-16 items-center mx-auto">
           <Link
             href="/"
             className="mr-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"

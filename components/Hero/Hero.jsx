@@ -18,14 +18,14 @@ const Hero = () => {
   return (
     <section
       id="main-content"
-      className="relative bg-gradient-to-r from-[#1A1F2C] to-blue-900 text-white min-h-screen flex items-center py-16 md:py-24"
+      className="relative bg-gradient-to-r from-[#1A1F2C] to-blue-900 text-white min-h-screen flex items-center"
     >
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1470')] bg-cover bg-center opacity-20"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0f1a]/60 to-[#0a0f1a]/90"></div>
       </div>
 
-      <div className="container mx-auto relative z-10 px-4 md:px-6">
+      <div className="container mx-auto relative z-10 px-4 md:px-6 -mt-20 md:mt-0">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h1
             initial={{ opacity: 0, y: 10 }}

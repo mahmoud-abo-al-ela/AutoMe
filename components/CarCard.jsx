@@ -29,7 +29,6 @@ const CarCard = ({ car, onWishlistChange }) => {
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
   const [isInCompare, setIsInCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 

@@ -2,7 +2,7 @@ import { Twitter, Instagram, Facebook } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-const Footer = () => {
+const Footer = ({ user }) => {
   return (
     <footer className="container mx-auto px-4 py-6 md:py-12">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
@@ -35,7 +35,7 @@ const Footer = () => {
             </li>
             <li>
               <Link
-                href="/favorites"
+                href={user ? "/wishlist" : "/sign-in"}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Saved Vehicles
@@ -57,7 +57,7 @@ const Footer = () => {
           <ul className="space-y-1.5 text-sm">
             <li>
               <Link
-                href="/about"
+                href="#"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 About Us
@@ -65,7 +65,7 @@ const Footer = () => {
             </li>
             <li>
               <Link
-                href="/contact"
+                href="#"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Contact Us
