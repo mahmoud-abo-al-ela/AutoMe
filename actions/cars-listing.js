@@ -1,276 +1,79 @@
 "use server";
-import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import * as carService from "@/lib/services/car";
+import * as wishlistService from "@/lib/services/wishlist";
+import * as carRepository from "@/lib/repositories/car";
+import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
+import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
+import { serializeCarWithImages } from "@/lib/utils/serializers";
 
-export async function getCars({
-  page = 1,
-  limit = 9,
-  search,
-  make,
-  bodyType,
-  fuelType,
-  transmission,
-  minPrice,
-  maxPrice,
-  sortBy = "newest",
-}) {
+export async function getCars(filters) {
   try {
     const { userId } = await auth();
-    let userDB = null;
+
+    // Get cars with filters
+    const result = await carService.getCars(filters, {
+      page: filters.page,
+      limit: filters.limit,
+    });
+
+    // Add wishlist status if user is logged in
     if (userId) {
-      userDB = await db.user.findUnique({
-        where: {
-          clerkId: userId,
-        },
-      });
+      const wishlistIds = await wishlistService.getWishlistCarIds(userId);
+      result.cars = result.cars.map((car) => ({
+        ...car,
+        isWishlisted: wishlistIds.has(car.id),
+      }));
+    } else {
+      result.cars = result.cars.map((car) => ({
+        ...car,
+        isWishlisted: false,
+      }));
     }
 
-    // Build where clause with all filters
-    const where = {
-      status: "AVAILABLE",
-    };
-
-    // Apply search filter if provided
-    if (search && search.trim() !== "") {
-      where.OR = [
-        { make: { contains: search, mode: "insensitive" } },
-        { model: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
-    }
-
-    // Apply additional filters if provided
-    if (make) where.make = make;
-    if (bodyType) where.bodyType = bodyType;
-    if (fuelType) where.fuelType = fuelType;
-    if (transmission) where.transmission = transmission;
-
-    // Price range filter
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.price = {};
-      if (minPrice !== undefined) where.price.gte = minPrice;
-      if (maxPrice !== undefined) where.price.lte = maxPrice;
-    }
-
-    const skip = (page - 1) * limit;
-
-    // Determine sort order based on sortBy parameter
-    let orderBy = { createdAt: "desc" }; // default sorting (newest)
-
-    if (sortBy === "priceAsc") {
-      orderBy = { price: "asc" };
-    } else if (sortBy === "priceDesc") {
-      orderBy = { price: "desc" };
-    }
-
-    const totalCars = await db.car.count({
-      where,
-    });
-
-    const cars = await db.car.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-    });
-
-    // Get user's wishlist if logged in
-    let wishlist = new Set();
-    if (userDB) {
-      const savedCars = await db.savedCar.findMany({
-        where: {
-          userId: userDB.id,
-        },
-        select: {
-          carId: true,
-        },
-      });
-      wishlist = new Set(savedCars.map((car) => car.carId));
-    }
-
-    return {
-      success: true,
-      data: {
-        cars: cars.map((car) => ({
-          ...car,
-          price: parseFloat(car.price.toString()),
-          createdAt: car.createdAt.toISOString(),
-          updatedAt: car.updatedAt.toISOString(),
-          isWishlisted: wishlist.has(car.id),
-        })),
-        pagination: {
-          total: parseInt(totalCars),
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: Math.ceil(totalCars / limit),
-        },
-      },
-    };
+    return createSuccessResponse(result);
   } catch (error) {
     console.error("Error fetching cars", error);
-    return {
-      success: false,
-      error: "Error fetching cars",
-    };
+    return createErrorResponse(error);
   }
 }
 
 export async function getCarById(id) {
   try {
     const { userId } = await auth();
-    let userDB = null;
+
+    const car = await carService.getCarById(id);
+
+    // Check if in wishlist
+    let isWishlisted = false;
     if (userId) {
-      userDB = await db.user.findUnique({
-        where: {
-          clerkId: userId,
-        },
-      });
+      isWishlisted = await wishlistService.isCarInUserWishlist(id, userId);
     }
-    const car = await db.car.findUnique({
-      where: { id },
+
+    const carWithImages = serializeCarWithImages(car);
+
+    return createSuccessResponse({
+      ...carWithImages,
+      isWishlisted,
     });
-
-    if (!car) {
-      return {
-        success: false,
-        error: "Car not found",
-      };
-    }
-
-    const carData = {
-      ...car,
-      price: parseFloat(car.price.toString()),
-      createdAt: car.createdAt.toISOString(),
-      updatedAt: car.updatedAt.toISOString(),
-      isWishlisted: userDB
-        ? await db.savedCar.findUnique({
-            where: {
-              userId_carId: {
-                userId: userDB.id,
-                carId: id,
-              },
-            },
-          })
-        : false,
-    };
-
-    return {
-      success: true,
-      data: {
-        ...carData,
-        images: carData.images.map((image) => ({
-          url: image,
-        })),
-      },
-    };
   } catch (error) {
     console.error("Error fetching car by id", error);
-    return {
-      success: false,
-      error: "Error fetching car by id",
-    };
+    return createErrorResponse(error);
   }
 }
 
-export async function getCarsFilters({
-  search,
-  make,
-  bodyType,
-  fuelType,
-  transmission,
-  minPrice,
-  maxPrice,
-} = {}) {
+export async function getCarsFilters(filters = {}) {
   try {
-    const baseWhere = {
-      status: "AVAILABLE",
-    };
+    const filterOptions = await carService.getFilterOptions(filters);
 
-    if (search && search.trim() !== "") {
-      baseWhere.OR = [
-        { make: { contains: search, mode: "insensitive" } },
-        { model: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
-    }
-
-    if (make) baseWhere.make = make;
-    if (bodyType) baseWhere.bodyType = bodyType;
-    if (fuelType) baseWhere.fuelType = fuelType;
-    if (transmission) baseWhere.transmission = transmission;
-
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      baseWhere.price = {};
-      if (minPrice !== undefined) baseWhere.price.gte = minPrice;
-      if (maxPrice !== undefined) baseWhere.price.lte = maxPrice;
-    }
-
-    // Helper function to get distinct values
-    const getDistinctValues = async (field) => {
-      const excludeField = { ...baseWhere };
-      if (excludeField[field]) delete excludeField[field];
-
-      const results = await db.car.findMany({
-        where: excludeField,
-        select: { [field]: true },
-        distinct: [field],
-        orderBy: { [field]: "asc" },
-      });
-
-      return results.map((item) => item[field]);
-    };
-
-    const [makes, bodyTypes, fuelTypes, transmissions] = await Promise.all([
-      getDistinctValues("make"),
-      getDistinctValues("bodyType"),
-      getDistinctValues("fuelType"),
-      getDistinctValues("transmission"),
-    ]);
-
-    const priceRanges = await db.car.aggregate({
-      where: baseWhere,
-      _min: { price: true },
-      _max: { price: true },
+    return createSuccessResponse({
+      ...filterOptions,
+      appliedFilters: filters,
     });
-
-    const totalFilteredCars = await db.car.count({
-      where: baseWhere,
-    });
-
-    return {
-      success: true,
-      data: {
-        makes,
-        bodyTypes,
-        fuelTypes,
-        transmissions,
-        priceRanges: {
-          min: priceRanges._min.price
-            ? parseFloat(priceRanges._min.price.toString())
-            : 0,
-          max: priceRanges._max.price
-            ? parseFloat(priceRanges._max.price.toString())
-            : 1000000,
-        },
-        totalFilteredCars,
-        appliedFilters: {
-          search,
-          make,
-          bodyType,
-          fuelType,
-          transmission,
-          minPrice,
-          maxPrice,
-        },
-      },
-    };
   } catch (error) {
     console.error("Error fetching cars filters", error);
-    return {
-      success: false,
-      error: "Error fetching cars filters",
-    };
+    return createErrorResponse(error);
   }
 }
 
@@ -278,79 +81,18 @@ export async function toggleWishlist(carId) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
+      throw new AuthenticationError();
     }
 
-    const userDB = await db.user.findUnique({
-      where: {
-        clerkId: userId,
-      },
-    });
+    const result = await wishlistService.toggleWishlist(carId, userId);
 
-    if (!userDB) {
-      return {
-        success: false,
-        error: "User not found",
-      };
-    }
-
-    const car = await db.car.findUnique({
-      where: {
-        id: carId,
-      },
-    });
-
-    if (!car) {
-      return {
-        success: false,
-        error: "Car not found",
-      };
-    }
-
-    const savedCar = await db.savedCar.findUnique({
-      where: {
-        userId_carId: {
-          userId: userDB.id,
-          carId,
-        },
-      },
-    });
-
-    if (savedCar) {
-      await db.savedCar.delete({
-        where: {
-          userId_carId: {
-            userId: userDB.id,
-            carId,
-          },
-        },
-      });
-    } else {
-      await db.savedCar.create({
-        data: {
-          userId: userDB.id,
-          carId,
-        },
-      });
-    }
-
-    // Revalidate both paths
     revalidatePath("/wishlist");
     revalidatePath("/cars");
 
-    return {
-      success: true,
-      message: savedCar ? "Car removed from wishlist" : "Car added to wishlist",
-    };
+    return createSuccessResponse(result, result.message);
   } catch (error) {
     console.error("Error toggling wishlist", error);
-    return {
-      success: false,
-      error: "Error toggling wishlist",
-    };
+    return createErrorResponse(error);
   }
 }
 
@@ -358,119 +100,35 @@ export async function getWishlist({ page = 1, limit = 6 } = {}) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
+      throw new AuthenticationError();
     }
 
-    const userDB = await db.user.findUnique({
-      where: {
-        clerkId: userId,
-      },
-    });
+    const result = await wishlistService.getUserWishlist(userId, { page, limit });
 
-    if (!userDB) {
-      return {
-        success: false,
-        error: "User not found",
-      };
-    }
-
-    // Calculate pagination values
-    const skip = (page - 1) * limit;
-
-    // Get total count for pagination
-    const totalCount = await db.savedCar.count({
-      where: {
-        userId: userDB.id,
-      },
-    });
-
-    const savedCars = await db.savedCar.findMany({
-      where: {
-        userId: userDB.id,
-      },
-      include: {
-        car: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      skip,
-      take: limit,
-    });
-
-    const cars = savedCars.map((savedCar) => ({
-      ...savedCar.car,
-      price: parseFloat(savedCar.car.price.toString()),
-      createdAt: savedCar.car.createdAt.toISOString(),
-      updatedAt: savedCar.car.updatedAt.toISOString(),
-      isWishlisted: true,
-    }));
-
-    return {
-      success: true,
-      data: {
-        cars,
-        pagination: {
-          total: totalCount,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: Math.ceil(totalCount / limit),
-        },
-      },
-    };
+    return createSuccessResponse(result);
   } catch (error) {
     console.error("Error fetching saved cars", error);
-    return {
-      success: false,
-      error: "Error fetching saved cars",
-    };
+    return createErrorResponse(error);
   }
 }
 
 export async function getCarsByIds(carIds) {
   try {
     if (!carIds || !Array.isArray(carIds) || carIds.length === 0) {
-      return {
-        success: false,
-        error: "No car IDs provided",
-      };
+      throw new ValidationError("No car IDs provided", "carIds");
     }
 
-    const cars = await db.car.findMany({
-      where: {
-        id: {
-          in: carIds,
-        },
-      },
-    });
+    const cars = await carRepository.findCarsByIds(carIds);
 
     if (!cars || cars.length === 0) {
-      return {
-        success: false,
-        error: "No cars found with the provided IDs",
-      };
+      throw new ValidationError("No cars found with the provided IDs", "carIds");
     }
 
-    return {
-      success: true,
-      data: cars.map((car) => ({
-        ...car,
-        price: parseFloat(car.price.toString()),
-        createdAt: car.createdAt.toISOString(),
-        updatedAt: car.updatedAt.toISOString(),
-        images: car.images.map((image) => ({
-          url: image,
-        })),
-      })),
-    };
+    const carsWithImages = cars.map(serializeCarWithImages);
+
+    return createSuccessResponse(carsWithImages);
   } catch (error) {
     console.error("Error fetching cars by IDs", error);
-    return {
-      success: false,
-      error: "Error fetching cars by IDs",
-    };
+    return createErrorResponse(error);
   }
 }

@@ -43,19 +43,17 @@ const CarsFilter = ({
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
             <form onSubmit={handleSearch} className="relative flex-1 w-full">
               <Search
-                className={`absolute left-2 sm:left-3 top-2.5 sm:top-3 h-3 w-3 sm:h-4 sm:w-4 ${
-                  isFocused ? "text-blue-500" : "text-gray-400"
-                } transition-colors`}
+                className={`absolute left-2 sm:left-3 top-2.5 sm:top-3 h-3 w-3 sm:h-4 sm:w-4 ${isFocused ? "text-blue-500" : "text-gray-400"
+                  } transition-colors`}
               />
               <Input
                 placeholder="Search by model or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-7 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10 bg-gray-50 border-gray-200 ${
-                  isFocused
-                    ? "ring-1 sm:ring-2 ring-blue-100 border-blue-300"
-                    : "focus:bg-white"
-                } transition-all`}
+                className={`pl-7 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10 bg-gray-50 border-gray-200 ${isFocused
+                  ? "ring-1 sm:ring-2 ring-blue-100 border-blue-300"
+                  : "focus:bg-white"
+                  } transition-all`}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 disabled={disabled}
@@ -86,19 +84,17 @@ const CarsFilter = ({
                 disabled={disabled}
               >
                 <SelectTrigger
-                  className={`w-full sm:w-[180px] h-8 sm:h-10 text-xs sm:text-sm bg-gray-50 border-gray-200 ${
-                    statusFilter !== "all"
-                      ? "border-blue-300 text-blue-700"
-                      : ""
-                  }`}
+                  className={`w-full sm:w-[180px] h-8 sm:h-10 text-xs sm:text-sm bg-gray-50 border-gray-200 ${statusFilter !== "all"
+                    ? "border-blue-300 text-blue-700"
+                    : ""
+                    }`}
                 >
                   <div className="flex items-center">
                     <Filter
-                      className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${
-                        statusFilter !== "all"
-                          ? "text-blue-500"
-                          : "text-gray-400"
-                      }`}
+                      className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${statusFilter !== "all"
+                        ? "text-blue-500"
+                        : "text-gray-400"
+                        }`}
                     />
                     <SelectValue placeholder="Filter by status" />
                   </div>

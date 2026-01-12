@@ -24,7 +24,7 @@ export default async function SiteLayout({ children }) {
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <MainHeader user={user} />
       <main
         className={`flex-1 animate-in fade-in duration-500 ${inter.className}`}
@@ -42,6 +42,6 @@ export default async function SiteLayout({ children }) {
       <Footer user={user} />
       <BackToTop />
       <Toaster position="top-right" richColors />
-    </>
+    </div>
   );
 }

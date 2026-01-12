@@ -10,8 +10,8 @@ import {
   Star,
   Settings,
   MessageSquare,
-  FileText,
   LogOut,
+  Calendar,
   Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ const iconMap = {
   Star,
   Settings,
   MessageSquare,
-  FileText,
+  Calendar
 };
 
 export default function MobileSidebar({ pathname }) {

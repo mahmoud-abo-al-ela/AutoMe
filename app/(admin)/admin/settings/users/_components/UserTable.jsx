@@ -80,17 +80,15 @@ const UserTable = ({
         </Table>
       </div>
 
-      {pagination && (
-        <div className="mt-3 sm:mt-4 md:mt-6 px-2 sm:px-3 md:px-0">
-          <UserPagination
-            page={page}
-            limit={limit}
-            total={pagination.total}
-            onPageChange={onPageChange}
-            isLoading={loading}
-            isSearching={isSearching}
-          />
-        </div>
+      {pagination && pagination.total > limit && (
+        <UserPagination
+          page={page}
+          limit={limit}
+          total={pagination.total}
+          onPageChange={onPageChange}
+          isLoading={loading}
+          isSearching={isSearching}
+        />
       )}
     </div>
   );

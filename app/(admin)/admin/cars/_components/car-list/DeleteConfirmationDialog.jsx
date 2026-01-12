@@ -36,14 +36,14 @@ const DeleteConfirmationDialog = ({
             variant="outline"
             onClick={() => onClose(false)}
             disabled={isDeleting}
-            className="w-full sm:w-auto order-2 sm:order-1"
+            className="w-full sm:w-auto order-2 sm:order-1 cursor-pointer"
           >
             Cancel
           </Button>
           <Button
             variant="destructive"
             onClick={() => onDelete(car?.id)}
-            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto order-1 sm:order-2"
+            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto order-1 sm:order-2 cursor-pointer"
             disabled={isDeleting}
           >
             {isDeleting ? (

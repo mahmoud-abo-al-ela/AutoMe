@@ -81,16 +81,15 @@ const CarImageGallery = ({ images, make, model, title }) => {
         </div>
 
         {/* Image Thumbnails */}
-        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 snap-x">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto p-2 snap-x">
           {images.map((image, index) => (
-            <Button
+            <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
-              className={`flex-shrink-0 w-16 h-14 sm:w-20 sm:h-16 md:w-24 md:h-20 rounded-md overflow-hidden border-2 transition-all duration-200 hover:scale-105 snap-start p-1 cursor-pointer ${
-                index === currentImageIndex
-                  ? "border-blue-500 shadow-lg shadow-blue-200"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
+              className={`flex-shrink-0 w-16 h-14 sm:w-20 sm:h-16 md:w-24 md:h-20 rounded-md overflow-hidden transition-all duration-200 hover:scale-105 snap-start cursor-pointer ${index === currentImageIndex
+                ? "ring-2 ring-blue-500 shadow-lg shadow-blue-200"
+                : "ring-2 ring-gray-200 hover:ring-gray-300"
+                }`}
             >
               <Image
                 src={image.url || image}
@@ -99,7 +98,7 @@ const CarImageGallery = ({ images, make, model, title }) => {
                 width={100}
                 height={80}
               />
-            </Button>
+            </button>
           ))}
         </div>
       </div>
@@ -138,16 +137,15 @@ const CarImageGallery = ({ images, make, model, title }) => {
           <div className="flex justify-center items-center gap-2 text-white text-sm sm:text-base">
             {currentImageIndex + 1} / {images.length}
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
+          <div className="flex gap-2 overflow-x-auto p-2 snap-x">
             {images.map((image, index) => (
-              <Button
+              <button
                 key={index}
                 onClick={() => setCurrentImageIndex(index)}
-                className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-md overflow-hidden border-1 snap-start p-1 cursor-pointer ${
-                  index === currentImageIndex
-                    ? "border-blue-500"
-                    : "border-transparent"
-                }`}
+                className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-md overflow-hidden snap-start cursor-pointer ${index === currentImageIndex
+                  ? "ring-2 ring-blue-500"
+                  : "ring-2 ring-transparent hover:ring-gray-400"
+                  }`}
               >
                 <Image
                   src={image.url || image}
@@ -156,7 +154,7 @@ const CarImageGallery = ({ images, make, model, title }) => {
                   width={80}
                   height={60}
                 />
-              </Button>
+              </button>
             ))}
           </div>
         </DialogContent>

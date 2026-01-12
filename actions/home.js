@@ -1,59 +1,49 @@
 "use server";
 import aj from "@/lib/arcjet";
-import { db } from "@/lib/prisma";
 import { request } from "@arcjet/next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { fileToBase64 } from "./cars";
+import * as carRepository from "@/lib/repositories/car";
+import { serializeCars } from "@/lib/utils/serializers";
+import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
+import { ValidationError, RateLimitError } from "@/lib/utils/errors";
 
 export async function getFeaturedCars(limit = 4) {
   try {
-    const cars = await db.car.findMany({
-      where: {
-        featured: true,
-        status: "AVAILABLE",
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: limit,
-    });
-    const serializedCars = cars.map((car) => ({
-      ...car,
-      price: Number(car.price),
-      createdAt: car.createdAt.toISOString(),
-      updatedAt: car.updatedAt.toISOString(),
-    }));
-    return {
-      success: true,
-      data: serializedCars,
-    };
+    const result = await carRepository.findManyCars(
+      { featured: true, onlyAvailable: true },
+      { page: 1, limit }
+    );
+
+    return createSuccessResponse(result.cars);
   } catch (error) {
     console.error("Error getting featured cars", error);
-    return {
-      success: false,
-      error: "Error getting featured cars",
-    };
+    return createErrorResponse(error);
   }
 }
 
 export async function processImagesSearch(file) {
   try {
+    // Rate limiting check
     const req = await request();
     const decision = await aj.protect(req, { requested: 1 });
+
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
         const { remaining, reset } = decision.reason;
-        throw new Error(
+        throw new RateLimitError(
           `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
             reset
           ).toLocaleString()}`
         );
       }
-      throw new Error("Request denied");
+      throw new ValidationError("Request denied", "request");
     }
+
     if (!process.env.GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY is not set");
+      throw new ValidationError("GEMINI_API_KEY is not set", "config");
     }
+
     const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
     const base64Image = await fileToBase64(file);
@@ -67,22 +57,22 @@ export async function processImagesSearch(file) {
     };
 
     const prompt = `
-        Analyze this car image and extract the following information for a search query:
-      1. Make (manufacturer)
-      2. Body type (SUV, Sedan, Hatchback, etc.)
-      3. Color
+Analyze this car image and extract the following information for a search query:
+1. Make (manufacturer)
+2. Body type (SUV, Sedan, Hatchback, etc.)
+3. Color
 
-      Format your response as a clean JSON object with these fields:
-      {
-        "make": "",
-        "bodyType": "",
-        "color": "",
-        "confidence": 0.0
-      }
+Format your response as a clean JSON object with these fields:
+{
+  "make": "",
+  "bodyType": "",
+  "color": "",
+  "confidence": 0.0
+}
 
-      For confidence, provide a value between 0 and 1 representing how confident you are in your overall identification.
-      Only respond with the JSON object, nothing else.
-      `;
+For confidence, provide a value between 0 and 1 representing how confident you are in your overall identification.
+Only respond with the JSON object, nothing else.
+`;
 
     // Retry logic
     const retryWithBackoff = async (fn, retries = 3, delay = 1000) => {
@@ -100,6 +90,7 @@ export async function processImagesSearch(file) {
     const result = await retryWithBackoff(() =>
       model.generateContent([imagePart, prompt])
     );
+
     const response = await result.response;
     const json = response.text();
     console.log("Raw API response:", json);
@@ -109,28 +100,19 @@ export async function processImagesSearch(file) {
       .replace(/```(json)?\n?/g, "")
       .replace(/```\n?/g, "")
       .trim();
+
     const jsonMatch = cleanData.match(/{[\s\S]*}/);
     if (jsonMatch) {
       cleanData = jsonMatch[0];
       console.log("Extracted JSON:", cleanData);
     } else {
-      throw new Error("No valid JSON object found in response");
+      throw new ValidationError("No valid JSON object found in response", "ai_response");
     }
-    try {
-      const parsedData = JSON.parse(cleanData);
-      return {
-        success: true,
-        data: parsedData,
-      };
-    } catch (error) {
-      console.error("Error parsing JSON", error);
-      return { success: false, error: "Error parsing JSON" };
-    }
+
+    const parsedData = JSON.parse(cleanData);
+    return createSuccessResponse(parsedData);
   } catch (error) {
     console.error("Error processing image search", error);
-    return {
-      success: false,
-      error: "Error processing image search",
-    };
+    return createErrorResponse(error);
   }
 }

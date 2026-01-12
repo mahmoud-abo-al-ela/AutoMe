@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,7 @@ import FieldInfo from "./FieldInfo";
 
 const DetailsSection = ({ register, errors, watch, setValue }) => {
   const watchImages = watch("images");
+  const [imagePreviews, setImagePreviews] = useState({});
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -20,11 +21,8 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
     maxFiles: 5,
     maxSize: 5242880, // 5MB
     onDrop: (acceptedFiles) => {
-      const filesWithPreview = acceptedFiles.map((file) =>
-        Object.assign(file, { preview: URL.createObjectURL(file) })
-      );
       const currentImages = watchImages || [];
-      const newImages = [...currentImages, ...filesWithPreview].slice(0, 5);
+      const newImages = [...currentImages, ...acceptedFiles].slice(0, 5);
       setValue("images", newImages, { shouldValidate: true });
     },
     onDropRejected: (fileRejections) => {
@@ -39,21 +37,46 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
       }
     },
   });
+
+  // Create and cache preview URLs
   useEffect(() => {
+    if (!watchImages) return;
+
+    const newPreviews = {};
+    watchImages.forEach((image, index) => {
+      if (image instanceof File) {
+        // Reuse existing preview or create new one
+        if (imagePreviews[index] && imagePreviews[index].file === image) {
+          newPreviews[index] = imagePreviews[index];
+        } else {
+          newPreviews[index] = {
+            file: image,
+            url: URL.createObjectURL(image)
+          };
+        }
+      }
+    });
+
+    setImagePreviews(newPreviews);
+
+    // Cleanup old previews that are no longer in use
     return () => {
-      watchImages?.forEach((image) => {
-        if (image.preview) {
-          URL.revokeObjectURL(image.preview);
+      Object.keys(imagePreviews).forEach(key => {
+        if (!newPreviews[key] && imagePreviews[key]?.url) {
+          URL.revokeObjectURL(imagePreviews[key].url);
         }
       });
     };
   }, [watchImages]);
+
   const removeImage = (index) => {
     const updatedImages = watchImages.filter((_, i) => i !== index);
-    // Only revoke object URL if the image has a preview property
-    if (watchImages[index].preview) {
-      URL.revokeObjectURL(watchImages[index].preview);
+
+    // Revoke the preview URL for the removed image
+    if (imagePreviews[index]?.url) {
+      URL.revokeObjectURL(imagePreviews[index].url);
     }
+
     setValue("images", updatedImages, { shouldValidate: true });
   };
 
@@ -82,9 +105,8 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
         <Textarea
           id="description"
           placeholder="Detailed description of the vehicle..."
-          className={`min-h-[120px] sm:min-h-[150px] ${
-            errors.description ? "border-red-500" : ""
-          }`}
+          className={`min-h-[120px] sm:min-h-[150px] ${errors.description ? "border-red-500" : ""
+            }`}
           {...register("description")}
         />
         {errors.description && (
@@ -108,10 +130,9 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-              ${
-                isDragActive
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-blue-400"
+              ${isDragActive
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-blue-400"
               } ${errors.images ? "border-red-500" : ""}`}
           >
             <input {...getInputProps()} />
@@ -138,28 +159,22 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
         {watchImages?.length > 0 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {watchImages.map((image, index) => {
-              // Handle both cases: images with preview (from dropzone) and File objects (from initial data)
-              let imageSrc;
-              if (image.preview) {
-                imageSrc = image.preview;
-              } else if (image instanceof File) {
-                imageSrc = URL.createObjectURL(image);
-              } else {
-                // Fallback for any other format
-                imageSrc = image;
-              }
+              // Use cached preview URL
+              const imageSrc = imagePreviews[index]?.url || (typeof image === 'string' ? image : '');
 
               return (
                 <div key={index} className="relative">
-                  <Image
-                    src={imageSrc}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-40 object-contain rounded-lg"
-                    width={100}
-                    height={100}
-                    priority
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                  {imageSrc && (
+                    <Image
+                      src={imageSrc}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-40 object-contain rounded-lg"
+                      width={100}
+                      height={100}
+                      priority
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
                   <Button
                     type="button"
                     onClick={(e) => {

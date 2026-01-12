@@ -6,7 +6,6 @@ import {
   CarDescription,
   CarFeatures,
   CarInfoCard,
-  FinancingCard,
 } from "./";
 import { notFound } from "next/navigation";
 
@@ -15,14 +14,20 @@ const CarContent = async ({ id }) => {
   try {
     const response = await getCarById(id);
     if (!response.success) {
-      throw new Error(response.error || "Failed to fetch car details");
+      const errorMsg = typeof response.error === 'string'
+        ? response.error
+        : response.error?.message || "Failed to fetch car details";
+      throw new Error(errorMsg);
     }
     car = response.data;
   } catch (error) {
     console.error("Error fetching car:", error);
+    const errorMessage = typeof error === 'string'
+      ? error
+      : error?.message || "An error occurred while fetching car details";
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">
-        Error: {error.message || "An error occurred while fetching car details"}
+        Error: {errorMessage}
       </div>
     );
   }
@@ -64,7 +69,6 @@ const CarContent = async ({ id }) => {
             <div className="hidden md:block">
               <CarInfoCard car={car} />
             </div>
-            <FinancingCard price={car.price} />
           </div>
         </div>
       </div>

@@ -17,10 +17,6 @@ const CarStatsDisplay = ({
         Car Inventory
       </CardTitle>
       <CardDescription className="text-gray-600 space-y-2">
-        <div className="text-sm font-medium">
-          {stats.count} cars found • Total value: $
-          {stats.totalValue.toLocaleString()}
-        </div>
         <div className="flex flex-wrap gap-3 text-xs sm:text-sm">
           <span className="text-green-600 font-medium">
             {stats.availableCount} available
@@ -43,19 +39,13 @@ const CarStatsDisplay = ({
         size="sm"
         onClick={onRefresh}
         disabled={isLoading || isRefreshing}
-        className="flex items-center gap-2 h-10 px-4 w-full sm:w-auto"
+        className="flex items-center gap-2 h-10 px-4 w-full sm:w-auto cursor-pointer"
       >
         <RefreshCw
           className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
         />
         Refresh
       </Button>
-      <Badge
-        variant="outline"
-        className="text-gray-600 bg-white text-sm py-1.5 px-3 w-full sm:w-auto text-center"
-      >
-        {stats.count} of {stats.totalCount} cars
-      </Badge>
     </div>
   </div>
 );

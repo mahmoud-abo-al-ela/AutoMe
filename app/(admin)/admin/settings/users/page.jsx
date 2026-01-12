@@ -59,8 +59,8 @@ const UsersPage = () => {
   }, [page, limit, debouncedSearchQuery]);
 
   useEffect(() => {
-    if (usersData?.data) {
-      setAdminUsers(usersData.data);
+    if (usersData?.data?.users) {
+      setAdminUsers(usersData.data.users);
     }
   }, [usersData]);
 
@@ -168,7 +168,7 @@ const UsersPage = () => {
             isSearching={isSearching}
           />
         </CardHeader>
-        <CardContent className="px-0 sm:px-2 md:px-4 pb-3 sm:pb-4 md:pb-6">
+        <CardContent >
           <UserTable
             users={adminUsers}
             loading={loadingUsers}
@@ -180,7 +180,7 @@ const UsersPage = () => {
             loadingUpdateRole={loadingUpdateRole}
             loadingDeleteUser={loadingDeleteUser}
             onRetry={handleRetry}
-            pagination={usersData?.pagination}
+            pagination={usersData?.data?.pagination}
             page={page}
             limit={limit}
             onPageChange={handlePageChange}

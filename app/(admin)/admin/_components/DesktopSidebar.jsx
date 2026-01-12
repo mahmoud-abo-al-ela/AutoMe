@@ -9,8 +9,8 @@ import {
   Star,
   Settings,
   MessageSquare,
-  FileText,
   LogOut,
+  Calendar,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -24,7 +24,7 @@ const iconMap = {
   Star,
   Settings,
   MessageSquare,
-  FileText,
+  Calendar
 };
 
 export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
