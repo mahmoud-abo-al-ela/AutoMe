@@ -12,7 +12,6 @@ import { Search, Plus, Filter, X, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const CarsFilter = ({
   searchTerm,
@@ -20,7 +19,6 @@ const CarsFilter = ({
   statusFilter,
   setStatusFilter,
   disabled,
-  isMobileView,
 }) => {
   const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
@@ -50,7 +48,7 @@ const CarsFilter = ({
                 placeholder="Search by model or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-7 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10 bg-gray-50 border-gray-200 ${isFocused
+                className={`pl-8 sm:pl-10 text-sm h-9 sm:h-10 bg-gray-50 border-gray-200 ${isFocused
                   ? "ring-1 sm:ring-2 ring-blue-100 border-blue-300"
                   : "focus:bg-white"
                   } transition-all`}
@@ -84,7 +82,7 @@ const CarsFilter = ({
                 disabled={disabled}
               >
                 <SelectTrigger
-                  className={`w-full sm:w-[180px] h-8 sm:h-10 text-xs sm:text-sm bg-gray-50 border-gray-200 ${statusFilter !== "all"
+                  className={`w-full sm:w-[180px] h-9 sm:h-10 text-sm bg-gray-50 border-gray-200 ${statusFilter !== "all"
                     ? "border-blue-300 text-blue-700"
                     : ""
                     }`}
@@ -115,34 +113,17 @@ const CarsFilter = ({
                     setStatusFilter("all");
                   }}
                   disabled={disabled}
-                  className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm h-8 sm:h-10 px-2"
+                  className="text-gray-500 hover:text-gray-700 text-sm h-9 sm:h-10 px-3"
                 >
                   <X className="h-3 w-3 mr-1" />
                   Clear
                 </Button>
               )}
             </div>
-          </div>
 
-          {/* Active filters and add button */}
-          <div className="flex flex-wrap justify-between items-center gap-2">
-            <div className="flex-grow">
-              {hasActiveFilters && (
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-50 text-blue-700 border border-blue-200 text-xs py-0.5 px-1.5"
-                >
-                  {statusFilter !== "all" && (
-                    <span className="mr-1 capitalize">{statusFilter}</span>
-                  )}
-                  {searchTerm && statusFilter !== "all" && " • "}
-                  {searchTerm && <span>"{searchTerm}"</span>}
-                </Badge>
-              )}
-            </div>
             <Button
               variant="outline"
-              className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white cursor-pointer text-xs sm:text-sm h-8 sm:h-10 py-0 px-2 sm:px-4 w-auto"
+              className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white cursor-pointer text-sm h-9 sm:h-10 px-3 sm:px-4 w-auto"
               onClick={() => router.push("/admin/cars/create")}
             >
               <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { CarsList } from "./_components/car-list";
 
@@ -9,13 +10,13 @@ export const metadata = {
 const CarsPage = () => {
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
               Car Management
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-gray-600 text-sm md:text-base">
               Manage your car listings and inventory
             </p>
           </div>

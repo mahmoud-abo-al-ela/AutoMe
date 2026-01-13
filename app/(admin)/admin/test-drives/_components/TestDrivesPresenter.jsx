@@ -4,103 +4,71 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Calendar, Car, Clock, User, Check, X } from "lucide-react";
-import { format } from "date-fns";
-import Image from "next/image";
-import Link from "next/link";
 import Loading from "@/components/Loading";
 import { Pagination } from "@/components/common/Pagination";
-
-const formatTime = (timeString) => {
-    if (!timeString) return "";
-
-    if (/^\d{2}:\d{2}$/.test(timeString)) {
-        return timeString;
-    }
-
-    try {
-        const [time, modifier] = timeString.split(" ");
-        let [hours, minutes] = time.split(":");
-
-        if (hours === "12") {
-            hours = "00";
-        }
-
-        if (modifier === "PM") {
-            hours = parseInt(hours, 10) + 12;
-        }
-
-        return `${hours.padStart(2, "0")}:${minutes}`;
-    } catch (error) {
-        return timeString;
-    }
-};
-
-const formatDate = (dateString) => {
-    return format(new Date(dateString), "PPP");
-};
-
-const getStatusBadge = (status) => {
-    switch (status) {
-        case "PENDING":
-            return (
-                <Badge className="bg-yellow-100 text-yellow-800 border-0">
-                    Pending
-                </Badge>
-            );
-        case "CONFIRMED":
-            return (
-                <Badge className="bg-green-100 text-green-800 border-0">
-                    Confirmed
-                </Badge>
-            );
-        case "CANCELLED":
-            return (
-                <Badge className="bg-red-100 text-red-800 border-0">Cancelled</Badge>
-            );
-        default:
-            return null;
-    }
-};
+import { TestDriveTable } from "./TestDriveTable";
+import { TestDriveFilters } from "./TestDriveFilters";
+import { TestDriveMobileSkeleton } from "./TestDriveMobileSkeleton";
+import { TestDriveMobileCard } from "./TestDriveMobileCard";
+import { TestDriveStatsDisplay } from "./TestDriveStatsDisplay";
 
 export const TestDrivesPresenter = ({
     testDrives,
     loading,
     error,
     statusFilter,
+    searchTerm = "",
     pagination,
+    testDriveStats,
     handlers,
 }) => {
     if (loading && testDrives.length === 0) {
         return (
-            <div className="p-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Test Drive Requests</CardTitle>
-                        <CardDescription>Manage test drive requests</CardDescription>
+            <div>
+                <div className="mb-6 md:mb-8">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                                Test Drive Management
+                            </h1>
+                            <p className="text-gray-600 text-sm md:text-base">
+                                Manage test drive requests and appointments
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <TestDriveFilters
+                    searchTerm=""
+                    setSearchTerm={() => { }}
+                    statusFilter="all"
+                    onFilterChange={() => { }}
+                    disabled={true}
+                />
+
+                <Card className="shadow-lg border-0 bg-white relative overflow-hidden gap-4 pt-0">
+                    <CardHeader className="border-b p-3">
+                        <CardTitle className="text-lg sm:text-xl">
+                            Test Drive Requests
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                            Manage test drive requests and appointments
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent className="flex justify-center items-center min-h-[400px]">
-                        <Loading />
+                    <CardContent className="p-0 relative">
+                        {/* Desktop Loading */}
+                        <div className="hidden md:flex justify-center items-center min-h-[400px]">
+                            <Loading />
+                        </div>
+                        {/* Mobile Loading */}
+                        <div className="md:hidden p-4">
+                            <TestDriveMobileSkeleton />
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -109,15 +77,39 @@ export const TestDrivesPresenter = ({
 
     if (error && testDrives.length === 0) {
         return (
-            <div className="p-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Test Drive Requests</CardTitle>
-                        <CardDescription>Manage test drive requests</CardDescription>
+            <div>
+                <div className="mb-6 md:mb-8">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                                Test Drive Management
+                            </h1>
+                            <p className="text-gray-600 text-sm md:text-base">
+                                Manage test drive requests and appointments
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <Card className="shadow-lg border-0 bg-white gap-4 pt-0">
+                    <CardHeader className="border-b p-3">
+                        <CardTitle className="text-lg sm:text-xl">
+                            Test Drive Requests
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                            Manage test drive requests and appointments
+                        </CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col justify-center items-center min-h-[400px]">
-                        <div className="text-red-500 mb-4">Error: {error}</div>
-                        <Button onClick={handlers.retry}>Try Again</Button>
+                    <CardContent className="flex flex-col justify-center items-center min-h-[400px] p-6">
+                        <div className="text-red-500 mb-4 text-center">
+                            <p className="text-lg font-semibold mb-2">
+                                Error Loading Test Drives
+                            </p>
+                            <p className="text-sm text-gray-600">{error}</p>
+                        </div>
+                        <Button onClick={handlers.retry} variant="outline">
+                            Try Again
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
@@ -125,193 +117,101 @@ export const TestDrivesPresenter = ({
     }
 
     return (
-        <div className="p-6">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <div className="mb-6 md:mb-8">
+                <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle>Test Drive Requests</CardTitle>
-                        <CardDescription>Manage test drive requests</CardDescription>
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                            Test Drive Management
+                        </h1>
+                        <p className="text-gray-600 text-sm md:text-base">
+                            Manage test drive requests and appointments
+                        </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Filter by status:</span>
-                        <Select value={statusFilter} onValueChange={handlers.handleFilterChange}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All</SelectItem>
-                                <SelectItem value="PENDING">Pending</SelectItem>
-                                <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-                                <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                </div>
+            </div>
+
+            <TestDriveFilters
+                searchTerm={searchTerm}
+                setSearchTerm={handlers.setSearchTerm || (() => { })}
+                statusFilter={statusFilter}
+                onFilterChange={handlers.handleFilterChange}
+                disabled={loading}
+            />
+
+            <Card className="shadow-lg border-0 bg-white relative overflow-hidden gap-4 pt-0">
+                <CardHeader className="border-b p-3">
+                    <TestDriveStatsDisplay
+                        stats={testDriveStats || {
+                            count: 0,
+                            pendingCount: 0,
+                            confirmedCount: 0,
+                            cancelledCount: 0
+                        }}
+                        isRefreshing={loading && testDrives.length > 0}
+                        isLoading={loading}
+                        onRefresh={handlers.handleRefresh}
+                    />
                 </CardHeader>
-                <CardContent>
+
+                <CardContent className="p-0 relative">
                     {testDrives.length === 0 ? (
-                        <div className="text-center py-10">
-                            <p className="text-gray-500">No test drive requests found</p>
+                        <div className="text-center py-10 px-4">
+                            <div className="max-w-md mx-auto">
+                                <p className="text-gray-500 text-lg mb-2">
+                                    No test drive requests found
+                                </p>
+                                <p className="text-gray-400 text-sm">
+                                    {searchTerm || statusFilter !== "all"
+                                        ? "Try adjusting your search or filter criteria"
+                                        : "Test drive requests will appear here when customers book appointments"}
+                                </p>
+                                {(searchTerm || statusFilter !== "all") && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handlers.handleClearFilters}
+                                        className="mt-4"
+                                    >
+                                        Clear filters
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     ) : (
                         <>
-                            <div className="rounded-md border overflow-hidden">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Car</TableHead>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead>Date & Time</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {testDrives.map((testDrive) => (
-                                            <TableRow key={testDrive.id}>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="relative h-12 w-16 overflow-hidden rounded-md">
-                                                            {testDrive.car.images &&
-                                                                testDrive.car.images[0] ? (
-                                                                <Image
-                                                                    src={testDrive.car.images[0]}
-                                                                    alt={`${testDrive.car.make} ${testDrive.car.model}`}
-                                                                    fill
-                                                                    className="object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                                                                    <Car className="h-6 w-6 text-gray-400" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <Link
-                                                                href={`/cars/${testDrive.car.id}`}
-                                                                className="font-medium hover:underline"
-                                                            >
-                                                                {testDrive.car.year} {testDrive.car.make}{" "}
-                                                                {testDrive.car.model}
-                                                            </Link>
-                                                            <p className="text-sm text-gray-500">
-                                                                ${Number(testDrive.car.price).toLocaleString()}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="relative h-8 w-8 overflow-hidden rounded-full">
-                                                            {testDrive.user.imageUrl ? (
-                                                                <Image
-                                                                    src={testDrive.user.imageUrl}
-                                                                    alt={testDrive.user.name}
-                                                                    fill
-                                                                    className="object-cover"
-                                                                />
-                                                            ) : (
-                                                                <div className="flex h-full w-full items-center justify-center bg-gray-100 rounded-full">
-                                                                    <User className="h-4 w-4 text-gray-400" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-medium">
-                                                                {testDrive.user.name}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500">
-                                                                {testDrive.user.email}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col">
-                                                        <div className="flex items-center gap-1">
-                                                            <Calendar className="h-3 w-3 text-gray-500" />
-                                                            <span className="text-sm">
-                                                                {formatDate(testDrive.date)}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1 mt-1">
-                                                            <Clock className="h-3 w-3 text-gray-500" />
-                                                            <span className="text-sm">
-                                                                {formatTime(testDrive.startTime)} -{" "}
-                                                                {formatTime(testDrive.endTime)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {getStatusBadge(testDrive.status)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        {testDrive.status === "PENDING" && (
-                                                            <>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    className="h-8 border-green-500 text-green-500 hover:bg-green-50"
-                                                                    onClick={() =>
-                                                                        handlers.handleStatusChange(
-                                                                            testDrive.id,
-                                                                            "CONFIRMED"
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <Check className="h-4 w-4 mr-1" />
-                                                                    Confirm
-                                                                </Button>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    className="h-8 border-red-500 text-red-500 hover:bg-red-50"
-                                                                    onClick={() =>
-                                                                        handlers.handleStatusChange(
-                                                                            testDrive.id,
-                                                                            "CANCELLED"
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <X className="h-4 w-4 mr-1" />
-                                                                    Cancel
-                                                                </Button>
-                                                            </>
-                                                        )}
-                                                        {testDrive.status === "CONFIRMED" && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="outline"
-                                                                className="h-8 border-red-500 text-red-500 hover:bg-red-50"
-                                                                onClick={() =>
-                                                                    handlers.handleStatusChange(testDrive.id, "CANCELLED")
-                                                                }
-                                                            >
-                                                                <X className="h-4 w-4 mr-1" />
-                                                                Cancel
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                            {/* Desktop Table View */}
+                            <TestDriveTable
+                                testDrives={testDrives}
+                                onStatusChange={handlers.handleStatusChange}
+                                isLoading={loading}
+                            />
 
-                            {pagination.total > pagination.limit && (
-                                <div className="mt-6">
-                                    <Pagination
-                                        currentPage={pagination.page}
-                                        totalPages={pagination.totalPages}
-                                        onPageChange={handlers.handlePageChange}
+                            {/* Mobile Card View */}
+                            <div className="md:hidden px-2 space-y-4">
+                                {testDrives.map((testDrive) => (
+                                    <TestDriveMobileCard
+                                        key={testDrive.id}
+                                        testDrive={testDrive}
+                                        onStatusChange={handlers.handleStatusChange}
+                                        isDisabled={loading}
+                                        isUpdating={false}
                                     />
-                                </div>
-                            )}
+                                ))}
+                            </div>
                         </>
                     )}
                 </CardContent>
+
+                {pagination.total > pagination.limit && (
+                    <CardFooter className="px-3 sm:px-6">
+                        <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.totalPages}
+                            onPageChange={handlers.handlePageChange}
+                        />
+                    </CardFooter>
+                )}
             </Card>
         </div>
     );

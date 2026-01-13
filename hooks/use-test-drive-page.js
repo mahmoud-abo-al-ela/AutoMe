@@ -13,7 +13,7 @@ const MODES = {
     EDIT: "edit",
 };
 
-export const useReservationPage = () => {
+export const useTestDrivePage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [mode, setMode] = useState(MODES.LIST);
@@ -80,7 +80,7 @@ export const useReservationPage = () => {
         }
     }, [testDriveData, router]);
 
-    const handleReservationSuccess = useCallback(() => {
+    const handleTestDriveSuccess = useCallback(() => {
         router.push(`/cars/${carId}`);
     }, [carId, router]);
 
@@ -134,7 +134,7 @@ export const useReservationPage = () => {
         loading,
         loadingTestDrive,
         handlers: {
-            handleReservationSuccess,
+            handleTestDriveSuccess,
             handleEditClick,
             handleEditCancel,
             handleEditSuccess,

@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "AutoMe",
   description: "Find your dream car",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({ children }) {

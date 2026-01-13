@@ -2,7 +2,7 @@ import { PageSkeleton, CarContent } from "./_components";
 import { Suspense } from "react";
 
 const CarPage = async ({ params }) => {
-  const id = params.id;
+  const id = (await params).id;
 
   return (
     <Suspense fallback={<PageSkeleton />}>

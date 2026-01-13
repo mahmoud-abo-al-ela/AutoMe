@@ -1,14 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { getTestDrives, updateTestDriveStatus } from "@/actions/test-drive";
 import { toast } from "sonner";
+
+// Debounce hook
+const useDebounce = (value, delay) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+};
 
 export const useAdminTestDrives = () => {
     const [testDrives, setTestDrives] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [statusFilter, setStatusFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 10,
@@ -16,11 +34,15 @@ export const useAdminTestDrives = () => {
         totalPages: 0,
     });
 
+    // Debounce search term to avoid too many API calls
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
     const fetchTestDrives = useCallback(async () => {
         setLoading(true);
         try {
             const response = await getTestDrives({
                 status: statusFilter,
+                search: debouncedSearchTerm,
                 page: pagination.page,
                 limit: pagination.limit,
             });
@@ -43,11 +65,16 @@ export const useAdminTestDrives = () => {
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, pagination.page, pagination.limit]);
+    }, [statusFilter, debouncedSearchTerm, pagination.page, pagination.limit]);
 
     useEffect(() => {
         fetchTestDrives();
     }, [fetchTestDrives]);
+
+    // Reset to first page when search term or filter changes
+    useEffect(() => {
+        setPagination((prev) => ({ ...prev, page: 1 }));
+    }, [debouncedSearchTerm, statusFilter]);
 
     const handleStatusChange = useCallback(async (testDriveId, newStatus) => {
         try {
@@ -70,24 +97,50 @@ export const useAdminTestDrives = () => {
 
     const handleFilterChange = useCallback((value) => {
         setStatusFilter(value);
-        setPagination((prev) => ({ ...prev, page: 1 }));
     }, []);
 
     const handlePageChange = useCallback((newPage) => {
         setPagination((prev) => ({ ...prev, page: newPage }));
     }, []);
 
+    const handleClearFilters = useCallback(() => {
+        setSearchTerm("");
+        setStatusFilter("all");
+    }, []);
+
+    const testDriveStats = useMemo(() => {
+        if (!testDrives || !Array.isArray(testDrives))
+            return {
+                count: 0,
+                pendingCount: 0,
+                confirmedCount: 0,
+                cancelledCount: 0,
+            };
+
+        return {
+            count: testDrives.length,
+            pendingCount: testDrives.filter((td) => td.status === "PENDING").length,
+            confirmedCount: testDrives.filter((td) => td.status === "CONFIRMED").length,
+            cancelledCount: testDrives.filter((td) => td.status === "CANCELLED").length,
+        };
+    }, [testDrives]);
+
     return {
         testDrives,
         loading,
         error,
         statusFilter,
+        searchTerm,
         pagination,
+        testDriveStats,
         handlers: {
             handleStatusChange,
             handleFilterChange,
             handlePageChange,
+            handleClearFilters,
+            setSearchTerm,
             retry: fetchTestDrives,
+            handleRefresh: fetchTestDrives,
         },
     };
 };

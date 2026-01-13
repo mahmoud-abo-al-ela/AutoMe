@@ -109,15 +109,22 @@ const UsersPage = () => {
 
     try {
       const response = await deleteUserFn(userToDelete.id);
-      if (response.success) {
+
+      // Close dialog first
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+
+      if (response?.success) {
         toast.success("User deleted successfully");
-        fetchUsers(debouncedSearchQuery, page, limit);
+        // Refresh the users list
+        await fetchUsers(debouncedSearchQuery, page, limit);
       } else {
-        toast.error(response.error || "Failed to delete user");
+        toast.error(response?.error || "Failed to delete user");
       }
     } catch (error) {
+      console.error("Delete user error:", error);
       toast.error("An error occurred while deleting the user");
-    } finally {
+      // Close dialog on error too
       setDeleteDialogOpen(false);
       setUserToDelete(null);
     }

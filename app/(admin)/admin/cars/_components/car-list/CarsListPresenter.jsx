@@ -13,6 +13,8 @@ import { Toaster } from "@/components/ui/sonner";
 import CarStatsDisplay from "./CarStatsDisplay";
 import CarTableHeader from "./CarTableHeader";
 import CarTableRow from "./CarTableRow";
+import CarMobileCard from "./CarMobileCard";
+import CarMobileSkeleton from "./CarMobileSkeleton";
 import EmptyState from "./EmptyState";
 import ErrorState from "./ErrorState";
 import TableSkeleton from "./TableSkeleton";
@@ -55,7 +57,7 @@ export const CarsListPresenter = ({
             />
 
             <Card className="shadow-lg border-0 bg-white relative overflow-hidden gap-4 pt-0">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b pt-3 px-3 sm:px-6">
+                <CardHeader className="border-b p-3">
                     <CarStatsDisplay
                         stats={carStats}
                         isRefreshing={isRefreshing}
@@ -68,14 +70,57 @@ export const CarsListPresenter = ({
                     {fetchCarsError ? (
                         <ErrorState error={fetchCarsError} onRetry={handlers.handleRefresh} />
                     ) : (
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <CarTableHeader />
-                                <TableBody>
-                                    {isFetchingCars || isRefreshing ? (
-                                        <TableSkeleton />
-                                    ) : paginatedCars?.length > 0 ? (
-                                        paginatedCars.map((car) => {
+                        <>
+                            {/* Desktop Table View */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <Table className="min-w-[700px]">
+                                    <CarTableHeader />
+                                    <TableBody>
+                                        {isFetchingCars || isRefreshing ? (
+                                            <TableSkeleton />
+                                        ) : paginatedCars?.length > 0 ? (
+                                            paginatedCars.map((car) => {
+                                                const isCarDisabled =
+                                                    deleteCarLoading || updateCarLoading;
+                                                const isThisCarUpdating =
+                                                    updateCarLoading && updatedCar?.data?.id === car.id;
+                                                const isThisCarDeleting =
+                                                    deleteCarLoading && carToDelete?.id === car.id;
+
+                                                return (
+                                                    <CarTableRow
+                                                        key={car.id}
+                                                        car={car}
+                                                        isCarDisabled={isCarDisabled}
+                                                        isThisCarUpdating={isThisCarUpdating}
+                                                        isThisCarDeleting={isThisCarDeleting}
+                                                        onUpdateCar={handlers.handleUpdateCar}
+                                                        onConfirmDelete={handlers.confirmDelete}
+                                                    />
+                                                );
+                                            })
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="p-0">
+                                                    <EmptyState
+                                                        searchTerm={searchTerm}
+                                                        statusFilter={statusFilter}
+                                                        onClearFilters={handlers.handleClearFilters}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden px-2">
+                                {isFetchingCars || isRefreshing ? (
+                                    <CarMobileSkeleton />
+                                ) : paginatedCars?.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {paginatedCars.map((car) => {
                                             const isCarDisabled =
                                                 deleteCarLoading || updateCarLoading;
                                             const isThisCarUpdating =
@@ -84,7 +129,7 @@ export const CarsListPresenter = ({
                                                 deleteCarLoading && carToDelete?.id === car.id;
 
                                             return (
-                                                <CarTableRow
+                                                <CarMobileCard
                                                     key={car.id}
                                                     car={car}
                                                     isCarDisabled={isCarDisabled}
@@ -94,21 +139,17 @@ export const CarsListPresenter = ({
                                                     onConfirmDelete={handlers.confirmDelete}
                                                 />
                                             );
-                                        })
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={5} className="p-0">
-                                                <EmptyState
-                                                    searchTerm={searchTerm}
-                                                    statusFilter={statusFilter}
-                                                    onClearFilters={handlers.handleClearFilters}
-                                                />
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
+                                        })}
+                                    </div>
+                                ) : (
+                                    <EmptyState
+                                        searchTerm={searchTerm}
+                                        statusFilter={statusFilter}
+                                        onClearFilters={handlers.handleClearFilters}
+                                    />
+                                )}
+                            </div>
+                        </>
                     )}
                 </CardContent>
 

@@ -38,9 +38,8 @@ const CarTableRow = ({
   return (
     <TableRow
       key={car.id}
-      className={`hover:bg-blue-50/30 transition-all duration-200 border-b border-gray-100 ${
-        isCarDisabled ? "opacity-60 pointer-events-none" : ""
-      }`}
+      className={`hover:bg-blue-50/30 transition-all duration-200 border-b border-gray-100 ${isCarDisabled ? "opacity-60 pointer-events-none" : ""
+        }`}
     >
       <TableCell className="py-4 md:py-6">
         <div className="flex items-center gap-2 md:gap-4">
@@ -48,11 +47,10 @@ const CarTableRow = ({
             <Image
               src={car.images[0]}
               alt={car.title}
-              className={`h-12 w-20 md:h-16 rounded-xl object-cover shadow-md border border-gray-200 transition-all relative ${
-                isCarDisabled ? "grayscale" : ""
-              }`}
-              width={80}
-              height={64}
+              className={`h-16 w-24 md:h-16 md:w-20 lg:h-20 lg:w-28 rounded-xl object-cover shadow-md border border-gray-200 transition-all relative ${isCarDisabled ? "grayscale" : ""
+                }`}
+              width={112}
+              height={80}
             />
             {isThisCarDeleting && (
               <div className="absolute inset-0 bg-red-500/20 rounded-xl flex items-center justify-center">
@@ -73,30 +71,30 @@ const CarTableRow = ({
             )}
           </div>
           <div className="min-w-0">
-            <div className="text-xs sm:text-sm md:text-base font-semibold text-gray-900 mb-1 max-w-[150px] md:max-w-none flex items-center overflow-hidden">
+            <div className="text-sm md:text-base font-semibold text-gray-900 mb-1 max-w-[180px] md:max-w-none flex items-center overflow-hidden">
               <span className="truncate">{car.title}</span>
             </div>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:gap-3 text-xs text-gray-500 mt-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:gap-3 text-xs md:text-sm text-gray-500 mt-1">
               <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+                <Calendar className="h-3 w-3 md:h-4 md:w-4" />
                 <span>{car.year}</span>
               </div>
               <div className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                <span className="truncate max-w-16 md:max-w-24">
+                <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="truncate max-w-20 md:max-w-32">
                   {car.location}
                 </span>
               </div>
-              <div className="flex md:hidden items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded">
+              <div className="flex md:hidden items-center gap-1 bg-green-50 px-2 py-1 rounded">
                 <DollarSign className="h-3 w-3 text-green-600" />
-                <span className="font-semibold text-green-700">
-                  {car.price.toLocaleString()}
+                <span className="font-semibold text-green-700 text-sm">
+                  ${car.price.toLocaleString()}
                 </span>
               </div>
               <div className="flex md:hidden">
                 <StatusBadge status={carStatus} compact={true} />
               </div>
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden lg:flex items-center gap-1">
                 <span className="text-xs text-gray-500">
                   Added: {new Date(car.createdAt).toLocaleDateString()}
                 </span>
@@ -155,7 +153,7 @@ const CarTableRow = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-36 sm:w-48 bg-white border shadow-lg"
+              className="w-40 sm:w-48 bg-white border shadow-lg"
             >
               <DropdownMenuLabel className="text-xs sm:text-sm">
                 Actions

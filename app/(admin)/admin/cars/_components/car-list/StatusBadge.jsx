@@ -37,9 +37,8 @@ const StatusBadge = ({ status, compact = false, iconOnly = false }) => {
   return (
     <Badge
       variant="outline"
-      className={`text-xs whitespace-nowrap ${className} ${
-        iconOnly ? "h-6 w-6 p-0 flex items-center justify-center" : ""
-      }`}
+      className={`text-xs whitespace-nowrap ${className} ${iconOnly ? "h-6 w-6 p-0 flex items-center justify-center" : "px-2 py-1"
+        }`}
     >
       <span className={compact || iconOnly ? "" : "mr-1"}>{icon}</span>
       {!compact && !iconOnly && text}

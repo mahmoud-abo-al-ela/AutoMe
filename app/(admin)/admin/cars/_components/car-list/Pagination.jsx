@@ -26,9 +26,14 @@ const Pagination = ({
 }) => {
   return (
     <div className="w-full flex flex-col sm:flex-row justify-between items-center py-3 px-0 sm:px-4 border-t gap-4 sm:gap-0">
-      <div className="text-xs sm:text-sm text-gray-500 order-2 sm:order-1">
-        Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)} to{" "}
-        {Math.min(currentPage * pageSize, totalCount)} of {totalCount} cars
+      <div className="text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-left">
+        <span className="hidden sm:inline">
+          Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)} to{" "}
+          {Math.min(currentPage * pageSize, totalCount)} of {totalCount} cars
+        </span>
+        <span className="sm:hidden">
+          {Math.min((currentPage - 1) * pageSize + 1, totalCount)}-{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
+        </span>
       </div>
       <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto">
         {!isMobileView && (
@@ -59,9 +64,8 @@ const Pagination = ({
         )}
 
         <div
-          className={`flex items-center gap-1 ${
-            isMobileView ? "w-full justify-center" : ""
-          }`}
+          className={`flex items-center gap-1 ${isMobileView ? "w-full justify-center" : ""
+            }`}
         >
           {!isMobileView && (
             <Button

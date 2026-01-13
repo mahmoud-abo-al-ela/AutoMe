@@ -143,3 +143,13 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
     return createErrorResponse(error);
   }
 }
+
+export async function getBookedTimeSlots(carId, date) {
+  try {
+    const bookedSlots = await testDriveService.getBookedTimeSlots(carId, date);
+    return createSuccessResponse(bookedSlots);
+  } catch (error) {
+    console.error("Error getting booked time slots:", error);
+    return createErrorResponse(error);
+  }
+}

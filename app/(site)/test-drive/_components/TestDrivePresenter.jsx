@@ -1,14 +1,14 @@
 "use client";
 
 import {
-    ReservationForm,
+    TestDriveForm,
     InfoSidebar,
     useWorkingHours,
-    ExistingReservation,
-    EditReservationForm,
+    ExistingTestDrive,
+    EditTestDriveForm,
     UserTestDrivesList,
+    TestDriveSkeleton,
 } from "./index";
-import { ReservationSkeleton } from "./ExistingReservation";
 
 const MODES = {
     LIST: "list",
@@ -17,10 +17,9 @@ const MODES = {
     EDIT: "edit",
 };
 
-export const ReservationPresenter = ({
+export const TestDrivePresenter = ({
     mode,
     carId,
-    testDriveId,
     selectedTestDrive,
     testDrives,
     pagination,
@@ -55,7 +54,7 @@ export const ReservationPresenter = ({
             </div>
 
             {mode === MODES.VIEW && (
-                <ExistingReservation
+                <ExistingTestDrive
                     testDrive={selectedTestDrive}
                     onEditClick={handlers.handleEditClick}
                     refreshData={handlers.fetchTestDrive}
@@ -67,10 +66,11 @@ export const ReservationPresenter = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2">
                         {loadingTestDrive ? (
-                            <ReservationSkeleton />
+                            <TestDriveSkeleton />
                         ) : (
-                            <EditReservationForm
+                            <EditTestDriveForm
                                 testDrive={selectedTestDrive}
+                                carId={selectedTestDrive?.carId || carId}
                                 onCancel={handlers.handleEditCancel}
                                 onSuccess={handlers.handleEditSuccess}
                                 workingHours={workingHours}
@@ -88,9 +88,9 @@ export const ReservationPresenter = ({
             {mode === MODES.CREATE && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2">
-                        <ReservationForm
+                        <TestDriveForm
                             carId={carId}
-                            onSuccess={handlers.handleReservationSuccess}
+                            onSuccess={handlers.handleTestDriveSuccess}
                             workingHours={workingHours}
                             availableDates={availableDates}
                             isDateDisabled={isDateDisabled}
