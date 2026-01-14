@@ -33,17 +33,21 @@ function NavLink({
   const Icon = icon
     ? { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare }[icon]
     : null;
-  
+
   // Special styling for messages icon
   const isMessagesIcon = icon === "MessageSquare";
-  
+
   return (
     <Link
       href={href}
       className={cn(
         "group flex items-center text-sm font-medium transition-all duration-200 relative",
         isMobile ? "py-1 space-x-2" : "rounded-md relative overflow-hidden",
-        isMessagesIcon && !isMobile ? "p-2" : !isMobile ? "px-3 py-2 space-x-2" : "space-x-2",
+        isMessagesIcon && !isMobile
+          ? "p-2"
+          : !isMobile
+          ? "px-3 py-2 space-x-2"
+          : "space-x-2",
         isActive
           ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
           : "hover:text-primary"
@@ -54,10 +58,14 @@ function NavLink({
       aria-label={label}
     >
       {Icon && (
-        <span className={cn(
-          "relative inline-flex items-center justify-center",
-          isMessagesIcon && !isMobile && "p-1.5 rounded-full hover:bg-muted/80 transition-colors"
-        )}>
+        <span
+          className={cn(
+            "relative inline-flex items-center justify-center",
+            isMessagesIcon &&
+              !isMobile &&
+              "p-1.5 rounded-full hover:bg-muted/80 transition-colors"
+          )}
+        >
           <Icon
             size={isMessagesIcon ? 22 : size}
             className={cn(

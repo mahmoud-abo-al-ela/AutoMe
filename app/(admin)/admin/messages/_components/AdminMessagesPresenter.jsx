@@ -32,10 +32,12 @@ export function AdminMessagesPresenter({
   return (
     <div className="space-y-3 sm:space-y-6">
       {/* Header - Hidden on mobile when conversation selected */}
-      <div className={cn(
-        "transition-all duration-200",
-        selectedConversation && "hidden sm:block"
-      )}>
+      <div
+        className={cn(
+          "transition-all duration-200",
+          selectedConversation && "hidden sm:block"
+        )}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <h1 className="text-xl sm:text-2xl font-bold">Messages</h1>
@@ -53,22 +55,32 @@ export function AdminMessagesPresenter({
             {conversations.length !== 1 ? "s" : ""}
           </Badge>
         </div>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage customer conversations</p>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">
+          Manage customer conversations
+        </p>
       </div>
 
       {/* Main content */}
       {error ? (
         <div className="p-6 sm:p-8 text-center rounded-lg bg-white border">
           <p className="text-destructive mb-4 text-sm sm:text-base">{error}</p>
-          <Button onClick={() => window.location.reload()} size="sm" className="sm:size-default">Try Again</Button>
+          <Button
+            onClick={() => window.location.reload()}
+            size="sm"
+            className="sm:size-default"
+          >
+            Try Again
+          </Button>
         </div>
       ) : (
-        <div className={cn(
-          "flex rounded-lg border bg-white overflow-hidden",
-          selectedConversation 
-            ? "h-[calc(100vh-5rem)] sm:h-[calc(100vh-10rem)]" 
-            : "h-[calc(100vh-9rem)] sm:h-[calc(100vh-10rem)]"
-        )}>
+        <div
+          className={cn(
+            "flex rounded-lg border bg-white overflow-hidden",
+            selectedConversation
+              ? "h-[calc(100vh-5rem)] sm:h-[calc(100vh-10rem)]"
+              : "h-[calc(100vh-9rem)] sm:h-[calc(100vh-10rem)]"
+          )}
+        >
           {/* Conversation list */}
           <div
             className={cn(
@@ -77,7 +89,9 @@ export function AdminMessagesPresenter({
             )}
           >
             <div className="p-3 sm:p-4 border-b">
-              <h2 className="font-semibold text-sm sm:text-base">All Conversations</h2>
+              <h2 className="font-semibold text-sm sm:text-base">
+                All Conversations
+              </h2>
             </div>
             <div className="flex-1 overflow-y-auto">
               <ConversationList

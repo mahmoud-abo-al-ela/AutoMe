@@ -4,9 +4,9 @@ import { MessagesPresenter } from "./_components/MessagesPresenter";
 import { useMessagesPage } from "@/hooks/use-messages-page";
 
 const MessagesPage = () => {
-    const pageData = useMessagesPage();
+  const pageData = useMessagesPage();
 
-    return <MessagesPresenter {...pageData} />;
+  return <MessagesPresenter {...pageData} />;
 };
 
 export default MessagesPage;

@@ -75,8 +75,8 @@ export default function AdminSidebar() {
           </div>
         </div>
         {/* Messages icon with unread badge */}
-        <Link 
-          href="/admin/messages" 
+        <Link
+          href="/admin/messages"
           className="relative p-2 rounded-lg hover:bg-sidebar-accent transition-colors"
           title="Messages"
         >

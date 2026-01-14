@@ -26,7 +26,7 @@ const iconMap = {
   Star,
   Settings,
   MessageSquare,
-  Calendar
+  Calendar,
 };
 
 export default function MobileSidebar({ pathname }) {

@@ -7,72 +7,72 @@ import TestDriveButton from "./TestDriveButton";
 import { ChatDrawer } from "@/components/Chat";
 
 const CarActions = ({
-    car,
-    testDriveId,
-    isCheckingTestDrive,
-    isScheduleLoading,
-    isInCompare,
-    onScheduleTestDrive,
-    onViewTestDrive,
-    onGoToCompare,
-    currentUserId,
-    currentUserName,
-    isSignedIn,
-    onChatClick,
+  car,
+  testDriveId,
+  isCheckingTestDrive,
+  isScheduleLoading,
+  isInCompare,
+  onScheduleTestDrive,
+  onViewTestDrive,
+  onGoToCompare,
+  currentUserId,
+  currentUserName,
+  isSignedIn,
+  onChatClick,
 }) => {
-    const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
-    const handleChatClick = () => {
-        if (!isSignedIn) {
-            onChatClick?.();
-            return;
-        }
-        setIsChatOpen(true);
-    };
+  const handleChatClick = () => {
+    if (!isSignedIn) {
+      onChatClick?.();
+      return;
+    }
+    setIsChatOpen(true);
+  };
 
-    return (
-        <>
-            <div className="space-y-3 sm:space-y-4">
-                <Button 
-                    onClick={handleChatClick}
-                    className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-                >
-                    <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Chat Now
-                </Button>
+  return (
+    <>
+      <div className="space-y-3 sm:space-y-4">
+        <Button
+          onClick={handleChatClick}
+          className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+        >
+          <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          Chat Now
+        </Button>
 
-                <TestDriveButton
-                    car={car}
-                    testDriveId={testDriveId}
-                    isCheckingTestDrive={isCheckingTestDrive}
-                    isScheduleLoading={isScheduleLoading}
-                    onScheduleTestDrive={onScheduleTestDrive}
-                    onViewTestDrive={onViewTestDrive}
-                />
+        <TestDriveButton
+          car={car}
+          testDriveId={testDriveId}
+          isCheckingTestDrive={isCheckingTestDrive}
+          isScheduleLoading={isScheduleLoading}
+          onScheduleTestDrive={onScheduleTestDrive}
+          onViewTestDrive={onViewTestDrive}
+        />
 
-                {isInCompare && (
-                    <Button
-                        variant="secondary"
-                        onClick={onGoToCompare}
-                        className="w-full py-2 sm:py-3 rounded-xl hover:scale-105 transition-transform cursor-pointer text-xs sm:text-sm"
-                    >
-                        <Scale className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        Go to Compare
-                    </Button>
-                )}
-            </div>
+        {isInCompare && (
+          <Button
+            variant="secondary"
+            onClick={onGoToCompare}
+            className="w-full py-2 sm:py-3 rounded-xl hover:scale-105 transition-transform cursor-pointer text-xs sm:text-sm"
+          >
+            <Scale className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            Go to Compare
+          </Button>
+        )}
+      </div>
 
-            {/* Chat Drawer */}
-            <ChatDrawer
-                open={isChatOpen}
-                onOpenChange={setIsChatOpen}
-                carId={car.id}
-                car={car}
-                currentUserId={currentUserId}
-                currentUserName={currentUserName}
-            />
-        </>
-    );
+      {/* Chat Drawer */}
+      <ChatDrawer
+        open={isChatOpen}
+        onOpenChange={setIsChatOpen}
+        carId={car.id}
+        car={car}
+        currentUserId={currentUserId}
+        currentUserName={currentUserName}
+      />
+    </>
+  );
 };
 
 export default CarActions;

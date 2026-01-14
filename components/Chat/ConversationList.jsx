@@ -37,8 +37,8 @@ export function ConversationItem({ conversation, isActive, onClick }) {
       onClick={onClick}
       className={cn(
         "w-full flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 text-left transition-all duration-200 border-b cursor-pointer group relative",
-        isActive 
-          ? "bg-blue-50 border-l-2 border-l-blue-500" 
+        isActive
+          ? "bg-blue-50 border-l-2 border-l-blue-500"
           : "hover:bg-slate-50 border-l-2 border-l-transparent hover:border-l-slate-200",
         hasUnread && !isActive && "bg-blue-50/50"
       )}
@@ -57,10 +57,12 @@ export function ConversationItem({ conversation, isActive, onClick }) {
             )}
           />
         ) : (
-          <div className={cn(
-            "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm transition-all duration-200",
-            "group-hover:shadow-md group-hover:scale-105"
-          )}>
+          <div
+            className={cn(
+              "w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm transition-all duration-200",
+              "group-hover:shadow-md group-hover:scale-105"
+            )}
+          >
             {car ? (
               <Car className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             ) : (
@@ -77,18 +79,26 @@ export function ConversationItem({ conversation, isActive, onClick }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-1.5 sm:gap-2">
-          <h3 className={cn(
-            "text-xs sm:text-sm truncate transition-colors",
-            hasUnread ? "font-semibold text-slate-900" : "font-medium text-slate-700"
-          )}>
+          <h3
+            className={cn(
+              "text-xs sm:text-sm truncate transition-colors",
+              hasUnread
+                ? "font-semibold text-slate-900"
+                : "font-medium text-slate-700"
+            )}
+          >
             {displayName}
           </h3>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {lastMessage && (
-              <span className={cn(
-                "text-[10px] sm:text-xs",
-                hasUnread ? "text-blue-600 font-medium" : "text-muted-foreground"
-              )}>
+              <span
+                className={cn(
+                  "text-[10px] sm:text-xs",
+                  hasUnread
+                    ? "text-blue-600 font-medium"
+                    : "text-muted-foreground"
+                )}
+              >
                 {formatTime(lastMessage.createdAt)}
               </span>
             )}
@@ -109,7 +119,9 @@ export function ConversationItem({ conversation, isActive, onClick }) {
               {lastMessage.content}
             </p>
           ) : (
-            <p className="text-xs sm:text-sm text-muted-foreground italic">No messages yet</p>
+            <p className="text-xs sm:text-sm text-muted-foreground italic">
+              No messages yet
+            </p>
           )}
           {hasUnread && (
             <span className="flex-shrink-0 min-w-[18px] sm:min-w-[20px] h-4 sm:h-5 px-1 sm:px-1.5 bg-blue-500 text-white text-[10px] sm:text-xs font-semibold rounded-full flex items-center justify-center">
@@ -136,7 +148,10 @@ export function ConversationList({
     return (
       <div className="space-y-1 p-2 sm:p-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg animate-pulse">
+          <div
+            key={i}
+            className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg animate-pulse"
+          >
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-200" />
             <div className="flex-1 space-y-1.5 sm:space-y-2">
               <div className="h-3 sm:h-4 bg-slate-200 rounded-full w-3/4" />
@@ -154,7 +169,9 @@ export function ConversationList({
         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-3 sm:mb-4">
           <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
         </div>
-        <p className="text-muted-foreground text-xs sm:text-sm">{emptyMessage}</p>
+        <p className="text-muted-foreground text-xs sm:text-sm">
+          {emptyMessage}
+        </p>
       </div>
     );
   }

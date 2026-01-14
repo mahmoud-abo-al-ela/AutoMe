@@ -25,7 +25,7 @@ const iconMap = {
   Star,
   Settings,
   MessageSquare,
-  Calendar
+  Calendar,
 };
 
 export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
@@ -108,7 +108,12 @@ export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
 
                 {/* Unread badge for messages */}
                 {item.name === "messages" && (
-                  <UnreadBadge className={cn("ml-auto", collapsed && "absolute -top-1 -right-1")} />
+                  <UnreadBadge
+                    className={cn(
+                      "ml-auto",
+                      collapsed && "absolute -top-1 -right-1"
+                    )}
+                  />
                 )}
 
                 {/* Active indicator */}

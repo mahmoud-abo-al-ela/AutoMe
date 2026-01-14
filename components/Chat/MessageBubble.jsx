@@ -80,7 +80,9 @@ export function MessageBubble({ message, isOwn, showAvatar = true }) {
             {formatTime(createdAt)}
           </span>
           {isOwn && message.readAt && (
-            <span className="text-[10px] sm:text-[11px] text-blue-500 font-medium">✓✓</span>
+            <span className="text-[10px] sm:text-[11px] text-blue-500 font-medium">
+              ✓✓
+            </span>
           )}
           {isOwn && !message.readAt && !message._pending && (
             <span className="text-[10px] sm:text-[11px] text-muted-foreground">

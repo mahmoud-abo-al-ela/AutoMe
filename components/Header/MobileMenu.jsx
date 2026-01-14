@@ -41,8 +41,8 @@ const iconMap = {
 function getNavIcon(label) {
   const icons = {
     "Browse Cars": Search,
-    "Compare": Scale,
-    "FAQ": HelpCircle,
+    Compare: Scale,
+    FAQ: HelpCircle,
   };
   return icons[label] || Home;
 }
@@ -82,7 +82,11 @@ function NavLink({
           {Icon && (
             <Icon
               size={size}
-              className={`${isActive ? "text-white" : "text-muted-foreground group-hover:text-foreground"} transition-colors`}
+              className={`${
+                isActive
+                  ? "text-white"
+                  : "text-muted-foreground group-hover:text-foreground"
+              } transition-colors`}
             />
           )}
           <span>{label}</span>
@@ -177,8 +181,12 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
                     }}
                   />
                   <div className="flex-1">
-                    <p className="font-semibold text-sm">{user?.name || "Welcome back"}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="font-semibold text-sm">
+                      {user?.name || "Welcome back"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {user?.email}
+                    </p>
                   </div>
                   <button
                     onClick={() => {
@@ -195,7 +203,10 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
             </SignedIn>
 
             {/* Navigation */}
-            <div className="p-3 overflow-y-auto" style={{ maxHeight: "calc(100vh - 14rem)" }}>
+            <div
+              className="p-3 overflow-y-auto"
+              style={{ maxHeight: "calc(100vh - 14rem)" }}
+            >
               {/* Main nav */}
               <div className="space-y-1">
                 {navItems.map((item, index) => {
