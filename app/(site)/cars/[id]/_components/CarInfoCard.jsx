@@ -25,7 +25,11 @@ const CarInfoCard = ({ car }) => {
     handleGoToCompare,
     handleScheduleTestDrive,
     handleViewTestDrive,
+    handleChatClick,
     formatPrice,
+    isSignedIn,
+    currentUserId,
+    currentUserName,
   } = useCarInfoCard(car);
 
   return (
@@ -60,6 +64,10 @@ const CarInfoCard = ({ car }) => {
             onScheduleTestDrive={handleScheduleTestDrive}
             onViewTestDrive={handleViewTestDrive}
             onGoToCompare={handleGoToCompare}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            isSignedIn={isSignedIn}
+            onChatClick={handleChatClick}
           />
         </CardContent>
       </Card>

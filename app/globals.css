@@ -198,6 +198,11 @@
   body {
     overflow-x: hidden;
   }
+
+  /* Safe area for mobile devices with notches */
+  .safe-area-inset-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
 }
 
 @layer base {

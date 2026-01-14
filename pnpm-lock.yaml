@@ -19,7 +19,7 @@ importers:
         version: 0.23.33(@types/react@19.2.8)(next@15.3.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@clerk/nextjs':
         specifier: ^6.19.3
-        version: 6.19.3(next@15.3.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 6.19.3(next@15.3.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svix@1.84.1)
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
@@ -116,6 +116,9 @@ importers:
       recharts:
         specifier: ^3.0.2
         version: 3.0.2(@types/react@19.2.8)(react-dom@19.1.0(react@19.1.0))(react-is@16.13.1)(react@19.1.0)(redux@5.0.1)
+      resend:
+        specifier: ^6.7.0
+        version: 6.7.0
       sonner:
         specifier: ^2.0.3
         version: 2.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1245,6 +1248,9 @@ packages:
       react-redux:
         optional: true
 
+  '@stablelib/base64@1.0.1':
+    resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
+
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
@@ -1838,6 +1844,9 @@ packages:
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
+
+  fast-sha256@1.3.0:
+    resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
 
   fast-uri@3.0.6:
     resolution: {integrity: sha512-Atfo14OibSv5wAp4VWNsFYE1AchQRTv9cBGWET4pZWHzYshFSS9NQI6I57rdKn9croWVMbYFbLhJ+yJvmZIIHw==}
@@ -2433,6 +2442,15 @@ packages:
   reselect@5.1.1:
     resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
 
+  resend@6.7.0:
+    resolution: {integrity: sha512-2ZV0NDZsh4Gh+Nd1hvluZIitmGJ59O4+OxMufymG6Y8uz1Jgt2uS1seSENnkIUlmwg7/dwmfIJC9rAufByz7wA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@react-email/render': '*'
+    peerDependenciesMeta:
+      '@react-email/render':
+        optional: true
+
   retry@0.12.0:
     resolution: {integrity: sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==}
     engines: {node: '>= 4'}
@@ -2522,6 +2540,9 @@ packages:
     resolution: {integrity: sha512-qC9iz2FlN7DQl3+wjwn3802RTyjCx7sDvfQEXchwa6CWOx07/WVfh91gBmQ9fahw8snwGEWU3xGzOt4tFyHLxg==}
     engines: {node: '>= 0.6'}
 
+  standardwebhooks@1.0.0:
+    resolution: {integrity: sha512-BbHGOQK9olHPMvQNHWul6MYlrRTAOKn03rOe4A8O3CLWhNf4YHBqq2HJKKC+sfqpxiBY52pNeesD6jIiLDz8jg==}
+
   std-env@3.9.0:
     resolution: {integrity: sha512-UGvjygr6F6tpH7o2qyqR6QYpwraIjKSdtzyBdyytFOHmPZY917kwdwLG0RbOjWOnKmnm3PeHjaoLLMie7kPLQw==}
 
@@ -2561,6 +2582,9 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
+
+  svix@1.84.1:
+    resolution: {integrity: sha512-K8DPPSZaW/XqXiz1kEyzSHYgmGLnhB43nQCMeKjWGCUpLIpAMMM8kx3rVVOSm6Bo6EHyK1RQLPT4R06skM/MlQ==}
 
   swr@2.3.3:
     resolution: {integrity: sha512-dshNvs3ExOqtZ6kJBaAsabhPdHyeY4P2cKwRCniDVifBMoG/SVI7tfLWqPXriVspf2Rg4tPzXJTnwaihIeFw2A==}
@@ -2843,13 +2867,15 @@ snapshots:
 
   '@chevrotain/utils@10.5.0': {}
 
-  '@clerk/backend@1.32.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@clerk/backend@1.32.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svix@1.84.1)':
     dependencies:
       '@clerk/shared': 3.9.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@clerk/types': 4.58.1
       cookie: 1.0.2
       snakecase-keys: 8.0.1
       tslib: 2.8.1
+    optionalDependencies:
+      svix: 1.84.1
     transitivePeerDependencies:
       - react
       - react-dom
@@ -2890,9 +2916,9 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@clerk/nextjs@6.19.3(next@15.3.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@clerk/nextjs@6.19.3(next@15.3.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svix@1.84.1)':
     dependencies:
-      '@clerk/backend': 1.32.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@clerk/backend': 1.32.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(svix@1.84.1)
       '@clerk/clerk-react': 5.31.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@clerk/shared': 3.9.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@clerk/types': 4.58.1
@@ -3802,6 +3828,8 @@ snapshots:
       react: 19.1.0
       react-redux: 9.2.0(@types/react@19.2.8)(react@19.1.0)(redux@5.0.1)
 
+  '@stablelib/base64@1.0.1': {}
+
   '@standard-schema/spec@1.0.0': {}
 
   '@standard-schema/utils@0.3.0': {}
@@ -4375,6 +4403,8 @@ snapshots:
       pure-rand: 6.1.0
 
   fast-deep-equal@3.1.3: {}
+
+  fast-sha256@1.3.0: {}
 
   fast-uri@3.0.6: {}
 
@@ -4950,6 +4980,10 @@ snapshots:
 
   reselect@5.1.1: {}
 
+  resend@6.7.0:
+    dependencies:
+      svix: 1.84.1
+
   retry@0.12.0: {}
 
   rimraf@5.0.10:
@@ -5052,6 +5086,11 @@ snapshots:
 
   sqlstring@2.3.3: {}
 
+  standardwebhooks@1.0.0:
+    dependencies:
+      '@stablelib/base64': 1.0.1
+      fast-sha256: 1.3.0
+
   std-env@3.9.0: {}
 
   streamsearch@1.1.0: {}
@@ -5084,6 +5123,11 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+
+  svix@1.84.1:
+    dependencies:
+      standardwebhooks: 1.0.0
+      uuid: 10.0.0
 
   swr@2.3.3(react@19.1.0):
     dependencies:

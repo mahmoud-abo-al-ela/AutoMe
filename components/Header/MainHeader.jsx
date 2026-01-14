@@ -9,12 +9,15 @@ import {
   CarFront,
   LayoutDashboard,
   ArrowLeft,
+  MessageSquare,
 } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import { Button } from "@/components/ui/button";
 import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { navItems, signedInLinks } from "@/lib/HeaderConfig";
+import { UnreadBadge } from "@/components/Chat";
+import { cn } from "@/lib/utils";
 
 function NavLink({
   href,
@@ -25,33 +28,48 @@ function NavLink({
   isMobile,
   onClick,
   isActive,
+  showUnreadBadge,
 }) {
   const Icon = icon
-    ? { Heart, CarFront, LayoutDashboard, ArrowLeft }[icon]
+    ? { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare }[icon]
     : null;
+  
+  // Special styling for messages icon
+  const isMessagesIcon = icon === "MessageSquare";
+  
   return (
     <Link
       href={href}
-      className={`group flex items-center space-x-2 text-sm font-medium transition-all duration-200 
-        ${isMobile ? "py-1" : "px-3 py-2 rounded-md relative overflow-hidden"}
-        ${
-          isActive
-            ? "text-primary font-semibold" + (!isMobile ? " bg-primary/5" : "")
-            : "hover:text-primary"
-        }
-      `}
+      className={cn(
+        "group flex items-center text-sm font-medium transition-all duration-200 relative",
+        isMobile ? "py-1 space-x-2" : "rounded-md relative overflow-hidden",
+        isMessagesIcon && !isMobile ? "p-2" : !isMobile ? "px-3 py-2 space-x-2" : "space-x-2",
+        isActive
+          ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
+          : "hover:text-primary"
+      )}
       onClick={onClick}
       aria-current={isActive ? "page" : undefined}
       title={label}
       aria-label={label}
     >
       {Icon && (
-        <Icon
-          size={size}
-          className={`${iconClass} ${
-            isActive ? "text-primary" : ""
-          } transition-transform duration-300 group-hover:scale-110`}
-        />
+        <span className={cn(
+          "relative inline-flex items-center justify-center",
+          isMessagesIcon && !isMobile && "p-1.5 rounded-full hover:bg-muted/80 transition-colors"
+        )}>
+          <Icon
+            size={isMessagesIcon ? 22 : size}
+            className={cn(
+              iconClass,
+              isActive ? "text-primary" : "",
+              "transition-transform duration-300 group-hover:scale-110"
+            )}
+          />
+          {showUnreadBadge && (
+            <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+          )}
+        </span>
       )}
       {!icon && (
         <>
@@ -141,6 +159,7 @@ export default function MainHeader({ user }) {
                         iconClass={link.iconClass}
                         size={link.size}
                         isActive={pathname === link.href}
+                        showUnreadBadge={link.showUnreadBadge}
                       />
                     ))}
                   <UserButton
@@ -157,30 +176,48 @@ export default function MainHeader({ user }) {
             </div>
           </div>
 
-          <button
-            className="md:hidden ml-auto flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
-          >
-            <div className="relative w-6 h-6">
-              <X
-                className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${
-                  isMenuOpen
-                    ? "opacity-100 rotate-0 scale-100"
-                    : "opacity-0 rotate-90 scale-75"
-                }`}
-              />
-              <Menu
-                className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${
-                  isMenuOpen
-                    ? "opacity-0 -rotate-90 scale-75"
-                    : "opacity-100 rotate-0 scale-100"
-                }`}
-              />
-            </div>
-          </button>
+          {/* Mobile icons - Messages and Menu */}
+          <div className="md:hidden ml-auto flex items-center gap-1">
+            {/* Messages icon with unread badge - only show when signed in and not admin */}
+            <SignedIn>
+              {!isAdmin && (
+                <Link
+                  href="/messages"
+                  className="relative flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
+                  title="Messages"
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+                </Link>
+              )}
+            </SignedIn>
+
+            {/* Menu toggle */}
+            <button
+              className="flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+            >
+              <div className="relative w-6 h-6">
+                <X
+                  className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${
+                    isMenuOpen
+                      ? "opacity-100 rotate-0 scale-100"
+                      : "opacity-0 rotate-90 scale-75"
+                  }`}
+                />
+                <Menu
+                  className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${
+                    isMenuOpen
+                      ? "opacity-0 -rotate-90 scale-75"
+                      : "opacity-100 rotate-0 scale-100"
+                  }`}
+                />
+              </div>
+            </button>
+          </div>
         </div>
 
         <MobileMenu

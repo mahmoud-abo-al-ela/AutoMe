@@ -18,7 +18,6 @@ export default async function SiteLayout({ children }) {
   let user = null;
   try {
     user = await checkUser();
-    console.log(user);
   } catch (error) {
     console.error("Error in layout when checking user:", error);
   }

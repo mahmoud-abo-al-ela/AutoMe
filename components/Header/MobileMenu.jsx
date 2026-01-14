@@ -2,81 +2,100 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
 import {
   Heart,
   CarFront,
   LayoutDashboard,
   ArrowLeft,
   ChevronRight,
+  MessageSquare,
+  Home,
+  Search,
+  Scale,
+  HelpCircle,
+  Calendar,
+  LogOut,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { navItems, signedInLinks } from "@/lib/HeaderConfig";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { UnreadBadge } from "@/components/Chat";
 
-// Reusable NavLink component with animation delay support
+// Icon map for nav items
+const iconMap = {
+  Heart,
+  CarFront,
+  LayoutDashboard,
+  ArrowLeft,
+  MessageSquare,
+  Home,
+  Search,
+  Scale,
+  HelpCircle,
+  Calendar,
+};
+
+// Get icon for nav item based on label
+function getNavIcon(label) {
+  const icons = {
+    "Browse Cars": Search,
+    "Compare": Scale,
+    "FAQ": HelpCircle,
+  };
+  return icons[label] || Home;
+}
+
+// Reusable NavLink component
 function NavLink({
   href,
   label,
   icon,
   iconClass,
-  size = 20,
+  size = 18,
   onClick,
   isActive,
   animationDelay = 0,
+  showUnreadBadge = false,
+  IconComponent = null,
 }) {
-  const Icon = icon
-    ? { Heart, CarFront, LayoutDashboard, ArrowLeft }[icon]
-    : null;
+  const Icon = IconComponent || (icon ? iconMap[icon] : null);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: animationDelay / 1000 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, delay: animationDelay / 1000 }}
     >
       <Link
         href={href}
-        className={`group flex items-center justify-between w-full 
-        ${icon ? "flex-row" : "flex-row"} 
-        text-sm font-medium transition-all duration-300 py-3 px-4 rounded-lg 
-        ${
+        className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${
           isActive
-            ? "text-primary bg-primary/10 shadow-sm"
-            : "hover:text-primary hover:bg-muted"
+            ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
+            : "text-foreground hover:bg-muted"
         }`}
         onClick={onClick}
         aria-current={isActive ? "page" : undefined}
-        title={label}
-        aria-label={label}
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           {Icon && (
-            <div
-              className={`p-1.5 rounded-md ${
-                isActive
-                  ? "bg-primary/20"
-                  : "bg-muted group-hover:bg-primary/10"
-              } transition-colors duration-200`}
-            >
-              <Icon
-                size={size}
-                className={`${iconClass} ${
-                  isActive ? "text-primary" : ""
-                } transition-transform duration-300 group-hover:scale-110`}
-              />
-            </div>
+            <Icon
+              size={size}
+              className={`${isActive ? "text-white" : "text-muted-foreground group-hover:text-foreground"} transition-colors`}
+            />
           )}
-          <span className={`${isActive ? "font-semibold" : ""}`}>{label}</span>
+          <span>{label}</span>
         </div>
-        <ChevronRight
-          size={16}
-          className={`text-muted-foreground transition-transform duration-300 ${
-            isActive ? "opacity-100" : "opacity-0 group-hover:opacity-70"
-          } group-hover:translate-x-1`}
-        />
+        <div className="flex items-center gap-2">
+          {showUnreadBadge && <UnreadBadge />}
+          {!isActive && (
+            <ChevronRight
+              size={16}
+              className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5"
+            />
+          )}
+        </div>
       </Link>
     </motion.div>
   );
@@ -86,6 +105,24 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
   const pathname = usePathname();
   const isAdmin = user?.role === "ADMIN";
   const menuRef = useRef(null);
+  const { signOut } = useClerk();
+
+  // Filter out messages from signed-in links (it's now in header)
+  const filteredSignedInLinks = signedInLinks.filter(
+    (link) => link.icon !== "MessageSquare"
+  );
+
+  useEffect(() => {
+    // Prevent body scroll when menu is open
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -102,131 +139,86 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen, setIsMenuOpen]);
 
-  useEffect(() => {
-    const handleTouchStart = (e) => {
-      const touchDown = e.touches[0].clientY;
-      menuRef.current.dataset.touchStartY = touchDown;
-    };
-
-    const handleTouchMove = (e) => {
-      if (!menuRef.current || !menuRef.current.dataset.touchStartY) return;
-
-      const touchDown = parseInt(menuRef.current.dataset.touchStartY);
-      const currentTouch = e.touches[0].clientY;
-      const diff = touchDown - currentTouch;
-
-      if (diff < -50) {
-        setIsMenuOpen(false);
-        menuRef.current.dataset.touchStartY = 0;
-      }
-    };
-
-    if (isMenuOpen && menuRef.current) {
-      menuRef.current.addEventListener("touchstart", handleTouchStart);
-      menuRef.current.addEventListener("touchmove", handleTouchMove);
-    }
-
-    return () => {
-      if (menuRef.current) {
-        menuRef.current.removeEventListener("touchstart", handleTouchStart);
-        menuRef.current.removeEventListener("touchmove", handleTouchMove);
-      }
-    };
-  }, [isMenuOpen, setIsMenuOpen]);
-
   return (
     <AnimatePresence>
       {isMenuOpen && (
         <>
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm md:hidden"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden"
             style={{ zIndex: 39 }}
             onClick={() => setIsMenuOpen(false)}
           />
-          <X
-            className="fixed top-4 right-4 z-50 hover:text-primary cursor-pointer bg-white rounded-md p-1"
-            size={24}
-            onClick={() => setIsMenuOpen(false)}
-          />
+
+          {/* Menu Panel */}
           <motion.div
             ref={menuRef}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{
-              duration: 0.3,
-              type: "spring",
-              stiffness: 400,
-              damping: 30,
-            }}
-            className="fixed top-16 left-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b shadow-lg md:hidden py-4 px-4 max-h-[calc(100vh-4rem)] overflow-y-auto"
-            style={{ zIndex: 40 }}
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed top-14 left-3 right-3 bg-background border rounded-3xl shadow-2xl md:hidden overflow-hidden"
+            style={{ zIndex: 40, maxHeight: "calc(100vh - 5rem)" }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Menu</h2>
-              <SignedIn>
-                <div className="flex items-center space-x-3">
-                  <div className="text-sm text-muted-foreground">
-                    Your Account
-                  </div>
+            {/* User section */}
+            <SignedIn>
+              <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
+                <div className="flex items-center gap-3">
                   <UserButton
                     afterSignOutUrl="/"
                     appearance={{
                       elements: {
-                        avatarBox: "w-8 h-8 rounded-full shadow-md",
+                        avatarBox: "w-11 h-11 rounded-full shadow-md",
                       },
                     }}
                   />
-                </div>
-              </SignedIn>
-            </div>
-
-            <nav className="flex flex-col space-y-1.5">
-              {navItems.map((item, index) => (
-                <NavLink
-                  key={item.href}
-                  href={item.href}
-                  label={item.label}
-                  onClick={() => setIsMenuOpen(false)}
-                  isActive={pathname === item.href}
-                  animationDelay={index * 50 + 50}
-                />
-              ))}
-
-              <div className="h-[1px] bg-border my-3"></div>
-
-              <SignedOut>
-                {pathname !== "/sign-in" && pathname !== "/sign-up" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.3,
-                      delay: navItems.length * 0.05 + 0.1,
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm">{user?.name || "Welcome back"}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      signOut({ redirectUrl: "/" });
                     }}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+                    aria-label="Sign out"
                   >
-                    <Button
-                      variant="default"
-                      className="w-full cursor-pointer bg-[#0532a3] text-white hover:bg-[#0532a3]/90 hover:text-white mt-2 py-5 rounded-lg shadow-sm transition-all duration-300 hover:shadow"
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </SignedIn>
+
+            {/* Navigation */}
+            <div className="p-3 overflow-y-auto" style={{ maxHeight: "calc(100vh - 14rem)" }}>
+              {/* Main nav */}
+              <div className="space-y-1">
+                {navItems.map((item, index) => {
+                  const NavIcon = getNavIcon(item.label);
+                  return (
+                    <NavLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      IconComponent={NavIcon}
                       onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Link
-                        href="/sign-in"
-                        className="w-full flex items-center justify-center"
-                      >
-                        Sign In
-                      </Link>
-                    </Button>
-                  </motion.div>
-                )}
-              </SignedOut>
+                      isActive={pathname === item.href}
+                      animationDelay={index * 40}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Signed in links */}
               <SignedIn>
-                <div className="flex flex-col space-y-1.5">
-                  {signedInLinks
+                <div className="my-3 mx-2 h-px bg-border" />
+                <div className="space-y-1">
+                  {filteredSignedInLinks
                     .filter(
                       (link) =>
                         (!link.adminOnly || isAdmin) &&
@@ -240,28 +232,40 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
                         label={link.label}
                         icon={link.icon}
                         iconClass={link.iconClass}
-                        size={link.size}
+                        size={18}
                         onClick={() => setIsMenuOpen(false)}
                         isActive={pathname === link.href}
-                        animationDelay={(navItems.length + index) * 50 + 100}
+                        animationDelay={(navItems.length + index) * 40}
+                        showUnreadBadge={link.showUnreadBadge}
                       />
                     ))}
                 </div>
               </SignedIn>
-            </nav>
 
-            <div className="mt-6 pt-4 border-t border-border">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.3,
-                  delay: (navItems.length + signedInLinks.length) * 0.05 + 0.15,
-                }}
-                className="text-xs text-center text-muted-foreground"
-              >
-                © 2023 AutoMe. All rights reserved.
-              </motion.div>
+              {/* Sign in button */}
+              <SignedOut>
+                {pathname !== "/sign-in" && pathname !== "/sign-up" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: 0.15 }}
+                    className="mt-4"
+                  >
+                    <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
+                        Sign In
+                      </Button>
+                    </Link>
+                  </motion.div>
+                )}
+              </SignedOut>
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t bg-muted/30 text-center">
+              <p className="text-[10px] text-muted-foreground">
+                © 2026 AutoMe • All rights reserved
+              </p>
             </div>
           </motion.div>
         </>

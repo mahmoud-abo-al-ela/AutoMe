@@ -8,42 +8,45 @@ datasource db {
 }
 
 model User {
-  id         String      @id @default(uuid())
-  clerkId    String      @unique
-  email      String      @unique
-  name       String?
-  imageUrl   String?
-  phone      String?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  role       UserRole    @default(USER)
-  savedCars  SavedCar[]
-  testDrives TestDrive[]
+  id            String         @id @default(uuid())
+  clerkId       String         @unique
+  email         String         @unique
+  name          String?
+  imageUrl      String?
+  phone         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  role          UserRole       @default(USER)
+  savedCars     SavedCar[]
+  testDrives    TestDrive[]
+  conversations Conversation[] @relation("ConversationParticipants")
+  messages      Message[]
 }
 
 model Car {
-  id           String      @id @default(uuid())
-  make         String
-  model        String
-  year         Int
-  price        Decimal
-  mileage      Int
-  fuelType     String
-  transmission String
-  color        String
-  seats        Int?
-  bodyType     String
-  featured     Boolean     @default(false)
-  status       CarStatus   @default(AVAILABLE)
-  images       String[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  title        String?
-  description  String?
-  location     String?
-  features     String[]
-  savedBy      SavedCar[]
-  testDrive    TestDrive[]
+  id            String         @id @default(uuid())
+  make          String
+  model         String
+  year          Int
+  price         Decimal
+  mileage       Int
+  fuelType      String
+  transmission  String
+  color         String
+  seats         Int?
+  bodyType      String
+  featured      Boolean        @default(false)
+  status        CarStatus      @default(AVAILABLE)
+  images        String[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  title         String?
+  description   String?
+  location      String?
+  features      String[]
+  savedBy       SavedCar[]
+  testDrive     TestDrive[]
+  conversations Conversation[]
 
   @@index([make, model])
   @@index([price])
@@ -141,4 +144,33 @@ enum TestDriveStatus {
   PENDING
   CONFIRMED
   CANCELLED
+}
+
+model Conversation {
+  id           String    @id @default(uuid())
+  carId        String?
+  car          Car?      @relation(fields: [carId], references: [id], onDelete: SetNull)
+  participants User[]    @relation("ConversationParticipants")
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([carId])
+  @@index([updatedAt])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([readAt])
 }

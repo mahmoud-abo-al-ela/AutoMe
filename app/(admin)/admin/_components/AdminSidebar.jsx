@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { CarFront } from "lucide-react";
+import { CarFront, MessageSquare } from "lucide-react";
 import MobileSidebar from "./MobileSidebar";
 import DesktopSidebar from "./DesktopSidebar";
+import { UnreadBadge } from "@/components/Chat";
+import Link from "next/link";
 
 export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -60,16 +62,27 @@ export default function AdminSidebar() {
   return (
     <>
       {/* Mobile Header with Hamburger */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center px-4">
-        <MobileSidebar pathname={pathname} />
-        <div className="flex items-center space-x-2 ml-4">
-          <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-            <CarFront className="h-5 w-5 text-white" />
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <MobileSidebar pathname={pathname} />
+          <div className="flex items-center space-x-2 ml-4">
+            <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <CarFront className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-bold text-lg text-sidebar-foreground">
+              AutoMe Admin
+            </span>
           </div>
-          <span className="font-bold text-lg text-sidebar-foreground">
-            AutoMe Admin
-          </span>
         </div>
+        {/* Messages icon with unread badge */}
+        <Link 
+          href="/admin/messages" 
+          className="relative p-2 rounded-lg hover:bg-sidebar-accent transition-colors"
+          title="Messages"
+        >
+          <MessageSquare className="h-5 w-5 text-sidebar-foreground" />
+          <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+        </Link>
       </div>
 
       {/* Desktop Sidebar */}

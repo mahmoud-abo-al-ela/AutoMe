@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sidebarItems } from "@/lib/SidebarConfig";
+import { UnreadBadge } from "@/components/Chat";
 
 const iconMap = {
   LayoutDashboard,
@@ -103,6 +104,11 @@ export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
                   <span className="font-medium transition-all duration-200">
                     {item.label}
                   </span>
+                )}
+
+                {/* Unread badge for messages */}
+                {item.name === "messages" && (
+                  <UnreadBadge className={cn("ml-auto", collapsed && "absolute -top-1 -right-1")} />
                 )}
 
                 {/* Active indicator */}

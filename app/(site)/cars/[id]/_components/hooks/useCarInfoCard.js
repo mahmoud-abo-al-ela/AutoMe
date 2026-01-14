@@ -17,7 +17,11 @@ export const useCarInfoCard = (car) => {
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
     const [testDriveId, setTestDriveId] = useState(null);
     const router = useRouter();
-    const { isSignedIn } = useUser();
+    const { isSignedIn, user } = useUser();
+
+    // Get current user info for chat
+    const currentUserId = user?.id;
+    const currentUserName = user?.fullName || user?.firstName || user?.emailAddresses?.[0]?.emailAddress;
 
     // Check if car is in compare list on component mount
     useEffect(() => {
@@ -129,6 +133,12 @@ export const useCarInfoCard = (car) => {
         }
     };
 
+    const handleChatClick = () => {
+        // Redirect to sign-in if not signed in
+        const redirectUrl = `/cars/${car.id}`;
+        router.push(`/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`);
+    };
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat("en-US", {
             style: "currency",
@@ -152,6 +162,11 @@ export const useCarInfoCard = (car) => {
         handleGoToCompare,
         handleScheduleTestDrive,
         handleViewTestDrive,
+        handleChatClick,
         formatPrice,
+        // User info for chat
+        isSignedIn,
+        currentUserId,
+        currentUserName,
     };
 };
