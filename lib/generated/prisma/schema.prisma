@@ -7,121 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id            String         @id @default(uuid())
-  clerkId       String         @unique
-  email         String         @unique
-  name          String?
-  imageUrl      String?
-  phone         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  role          UserRole       @default(USER)
-  savedCars     SavedCar[]
-  testDrives    TestDrive[]
-  conversations Conversation[] @relation("ConversationParticipants")
-  messages      Message[]
-}
-
-model Car {
-  id            String         @id @default(uuid())
-  make          String
-  model         String
-  year          Int
-  price         Decimal
-  mileage       Int
-  fuelType      String
-  transmission  String
-  color         String
-  seats         Int?
-  bodyType      String
-  featured      Boolean        @default(false)
-  status        CarStatus      @default(AVAILABLE)
-  images        String[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  title         String?
-  description   String?
-  location      String?
-  features      String[]
-  savedBy       SavedCar[]
-  testDrive     TestDrive[]
-  conversations Conversation[]
-
-  @@index([make, model])
-  @@index([price])
-  @@index([year])
-  @@index([fuelType])
-  @@index([status])
-  @@index([color])
-  @@index([featured])
-  @@index([bodyType])
-}
-
-model Dealership {
-  id           String         @id @default(uuid())
-  name         String         @default("AutoMe")
-  address      String         @default("Cairo, Egypt")
-  phone        String         @default("+201012345678")
-  email        String         @default("autome@gmail.com")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  workingHours WorkingHours[]
-}
-
-model WorkingHours {
-  id           String      @id @default(uuid())
-  dayOfWeek    DayOfWeek[]
-  openTime     String
-  closeTime    String
-  isOpen       Boolean     @default(false)
-  dealershipId String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  dealership   Dealership  @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
-
-  @@unique([dayOfWeek, dealershipId])
-  @@index([dealershipId])
-  @@index([isOpen])
-  @@index([dayOfWeek])
-}
-
-model SavedCar {
-  id        String   @id @default(uuid())
-  userId    String
-  carId     String
-  createdAt DateTime @default(now())
-  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, carId])
-  @@index([userId])
-  @@index([carId])
-}
-
-model TestDrive {
-  id        String          @id @default(uuid())
-  status    TestDriveStatus @default(PENDING)
-  date      DateTime        @db.Date
-  startTime String
-  endTime   String
-  notes     String?
-  userId    String
-  carId     String
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  car       Car             @relation(fields: [carId], references: [id], onDelete: Cascade)
-  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([carId])
-  @@index([status])
-  @@index([date])
-}
+// ============ ENUMS ============
 
 enum UserRole {
   USER
   ADMIN
+  SUPER_ADMIN
 }
 
 enum CarStatus {
@@ -144,17 +35,414 @@ enum TestDriveStatus {
   PENDING
   CONFIRMED
   CANCELLED
+  COMPLETED
 }
 
+enum PlanType {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+enum AuditAction {
+  // Organization
+  ORG_CREATED
+  ORG_UPDATED
+  ORG_DELETED
+  ORG_SUSPENDED
+  ORG_ACTIVATED
+  // Membership
+  MEMBER_INVITED
+  MEMBER_ACCEPTED
+  MEMBER_REMOVED
+  MEMBER_ROLE_CHANGED
+  // Subscription
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_UPGRADED
+  SUBSCRIPTION_DOWNGRADED
+  SUBSCRIPTION_CANCELED
+  SUBSCRIPTION_RENEWED
+  // Car
+  CAR_CREATED
+  CAR_UPDATED
+  CAR_DELETED
+  CAR_STATUS_CHANGED
+  CAR_FEATURED_TOGGLED
+  // Test Drive
+  TEST_DRIVE_CREATED
+  TEST_DRIVE_CONFIRMED
+  TEST_DRIVE_CANCELED
+  TEST_DRIVE_COMPLETED
+  // Message
+  CONVERSATION_CREATED
+  MESSAGE_SENT
+  // User
+  USER_CREATED
+  USER_UPDATED
+  USER_ROLE_CHANGED
+  USER_DELETED
+  // Settings
+  WORKING_HOURS_UPDATED
+  ORG_SETTINGS_UPDATED
+  // Impersonation
+  IMPERSONATION_STARTED
+  IMPERSONATION_ENDED
+}
+
+enum EntityType {
+  ORGANIZATION
+  USER
+  CAR
+  TEST_DRIVE
+  CONVERSATION
+  MESSAGE
+  MEMBERSHIP
+  SUBSCRIPTION
+  WORKING_HOURS
+  IMPERSONATION_SESSION
+}
+
+// ============ MULTI-TENANCY MODELS ============
+
+model Organization {
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
+  logo        String?
+  email       String?
+  phone       String?
+  address     String?
+  website     String?
+  description String?
+  isActive    Boolean @default(true)
+
+  // Pending owner invitation (email of user who should become owner when they sign up)
+  pendingOwnerEmail String?
+
+  // Branding & Settings
+  theme    Json? // { primaryColor, secondaryColor, etc. }
+  settings Json? // Feature flags, preferences
+
+  // Relationships
+  subscription          Subscription?
+  memberships           Membership[]
+  cars                  Car[]
+  workingHours          WorkingHours[]
+  testDrives            TestDrive[]
+  conversations         Conversation[]
+  auditLogs             AuditLog[]
+  impersonationSessions ImpersonationSession[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft delete timestamp
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model Plan {
+  id   String   @id @default(uuid())
+  name String // "Starter", "Pro", "Enterprise"
+  type PlanType @unique
+
+  // Pricing (in cents)
+  monthlyPrice Int @default(0)
+  yearlyPrice  Int @default(0)
+
+  // Limits
+  maxCars               Int  @default(10)
+  maxMembers            Int  @default(1)
+  maxImagesPerCar       Int  @default(5)
+  maxStorageMB          Int  @default(500)
+  auditLogRetentionDays Int? // null = unlimited
+
+  // Features (JSON for flexibility)
+  features Json // { aiProcessing: { enabled, limit }, analytics, chat, etc. }
+
+  isActive      Boolean        @default(true)
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  planId         String
+  plan           Plan         @relation(fields: [planId], references: [id])
+
+  status SubscriptionStatus @default(TRIALING)
+
+  // Stripe Integration
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+
+  // Billing Period
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialEndsAt        DateTime?
+  canceledAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([planId])
+  @@index([status])
+}
+
+model Membership {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  role MemberRole @default(MEMBER)
+
+  // Invitation tracking
+  invitedById String?
+  invitedBy   User?     @relation("InvitedMemberships", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedAt   DateTime?
+  acceptedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([role])
+}
+
+// ============ AUDIT & IMPERSONATION ============
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  action         AuditAction
+  entityType     EntityType
+  entityId       String?
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  // Actor info
+  userId         String?
+  user           User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail      String?
+  impersonatedBy String? // Super Admin ID if impersonating
+
+  // Change tracking
+  oldValue Json?
+  newValue Json?
+  metadata Json? // Additional context (IP, userAgent, reason, etc.)
+
+  // Retention
+  retainUntil DateTime? // null = keep forever (Enterprise)
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+  @@index([retainUntil])
+}
+
+model ImpersonationSession {
+  id           String @id @default(uuid())
+  superAdminId String
+  superAdmin   User   @relation("SuperAdminSessions", fields: [superAdminId], references: [id], onDelete: Cascade)
+
+  targetUserId String
+  targetUser   User   @relation("ImpersonatedSessions", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  targetOrganizationId String
+  organization         Organization @relation(fields: [targetOrganizationId], references: [id], onDelete: Cascade)
+  reason               String
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  // Request metadata
+  ipAddress String?
+  userAgent String?
+
+  @@index([superAdminId])
+  @@index([targetUserId])
+  @@index([targetOrganizationId])
+  @@index([startedAt])
+}
+
+// ============ USER MODEL ============
+
+model User {
+  id        String   @id @default(uuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      UserRole @default(USER)
+
+  // Relationships
+  savedCars     SavedCar[]
+  testDrives    TestDrive[]
+  conversations Conversation[] @relation("ConversationParticipants")
+  messages      Message[]
+  memberships   Membership[]
+
+  // Invitation tracking
+  invitedMembers Membership[] @relation("InvitedMemberships")
+
+  // Impersonation (for Super Admins)
+  superAdminSessions   ImpersonationSession[] @relation("SuperAdminSessions")
+  impersonatedSessions ImpersonationSession[] @relation("ImpersonatedSessions")
+
+  // Audit logs
+  auditLogs AuditLog[]
+}
+
+// ============ CAR MODEL ============
+
+model Car {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  make         String
+  model        String
+  year         Int
+  price        Decimal
+  mileage      Int
+  fuelType     String
+  transmission String
+  color        String
+  seats        Int?
+  bodyType     String
+  featured     Boolean   @default(false)
+  status       CarStatus @default(AVAILABLE)
+  images       String[]
+  title        String?
+  description  String?
+  location     String?
+  features     String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  savedBy       SavedCar[]
+  testDrive     TestDrive[]
+  conversations Conversation[]
+
+  @@index([organizationId])
+  @@index([make, model])
+  @@index([price])
+  @@index([year])
+  @@index([fuelType])
+  @@index([status])
+  @@index([color])
+  @@index([featured])
+  @@index([bodyType])
+}
+
+// ============ WORKING HOURS ============
+
+model WorkingHours {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  dayOfWeek DayOfWeek[]
+  openTime  String
+  closeTime String
+  isOpen    Boolean     @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([dayOfWeek, organizationId])
+  @@index([organizationId])
+  @@index([isOpen])
+  @@index([dayOfWeek])
+}
+
+// ============ SAVED CAR ============
+
+model SavedCar {
+  id        String   @id @default(uuid())
+  userId    String
+  carId     String
+  createdAt DateTime @default(now())
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, carId])
+  @@index([userId])
+  @@index([carId])
+}
+
+// ============ TEST DRIVE ============
+
+model TestDrive {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  status    TestDriveStatus @default(PENDING)
+  date      DateTime        @db.Date
+  startTime String
+  endTime   String
+  notes     String?
+  userId    String
+  carId     String
+  car       Car             @relation(fields: [carId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([carId])
+  @@index([status])
+  @@index([date])
+}
+
+// ============ CONVERSATION & MESSAGE ============
+
 model Conversation {
-  id           String    @id @default(uuid())
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   carId        String?
   car          Car?      @relation(fields: [carId], references: [id], onDelete: SetNull)
   participants User[]    @relation("ConversationParticipants")
   messages     Message[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
   @@index([carId])
   @@index([updatedAt])
 }

@@ -29,6 +29,7 @@ const CarCard = ({ car, onWishlistChange }) => {
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
   const [isInCompare, setIsInCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
@@ -116,15 +117,21 @@ const CarCard = ({ car, onWishlistChange }) => {
         <Link href={`/cars/${car.id}`} className="flex flex-grow flex-col">
           <div className="relative overflow-hidden">
             <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
-              <Image
-                src={car.images[0]}
-                alt={carTitle}
-                className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
-                width={500}
-                height={300}
-                onError={handleImageError}
-                priority={false}
-              />
+              {car.images?.[0] && !imageError ? (
+                <Image
+                  src={car.images[0]}
+                  alt={carTitle}
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  width={500}
+                  height={300}
+                  onError={handleImageError}
+                  priority={false}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <span className="text-gray-400 text-sm">No image available</span>
+                </div>
+              )}
             </div>
             <div className="absolute top-2 right-2 flex gap-2 z-10">
               <Tooltip>

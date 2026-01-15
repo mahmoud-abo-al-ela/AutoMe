@@ -13,6 +13,8 @@ import {
   LogOut,
   Calendar,
   Menu,
+  CreditCard,
+  ScrollText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -27,10 +29,13 @@ const iconMap = {
   Settings,
   MessageSquare,
   Calendar,
+  CreditCard,
+  ScrollText,
 };
 
-export default function MobileSidebar({ pathname }) {
+export default function MobileSidebar({ pathname, organization }) {
   const [open, setOpen] = useState(false);
+  const orgName = organization?.name || "AutoMe Admin";
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -51,8 +56,8 @@ export default function MobileSidebar({ pathname }) {
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-sidebar-border">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-sidebar-foreground">
-                AutoMe Admin
+              <h2 className="text-xl font-bold text-sidebar-foreground truncate">
+                {orgName}
               </h2>
             </div>
           </div>

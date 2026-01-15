@@ -1,0 +1,106 @@
+import { formatDistanceToNow, format } from "date-fns";
+import { FileText, Calendar, Car } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+export default function UserActivity({ activity, testDrives }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Activity</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="audit" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="audit">Audit Log</TabsTrigger>
+            <TabsTrigger value="testdrives">Test Drives</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="audit">
+            {activity.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                No activity recorded
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {activity.map((log) => (
+                  <div
+                    key={log.id}
+                    className="flex items-start gap-3 p-3 border rounded-lg"
+                  >
+                    <div className="p-2 rounded-lg bg-muted">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {log.action}
+                        </Badge>
+                        <span className="text-sm font-medium">
+                          {log.entityType}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {log.createdAt
+                          ? formatDistanceToNow(new Date(log.createdAt), {
+                              addSuffix: true,
+                            })
+                          : "Unknown time"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="testdrives">
+            {testDrives.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                No test drives booked
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {testDrives.map((td) => (
+                  <div
+                    key={td.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-muted">
+                        <Car className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">
+                          {td.car.year} {td.car.make} {td.car.model}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {td.bookingDate
+                            ? format(new Date(td.bookingDate), "MMM d, yyyy")
+                            : "No date set"}
+                        </div>
+                      </div>
+                    </div>
+                    <Badge
+                      variant={
+                        td.status === "COMPLETED"
+                          ? "default"
+                          : td.status === "CANCELLED"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                    >
+                      {td.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+}

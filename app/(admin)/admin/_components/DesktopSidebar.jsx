@@ -13,6 +13,8 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
+  ScrollText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sidebarItems } from "@/lib/SidebarConfig";
@@ -26,9 +28,13 @@ const iconMap = {
   Settings,
   MessageSquare,
   Calendar,
+  CreditCard,
+  ScrollText,
 };
 
-export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
+export default function DesktopSidebar({ collapsed, setCollapsed, pathname, organization }) {
+  const orgName = organization?.name || "AutoMe Admin";
+
   return (
     <aside
       className={cn(
@@ -40,11 +46,11 @@ export default function DesktopSidebar({ collapsed, setCollapsed, pathname }) {
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border h-16 relative">
         {!collapsed && (
           <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <CarFront className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-              AutoMe Admin
+            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent truncate">
+              {orgName}
             </span>
           </div>
         )}

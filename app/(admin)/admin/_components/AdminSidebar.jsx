@@ -8,7 +8,7 @@ import DesktopSidebar from "./DesktopSidebar";
 import { UnreadBadge } from "@/components/Chat";
 import Link from "next/link";
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ organization }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -59,18 +59,20 @@ export default function AdminSidebar() {
     return null;
   }
 
+  const orgName = organization?.name || "AutoMe Admin";
+
   return (
     <>
       {/* Mobile Header with Hamburger */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
-          <MobileSidebar pathname={pathname} />
+          <MobileSidebar pathname={pathname} organization={organization} />
           <div className="flex items-center space-x-2 ml-4">
             <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <CarFront className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-sidebar-foreground">
-              AutoMe Admin
+            <span className="font-bold text-lg text-sidebar-foreground truncate max-w-[150px]">
+              {orgName}
             </span>
           </div>
         </div>
@@ -90,6 +92,7 @@ export default function AdminSidebar() {
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         pathname={pathname}
+        organization={organization}
       />
     </>
   );
