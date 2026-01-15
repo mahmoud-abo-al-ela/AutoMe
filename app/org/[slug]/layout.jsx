@@ -27,7 +27,6 @@ export default async function OrganizationLayout({ children, params }) {
     let organization = null;
 
     try {
-        user = await checkUser();
         organization = await getOrganizationBySlug(slug);
     } catch (error) {
         console.error("Error in organization layout:", error);
