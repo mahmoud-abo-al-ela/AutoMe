@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import * as testDriveService from "@/lib/services/test-drive";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
 import { AuthenticationError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
+import { checkUser } from "@/lib/checkUser";
 
 export async function requestTestDrive(testDriveData) {
   try {
@@ -15,7 +17,7 @@ export async function requestTestDrive(testDriveData) {
     const testDrive = await testDriveService.requestTestDrive(testDriveData, userId);
 
     revalidatePath("/cars/[id]");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin");
 
     return createSuccessResponse(testDrive, "Test drive requested successfully");
   } catch (error) {
@@ -31,10 +33,17 @@ export async function getTestDrives({ status, page = 1, limit = 10 }) {
       throw new AuthenticationError();
     }
 
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
     const result = await testDriveService.getTestDrives(
       { status },
       { page, limit },
-      userId
+      userId,
+      organization.id
     );
 
     return createSuccessResponse(result);
@@ -74,7 +83,7 @@ export async function editTestDrive({ testDriveId, date, startTime, endTime, not
     );
 
     revalidatePath("/cars/[id]");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
 
     return createSuccessResponse(updatedTestDrive, "Test drive updated successfully");
@@ -94,7 +103,7 @@ export async function cancelTestDriveByUser(testDriveId) {
     const cancelledTestDrive = await testDriveService.cancelTestDrive(testDriveId, userId);
 
     revalidatePath("/cars/[id]");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
 
     return createSuccessResponse(cancelledTestDrive, "Test drive cancelled successfully");
@@ -127,13 +136,20 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
       throw new AuthenticationError();
     }
 
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
     const updatedTestDrive = await testDriveService.updateTestDriveStatus(
       testDriveId,
       status,
-      userId
+      userId,
+      organization.id
     );
 
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
     revalidatePath("/reservation");
 

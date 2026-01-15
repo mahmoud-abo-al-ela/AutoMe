@@ -313,20 +313,20 @@ async function main() {
 
   console.log("✅ Plans created: Starter, Pro, Enterprise\n");
 
-  // ============ CREATE SUPER ADMIN ============
-  console.log("👑 Creating Super Admin...");
+  // ============ CREATE PLATFORM ADMIN ============
+  console.log("👑 Creating Platform Admin...");
 
   const superAdmin = await prisma.user.create({
     data: {
-      clerkId: "super_admin_clerk_id",
-      email: "superadmin@autome.com",
-      name: "Super Admin",
-      role: "SUPER_ADMIN",
-      imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=superadmin",
+      clerkId: "admin_clerk_id",
+      email: "admin@autome.com",
+      name: "Platform Admin",
+      role: "ADMIN",
+      imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
     },
   });
 
-  console.log(`✅ Super Admin created: ${superAdmin.email}\n`);
+  console.log(`✅ Platform Admin created: ${superAdmin.email}\n`);
 
   // ============ CREATE ORGANIZATIONS ============
   console.log("🏢 Creating organizations...");
@@ -416,7 +416,7 @@ async function main() {
         data: {
           userId: memberUser.id,
           organizationId: org.id,
-          role: j === 0 ? "ADMIN" : "MEMBER",
+          role: "MEMBER",
           invitedById: adminUser.id,
           invitedAt: new Date(),
           acceptedAt: new Date(),

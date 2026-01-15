@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import * as dashboardService from "@/lib/services/dashboard";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
 import { AuthenticationError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
+import { checkUser } from "@/lib/checkUser";
 
 export async function getDashboardStats() {
   try {
@@ -11,7 +13,24 @@ export async function getDashboardStats() {
       throw new AuthenticationError();
     }
 
-    const stats = await dashboardService.getDashboardStats(userId);
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    // Try to get organization from subdomain first
+    let organization = await getCurrentOrganization();
+
+    // If no organization from subdomain, get from user's first membership
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    const stats = await dashboardService.getDashboardStats(user.id, organization.id);
 
     return createSuccessResponse(stats);
   } catch (error) {
@@ -27,7 +46,13 @@ export async function getOverviewChartData() {
       throw new AuthenticationError();
     }
 
-    const chartData = await dashboardService.getOverviewChartData(userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    const chartData = await dashboardService.getOverviewChartData(userId, organization.id);
 
     // Return just the array directly without nesting it in a data property
     return chartData;

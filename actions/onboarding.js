@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import { checkUser } from "@/lib/checkUser";
 import { auditHelpers } from "@/lib/services/audit/audit";
 
@@ -10,7 +10,7 @@ export async function checkSlugAvailability(slug) {
       return { available: false };
     }
 
-    const existing = await prisma.organization.findUnique({
+    const existing = await db.organization.findUnique({
       where: { slug },
       select: { id: true },
     });
@@ -45,7 +45,7 @@ export async function createOrganization({
     }
 
     // Get the plan
-    const plan = await prisma.plan.findUnique({
+    const plan = await db.plan.findUnique({
       where: { id: planId },
     });
 
@@ -54,7 +54,7 @@ export async function createOrganization({
     }
 
     // Create organization with related data in a transaction
-    const organization = await prisma.$transaction(async (tx) => {
+    const organization = await db.$transaction(async (tx) => {
       // Create the organization
       const org = await tx.organization.create({
         data: {

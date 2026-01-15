@@ -42,9 +42,8 @@ export default function OrgDetailsHeader({ org }) {
         toast.success(
           org.isActive ? "Organization suspended" : "Organization activated",
           {
-            description: `${org.name} has been ${
-              org.isActive ? "suspended" : "activated"
-            } successfully.`,
+            description: `${org.name} has been ${org.isActive ? "suspended" : "activated"
+              } successfully.`,
           }
         );
         startTransition(() => {
@@ -113,12 +112,12 @@ export default function OrgDetailsHeader({ org }) {
               </Badge>
             </div>
             <a
-              href={`http://${org.slug}.localhost:3000`}
+              href={`/org/${org.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary flex items-center gap-1"
             >
-              {org.slug}.localhost
+              /org/{org.slug}
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>

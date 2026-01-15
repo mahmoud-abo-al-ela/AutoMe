@@ -1,6 +1,6 @@
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import OnboardingWizard from "./_components/OnboardingWizard";
 
 async function getPlans() {
@@ -32,7 +32,7 @@ export default async function OnboardingPage() {
   if (existingOrg) {
     // Redirect to their org's admin dashboard
     const orgSlug = existingOrg.organization.slug;
-    redirect(`http://${orgSlug}.localhost:3000/admin`);
+    redirect(`/org/${orgSlug}/admin`);
   }
 
   const plans = await getPlans();

@@ -1,7 +1,7 @@
 "use server";
 
 import { checkUser } from "@/lib/checkUser";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import {
   getCurrentOrganization,
   getUserMembership,
@@ -21,12 +21,9 @@ export async function inviteTeamMember({ organizationId, email, role }) {
       return { success: false, error: "Organization not found" };
     }
 
-    // Check if user has permission
+    // Check if user has permission (only OWNER can invite)
     const membership = await getUserMembership(user.id, organizationId);
-    if (
-      !membership ||
-      (membership.role !== "OWNER" && membership.role !== "ADMIN")
-    ) {
+    if (!membership || membership.role !== "OWNER") {
       return {
         success: false,
         error: "You don't have permission to invite members",
@@ -34,11 +31,11 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     }
 
     // Check plan limits
-    const memberCount = await prisma.membership.count({
+    const memberCount = await db.membership.count({
       where: { organizationId },
     });
 
-    const subscription = await prisma.subscription.findFirst({
+    const subscription = await db.subscription.findFirst({
       where: {
         organizationId,
         status: { in: ["ACTIVE", "TRIALING"] },
@@ -61,7 +58,7 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     }
 
     // Check if user exists
-    const invitedUser = await prisma.user.findUnique({
+    const invitedUser = await db.user.findUnique({
       where: { email },
     });
 
@@ -75,7 +72,7 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     }
 
     // Check if already a member
-    const existingMembership = await prisma.membership.findFirst({
+    const existingMembership = await db.membership.findFirst({
       where: {
         userId: invitedUser.id,
         organizationId,
@@ -87,7 +84,7 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     }
 
     // Create membership
-    const newMembership = await prisma.membership.create({
+    const newMembership = await db.membership.create({
       data: {
         userId: invitedUser.id,
         organizationId,
@@ -119,12 +116,9 @@ export async function updateMemberRole({ organizationId, memberId, newRole }) {
       return { success: false, error: "Organization not found" };
     }
 
-    // Check if user has permission
+    // Check if user has permission (only OWNER can change roles)
     const currentMembership = await getUserMembership(user.id, organizationId);
-    if (
-      !currentMembership ||
-      (currentMembership.role !== "OWNER" && currentMembership.role !== "ADMIN")
-    ) {
+    if (!currentMembership || currentMembership.role !== "OWNER") {
       return {
         success: false,
         error: "You don't have permission to change roles",
@@ -132,7 +126,7 @@ export async function updateMemberRole({ organizationId, memberId, newRole }) {
     }
 
     // Get the target membership
-    const targetMembership = await prisma.membership.findUnique({
+    const targetMembership = await db.membership.findUnique({
       where: { id: memberId },
       include: { user: true },
     });
@@ -152,7 +146,7 @@ export async function updateMemberRole({ organizationId, memberId, newRole }) {
     const oldRole = targetMembership.role;
 
     // Update role
-    const updatedMembership = await prisma.membership.update({
+    const updatedMembership = await db.membership.update({
       where: { id: memberId },
       data: { role: newRole },
     });
@@ -186,12 +180,9 @@ export async function removeMember({ organizationId, memberId }) {
       return { success: false, error: "Organization not found" };
     }
 
-    // Check if user has permission
+    // Check if user has permission (only OWNER can remove members)
     const currentMembership = await getUserMembership(user.id, organizationId);
-    if (
-      !currentMembership ||
-      (currentMembership.role !== "OWNER" && currentMembership.role !== "ADMIN")
-    ) {
+    if (!currentMembership || currentMembership.role !== "OWNER") {
       return {
         success: false,
         error: "You don't have permission to remove members",
@@ -199,7 +190,7 @@ export async function removeMember({ organizationId, memberId }) {
     }
 
     // Get the target membership
-    const targetMembership = await prisma.membership.findUnique({
+    const targetMembership = await db.membership.findUnique({
       where: { id: memberId },
       include: { user: true },
     });
@@ -225,7 +216,7 @@ export async function removeMember({ organizationId, memberId }) {
     await auditHelpers.logMemberRemoved(targetMembership, user.id, user.email);
 
     // Remove membership
-    await prisma.membership.delete({
+    await db.membership.delete({
       where: { id: memberId },
     });
 

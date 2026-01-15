@@ -85,8 +85,7 @@ export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>
 export namespace $Enums {
   export const UserRole: {
   USER: 'USER',
-  ADMIN: 'ADMIN',
-  SUPER_ADMIN: 'SUPER_ADMIN'
+  ADMIN: 'ADMIN'
 };
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
@@ -135,7 +134,6 @@ export type PlanType = (typeof PlanType)[keyof typeof PlanType]
 
 export const MemberRole: {
   OWNER: 'OWNER',
-  ADMIN: 'ADMIN',
   MEMBER: 'MEMBER'
 };
 

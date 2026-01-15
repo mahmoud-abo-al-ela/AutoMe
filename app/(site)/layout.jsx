@@ -16,6 +16,7 @@ export const metadata = {
 
 export default async function SiteLayout({ children }) {
   let user = null;
+
   try {
     user = await checkUser();
   } catch (error) {

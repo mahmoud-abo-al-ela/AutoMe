@@ -20,7 +20,7 @@ export async function startImpersonationAction({
     // Get the actual user (not impersonated)
     const user = await getActualUser();
 
-    if (!user || user.role !== "SUPER_ADMIN") {
+    if (!user || user.role !== "ADMIN") {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -63,7 +63,7 @@ export async function endImpersonationAction() {
     // Get the actual super admin
     const user = await getActualUser();
 
-    if (!user || user.role !== "SUPER_ADMIN") {
+    if (!user || user.role !== "ADMIN") {
       return { success: false, error: "Unauthorized" };
     }
 

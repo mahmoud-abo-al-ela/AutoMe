@@ -5,6 +5,8 @@ import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
 import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
+import { checkUser } from "@/lib/checkUser";
 
 export async function fileToBase64(file) {
   const buffer = await file.arrayBuffer();
@@ -132,8 +134,14 @@ export async function addCar(payload) {
       throw new AuthenticationError();
     }
 
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
     const carData = payload.data || payload;
-    const car = await carService.createCar(carData, userId);
+    const car = await carService.createCar(carData, userId, organization.id);
 
     revalidatePath("/admin/cars");
     return createSuccessResponse(car, "Car added successfully");
@@ -155,13 +163,19 @@ export async function getCars(
       throw new AuthenticationError();
     }
 
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
     const filters = {
       search: search || undefined,
       status: status === "all" ? undefined : status.toUpperCase(),
       onlyAvailable: false,
     };
 
-    const result = await carService.getCars(filters, { page, limit });
+    const result = await carService.getCars(filters, { page, limit }, userId, organization.id);
 
     return createSuccessResponse({
       data: result.cars,
@@ -180,7 +194,13 @@ export async function deleteCar(carId) {
       throw new AuthenticationError();
     }
 
-    await carService.deleteCar(carId, userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    await carService.deleteCar(carId, userId, organization.id);
 
     revalidatePath("/admin/cars");
     return createSuccessResponse(null, "Car deleted successfully");
@@ -197,11 +217,17 @@ export async function updateCar(carId, { status, featured }) {
       throw new AuthenticationError();
     }
 
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
     const updateData = {};
     if (status !== undefined) updateData.status = status;
     if (featured !== undefined) updateData.featured = featured;
 
-    const updatedCar = await carService.updateCar(carId, updateData, userId);
+    const updatedCar = await carService.updateCar(carId, updateData, userId, organization.id);
 
     revalidatePath("/admin/cars");
     return createSuccessResponse(updatedCar, "Car updated successfully");

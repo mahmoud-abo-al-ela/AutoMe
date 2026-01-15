@@ -1,0 +1,79 @@
+import { useState } from "react";
+import { toast } from "sonner";
+import useFetch from "@/hooks/use-fetch";
+import { updateMemberRole, removeMember } from "@/actions/team";
+
+export function useTeamActions(organizationId) {
+    const [memberToRemove, setMemberToRemove] = useState(null);
+    const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+
+    const { loading: loadingRoleUpdate, fn: updateRoleFn } = useFetch(updateMemberRole);
+    const { loading: loadingRemove, fn: removeMemberFn } = useFetch(removeMember);
+
+    const handleRemoveMember = (member) => {
+        if (member.role === "OWNER") {
+            toast.error("Cannot remove the organization owner");
+            return;
+        }
+
+        setMemberToRemove(member);
+        setRemoveDialogOpen(true);
+    };
+
+    const confirmRemoveMember = async () => {
+        if (!memberToRemove) return;
+
+        try {
+            const response = await removeMemberFn({
+                organizationId,
+                memberId: memberToRemove.id,
+            });
+
+            setRemoveDialogOpen(false);
+            setMemberToRemove(null);
+
+            if (response?.success) {
+                toast.success("Member removed successfully");
+                window.location.reload();
+            } else {
+                toast.error(response?.error || "Failed to remove member");
+            }
+        } catch (error) {
+            console.error("Remove member error:", error);
+            toast.error("An error occurred while removing the member");
+            setRemoveDialogOpen(false);
+            setMemberToRemove(null);
+        }
+    };
+
+    const handleRoleChange = async (memberId, newRole) => {
+        try {
+            const response = await updateRoleFn({
+                organizationId,
+                memberId,
+                newRole,
+            });
+
+            if (response?.success) {
+                toast.success("Member role updated successfully");
+                window.location.reload();
+            } else {
+                toast.error(response?.error || "Failed to update member role");
+            }
+        } catch (error) {
+            console.error("Update role error:", error);
+            toast.error("An error occurred while updating the role");
+        }
+    };
+
+    return {
+        memberToRemove,
+        removeDialogOpen,
+        setRemoveDialogOpen,
+        loadingRoleUpdate,
+        loadingRemove,
+        handleRemoveMember,
+        confirmRemoveMember,
+        handleRoleChange,
+    };
+}

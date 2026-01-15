@@ -75,7 +75,7 @@ export default function ImpersonateModal({ organization, onClose }) {
       if (result.success) {
         toast.success("Impersonation started");
         // Redirect to the organization's admin page
-        window.location.href = `http://${organization.slug}.localhost:3000/admin`;
+        window.location.href = `/org/${organization.slug}/admin`;
       } else {
         toast.error(result.error || "Failed to start impersonation");
       }

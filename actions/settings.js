@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
 import { AuthenticationError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
+import { checkUser } from "@/lib/checkUser";
 
 export async function getDealershipInfo() {
   try {
@@ -12,11 +14,17 @@ export async function getDealershipInfo() {
       throw new AuthenticationError();
     }
 
-    const dealership = await dealershipService.getDealershipInfo(userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
 
-    return createSuccessResponse(dealership);
+    const workingHoursData = await dealershipService.getWorkingHours(userId, organization.id);
+
+    return createSuccessResponse(workingHoursData);
   } catch (error) {
-    console.error("Error fetching dealership info:", error);
+    console.error("Error fetching working hours:", error);
     return createErrorResponse(error);
   }
 }
@@ -28,7 +36,13 @@ export async function updateWorkingHours(workingHours) {
       throw new AuthenticationError();
     }
 
-    await dealershipService.updateWorkingHours(workingHours, userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    await dealershipService.updateWorkingHours(workingHours, userId, organization.id);
 
     revalidatePath("/admin/settings/working-hours");
     revalidatePath("/");
@@ -47,7 +61,13 @@ export async function getUsers(search = "", page = 1, limit = 10) {
       throw new AuthenticationError();
     }
 
-    const result = await dealershipService.getUsers(search, { page, limit }, userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    const result = await dealershipService.getUsers(search, { page, limit }, userId, organization.id);
 
     return createSuccessResponse(result);
   } catch (error) {
@@ -63,7 +83,13 @@ export async function updateUserRole(targetUserId, role) {
       throw new AuthenticationError();
     }
 
-    await dealershipService.updateUserRole(targetUserId, role, userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    await dealershipService.updateUserRole(targetUserId, role, userId, organization.id);
 
     revalidatePath("/admin/settings/users");
     revalidatePath("/");
@@ -82,7 +108,13 @@ export async function deleteUser(targetUserId) {
       throw new AuthenticationError();
     }
 
-    await dealershipService.deleteUser(targetUserId, userId);
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    await dealershipService.deleteUser(targetUserId, userId, organization.id);
 
     revalidatePath("/admin/settings/users");
 

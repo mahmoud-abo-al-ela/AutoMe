@@ -8,13 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserActions from "./UserActions";
 
 const roleConfig = {
-  SUPER_ADMIN: {
-    label: "Super Admin",
-    variant: "destructive",
-  },
   ADMIN: {
     label: "Admin",
-    variant: "default",
+    variant: "destructive",
   },
   USER: {
     label: "User",

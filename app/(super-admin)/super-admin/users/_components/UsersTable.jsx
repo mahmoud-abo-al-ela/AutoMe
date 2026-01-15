@@ -17,9 +17,6 @@ import ChangeRoleDialog from "./ChangeRoleDialog";
 import UsersPagination from "./UsersPagination";
 
 const roleConfig = {
-  SUPER_ADMIN: {
-    label: "Super Admin",
-  },
   ADMIN: {
     label: "Admin",
   },

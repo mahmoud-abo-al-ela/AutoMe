@@ -1,4 +1,4 @@
-import { checkUser, isSuperAdmin } from "@/lib/checkUser";
+import { checkUser } from "@/lib/checkUser";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
 import SuperAdminSidebar from "./_components/SuperAdminSidebar";
@@ -16,8 +16,8 @@ export default async function SuperAdminLayout({ children }) {
     notFound();
   }
 
-  // Must be Super Admin
-  if (user.role !== "SUPER_ADMIN") {
+  // Must be Admin
+  if (user.role !== "ADMIN") {
     notFound();
   }
 

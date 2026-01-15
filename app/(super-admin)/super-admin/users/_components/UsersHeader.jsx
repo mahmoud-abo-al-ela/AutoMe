@@ -52,18 +52,11 @@ export default function UsersHeader({ roleStats }) {
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
     {
-      title: "Super Admins",
-      value: roleStats.SUPER_ADMIN || 0,
+      title: "Platform Admins",
+      value: roleStats.ADMIN || 0,
       icon: Shield,
       color: "text-red-600",
       bgColor: "bg-red-100 dark:bg-red-900/30",
-    },
-    {
-      title: "Org Admins",
-      value: roleStats.ADMIN || 0,
-      icon: UserCog,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100 dark:bg-purple-900/30",
     },
     {
       title: "Regular Users",
@@ -126,7 +119,6 @@ export default function UsersHeader({ roleStats }) {
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="USER">Users</SelectItem>
             <SelectItem value="ADMIN">Admins</SelectItem>
-            <SelectItem value="SUPER_ADMIN">Super Admins</SelectItem>
           </SelectContent>
         </Select>
       </div>

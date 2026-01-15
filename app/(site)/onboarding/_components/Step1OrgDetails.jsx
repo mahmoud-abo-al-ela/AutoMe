@@ -143,7 +143,7 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
           </div>
           <p className="text-xs text-muted-foreground">
             Your site will be at:{" "}
-            <strong>{formData.slug || "your-slug"}.localhost:3000</strong>
+            <strong>/org/{formData.slug || "your-slug"}</strong>
           </p>
           {errors.slug && (
             <p className="text-sm text-destructive">{errors.slug}</p>

@@ -1,147 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
-import {
-  Heart,
-  CarFront,
-  LayoutDashboard,
-  ArrowLeft,
-  ChevronRight,
-  MessageSquare,
-  Home,
-  Search,
-  Scale,
-  HelpCircle,
-  Calendar,
-  LogOut,
-} from "lucide-react";
-import { usePathname } from "next/navigation";
-import { navItems, signedInLinks } from "@/lib/HeaderConfig";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UnreadBadge } from "@/components/Chat";
+import { MobileUserSection } from "./_components/MobileUserSection";
+import { MobileNavigation } from "./_components/MobileNavigation";
+import { useMobileMenu } from "./_components/useMobileMenu";
 
-// Icon map for nav items
-const iconMap = {
-  Heart,
-  CarFront,
-  LayoutDashboard,
-  ArrowLeft,
-  MessageSquare,
-  Home,
-  Search,
-  Scale,
-  HelpCircle,
-  Calendar,
-};
-
-// Get icon for nav item based on label
-function getNavIcon(label) {
-  const icons = {
-    "Browse Cars": Search,
-    Compare: Scale,
-    FAQ: HelpCircle,
-  };
-  return icons[label] || Home;
-}
-
-// Reusable NavLink component
-function NavLink({
-  href,
-  label,
-  icon,
-  iconClass,
-  size = 18,
-  onClick,
-  isActive,
-  animationDelay = 0,
-  showUnreadBadge = false,
-  IconComponent = null,
-}) {
-  const Icon = IconComponent || (icon ? iconMap[icon] : null);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, delay: animationDelay / 1000 }}
-    >
-      <Link
-        href={href}
-        className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${
-          isActive
-            ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
-            : "text-foreground hover:bg-muted"
-        }`}
-        onClick={onClick}
-        aria-current={isActive ? "page" : undefined}
-      >
-        <div className="flex items-center gap-3">
-          {Icon && (
-            <Icon
-              size={size}
-              className={`${
-                isActive
-                  ? "text-white"
-                  : "text-muted-foreground group-hover:text-foreground"
-              } transition-colors`}
-            />
-          )}
-          <span>{label}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {showUnreadBadge && <UnreadBadge />}
-          {!isActive && (
-            <ChevronRight
-              size={16}
-              className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5"
-            />
-          )}
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
-
-export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
-  const pathname = usePathname();
-  const isAdmin = user?.role === "ADMIN";
+export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user, organization, userOrgSlug }) {
   const menuRef = useRef(null);
-  const { signOut } = useClerk();
-
-  // Filter out messages from signed-in links (it's now in header)
-  const filteredSignedInLinks = signedInLinks.filter(
-    (link) => link.icon !== "MessageSquare"
+  const { pathname, hasOrgMembership, isOwner, isOnAdminPath, navToShow } = useMobileMenu(
+    user,
+    organization,
+    isMenuOpen,
+    setIsMenuOpen,
+    menuRef
   );
-
-  useEffect(() => {
-    // Prevent body scroll when menu is open
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target) &&
-        isMenuOpen
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen, setIsMenuOpen]);
 
   return (
     <AnimatePresence>
@@ -169,108 +42,17 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
             style={{ zIndex: 40, maxHeight: "calc(100vh - 5rem)" }}
           >
             {/* User section */}
-            <SignedIn>
-              <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
-                <div className="flex items-center gap-3">
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-11 h-11 rounded-full shadow-md",
-                      },
-                    }}
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm">
-                      {user?.name || "Welcome back"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      signOut({ redirectUrl: "/" });
-                    }}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                    aria-label="Sign out"
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </SignedIn>
+            <MobileUserSection user={user} setIsMenuOpen={setIsMenuOpen} />
 
             {/* Navigation */}
-            <div
-              className="p-3 overflow-y-auto"
-              style={{ maxHeight: "calc(100vh - 14rem)" }}
-            >
-              {/* Main nav */}
-              <div className="space-y-1">
-                {navItems.map((item, index) => {
-                  const NavIcon = getNavIcon(item.label);
-                  return (
-                    <NavLink
-                      key={item.href}
-                      href={item.href}
-                      label={item.label}
-                      IconComponent={NavIcon}
-                      onClick={() => setIsMenuOpen(false)}
-                      isActive={pathname === item.href}
-                      animationDelay={index * 40}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Signed in links */}
-              <SignedIn>
-                <div className="my-3 mx-2 h-px bg-border" />
-                <div className="space-y-1">
-                  {filteredSignedInLinks
-                    .filter(
-                      (link) =>
-                        (!link.adminOnly || isAdmin) &&
-                        (!link.notAdmin || !isAdmin) &&
-                        (!link.adminPath || pathname === link.adminPath)
-                    )
-                    .map((link, index) => (
-                      <NavLink
-                        key={link.href}
-                        href={link.href}
-                        label={link.label}
-                        icon={link.icon}
-                        iconClass={link.iconClass}
-                        size={18}
-                        onClick={() => setIsMenuOpen(false)}
-                        isActive={pathname === link.href}
-                        animationDelay={(navItems.length + index) * 40}
-                        showUnreadBadge={link.showUnreadBadge}
-                      />
-                    ))}
-                </div>
-              </SignedIn>
-
-              {/* Sign in button */}
-              <SignedOut>
-                {pathname !== "/sign-in" && pathname !== "/sign-up" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: 0.15 }}
-                    className="mt-4"
-                  >
-                    <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        Sign In
-                      </Button>
-                    </Link>
-                  </motion.div>
-                )}
-              </SignedOut>
-            </div>
+            <MobileNavigation
+              hasOrgMembership={hasOrgMembership}
+              isOwner={isOwner}
+              pathname={pathname}
+              navToShow={navToShow}
+              setIsMenuOpen={setIsMenuOpen}
+              userOrgSlug={userOrgSlug}
+            />
 
             {/* Footer */}
             <div className="px-5 py-3 border-t bg-muted/30 text-center">

@@ -7,6 +7,8 @@ import {
   createErrorResponse,
 } from "@/lib/utils/response";
 import { AuthenticationError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
+import { checkUser } from "@/lib/checkUser";
 
 /**
  * Start or get existing conversation (optionally about a specific car)
@@ -61,7 +63,13 @@ export async function getAllConversations({ page = 1, limit = 20 } = {}) {
       throw new AuthenticationError();
     }
 
-    const result = await messageService.getAllConversations(userId, {
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    const result = await messageService.getAllConversations(userId, organization.id, {
       page,
       limit,
     });

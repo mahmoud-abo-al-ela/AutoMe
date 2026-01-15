@@ -20,16 +20,6 @@ const nextConfig = {
     ],
   },
 
-  // Enable subdomain routing in development
-  async rewrites() {
-    return {
-      beforeFiles: [
-        // Handle subdomain requests by passing org slug as header
-        // This is handled in middleware, rewrites are for fallback
-      ],
-    };
-  },
-
   async headers() {
     return [
       {
@@ -39,16 +29,6 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value:
               "frame-src https://roadsidecoder.created.app; frame-ancestors https://roadsidecoder.created.app;",
-          },
-        ],
-      },
-      {
-        // Allow subdomain cookies
-        source: "/:path*",
-        headers: [
-          {
-            key: "Access-Control-Allow-Credentials",
-            value: "true",
           },
         ],
       },

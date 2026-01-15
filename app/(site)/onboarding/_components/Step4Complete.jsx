@@ -41,10 +41,10 @@ export default function Step4Complete({ createdOrg }) {
   }, []);
 
   const adminUrl = createdOrg
-    ? `http://${createdOrg.slug}.localhost:3000/admin`
+    ? `/org/${createdOrg.slug}/admin`
     : "#";
 
-  const siteUrl = createdOrg ? `http://${createdOrg.slug}.localhost:3000` : "#";
+  const siteUrl = createdOrg ? `/org/${createdOrg.slug}` : "#";
 
   return (
     <div className="text-center space-y-6 py-8">
@@ -69,18 +69,16 @@ export default function Step4Complete({ createdOrg }) {
         </p>
         <a
           href={siteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
           className="font-mono text-primary hover:underline flex items-center justify-center gap-1"
         >
-          {createdOrg?.slug}.localhost:3000
+          /org/{createdOrg?.slug}
           <ExternalLink className="h-3 w-3" />
         </a>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
         <Button variant="outline" asChild>
-          <a href={siteUrl} target="_blank" rel="noopener noreferrer">
+          <a href={siteUrl}>
             View Your Site
             <ExternalLink className="h-4 w-4 ml-2" />
           </a>

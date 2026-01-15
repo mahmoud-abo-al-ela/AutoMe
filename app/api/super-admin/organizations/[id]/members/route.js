@@ -6,7 +6,7 @@ export async function GET(request, { params }) {
   try {
     const user = await checkUser();
 
-    if (!user || user.role !== "SUPER_ADMIN") {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

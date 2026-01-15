@@ -5,49 +5,27 @@ import { NextResponse } from "next/server";
 // ============ ROUTE MATCHERS ============
 
 const isProtectedRoute = createRouteMatcher([
-  "/admin(.*)",
+  "/org/:slug/admin(.*)",
   "/saved-cars(.*)",
   "/reservations(.*)",
 ]);
 
 const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
 
-const isMainDomainOnlyRoute = createRouteMatcher([
-  "/pricing(.*)",
-  "/signup-org(.*)",
-  "/super-admin(.*)",
-]);
-
 const isPublicApiRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
 ]);
 
-// ============ SUBDOMAIN PARSING ============
+// ============ PATH-BASED ORGANIZATION PARSING ============
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost";
+function getOrganizationSlugFromPath(request) {
+  const url = new URL(request.url);
+  const pathSegments = url.pathname.split("/").filter(Boolean);
 
-function getSubdomain(request) {
-  const host = request.headers.get("host") || "";
-  const hostname = host.split(":")[0]; // Remove port
-
-  // Handle localhost development with .localhost TLD
-  // e.g., autome-cairo.localhost:3000 -> autome-cairo
-  if (hostname.endsWith(".localhost")) {
-    const subdomain = hostname.replace(".localhost", "");
-    if (subdomain && subdomain !== "autome" && subdomain !== "www") {
-      return subdomain;
-    }
-    return null;
-  }
-
-  // Production: extract subdomain from hostname
-  // Expected: {subdomain}.autome.com
-  if (ROOT_DOMAIN !== "localhost" && hostname.endsWith(`.${ROOT_DOMAIN}`)) {
-    const subdomain = hostname.replace(`.${ROOT_DOMAIN}`, "");
-    if (subdomain && subdomain !== "www" && subdomain !== hostname) {
-      return subdomain;
-    }
+  // Check if path starts with /org/[slug]
+  if (pathSegments[0] === "org" && pathSegments[1]) {
+    return pathSegments[1];
   }
 
   return null;
@@ -94,14 +72,14 @@ const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
 
-  // Parse subdomain
-  const subdomain = getSubdomain(req);
+  // Parse organization slug from path
+  const orgSlugFromPath = getOrganizationSlugFromPath(req);
 
   // Check for impersonation context
   const impersonation = getImpersonationContext(req);
 
-  // Determine effective organization slug
-  const effectiveOrgSlug = impersonation?.organizationSlug || subdomain;
+  // Determine effective organization slug (impersonation takes precedence)
+  const effectiveOrgSlug = impersonation?.organizationSlug || orgSlugFromPath;
 
   // Create response with custom headers
   const response = NextResponse.next();
@@ -109,10 +87,6 @@ const clerk = clerkMiddleware(async (auth, req) => {
   // Set organization context headers for downstream use
   if (effectiveOrgSlug) {
     response.headers.set("x-organization-slug", effectiveOrgSlug);
-  }
-
-  if (subdomain) {
-    response.headers.set("x-subdomain", subdomain);
   }
 
   // Set impersonation headers if active
@@ -128,12 +102,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
     return response;
   }
 
-  // Block main-domain-only routes on subdomains
-  if (subdomain && isMainDomainOnlyRoute(req)) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
-  // Super admin routes: require auth and SUPER_ADMIN role (checked in layout)
+  // Admin routes (platform admin): require auth and ADMIN role (checked in layout)
   if (isSuperAdminRoute(req)) {
     if (!userId) {
       const { redirectToSignIn } = await auth();
@@ -145,12 +114,6 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   // Protected routes: require auth
   if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
-  }
-
-  // For org admin routes on subdomains, ensure user has access (checked in layout)
-  if (subdomain && isProtectedRoute(req) && !userId) {
     const { redirectToSignIn } = await auth();
     return redirectToSignIn();
   }

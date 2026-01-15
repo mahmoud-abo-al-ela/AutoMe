@@ -8,15 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 
 const roleConfig = {
-  SUPER_ADMIN: {
-    label: "Super Admin",
-    icon: Shield,
-    variant: "destructive",
-  },
   ADMIN: {
     label: "Admin",
-    icon: UserCog,
-    variant: "default",
+    icon: Shield,
+    variant: "destructive",
   },
   USER: {
     label: "User",

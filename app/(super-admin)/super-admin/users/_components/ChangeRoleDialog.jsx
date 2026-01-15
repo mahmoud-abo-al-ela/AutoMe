@@ -46,7 +46,6 @@ export default function ChangeRoleDialog({
             <SelectContent>
               <SelectItem value="USER">User</SelectItem>
               <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
             </SelectContent>
           </Select>
         </div>
