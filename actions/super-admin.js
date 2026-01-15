@@ -3,7 +3,10 @@
 
 export { updateUserRole } from "./super-admin/users";
 export { updatePlan, createPlan, deletePlan } from "./super-admin/plans";
-export { startImpersonation, endImpersonation } from "./super-admin/impersonation";
+export {
+  startImpersonation,
+  endImpersonation,
+} from "./super-admin/impersonation";
 export {
   createOrganization,
   updateOrganizationStatus,

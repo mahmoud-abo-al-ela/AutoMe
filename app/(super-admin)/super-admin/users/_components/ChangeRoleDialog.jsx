@@ -29,10 +29,7 @@ export default function ChangeRoleDialog({
   isPending,
 }) {
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => !open && onClose()}
-    >
+    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change User Role</DialogTitle>

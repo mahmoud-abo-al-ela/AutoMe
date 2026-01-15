@@ -55,15 +55,16 @@ export default function AuditLogsFilters({ currentFilters }) {
     router.push("/admin/audit-logs");
   };
 
-  const hasFilters = currentFilters.action || currentFilters.entityType || currentFilters.userId;
+  const hasFilters =
+    currentFilters.action || currentFilters.entityType || currentFilters.userId;
 
   return (
     <Card>
       <CardContent className="py-4">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex-1 min-w-[200px]">
-            <Select 
-              value={currentFilters.action || ""} 
+            <Select
+              value={currentFilters.action || ""}
               onValueChange={(value) => updateFilter("action", value)}
             >
               <SelectTrigger>
@@ -80,8 +81,8 @@ export default function AuditLogsFilters({ currentFilters }) {
           </div>
 
           <div className="flex-1 min-w-[200px]">
-            <Select 
-              value={currentFilters.entityType || ""} 
+            <Select
+              value={currentFilters.entityType || ""}
               onValueChange={(value) => updateFilter("entityType", value)}
             >
               <SelectTrigger>

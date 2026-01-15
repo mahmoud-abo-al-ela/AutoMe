@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserCog, ArrowRight, Clock, AlertCircle } from "lucide-react";
-import { getActiveImpersonationCount, getImpersonationSessions } from "@/lib/services/impersonation";
+import {
+  getActiveImpersonationCount,
+  getImpersonationSessions,
+} from "@/lib/services/impersonation";
 
 export default async function ActiveImpersonations() {
   const activeCount = await getActiveImpersonationCount();
@@ -39,7 +42,8 @@ export default async function ActiveImpersonations() {
             <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               <span className="text-sm text-yellow-700 dark:text-yellow-300">
-                {activeCount} active impersonation {activeCount === 1 ? "session" : "sessions"}
+                {activeCount} active impersonation{" "}
+                {activeCount === 1 ? "session" : "sessions"}
               </span>
             </div>
 
@@ -67,7 +71,9 @@ export default async function ActiveImpersonations() {
                       <span>·</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(session.startedAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(session.startedAt), {
+                          addSuffix: true,
+                        })}
                       </span>
                     </div>
                   </div>

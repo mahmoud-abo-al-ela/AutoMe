@@ -32,7 +32,10 @@ export default function CreateOrganizationForm({ plans }) {
 
     // Auto-generate slug from name
     if (name === "name") {
-      const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const slug = value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
       setFormData((prev) => ({ ...prev, slug }));
     }
   };
@@ -55,7 +58,9 @@ export default function CreateOrganizationForm({ plans }) {
 
       if (result.success) {
         toast.success("Organization created successfully", {
-          description: `${formData.name} has been created with the ${plans.find(p => p.id === formData.planId)?.name} plan.`,
+          description: `${formData.name} has been created with the ${
+            plans.find((p) => p.id === formData.planId)?.name
+          } plan.`,
         });
         router.push("/super-admin/organizations");
       } else {

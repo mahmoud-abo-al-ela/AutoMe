@@ -24,7 +24,7 @@ export default function Step4Complete({ createdOrg }) {
       }
 
       const particleCount = 50 * (timeLeft / duration);
-      
+
       confetti({
         ...defaults,
         particleCount,
@@ -40,13 +40,11 @@ export default function Step4Complete({ createdOrg }) {
     return () => clearInterval(interval);
   }, []);
 
-  const adminUrl = createdOrg 
+  const adminUrl = createdOrg
     ? `http://${createdOrg.slug}.localhost:3000/admin`
     : "#";
 
-  const siteUrl = createdOrg
-    ? `http://${createdOrg.slug}.localhost:3000`
-    : "#";
+  const siteUrl = createdOrg ? `http://${createdOrg.slug}.localhost:3000` : "#";
 
   return (
     <div className="text-center space-y-6 py-8">
@@ -59,13 +57,16 @@ export default function Step4Complete({ createdOrg }) {
       <div className="space-y-2">
         <h2 className="text-2xl font-bold">🎉 Your Dealership is Ready!</h2>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Congratulations! <strong>{createdOrg?.name}</strong> has been created successfully.
-          You can now start adding cars and managing your dealership.
+          Congratulations! <strong>{createdOrg?.name}</strong> has been created
+          successfully. You can now start adding cars and managing your
+          dealership.
         </p>
       </div>
 
       <div className="bg-muted p-4 rounded-lg max-w-md mx-auto">
-        <p className="text-sm text-muted-foreground mb-2">Your dealership URL:</p>
+        <p className="text-sm text-muted-foreground mb-2">
+          Your dealership URL:
+        </p>
         <a
           href={siteUrl}
           target="_blank"

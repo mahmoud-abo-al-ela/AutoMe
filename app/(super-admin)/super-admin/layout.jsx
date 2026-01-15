@@ -31,7 +31,7 @@ export default async function SuperAdminLayout({ children }) {
       >
         {/* Mobile header spacer */}
         <div className="md:hidden h-16" />
-        
+
         {/* Main content */}
         <div className="p-4 md:p-6 animate-in fade-in duration-500 flex-1 min-h-0">
           {children}

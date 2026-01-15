@@ -24,7 +24,11 @@ import {
 import { toast } from "sonner";
 import { inviteTeamMember } from "@/actions/team";
 
-export default function InviteMemberButton({ organizationId, canAdd, currentPlan }) {
+export default function InviteMemberButton({
+  organizationId,
+  canAdd,
+  currentPlan,
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -108,7 +112,8 @@ export default function InviteMemberButton({ organizationId, canAdd, currentPlan
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Admins can manage cars, test drives, and team members. Members can view only.
+              Admins can manage cars, test drives, and team members. Members can
+              view only.
             </p>
           </div>
         </div>

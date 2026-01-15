@@ -2,7 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Pause, Play, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Pause,
+  Play,
+  Trash2,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,7 +22,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { updateOrganizationStatus, deleteOrganization } from "@/actions/super-admin";
+import {
+  updateOrganizationStatus,
+  deleteOrganization,
+} from "@/actions/super-admin";
 
 export default function OrgDetailsHeader({ org }) {
   const router = useRouter();
@@ -28,9 +39,14 @@ export default function OrgDetailsHeader({ org }) {
     try {
       const result = await updateOrganizationStatus(org.id, !org.isActive);
       if (result.success) {
-        toast.success(org.isActive ? "Organization suspended" : "Organization activated", {
-          description: `${org.name} has been ${org.isActive ? "suspended" : "activated"} successfully.`,
-        });
+        toast.success(
+          org.isActive ? "Organization suspended" : "Organization activated",
+          {
+            description: `${org.name} has been ${
+              org.isActive ? "suspended" : "activated"
+            } successfully.`,
+          }
+        );
         startTransition(() => {
           router.refresh();
         });
@@ -152,7 +168,10 @@ export default function OrgDetailsHeader({ org }) {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={(open) => !deleteLoading && setDeleteDialogOpen(open)}>
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => !deleteLoading && setDeleteDialogOpen(open)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -162,18 +181,24 @@ export default function OrgDetailsHeader({ org }) {
             <DialogDescription asChild>
               <div>
                 <p>
-                  Are you sure you want to delete <span className="font-semibold">{org.name}</span>?
-                  This action cannot be undone.
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold">{org.name}</span>? This action
+                  cannot be undone.
                 </p>
                 <div className="mt-2 p-2 bg-destructive/10 rounded-md text-destructive">
-                  <strong>Warning:</strong> All associated data including cars, test drives,
-                  conversations, and team memberships will be permanently removed.
+                  <strong>Warning:</strong> All associated data including cars,
+                  test drives, conversations, and team memberships will be
+                  permanently removed.
                 </div>
               </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteLoading}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleteLoading}
+            >
               Cancel
             </Button>
             <Button

@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  Shield,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Shield, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function SuperAdminDesktopSidebar({ collapsed, setCollapsed, pathname, user }) {
+export default function SuperAdminDesktopSidebar({
+  collapsed,
+  setCollapsed,
+  pathname,
+  user,
+}) {
   return (
     <aside
       className={cn(
@@ -54,7 +54,8 @@ export default function SuperAdminDesktopSidebar({ collapsed, setCollapsed, path
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-hidden">
         {superAdminSidebarItems.map((item, index) => {
           const ItemIcon = item.icon;
-          const isActive = pathname === item.path || 
+          const isActive =
+            pathname === item.path ||
             (item.path !== "/super-admin" && pathname.startsWith(item.path));
 
           return (
@@ -121,7 +122,9 @@ export default function SuperAdminDesktopSidebar({ collapsed, setCollapsed, path
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {user.email}
+              </p>
             </div>
           </div>
         )}

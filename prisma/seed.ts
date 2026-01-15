@@ -16,24 +16,71 @@ const prisma = new PrismaClient({ adapter });
 // ============ CONSTANTS ============
 
 const CAR_MAKES = [
-  { make: "Toyota", models: ["Camry", "Corolla", "RAV4", "Highlander", "Prius"] },
+  {
+    make: "Toyota",
+    models: ["Camry", "Corolla", "RAV4", "Highlander", "Prius"],
+  },
   { make: "Honda", models: ["Civic", "Accord", "CR-V", "Pilot", "HR-V"] },
   { make: "BMW", models: ["3 Series", "5 Series", "X3", "X5", "M4"] },
-  { make: "Mercedes-Benz", models: ["C-Class", "E-Class", "GLC", "GLE", "A-Class"] },
-  { make: "Ford", models: ["F-150", "Mustang", "Explorer", "Escape", "Bronco"] },
-  { make: "Chevrolet", models: ["Silverado", "Malibu", "Equinox", "Tahoe", "Camaro"] },
+  {
+    make: "Mercedes-Benz",
+    models: ["C-Class", "E-Class", "GLC", "GLE", "A-Class"],
+  },
+  {
+    make: "Ford",
+    models: ["F-150", "Mustang", "Explorer", "Escape", "Bronco"],
+  },
+  {
+    make: "Chevrolet",
+    models: ["Silverado", "Malibu", "Equinox", "Tahoe", "Camaro"],
+  },
   { make: "Audi", models: ["A4", "A6", "Q5", "Q7", "e-tron"] },
-  { make: "Nissan", models: ["Altima", "Sentra", "Rogue", "Pathfinder", "Leaf"] },
-  { make: "Hyundai", models: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Ioniq"] },
+  {
+    make: "Nissan",
+    models: ["Altima", "Sentra", "Rogue", "Pathfinder", "Leaf"],
+  },
+  {
+    make: "Hyundai",
+    models: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Ioniq"],
+  },
   { make: "Kia", models: ["Optima", "Forte", "Sportage", "Sorento", "EV6"] },
 ];
 
-const BODY_TYPES = ["SUV", "Sedan", "Hatchback", "Convertible", "Coupe", "Wagon", "Pickup"];
-const FUEL_TYPES = ["Gasoline", "Diesel", "Electric", "Hybrid", "Plug-in Hybrid"];
+const BODY_TYPES = [
+  "SUV",
+  "Sedan",
+  "Hatchback",
+  "Convertible",
+  "Coupe",
+  "Wagon",
+  "Pickup",
+];
+const FUEL_TYPES = [
+  "Gasoline",
+  "Diesel",
+  "Electric",
+  "Hybrid",
+  "Plug-in Hybrid",
+];
 const TRANSMISSIONS = ["Automatic", "Manual", "Semi-Automatic"];
-const COLORS = ["Black", "White", "Silver", "Gray", "Red", "Blue", "Green", "Brown", "Beige"];
+const COLORS = [
+  "Black",
+  "White",
+  "Silver",
+  "Gray",
+  "Red",
+  "Blue",
+  "Green",
+  "Brown",
+  "Beige",
+];
 const CAR_STATUSES = ["AVAILABLE", "UNAVAILABLE", "SOLD"] as const;
-const TEST_DRIVE_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] as const;
+const TEST_DRIVE_STATUSES = [
+  "PENDING",
+  "CONFIRMED",
+  "CANCELLED",
+  "COMPLETED",
+] as const;
 
 // Stock car images from Unsplash (free to use)
 const CAR_IMAGES = [
@@ -81,7 +128,8 @@ const DEMO_ORGANIZATIONS = [
     email: "cairo@autome.com",
     phone: "+201012345678",
     address: "Nasr City, Cairo, Egypt",
-    description: "Premier car dealership in Cairo with the best selection of vehicles.",
+    description:
+      "Premier car dealership in Cairo with the best selection of vehicles.",
   },
   {
     name: "AutoMe Alexandria",
@@ -97,7 +145,8 @@ const DEMO_ORGANIZATIONS = [
     email: "giza@autome.com",
     phone: "+201234567890",
     address: "6th of October, Giza, Egypt",
-    description: "Giza's leading automotive destination with exceptional service.",
+    description:
+      "Giza's leading automotive destination with exceptional service.",
   },
 ];
 
@@ -109,8 +158,11 @@ function generateCar(organizationId: string) {
   const year = faker.number.int({ min: 2018, max: 2025 });
   const mileage = faker.number.int({ min: 0, max: 150000 });
   const price = faker.number.int({ min: 15000, max: 150000 });
-  const features = faker.helpers.arrayElements(CAR_FEATURES, { min: 3, max: 10 });
-  
+  const features = faker.helpers.arrayElements(CAR_FEATURES, {
+    min: 3,
+    max: 10,
+  });
+
   return {
     organizationId,
     make: makeData.make,
@@ -138,8 +190,16 @@ function generateCar(organizationId: string) {
 }
 
 function generateWorkingHours(organizationId: string) {
-  const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
-  
+  const days = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+    "SUNDAY",
+  ] as const;
+
   return days.map((day) => ({
     organizationId,
     dayOfWeek: [day],
@@ -180,7 +240,7 @@ async function main() {
 
   // ============ CREATE PLANS ============
   console.log("📋 Creating plans...");
-  
+
   const starterPlan = await prisma.plan.create({
     data: {
       name: "Starter",
@@ -255,7 +315,7 @@ async function main() {
 
   // ============ CREATE SUPER ADMIN ============
   console.log("👑 Creating Super Admin...");
-  
+
   const superAdmin = await prisma.user.create({
     data: {
       clerkId: "super_admin_clerk_id",
@@ -393,14 +453,14 @@ async function main() {
   const allCars: any[] = [];
   for (const { org, plan } of createdOrgs) {
     const carCount = faker.number.int({ min: 10, max: 15 });
-    
+
     for (let i = 0; i < carCount; i++) {
       const car = await prisma.car.create({
         data: generateCar(org.id),
       });
       allCars.push({ car, org });
     }
-    
+
     console.log(`  ✅ ${org.name}: Created ${carCount} cars`);
   }
   console.log("");
@@ -410,11 +470,11 @@ async function main() {
 
   for (const { org } of createdOrgs) {
     const workingHoursData = generateWorkingHours(org.id);
-    
+
     for (const wh of workingHoursData) {
       await prisma.workingHours.create({ data: wh });
     }
-    
+
     console.log(`  ✅ ${org.name}: Working hours set`);
   }
   console.log("");
@@ -425,7 +485,7 @@ async function main() {
   for (const customer of customerUsers) {
     const savedCount = faker.number.int({ min: 0, max: 5 });
     const randomCars = faker.helpers.arrayElements(allCars, savedCount);
-    
+
     for (const { car } of randomCars) {
       try {
         await prisma.savedCar.create({
@@ -460,8 +520,22 @@ async function main() {
           carId: car.id,
           status: faker.helpers.arrayElement(TEST_DRIVE_STATUSES),
           date: futureDate,
-          startTime: faker.helpers.arrayElement(["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"]),
-          endTime: faker.helpers.arrayElement(["10:00", "11:00", "12:00", "15:00", "16:00", "17:00"]),
+          startTime: faker.helpers.arrayElement([
+            "09:00",
+            "10:00",
+            "11:00",
+            "14:00",
+            "15:00",
+            "16:00",
+          ]),
+          endTime: faker.helpers.arrayElement([
+            "10:00",
+            "11:00",
+            "12:00",
+            "15:00",
+            "16:00",
+            "17:00",
+          ]),
           notes: faker.datatype.boolean() ? faker.lorem.sentence() : null,
         },
       });
@@ -531,7 +605,7 @@ async function main() {
 
   for (const { org, plan } of createdOrgs) {
     const retainUntil = getRetainUntilDate(plan.auditLogRetentionDays);
-    
+
     // Org creation log
     await prisma.auditLog.create({
       data: {
@@ -551,7 +625,9 @@ async function main() {
     });
 
     // Some car creation logs
-    const orgCars = allCars.filter(({ org: carOrg }) => carOrg.id === org.id).slice(0, 3);
+    const orgCars = allCars
+      .filter(({ org: carOrg }) => carOrg.id === org.id)
+      .slice(0, 3);
     for (const { car } of orgCars) {
       await prisma.auditLog.create({
         data: {

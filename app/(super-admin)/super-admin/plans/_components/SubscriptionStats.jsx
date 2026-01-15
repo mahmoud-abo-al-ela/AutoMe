@@ -1,4 +1,10 @@
-import { DollarSign, TrendingUp, CheckCircle, XCircle, Clock } from "lucide-react";
+import {
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SubscriptionStats({ stats, mrr }) {

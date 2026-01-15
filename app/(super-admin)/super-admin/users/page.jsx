@@ -72,7 +72,7 @@ export default async function UsersPage({ searchParams }) {
   return (
     <div className="space-y-6">
       <UsersHeader roleStats={roleStats} />
-      
+
       <Suspense fallback={<TableSkeleton />}>
         <UsersTable users={users} pagination={pagination} />
       </Suspense>

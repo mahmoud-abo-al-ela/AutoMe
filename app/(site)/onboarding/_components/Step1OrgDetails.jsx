@@ -26,7 +26,7 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     const name = e.target.value;
     const slug = generateSlug(name);
     updateFormData({ name, slug });
-    
+
     // Debounce slug check
     if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
     if (slug.length >= 3) {
@@ -44,7 +44,7 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
   const handleSlugChange = (e) => {
     const slug = generateSlug(e.target.value);
     updateFormData({ slug });
-    
+
     // Debounce slug check
     if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
     if (slug.length >= 3) {
@@ -61,11 +61,11 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
 
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Organization name is required";
     }
-    
+
     if (!formData.slug.trim()) {
       newErrors.slug = "URL slug is required";
     } else if (formData.slug.length < 3) {
@@ -73,7 +73,7 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     } else if (slugStatus === "taken") {
       newErrors.slug = "This slug is already taken";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -142,7 +142,8 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Your site will be at: <strong>{formData.slug || "your-slug"}.localhost:3000</strong>
+            Your site will be at:{" "}
+            <strong>{formData.slug || "your-slug"}.localhost:3000</strong>
           </p>
           {errors.slug && (
             <p className="text-sm text-destructive">{errors.slug}</p>

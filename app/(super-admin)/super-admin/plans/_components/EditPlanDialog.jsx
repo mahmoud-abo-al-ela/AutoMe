@@ -38,9 +38,7 @@ export default function EditPlanDialog({
             <Input
               id="name"
               value={formData.name || ""}
-              onChange={(e) =>
-                onChange({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => onChange({ ...formData, name: e.target.value })}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

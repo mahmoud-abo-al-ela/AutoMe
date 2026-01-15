@@ -68,12 +68,14 @@ async function getAuditLogs(searchParams) {
 
 export default async function AuditLogsPage({ searchParams }) {
   const resolvedParams = await searchParams;
-  const { logs, pagination, actions, entities } = await getAuditLogs(resolvedParams);
+  const { logs, pagination, actions, entities } = await getAuditLogs(
+    resolvedParams
+  );
 
   return (
     <div className="space-y-6">
       <AuditLogsHeader actions={actions} entities={entities} />
-      
+
       <Suspense fallback={<TableSkeleton />}>
         <AuditLogsTable logs={logs} pagination={pagination} />
       </Suspense>

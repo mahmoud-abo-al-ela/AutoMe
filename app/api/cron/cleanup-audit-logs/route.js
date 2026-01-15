@@ -4,7 +4,7 @@ import { cleanupExpiredAuditLogs } from "@/lib/services/audit";
 /**
  * Cron job to clean up expired audit logs
  * Should be called daily via Vercel Cron or similar
- * 
+ *
  * Add to vercel.json:
  * {
  *   "crons": [{

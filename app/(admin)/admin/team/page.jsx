@@ -1,5 +1,8 @@
 import { checkUser } from "@/lib/checkUser";
-import { getCurrentOrganization, getUserMembership } from "@/lib/getOrganization";
+import {
+  getCurrentOrganization,
+  getUserMembership,
+} from "@/lib/getOrganization";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import TeamHeader from "./_components/TeamHeader";
@@ -22,10 +25,7 @@ async function getTeamMembers(organizationId) {
         },
       },
     },
-    orderBy: [
-      { role: "asc" },
-      { createdAt: "asc" },
-    ],
+    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
   });
 
   return members;
@@ -40,7 +40,8 @@ export default async function TeamPage() {
   }
 
   const membership = await getUserMembership(user.id, organization.id);
-  const isOwnerOrAdmin = membership?.role === "OWNER" || membership?.role === "ADMIN";
+  const isOwnerOrAdmin =
+    membership?.role === "OWNER" || membership?.role === "ADMIN";
 
   const members = await getTeamMembers(organization.id);
 
@@ -67,14 +68,11 @@ export default async function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <TeamHeader 
-        memberCount={members.length}
-        memberLimit={memberLimit}
-      />
+      <TeamHeader memberCount={members.length} memberLimit={memberLimit} />
 
       {isOwnerOrAdmin && (
         <div className="flex justify-end">
-          <InviteMemberButton 
+          <InviteMemberButton
             organizationId={organization.id}
             canAdd={canAddMembers}
             currentPlan={currentPlan}
@@ -82,7 +80,7 @@ export default async function TeamPage() {
         </div>
       )}
 
-      <TeamTable 
+      <TeamTable
         members={members}
         currentUserId={user.id}
         isOwnerOrAdmin={isOwnerOrAdmin}

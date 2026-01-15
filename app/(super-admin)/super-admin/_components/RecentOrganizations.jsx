@@ -68,14 +68,18 @@ export default function RecentOrganizations({ organizations }) {
                       </div>
                       <div>
                         <p className="font-medium">{org.name}</p>
-                        <p className="text-xs text-muted-foreground">{org.slug}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {org.slug}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge
                       variant="secondary"
-                      className={getPlanBadgeColor(org.subscription?.plan?.type)}
+                      className={getPlanBadgeColor(
+                        org.subscription?.plan?.type
+                      )}
                     >
                       {org.subscription?.plan?.name || "No Plan"}
                     </Badge>
@@ -98,13 +102,18 @@ export default function RecentOrganizations({ organizations }) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {formatDistanceToNow(new Date(org.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(org.createdAt), {
+                      addSuffix: true,
+                    })}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No organizations yet
                 </TableCell>
               </TableRow>

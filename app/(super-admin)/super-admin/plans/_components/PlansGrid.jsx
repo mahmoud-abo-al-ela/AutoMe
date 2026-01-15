@@ -160,7 +160,8 @@ export default function PlansGrid({ plans }) {
   const handleAddPlanClick = () => {
     if (availableTypes.length === 0) {
       toast.error("All plan types already exist", {
-        description: "You can only have one plan of each type (Starter, Pro, Enterprise).",
+        description:
+          "You can only have one plan of each type (Starter, Pro, Enterprise).",
       });
       return;
     }

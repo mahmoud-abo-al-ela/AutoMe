@@ -53,10 +53,7 @@ export default function UserRow({ user, onChangeRole }) {
         {user.memberships.length > 0 ? (
           <div className="flex flex-col gap-1">
             {user.memberships.slice(0, 2).map((m) => (
-              <div
-                key={m.id}
-                className="text-sm flex items-center gap-1"
-              >
+              <div key={m.id} className="text-sm flex items-center gap-1">
                 <Building2 className="h-3 w-3 text-muted-foreground" />
                 <span>{m.organization.name}</span>
                 <Badge variant="outline" className="text-xs ml-1">

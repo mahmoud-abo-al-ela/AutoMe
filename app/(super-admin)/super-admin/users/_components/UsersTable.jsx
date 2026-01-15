@@ -62,7 +62,8 @@ export default function UsersTable({ users, pagination }) {
         });
       } else {
         toast.error("Failed to update role", {
-          description: result.error || "An error occurred while updating the role.",
+          description:
+            result.error || "An error occurred while updating the role.",
         });
       }
     } catch (error) {
@@ -108,7 +109,10 @@ export default function UsersTable({ users, pagination }) {
         </Table>
       </div>
 
-      <UsersPagination pagination={pagination} onPageChange={handlePageChange} />
+      <UsersPagination
+        pagination={pagination}
+        onPageChange={handlePageChange}
+      />
 
       <ChangeRoleDialog
         open={roleDialog.open}

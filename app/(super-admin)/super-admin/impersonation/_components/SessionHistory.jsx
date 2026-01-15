@@ -62,7 +62,10 @@ export default function SessionHistory({ sessions }) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge variant="outline" className="flex items-center gap-1">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
                       <CheckCircle className="h-3 w-3 text-green-500" />
                       {duration} min
                     </Badge>

@@ -39,7 +39,8 @@ export default function ImpersonationBanner({ session, organization }) {
             Viewing as <strong>{session?.targetUser?.name || "User"}</strong>
             {organization && (
               <>
-                {" "}in <strong>{organization.name}</strong>
+                {" "}
+                in <strong>{organization.name}</strong>
               </>
             )}
           </span>

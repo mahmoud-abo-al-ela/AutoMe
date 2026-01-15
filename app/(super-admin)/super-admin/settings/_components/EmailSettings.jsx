@@ -105,7 +105,11 @@ export default function EmailSettings({ settings }) {
         </div>
 
         <div className="flex justify-between">
-          <Button variant="outline" onClick={handleTestEmail} disabled={testLoading}>
+          <Button
+            variant="outline"
+            onClick={handleTestEmail}
+            disabled={testLoading}
+          >
             <Send className="h-4 w-4 mr-2" />
             {testLoading ? "Sending..." : "Send Test Email"}
           </Button>

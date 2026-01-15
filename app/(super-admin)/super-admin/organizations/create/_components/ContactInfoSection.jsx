@@ -20,9 +20,7 @@ export default function ContactInfoSection({ formData, onChange }) {
           <Mail className="h-5 w-5" />
           Contact Information
         </CardTitle>
-        <CardDescription>
-          Organization contact details
-        </CardDescription>
+        <CardDescription>Organization contact details</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

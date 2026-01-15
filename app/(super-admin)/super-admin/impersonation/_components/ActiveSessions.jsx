@@ -105,10 +105,13 @@ export default function ActiveSessions({ sessions }) {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleEndSession(session.id, session.targetUser.name)}
+                  onClick={() =>
+                    handleEndSession(session.id, session.targetUser.name)
+                  }
                   disabled={endingSession === session.id || isPending}
                 >
-                  {endingSession === session.id || (isPending && endingSession === session.id) ? (
+                  {endingSession === session.id ||
+                  (isPending && endingSession === session.id) ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Ending...

@@ -16,7 +16,13 @@ async function getOrganization(orgId) {
       memberships: {
         include: {
           user: {
-            select: { id: true, name: true, email: true, imageUrl: true, role: true },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              imageUrl: true,
+              role: true,
+            },
           },
         },
         orderBy: { role: "asc" },
@@ -67,15 +73,15 @@ export default async function OrganizationDetailsPage({ params }) {
     <div className="space-y-6">
       <OrgDetailsHeader org={org} />
       <OrgStats org={org} />
-      
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <OrgMembers memberships={org.memberships} orgId={org.id} />
           <OrgActivity activity={recentActivity} />
         </div>
         <div>
-          <OrgSubscription 
-            subscription={org.subscription} 
+          <OrgSubscription
+            subscription={org.subscription}
             plans={plans}
             orgId={org.id}
           />

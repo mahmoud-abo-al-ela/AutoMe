@@ -19,7 +19,14 @@ const days = [
   { key: "sunday", label: "Sunday" },
 ];
 
-export default function Step3WorkingHours({ formData, updateFormData, onNext, onPrev, setCreatedOrg, userId }) {
+export default function Step3WorkingHours({
+  formData,
+  updateFormData,
+  onNext,
+  onPrev,
+  setCreatedOrg,
+  userId,
+}) {
   const [loading, setLoading] = useState(false);
 
   const updateDayHours = (day, field, value) => {
@@ -78,18 +85,20 @@ export default function Step3WorkingHours({ formData, updateFormData, onNext, on
       <div className="space-y-3">
         {days.map(({ key, label }) => {
           const dayData = formData.workingHours[key];
-          
+
           return (
             <div
               key={key}
               className="flex items-center gap-4 p-3 rounded-lg border bg-card"
             >
               <div className="w-28 font-medium">{label}</div>
-              
+
               <div className="flex items-center gap-2">
                 <Switch
                   checked={!dayData.closed}
-                  onCheckedChange={(checked) => updateDayHours(key, "closed", !checked)}
+                  onCheckedChange={(checked) =>
+                    updateDayHours(key, "closed", !checked)
+                  }
                 />
                 <span className="text-sm text-muted-foreground w-14">
                   {dayData.closed ? "Closed" : "Open"}
@@ -99,26 +108,36 @@ export default function Step3WorkingHours({ formData, updateFormData, onNext, on
               {!dayData.closed && (
                 <div className="flex items-center gap-2 flex-1">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`${key}-open`} className="text-sm text-muted-foreground">
+                    <Label
+                      htmlFor={`${key}-open`}
+                      className="text-sm text-muted-foreground"
+                    >
                       From
                     </Label>
                     <Input
                       id={`${key}-open`}
                       type="time"
                       value={dayData.open}
-                      onChange={(e) => updateDayHours(key, "open", e.target.value)}
+                      onChange={(e) =>
+                        updateDayHours(key, "open", e.target.value)
+                      }
                       className="w-32"
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`${key}-close`} className="text-sm text-muted-foreground">
+                    <Label
+                      htmlFor={`${key}-close`}
+                      className="text-sm text-muted-foreground"
+                    >
                       To
                     </Label>
                     <Input
                       id={`${key}-close`}
                       type="time"
                       value={dayData.close}
-                      onChange={(e) => updateDayHours(key, "close", e.target.value)}
+                      onChange={(e) =>
+                        updateDayHours(key, "close", e.target.value)
+                      }
                       className="w-32"
                     />
                   </div>

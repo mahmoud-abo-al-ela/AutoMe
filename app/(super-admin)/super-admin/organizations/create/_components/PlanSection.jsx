@@ -57,7 +57,9 @@ export default function PlanSection({ formData, plans, onPlanChange }) {
           {selectedPlan && (
             <div className="p-4 bg-muted rounded-lg">
               <div className="space-y-2 text-sm">
-                <p className="font-medium">{selectedPlan.name} Plan Features:</p>
+                <p className="font-medium">
+                  {selectedPlan.name} Plan Features:
+                </p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li>• Up to {selectedPlan.maxCars} cars</li>
                   <li>• Up to {selectedPlan.maxMembers} team members</li>

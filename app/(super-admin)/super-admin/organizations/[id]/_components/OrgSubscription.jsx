@@ -32,7 +32,9 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
       const newPlan = plans.find((p) => p.id === selectedPlan);
       if (result.success) {
         toast.success("Plan updated successfully", {
-          description: `Subscription changed to ${newPlan?.name || "new plan"}.`,
+          description: `Subscription changed to ${
+            newPlan?.name || "new plan"
+          }.`,
         });
         startTransition(() => {
           router.refresh();
@@ -92,7 +94,10 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
                 <span className="text-muted-foreground">Period Start</span>
                 <span>
                   {subscription.currentPeriodStart
-                    ? format(new Date(subscription.currentPeriodStart), "MMM d, yyyy")
+                    ? format(
+                        new Date(subscription.currentPeriodStart),
+                        "MMM d, yyyy"
+                      )
                     : "N/A"}
                 </span>
               </div>
@@ -100,7 +105,10 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
                 <span className="text-muted-foreground">Period End</span>
                 <span>
                   {subscription.currentPeriodEnd
-                    ? format(new Date(subscription.currentPeriodEnd), "MMM d, yyyy")
+                    ? format(
+                        new Date(subscription.currentPeriodEnd),
+                        "MMM d, yyyy"
+                      )
                     : "N/A"}
                 </span>
               </div>
@@ -125,7 +133,9 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
               <Button
                 className="w-full mt-2"
                 onClick={handleChangePlan}
-                disabled={loading || isPending || selectedPlan === subscription.planId}
+                disabled={
+                  loading || isPending || selectedPlan === subscription.planId
+                }
               >
                 {loading || isPending ? (
                   <>

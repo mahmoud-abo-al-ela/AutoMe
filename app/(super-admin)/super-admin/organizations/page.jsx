@@ -63,12 +63,14 @@ async function getOrganizations(searchParams) {
 
 export default async function OrganizationsPage({ searchParams }) {
   const resolvedParams = await searchParams;
-  const { organizations, pagination, plans } = await getOrganizations(resolvedParams);
+  const { organizations, pagination, plans } = await getOrganizations(
+    resolvedParams
+  );
 
   return (
     <div className="space-y-6">
       <OrganizationsHeader plans={plans} />
-      
+
       <Suspense fallback={<TableSkeleton />}>
         <OrganizationsTable
           organizations={organizations}

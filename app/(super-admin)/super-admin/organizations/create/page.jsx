@@ -24,7 +24,9 @@ export default async function CreateOrganizationPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create Organization</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Create Organization
+          </h1>
           <p className="text-muted-foreground">
             Set up a new organization on the platform
           </p>

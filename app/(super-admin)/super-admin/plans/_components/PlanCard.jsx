@@ -1,7 +1,23 @@
 "use client";
 
-import { Check, MoreVertical, Pencil, Trash2, Building2, Car, Users, Image } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Check,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Building2,
+  Car,
+  Users,
+  Image,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,9 +39,7 @@ export default function PlanCard({ plan, onEdit, onDelete }) {
     <Card className={`relative ${planColors[plan.type] || ""}`}>
       {plan.type === "PRO" && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Badge className="bg-blue-500 hover:bg-blue-600">
-            Most Popular
-          </Badge>
+          <Badge className="bg-blue-500 hover:bg-blue-600">Most Popular</Badge>
         </div>
       )}
       <CardHeader>
@@ -57,9 +71,7 @@ export default function PlanCard({ plan, onEdit, onDelete }) {
           </DropdownMenu>
         </div>
         <div className="mt-4">
-          <span className="text-4xl font-bold">
-            ${plan.monthlyPrice || 0}
-          </span>
+          <span className="text-4xl font-bold">${plan.monthlyPrice || 0}</span>
           <span className="text-muted-foreground">/month</span>
           {plan.monthlyPrice > 0 && plan.yearlyPrice > 0 && (
             <div className="text-sm text-muted-foreground">
@@ -83,7 +95,8 @@ export default function PlanCard({ plan, onEdit, onDelete }) {
           <div className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span>
-              {plan.maxMembers === -1 ? "Unlimited" : plan.maxMembers} team members
+              {plan.maxMembers === -1 ? "Unlimited" : plan.maxMembers} team
+              members
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">

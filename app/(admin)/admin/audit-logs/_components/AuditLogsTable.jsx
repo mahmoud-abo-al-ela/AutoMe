@@ -19,9 +19,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Car,
   Calendar,
@@ -35,20 +35,33 @@ import {
 import { useState } from "react";
 
 const actionColors = {
-  CAR_CREATED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  CAR_UPDATED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  CAR_CREATED:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  CAR_UPDATED:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   CAR_DELETED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  CAR_STATUS_CHANGED: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  TEST_DRIVE_CREATED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  TEST_DRIVE_CONFIRMED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  TEST_DRIVE_CANCELED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  MEMBER_INVITED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  MEMBER_ROLE_CHANGED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  MEMBER_REMOVED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  SETTINGS_UPDATED: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-  ORG_UPDATED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  SUBSCRIPTION_CREATED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  SUBSCRIPTION_UPGRADED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  CAR_STATUS_CHANGED:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  TEST_DRIVE_CREATED:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  TEST_DRIVE_CONFIRMED:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  TEST_DRIVE_CANCELED:
+    "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  MEMBER_INVITED:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  MEMBER_ROLE_CHANGED:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  MEMBER_REMOVED:
+    "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  SETTINGS_UPDATED:
+    "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+  ORG_UPDATED:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  SUBSCRIPTION_CREATED:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  SUBSCRIPTION_UPGRADED:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
 };
 
 const entityIcons = {
@@ -114,14 +127,16 @@ export default function AuditLogsTable({ logs, pagination }) {
           <TableBody>
             {logs.map((log) => {
               const EntityIcon = entityIcons[log.entityType] || Settings;
-              
+
               return (
                 <TableRow key={log.id}>
                   <TableCell className="text-muted-foreground text-sm">
                     {formatDate(log.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <Badge className={actionColors[log.action] || "bg-gray-100"}>
+                    <Badge
+                      className={actionColors[log.action] || "bg-gray-100"}
+                    >
                       {formatActionLabel(log.action)}
                     </Badge>
                   </TableCell>
@@ -149,8 +164,8 @@ export default function AuditLogsTable({ logs, pagination }) {
                   <TableCell>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => setSelectedLog(log)}
                         >
@@ -161,39 +176,56 @@ export default function AuditLogsTable({ logs, pagination }) {
                         <DialogHeader>
                           <DialogTitle>Audit Log Details</DialogTitle>
                           <DialogDescription>
-                            {formatActionLabel(log.action)} on {formatDate(log.createdAt)}
+                            {formatActionLabel(log.action)} on{" "}
+                            {formatDate(log.createdAt)}
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 mt-4">
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                              <span className="font-medium text-muted-foreground">Action</span>
+                              <span className="font-medium text-muted-foreground">
+                                Action
+                              </span>
                               <p>{formatActionLabel(log.action)}</p>
                             </div>
                             <div>
-                              <span className="font-medium text-muted-foreground">Entity Type</span>
+                              <span className="font-medium text-muted-foreground">
+                                Entity Type
+                              </span>
                               <p>{log.entityType}</p>
                             </div>
                             <div>
-                              <span className="font-medium text-muted-foreground">Entity ID</span>
-                              <p className="font-mono text-xs">{log.entityId}</p>
+                              <span className="font-medium text-muted-foreground">
+                                Entity ID
+                              </span>
+                              <p className="font-mono text-xs">
+                                {log.entityId}
+                              </p>
                             </div>
                             <div>
-                              <span className="font-medium text-muted-foreground">User</span>
+                              <span className="font-medium text-muted-foreground">
+                                User
+                              </span>
                               <p>{log.user?.name || log.userEmail}</p>
                             </div>
                           </div>
 
                           {log.metadata?.ipAddress && (
                             <div className="text-sm">
-                              <span className="font-medium text-muted-foreground">IP Address</span>
-                              <p className="font-mono text-xs">{log.metadata.ipAddress}</p>
+                              <span className="font-medium text-muted-foreground">
+                                IP Address
+                              </span>
+                              <p className="font-mono text-xs">
+                                {log.metadata.ipAddress}
+                              </p>
                             </div>
                           )}
 
                           {log.oldValue && (
                             <div>
-                              <span className="font-medium text-muted-foreground text-sm">Previous Value</span>
+                              <span className="font-medium text-muted-foreground text-sm">
+                                Previous Value
+                              </span>
                               <pre className="mt-1 p-3 bg-muted rounded-lg text-xs overflow-x-auto">
                                 {JSON.stringify(log.oldValue, null, 2)}
                               </pre>
@@ -202,7 +234,9 @@ export default function AuditLogsTable({ logs, pagination }) {
 
                           {log.newValue && (
                             <div>
-                              <span className="font-medium text-muted-foreground text-sm">New Value</span>
+                              <span className="font-medium text-muted-foreground text-sm">
+                                New Value
+                              </span>
                               <pre className="mt-1 p-3 bg-muted rounded-lg text-xs overflow-x-auto">
                                 {JSON.stringify(log.newValue, null, 2)}
                               </pre>

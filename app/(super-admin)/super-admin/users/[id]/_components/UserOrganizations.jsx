@@ -35,14 +35,13 @@ export default function UserOrganizations({ memberships }) {
                   <Badge variant="outline">{m.role}</Badge>
                 </div>
                 <div className="flex items-center justify-between mt-3">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs"
-                  >
+                  <Badge variant="secondary" className="text-xs">
                     {m.organization.subscription?.plan?.name || "No Plan"}
                   </Badge>
                   <Button size="sm" variant="ghost" asChild>
-                    <Link href={`/super-admin/organizations/${m.organization.id}`}>
+                    <Link
+                      href={`/super-admin/organizations/${m.organization.id}`}
+                    >
                       <ExternalLink className="h-3 w-3 mr-1" />
                       View
                     </Link>

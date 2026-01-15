@@ -1,5 +1,8 @@
 import { checkUser } from "@/lib/checkUser";
-import { getCurrentOrganization, getUserMembership } from "@/lib/getOrganization";
+import {
+  getCurrentOrganization,
+  getUserMembership,
+} from "@/lib/getOrganization";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BillingHeader from "./_components/BillingHeader";
@@ -41,7 +44,7 @@ async function getUsageStats(organizationId) {
       where: { organizationId },
     }),
     prisma.testDrive.count({
-      where: { 
+      where: {
         organizationId,
         createdAt: {
           gte: new Date(new Date().setDate(1)), // This month
@@ -74,22 +77,20 @@ export default async function BillingPage() {
     <div className="space-y-8">
       <BillingHeader />
 
-      <CurrentPlan 
+      <CurrentPlan
         subscription={subscription}
         usage={usage}
         isOwner={isOwner}
       />
 
-      <PlanComparison 
+      <PlanComparison
         plans={plans}
         currentPlanId={subscription?.planId}
         isOwner={isOwner}
         organizationId={organization.id}
       />
 
-      {isOwner && (
-        <BillingHistory organizationId={organization.id} />
-      )}
+      {isOwner && <BillingHistory organizationId={organization.id} />}
     </div>
   );
 }

@@ -93,25 +93,30 @@ async function getMonthlyGrowth() {
   for (let i = 5; i >= 0; i--) {
     const date = new Date();
     date.setMonth(date.getMonth() - i);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const monthKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}`;
     const monthName = date.toLocaleDateString("en-US", { month: "short" });
 
     months.push({
       month: monthName,
       organizations: organizations.filter(
         (o) =>
-          `${o.createdAt.getFullYear()}-${String(o.createdAt.getMonth() + 1).padStart(2, "0")}` ===
-          monthKey
+          `${o.createdAt.getFullYear()}-${String(
+            o.createdAt.getMonth() + 1
+          ).padStart(2, "0")}` === monthKey
       ).length,
       users: users.filter(
         (u) =>
-          `${u.createdAt.getFullYear()}-${String(u.createdAt.getMonth() + 1).padStart(2, "0")}` ===
-          monthKey
+          `${u.createdAt.getFullYear()}-${String(
+            u.createdAt.getMonth() + 1
+          ).padStart(2, "0")}` === monthKey
       ).length,
       cars: cars.filter(
         (c) =>
-          `${c.createdAt.getFullYear()}-${String(c.createdAt.getMonth() + 1).padStart(2, "0")}` ===
-          monthKey
+          `${c.createdAt.getFullYear()}-${String(
+            c.createdAt.getMonth() + 1
+          ).padStart(2, "0")}` === monthKey
       ).length,
     });
   }

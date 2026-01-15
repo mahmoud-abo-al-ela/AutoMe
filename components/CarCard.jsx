@@ -129,7 +129,9 @@ const CarCard = ({ car, onWishlistChange }) => {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                  <span className="text-gray-400 text-sm">No image available</span>
+                  <span className="text-gray-400 text-sm">
+                    No image available
+                  </span>
                 </div>
               )}
             </div>

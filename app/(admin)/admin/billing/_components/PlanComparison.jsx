@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
@@ -51,7 +58,12 @@ const planDetails = {
   },
 };
 
-export default function PlanComparison({ plans, currentPlanId, isOwner, organizationId }) {
+export default function PlanComparison({
+  plans,
+  currentPlanId,
+  isOwner,
+  organizationId,
+}) {
   const formatPrice = (price) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -72,12 +84,16 @@ export default function PlanComparison({ plans, currentPlanId, isOwner, organiza
       <div className="grid gap-6 md:grid-cols-3">
         {plans.map((plan) => {
           const details = planDetails[plan.type];
-          const isCurrentPlan = plan.id === currentPlanId || (!currentPlanId && plan.type === "STARTER");
-          
+          const isCurrentPlan =
+            plan.id === currentPlanId ||
+            (!currentPlanId && plan.type === "STARTER");
+
           return (
-            <Card 
-              key={plan.id} 
-              className={`relative ${details.color} ${isCurrentPlan ? "ring-2 ring-primary" : ""}`}
+            <Card
+              key={plan.id}
+              className={`relative ${details.color} ${
+                isCurrentPlan ? "ring-2 ring-primary" : ""
+              }`}
             >
               {details.badge && (
                 <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-600">
@@ -112,7 +128,11 @@ export default function PlanComparison({ plans, currentPlanId, isOwner, organiza
                       ) : (
                         <X className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       )}
-                      <span className={feature.included ? "" : "text-muted-foreground"}>
+                      <span
+                        className={
+                          feature.included ? "" : "text-muted-foreground"
+                        }
+                      >
                         {feature.name}
                       </span>
                     </li>
@@ -127,7 +147,7 @@ export default function PlanComparison({ plans, currentPlanId, isOwner, organiza
                       Current Plan
                     </Button>
                   ) : (
-                    <Button 
+                    <Button
                       className="w-full"
                       variant={plan.type === "PRO" ? "default" : "outline"}
                     >

@@ -36,7 +36,9 @@ export default function ImpersonateModal({ organization, onClose }) {
   useEffect(() => {
     async function fetchMembers() {
       try {
-        const response = await fetch(`/api/super-admin/organizations/${organization.id}/members`);
+        const response = await fetch(
+          `/api/super-admin/organizations/${organization.id}/members`
+        );
         if (response.ok) {
           const data = await response.json();
           setMembers(data.members || []);
@@ -94,7 +96,8 @@ export default function ImpersonateModal({ organization, onClose }) {
             Impersonate User
           </DialogTitle>
           <DialogDescription>
-            Access <strong>{organization.name}</strong> as a specific user. All actions will be logged.
+            Access <strong>{organization.name}</strong> as a specific user. All
+            actions will be logged.
           </DialogDescription>
         </DialogHeader>
 
@@ -105,7 +108,8 @@ export default function ImpersonateModal({ organization, onClose }) {
             <div className="text-sm text-yellow-700 dark:text-yellow-300">
               <p className="font-medium">Audit Trail Warning</p>
               <p className="mt-1">
-                All actions performed during impersonation will be logged with your identity.
+                All actions performed during impersonation will be logged with
+                your identity.
               </p>
             </div>
           </div>
@@ -128,7 +132,9 @@ export default function ImpersonateModal({ organization, onClose }) {
                     <SelectItem key={member.userId} value={member.userId}>
                       <div className="flex items-center gap-2">
                         <span>{member.user?.name || member.user?.email}</span>
-                        <span className="text-xs text-muted-foreground">({member.role})</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({member.role})
+                        </span>
                       </div>
                     </SelectItem>
                   ))}

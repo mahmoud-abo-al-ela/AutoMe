@@ -19,10 +19,7 @@ export default function DeletePlanDialog({
   loading,
 }) {
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => !loading && !open && onClose()}
-    >
+    <Dialog open={open} onOpenChange={(open) => !loading && !open && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -33,14 +30,14 @@ export default function DeletePlanDialog({
             <div>
               <p>
                 This action cannot be undone. This will permanently delete the{" "}
-                <span className="font-semibold">{plan?.name}</span> plan
-                and remove it from the system.
+                <span className="font-semibold">{plan?.name}</span> plan and
+                remove it from the system.
               </p>
               {plan?.activeSubscriptions > 0 && (
                 <div className="mt-2 p-2 bg-destructive/10 rounded-md text-destructive">
                   <strong>Warning:</strong> This plan has{" "}
-                  {plan.activeSubscriptions} active subscription(s).
-                  You cannot delete it until all subscribers are migrated.
+                  {plan.activeSubscriptions} active subscription(s). You cannot
+                  delete it until all subscribers are migrated.
                 </div>
               )}
             </div>

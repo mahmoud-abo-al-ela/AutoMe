@@ -27,7 +27,15 @@ async function getUser(userId) {
       savedCars: {
         take: 10,
         include: {
-          car: { select: { id: true, make: true, model: true, year: true, images: true } },
+          car: {
+            select: {
+              id: true,
+              make: true,
+              model: true,
+              year: true,
+              images: true,
+            },
+          },
         },
       },
     },
@@ -58,10 +66,13 @@ export default async function UserDetailsPage({ params }) {
   return (
     <div className="space-y-6">
       <UserDetailsHeader user={user} />
-      
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <UserActivity activity={recentActivity} testDrives={user.testDrives} />
+          <UserActivity
+            activity={recentActivity}
+            testDrives={user.testDrives}
+          />
         </div>
         <div>
           <UserOrganizations memberships={user.memberships} />

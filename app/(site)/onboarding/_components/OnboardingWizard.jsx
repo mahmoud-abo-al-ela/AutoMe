@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Check, Building2, CreditCard, Clock, Rocket } from "lucide-react";
@@ -74,12 +80,16 @@ export default function OnboardingWizard({ user, plans }) {
             const StepIcon = step.icon;
             const isCompleted = currentStep > step.id;
             const isCurrent = currentStep === step.id;
-            
+
             return (
               <div
                 key={step.id}
                 className={`flex flex-col items-center gap-2 ${
-                  isCurrent ? "text-primary" : isCompleted ? "text-green-600" : "text-muted-foreground"
+                  isCurrent
+                    ? "text-primary"
+                    : isCompleted
+                    ? "text-green-600"
+                    : "text-muted-foreground"
                 }`}
               >
                 <div
@@ -97,7 +107,9 @@ export default function OnboardingWizard({ user, plans }) {
                     <StepIcon className="h-5 w-5" />
                   )}
                 </div>
-                <span className="text-xs font-medium hidden sm:block">{step.name}</span>
+                <span className="text-xs font-medium hidden sm:block">
+                  {step.name}
+                </span>
               </div>
             );
           })}
@@ -133,9 +145,7 @@ export default function OnboardingWizard({ user, plans }) {
               userId={user.id}
             />
           )}
-          {currentStep === 4 && (
-            <Step4Complete createdOrg={createdOrg} />
-          )}
+          {currentStep === 4 && <Step4Complete createdOrg={createdOrg} />}
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -42,7 +48,8 @@ const mockInvoices = [
 
 const statusColors = {
   PAID: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  PENDING:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
   FAILED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 
@@ -69,9 +76,7 @@ export default function BillingHistory({ organizationId }) {
           <Receipt className="h-5 w-5" />
           Billing History
         </CardTitle>
-        <CardDescription>
-          View and download your past invoices
-        </CardDescription>
+        <CardDescription>View and download your past invoices</CardDescription>
       </CardHeader>
       <CardContent>
         {mockInvoices.length === 0 ? (
@@ -122,7 +127,10 @@ export default function BillingHistory({ organizationId }) {
         <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
           <p>
             Need help with billing?{" "}
-            <a href="mailto:billing@autome.com" className="text-primary hover:underline">
+            <a
+              href="mailto:billing@autome.com"
+              className="text-primary hover:underline"
+            >
               Contact our billing team
             </a>
           </p>

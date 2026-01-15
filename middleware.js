@@ -10,9 +10,7 @@ const isProtectedRoute = createRouteMatcher([
   "/reservations(.*)",
 ]);
 
-const isSuperAdminRoute = createRouteMatcher([
-  "/super-admin(.*)",
-]);
+const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
 
 const isMainDomainOnlyRoute = createRouteMatcher([
   "/pricing(.*)",
@@ -60,7 +58,9 @@ function getSubdomain(request) {
 function getImpersonationContext(request) {
   const impersonatedOrg = request.cookies.get("x-impersonated-org")?.value;
   const impersonatedUser = request.cookies.get("x-impersonated-user")?.value;
-  const impersonationSessionId = request.cookies.get("x-impersonation-session")?.value;
+  const impersonationSessionId = request.cookies.get(
+    "x-impersonation-session"
+  )?.value;
 
   if (impersonatedOrg && impersonatedUser && impersonationSessionId) {
     return {
@@ -83,9 +83,7 @@ const aj = arcjet({
     }),
     detectBot({
       mode: "LIVE",
-      allow: [
-        "CATEGORY:SEARCH_ENGINE",
-      ],
+      allow: ["CATEGORY:SEARCH_ENGINE"],
     }),
   ],
 });
@@ -95,13 +93,13 @@ const aj = arcjet({
 const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
-  
+
   // Parse subdomain
   const subdomain = getSubdomain(req);
-  
+
   // Check for impersonation context
   const impersonation = getImpersonationContext(req);
-  
+
   // Determine effective organization slug
   const effectiveOrgSlug = impersonation?.organizationSlug || subdomain;
 
@@ -112,7 +110,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
   if (effectiveOrgSlug) {
     response.headers.set("x-organization-slug", effectiveOrgSlug);
   }
-  
+
   if (subdomain) {
     response.headers.set("x-subdomain", subdomain);
   }

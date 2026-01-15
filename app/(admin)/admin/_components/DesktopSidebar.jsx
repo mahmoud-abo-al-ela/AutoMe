@@ -32,7 +32,12 @@ const iconMap = {
   ScrollText,
 };
 
-export default function DesktopSidebar({ collapsed, setCollapsed, pathname, organization }) {
+export default function DesktopSidebar({
+  collapsed,
+  setCollapsed,
+  pathname,
+  organization,
+}) {
   const orgName = organization?.name || "AutoMe Admin";
 
   return (

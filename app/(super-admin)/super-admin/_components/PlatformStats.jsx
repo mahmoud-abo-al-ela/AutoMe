@@ -63,9 +63,13 @@ export default function PlatformStats({
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                {stat.value.toLocaleString()}
+              </div>
               {stat.subtitle && (
-                <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stat.subtitle}
+                </p>
               )}
             </CardContent>
           </Card>
@@ -96,7 +100,9 @@ export default function PlatformStats({
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">No active subscriptions</p>
+              <p className="text-sm text-muted-foreground">
+                No active subscriptions
+              </p>
             )}
           </div>
         </CardContent>

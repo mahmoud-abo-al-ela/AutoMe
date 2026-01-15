@@ -36,18 +36,18 @@ function DealerCTA() {
                   For Dealerships
                 </span>
               </div>
-              
+
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 Start Your Own{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">
                   Digital Dealership
                 </span>
               </h2>
-              
+
               <p className="text-lg text-gray-300 mb-6">
-                Join AutoMe and get your dealership online in minutes. 
-                Manage inventory, handle customer inquiries, and schedule 
-                test drives - all in one powerful platform.
+                Join AutoMe and get your dealership online in minutes. Manage
+                inventory, handle customer inquiries, and schedule test drives -
+                all in one powerful platform.
               </p>
 
               <ul className="space-y-3 mb-8">
@@ -103,7 +103,7 @@ function DealerCTA() {
                     <div className="h-3 w-3 rounded-full bg-yellow-400" />
                     <div className="h-3 w-3 rounded-full bg-green-400" />
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="bg-white/5 rounded px-3 py-2 text-sm">
@@ -113,7 +113,7 @@ function DealerCTA() {
                         Pro Plan
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-3">
                       <div className="bg-white/5 rounded-lg p-3 text-center">
                         <div className="text-2xl font-bold">24</div>
@@ -128,7 +128,7 @@ function DealerCTA() {
                         <div className="text-xs text-gray-400">Messages</div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="bg-white/5 rounded h-8 w-full" />
                       <div className="bg-white/5 rounded h-8 w-3/4" />
@@ -136,7 +136,7 @@ function DealerCTA() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Floating elements */}
                 <div className="absolute -top-4 -right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
                   +3 New Leads Today

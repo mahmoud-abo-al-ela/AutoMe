@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -9,7 +15,8 @@ import { Calendar, Car, Users, ArrowUpRight } from "lucide-react";
 const planColors = {
   STARTER: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
   PRO: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  ENTERPRISE: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+  ENTERPRISE:
+    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
 };
 
 const planLimits = {
@@ -43,9 +50,7 @@ export default function CurrentPlan({ subscription, usage, isOwner }) {
           <div>
             <CardTitle className="flex items-center gap-2">
               Current Plan
-              <Badge className={planColors[planType]}>
-                {planType}
-              </Badge>
+              <Badge className={planColors[planType]}>{planType}</Badge>
             </CardTitle>
             <CardDescription>
               {subscription?.status === "TRIALING" && (
@@ -53,14 +58,13 @@ export default function CurrentPlan({ subscription, usage, isOwner }) {
                   Trial ends on {formatDate(subscription.trialEnd)}
                 </span>
               )}
-              {subscription?.status === "ACTIVE" && subscription.currentPeriodEnd && (
-                <span>
-                  Renews on {formatDate(subscription.currentPeriodEnd)}
-                </span>
-              )}
-              {!subscription && (
-                <span>You're on the free Starter plan</span>
-              )}
+              {subscription?.status === "ACTIVE" &&
+                subscription.currentPeriodEnd && (
+                  <span>
+                    Renews on {formatDate(subscription.currentPeriodEnd)}
+                  </span>
+                )}
+              {!subscription && <span>You're on the free Starter plan</span>}
             </CardDescription>
           </div>
           {isOwner && planType !== "ENTERPRISE" && (
@@ -81,17 +85,20 @@ export default function CurrentPlan({ subscription, usage, isOwner }) {
                 <span>Car Listings</span>
               </div>
               <span className="font-medium">
-                {usage.carCount}{limits.cars !== -1 ? ` / ${limits.cars}` : ""}
+                {usage.carCount}
+                {limits.cars !== -1 ? ` / ${limits.cars}` : ""}
               </span>
             </div>
             {limits.cars !== -1 && (
-              <Progress 
-                value={getUsagePercent(usage.carCount, limits.cars)} 
+              <Progress
+                value={getUsagePercent(usage.carCount, limits.cars)}
                 className="h-2"
               />
             )}
             {limits.cars === -1 && (
-              <Badge variant="outline" className="text-xs">Unlimited</Badge>
+              <Badge variant="outline" className="text-xs">
+                Unlimited
+              </Badge>
             )}
           </div>
 
@@ -103,17 +110,20 @@ export default function CurrentPlan({ subscription, usage, isOwner }) {
                 <span>Team Members</span>
               </div>
               <span className="font-medium">
-                {usage.memberCount}{limits.members !== -1 ? ` / ${limits.members}` : ""}
+                {usage.memberCount}
+                {limits.members !== -1 ? ` / ${limits.members}` : ""}
               </span>
             </div>
             {limits.members !== -1 && (
-              <Progress 
-                value={getUsagePercent(usage.memberCount, limits.members)} 
+              <Progress
+                value={getUsagePercent(usage.memberCount, limits.members)}
                 className="h-2"
               />
             )}
             {limits.members === -1 && (
-              <Badge variant="outline" className="text-xs">Unlimited</Badge>
+              <Badge variant="outline" className="text-xs">
+                Unlimited
+              </Badge>
             )}
           </div>
 
@@ -126,7 +136,9 @@ export default function CurrentPlan({ subscription, usage, isOwner }) {
               </div>
               <span className="font-medium">{usage.testDriveCount}</span>
             </div>
-            <Badge variant="outline" className="text-xs">Unlimited</Badge>
+            <Badge variant="outline" className="text-xs">
+              Unlimited
+            </Badge>
           </div>
         </div>
 
@@ -134,10 +146,25 @@ export default function CurrentPlan({ subscription, usage, isOwner }) {
         <div className="mt-6 pt-6 border-t">
           <h4 className="text-sm font-medium mb-3">Plan Features</h4>
           <div className="grid gap-2 md:grid-cols-2 text-sm text-muted-foreground">
-            <div>• {limits.cars === -1 ? "Unlimited" : limits.cars} car listings</div>
-            <div>• {limits.members === -1 ? "Unlimited" : limits.members} team members</div>
-            <div>• {planType === "STARTER" ? "90 days" : planType === "PRO" ? "1 year" : "Unlimited"} audit log retention</div>
-            <div>• {planType === "ENTERPRISE" ? "Priority" : "Standard"} support</div>
+            <div>
+              • {limits.cars === -1 ? "Unlimited" : limits.cars} car listings
+            </div>
+            <div>
+              • {limits.members === -1 ? "Unlimited" : limits.members} team
+              members
+            </div>
+            <div>
+              •{" "}
+              {planType === "STARTER"
+                ? "90 days"
+                : planType === "PRO"
+                ? "1 year"
+                : "Unlimited"}{" "}
+              audit log retention
+            </div>
+            <div>
+              • {planType === "ENTERPRISE" ? "Priority" : "Standard"} support
+            </div>
             {planType !== "STARTER" && <div>• AI-powered car analysis</div>}
             {planType === "ENTERPRISE" && <div>• Custom integrations</div>}
           </div>

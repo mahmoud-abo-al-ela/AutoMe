@@ -12,7 +12,7 @@ import {
 export default function AuditLogsHeader({ retentionInfo }) {
   const getRetentionText = () => {
     if (!retentionInfo) return "90 days (Starter Plan)";
-    
+
     const days = retentionInfo.auditLogRetentionDays;
     if (days === null) return "Unlimited (Enterprise Plan)";
     if (days === 365) return "1 year (Pro Plan)";

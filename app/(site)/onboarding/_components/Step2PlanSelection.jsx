@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Check, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,7 +50,13 @@ const planDetails = {
   },
 };
 
-export default function Step2PlanSelection({ plans, formData, updateFormData, onNext, onPrev }) {
+export default function Step2PlanSelection({
+  plans,
+  formData,
+  updateFormData,
+  onNext,
+  onPrev,
+}) {
   const formatPrice = (price) => {
     if (price === 0) return "Free";
     return new Intl.NumberFormat("en-US", {
@@ -75,7 +88,7 @@ export default function Step2PlanSelection({ plans, formData, updateFormData, on
         {plans.map((plan) => {
           const details = planDetails[plan.type];
           const isSelected = formData.planId === plan.id;
-          
+
           return (
             <Card
               key={plan.id}
@@ -91,7 +104,7 @@ export default function Step2PlanSelection({ plans, formData, updateFormData, on
                   {details.badge}
                 </Badge>
               )}
-              
+
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between">
                   {plan.name}
@@ -103,9 +116,13 @@ export default function Step2PlanSelection({ plans, formData, updateFormData, on
                 </CardTitle>
                 <CardDescription>{details.description}</CardDescription>
                 <div className="pt-2">
-                  <span className="text-2xl font-bold">{formatPrice(plan.price)}</span>
+                  <span className="text-2xl font-bold">
+                    {formatPrice(plan.price)}
+                  </span>
                   {plan.price > 0 && (
-                    <span className="text-muted-foreground text-sm">/month</span>
+                    <span className="text-muted-foreground text-sm">
+                      /month
+                    </span>
                   )}
                 </div>
               </CardHeader>

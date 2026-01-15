@@ -49,7 +49,8 @@ export default function SuperAdminMobileSidebar({ pathname, user }) {
         <nav className="flex-1 py-4 px-3 space-y-1">
           {superAdminSidebarItems.map((item) => {
             const ItemIcon = item.icon;
-            const isActive = pathname === item.path ||
+            const isActive =
+              pathname === item.path ||
               (item.path !== "/super-admin" && pathname.startsWith(item.path));
 
             return (
@@ -92,7 +93,9 @@ export default function SuperAdminMobileSidebar({ pathname, user }) {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user.email}
+                </p>
               </div>
             </div>
           )}

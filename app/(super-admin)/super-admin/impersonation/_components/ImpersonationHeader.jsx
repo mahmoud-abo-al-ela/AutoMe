@@ -15,7 +15,10 @@ export default function ImpersonationHeader({ activeCount }) {
       </div>
 
       {activeCount > 0 && (
-        <Alert variant="warning" className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+        <Alert
+          variant="warning"
+          className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
+        >
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             There {activeCount === 1 ? "is" : "are"} {activeCount} active

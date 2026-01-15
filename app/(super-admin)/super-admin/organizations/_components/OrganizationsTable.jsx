@@ -212,4 +212,3 @@ export default function OrganizationsTable({ organizations, pagination }) {
     </>
   );
 }
-

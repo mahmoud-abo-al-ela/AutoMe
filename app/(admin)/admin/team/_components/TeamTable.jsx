@@ -132,7 +132,9 @@ export default function TeamTable({
                         <div className="font-medium flex items-center gap-2">
                           {member.user.name || "Unnamed User"}
                           {isCurrentUser && (
-                            <Badge variant="outline" className="text-xs">You</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              You
+                            </Badge>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
@@ -167,7 +169,9 @@ export default function TeamTable({
                           <DropdownMenuContent align="end">
                             {member.role === "MEMBER" && (
                               <DropdownMenuItem
-                                onClick={() => handleRoleChange(member.id, "ADMIN")}
+                                onClick={() =>
+                                  handleRoleChange(member.id, "ADMIN")
+                                }
                               >
                                 <Shield className="h-4 w-4 mr-2" />
                                 Make Admin
@@ -175,7 +179,9 @@ export default function TeamTable({
                             )}
                             {member.role === "ADMIN" && (
                               <DropdownMenuItem
-                                onClick={() => handleRoleChange(member.id, "MEMBER")}
+                                onClick={() =>
+                                  handleRoleChange(member.id, "MEMBER")
+                                }
                               >
                                 <User className="h-4 w-4 mr-2" />
                                 Make Member
@@ -201,14 +207,20 @@ export default function TeamTable({
         </Table>
       </div>
 
-      <AlertDialog open={!!confirmRemove} onOpenChange={() => setConfirmRemove(null)}>
+      <AlertDialog
+        open={!!confirmRemove}
+        onOpenChange={() => setConfirmRemove(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to remove{" "}
-              <strong>{confirmRemove?.user?.name || confirmRemove?.user?.email}</strong>{" "}
-              from your organization? They will no longer have access to this dashboard.
+              <strong>
+                {confirmRemove?.user?.name || confirmRemove?.user?.email}
+              </strong>{" "}
+              from your organization? They will no longer have access to this
+              dashboard.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -39,7 +39,8 @@ export default function OwnerSection({ formData, onChange }) {
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            If this email matches an existing user, they will be assigned as the organization owner.
+            If this email matches an existing user, they will be assigned as the
+            organization owner.
           </p>
         </div>
       </CardContent>
