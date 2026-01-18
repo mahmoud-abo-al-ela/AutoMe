@@ -134,8 +134,16 @@ export async function addCar(payload) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -143,7 +151,7 @@ export async function addCar(payload) {
     const carData = payload.data || payload;
     const car = await carService.createCar(carData, userId, organization.id);
 
-    revalidatePath("/admin/cars");
+    revalidatePath(`/org/${organization.slug}/cars`);
     return createSuccessResponse(car, "Car added successfully");
   } catch (error) {
     console.error("Error adding car", error);
@@ -163,8 +171,16 @@ export async function getCars(
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -194,15 +210,23 @@ export async function deleteCar(carId) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
 
     await carService.deleteCar(carId, userId, organization.id);
 
-    revalidatePath("/admin/cars");
+    revalidatePath(`/org/${organization.slug}/cars`);
     return createSuccessResponse(null, "Car deleted successfully");
   } catch (error) {
     console.error("Error deleting car", error);
@@ -217,8 +241,16 @@ export async function updateCar(carId, { status, featured }) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -229,7 +261,7 @@ export async function updateCar(carId, { status, featured }) {
 
     const updatedCar = await carService.updateCar(carId, updateData, userId, organization.id);
 
-    revalidatePath("/admin/cars");
+    revalidatePath(`/org/${organization.slug}/cars`);
     return createSuccessResponse(updatedCar, "Car updated successfully");
   } catch (error) {
     console.error("Error updating car", error);

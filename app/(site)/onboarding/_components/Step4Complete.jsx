@@ -41,8 +41,9 @@ export default function Step4Complete({ createdOrg }) {
   }, []);
 
   const adminUrl = createdOrg
-    ? `/org/${createdOrg.slug}/admin`
+    ? `/org/${createdOrg.slug}/dashboard`
     : "#";
+
 
   const siteUrl = createdOrg ? `/org/${createdOrg.slug}` : "#";
 

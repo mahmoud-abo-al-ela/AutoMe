@@ -1,18 +1,41 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Building2, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { checkSlugAvailability } from "@/actions/onboarding";
+import { orgDetailsSchema } from "./schemas";
 
 export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
-  const [errors, setErrors] = useState({});
   const [slugStatus, setSlugStatus] = useState(null); // null, "checking", "available", "taken"
+  const [generatedSlug, setGeneratedSlug] = useState("");
   const [slugCheckTimeout, setSlugCheckTimeout] = useState(null);
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm({
+    resolver: zodResolver(orgDetailsSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: formData.name || "",
+      email: formData.email || "",
+      phone: formData.phone || "",
+      address: formData.address || "",
+    },
+  });
+
+  const watchedName = watch("name");
+  const watchedEmail = watch("email");
+  const watchedPhone = watch("phone")
+  const watchAedddress = watch("address")
   const generateSlug = (name) => {
     return name
       .toLowerCase()
@@ -22,76 +45,41 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
       .substring(0, 50);
   };
 
-  const handleNameChange = (e) => {
-    const name = e.target.value;
-    const slug = generateSlug(name);
-    updateFormData({ name, slug });
-
-    // Debounce slug check
+  // Auto-generate slug from name and check availability
+  useEffect(() => {
     if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
-    if (slug.length >= 3) {
+
+    if (watchedName && watchedName.length >= 3) {
+      const slug = generateSlug(watchedName);
+      setGeneratedSlug(slug);
       setSlugStatus("checking");
+
       const timeout = setTimeout(async () => {
         const result = await checkSlugAvailability(slug);
         setSlugStatus(result.available ? "available" : "taken");
       }, 500);
       setSlugCheckTimeout(timeout);
     } else {
+      setGeneratedSlug("");
       setSlugStatus(null);
     }
-  };
 
-  const handleSlugChange = (e) => {
-    const slug = generateSlug(e.target.value);
-    updateFormData({ slug });
+    return () => {
+      if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
+    };
+  }, [watchedName]);
 
-    // Debounce slug check
-    if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
-    if (slug.length >= 3) {
-      setSlugStatus("checking");
-      const timeout = setTimeout(async () => {
-        const result = await checkSlugAvailability(slug);
-        setSlugStatus(result.available ? "available" : "taken");
-      }, 500);
-      setSlugCheckTimeout(timeout);
-    } else {
-      setSlugStatus(null);
+  const onSubmit = (data) => {
+    if (slugStatus === "taken" || !generatedSlug) {
+      return;
     }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Organization name is required";
-    }
-
-    if (!formData.slug.trim()) {
-      newErrors.slug = "URL slug is required";
-    } else if (formData.slug.length < 3) {
-      newErrors.slug = "Slug must be at least 3 characters";
-    } else if (slugStatus === "taken") {
-      newErrors.slug = "This slug is already taken";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (validate()) {
-      onNext();
-    }
+    // Add the auto-generated slug to the form data
+    updateFormData({ ...data, slug: generatedSlug });
+    onNext();
   };
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-primary/10 rounded-lg">
           <Building2 className="h-5 w-5 text-primary" />
@@ -104,96 +92,85 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="name">Dealership Name *</Label>
+          <Label htmlFor="name">Dealership Name <span className="text-destructive"> * </span></Label>
           <Input
             id="name"
             placeholder="Cairo Premium Cars"
-            value={formData.name}
-            onChange={handleNameChange}
+            {...register("name")}
             className={errors.name ? "border-destructive" : ""}
           />
           {errors.name && (
-            <p className="text-sm text-destructive">{errors.name}</p>
+            <p className="text-sm text-destructive">{errors.name.message}</p>
+          )}
+          {slugStatus === "taken" && (
+            <p className="text-sm text-destructive">
+              This name is already taken. Please choose a different name.
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="slug">URL Slug *</Label>
-          <div className="relative">
-            <Input
-              id="slug"
-              placeholder="cairo-premium-cars"
-              value={formData.slug}
-              onChange={handleSlugChange}
-              className={`pr-10 ${errors.slug ? "border-destructive" : ""}`}
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {slugStatus === "checking" && (
-                <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              )}
-              {slugStatus === "available" && (
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-              )}
-              {slugStatus === "taken" && (
-                <XCircle className="h-4 w-4 text-destructive" />
-              )}
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Your site will be at:{" "}
-            <strong>/org/{formData.slug || "your-slug"}</strong>
-          </p>
-          {errors.slug && (
-            <p className="text-sm text-destructive">{errors.slug}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Contact Email *</Label>
+          <Label htmlFor="email">Contact Email <span className="text-destructive"> * </span></Label>
           <Input
             id="email"
             type="email"
             placeholder="contact@yourdealership.com"
-            value={formData.email}
-            onChange={(e) => updateFormData({ email: e.target.value })}
+            {...register("email")}
             className={errors.email ? "border-destructive" : ""}
           />
           {errors.email && (
-            <p className="text-sm text-destructive">{errors.email}</p>
+            <p className="text-sm text-destructive">{errors.email.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number <span className="text-destructive"> * </span></Label>
           <Input
             id="phone"
             type="tel"
             placeholder="+20 123 456 7890"
-            value={formData.phone}
-            onChange={(e) => updateFormData({ phone: e.target.value })}
+            {...register("phone")}
           />
+          {errors.phone && (
+            <p className="text-sm text-destructive">{errors.phone.message}</p>
+          )}
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="address">Address</Label>
-          <Textarea
+        <div className="space-y-2">
+          <Label htmlFor="address">Address <span className="text-destructive"> * </span></Label>
+          <Input
             id="address"
+            type="text"
             placeholder="123 Main Street, Cairo, Egypt"
-            value={formData.address}
-            onChange={(e) => updateFormData({ address: e.target.value })}
-            rows={2}
+            {...register("address")}
           />
+          {errors.address && (
+            <p className="text-sm text-destructive">{errors.address.message}</p>
+          )}
         </div>
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button onClick={handleNext} disabled={slugStatus === "checking"}>
+        <Button
+          type="submit"
+          disabled={
+            slugStatus === "checking" ||
+            slugStatus === "taken" ||
+            !generatedSlug ||
+            !watchedName?.trim() ||
+            !watchedEmail?.trim() ||
+            !watchedPhone?.trim() ||
+            !watchAedddress?.trim()
+          }
+          data-continue-btn
+          className="cursor-pointer"
+        >
           Continue
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
-    </div>
+    </form>
   );
 }

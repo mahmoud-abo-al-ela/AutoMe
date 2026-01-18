@@ -36,8 +36,8 @@ export default function QuickImpersonate({ organizations }) {
         toast.success(`Impersonation started`, {
           description: `Now viewing as ${org.owner.name} in ${org.name}.`,
         });
-        // Redirect to the org's admin page
-        window.location.href = `/org/${org.slug}/admin`;
+        // Redirect to the org's dashboard page
+        window.location.href = `/org/${org.slug}/dashboard`;
       } else {
         toast.error("Failed to start impersonation", {
           description: result.error || "An error occurred.",

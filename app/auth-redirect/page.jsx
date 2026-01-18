@@ -16,8 +16,9 @@ export default async function AuthRedirectPage() {
     // Org member/owner - redirect to their org admin
     if (user.memberships && user.memberships.length > 0) {
         const firstOrg = user.memberships[0].organization;
-        redirect(`/org/${firstOrg.slug}/admin`);
+        redirect(`/org/${firstOrg.slug}/dashboard`);
     }
+
 
     // No organization - redirect to onboarding
     redirect("/onboarding");

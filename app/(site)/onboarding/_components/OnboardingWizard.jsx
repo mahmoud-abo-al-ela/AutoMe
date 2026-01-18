@@ -1,14 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Check, Building2, CreditCard, Clock, Rocket } from "lucide-react";
 import Step1OrgDetails from "./Step1OrgDetails";
@@ -53,21 +46,42 @@ export default function OnboardingWizard({ user, plans }) {
   const nextStep = () => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't interfere with form inputs
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+        return;
+      }
+
+      if (e.key === "ArrowLeft" && currentStep > 1 && currentStep < 4) {
+        prevStep();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentStep]);
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Create Your Dealership</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold">
+          Create Your Dealership
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Set up your online presence in just a few steps
         </p>
       </div>
@@ -75,7 +89,7 @@ export default function OnboardingWizard({ user, plans }) {
       {/* Progress */}
       <div className="space-y-4">
         <Progress value={progress} className="h-2" />
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-2">
           {steps.map((step) => {
             const StepIcon = step.icon;
             const isCompleted = currentStep > step.id;
@@ -84,30 +98,28 @@ export default function OnboardingWizard({ user, plans }) {
             return (
               <div
                 key={step.id}
-                className={`flex flex-col items-center gap-2 ${
-                  isCurrent
-                    ? "text-primary"
-                    : isCompleted
+                className={`flex flex-col items-center gap-2 flex-1 ${isCurrent
+                  ? "text-primary"
+                  : isCompleted
                     ? "text-green-600"
                     : "text-muted-foreground"
-                }`}
+                  }`}
               >
                 <div
-                  className={`h-10 w-10 rounded-full flex items-center justify-center border-2 ${
-                    isCurrent
-                      ? "border-primary bg-primary/10"
-                      : isCompleted
+                  className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center border-2 ${isCurrent
+                    ? "border-primary bg-primary/10"
+                    : isCompleted
                       ? "border-green-600 bg-green-600 text-white"
                       : "border-muted"
-                  }`}
+                    }`}
                 >
                   {isCompleted ? (
-                    <Check className="h-5 w-5" />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
-                    <StepIcon className="h-5 w-5" />
+                    <StepIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                   )}
                 </div>
-                <span className="text-xs font-medium hidden sm:block">
+                <span className="text-[10px] sm:text-xs font-medium text-center leading-tight">
                   {step.name}
                 </span>
               </div>
@@ -148,6 +160,13 @@ export default function OnboardingWizard({ user, plans }) {
           {currentStep === 4 && <Step4Complete createdOrg={createdOrg} />}
         </CardContent>
       </Card>
+
+      {/* Keyboard hint */}
+      {currentStep > 1 && currentStep < 4 && (
+        <p className="text-xs text-center text-muted-foreground">
+          Tip: Use left arrow key to go back
+        </p>
+      )}
     </div>
   );
 }

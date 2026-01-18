@@ -30,7 +30,7 @@ export async function getDashboardStats() {
       throw new AuthenticationError("No organization found");
     }
 
-    const stats = await dashboardService.getDashboardStats(user.id, organization.id);
+    const stats = await dashboardService.getDashboardStats(userId, organization.id);
 
     return createSuccessResponse(stats);
   } catch (error) {
@@ -46,8 +46,18 @@ export async function getOverviewChartData() {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+
+    // If no organization from subdomain, get from user's first membership
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }

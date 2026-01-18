@@ -1,10 +1,13 @@
 import { checkUser } from "@/lib/checkUser";
-import { getOrganizationBySlug } from "@/lib/getOrganization";
+import { getOrganizationBySlug, getUserMembership } from "@/lib/getOrganization";
+import { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
 import BackToTop from "@/components/BackToTop";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import Loading from "@/components/Loading";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import AdminSidebar from "./_components/AdminSidebar";
+import ImpersonationBanner from "./_components/ImpersonationBanner";
 
 export async function generateMetadata({ params }) {
     const { slug } = await params;
@@ -24,31 +27,61 @@ export async function generateMetadata({ params }) {
 
 export default async function OrganizationLayout({ children, params }) {
     const { slug } = await params;
-    let organization = null;
+    const user = await checkUser();
 
-    try {
-        organization = await getOrganizationBySlug(slug);
-    } catch (error) {
-        console.error("Error in organization layout:", error);
+    if (!user) {
+        redirect("/sign-in");
     }
+
+    // Get organization from path parameter
+    const organization = await getOrganizationBySlug(slug);
 
     if (!organization) {
         notFound();
     }
 
+    // Check if user is impersonating
+    const impersonationSession = await getCurrentImpersonationSession();
+    const isImpersonating = !!impersonationSession;
+
+    // Get user's membership in this organization
+    const membership = await getUserMembership(user.id, organization.id);
+    const isAdmin = user.role === "ADMIN";
+    const hasOrgAccess = !!membership;
+
+    if (!isAdmin && !isImpersonating && !hasOrgAccess) {
+        notFound();
+    }
+
     return (
-        <div className="flex flex-col min-h-screen">
-            <Suspense
-                fallback={
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                        <Loading />
-                    </div>
-                }
-            >
-                {children}
-            </Suspense>
-            <BackToTop />
+        <div className="flex min-h-screen bg-background">
             <Toaster position="top-right" richColors />
+            <AdminSidebar organization={organization} userRole={membership?.role} />
+            <main
+                className="flex-1 transition-all duration-300 ease-in-out flex flex-col"
+                style={{ marginLeft: "var(--sidebar-width, 0)" }}
+            >
+                {isImpersonating && impersonationSession && (
+                    <ImpersonationBanner
+                        targetUser={impersonationSession.targetUser}
+                        organization={organization}
+                    />
+                )}
+                <div className="md:hidden h-16" />
+                <div className="p-4 md:p-6 animate-in fade-in duration-500 flex-1 min-h-0">
+                    <Suspense
+                        fallback={
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+                                <Loading />
+                            </div>
+                        }
+                    >
+                        {children}
+                    </Suspense>
+                </div>
+            </main>
+            <BackToTop />
         </div>
     );
 }
+

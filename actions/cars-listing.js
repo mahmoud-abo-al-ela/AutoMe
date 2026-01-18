@@ -6,17 +6,20 @@ import * as wishlistService from "@/lib/services/wishlist";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
 import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
 import { serializeCarWithImages } from "@/lib/utils/serializers";
 
 export async function getCars(filters) {
   try {
     const { userId } = await auth();
 
+    const organization = await getCurrentOrganization();
+    
     // Get cars with filters
     const result = await carService.getCars(filters, {
       page: filters.page,
       limit: filters.limit,
-    });
+    }, userId, organization?.id);
 
     // Add wishlist status if user is logged in
     if (userId) {
@@ -65,7 +68,9 @@ export async function getCarById(id) {
 
 export async function getCarsFilters(filters = {}) {
   try {
-    const filterOptions = await carService.getFilterOptions(filters);
+    const { userId } = await auth();
+    const organization = await getCurrentOrganization();
+    const filterOptions = await carService.getFilterOptions(filters, userId, organization?.id);
 
     return createSuccessResponse({
       ...filterOptions,

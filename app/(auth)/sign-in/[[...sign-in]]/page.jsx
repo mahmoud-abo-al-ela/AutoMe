@@ -1,18 +1,10 @@
 import { SignIn } from "@clerk/nextjs";
 
-export default function SignInPage() {
+export default async function SignInPage({ searchParams }) {
+  const params = await searchParams;
+  const redirectUrl = params?.redirect_url || "/admin";
+
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <SignIn
-        appearance={{
-          elements: {
-            rootBox: "mx-auto",
-            card: "shadow-xl",
-          },
-        }}
-        afterSignInUrl="/auth-redirect"
-        afterSignUpUrl="/onboarding"
-      />
-    </div>
+    <SignIn forceRedirectUrl={redirectUrl} fallbackRedirectUrl={redirectUrl} />
   );
 }

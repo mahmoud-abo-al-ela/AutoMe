@@ -63,9 +63,25 @@ export async function createOrganization({
           email,
           phone: phone || null,
           address: address || null,
-          workingHours,
         },
       });
+
+      // Create working hours
+      if (workingHours) {
+        const workingHoursData = Object.entries(workingHours).map(
+          ([day, hours]) => ({
+            organizationId: org.id,
+            dayOfWeek: [day.toUpperCase()],
+            openTime: hours.open,
+            closeTime: hours.close,
+            isOpen: !hours.closed,
+          })
+        );
+
+        await tx.workingHours.createMany({
+          data: workingHoursData,
+        });
+      }
 
       // Create owner membership
       await tx.membership.create({
@@ -78,7 +94,7 @@ export async function createOrganization({
 
       // Create subscription
       const now = new Date();
-      const trialEnd =
+      const trialEndsAt =
         plan.trialDays > 0
           ? new Date(now.getTime() + plan.trialDays * 24 * 60 * 60 * 1000)
           : null;
@@ -87,8 +103,8 @@ export async function createOrganization({
         data: {
           organizationId: org.id,
           planId: plan.id,
-          status: trialEnd ? "TRIALING" : "ACTIVE",
-          trialEnd,
+          status: trialEndsAt ? "TRIALING" : "ACTIVE",
+          trialEndsAt,
           currentPeriodStart: now,
           currentPeriodEnd: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
         },

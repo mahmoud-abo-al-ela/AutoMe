@@ -5,9 +5,10 @@ import { NextResponse } from "next/server";
 // ============ ROUTE MATCHERS ============
 
 const isProtectedRoute = createRouteMatcher([
-  "/org/:slug/admin(.*)",
+  "/admin(.*)",
   "/saved-cars(.*)",
   "/reservations(.*)",
+  "/org(.*)",
 ]);
 
 const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
@@ -17,19 +18,7 @@ const isPublicApiRoute = createRouteMatcher([
   "/api/cron(.*)",
 ]);
 
-// ============ PATH-BASED ORGANIZATION PARSING ============
 
-function getOrganizationSlugFromPath(request) {
-  const url = new URL(request.url);
-  const pathSegments = url.pathname.split("/").filter(Boolean);
-
-  // Check if path starts with /org/[slug]
-  if (pathSegments[0] === "org" && pathSegments[1]) {
-    return pathSegments[1];
-  }
-
-  return null;
-}
 
 // ============ IMPERSONATION DETECTION ============
 
@@ -66,28 +55,17 @@ const aj = arcjet({
   ],
 });
 
-// ============ CLERK MIDDLEWARE WITH SUBDOMAIN SUPPORT ============
+// ============ CLERK MIDDLEWARE WITH IMPERSONATION SUPPORT ============
 
 const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
 
-  // Parse organization slug from path
-  const orgSlugFromPath = getOrganizationSlugFromPath(req);
-
   // Check for impersonation context
   const impersonation = getImpersonationContext(req);
 
-  // Determine effective organization slug (impersonation takes precedence)
-  const effectiveOrgSlug = impersonation?.organizationSlug || orgSlugFromPath;
-
   // Create response with custom headers
   const response = NextResponse.next();
-
-  // Set organization context headers for downstream use
-  if (effectiveOrgSlug) {
-    response.headers.set("x-organization-slug", effectiveOrgSlug);
-  }
 
   // Set impersonation headers if active
   if (impersonation) {

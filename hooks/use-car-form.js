@@ -181,12 +181,14 @@ export const useCarForm = (initialData = {}) => {
         const response = await fn({ data });
         if (response?.success) {
             toast.success("Car added successfully");
-            router.push("/admin/cars");
+            const slug = window.location.pathname.split('/')[2];
+            router.push(`/org/${slug}/cars`);
         } else {
             const errorMessage = response?.error || "Failed to add car";
             toast.error(errorMessage);
         }
     };
+
 
     return {
         form,

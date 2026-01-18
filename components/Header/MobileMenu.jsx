@@ -1,20 +1,90 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MobileUserSection } from "./_components/MobileUserSection";
-import { MobileNavigation } from "./_components/MobileNavigation";
-import { useMobileMenu } from "./_components/useMobileMenu";
+import { SignedIn } from "@clerk/nextjs";
+import {
+  Heart,
+  CarFront,
+  MessageSquare,
+  Home,
+  Search,
+  Scale,
+  HelpCircle,
+} from "lucide-react";
+import { navItems, signedInLinks } from "@/lib/HeaderConfig";
+import MobileNavLink from "./components/MobileNavLink";
+import MobileUserSection from "./components/MobileUserSection";
+import MobileSignedOutSection from "./components/MobileSignedOutSection";
+import DashboardButton from "./components/DashboardButton";
 
-export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user, organization, userOrgSlug }) {
+// Icon map for nav items
+const iconMap = {
+  Heart,
+  CarFront,
+  MessageSquare,
+  Home,
+  Search,
+  Scale,
+  HelpCircle,
+};
+
+// Get icon for nav item based on label
+function getNavIcon(label) {
+  const icons = {
+    "Browse Cars": Search,
+    Compare: Scale,
+    FAQ: HelpCircle,
+    Messages: MessageSquare,
+  };
+  return icons[label] || Home;
+}
+
+export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
+  const pathname = usePathname();
+
+  // Check if user has any organization membership
+  const hasOrgMembership = user?.memberships?.length > 0;
+  const isAdmin = user?.role === "ADMIN";
+
+  // Check if user can manage the organization (OWNER role in any org)
+  // const isOwner = hasOrgMembership && user.memberships.some((m) => m.role === "OWNER");
+  // isOwner is actually unused in the filtering below, as we check !hasOrgMembership && !isAdmin for some links
+
   const menuRef = useRef(null);
-  const { pathname, hasOrgMembership, isOwner, isOnAdminPath, navToShow } = useMobileMenu(
-    user,
-    organization,
-    isMenuOpen,
-    setIsMenuOpen,
-    menuRef
+
+  // Filter out messages from signed-in links (it's now in header)
+  const filteredSignedInLinks = signedInLinks.filter(
+    (link) => link.icon !== "MessageSquare"
   );
+
+  useEffect(() => {
+    // Prevent body scroll when menu is open
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        isMenuOpen
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen, setIsMenuOpen]);
 
   return (
     <AnimatePresence>
@@ -45,14 +115,75 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user, organizati
             <MobileUserSection user={user} setIsMenuOpen={setIsMenuOpen} />
 
             {/* Navigation */}
-            <MobileNavigation
-              hasOrgMembership={hasOrgMembership}
-              isOwner={isOwner}
-              pathname={pathname}
-              navToShow={navToShow}
-              setIsMenuOpen={setIsMenuOpen}
-              userOrgSlug={userOrgSlug}
-            />
+            <div
+              className="p-3 overflow-y-auto"
+              style={{ maxHeight: "calc(100vh - 14rem)" }}
+            >
+              {/* Context switcher for org members */}
+              {(hasOrgMembership || isAdmin) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="mb-3"
+                >
+                  <DashboardButton
+                    user={user}
+                    hasOrgMembership={hasOrgMembership}
+                    isAdmin={isAdmin}
+                    className="w-full"
+                    buttonClassName="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+                </motion.div>
+              )}
+
+              {/* Main nav */}
+              <div className="space-y-1">
+                {navItems.map((item, index) => {
+                  const NavIcon = getNavIcon(item.label);
+                  return (
+                    <MobileNavLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      IconComponent={NavIcon}
+                      onClick={() => setIsMenuOpen(false)}
+                      isActive={pathname === item.href}
+                      animationDelay={index * 40}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Signed in links */}
+              <SignedIn>
+                <div className="my-3 mx-2 h-px bg-border" />
+                <div className="space-y-1">
+                  {filteredSignedInLinks
+                    .filter((link) => !hasOrgMembership && !isAdmin)
+                    .map((link, index) => (
+                      <MobileNavLink
+                        key={link.href}
+                        href={link.href}
+                        label={link.label}
+                        IconComponent={iconMap[link.icon]} // icon string map
+                        size={18}
+                        onClick={() => setIsMenuOpen(false)}
+                        isActive={pathname === link.href}
+                        animationDelay={(navItems.length + index) * 40}
+                        showUnreadBadge={link.showUnreadBadge}
+                      />
+                    ))}
+                </div>
+              </SignedIn>
+
+              {/* Sign in button */}
+              <MobileSignedOutSection
+                pathname={pathname}
+                setIsMenuOpen={setIsMenuOpen}
+              />
+            </div>
 
             {/* Footer */}
             <div className="px-5 py-3 border-t bg-muted/30 text-center">

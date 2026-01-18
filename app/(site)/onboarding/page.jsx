@@ -1,14 +1,32 @@
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/prisma";
+import { getOnboardingData } from "@/lib/services/onboarding";
 import OnboardingWizard from "./_components/OnboardingWizard";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-async function getPlans() {
-  const plans = await prisma.plan.findMany({
-    where: { isActive: true },
-    orderBy: { price: "asc" },
-  });
-  return plans;
+function OnboardingLoader() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+      <div className="container max-w-4xl py-12 px-4">
+        <div className="space-y-8">
+          <div className="text-center space-y-2">
+            <Skeleton className="h-9 w-64 mx-auto" />
+            <Skeleton className="h-5 w-96 mx-auto" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-2 w-full" />
+            <div className="flex justify-between">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-10 w-10 rounded-full" />
+              ))}
+            </div>
+          </div>
+          <Skeleton className="h-96 w-full rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default async function OnboardingPage() {
@@ -18,30 +36,21 @@ export default async function OnboardingPage() {
     redirect("/sign-in?redirect=/onboarding");
   }
 
-  // Check if user already owns an organization
-  const existingOrg = await prisma.membership.findFirst({
-    where: {
-      userId: user.id,
-      role: "OWNER",
-    },
-    include: {
-      organization: true,
-    },
-  });
+  const { plans, existingOwnership } = await getOnboardingData(user.id);
 
-  if (existingOrg) {
-    // Redirect to their org's admin dashboard
-    const orgSlug = existingOrg.organization.slug;
-    redirect(`/org/${orgSlug}/admin`);
+  // Redirect if user already owns an organization
+  if (existingOwnership) {
+    const orgSlug = existingOwnership.organization.slug;
+    redirect(`/org/${orgSlug}/dashboard`);
   }
 
-  const plans = await getPlans();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
-      <div className="container max-w-4xl py-12 px-4">
-        <OnboardingWizard user={user} plans={plans} />
+    <Suspense fallback={<OnboardingLoader />}>
+      <div className="bg-gradient-to-br from-background to-muted">
+        <div className="container mx-auto py-12 pt-20 px-4">
+          <OnboardingWizard user={user} plans={plans} />
+        </div>
       </div>
-    </div>
+    </Suspense>
   );
 }

@@ -165,7 +165,6 @@ model Plan {
   maxCars               Int  @default(10)
   maxMembers            Int  @default(1)
   maxImagesPerCar       Int  @default(5)
-  maxStorageMB          Int  @default(500)
   auditLogRetentionDays Int? // null = unlimited
 
   // Features (JSON for flexibility)

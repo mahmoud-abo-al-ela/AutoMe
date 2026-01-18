@@ -2,7 +2,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import * as testDriveService from "@/lib/services/test-drive";
-import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+} from "@/lib/utils/response";
 import { AuthenticationError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { checkUser } from "@/lib/checkUser";
@@ -14,12 +17,18 @@ export async function requestTestDrive(testDriveData) {
       throw new AuthenticationError();
     }
 
-    const testDrive = await testDriveService.requestTestDrive(testDriveData, userId);
+    const testDrive = await testDriveService.requestTestDrive(
+      testDriveData,
+      userId
+    );
 
     revalidatePath("/cars/[id]");
     revalidatePath("/admin");
 
-    return createSuccessResponse(testDrive, "Test drive requested successfully");
+    return createSuccessResponse(
+      testDrive,
+      "Test drive requested successfully"
+    );
   } catch (error) {
     console.error("Error requesting test drive:", error);
     return createErrorResponse(error);
@@ -33,8 +42,16 @@ export async function getTestDrives({ status, page = 1, limit = 10 }) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -60,7 +77,10 @@ export async function getTestDriveById(testDriveId) {
       throw new AuthenticationError();
     }
 
-    const testDrive = await testDriveService.getTestDriveById(testDriveId, userId);
+    const testDrive = await testDriveService.getTestDriveById(
+      testDriveId,
+      userId
+    );
 
     return createSuccessResponse(testDrive);
   } catch (error) {
@@ -69,7 +89,13 @@ export async function getTestDriveById(testDriveId) {
   }
 }
 
-export async function editTestDrive({ testDriveId, date, startTime, endTime, notes = "" }) {
+export async function editTestDrive({
+  testDriveId,
+  date,
+  startTime,
+  endTime,
+  notes = "",
+}) {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -86,7 +112,10 @@ export async function editTestDrive({ testDriveId, date, startTime, endTime, not
     revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
 
-    return createSuccessResponse(updatedTestDrive, "Test drive updated successfully");
+    return createSuccessResponse(
+      updatedTestDrive,
+      "Test drive updated successfully"
+    );
   } catch (error) {
     console.error("Error editing test drive:", error);
     return createErrorResponse(error);
@@ -100,13 +129,19 @@ export async function cancelTestDriveByUser(testDriveId) {
       throw new AuthenticationError();
     }
 
-    const cancelledTestDrive = await testDriveService.cancelTestDrive(testDriveId, userId);
+    const cancelledTestDrive = await testDriveService.cancelTestDrive(
+      testDriveId,
+      userId
+    );
 
     revalidatePath("/cars/[id]");
     revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
 
-    return createSuccessResponse(cancelledTestDrive, "Test drive cancelled successfully");
+    return createSuccessResponse(
+      cancelledTestDrive,
+      "Test drive cancelled successfully"
+    );
   } catch (error) {
     console.error("Error cancelling test drive:", error);
     return createErrorResponse(error);
@@ -136,8 +171,16 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -153,7 +196,10 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
     revalidatePath("/admin/test-drives");
     revalidatePath("/reservation");
 
-    return createSuccessResponse(updatedTestDrive, `Test drive ${status.toLowerCase()} successfully`);
+    return createSuccessResponse(
+      updatedTestDrive,
+      `Test drive ${status.toLowerCase()} successfully`
+    );
   } catch (error) {
     console.error("Error updating test drive status:", error);
     return createErrorResponse(error);

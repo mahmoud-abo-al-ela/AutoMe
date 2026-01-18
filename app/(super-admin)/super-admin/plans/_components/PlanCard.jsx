@@ -2,6 +2,7 @@
 
 import {
   Check,
+  X,
   MoreVertical,
   Pencil,
   Trash2,
@@ -9,6 +10,10 @@ import {
   Car,
   Users,
   Image,
+  Sparkles,
+  MessageSquare,
+  Zap,
+  Clock,
 } from "lucide-react";
 import {
   Card,
@@ -27,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 
 const planColors = {
   STARTER: "border-gray-200 dark:border-gray-700",
@@ -35,6 +41,14 @@ const planColors = {
 };
 
 export default function PlanCard({ plan, onEdit, onDelete }) {
+  const features = plan.features || {};
+
+  const allFeatures = [
+    { key: "aiProcessing", label: "AI Processing", icon: Sparkles, enabled: features.aiProcessing?.enabled || false },
+    { key: "chat", label: "Live Chat", icon: MessageSquare, enabled: features.chat || false },
+    { key: "prioritySupport", label: "Priority Support", icon: Zap, enabled: features.prioritySupport || false },
+  ];
+
   return (
     <Card className={`relative ${planColors[plan.type] || ""}`}>
       {plan.type === "PRO" && (
@@ -46,7 +60,9 @@ export default function PlanCard({ plan, onEdit, onDelete }) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-xl">{plan.name}</CardTitle>
-            <CardDescription>{plan.description}</CardDescription>
+            <CardDescription>
+              <Badge variant="outline" className="mt-1">{plan.type}</Badge>
+            </CardDescription>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -71,11 +87,13 @@ export default function PlanCard({ plan, onEdit, onDelete }) {
           </DropdownMenu>
         </div>
         <div className="mt-4">
-          <span className="text-4xl font-bold">${plan.monthlyPrice || 0}</span>
+          <span className="text-4xl font-bold">
+            ${plan.monthlyPrice === 0 ? "0" : (plan.monthlyPrice / 100).toFixed(2)}
+          </span>
           <span className="text-muted-foreground">/month</span>
           {plan.monthlyPrice > 0 && plan.yearlyPrice > 0 && (
             <div className="text-sm text-muted-foreground">
-              or ${plan.yearlyPrice}/year (save{" "}
+              or ${(plan.yearlyPrice / 100).toFixed(2)}/year (save{" "}
               {Math.round(
                 (1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100
               )}
@@ -95,33 +113,45 @@ export default function PlanCard({ plan, onEdit, onDelete }) {
           <div className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span>
-              {plan.maxMembers === -1 ? "Unlimited" : plan.maxMembers} team
-              members
+              {plan.maxMembers === -1 ? "Unlimited" : plan.maxMembers} team members
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Image className="h-4 w-4 text-muted-foreground" />
             <span>{plan.maxImagesPerCar} images per car</span>
           </div>
-          {plan.hasMessaging && (
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500" />
-              <span>Customer messaging</span>
-            </div>
-          )}
-          {plan.hasAnalytics && (
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500" />
-              <span>Advanced analytics</span>
-            </div>
-          )}
-          {plan.hasAIFeatures && (
-            <div className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500" />
-              <span>AI-powered features</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span>
+              {plan.auditLogRetentionDays === null
+                ? "Unlimited audit logs"
+                : `${plan.auditLogRetentionDays} days audit logs`}
+            </span>
+          </div>
         </div>
+
+        {allFeatures.length > 0 && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase">Features</p>
+              {allFeatures.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <div key={feature.key} className="flex items-center gap-2 text-sm">
+                    {feature.enabled ? (
+                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <X className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+                    )}
+                    <Icon className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                    <span className={feature.enabled ? "" : "text-muted-foreground"}>{feature.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </CardContent>
       <CardFooter>
         <div className="w-full text-center">

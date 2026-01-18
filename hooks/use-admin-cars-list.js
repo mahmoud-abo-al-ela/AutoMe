@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import useFetch from "@/hooks/use-fetch";
 import { getCars, deleteCar, updateCar } from "@/actions/cars";
 import { toast } from "sonner";
-import useDebounce from "@/app/(admin)/admin/cars/_components/car-list/hooks/useDebounce";
+import useDebounce from "@/app/org/[slug]/cars/_components/car-list/hooks/useDebounce";
 
 export const useAdminCarsList = () => {
     const [searchTerm, setSearchTerm] = useState("");

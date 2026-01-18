@@ -16,7 +16,6 @@ export default function PlansGrid({ plans }) {
   const [editDialog, setEditDialog] = useState({ open: false, plan: null });
   const [createDialog, setCreateDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, plan: null });
-  const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -27,31 +26,14 @@ export default function PlansGrid({ plans }) {
   );
 
   const openEditDialog = (plan) => {
-    setFormData({
-      name: plan.name,
-      monthlyPrice: plan.monthlyPrice,
-      yearlyPrice: plan.yearlyPrice,
-      maxCars: plan.maxCars,
-      maxUsers: plan.maxMembers, // Schema uses maxMembers
-      maxImagesPerCar: plan.maxImagesPerCar,
-    });
     setEditDialog({ open: true, plan });
   };
 
   const openCreateDialog = () => {
-    setFormData({
-      name: "",
-      type: availableTypes[0] || "",
-      monthlyPrice: 0,
-      yearlyPrice: 0,
-      maxCars: 10,
-      maxUsers: 1,
-      maxImagesPerCar: 5,
-    });
     setCreateDialog(true);
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (formData) => {
     if (!formData.name || !formData.type) {
       toast.error("Please fill in all required fields");
       return;
@@ -59,15 +41,7 @@ export default function PlansGrid({ plans }) {
 
     setLoading(true);
     try {
-      const result = await createPlan({
-        name: formData.name,
-        type: formData.type,
-        monthlyPrice: parseInt(formData.monthlyPrice) || 0,
-        yearlyPrice: parseInt(formData.yearlyPrice) || 0,
-        maxCars: parseInt(formData.maxCars) || 10,
-        maxMembers: parseInt(formData.maxUsers) || 1,
-        maxImagesPerCar: parseInt(formData.maxImagesPerCar) || 5,
-      });
+      const result = await createPlan(formData);
 
       if (result.success) {
         toast.success("Plan created successfully", {
@@ -91,19 +65,12 @@ export default function PlansGrid({ plans }) {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (formData) => {
     if (!editDialog.plan) return;
 
     setLoading(true);
     try {
-      const result = await updatePlan(editDialog.plan.id, {
-        name: formData.name,
-        monthlyPrice: parseInt(formData.monthlyPrice) || 0,
-        yearlyPrice: parseInt(formData.yearlyPrice) || 0,
-        maxCars: parseInt(formData.maxCars) || 10,
-        maxUsers: parseInt(formData.maxUsers) || 1,
-        maxImagesPerCar: parseInt(formData.maxImagesPerCar) || 5,
-      });
+      const result = await updatePlan(editDialog.plan.id, formData);
 
       if (result.success) {
         toast.success("Plan updated successfully", {
@@ -179,17 +146,16 @@ export default function PlansGrid({ plans }) {
             onDelete={(plan) => setDeleteDialog({ open: true, plan })}
           />
         ))}
-        <AddPlanCard
-          availableTypes={availableTypes}
-          onClick={handleAddPlanClick}
-        />
+        {!plans.length > 2 &&
+          <AddPlanCard
+            availableTypes={availableTypes}
+            onClick={handleAddPlanClick}
+          />}
       </div>
 
       <CreatePlanDialog
         open={createDialog}
         onClose={() => setCreateDialog(false)}
-        formData={formData}
-        onChange={setFormData}
         onSubmit={handleCreate}
         loading={loading}
         isPending={isPending}
@@ -200,8 +166,6 @@ export default function PlansGrid({ plans }) {
         open={editDialog.open}
         plan={editDialog.plan}
         onClose={() => setEditDialog({ open: false, plan: null })}
-        formData={formData}
-        onChange={setFormData}
         onSubmit={handleUpdate}
         loading={loading}
         isPending={isPending}

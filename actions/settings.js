@@ -14,8 +14,16 @@ export async function getDealershipInfo() {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -36,8 +44,16 @@ export async function updateWorkingHours(workingHours) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -61,8 +77,16 @@ export async function getUsers(search = "", page = 1, limit = 10) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -83,8 +107,16 @@ export async function updateUserRole(targetUserId, role) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -108,8 +140,16 @@ export async function deleteUser(targetUserId) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }

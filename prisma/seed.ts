@@ -250,9 +250,16 @@ async function main() {
       maxCars: 15,
       maxMembers: 2,
       maxImagesPerCar: 5,
-      maxStorageMB: 500,
       auditLogRetentionDays: 90,
       features: {
+        description: "Perfect for small dealerships just getting started",
+        featureList: [
+          "Up to 15 car listings",
+          "Up to 2 team members",
+          "90 days audit log retention",
+          "Email support",
+        ],
+        color: "border-gray-200 dark:border-gray-700",
         aiProcessing: { enabled: false, limit: 0 },
         analytics: "basic",
         chat: false,
@@ -273,9 +280,18 @@ async function main() {
       maxCars: 100,
       maxMembers: 10,
       maxImagesPerCar: 15,
-      maxStorageMB: 5000,
       auditLogRetentionDays: 365,
       features: {
+        description: "Best for growing dealerships with larger inventory",
+        featureList: [
+          "Up to 100 car listings",
+          "Up to 10 team members",
+          "1 year audit log retention",
+          "Priority support",
+          "AI-powered car analysis",
+        ],
+        color: "border-blue-500",
+        badge: "Recommended",
         aiProcessing: { enabled: true, limit: 100 },
         analytics: "advanced",
         chat: true,
@@ -296,9 +312,18 @@ async function main() {
       maxCars: -1, // Unlimited
       maxMembers: -1, // Unlimited
       maxImagesPerCar: 30,
-      maxStorageMB: 50000,
       auditLogRetentionDays: null, // Unlimited retention
       features: {
+        description: "For large dealerships with unlimited needs",
+        featureList: [
+          "Unlimited car listings",
+          "Unlimited team members",
+          "Unlimited audit log retention",
+          "24/7 priority support",
+          "AI-powered car analysis",
+          "Custom integrations",
+        ],
+        color: "border-purple-500",
         aiProcessing: { enabled: true, limit: -1 },
         analytics: "advanced",
         chat: true,

@@ -63,8 +63,16 @@ export async function getAllConversations({ page = 1, limit = 20 } = {}) {
       throw new AuthenticationError();
     }
 
-    await checkUser();
-    const organization = await getCurrentOrganization();
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -146,7 +154,18 @@ export async function sendMessage(conversationId, content) {
     );
 
     revalidatePath("/messages");
-    revalidatePath("/admin/messages");
+    let organization = await getCurrentOrganization().catch(() => null);
+
+    if (!organization) {
+      const user = await checkUser();
+      if (user?.memberships?.length > 0) {
+        organization = user.memberships[0].organization;
+      }
+    }
+
+    if (organization?.slug) {
+      revalidatePath(`/org/${organization.slug}/messages`);
+    }
 
     return createSuccessResponse(message, "Message sent");
   } catch (error) {
@@ -168,7 +187,10 @@ export async function markMessagesAsRead(conversationId) {
     await messageService.markAsRead(conversationId, userId);
 
     revalidatePath("/messages");
-    revalidatePath("/admin/messages");
+    const organization = await getCurrentOrganization().catch(() => null);
+    if (organization?.slug) {
+      revalidatePath(`/org/${organization.slug}/messages`);
+    }
 
     return createSuccessResponse(null, "Messages marked as read");
   } catch (error) {

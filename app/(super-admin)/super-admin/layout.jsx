@@ -1,4 +1,4 @@
-import { checkUser } from "@/lib/checkUser";
+import { checkUser, isSuperAdmin } from "@/lib/checkUser";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
 import SuperAdminSidebar from "./_components/SuperAdminSidebar";

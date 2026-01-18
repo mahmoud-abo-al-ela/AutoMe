@@ -3838,7 +3838,6 @@ export namespace Prisma {
     maxCars: number | null
     maxMembers: number | null
     maxImagesPerCar: number | null
-    maxStorageMB: number | null
     auditLogRetentionDays: number | null
   }
 
@@ -3848,7 +3847,6 @@ export namespace Prisma {
     maxCars: number | null
     maxMembers: number | null
     maxImagesPerCar: number | null
-    maxStorageMB: number | null
     auditLogRetentionDays: number | null
   }
 
@@ -3861,7 +3859,6 @@ export namespace Prisma {
     maxCars: number | null
     maxMembers: number | null
     maxImagesPerCar: number | null
-    maxStorageMB: number | null
     auditLogRetentionDays: number | null
     isActive: boolean | null
     createdAt: Date | null
@@ -3877,7 +3874,6 @@ export namespace Prisma {
     maxCars: number | null
     maxMembers: number | null
     maxImagesPerCar: number | null
-    maxStorageMB: number | null
     auditLogRetentionDays: number | null
     isActive: boolean | null
     createdAt: Date | null
@@ -3893,7 +3889,6 @@ export namespace Prisma {
     maxCars: number
     maxMembers: number
     maxImagesPerCar: number
-    maxStorageMB: number
     auditLogRetentionDays: number
     features: number
     isActive: number
@@ -3909,7 +3904,6 @@ export namespace Prisma {
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
-    maxStorageMB?: true
     auditLogRetentionDays?: true
   }
 
@@ -3919,7 +3913,6 @@ export namespace Prisma {
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
-    maxStorageMB?: true
     auditLogRetentionDays?: true
   }
 
@@ -3932,7 +3925,6 @@ export namespace Prisma {
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
-    maxStorageMB?: true
     auditLogRetentionDays?: true
     isActive?: true
     createdAt?: true
@@ -3948,7 +3940,6 @@ export namespace Prisma {
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
-    maxStorageMB?: true
     auditLogRetentionDays?: true
     isActive?: true
     createdAt?: true
@@ -3964,7 +3955,6 @@ export namespace Prisma {
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
-    maxStorageMB?: true
     auditLogRetentionDays?: true
     features?: true
     isActive?: true
@@ -4068,7 +4058,6 @@ export namespace Prisma {
     maxCars: number
     maxMembers: number
     maxImagesPerCar: number
-    maxStorageMB: number
     auditLogRetentionDays: number | null
     features: JsonValue
     isActive: boolean
@@ -4104,7 +4093,6 @@ export namespace Prisma {
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
-    maxStorageMB?: boolean
     auditLogRetentionDays?: boolean
     features?: boolean
     isActive?: boolean
@@ -4123,7 +4111,6 @@ export namespace Prisma {
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
-    maxStorageMB?: boolean
     auditLogRetentionDays?: boolean
     features?: boolean
     isActive?: boolean
@@ -4140,7 +4127,6 @@ export namespace Prisma {
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
-    maxStorageMB?: boolean
     auditLogRetentionDays?: boolean
     features?: boolean
     isActive?: boolean
@@ -4157,7 +4143,6 @@ export namespace Prisma {
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
-    maxStorageMB?: boolean
     auditLogRetentionDays?: boolean
     features?: boolean
     isActive?: boolean
@@ -4165,7 +4150,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "monthlyPrice" | "yearlyPrice" | "maxCars" | "maxMembers" | "maxImagesPerCar" | "maxStorageMB" | "auditLogRetentionDays" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+  export type PlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "monthlyPrice" | "yearlyPrice" | "maxCars" | "maxMembers" | "maxImagesPerCar" | "auditLogRetentionDays" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
   export type PlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subscriptions?: boolean | Plan$subscriptionsArgs<ExtArgs>
     _count?: boolean | PlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -4187,7 +4172,6 @@ export namespace Prisma {
       maxCars: number
       maxMembers: number
       maxImagesPerCar: number
-      maxStorageMB: number
       auditLogRetentionDays: number | null
       features: Prisma.JsonValue
       isActive: boolean
@@ -4625,7 +4609,6 @@ export namespace Prisma {
     readonly maxCars: FieldRef<"Plan", 'Int'>
     readonly maxMembers: FieldRef<"Plan", 'Int'>
     readonly maxImagesPerCar: FieldRef<"Plan", 'Int'>
-    readonly maxStorageMB: FieldRef<"Plan", 'Int'>
     readonly auditLogRetentionDays: FieldRef<"Plan", 'Int'>
     readonly features: FieldRef<"Plan", 'Json'>
     readonly isActive: FieldRef<"Plan", 'Boolean'>
@@ -17986,7 +17969,6 @@ export namespace Prisma {
     maxCars: 'maxCars',
     maxMembers: 'maxMembers',
     maxImagesPerCar: 'maxImagesPerCar',
-    maxStorageMB: 'maxStorageMB',
     auditLogRetentionDays: 'auditLogRetentionDays',
     features: 'features',
     isActive: 'isActive',
@@ -18586,7 +18568,6 @@ export namespace Prisma {
     maxCars?: IntFilter<"Plan"> | number
     maxMembers?: IntFilter<"Plan"> | number
     maxImagesPerCar?: IntFilter<"Plan"> | number
-    maxStorageMB?: IntFilter<"Plan"> | number
     auditLogRetentionDays?: IntNullableFilter<"Plan"> | number | null
     features?: JsonFilter<"Plan">
     isActive?: BoolFilter<"Plan"> | boolean
@@ -18604,7 +18585,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrderInput | SortOrder
     features?: SortOrder
     isActive?: SortOrder
@@ -18625,7 +18605,6 @@ export namespace Prisma {
     maxCars?: IntFilter<"Plan"> | number
     maxMembers?: IntFilter<"Plan"> | number
     maxImagesPerCar?: IntFilter<"Plan"> | number
-    maxStorageMB?: IntFilter<"Plan"> | number
     auditLogRetentionDays?: IntNullableFilter<"Plan"> | number | null
     features?: JsonFilter<"Plan">
     isActive?: BoolFilter<"Plan"> | boolean
@@ -18643,7 +18622,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrderInput | SortOrder
     features?: SortOrder
     isActive?: SortOrder
@@ -18668,7 +18646,6 @@ export namespace Prisma {
     maxCars?: IntWithAggregatesFilter<"Plan"> | number
     maxMembers?: IntWithAggregatesFilter<"Plan"> | number
     maxImagesPerCar?: IntWithAggregatesFilter<"Plan"> | number
-    maxStorageMB?: IntWithAggregatesFilter<"Plan"> | number
     auditLogRetentionDays?: IntNullableWithAggregatesFilter<"Plan"> | number | null
     features?: JsonWithAggregatesFilter<"Plan">
     isActive?: BoolWithAggregatesFilter<"Plan"> | boolean
@@ -19792,7 +19769,6 @@ export namespace Prisma {
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
-    maxStorageMB?: number
     auditLogRetentionDays?: number | null
     features: JsonNullValueInput | InputJsonValue
     isActive?: boolean
@@ -19810,7 +19786,6 @@ export namespace Prisma {
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
-    maxStorageMB?: number
     auditLogRetentionDays?: number | null
     features: JsonNullValueInput | InputJsonValue
     isActive?: boolean
@@ -19828,7 +19803,6 @@ export namespace Prisma {
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
-    maxStorageMB?: IntFieldUpdateOperationsInput | number
     auditLogRetentionDays?: NullableIntFieldUpdateOperationsInput | number | null
     features?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -19846,7 +19820,6 @@ export namespace Prisma {
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
-    maxStorageMB?: IntFieldUpdateOperationsInput | number
     auditLogRetentionDays?: NullableIntFieldUpdateOperationsInput | number | null
     features?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -19864,7 +19837,6 @@ export namespace Prisma {
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
-    maxStorageMB?: number
     auditLogRetentionDays?: number | null
     features: JsonNullValueInput | InputJsonValue
     isActive?: boolean
@@ -19881,7 +19853,6 @@ export namespace Prisma {
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
-    maxStorageMB?: IntFieldUpdateOperationsInput | number
     auditLogRetentionDays?: NullableIntFieldUpdateOperationsInput | number | null
     features?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -19898,7 +19869,6 @@ export namespace Prisma {
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
-    maxStorageMB?: IntFieldUpdateOperationsInput | number
     auditLogRetentionDays?: NullableIntFieldUpdateOperationsInput | number | null
     features?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -21303,7 +21273,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrder
     features?: SortOrder
     isActive?: SortOrder
@@ -21317,7 +21286,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrder
   }
 
@@ -21330,7 +21298,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -21346,7 +21313,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -21359,7 +21325,6 @@ export namespace Prisma {
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
-    maxStorageMB?: SortOrder
     auditLogRetentionDays?: SortOrder
   }
 
@@ -24563,7 +24528,6 @@ export namespace Prisma {
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
-    maxStorageMB?: number
     auditLogRetentionDays?: number | null
     features: JsonNullValueInput | InputJsonValue
     isActive?: boolean
@@ -24580,7 +24544,6 @@ export namespace Prisma {
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
-    maxStorageMB?: number
     auditLogRetentionDays?: number | null
     features: JsonNullValueInput | InputJsonValue
     isActive?: boolean
@@ -24676,7 +24639,6 @@ export namespace Prisma {
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
-    maxStorageMB?: IntFieldUpdateOperationsInput | number
     auditLogRetentionDays?: NullableIntFieldUpdateOperationsInput | number | null
     features?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -24693,7 +24655,6 @@ export namespace Prisma {
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
-    maxStorageMB?: IntFieldUpdateOperationsInput | number
     auditLogRetentionDays?: NullableIntFieldUpdateOperationsInput | number | null
     features?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
