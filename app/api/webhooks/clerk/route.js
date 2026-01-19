@@ -44,7 +44,7 @@ export async function POST(req) {
 
     // Handle the webhook
     const eventType = evt.type;
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+    const { id, email_addresses, first_name, last_name, image_url, username } = evt.data;
 
     console.log(`Webhook received: ${eventType}`);
 
@@ -52,11 +52,11 @@ export async function POST(req) {
         switch (eventType) {
             case "user.created":
                 // User is created via checkUser function, but we can update if needed
-                await handleUserCreated(id, email_addresses, first_name, last_name, image_url);
+                await handleUserCreated(id, email_addresses, first_name, last_name, image_url, username);
                 break;
 
             case "user.updated":
-                await handleUserUpdated(id, email_addresses, first_name, last_name, image_url);
+                await handleUserUpdated(id, email_addresses, first_name, last_name, image_url, username);
                 break;
 
             case "user.deleted":
@@ -79,9 +79,17 @@ export async function GET() {
     return new Response("Webhook endpoint is active", { status: 200 });
 }
 
-async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, imageUrl) {
+async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, imageUrl, username) {
     const email = emailAddresses?.[0]?.email_address;
-    const name = `${firstName || ""} ${lastName || ""}`.trim();
+
+    // Get name from firstName/lastName, or fallback to username if not available
+    let name = `${firstName || ""} ${lastName || ""}`.trim();
+    if (!name && username) {
+        name = username;
+    }
+    if (!name) {
+        name = "User"; // Final fallback
+    }
 
     // Check if user already exists
     const existingUser = await db.user.findUnique({
@@ -106,9 +114,17 @@ async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, i
     console.log(`User created: ${clerkId}`);
 }
 
-async function handleUserUpdated(clerkId, emailAddresses, firstName, lastName, imageUrl) {
+async function handleUserUpdated(clerkId, emailAddresses, firstName, lastName, imageUrl, username) {
     const email = emailAddresses?.[0]?.email_address;
-    const name = `${firstName || ""} ${lastName || ""}`.trim();
+
+    // Get name from firstName/lastName, or fallback to username if not available
+    let name = `${firstName || ""} ${lastName || ""}`.trim();
+    if (!name && username) {
+        name = username;
+    }
+    if (!name) {
+        name = "User"; // Final fallback
+    }
 
     // Update user
     await db.user.update({
