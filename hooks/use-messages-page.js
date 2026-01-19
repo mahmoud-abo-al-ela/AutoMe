@@ -25,7 +25,7 @@ export function useMessagesPage() {
   // Redirect to sign-in if not authenticated
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.push("/sign-in?redirect_url=/messages");
+      router.push("/messages");
     }
   }, [isLoaded, isSignedIn, router]);
 

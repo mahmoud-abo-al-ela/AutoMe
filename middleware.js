@@ -5,9 +5,10 @@ import { NextResponse } from "next/server";
 // ============ ROUTE MATCHERS ============
 
 const isProtectedRoute = createRouteMatcher([
-  "/admin(.*)",
-  "/saved-cars(.*)",
-  "/reservations(.*)",
+  "/wishlist(.*)",
+  "/test-drive(.*)",
+  "/messages(.*)",
+  "/onboarding(.*)",
   "/org(.*)",
 ]);
 

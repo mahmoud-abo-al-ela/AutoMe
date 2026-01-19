@@ -32,8 +32,9 @@ function OnboardingLoader() {
 export default async function OnboardingPage() {
   const user = await checkUser();
 
+  // If no user, middleware will handle redirect
   if (!user) {
-    redirect("/sign-in?redirect=/onboarding");
+    return null;
   }
 
   const { plans, existingOwnership } = await getOnboardingData(user.id);

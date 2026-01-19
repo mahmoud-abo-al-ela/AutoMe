@@ -35,7 +35,7 @@ const Footer = ({ user }) => {
             </li>
             <li>
               <Link
-                href={user ? "/wishlist" : "/sign-in"}
+                href="/wishlist"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Saved Vehicles

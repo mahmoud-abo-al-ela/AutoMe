@@ -179,10 +179,7 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
               </SignedIn>
 
               {/* Sign in button */}
-              <MobileSignedOutSection
-                pathname={pathname}
-                setIsMenuOpen={setIsMenuOpen}
-              />
+              <MobileSignedOutSection setIsMenuOpen={setIsMenuOpen} />
             </div>
 
             {/* Footer */}

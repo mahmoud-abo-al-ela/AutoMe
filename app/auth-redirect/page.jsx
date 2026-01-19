@@ -21,5 +21,5 @@ export default async function AuthRedirectPage() {
 
 
     // No organization - redirect to onboarding
-    redirect("/onboarding");
+    redirect("/");
 }

@@ -52,15 +52,15 @@ export async function getTestDrives({ status, page = 1, limit = 10 }) {
       organization = user.memberships[0].organization;
     }
 
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
+    // For regular users without organization, pass null
+    // The service will filter by userId only
+    const organizationId = organization?.id || null;
 
     const result = await testDriveService.getTestDrives(
       { status },
       { page, limit },
       userId,
-      organization.id
+      organizationId
     );
 
     return createSuccessResponse(result);

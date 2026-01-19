@@ -118,9 +118,8 @@ export const useCarInfoCard = (car) => {
     setIsScheduleLoading(true);
 
     if (!isSignedIn) {
-      // If user is not signed in, redirect to sign-in page with redirect URL back to reservation
-      const redirectUrl = `/test-drive?carId=${car.id}`;
-      router.push(`/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`);
+      // If user is not signed in, let middleware handle redirect
+      router.push(`/test-drive?carId=${car.id}`);
       return;
     }
 
@@ -137,9 +136,8 @@ export const useCarInfoCard = (car) => {
   };
 
   const handleChatClick = () => {
-    // Redirect to sign-in if not signed in
-    const redirectUrl = `/cars/${car.id}`;
-    router.push(`/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`);
+    // Let middleware handle redirect if not signed in
+    router.push(`/messages?carId=${car.id}`);
   };
 
   const formatPrice = (price) => {

@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { signedInLinks } from "@/lib/HeaderConfig";
 import HeaderNavLink from "./HeaderNavLink";
 
@@ -14,19 +13,14 @@ export default function AuthSection({
   return (
     <div className="space-x-6">
       <SignedOut>
-        {pathname !== "/sign-in" && pathname !== "/sign-up" && (
+        <SignInButton mode="modal" forceRedirectUrl="/auth-redirect">
           <Button
             variant="default"
             className="cursor-pointer bg-[#0532a3] text-white hover:bg-[#0532a3]/90 hover:text-white transition-all duration-300 hover:shadow-md"
           >
-            <Link
-              href="/sign-in"
-              className="w-full flex items-center justify-center"
-            >
-              Sign In
-            </Link>
+            Sign In
           </Button>
-        )}
+        </SignInButton>
       </SignedOut>
       <SignedIn>
         <div className="flex items-center space-x-6">

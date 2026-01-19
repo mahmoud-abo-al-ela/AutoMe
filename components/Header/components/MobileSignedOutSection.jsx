@@ -1,16 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { SignedOut } from "@clerk/nextjs";
+import { SignedOut, SignInButton } from "@clerk/nextjs";
 
-export default function MobileSignedOutSection({
-  pathname,
-  setIsMenuOpen,
-}) {
-  if (pathname === "/sign-in" || pathname === "/sign-up") return null;
-
+export default function MobileSignedOutSection({ setIsMenuOpen }) {
   return (
     <SignedOut>
       <motion.div
@@ -19,11 +13,14 @@ export default function MobileSignedOutSection({
         transition={{ duration: 0.2, delay: 0.15 }}
         className="mt-4"
       >
-        <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
-          <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
+        <SignInButton mode="modal" forceRedirectUrl="/auth-redirect">
+          <Button
+            className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25"
+            onClick={() => setIsMenuOpen(false)}
+          >
             Sign In
           </Button>
-        </Link>
+        </SignInButton>
       </motion.div>
     </SignedOut>
   );
