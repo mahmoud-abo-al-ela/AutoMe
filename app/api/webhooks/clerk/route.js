@@ -2,6 +2,9 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { db } from "@/lib/prisma";
 
+// Disable body parsing for webhook verification
+export const runtime = "nodejs";
+
 export async function POST(req) {
     // Get the headers
     const headerPayload = await headers();
@@ -69,6 +72,11 @@ export async function POST(req) {
         console.error(`Error processing webhook ${eventType}:`, error);
         return new Response("Error processing webhook", { status: 500 });
     }
+}
+
+// Handle GET requests (for webhook verification)
+export async function GET() {
+    return new Response("Webhook endpoint is active", { status: 200 });
 }
 
 async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, imageUrl) {
