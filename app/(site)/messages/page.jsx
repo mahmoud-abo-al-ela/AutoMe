@@ -1,12 +1,36 @@
-"use client";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { MessagesPageClient } from "./_components/MessagesPageClient";
+import { getMyConversations } from "@/actions/messages";
+import { db as prisma } from "@/lib/prisma";
 
-import { MessagesPresenter } from "./_components/MessagesPresenter";
-import { useMessagesPage } from "@/hooks/use-messages-page";
-
-const MessagesPage = () => {
-  const pageData = useMessagesPage();
-
-  return <MessagesPresenter {...pageData} />;
+export const metadata = {
+  title: "Messages",
+  description: "Chat with dealerships",
 };
 
-export default MessagesPage;
+export default async function MessagesPage() {
+  const { userId: clerkId } = await auth();
+
+  if (!clerkId) {
+    redirect("/sign-in");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId },
+  });
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  const result = await getMyConversations();
+  const conversations = result.success ? result.data : [];
+
+  return (
+    <MessagesPageClient
+      initialConversations={conversations}
+      currentUserId={user.id}
+    />
+  );
+}

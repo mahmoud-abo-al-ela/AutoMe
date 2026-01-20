@@ -194,7 +194,7 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
 
     revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
-    revalidatePath("/reservation");
+    revalidatePath("/test-drive");
 
     return createSuccessResponse(
       updatedTestDrive,

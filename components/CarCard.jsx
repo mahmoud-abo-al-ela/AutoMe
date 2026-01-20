@@ -33,6 +33,11 @@ const CarCard = ({ car, onWishlistChange }) => {
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
+  // Sync isFavorite state with car.isWishlisted prop
+  useEffect(() => {
+    setIsFavorite(car?.isWishlisted || false);
+  }, [car?.isWishlisted]);
+
   useEffect(() => {
     const compareList = compareUtils.getCompareList();
     setIsInCompare(compareList.includes(car.id));
@@ -149,11 +154,10 @@ const CarCard = ({ car, onWishlistChange }) => {
                     }
                   >
                     <Heart
-                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${
-                        isFavorite
+                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${isFavorite
                           ? "fill-red-500 text-red-500"
                           : "text-gray-500"
-                      } ${isLoading ? "opacity-50" : ""}`}
+                        } ${isLoading ? "opacity-50" : ""}`}
                     />
                   </Button>
                 </TooltipTrigger>
@@ -174,11 +178,10 @@ const CarCard = ({ car, onWishlistChange }) => {
                     }
                   >
                     <Scale
-                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${
-                        isInCompare
+                      className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${isInCompare
                           ? "fill-blue-500 text-blue-500"
                           : "text-gray-500"
-                      }`}
+                        }`}
                     />
                   </Button>
                 </TooltipTrigger>

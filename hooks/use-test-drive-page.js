@@ -76,7 +76,7 @@ export const useTestDrivePage = () => {
             setSelectedTestDrive(testDriveData.data);
         } else if (testDriveData && !testDriveData.success) {
             toast.error(testDriveData.error || "Failed to load test drive details");
-            router.push("/reservation");
+            router.push("/test-drive");
         }
     }, [testDriveData, router]);
 

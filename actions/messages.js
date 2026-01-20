@@ -1,219 +1,210 @@
 "use server";
+
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
-import * as messageService from "@/lib/services/message";
 import {
-  createSuccessResponse,
-  createErrorResponse,
-} from "@/lib/utils/response";
-import { AuthenticationError } from "@/lib/utils/errors";
-import { getCurrentOrganization } from "@/lib/getOrganization";
-import { checkUser } from "@/lib/checkUser";
+    getUserConversations,
+    getOrganizationConversations,
+    getConversation,
+    getConversationMessages,
+    getUserUnreadCount,
+    startConversation,
+    sendMessage,
+    markConversationAsRead,
+    removeConversation,
+} from "@/lib/services/message";
+import { getOrganization } from "@/lib/getOrganization";
+import { db as prisma } from "@/lib/prisma";
 
-/**
- * Start or get existing conversation (optionally about a specific car)
- */
-export async function startConversation(carId = null) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function getMyConversations() {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        const conversations = await getUserConversations(user.id);
+        return { success: true, data: conversations };
+    } catch (error) {
+        console.error("Error fetching conversations:", error);
+        return { success: false, error: error.message };
     }
-
-    const conversation = await messageService.startConversation(userId, carId);
-
-    revalidatePath("/messages");
-
-    return createSuccessResponse(conversation, "Conversation started");
-  } catch (error) {
-    console.error("Error starting conversation:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Get user's conversations
- */
-export async function getConversations({ page = 1, limit = 20 } = {}) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function getOrgConversations(slug) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const { organization, membership } = await getOrganization(slug);
+        if (!organization || !membership) {
+            return { success: false, error: "Organization not found or access denied" };
+        }
+
+        const conversations = await getOrganizationConversations(organization.id);
+        return { success: true, data: conversations };
+    } catch (error) {
+        console.error("Error fetching org conversations:", error);
+        return { success: false, error: error.message };
     }
-
-    const result = await messageService.getUserConversations(userId, {
-      page,
-      limit,
-    });
-
-    return createSuccessResponse(result);
-  } catch (error) {
-    console.error("Error getting conversations:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Get all conversations (admin)
- */
-export async function getAllConversations({ page = 1, limit = 20 } = {}) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function getConversationDetails(conversationId) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        const conversation = await getConversation(conversationId, user.id);
+        if (!conversation) {
+            return { success: false, error: "Conversation not found" };
+        }
+
+        const messages = await getConversationMessages(conversationId, user.id);
+
+        // Mark messages as read
+        await markConversationAsRead(conversationId, user.id);
+
+        return { success: true, data: { conversation, messages } };
+    } catch (error) {
+        console.error("Error fetching conversation details:", error);
+        return { success: false, error: error.message };
     }
-
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
-
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
-
-    const result = await messageService.getAllConversations(userId, organization.id, {
-      page,
-      limit,
-    });
-
-    return createSuccessResponse(result);
-  } catch (error) {
-    console.error("Error getting all conversations:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Get a specific conversation
- */
-export async function getConversation(conversationId) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function createConversation(organizationId, carId = null) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        const conversation = await startConversation(user.id, organizationId, carId);
+        return { success: true, data: conversation };
+    } catch (error) {
+        console.error("Error creating conversation:", error);
+        return { success: false, error: error.message };
     }
-
-    const conversation = await messageService.getConversation(
-      conversationId,
-      userId
-    );
-
-    return createSuccessResponse(conversation);
-  } catch (error) {
-    console.error("Error getting conversation:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Get messages for a conversation
- */
-export async function getMessages(
-  conversationId,
-  { page = 1, limit = 50 } = {}
-) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function sendMessageAction(conversationId, content) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        if (!content || content.trim().length === 0) {
+            return { success: false, error: "Message content is required" };
+        }
+
+        const message = await sendMessage(conversationId, user.id, content.trim());
+        return { success: true, data: message };
+    } catch (error) {
+        console.error("Error sending message:", error);
+        return { success: false, error: error.message };
     }
-
-    const result = await messageService.getConversationMessages(
-      conversationId,
-      userId,
-      { page, limit }
-    );
-
-    return createSuccessResponse(result);
-  } catch (error) {
-    console.error("Error getting messages:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Send a message
- */
-export async function sendMessage(conversationId, content) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function markAsRead(conversationId) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        await markConversationAsRead(conversationId, user.id);
+        return { success: true };
+    } catch (error) {
+        console.error("Error marking as read:", error);
+        return { success: false, error: error.message };
     }
-
-    const message = await messageService.sendMessage(
-      conversationId,
-      content,
-      userId
-    );
-
-    revalidatePath("/messages");
-    let organization = await getCurrentOrganization().catch(() => null);
-
-    if (!organization) {
-      const user = await checkUser();
-      if (user?.memberships?.length > 0) {
-        organization = user.memberships[0].organization;
-      }
-    }
-
-    if (organization?.slug) {
-      revalidatePath(`/org/${organization.slug}/messages`);
-    }
-
-    return createSuccessResponse(message, "Message sent");
-  } catch (error) {
-    console.error("Error sending message:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Mark messages as read
- */
-export async function markMessagesAsRead(conversationId) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+export async function deleteConversationAction(conversationId) {
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        await removeConversation(conversationId, user.id);
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting conversation:", error);
+        return { success: false, error: error.message };
     }
-
-    await messageService.markAsRead(conversationId, userId);
-
-    revalidatePath("/messages");
-    const organization = await getCurrentOrganization().catch(() => null);
-    if (organization?.slug) {
-      revalidatePath(`/org/${organization.slug}/messages`);
-    }
-
-    return createSuccessResponse(null, "Messages marked as read");
-  } catch (error) {
-    console.error("Error marking messages as read:", error);
-    return createErrorResponse(error);
-  }
 }
 
-/**
- * Get unread message count
- */
 export async function getUnreadCount() {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+    try {
+        const { userId: clerkId } = await auth();
+        if (!clerkId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { clerkId },
+        });
+
+        if (!user) {
+            return { success: false, error: "User not found" };
+        }
+
+        const count = await getUserUnreadCount(user.id);
+        return { success: true, data: count };
+    } catch (error) {
+        console.error("Error getting unread count:", error);
+        return { success: false, error: error.message };
     }
-
-    const count = await messageService.getUnreadCount(userId);
-
-    return createSuccessResponse({ count });
-  } catch (error) {
-    console.error("Error getting unread count:", error);
-    return createErrorResponse(error);
-  }
 }

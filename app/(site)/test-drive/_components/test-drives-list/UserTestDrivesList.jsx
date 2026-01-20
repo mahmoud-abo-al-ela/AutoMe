@@ -59,7 +59,7 @@ const UserTestDrivesList = ({ testDrives, loading, pagination }) => {
   };
 
   const handleViewDetails = (testDriveId) => {
-    router.push(`/reservation?testDriveId=${testDriveId}`);
+    router.push(`/test-drive?testDriveId=${testDriveId}`);
   };
 
   const handleViewCar = (carId) => {

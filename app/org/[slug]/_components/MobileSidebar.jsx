@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { sidebarItems } from "@/lib/SidebarConfig";
-import { UnreadBadge } from "@/components/Chat";
+import { AdminUnreadBadge } from "@/components/Chat";
 
 const iconMap = {
   LayoutDashboard,
@@ -101,8 +101,11 @@ export default function MobileSidebar({ pathname, organization, userRole }) {
                       />
                     )}
                     <span className="font-medium flex-1">{item.label}</span>
-                    {item.name === "messages" && (
-                      <UnreadBadge className="ml-auto" />
+                    {item.name === "messages" && item.showUnreadBadge && (
+                      <AdminUnreadBadge
+                        organizationSlug={organization.slug}
+                        className="ml-auto"
+                      />
                     )}
                   </Link>
                 );

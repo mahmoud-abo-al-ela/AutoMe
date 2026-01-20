@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Scale } from "lucide-react";
+import { MessageCircle, Scale, MessageSquare } from "lucide-react";
 import TestDriveButton from "./TestDriveButton";
 import { ChatDrawer } from "@/components/Chat";
+import { MessageDealerButton } from "./MessageDealerButton";
 
 const CarActions = ({
   car,
@@ -40,6 +41,14 @@ const CarActions = ({
           <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
           Chat Now
         </Button>
+
+        {isSignedIn && (
+          <MessageDealerButton
+            organizationId={car.organizationId}
+            carId={car.id}
+            className="w-full py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl"
+          />
+        )}
 
         <TestDriveButton
           car={car}

@@ -1,62 +1,86 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { getUnreadCount } from "@/actions/messages";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { getUnreadCount } from "@/actions/messages";
 
-/**
- * Component that displays unread message count badge
- */
-export function UnreadBadge({ className, showZero = false }) {
-  const [count, setCount] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+export function UnreadBadge({ className }) {
+    const [count, setCount] = useState(0);
 
-  const fetchCount = useCallback(async () => {
-    try {
-      const response = await getUnreadCount();
-      if (response.success) {
-        const newCount = response.data.count;
-        if (newCount > count) {
-          setIsAnimating(true);
-          setTimeout(() => setIsAnimating(false), 300);
+    useEffect(() => {
+        const fetchCount = async () => {
+            const result = await getUnreadCount();
+            if (result.success) {
+                setCount(result.data);
+            }
+        };
+
+        fetchCount();
+
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchCount, 30000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    if (count === 0) return null;
+
+    return (
+        <Badge
+            variant="destructive"
+            className={cn(
+                "h-5 min-w-5 px-1.5 flex items-center justify-center text-xs font-bold rounded-full",
+                className
+            )}
+        >
+            {count > 99 ? "99+" : count}
+        </Badge>
+    );
+}
+
+export function AdminUnreadBadge({ organizationSlug, className }) {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        const fetchCount = async () => {
+            const { getOrgConversations } = await import("@/actions/messages");
+            const result = await getOrgConversations(organizationSlug);
+
+            if (result.success) {
+                // Count unread messages
+                const unreadCount = result.data.reduce((total, conv) => {
+                    const lastMessage = conv.messages[0];
+                    if (lastMessage && !lastMessage.readAt) {
+                        return total + 1;
+                    }
+                    return total;
+                }, 0);
+                setCount(unreadCount);
+            }
+        };
+
+        if (organizationSlug) {
+            fetchCount();
+
+            // Refresh every 30 seconds
+            const interval = setInterval(fetchCount, 30000);
+
+            return () => clearInterval(interval);
         }
-        setCount(newCount);
-      }
-    } catch (error) {
-      console.error("Error fetching unread count:", error);
-    }
-  }, [count]);
+    }, [organizationSlug]);
 
-  useEffect(() => {
-    fetchCount();
+    if (count === 0) return null;
 
-    // Poll every 30 seconds
-    const interval = setInterval(fetchCount, 30000);
-
-    // Listen for custom event to refresh unread count
-    const handleRefresh = () => {
-      fetchCount();
-    };
-    window.addEventListener("refresh-unread-count", handleRefresh);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("refresh-unread-count", handleRefresh);
-    };
-  }, [fetchCount]);
-
-  if (count === 0 && !showZero) return null;
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center font-semibold text-white bg-red-500 rounded-full shadow-sm",
-        "min-w-[18px] h-[18px] px-1.5 text-[10px] leading-none",
-        isAnimating && "animate-bounce",
-        className
-      )}
-    >
-      {count > 99 ? "99+" : count}
-    </span>
-  );
+    return (
+        <Badge
+            variant="destructive"
+            className={cn(
+                "h-5 min-w-5 px-1.5 flex items-center justify-center text-xs font-bold rounded-full",
+                className
+            )}
+        >
+            {count > 99 ? "99+" : count}
+        </Badge>
+    );
 }
