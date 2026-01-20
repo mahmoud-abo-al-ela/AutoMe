@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Scale, MessageSquare } from "lucide-react";
+import { Scale } from "lucide-react";
 import TestDriveButton from "./TestDriveButton";
-import { ChatDrawer } from "@/components/Chat";
-import { MessageDealerButton } from "./MessageDealerButton";
+import { StartConversationButton, ChatSidebar } from "@/components/StreamChat";
 
 const CarActions = ({
   car,
@@ -16,38 +15,47 @@ const CarActions = ({
   onScheduleTestDrive,
   onViewTestDrive,
   onGoToCompare,
-  currentUserId,
-  currentUserName,
   isSignedIn,
   onChatClick,
 }) => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedCarId, setSelectedCarId] = useState(null);
 
   const handleChatClick = () => {
     if (!isSignedIn) {
       onChatClick?.();
       return;
     }
-    setIsChatOpen(true);
+  };
+
+  const handleChatOpen = (carId) => {
+    setSelectedCarId(carId);
+    setChatOpen(true);
   };
 
   return (
     <>
       <div className="space-y-3 sm:space-y-4">
-        <Button
-          onClick={handleChatClick}
-          className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-        >
-          <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-          Chat Now
-        </Button>
-
-        {isSignedIn && (
-          <MessageDealerButton
-            organizationId={car.organizationId}
-            carId={car.id}
-            className="w-full py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl"
-          />
+        {isSignedIn ? (
+          <>
+            <StartConversationButton
+              carId={car.id}
+              onChatOpen={handleChatOpen}
+              className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            />
+            <ChatSidebar
+              open={chatOpen}
+              onOpenChange={setChatOpen}
+              carId={selectedCarId}
+            />
+          </>
+        ) : (
+          <Button
+            onClick={handleChatClick}
+            className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+          >
+            Chat Now
+          </Button>
         )}
 
         <TestDriveButton
@@ -70,16 +78,6 @@ const CarActions = ({
           </Button>
         )}
       </div>
-
-      {/* Chat Drawer */}
-      <ChatDrawer
-        open={isChatOpen}
-        onOpenChange={setIsChatOpen}
-        carId={car.id}
-        car={car}
-        currentUserId={currentUserId}
-        currentUserName={currentUserName}
-      />
     </>
   );
 };

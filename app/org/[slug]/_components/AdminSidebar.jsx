@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { CarFront, MessageSquare } from "lucide-react";
 import MobileSidebar from "./MobileSidebar";
 import DesktopSidebar from "./DesktopSidebar";
-import { AdminUnreadBadge } from "@/components/Chat";
+import { OrgUnreadBadge } from "@/components/StreamChat";
 import Link from "next/link";
 
 export default function AdminSidebar({ organization, userRole }) {
@@ -83,8 +83,8 @@ export default function AdminSidebar({ organization, userRole }) {
           title="Messages"
         >
           <MessageSquare className="h-5 w-5 text-sidebar-foreground" />
-          <AdminUnreadBadge
-            organizationSlug={organization.slug}
+          <OrgUnreadBadge
+            organizationId={organization.id}
             className="absolute -top-0.5 -right-0.5"
           />
         </Link>

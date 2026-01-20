@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Heart, CarFront, MessageSquare } from "lucide-react";
-import { UnreadBadge } from "@/components/Chat";
+import { UnreadBadge } from "@/components/StreamChat";
 
 export default function HeaderNavLink({
   href,
@@ -30,8 +30,8 @@ export default function HeaderNavLink({
         isMessagesIcon && !isMobile
           ? "p-2"
           : !isMobile
-          ? "px-3 py-2 space-x-2"
-          : "space-x-2",
+            ? "px-3 py-2 space-x-2"
+            : "space-x-2",
         isActive
           ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
           : "hover:text-primary"
@@ -47,7 +47,7 @@ export default function HeaderNavLink({
             "relative inline-flex items-center justify-center",
             isMessagesIcon &&
             !isMobile &&
-              "p-1.5 rounded-full hover:bg-muted/80 transition-colors"
+            "p-1.5 rounded-full hover:bg-muted/80 transition-colors"
           )}
         >
           <Icon

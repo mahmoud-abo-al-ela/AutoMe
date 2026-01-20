@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sidebarItems } from "@/lib/SidebarConfig";
-import { AdminUnreadBadge } from "@/components/Chat";
+import { OrgUnreadBadge } from "@/components/StreamChat";
 
 const iconMap = {
   LayoutDashboard,
@@ -131,8 +131,8 @@ export default function DesktopSidebar({
 
                   {/* Unread badge for messages */}
                   {item.name === "messages" && item.showUnreadBadge && (
-                    <AdminUnreadBadge
-                      organizationSlug={organization.slug}
+                    <OrgUnreadBadge
+                      organizationId={organization.id}
                       className={cn(
                         "ml-auto",
                         collapsed && "absolute -top-1 -right-1"

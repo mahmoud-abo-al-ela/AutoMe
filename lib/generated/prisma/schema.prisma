@@ -84,9 +84,6 @@ enum AuditAction {
   TEST_DRIVE_CONFIRMED
   TEST_DRIVE_CANCELED
   TEST_DRIVE_COMPLETED
-  // Message
-  CONVERSATION_CREATED
-  MESSAGE_SENT
   // User
   USER_CREATED
   USER_UPDATED
@@ -105,8 +102,6 @@ enum EntityType {
   USER
   CAR
   TEST_DRIVE
-  CONVERSATION
-  MESSAGE
   MEMBERSHIP
   SUBSCRIPTION
   WORKING_HOURS
@@ -140,7 +135,6 @@ model Organization {
   cars                  Car[]
   workingHours          WorkingHours[]
   testDrives            TestDrive[]
-  conversations         Conversation[]
   auditLogs             AuditLog[]
   impersonationSessions ImpersonationSession[]
 
@@ -301,11 +295,9 @@ model User {
   role      UserRole @default(USER)
 
   // Relationships
-  savedCars     SavedCar[]
-  testDrives    TestDrive[]
-  conversations Conversation[] @relation("ConversationParticipants")
-  messages      Message[]
-  memberships   Membership[]
+  savedCars   SavedCar[]
+  testDrives  TestDrive[]
+  memberships Membership[]
 
   // Invitation tracking
   invitedMembers Membership[] @relation("InvitedMemberships")
@@ -346,9 +338,8 @@ model Car {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  savedBy       SavedCar[]
-  testDrive     TestDrive[]
-  conversations Conversation[]
+  savedBy   SavedCar[]
+  testDrive TestDrive[]
 
   @@index([organizationId])
   @@index([make, model])
@@ -422,40 +413,4 @@ model TestDrive {
   @@index([carId])
   @@index([status])
   @@index([date])
-}
-
-// ============ CONVERSATION & MESSAGE ============
-
-model Conversation {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  carId        String?
-  car          Car?      @relation(fields: [carId], references: [id], onDelete: SetNull)
-  participants User[]    @relation("ConversationParticipants")
-  messages     Message[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([organizationId])
-  @@index([carId])
-  @@index([updatedAt])
-}
-
-model Message {
-  id             String       @id @default(uuid())
-  content        String
-  senderId       String
-  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  readAt         DateTime?
-  createdAt      DateTime     @default(now())
-
-  @@index([conversationId])
-  @@index([senderId])
-  @@index([createdAt])
-  @@index([readAt])
 }

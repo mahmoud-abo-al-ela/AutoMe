@@ -1,33 +1,40 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { SignedIn } from "@clerk/nextjs";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
 import {
   Heart,
   CarFront,
+  LayoutDashboard,
+  ArrowLeft,
+  ChevronRight,
   MessageSquare,
   Home,
   Search,
   Scale,
   HelpCircle,
+  Calendar,
+  LogOut,
 } from "lucide-react";
-import { navItems, signedInLinks } from "@/lib/HeaderConfig";
-import MobileNavLink from "./components/MobileNavLink";
-import MobileUserSection from "./components/MobileUserSection";
-import MobileSignedOutSection from "./components/MobileSignedOutSection";
-import DashboardButton from "./components/DashboardButton";
+import { usePathname } from "next/navigation";
+import { navItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
+import { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { UnreadBadge } from "@/components/StreamChat";
 
 // Icon map for nav items
 const iconMap = {
   Heart,
   CarFront,
+  LayoutDashboard,
+  ArrowLeft,
   MessageSquare,
   Home,
   Search,
   Scale,
   HelpCircle,
+  Calendar,
 };
 
 // Get icon for nav item based on label
@@ -36,27 +43,96 @@ function getNavIcon(label) {
     "Browse Cars": Search,
     Compare: Scale,
     FAQ: HelpCircle,
+    Dashboard: LayoutDashboard,
+    Cars: CarFront,
+    "Test Drives": Calendar,
     Messages: MessageSquare,
   };
   return icons[label] || Home;
 }
 
-export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
+// Reusable NavLink component
+function NavLink({
+  href,
+  label,
+  icon,
+  iconClass,
+  size = 18,
+  onClick,
+  isActive,
+  animationDelay = 0,
+  showUnreadBadge = false,
+  IconComponent = null,
+}) {
+  const Icon = IconComponent || (icon ? iconMap[icon] : null);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, delay: animationDelay / 1000 }}
+    >
+      <Link
+        href={href}
+        className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${isActive
+            ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
+            : "text-foreground hover:bg-muted"
+          }`}
+        onClick={onClick}
+        aria-current={isActive ? "page" : undefined}
+      >
+        <div className="flex items-center gap-3">
+          {Icon && (
+            <Icon
+              size={size}
+              className={`${isActive
+                  ? "text-white"
+                  : "text-muted-foreground group-hover:text-foreground"
+                } transition-colors`}
+            />
+          )}
+          <span>{label}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {showUnreadBadge && <UnreadBadge />}
+          {!isActive && (
+            <ChevronRight
+              size={16}
+              className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5"
+            />
+          )}
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+export default function MobileMenu({
+  isMenuOpen,
+  setIsMenuOpen,
+  user,
+  organizationSlug,
+}) {
   const pathname = usePathname();
 
   // Check if user has any organization membership
   const hasOrgMembership = user?.memberships?.length > 0;
-  const isAdmin = user?.role === "ADMIN";
 
   // Check if user can manage the organization (OWNER role in any org)
-  // const isOwner = hasOrgMembership && user.memberships.some((m) => m.role === "OWNER");
-  // isOwner is actually unused in the filtering below, as we check !hasOrgMembership && !isAdmin for some links
+  const isOwner =
+    hasOrgMembership && user.memberships.some((m) => m.role === "OWNER");
 
   const menuRef = useRef(null);
+  const { signOut } = useClerk();
+  const isOnAdminPath = pathname?.startsWith("/admin");
+
+  // Show admin nav for org members when on subdomain and not already on admin path
+  const showAdminNav = hasOrgMembership && organizationSlug && !isOnAdminPath;
+  const navToShow = showAdminNav ? adminNavItems : navItems;
 
   // Filter out messages from signed-in links (it's now in header)
   const filteredSignedInLinks = signedInLinks.filter(
-    (link) => link.icon !== "MessageSquare"
+    (link) => link.icon !== "MessageSquare",
   );
 
   useEffect(() => {
@@ -112,7 +188,38 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
             style={{ zIndex: 40, maxHeight: "calc(100vh - 5rem)" }}
           >
             {/* User section */}
-            <MobileUserSection user={user} setIsMenuOpen={setIsMenuOpen} />
+            <SignedIn>
+              <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
+                <div className="flex items-center gap-3">
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-11 h-11 rounded-full shadow-md",
+                      },
+                    }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm">
+                      {user?.name || "Welcome back"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      signOut({ redirectUrl: "/" });
+                    }}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+                    aria-label="Sign out"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </SignedIn>
 
             {/* Navigation */}
             <div
@@ -120,30 +227,38 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
               style={{ maxHeight: "calc(100vh - 14rem)" }}
             >
               {/* Context switcher for org members */}
-              {(hasOrgMembership || isAdmin) && (
+              {hasOrgMembership && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
                   className="mb-3"
                 >
-                  <DashboardButton
-                    user={user}
-                    hasOrgMembership={hasOrgMembership}
-                    isAdmin={isAdmin}
-                    className="w-full"
-                    buttonClassName="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25"
-                    onClick={() => setIsMenuOpen(false)}
-                  />
+                  {isOnAdminPath ? (
+                    <Link href="/" onClick={() => setIsMenuOpen(false)}>
+                      <Button
+                        variant="outline"
+                        className="w-full py-6 rounded-2xl font-semibold"
+                      >
+                        View Storefront
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
+                        Go to Admin
+                      </Button>
+                    </Link>
+                  )}
                 </motion.div>
               )}
 
               {/* Main nav */}
               <div className="space-y-1">
-                {navItems.map((item, index) => {
+                {navToShow.map((item, index) => {
                   const NavIcon = getNavIcon(item.label);
                   return (
-                    <MobileNavLink
+                    <NavLink
                       key={item.href}
                       href={item.href}
                       label={item.label}
@@ -161,13 +276,19 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
                 <div className="my-3 mx-2 h-px bg-border" />
                 <div className="space-y-1">
                   {filteredSignedInLinks
-                    .filter((link) => !hasOrgMembership && !isAdmin)
+                    .filter(
+                      (link) =>
+                        (!link.adminOnly || isOwner) &&
+                        (!link.notAdmin || !isOwner) &&
+                        (!link.adminPath || pathname === link.adminPath),
+                    )
                     .map((link, index) => (
-                      <MobileNavLink
+                      <NavLink
                         key={link.href}
                         href={link.href}
                         label={link.label}
-                        IconComponent={iconMap[link.icon]} // icon string map
+                        icon={link.icon}
+                        iconClass={link.iconClass}
                         size={18}
                         onClick={() => setIsMenuOpen(false)}
                         isActive={pathname === link.href}
@@ -179,7 +300,22 @@ export default function MobileMenu({ isMenuOpen, setIsMenuOpen, user }) {
               </SignedIn>
 
               {/* Sign in button */}
-              <MobileSignedOutSection setIsMenuOpen={setIsMenuOpen} />
+              <SignedOut>
+                {pathname !== "/sign-in" && pathname !== "/sign-up" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: 0.15 }}
+                    className="mt-4"
+                  >
+                    <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
+                        Sign In
+                      </Button>
+                    </Link>
+                  </motion.div>
+                )}
+              </SignedOut>
             </div>
 
             {/* Footer */}

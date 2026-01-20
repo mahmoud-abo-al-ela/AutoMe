@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import LoadingProvider from "@/components/LoadingProvider";
+import { StreamChatProvider } from "@/components/StreamChat";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,11 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html lang="en" className="scroll-smooth h-full">
         <body className={`${inter.className} flex flex-col min-h-screen`}>
-          <LoadingProvider>{children}</LoadingProvider>
+          <LoadingProvider>
+            <StreamChatProvider>
+              {children}
+            </StreamChatProvider>
+          </LoadingProvider>
         </body>
       </html>
     </ClerkProvider>

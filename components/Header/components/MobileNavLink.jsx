@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { UnreadBadge } from "@/components/Chat";
+import { UnreadBadge } from "@/components/StreamChat";
 
 export default function MobileNavLink({
   href,
@@ -23,11 +23,10 @@ export default function MobileNavLink({
     >
       <Link
         href={href}
-        className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${
-          isActive
+        className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${isActive
             ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
             : "text-foreground hover:bg-muted"
-        }`}
+          }`}
         onClick={onClick}
         aria-current={isActive ? "page" : undefined}
       >
@@ -35,11 +34,10 @@ export default function MobileNavLink({
           {IconComponent && (
             <IconComponent
               size={size}
-              className={`${
-                isActive
+              className={`${isActive
                   ? "text-white"
                   : "text-muted-foreground group-hover:text-foreground"
-              } transition-colors`}
+                } transition-colors`}
             />
           )}
           <span>{label}</span>

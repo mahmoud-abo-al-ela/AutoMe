@@ -19,7 +19,7 @@ export async function requestTestDrive(testDriveData) {
 
     const testDrive = await testDriveService.requestTestDrive(
       testDriveData,
-      userId
+      userId,
     );
 
     revalidatePath("/cars/[id]");
@@ -27,7 +27,7 @@ export async function requestTestDrive(testDriveData) {
 
     return createSuccessResponse(
       testDrive,
-      "Test drive requested successfully"
+      "Test drive requested successfully",
     );
   } catch (error) {
     console.error("Error requesting test drive:", error);
@@ -42,25 +42,17 @@ export async function getTestDrives({ status, page = 1, limit = 10 }) {
       throw new AuthenticationError();
     }
 
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
+    await checkUser();
+    const organization = await getCurrentOrganization();
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
     }
-
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
-    // For regular users without organization, pass null
-    // The service will filter by userId only
-    const organizationId = organization?.id || null;
 
     const result = await testDriveService.getTestDrives(
       { status },
       { page, limit },
       userId,
-      organizationId
+      organization.id,
     );
 
     return createSuccessResponse(result);
@@ -79,7 +71,7 @@ export async function getTestDriveById(testDriveId) {
 
     const testDrive = await testDriveService.getTestDriveById(
       testDriveId,
-      userId
+      userId,
     );
 
     return createSuccessResponse(testDrive);
@@ -105,7 +97,7 @@ export async function editTestDrive({
     const updatedTestDrive = await testDriveService.editTestDrive(
       testDriveId,
       { date, startTime, endTime, notes },
-      userId
+      userId,
     );
 
     revalidatePath("/cars/[id]");
@@ -114,7 +106,7 @@ export async function editTestDrive({
 
     return createSuccessResponse(
       updatedTestDrive,
-      "Test drive updated successfully"
+      "Test drive updated successfully",
     );
   } catch (error) {
     console.error("Error editing test drive:", error);
@@ -131,7 +123,7 @@ export async function cancelTestDriveByUser(testDriveId) {
 
     const cancelledTestDrive = await testDriveService.cancelTestDrive(
       testDriveId,
-      userId
+      userId,
     );
 
     revalidatePath("/cars/[id]");
@@ -140,7 +132,7 @@ export async function cancelTestDriveByUser(testDriveId) {
 
     return createSuccessResponse(
       cancelledTestDrive,
-      "Test drive cancelled successfully"
+      "Test drive cancelled successfully",
     );
   } catch (error) {
     console.error("Error cancelling test drive:", error);
@@ -171,16 +163,8 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
       throw new AuthenticationError();
     }
 
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
-
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
+    await checkUser();
+    const organization = await getCurrentOrganization();
     if (!organization) {
       throw new AuthenticationError("No organization found");
     }
@@ -189,16 +173,16 @@ export async function updateTestDriveStatus({ testDriveId, status }) {
       testDriveId,
       status,
       userId,
-      organization.id
+      organization.id,
     );
 
     revalidatePath("/admin");
     revalidatePath("/admin/test-drives");
-    revalidatePath("/test-drive");
+    revalidatePath("/reservation");
 
     return createSuccessResponse(
       updatedTestDrive,
-      `Test drive ${status.toLowerCase()} successfully`
+      `Test drive ${status.toLowerCase()} successfully`,
     );
   } catch (error) {
     console.error("Error updating test drive status:", error);
