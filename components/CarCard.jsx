@@ -1,6 +1,8 @@
 "use client";
 import {
+  Building2,
   Calendar,
+  ChevronRight,
   Heart,
   ExternalLink,
   MapPin,
@@ -111,24 +113,20 @@ const CarCard = ({ car, onWishlistChange }) => {
   return (
     <TooltipProvider delayDuration={300}>
       <motion.div
-        whileHover={{
-          scale: 1.02,
-          boxShadow:
-            "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-        }}
-        transition={{ duration: 0.2 }}
-        className="car-card rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl transition-all h-full flex flex-col"
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="car-card rounded-xl overflow-hidden bg-white border border-gray-200 hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
       >
         <Link href={`/cars/${car.id}`} className="flex flex-grow flex-col">
-          <div className="relative overflow-hidden">
-            <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
+          <div className="relative overflow-hidden group">
+            <div className="aspect-[16/9] relative overflow-hidden bg-gray-100">
               {car.images?.[0] && !imageError ? (
                 <Image
                   src={car.images[0]}
                   alt={carTitle}
-                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   width={500}
-                  height={300}
+                  height={280}
                   onError={handleImageError}
                   priority={false}
                 />
@@ -155,8 +153,8 @@ const CarCard = ({ car, onWishlistChange }) => {
                   >
                     <Heart
                       className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${isFavorite
-                          ? "fill-red-500 text-red-500"
-                          : "text-gray-500"
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-500"
                         } ${isLoading ? "opacity-50" : ""}`}
                     />
                   </Button>
@@ -179,8 +177,8 @@ const CarCard = ({ car, onWishlistChange }) => {
                   >
                     <Scale
                       className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-colors duration-300 ${isInCompare
-                          ? "fill-blue-500 text-blue-500"
-                          : "text-gray-500"
+                        ? "fill-blue-500 text-blue-500"
+                        : "text-gray-500"
                         }`}
                     />
                   </Button>
@@ -190,23 +188,20 @@ const CarCard = ({ car, onWishlistChange }) => {
                 </TooltipContent>
               </Tooltip>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent h-10"></div>
-            <div className="absolute bottom-2 left-2">
-              <Badge
-                variant="secondary"
-                className="bg-white/90 text-black font-bold text-xs px-2 py-0.5 sm:py-1"
-              >
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent h-12"></div>
+            <div className="absolute bottom-2.5 left-2.5">
+              <span className="inline-block bg-white/95 backdrop-blur-sm text-gray-900 font-bold text-sm sm:text-base px-2.5 py-1 rounded-lg shadow-sm">
                 {formatPrice(car.price)}
-              </Badge>
+              </span>
             </div>
           </div>
 
-          <div className="p-2 sm:p-3 flex flex-col flex-grow">
-            <div className="mb-1.5 sm:mb-2">
+          <div className="p-3 sm:p-4 flex flex-col flex-grow">
+            <div className="mb-2 sm:mb-2.5">
               <h3 className="font-semibold text-sm sm:text-base tracking-tight line-clamp-1">
                 {carTitle}
               </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1">
+              <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1 mt-0.5">
                 {car.trim && `${car.trim} • `}
                 {car.engine || ""}
               </p>
@@ -237,11 +232,11 @@ const CarCard = ({ car, onWishlistChange }) => {
               )}
             </div>
 
-            <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
+            <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 sm:mb-4">
               {car.bodyType && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 px-1 sm:px-1.5 py-0 sm:py-0.5"
+                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 rounded-full px-2 sm:px-2.5 py-0.5"
                 >
                   {car.bodyType}
                 </Badge>
@@ -249,7 +244,7 @@ const CarCard = ({ car, onWishlistChange }) => {
               {car.transmission && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 px-1 sm:px-1.5 py-0 sm:py-0.5"
+                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 rounded-full px-2 sm:px-2.5 py-0.5"
                 >
                   {car.transmission}
                 </Badge>
@@ -257,10 +252,10 @@ const CarCard = ({ car, onWishlistChange }) => {
               {car.color && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 flex items-center gap-1 px-1 sm:px-1.5 py-0 sm:py-0.5"
+                  className="text-[10px] sm:text-xs bg-slate-50 hover:bg-slate-100 flex items-center gap-1 rounded-full px-2 sm:px-2.5 py-0.5"
                 >
                   <span
-                    className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full inline-block"
+                    className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full inline-block border border-gray-200"
                     style={{
                       backgroundColor: car.color
                         .toLowerCase()
@@ -271,6 +266,33 @@ const CarCard = ({ car, onWishlistChange }) => {
                 </Badge>
               )}
             </div>
+
+            {car.organization && (
+              <div className="flex items-center gap-1.5 mb-2 sm:mb-3 px-0.5">
+                {car.organization.logo ? (
+                  <Image
+                    src={car.organization.logo}
+                    alt={car.organization.name}
+                    width={20}
+                    height={20}
+                    className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                )}
+                <span
+                  className="text-[10px] sm:text-xs text-muted-foreground truncate hover:text-primary transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = `/dealerships/${car.organization.slug}`;
+                  }}
+                >
+                  {car.organization.name}
+                </span>
+                <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/50 flex-shrink-0 ml-auto" />
+              </div>
+            )}
 
             <div className="mt-auto">
               <Button

@@ -1,6 +1,5 @@
 "use server";
 
-import { checkUser } from "@/lib/checkUser";
 import { db } from "@/lib/prisma";
 import {
   getCurrentOrganization,
@@ -8,26 +7,28 @@ import {
 } from "@/lib/getOrganization";
 import { revalidatePath } from "next/cache";
 import { auditHelpers } from "@/lib/services/audit/audit";
+import { withAuth } from "@/lib/middleware/with-auth";
+import { createSuccessResponse } from "@/lib/utils/response";
+import {
+  AuthorizationError,
+  NotFoundError,
+  ValidationError,
+  ConflictError,
+} from "@/lib/utils/errors";
 
-export async function inviteTeamMember({ organizationId, email, role }) {
-  try {
-    const user = await checkUser();
-    if (!user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
+export const inviteTeamMember = withAuth(
+  async (ctx, { organizationId, email, role }) => {
     const organization = await getCurrentOrganization();
     if (!organization || organization.id !== organizationId) {
-      return { success: false, error: "Organization not found" };
+      throw new NotFoundError("Organization");
     }
 
     // Check if user has permission (only OWNER can invite)
-    const membership = await getUserMembership(user.id, organizationId);
+    const membership = await getUserMembership(ctx.user.id, organizationId);
     if (!membership || membership.role !== "OWNER") {
-      return {
-        success: false,
-        error: "You don't have permission to invite members",
-      };
+      throw new AuthorizationError(
+        "You don't have permission to invite members"
+      );
     }
 
     // Check plan limits
@@ -51,10 +52,9 @@ export async function inviteTeamMember({ organizationId, email, role }) {
 
     const limit = planLimits[subscription?.plan?.type || "STARTER"];
     if (limit !== -1 && memberCount >= limit) {
-      return {
-        success: false,
-        error: "Member limit reached. Upgrade your plan to add more members.",
-      };
+      throw new ValidationError(
+        "Member limit reached. Upgrade your plan to add more members."
+      );
     }
 
     // Check if user exists
@@ -63,12 +63,9 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     });
 
     if (!invitedUser) {
-      // TODO: Send invitation email to new user
-      // For now, return an error
-      return {
-        success: false,
-        error: "User not found. They need to create an account first.",
-      };
+      throw new NotFoundError(
+        "User not found. They need to create an account first."
+      );
     }
 
     // Check if already a member
@@ -80,7 +77,7 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     });
 
     if (existingMembership) {
-      return { success: false, error: "This user is already a member" };
+      throw new ConflictError("This user is already a member");
     }
 
     // Create membership
@@ -93,36 +90,34 @@ export async function inviteTeamMember({ organizationId, email, role }) {
     });
 
     // Audit log
-    await auditHelpers.logMemberInvited(newMembership, user.id, user.email);
+    await auditHelpers.logMemberInvited(
+      newMembership,
+      ctx.user.id,
+      ctx.user.email
+    );
 
     revalidatePath("/admin/team");
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error inviting team member:", error);
-    return { success: false, error: "Failed to invite team member" };
+    return createSuccessResponse(null, "Team member invited successfully");
   }
-}
+);
 
-export async function updateMemberRole({ organizationId, memberId, newRole }) {
-  try {
-    const user = await checkUser();
-    if (!user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
+export const updateMemberRole = withAuth(
+  async (ctx, { organizationId, memberId, newRole }) => {
     const organization = await getCurrentOrganization();
     if (!organization || organization.id !== organizationId) {
-      return { success: false, error: "Organization not found" };
+      throw new NotFoundError("Organization");
     }
 
     // Check if user has permission (only OWNER can change roles)
-    const currentMembership = await getUserMembership(user.id, organizationId);
+    const currentMembership = await getUserMembership(
+      ctx.user.id,
+      organizationId
+    );
     if (!currentMembership || currentMembership.role !== "OWNER") {
-      return {
-        success: false,
-        error: "You don't have permission to change roles",
-      };
+      throw new AuthorizationError(
+        "You don't have permission to change roles"
+      );
     }
 
     // Get the target membership
@@ -135,12 +130,12 @@ export async function updateMemberRole({ organizationId, memberId, newRole }) {
       !targetMembership ||
       targetMembership.organizationId !== organizationId
     ) {
-      return { success: false, error: "Member not found" };
+      throw new NotFoundError("Member");
     }
 
     // Cannot change owner role
     if (targetMembership.role === "OWNER") {
-      return { success: false, error: "Cannot change the owner's role" };
+      throw new AuthorizationError("Cannot change the owner's role");
     }
 
     const oldRole = targetMembership.role;
@@ -155,38 +150,32 @@ export async function updateMemberRole({ organizationId, memberId, newRole }) {
     await auditHelpers.logMemberRoleChanged(
       updatedMembership,
       oldRole,
-      user.id,
-      user.email,
+      ctx.user.id,
+      ctx.user.email
     );
 
     revalidatePath("/admin/team");
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating member role:", error);
-    return { success: false, error: "Failed to update role" };
+    return createSuccessResponse(null, "Member role updated successfully");
   }
-}
+);
 
-export async function removeMember({ organizationId, memberId }) {
-  try {
-    const user = await checkUser();
-    if (!user) {
-      return { success: false, error: "Unauthorized" };
-    }
-
+export const removeMember = withAuth(
+  async (ctx, { organizationId, memberId }) => {
     const organization = await getCurrentOrganization();
     if (!organization || organization.id !== organizationId) {
-      return { success: false, error: "Organization not found" };
+      throw new NotFoundError("Organization");
     }
 
     // Check if user has permission (only OWNER can remove members)
-    const currentMembership = await getUserMembership(user.id, organizationId);
+    const currentMembership = await getUserMembership(
+      ctx.user.id,
+      organizationId
+    );
     if (!currentMembership || currentMembership.role !== "OWNER") {
-      return {
-        success: false,
-        error: "You don't have permission to remove members",
-      };
+      throw new AuthorizationError(
+        "You don't have permission to remove members"
+      );
     }
 
     // Get the target membership
@@ -199,21 +188,25 @@ export async function removeMember({ organizationId, memberId }) {
       !targetMembership ||
       targetMembership.organizationId !== organizationId
     ) {
-      return { success: false, error: "Member not found" };
+      throw new NotFoundError("Member");
     }
 
     // Cannot remove owner
     if (targetMembership.role === "OWNER") {
-      return { success: false, error: "Cannot remove the owner" };
+      throw new AuthorizationError("Cannot remove the owner");
     }
 
     // Cannot remove yourself
-    if (targetMembership.userId === user.id) {
-      return { success: false, error: "Cannot remove yourself" };
+    if (targetMembership.userId === ctx.user.id) {
+      throw new ValidationError("Cannot remove yourself");
     }
 
     // Audit log before deletion
-    await auditHelpers.logMemberRemoved(targetMembership, user.id, user.email);
+    await auditHelpers.logMemberRemoved(
+      targetMembership,
+      ctx.user.id,
+      ctx.user.email
+    );
 
     // Remove membership
     await db.membership.delete({
@@ -222,9 +215,6 @@ export async function removeMember({ organizationId, memberId }) {
 
     revalidatePath("/admin/team");
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error removing member:", error);
-    return { success: false, error: "Failed to remove member" };
+    return createSuccessResponse(null, "Member removed successfully");
   }
-}
+);

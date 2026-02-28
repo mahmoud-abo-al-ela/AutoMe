@@ -1,61 +1,123 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EmptyCompare, CompareTable, MobileCompareTable } from "./index";
-import { LoadingCard } from "@/components/common/LoadingStates";
+import EmptyCompare from "./EmptyCompare";
+import CompareTable from "./CompareTable";
+import MobileCompareTable from "./MobileCompareTable";
+import ComparePageHeader from "./ComparePageHeader";
+import ComparePageSkeleton from "./ComparePageSkeleton";
 
 export const ComparePresenter = ({
     cars,
     loading,
-    isMobile,
+    error,
     hasCars,
     singleCar,
+    highlightDifferences,
+    activeCategory,
+    differences,
+    winners,
     handlers,
 }) => {
     return (
-        <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen py-20">
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-10 sm:pb-16 md:pb-20">
-                <div className="mb-4 sm:mb-6">
-                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mt-2">
-                        Car Comparison
-                    </h1>
-                    <p className="text-sm sm:text-base text-gray-500 mt-1">
-                        Compare up to 3 cars side by side to help you make the right
-                        decision
-                    </p>
-                </div>
+        <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen py-20 print:bg-white print:py-4">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-10 sm:pb-16 md:pb-20 print:px-2 print:pb-4">
+                <AnimatePresence mode="wait">
+                    {loading ? (
+                        /* ── Loading skeleton ──────────────────────────────── */
+                        <motion.div
+                            key="skeleton"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <ComparePageSkeleton />
+                        </motion.div>
+                    ) : error ? (
+                        /* ── Error state ───────────────────────────────────── */
+                        <motion.div
+                            key="error"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }}
+                            transition={{ duration: 0.3 }}
+                            className="bg-white rounded-xl shadow-md p-8 sm:p-12 text-center"
+                        >
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="h-14 w-14 rounded-full bg-red-50 flex items-center justify-center">
+                                    <AlertCircle className="h-7 w-7 text-red-500" />
+                                </div>
+                                <h2 className="text-lg sm:text-xl font-semibold">
+                                    Something went wrong
+                                </h2>
+                                <p className="text-sm sm:text-base text-muted-foreground max-w-md">
+                                    {error}
+                                </p>
+                                <Button
+                                    onClick={handlers.retry}
+                                    variant="outline"
+                                    className="cursor-pointer mt-2"
+                                >
+                                    <RefreshCw className="mr-2 h-4 w-4" />
+                                    Try Again
+                                </Button>
+                            </div>
+                        </motion.div>
+                    ) : !hasCars ? (
+                        /* ── Empty / single-car state ──────────────────────── */
+                        <motion.div
+                            key="empty"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <EmptyCompare singleCar={singleCar} />
+                        </motion.div>
+                    ) : (
+                        /* ── Comparison view ───────────────────────────────── */
+                        <motion.div
+                            key="compare"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -12 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {/* Header with controls */}
+                            <ComparePageHeader
+                                carCount={cars.length}
+                                highlightDifferences={highlightDifferences}
+                                handlers={handlers}
+                            />
 
-                {loading ? (
-                    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 md:p-8 text-center min-h-[40vh] sm:min-h-[50vh]">
-                        <div className="animate-pulse flex flex-col items-center">
-                            <div className="h-8 sm:h-10 md:h-12 w-8 sm:w-10 md:w-12 bg-gray-200 rounded-full mb-3 md:mb-4"></div>
-                            <div className="h-4 sm:h-5 md:h-6 w-32 sm:w-40 md:w-48 bg-gray-200 rounded mb-3 md:mb-4"></div>
-                            <div className="h-3 sm:h-3.5 md:h-4 w-48 sm:w-56 md:w-64 bg-gray-200 rounded"></div>
-                        </div>
-                    </div>
-                ) : !hasCars ? (
-                    <EmptyCompare singleCar={singleCar} />
-                ) : (
-                    <>
-                        <div className="mb-3 sm:mb-4 flex justify-end">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handlers.clearAll}
-                                className="cursor-pointer text-xs sm:text-sm"
-                            >
-                                Clear All
-                            </Button>
-                        </div>
+                            {/* Desktop table */}
+                            <div className="hidden md:block print:block">
+                                <CompareTable
+                                    cars={cars}
+                                    highlightDifferences={highlightDifferences}
+                                    activeCategory={activeCategory}
+                                    differences={differences}
+                                    winners={winners}
+                                    handlers={handlers}
+                                />
+                            </div>
 
-                        <div className="md:hidden">
-                            <MobileCompareTable cars={cars} />
-                        </div>
-                        <div className="hidden md:block">
-                            <CompareTable cars={cars} />
-                        </div>
-                    </>
-                )}
+                            {/* Mobile table */}
+                            <div className="md:hidden print:hidden">
+                                <MobileCompareTable
+                                    cars={cars}
+                                    highlightDifferences={highlightDifferences}
+                                    differences={differences}
+                                    winners={winners}
+                                    handlers={handlers}
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

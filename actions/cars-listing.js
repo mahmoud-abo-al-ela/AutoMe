@@ -5,7 +5,7 @@ import * as carService from "@/lib/services/car";
 import * as wishlistService from "@/lib/services/wishlist";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
-import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
+import { AuthenticationError, ValidationError, NotFoundError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { serializeCarWithImages } from "@/lib/utils/serializers";
 
@@ -14,7 +14,7 @@ export async function getCars(filters) {
     const { userId } = await auth();
 
     const organization = await getCurrentOrganization();
-    
+
     // Get cars with filters
     const result = await carService.getCars(filters, {
       page: filters.page,
@@ -47,6 +47,12 @@ export async function getCarById(id) {
     const { userId } = await auth();
 
     const car = await carService.getCarById(id);
+
+    // Validate car belongs to current organization when on a subdomain
+    const organization = await getCurrentOrganization();
+    if (organization && car.organizationId !== organization.id) {
+      throw new NotFoundError("Car");
+    }
 
     // Check if in wishlist
     let isWishlisted = false;
@@ -108,7 +114,9 @@ export async function getWishlist({ page = 1, limit = 6 } = {}) {
       throw new AuthenticationError();
     }
 
-    const result = await wishlistService.getUserWishlist(userId, { page, limit });
+    // Scope to current organization when on a subdomain
+    const organization = await getCurrentOrganization();
+    const result = await wishlistService.getUserWishlist(userId, { page, limit }, organization?.id || null);
 
     return createSuccessResponse(result);
   } catch (error) {
@@ -123,7 +131,9 @@ export async function getCarsByIds(carIds) {
       throw new ValidationError("No car IDs provided", "carIds");
     }
 
-    const cars = await carRepository.findCarsByIds(carIds);
+    // Scope to current organization when on a subdomain
+    const organization = await getCurrentOrganization();
+    const cars = await carRepository.findCarsByIds(carIds, organization?.id || null);
 
     if (!cars || cars.length === 0) {
       throw new ValidationError("No cars found with the provided IDs", "carIds");

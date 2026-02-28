@@ -15,7 +15,7 @@ import MobileMenu from "./MobileMenu";
 import { Button } from "@/components/ui/button";
 import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
-import { navItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
+import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { UnreadBadge } from "@/components/StreamChat";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ function NavLink({
   onClick,
   isActive,
   showUnreadBadge,
+  organizationId,
 }) {
   const Icon = icon
     ? { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare }[icon]
@@ -75,7 +76,7 @@ function NavLink({
             )}
           />
           {showUnreadBadge && (
-            <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+            <UnreadBadge className="absolute -top-0.5 -right-0.5" organizationId={organizationId} />
           )}
         </span>
       )}
@@ -94,13 +95,16 @@ function NavLink({
   );
 }
 
-export default function MainHeader({ user, organizationSlug }) {
+export default function MainHeader({ user, organizationSlug, organization }) {
   // Check if user has any organization membership
   const hasOrgMembership = user?.memberships?.length > 0;
 
   // Get user's first organization (for admin link)
   const userOrg = user?.memberships?.[0]?.organization;
   const userOrgSlug = organizationSlug || userOrg?.slug;
+
+  // Whether we're on a subdomain (tenant context)
+  const isOnSubdomain = !!organizationSlug;
 
   // Check if user can manage the organization (OWNER role in any org)
   const isOwner =
@@ -109,9 +113,16 @@ export default function MainHeader({ user, organizationSlug }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const isOnAdminPath = pathname?.startsWith("/admin");
+  const isOnOrgPath = pathname?.startsWith("/org/");
 
   // Show admin nav for org members when on subdomain and not already on admin path
   const showAdminNav = hasOrgMembership && organizationSlug && !isOnAdminPath;
+
+  // Dashboard link for org members (used on main domain)
+  const orgDashboardHref = userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/admin";
+
+  // Use subdomain-specific nav items when on a tenant subdomain
+  const publicNavItems = isOnSubdomain ? subdomainNavItems : navItems;
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -128,11 +139,22 @@ export default function MainHeader({ user, organizationSlug }) {
           <Link
             href="/"
             className="mr-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
-            title="Home"
-            aria-label="Home"
+            title={isOnSubdomain && organization?.name ? organization.name : "Home"}
+            aria-label={isOnSubdomain && organization?.name ? organization.name : "Home"}
           >
+            {isOnSubdomain && organization?.logo ? (
+              <img
+                src={organization.logo}
+                alt={organization.name}
+                className="h-8 w-8 rounded-full object-cover ml-4 md:ml-0"
+              />
+            ) : null}
             <span className="text-2xl font-bold text-primary ml-4 md:ml-0">
-              Auto<span className="text-black dark:text-white">Me</span>
+              {isOnSubdomain && organization?.name ? (
+                <span className="text-black dark:text-white">{organization.name}</span>
+              ) : (
+                <>Auto<span className="text-black dark:text-white">Me</span></>
+              )}
             </span>
           </Link>
           <div className="hidden md:flex items-center justify-between w-full">
@@ -147,8 +169,8 @@ export default function MainHeader({ user, organizationSlug }) {
                     isActive={pathname === item.href}
                   />
                 ))
-                : // Show public navigation
-                navItems.map((item) => (
+                : // Show public navigation (tenant-aware)
+                publicNavItems.map((item) => (
                   <NavLink
                     key={item.href}
                     href={item.href}
@@ -159,7 +181,7 @@ export default function MainHeader({ user, organizationSlug }) {
             </nav>
 
             {/* Context switcher for org members */}
-            {hasOrgMembership && (
+            {hasOrgMembership && !isOnOrgPath && (
               <div className="mr-4">
                 {isOnAdminPath ? (
                   <Button variant="outline" size="sm" asChild>
@@ -167,7 +189,7 @@ export default function MainHeader({ user, organizationSlug }) {
                   </Button>
                 ) : (
                   <Button variant="default" size="sm" asChild>
-                    <Link href="/admin">Go to Admin</Link>
+                    <Link href={orgDashboardHref}>Dashboard</Link>
                   </Button>
                 )}
               </div>
@@ -208,6 +230,7 @@ export default function MainHeader({ user, organizationSlug }) {
                         size={link.size}
                         isActive={pathname === link.href}
                         showUnreadBadge={link.showUnreadBadge}
+                        organizationId={organization?.id}
                       />
                     ))}
                   <UserButton
@@ -235,7 +258,7 @@ export default function MainHeader({ user, organizationSlug }) {
                   title="Messages"
                 >
                   <MessageSquare className="h-5 w-5" />
-                  <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+                  <UnreadBadge className="absolute -top-0.5 -right-0.5" organizationId={organization?.id} />
                 </Link>
               )}
             </SignedIn>
@@ -251,14 +274,14 @@ export default function MainHeader({ user, organizationSlug }) {
               <div className="relative w-6 h-6">
                 <X
                   className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${isMenuOpen
-                      ? "opacity-100 rotate-0 scale-100"
-                      : "opacity-0 rotate-90 scale-75"
+                    ? "opacity-100 rotate-0 scale-100"
+                    : "opacity-0 rotate-90 scale-75"
                     }`}
                 />
                 <Menu
                   className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${isMenuOpen
-                      ? "opacity-0 -rotate-90 scale-75"
-                      : "opacity-100 rotate-0 scale-100"
+                    ? "opacity-0 -rotate-90 scale-75"
+                    : "opacity-100 rotate-0 scale-100"
                     }`}
                 />
               </div>
@@ -271,6 +294,7 @@ export default function MainHeader({ user, organizationSlug }) {
           setIsMenuOpen={setIsMenuOpen}
           user={user}
           organizationSlug={organizationSlug}
+          organization={organization}
         />
       </>
     </header>

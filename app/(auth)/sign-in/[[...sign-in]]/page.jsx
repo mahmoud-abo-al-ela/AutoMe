@@ -2,7 +2,7 @@ import { SignIn } from "@clerk/nextjs";
 
 export default async function SignInPage({ searchParams }) {
   const params = await searchParams;
-  const redirectUrl = params?.redirect_url || "/admin";
+  const redirectUrl = params?.redirect_url;
 
   return (
     <SignIn forceRedirectUrl={redirectUrl} fallbackRedirectUrl={redirectUrl} />

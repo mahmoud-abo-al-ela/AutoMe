@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { CarFront, MessageSquare } from "lucide-react";
 import MobileSidebar from "./MobileSidebar";
 import DesktopSidebar from "./DesktopSidebar";
@@ -68,9 +69,21 @@ export default function AdminSidebar({ organization, userRole }) {
         <div className="flex items-center">
           <MobileSidebar pathname={pathname} organization={organization} userRole={userRole} />
           <div className="flex items-center space-x-2 ml-4">
-            <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <CarFront className="h-5 w-5 text-white" />
-            </div>
+            {organization?.logo ? (
+              <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0 relative">
+                <Image
+                  src={organization.logo}
+                  alt={orgName}
+                  fill
+                  className="object-cover"
+                  sizes="32px"
+                />
+              </div>
+            ) : (
+              <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <CarFront className="h-5 w-5 text-white" />
+              </div>
+            )}
             <span className="font-bold text-lg text-sidebar-foreground truncate max-w-[150px]">
               {orgName}
             </span>

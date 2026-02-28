@@ -12,7 +12,7 @@ import { Mail, Copy, Facebook, Twitter, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { socialShares } from "@/lib/SocialShare";
 
-const ShareDialog = ({ isOpen, onOpenChange }) => {
+const ShareDialog = ({ isOpen, onOpenChange, title = "Share This Vehicle" }) => {
   const [copying, setCopying] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -36,7 +36,7 @@ const ShareDialog = ({ isOpen, onOpenChange }) => {
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-start sm:text-center text-base sm:text-xl">
-            Share This Vehicle
+            {title}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-2">

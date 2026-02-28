@@ -50,6 +50,7 @@ export const CarFormPresenter = ({
     aiConfidence = null,
     uploadedImage = null,
     handlers,
+    maxImages = 5,
 }) => {
     const themeColors = getThemeColors(isAIMode);
     const { register, formState: { errors }, watch, setValue, trigger } = form;
@@ -218,6 +219,7 @@ export const CarFormPresenter = ({
                                     errors={errors}
                                     watch={watch}
                                     setValue={setValue}
+                                    maxImages={maxImages}
                                 />
                             )}
 

@@ -15,7 +15,7 @@ const CarDescription = ({ description }) => {
             Vehicle Description
           </h3>
         </div>
-        <p className="text-gray-700 leading-relaxed text-xs  md:text-lg">
+        <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
           {description || "No description available for this vehicle."}
         </p>
       </CardContent>

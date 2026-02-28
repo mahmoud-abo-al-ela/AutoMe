@@ -1,31 +1,38 @@
 "use server";
 
-import { checkUser, getActualUser } from "@/lib/checkUser";
+import { getActualUser } from "@/lib/checkUser";
 import {
   startImpersonation,
   endImpersonation,
   getCurrentImpersonationSession,
 } from "@/lib/services/impersonation";
 import { revalidatePath } from "next/cache";
+import { withErrorHandling } from "@/lib/middleware/with-auth";
+import { createSuccessResponse } from "@/lib/utils/response";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  ValidationError,
+  NotFoundError,
+} from "@/lib/utils/errors";
 
 /**
  * Start an impersonation session (Super Admin only)
  */
-export async function startImpersonationAction({
-  targetUserId,
-  targetOrganizationId,
-  reason,
-}) {
-  try {
+export const startImpersonationAction = withErrorHandling(
+  async ({ targetUserId, targetOrganizationId, reason }) => {
     // Get the actual user (not impersonated)
     const user = await getActualUser();
 
     if (!user || user.role !== "ADMIN") {
-      return { success: false, error: "Unauthorized" };
+      throw new AuthorizationError();
     }
 
     if (!reason || reason.trim().length < 10) {
-      return { success: false, error: "Reason must be at least 10 characters" };
+      throw new ValidationError(
+        "Reason must be at least 10 characters",
+        "reason"
+      );
     }
 
     const result = await startImpersonation({
@@ -36,71 +43,55 @@ export async function startImpersonationAction({
       reason,
     });
 
-    return {
-      success: true,
-      data: {
-        sessionId: result.session.id,
-        organizationSlug: result.organization.slug,
-      },
-    };
-  } catch (error) {
-    console.error("Start impersonation error:", error);
-    return { success: false, error: error.message };
+    return createSuccessResponse({
+      sessionId: result.session.id,
+      organizationSlug: result.organization.slug,
+    });
   }
-}
+);
 
 /**
  * End the current impersonation session
  */
-export async function endImpersonationAction() {
-  try {
-    const session = await getCurrentImpersonationSession();
+export const endImpersonationAction = withErrorHandling(async () => {
+  const session = await getCurrentImpersonationSession();
 
-    if (!session) {
-      return { success: false, error: "No active impersonation session" };
-    }
-
-    // Get the actual super admin
-    const user = await getActualUser();
-
-    if (!user || user.role !== "ADMIN") {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    await endImpersonation(session.id, user.email);
-
-    revalidatePath("/super-admin");
-
-    return { success: true };
-  } catch (error) {
-    console.error("End impersonation error:", error);
-    return { success: false, error: error.message };
+  if (!session) {
+    throw new NotFoundError("No active impersonation session");
   }
-}
+
+  // Get the actual super admin
+  const user = await getActualUser();
+
+  if (!user || user.role !== "ADMIN") {
+    throw new AuthorizationError();
+  }
+
+  await endImpersonation(session.id, user.email);
+
+  revalidatePath("/super-admin");
+
+  return createSuccessResponse(null, "Impersonation session ended");
+});
 
 /**
  * Get current impersonation status
  */
-export async function getImpersonationStatus() {
-  try {
-    const session = await getCurrentImpersonationSession();
+export const getImpersonationStatus = withErrorHandling(async () => {
+  const session = await getCurrentImpersonationSession();
 
-    if (!session) {
-      return { isImpersonating: false };
-    }
-
-    return {
-      isImpersonating: true,
-      session: {
-        id: session.id,
-        superAdmin: session.superAdmin,
-        targetUser: session.targetUser,
-        targetOrganizationId: session.targetOrganizationId,
-        startedAt: session.startedAt,
-      },
-    };
-  } catch (error) {
-    console.error("Get impersonation status error:", error);
-    return { isImpersonating: false };
+  if (!session) {
+    return createSuccessResponse({ isImpersonating: false });
   }
-}
+
+  return createSuccessResponse({
+    isImpersonating: true,
+    session: {
+      id: session.id,
+      superAdmin: session.superAdmin,
+      targetUser: session.targetUser,
+      targetOrganizationId: session.targetOrganizationId,
+      startedAt: session.startedAt,
+    },
+  });
+});

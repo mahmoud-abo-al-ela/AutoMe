@@ -16,9 +16,10 @@ import {
   HelpCircle,
   Calendar,
   LogOut,
+  Building2,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { navItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
+import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UnreadBadge } from "@/components/StreamChat";
@@ -41,6 +42,7 @@ const iconMap = {
 function getNavIcon(label) {
   const icons = {
     "Browse Cars": Search,
+    Dealerships: Building2,
     Compare: Scale,
     FAQ: HelpCircle,
     Dashboard: LayoutDashboard,
@@ -63,6 +65,7 @@ function NavLink({
   animationDelay = 0,
   showUnreadBadge = false,
   IconComponent = null,
+  organizationId,
 }) {
   const Icon = IconComponent || (icon ? iconMap[icon] : null);
 
@@ -75,8 +78,8 @@ function NavLink({
       <Link
         href={href}
         className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${isActive
-            ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
-            : "text-foreground hover:bg-muted"
+          ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
+          : "text-foreground hover:bg-muted"
           }`}
         onClick={onClick}
         aria-current={isActive ? "page" : undefined}
@@ -86,15 +89,15 @@ function NavLink({
             <Icon
               size={size}
               className={`${isActive
-                  ? "text-white"
-                  : "text-muted-foreground group-hover:text-foreground"
+                ? "text-white"
+                : "text-muted-foreground group-hover:text-foreground"
                 } transition-colors`}
             />
           )}
           <span>{label}</span>
         </div>
         <div className="flex items-center gap-2">
-          {showUnreadBadge && <UnreadBadge />}
+          {showUnreadBadge && <UnreadBadge organizationId={organizationId} />}
           {!isActive && (
             <ChevronRight
               size={16}
@@ -112,11 +115,19 @@ export default function MobileMenu({
   setIsMenuOpen,
   user,
   organizationSlug,
+  organization,
 }) {
   const pathname = usePathname();
 
   // Check if user has any organization membership
   const hasOrgMembership = user?.memberships?.length > 0;
+
+  // Get user's first organization (for dashboard link)
+  const userOrg = user?.memberships?.[0]?.organization;
+  const userOrgSlug = organizationSlug || userOrg?.slug;
+
+  // Whether we're on a subdomain (tenant context)
+  const isOnSubdomain = !!organizationSlug;
 
   // Check if user can manage the organization (OWNER role in any org)
   const isOwner =
@@ -125,10 +136,17 @@ export default function MobileMenu({
   const menuRef = useRef(null);
   const { signOut } = useClerk();
   const isOnAdminPath = pathname?.startsWith("/admin");
+  const isOnOrgPath = pathname?.startsWith("/org/");
 
   // Show admin nav for org members when on subdomain and not already on admin path
   const showAdminNav = hasOrgMembership && organizationSlug && !isOnAdminPath;
-  const navToShow = showAdminNav ? adminNavItems : navItems;
+
+  // Dashboard link for org members (used on main domain)
+  const orgDashboardHref = userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/admin";
+
+  // Use subdomain-specific nav items when on a tenant subdomain
+  const publicNavItems = isOnSubdomain ? subdomainNavItems : navItems;
+  const navToShow = showAdminNav ? adminNavItems : publicNavItems;
 
   // Filter out messages from signed-in links (it's now in header)
   const filteredSignedInLinks = signedInLinks.filter(
@@ -227,7 +245,7 @@ export default function MobileMenu({
               style={{ maxHeight: "calc(100vh - 14rem)" }}
             >
               {/* Context switcher for org members */}
-              {hasOrgMembership && (
+              {hasOrgMembership && !isOnOrgPath && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -244,9 +262,9 @@ export default function MobileMenu({
                       </Button>
                     </Link>
                   ) : (
-                    <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
+                    <Link href={orgDashboardHref} onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        Go to Admin
+                        Dashboard
                       </Button>
                     </Link>
                   )}
@@ -294,6 +312,7 @@ export default function MobileMenu({
                         isActive={pathname === link.href}
                         animationDelay={(navItems.length + index) * 40}
                         showUnreadBadge={link.showUnreadBadge}
+                        organizationId={organization?.id}
                       />
                     ))}
                 </div>
@@ -321,7 +340,9 @@ export default function MobileMenu({
             {/* Footer */}
             <div className="px-5 py-3 border-t bg-muted/30 text-center">
               <p className="text-[10px] text-muted-foreground">
-                © 2026 AutoMe • All rights reserved
+                {isOnSubdomain && organization?.name
+                  ? `© 2026 ${organization.name} • Powered by AutoMe`
+                  : "© 2026 AutoMe • All rights reserved"}
               </p>
             </div>
           </motion.div>

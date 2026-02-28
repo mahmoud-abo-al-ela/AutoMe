@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { Building2, CheckCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 function DealerCTA() {
   const benefits = [
@@ -67,16 +68,30 @@ function DealerCTA() {
               </ul>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Link href="/onboarding" className="flex items-center gap-2">
-                    Start Free Trial
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <SignedIn>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Link href="/onboarding" className="flex items-center gap-2">
+                      Start Free Trial
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </SignedIn>
+                <SignedOut>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Link href="/sign-up?redirect_url=/onboarding" className="flex items-center gap-2">
+                      Start Free Trial
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </SignedOut>
                 <Button
                   asChild
                   variant="outline"

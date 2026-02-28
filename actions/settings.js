@@ -60,7 +60,7 @@ export async function updateWorkingHours(workingHours) {
 
     await dealershipService.updateWorkingHours(workingHours, userId, organization.id);
 
-    revalidatePath("/admin/settings/working-hours");
+    revalidatePath(`/org/${organization.slug}/settings/working-hours`);
     revalidatePath("/");
 
     return createSuccessResponse(null, "Working hours updated successfully");

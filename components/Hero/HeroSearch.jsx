@@ -45,7 +45,6 @@ const HeroSearch = () => {
       toast.error("Please select an image");
       return;
     }
-    console.log("Starting image search with file:", selectedImage);
     toast.info("Processing image...");
     await fetchImageSearch(selectedImage);
   };
@@ -58,7 +57,6 @@ const HeroSearch = () => {
 
   useEffect(() => {
     if (imageSearch?.success) {
-      console.log(imageSearch);
       const params = new URLSearchParams();
       if (imageSearch.data.make) {
         params.append("make", imageSearch.data.make);
@@ -83,7 +81,6 @@ const HeroSearch = () => {
         setImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
-      console.log("Image uploaded:", file.name);
     }
   };
 
@@ -128,9 +125,8 @@ const HeroSearch = () => {
             <div
               onClick={triggerFileInput}
               title="Photo Search"
-              className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-all duration-300 flex items-center gap-1 ${
-                searchQuery.trim() ? "hidden" : "block"
-              }`}
+              className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-all duration-300 flex items-center gap-1 ${searchQuery.trim() ? "hidden" : "block"
+                }`}
             >
               <Camera size={18} className="sm:size-[20px]" />
             </div>

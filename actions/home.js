@@ -4,14 +4,20 @@ import { request } from "@arcjet/next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { fileToBase64 } from "./cars";
 import * as carRepository from "@/lib/repositories/car";
-import { serializeCars } from "@/lib/utils/serializers";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
 import { ValidationError, RateLimitError } from "@/lib/utils/errors";
+import { getCurrentOrganization } from "@/lib/getOrganization";
 
 export async function getFeaturedCars(limit = 4) {
   try {
+    const organization = await getCurrentOrganization();
+
     const result = await carRepository.findManyCars(
-      { featured: true, onlyAvailable: true },
+      {
+        featured: true,
+        onlyAvailable: true,
+        ...(organization?.id && { organizationId: organization.id }),
+      },
       { page: 1, limit }
     );
 
@@ -47,7 +53,6 @@ export async function processImagesSearch(file) {
     const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
     const base64Image = await fileToBase64(file);
-    console.log("Base64 image generated", { length: base64Image.length });
 
     const imagePart = {
       inlineData: {
@@ -93,7 +98,6 @@ Only respond with the JSON object, nothing else.
 
     const response = await result.response;
     const json = response.text();
-    console.log("Raw API response:", json);
 
     // Clean response
     let cleanData = json
@@ -104,7 +108,6 @@ Only respond with the JSON object, nothing else.
     const jsonMatch = cleanData.match(/{[\s\S]*}/);
     if (jsonMatch) {
       cleanData = jsonMatch[0];
-      console.log("Extracted JSON:", cleanData);
     } else {
       throw new ValidationError("No valid JSON object found in response", "ai_response");
     }

@@ -24,7 +24,6 @@ const UserTestDrivesList = ({ testDrives, loading, pagination }) => {
 
   useEffect(() => {
     if (pagination?.status && pagination.status !== statusFilter) {
-      console.log("Updating local status from pagination:", pagination.status);
       setStatusFilter(pagination.status);
     }
   }, [pagination?.status]);

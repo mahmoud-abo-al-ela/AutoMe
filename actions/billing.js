@@ -3,96 +3,293 @@
 import { checkUser } from "@/lib/checkUser";
 import { getOrganizationById, getUserMembership } from "@/lib/getOrganization";
 import * as billingService from "@/lib/services/billing";
+import { createBillingPortalSession as createPortalSession } from "@/lib/services/stripe/portal";
+import {
+  createNewSubscriptionCheckout,
+  updateSubscriptionPlan,
+} from "@/lib/services/stripe/plan-change";
+import { getCustomerInvoices } from "@/lib/services/stripe/invoices";
+import { getDefaultPaymentMethod } from "@/lib/services/stripe/payment-method";
+import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
+import { createSuccessResponse } from "@/lib/utils/response";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  ValidationError,
+} from "@/lib/utils/errors";
 
 // ============ PLAN ACTIONS ============
 
 /**
  * Get all active plans
  */
-export async function getActivePlans() {
-  return billingService.getActivePlans();
-}
+export const getActivePlans = withErrorHandling(async () => {
+  const plans = await billingService.getActivePlans();
+  return createSuccessResponse(plans);
+});
 
 /**
  * Get a plan by ID
  */
-export async function getPlanById(planId) {
-  return billingService.getPlanById(planId);
-}
+export const getPlanById = withErrorHandling(async (planId) => {
+  const plan = await billingService.getPlanById(planId);
+  if (!plan) {
+    throw new NotFoundError("Plan");
+  }
+  return createSuccessResponse(plan);
+});
 
 // ============ BILLING DATA ACTIONS ============
 
 /**
  * Get billing data for an organization
  */
-export async function getBillingData(organizationId) {
-  const user = await checkUser();
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
+export const getBillingData = withAuth(async (ctx, organizationId) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
-  return billingService.getBillingData(organization.id);
-}
+  const data = await billingService.getBillingData(organization.id);
+  return createSuccessResponse(data);
+});
 
 /**
  * Get billing history for an organization
  */
-export async function getBillingHistory(organizationId) {
-  const user = await checkUser();
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
+export const getBillingHistory = withAuth(async (ctx, organizationId) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
-  const membership = await getUserMembership(user.id, organization.id);
+  const membership = await getUserMembership(ctx.user.id, organization.id);
   if (!membership || membership.role !== "OWNER") {
-    throw new Error("Only owners can view billing history");
+    throw new AuthorizationError("Only owners can view billing history");
   }
 
   const history = await billingService.getBillingHistory(organization.id);
-
-  return { history };
-}
+  return createSuccessResponse({ history });
+});
 
 /**
  * Get current subscription for an organization
  */
-export async function getCurrentSubscription(organizationId) {
-  const user = await checkUser();
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
+export const getCurrentSubscription = withAuth(async (ctx, organizationId) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
-  return billingService.getActiveSubscription(organization.id);
-}
+  const subscription = await billingService.getActiveSubscription(organization.id);
+  return createSuccessResponse(subscription);
+});
 
 /**
  * Get usage stats for an organization
  */
-export async function getUsageStats(organizationId) {
-  const user = await checkUser();
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
+export const getUsageStats = withAuth(async (ctx, organizationId) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
-  return billingService.getUsageStats(organization.id);
-}
+  const stats = await billingService.getUsageStats(organization.id);
+  return createSuccessResponse(stats);
+});
+
+// ============ STRIPE PORTAL ACTIONS ============
+
+export const createBillingPortalSession = withAuth(
+  async (ctx, organizationId, returnPath) => {
+    const organization = await getOrganizationById(organizationId);
+    if (!organization) {
+      throw new NotFoundError("Organization");
+    }
+
+    const membership = await getUserMembership(ctx.user.id, organization.id);
+    if (!membership || membership.role !== "OWNER") {
+      throw new AuthorizationError("Only owners can manage billing");
+    }
+
+    const subscription = organization.subscription;
+    if (!subscription?.stripeCustomerId) {
+      throw new ValidationError(
+        "No active Stripe subscription found. Please subscribe to a plan first."
+      );
+    }
+
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === "production"
+        ? undefined
+        : "http://localhost:3000");
+
+    if (!appUrl) {
+      throw new ValidationError("NEXT_PUBLIC_APP_URL is not configured");
+    }
+
+    const returnUrl = `${appUrl}${returnPath}`;
+    const session = await createPortalSession(
+      subscription.stripeCustomerId,
+      returnUrl
+    );
+    return createSuccessResponse(session);
+  }
+);
+
+// ============ PLAN CHANGE ACTIONS ============
+
+export const createPlanChangeSession = withAuth(
+  async (ctx, organizationId, newPlanId, billingCycle, billingPagePath) => {
+    const organization = await getOrganizationById(organizationId);
+    if (!organization) {
+      throw new NotFoundError("Organization");
+    }
+
+    const membership = await getUserMembership(ctx.user.id, organization.id);
+    if (!membership || membership.role !== "OWNER") {
+      throw new AuthorizationError("Only owners can change plans");
+    }
+
+    // Get the new plan details
+    const newPlan = await billingService.getPlanById(newPlanId);
+    if (!newPlan) {
+      throw new NotFoundError("Plan");
+    }
+
+    // Determine the Stripe price ID based on billing cycle
+    const stripePriceId =
+      billingCycle === "yearly"
+        ? newPlan.stripeYearlyPriceId
+        : newPlan.stripeMonthlyPriceId;
+
+    // Check if the new plan is free (downgrade to starter)
+    const newPrice =
+      billingCycle === "yearly" ? newPlan.yearlyPrice : newPlan.monthlyPrice;
+
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === "production"
+        ? undefined
+        : "http://localhost:3000");
+
+    if (!appUrl) {
+      throw new ValidationError("NEXT_PUBLIC_APP_URL is not configured");
+    }
+
+    const subscription = organization.subscription;
+
+    // Case 1: User has an existing Stripe subscription — update it
+    if (subscription?.stripeSubscriptionId && stripePriceId) {
+      const updatedSubscription = await updateSubscriptionPlan({
+        stripeSubscriptionId: subscription.stripeSubscriptionId,
+        newStripePriceId: stripePriceId,
+        newPlanId: newPlan.id,
+      });
+
+      // Update our local subscription record with the new plan
+      const { db } = await import("@/lib/prisma");
+      await db.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          planId: newPlan.id,
+          status:
+            updatedSubscription.status === "active"
+              ? "ACTIVE"
+              : subscription.status,
+        },
+      });
+
+      return createSuccessResponse({ type: "updated" });
+    }
+
+    // Case 2: No existing subscription and new plan is free — nothing to do
+    if (newPrice === 0) {
+      throw new ValidationError("You are already on the free plan");
+    }
+
+    // Case 3: No existing Stripe subscription — create a Checkout session
+    if (!stripePriceId) {
+      throw new ValidationError(
+        `Plan "${newPlan.name}" is not configured for Stripe billing. Please contact support.`
+      );
+    }
+
+    const successUrl = `${appUrl}${billingPagePath}/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${appUrl}${billingPagePath}`;
+
+    const { url } = await createNewSubscriptionCheckout({
+      customerEmail: ctx.user.email,
+      stripePriceId,
+      successUrl,
+      cancelUrl,
+      metadata: {
+        userId: ctx.user.id,
+        planId: newPlan.id,
+        organizationId: organization.id,
+        billingCycle,
+        type: "plan_change",
+      },
+    });
+
+    return createSuccessResponse({ type: "redirect", url });
+  }
+);
+
+// ============ PAYMENT METHOD ACTIONS ============
+
+/**
+ * Get the default payment method for an organization's Stripe customer
+ */
+export const getPaymentMethod = withAuth(async (ctx, organizationId) => {
+  const organization = await getOrganizationById(organizationId);
+  if (!organization) {
+    throw new NotFoundError("Organization");
+  }
+
+  const membership = await getUserMembership(ctx.user.id, organization.id);
+  if (!membership) {
+    throw new AuthorizationError("You are not a member of this organization");
+  }
+
+  const subscription = organization.subscription;
+  if (!subscription?.stripeCustomerId) {
+    return createSuccessResponse(null);
+  }
+
+  const paymentMethod = await getDefaultPaymentMethod(
+    subscription.stripeCustomerId
+  );
+  return createSuccessResponse(paymentMethod);
+});
+
+// ============ INVOICE ACTIONS ============
+
+export const getInvoices = withAuth(async (ctx, organizationId, options = {}) => {
+  const organization = await getOrganizationById(organizationId);
+  if (!organization) {
+    throw new NotFoundError("Organization");
+  }
+
+  const membership = await getUserMembership(ctx.user.id, organization.id);
+  if (!membership || membership.role !== "OWNER") {
+    throw new AuthorizationError("Only owners can view invoices");
+  }
+
+  const subscription = organization.subscription;
+  if (!subscription?.stripeCustomerId) {
+    return createSuccessResponse({
+      invoices: [],
+      hasMore: false,
+      nextCursor: null,
+    });
+  }
+
+  const invoices = await getCustomerInvoices(
+    subscription.stripeCustomerId,
+    options
+  );
+  return createSuccessResponse(invoices);
+});

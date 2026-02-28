@@ -10,6 +10,7 @@ import {
 const PriceRangeFilter = ({
   priceRange,
   setPriceRange,
+  onPriceCommit,
   maxPriceValue,
   formatPrice,
   isLoading,
@@ -22,13 +23,13 @@ const PriceRangeFilter = ({
           (priceRange[1] < maxPriceValue &&
             priceRange[1] > 0 &&
             maxPriceValue > 0)) && (
-          <Badge
-            variant="secondary"
-            className="ml-2 bg-primary/10 text-primary"
-          >
-            Set
-          </Badge>
-        )}
+            <Badge
+              variant="secondary"
+              className="ml-2 bg-primary/10 text-primary"
+            >
+              Set
+            </Badge>
+          )}
       </AccordionTrigger>
       <AccordionContent>
         <div className="pt-1 pb-3">
@@ -43,6 +44,7 @@ const PriceRangeFilter = ({
             step={1000}
             value={priceRange}
             onValueChange={(value) => !isLoading && setPriceRange(value)}
+            onValueCommit={(value) => !isLoading && onPriceCommit && onPriceCommit(value)}
             disabled={isLoading || maxPriceValue === 0}
             className="mb-2"
           />

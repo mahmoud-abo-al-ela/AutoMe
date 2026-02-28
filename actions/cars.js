@@ -27,11 +27,6 @@ export async function processCarImageWithAI(file) {
       throw new ValidationError("Invalid file type; must be an image", "file");
     }
 
-    console.log("Processing image:", {
-      type: file.type,
-      size: file.size,
-    });
-
     const base64Image = await fileToBase64(file);
 
     const prompt = `
@@ -86,7 +81,6 @@ Schema:
     });
 
     const text = response.text;
-    console.log("Raw AI response:", text);
 
     let parsed;
     try {
@@ -126,6 +120,47 @@ Schema:
   }
 }
 
+
+export async function getCarPlanLimits() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new AuthenticationError();
+    }
+
+    const user = await checkUser();
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    let organization = await getCurrentOrganization();
+    if (!organization && user.memberships?.length > 0) {
+      organization = user.memberships[0].organization;
+    }
+
+    if (!organization) {
+      throw new AuthenticationError("No organization found");
+    }
+
+    const plan = organization.subscription?.plan;
+    const maxImages = plan?.maxImagesPerCar ?? 5;
+    const features = plan?.features || {};
+    const aiProcessingEnabled = features.aiProcessing?.enabled ?? false;
+
+    return createSuccessResponse({
+      maxImagesPerCar: maxImages,
+      aiProcessingEnabled,
+    });
+  } catch (error) {
+    console.error("Error getting car plan limits", error);
+    return createErrorResponse(error);
+  }
+}
+
+// Backward-compatible alias
+export async function getMaxImagesPerCar() {
+  return getCarPlanLimits();
+}
 
 export async function addCar(payload) {
   try {

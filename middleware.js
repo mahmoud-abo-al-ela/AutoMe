@@ -16,6 +16,12 @@ const isMainDomainOnlyRoute = createRouteMatcher([
   "/pricing(.*)",
   "/signup-org(.*)",
   "/super-admin(.*)",
+  "/onboarding(.*)",
+]);
+
+// Routes that should redirect to the dealership home on subdomains
+const isSubdomainRedirectToHomeRoute = createRouteMatcher([
+  "/dealerships",
 ]);
 
 const isPublicApiRoute = createRouteMatcher([
@@ -75,14 +81,19 @@ function getImpersonationContext(request) {
 
 // ============ ARCJET CONFIGURATION ============
 
+// Use DRY_RUN in development to avoid blocking browser requests locally;
+// LIVE mode is used in production for full protection.
+const arcjetMode =
+  process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN";
+
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
     shield({
-      mode: "LIVE",
+      mode: arcjetMode,
     }),
     detectBot({
-      mode: "LIVE",
+      mode: arcjetMode,
       allow: ["CATEGORY:SEARCH_ENGINE"],
     }),
   ],
@@ -130,6 +141,19 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   // Block main-domain-only routes on subdomains
   if (subdomain && isMainDomainOnlyRoute(req)) {
+    // For onboarding, redirect to the main domain's onboarding page
+    if (url.pathname.startsWith("/onboarding")) {
+      const mainDomainUrl = ROOT_DOMAIN === "localhost"
+        ? `http://localhost:${url.port || "3000"}${url.pathname}${url.search}`
+        : `https://${ROOT_DOMAIN}${url.pathname}${url.search}`;
+      return NextResponse.redirect(mainDomainUrl);
+    }
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  // Redirect dealership-listing routes to home on subdomains
+  // (on a subdomain, the user is already on a specific dealership)
+  if (subdomain && isSubdomainRedirectToHomeRoute(req)) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 

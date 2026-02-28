@@ -43,6 +43,16 @@ export default function PlanFormDialog({
 
     const [features, setFeatures] = useState(DEFAULT_FEATURES);
 
+    // Local state for input values to prevent focus loss
+    const [inputValues, setInputValues] = useState({
+        monthlyPrice: "",
+        yearlyPrice: "",
+        maxCars: "",
+        maxMembers: "",
+        maxImagesPerCar: "",
+        auditLogRetentionDays: "",
+    });
+
     // Initialize form data when dialog opens or plan changes
     useEffect(() => {
         if (mode === "edit" && plan) {
@@ -58,6 +68,14 @@ export default function PlanFormDialog({
                 features: plan.features || DEFAULT_FEATURES,
             });
             setFeatures(plan.features || DEFAULT_FEATURES);
+            setInputValues({
+                monthlyPrice: plan.monthlyPrice ? (plan.monthlyPrice / 100).toString() : "",
+                yearlyPrice: plan.yearlyPrice ? (plan.yearlyPrice / 100).toString() : "",
+                maxCars: plan.maxCars === 0 ? "" : plan.maxCars.toString(),
+                maxMembers: plan.maxMembers === 0 ? "" : plan.maxMembers.toString(),
+                maxImagesPerCar: plan.maxImagesPerCar === 0 ? "" : plan.maxImagesPerCar.toString(),
+                auditLogRetentionDays: plan.auditLogRetentionDays === null ? "" : plan.auditLogRetentionDays.toString(),
+            });
         } else if (mode === "create") {
             setFormData({
                 name: "",
@@ -71,6 +89,14 @@ export default function PlanFormDialog({
                 features: DEFAULT_FEATURES,
             });
             setFeatures(DEFAULT_FEATURES);
+            setInputValues({
+                monthlyPrice: "",
+                yearlyPrice: "",
+                maxCars: "",
+                maxMembers: "",
+                maxImagesPerCar: "",
+                auditLogRetentionDays: "",
+            });
         }
     }, [mode, plan, open]);
 
@@ -81,7 +107,17 @@ export default function PlanFormDialog({
     };
 
     const handleSubmit = () => {
-        onSubmit(formData);
+        // Update form data with current input values before submitting
+        const updatedFormData = {
+            ...formData,
+            monthlyPrice: Math.round(parseFloat(inputValues.monthlyPrice) * 100) || 0,
+            yearlyPrice: Math.round(parseFloat(inputValues.yearlyPrice) * 100) || 0,
+            maxCars: inputValues.maxCars === "" ? 0 : parseInt(inputValues.maxCars),
+            maxMembers: inputValues.maxMembers === "" ? 0 : parseInt(inputValues.maxMembers),
+            maxImagesPerCar: inputValues.maxImagesPerCar === "" ? 0 : parseInt(inputValues.maxImagesPerCar),
+            auditLogRetentionDays: inputValues.auditLogRetentionDays === "" ? null : parseInt(inputValues.auditLogRetentionDays),
+        };
+        onSubmit(updatedFormData);
     };
 
     const handleClose = () => {
@@ -140,9 +176,15 @@ export default function PlanFormDialog({
                                 <Input
                                     id="monthlyPrice"
                                     type="number"
+                                    step="0.01"
                                     placeholder="e.g., 29.00"
-                                    value={formData.monthlyPrice ? (formData.monthlyPrice / 100).toFixed(2) : ""}
-                                    onChange={(e) => setFormData({ ...formData, monthlyPrice: Math.round(parseFloat(e.target.value) * 100) || 0 })}
+                                    value={inputValues.monthlyPrice}
+                                    onChange={(e) => setInputValues({ ...inputValues, monthlyPrice: e.target.value })}
+                                    onBlur={(e) => {
+                                        const value = parseFloat(e.target.value) || 0;
+                                        setFormData({ ...formData, monthlyPrice: Math.round(value * 100) });
+                                        setInputValues({ ...inputValues, monthlyPrice: value.toString() });
+                                    }}
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -150,9 +192,15 @@ export default function PlanFormDialog({
                                 <Input
                                     id="yearlyPrice"
                                     type="number"
+                                    step="0.01"
                                     placeholder="e.g., 290.00"
-                                    value={formData.yearlyPrice ? (formData.yearlyPrice / 100).toFixed(2) : ""}
-                                    onChange={(e) => setFormData({ ...formData, yearlyPrice: Math.round(parseFloat(e.target.value) * 100) || 0 })}
+                                    value={inputValues.yearlyPrice}
+                                    onChange={(e) => setInputValues({ ...inputValues, yearlyPrice: e.target.value })}
+                                    onBlur={(e) => {
+                                        const value = parseFloat(e.target.value) || 0;
+                                        setFormData({ ...formData, yearlyPrice: Math.round(value * 100) });
+                                        setInputValues({ ...inputValues, yearlyPrice: value.toString() });
+                                    }}
                                 />
                             </div>
                         </div>
@@ -165,10 +213,12 @@ export default function PlanFormDialog({
                                 <Input
                                     id="maxCars"
                                     type="number"
-                                    value={formData.maxCars === 0 ? "" : formData.maxCars}
-                                    onChange={(e) => {
+                                    value={inputValues.maxCars}
+                                    onChange={(e) => setInputValues({ ...inputValues, maxCars: e.target.value })}
+                                    onBlur={(e) => {
                                         const value = e.target.value === "" ? 0 : parseInt(e.target.value);
                                         setFormData({ ...formData, maxCars: isNaN(value) ? 0 : value });
+                                        setInputValues({ ...inputValues, maxCars: value === 0 ? "" : value.toString() });
                                     }}
                                     placeholder="0"
                                 />
@@ -178,10 +228,12 @@ export default function PlanFormDialog({
                                 <Input
                                     id="maxMembers"
                                     type="number"
-                                    value={formData.maxMembers === 0 ? "" : formData.maxMembers}
-                                    onChange={(e) => {
+                                    value={inputValues.maxMembers}
+                                    onChange={(e) => setInputValues({ ...inputValues, maxMembers: e.target.value })}
+                                    onBlur={(e) => {
                                         const value = e.target.value === "" ? 0 : parseInt(e.target.value);
                                         setFormData({ ...formData, maxMembers: isNaN(value) ? 0 : value });
+                                        setInputValues({ ...inputValues, maxMembers: value === 0 ? "" : value.toString() });
                                     }}
                                     placeholder="0"
                                 />
@@ -193,10 +245,12 @@ export default function PlanFormDialog({
                                 <Input
                                     id="maxImagesPerCar"
                                     type="number"
-                                    value={formData.maxImagesPerCar === 0 ? "" : formData.maxImagesPerCar}
-                                    onChange={(e) => {
+                                    value={inputValues.maxImagesPerCar}
+                                    onChange={(e) => setInputValues({ ...inputValues, maxImagesPerCar: e.target.value })}
+                                    onBlur={(e) => {
                                         const value = e.target.value === "" ? 0 : parseInt(e.target.value);
                                         setFormData({ ...formData, maxImagesPerCar: isNaN(value) ? 0 : value });
+                                        setInputValues({ ...inputValues, maxImagesPerCar: value === 0 ? "" : value.toString() });
                                     }}
                                     placeholder="0"
                                 />
@@ -207,10 +261,12 @@ export default function PlanFormDialog({
                                     id="auditLogRetentionDays"
                                     type="number"
                                     placeholder="Leave empty for unlimited"
-                                    value={formData.auditLogRetentionDays === null ? "" : formData.auditLogRetentionDays}
-                                    onChange={(e) => {
+                                    value={inputValues.auditLogRetentionDays}
+                                    onChange={(e) => setInputValues({ ...inputValues, auditLogRetentionDays: e.target.value })}
+                                    onBlur={(e) => {
                                         const value = e.target.value === "" ? null : parseInt(e.target.value);
                                         setFormData({ ...formData, auditLogRetentionDays: value === null || isNaN(value) ? null : value });
+                                        setInputValues({ ...inputValues, auditLogRetentionDays: value === null ? "" : value.toString() });
                                     }}
                                 />
                             </div>
@@ -248,10 +304,10 @@ export default function PlanFormDialog({
                 </Tabs>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={handleClose} disabled={loading || isPending}>
+                    <Button variant="outline" onClick={handleClose} disabled={loading || isPending} className="cursor-pointer">
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} disabled={loading || isPending}>
+                    <Button onClick={handleSubmit} disabled={loading || isPending} className="cursor-pointer">
                         {loading || isPending ? (
                             <>
                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -43,6 +43,12 @@ enum PlanType {
   ENTERPRISE
 }
 
+enum OnboardingSessionStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+}
+
 enum MemberRole {
   OWNER
   MEMBER
@@ -53,6 +59,7 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELED
   TRIALING
+  PENDING
 }
 
 enum AuditAction {
@@ -129,6 +136,10 @@ model Organization {
   theme    Json? // { primaryColor, secondaryColor, etc. }
   settings Json? // Feature flags, preferences
 
+  // Rating & Reviews (denormalized for efficient querying)
+  averageRating Float @default(0)
+  totalReviews  Int   @default(0)
+
   // Relationships
   subscription          Subscription?
   memberships           Membership[]
@@ -137,6 +148,7 @@ model Organization {
   testDrives            TestDrive[]
   auditLogs             AuditLog[]
   impersonationSessions ImpersonationSession[]
+  dealershipReviews     DealershipReview[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -144,6 +156,7 @@ model Organization {
 
   @@index([slug])
   @@index([isActive])
+  @@index([averageRating])
 }
 
 model Plan {
@@ -154,6 +167,11 @@ model Plan {
   // Pricing (in cents)
   monthlyPrice Int @default(0)
   yearlyPrice  Int @default(0)
+
+  // Stripe Integration
+  stripeProductId      String? @unique
+  stripeMonthlyPriceId String? @unique
+  stripeYearlyPriceId  String? @unique
 
   // Limits
   maxCars               Int  @default(10)
@@ -181,8 +199,9 @@ model Subscription {
   status SubscriptionStatus @default(TRIALING)
 
   // Stripe Integration
-  stripeCustomerId     String? @unique
-  stripeSubscriptionId String? @unique
+  stripeCustomerId        String? @unique
+  stripeSubscriptionId    String? @unique
+  stripeCheckoutSessionId String? @unique
 
   // Billing Period
   currentPeriodStart DateTime?
@@ -308,6 +327,12 @@ model User {
 
   // Audit logs
   auditLogs AuditLog[]
+
+  // Onboarding
+  onboardingSessions OnboardingSession[]
+
+  // Dealership Reviews
+  dealershipReviews DealershipReview[]
 }
 
 // ============ CAR MODEL ============
@@ -413,4 +438,45 @@ model TestDrive {
   @@index([carId])
   @@index([status])
   @@index([date])
+}
+
+// ============ ONBOARDING SESSION ============
+
+model OnboardingSession {
+  id        String                  @id @default(cuid())
+  userId    String
+  user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Json
+  status    OnboardingSessionStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// ============ DEALERSHIP REVIEW ============
+
+model DealershipReview {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating     Int
+  title      String?
+  comment    String?
+  isApproved Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([isApproved])
+  @@index([rating])
 }

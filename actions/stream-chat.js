@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { db as prisma } from "@/lib/prisma";
 import {
     generateStreamToken,
@@ -9,257 +8,211 @@ import {
     addMembersToChannel,
 } from "@/lib/stream-chat";
 import { getOrganization } from "@/lib/getOrganization";
+import { withAuth } from "@/lib/middleware/with-auth";
+import { createSuccessResponse } from "@/lib/utils/response";
+import {
+    AuthenticationError,
+    NotFoundError,
+} from "@/lib/utils/errors";
 
 /**
  * Get Stream Chat token for the current user
  */
-export async function getStreamToken() {
-    try {
-        const { userId: clerkId } = await auth();
-        if (!clerkId) {
-            return { success: false, error: "Unauthorized" };
-        }
+export const getStreamToken = withAuth(async (ctx) => {
+    const user = await prisma.user.findUnique({
+        where: { clerkId: ctx.userId },
+    });
 
-        const user = await prisma.user.findUnique({
-            where: { clerkId },
-        });
-
-        if (!user) {
-            return { success: false, error: "User not found" };
-        }
-
-        // Upsert user in Stream Chat
-        await upsertStreamUser({
-            id: user.id,
-            name: user.name || user.email,
-            image: user.imageUrl,
-            email: user.email,
-            custom: {
-                clerk_id: user.clerkId,
-                user_role: user.role, // Renamed to avoid conflict with Stream's role system
-            },
-        });
-
-        // Generate token
-        const token = generateStreamToken(user.id);
-
-        return {
-            success: true,
-            data: {
-                token,
-                userId: user.id,
-                apiKey: process.env.NEXT_PUBLIC_STREAM_API_KEY,
-            }
-        };
-    } catch (error) {
-        console.error("Error getting Stream token:", error);
-        return { success: false, error: error.message };
+    if (!user) {
+        throw new AuthenticationError("User not found");
     }
-}
+
+    // Upsert user in Stream Chat
+    await upsertStreamUser({
+        id: user.id,
+        name: user.name || user.email,
+        image: user.imageUrl,
+        email: user.email,
+        custom: {
+            clerk_id: user.clerkId,
+            user_role: user.role,
+        },
+    });
+
+    // Generate token
+    const token = generateStreamToken(user.id);
+
+    return createSuccessResponse({
+        token,
+        userId: user.id,
+        apiKey: process.env.NEXT_PUBLIC_STREAM_API_KEY,
+    });
+});
 
 /**
  * Start a conversation about a car
  */
-export async function startCarConversation(carId) {
-    try {
-        const { userId: clerkId } = await auth();
-        if (!clerkId) {
-            return { success: false, error: "Unauthorized" };
-        }
+export const startCarConversation = withAuth(async (ctx, carId) => {
+    const user = await prisma.user.findUnique({
+        where: { clerkId: ctx.userId },
+    });
 
-        const user = await prisma.user.findUnique({
-            where: { clerkId },
-        });
+    if (!user) {
+        throw new AuthenticationError("User not found");
+    }
 
-        if (!user) {
-            return { success: false, error: "User not found" };
-        }
-
-        // Get car details
-        const car = await prisma.car.findUnique({
-            where: { id: carId },
-            include: {
-                organization: {
-                    include: {
-                        memberships: {
-                            include: {
-                                user: true,
-                            },
+    // Get car details
+    const car = await prisma.car.findUnique({
+        where: { id: carId },
+        include: {
+            organization: {
+                include: {
+                    memberships: {
+                        include: {
+                            user: true,
                         },
                     },
                 },
             },
-        });
+        },
+    });
 
-        if (!car) {
-            return { success: false, error: "Car not found" };
-        }
-
-        // Ensure all organization members exist in Stream Chat
-        const orgMembers = car.organization.memberships.map(m => m.user);
-        for (const member of orgMembers) {
-            await upsertStreamUser({
-                id: member.id,
-                name: member.name || member.email,
-                image: member.imageUrl,
-                email: member.email,
-                custom: {
-                    clerk_id: member.clerkId,
-                    user_role: member.role, // Renamed to avoid conflict
-                },
-            });
-        }
-
-        // Create channel in Stream Chat
-        const channel = await createCarInquiryChannel({
-            organizationId: car.organizationId,
-            userId: user.id,
-            carId: car.id,
-            carData: {
-                id: car.id,
-                title: car.title,
-                make: car.make,
-                model: car.model,
-                year: car.year,
-                price: car.price,
-                images: car.images,
-            },
-            organizationData: {
-                id: car.organization.id,
-                name: car.organization.name,
-                slug: car.organization.slug,
-            },
-        });
-
-        // Add organization members to the channel
-        const orgMemberIds = orgMembers.map(m => m.id);
-        if (orgMemberIds.length > 0) {
-            await addMembersToChannel(channel.id, orgMemberIds);
-        }
-
-        return {
-            success: true,
-            data: {
-                channelId: channel.id,
-                channelType: "messaging",
-            }
-        };
-    } catch (error) {
-        console.error("Error starting car conversation:", error);
-        return { success: false, error: error.message };
+    if (!car) {
+        throw new NotFoundError("Car");
     }
-}
+
+    // Ensure all organization members exist in Stream Chat
+    const orgMembers = car.organization.memberships.map(m => m.user);
+    for (const member of orgMembers) {
+        await upsertStreamUser({
+            id: member.id,
+            name: member.name || member.email,
+            image: member.imageUrl,
+            email: member.email,
+            custom: {
+                clerk_id: member.clerkId,
+                user_role: member.role,
+            },
+        });
+    }
+
+    // Create channel in Stream Chat
+    const channel = await createCarInquiryChannel({
+        organizationId: car.organizationId,
+        userId: user.id,
+        carId: car.id,
+        carData: {
+            id: car.id,
+            title: car.title,
+            make: car.make,
+            model: car.model,
+            year: car.year,
+            price: car.price,
+            images: car.images,
+        },
+        organizationData: {
+            id: car.organization.id,
+            name: car.organization.name,
+            slug: car.organization.slug,
+        },
+    });
+
+    // Add organization members to the channel
+    const orgMemberIds = orgMembers.map(m => m.id);
+    if (orgMemberIds.length > 0) {
+        await addMembersToChannel(channel.id, orgMemberIds);
+    }
+
+    return createSuccessResponse({
+        channelId: channel.id,
+        channelType: "messaging",
+    });
+});
 
 /**
  * Start a general conversation with an organization
  */
-export async function startOrganizationConversation(organizationId) {
-    try {
-        const { userId: clerkId } = await auth();
-        if (!clerkId) {
-            return { success: false, error: "Unauthorized" };
-        }
+export const startOrganizationConversation = withAuth(async (ctx, organizationId) => {
+    const user = await prisma.user.findUnique({
+        where: { clerkId: ctx.userId },
+    });
 
-        const user = await prisma.user.findUnique({
-            where: { clerkId },
-        });
-
-        if (!user) {
-            return { success: false, error: "User not found" };
-        }
-
-        // Get organization details
-        const organization = await prisma.organization.findUnique({
-            where: { id: organizationId },
-            include: {
-                memberships: {
-                    include: {
-                        user: true,
-                    },
-                },
-            },
-        });
-
-        if (!organization) {
-            return { success: false, error: "Organization not found" };
-        }
-
-        // Ensure all organization members exist in Stream Chat
-        const orgMembers = organization.memberships.map(m => m.user);
-        for (const member of orgMembers) {
-            await upsertStreamUser({
-                id: member.id,
-                name: member.name || member.email,
-                image: member.imageUrl,
-                email: member.email,
-                custom: {
-                    clerk_id: member.clerkId,
-                    user_role: member.role, // Renamed to avoid conflict
-                },
-            });
-        }
-
-        // Create channel in Stream Chat
-        const channel = await createCarInquiryChannel({
-            organizationId: organization.id,
-            userId: user.id,
-            organizationData: {
-                id: organization.id,
-                name: organization.name,
-                slug: organization.slug,
-            },
-        });
-
-        // Add organization members to the channel
-        const orgMemberIds = orgMembers.map(m => m.id);
-        if (orgMemberIds.length > 0) {
-            await addMembersToChannel(channel.id, orgMemberIds);
-        }
-
-        return {
-            success: true,
-            data: {
-                channelId: channel.id,
-                channelType: "messaging",
-            }
-        };
-    } catch (error) {
-        console.error("Error starting organization conversation:", error);
-        return { success: false, error: error.message };
+    if (!user) {
+        throw new AuthenticationError("User not found");
     }
-}
+
+    // Get organization details
+    const organization = await prisma.organization.findUnique({
+        where: { id: organizationId },
+        include: {
+            memberships: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+
+    if (!organization) {
+        throw new NotFoundError("Organization");
+    }
+
+    // Ensure all organization members exist in Stream Chat
+    const orgMembers = organization.memberships.map(m => m.user);
+    for (const member of orgMembers) {
+        await upsertStreamUser({
+            id: member.id,
+            name: member.name || member.email,
+            image: member.imageUrl,
+            email: member.email,
+            custom: {
+                clerk_id: member.clerkId,
+                user_role: member.role,
+            },
+        });
+    }
+
+    // Create channel in Stream Chat
+    const channel = await createCarInquiryChannel({
+        organizationId: organization.id,
+        userId: user.id,
+        organizationData: {
+            id: organization.id,
+            name: organization.name,
+            slug: organization.slug,
+        },
+    });
+
+    // Add organization members to the channel
+    const orgMemberIds = orgMembers.map(m => m.id);
+    if (orgMemberIds.length > 0) {
+        await addMembersToChannel(channel.id, orgMemberIds);
+    }
+
+    return createSuccessResponse({
+        channelId: channel.id,
+        channelType: "messaging",
+    });
+});
 
 /**
  * Get organization member IDs for filtering channels
  */
-export async function getOrganizationMemberIds(slug) {
-    try {
-        const { userId: clerkId } = await auth();
-        if (!clerkId) {
-            return { success: false, error: "Unauthorized" };
-        }
-
-        const { organization, membership } = await getOrganization(slug);
-        if (!organization || !membership) {
-            return { success: false, error: "Organization not found or access denied" };
-        }
-
-        const memberships = await prisma.membership.findMany({
-            where: { organizationId: organization.id },
-            select: { userId: true },
-        });
-
-        const memberIds = memberships.map(m => m.userId);
-
-        return {
-            success: true,
-            data: {
-                memberIds,
-                organizationId: organization.id,
-            }
-        };
-    } catch (error) {
-        console.error("Error getting organization members:", error);
-        return { success: false, error: error.message };
+export const getOrganizationMemberIds = withAuth(async (ctx, slug) => {
+    const { organization, membership } = await getOrganization(slug);
+    if (!organization || !membership) {
+        throw new NotFoundError("Organization not found or access denied");
     }
-}
+
+    const memberships = await prisma.membership.findMany({
+        where: { organizationId: organization.id },
+        select: { userId: true },
+    });
+
+    const memberIds = memberships.map(m => m.userId);
+
+    return createSuccessResponse({
+        memberIds,
+        organizationId: organization.id,
+    });
+});

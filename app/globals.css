@@ -207,6 +207,68 @@
   }
 }
 
+/* ── Print-optimized styles for Compare page ─────────────────────────────── */
+@media print {
+  /* Hide site chrome: header, footer, back-to-top, toasts */
+  header,
+  footer,
+  nav,
+  [data-sonner-toaster],
+  .back-to-top {
+    display: none !important;
+  }
+
+  /* Reset page background & spacing */
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Remove shadows and unnecessary decorations */
+  .shadow-md,
+  .shadow-sm,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  /* Ensure comparison table fits on page */
+  .max-w-7xl {
+    max-width: 100% !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Prevent page breaks inside car cards and spec rows */
+  .compare-car-card,
+  tr,
+  .grid > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Allow page break before category sections */
+  [role="tabpanel"] {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  /* Ensure images print */
+  img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Remove animations for print */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

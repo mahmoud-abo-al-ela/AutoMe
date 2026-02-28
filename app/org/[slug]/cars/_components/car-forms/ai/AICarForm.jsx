@@ -35,7 +35,6 @@ const AICarForm = () => {
         setCarData(result.data);
         setShowForm(true);
         toast.success("Car details extracted successfully");
-        console.log(result);
       } else {
         throw new Error(result.error || "Failed to process image.");
       }

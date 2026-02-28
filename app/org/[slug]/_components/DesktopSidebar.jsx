@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -50,32 +51,46 @@ export default function DesktopSidebar({
     >
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-sidebar-border h-16 relative">
-        {!collapsed && (
-          <div className="flex items-center space-x-2">
+        <div
+          className={cn(
+            "flex items-center",
+            collapsed ? "mx-auto cursor-pointer" : "space-x-2"
+          )}
+          onClick={collapsed ? () => setCollapsed(false) : undefined}
+          title={collapsed ? orgName : undefined}
+        >
+          {organization?.logo ? (
+            <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0 relative">
+              <Image
+                src={organization.logo}
+                alt={orgName}
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
+            </div>
+          ) : (
             <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <CarFront className="h-5 w-5 text-white" />
             </div>
+          )}
+          {!collapsed && (
             <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent truncate">
               {orgName}
             </span>
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "h-8 w-8 p-0 hover:bg-sidebar-accent rounded-lg transition-all duration-200",
-            collapsed && "mx-auto"
           )}
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-          ) : (
+        </div>
+        {!collapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-sidebar-accent rounded-lg transition-all duration-200"
+            onClick={() => setCollapsed(true)}
+            aria-label="Collapse sidebar"
+          >
             <ChevronLeft className="h-4 w-4 transition-transform duration-200" />
-          )}
-        </Button>
+          </Button>
+        )}
       </div>
 
       {/* Navigation */}

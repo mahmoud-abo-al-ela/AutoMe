@@ -59,7 +59,6 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                             await existingChannel.watch();
                             setChannel(existingChannel);
                             setChannelCreated(true);
-                            console.log("Loaded existing channel:", existingChannel.id);
                         } else {
                             // No existing channel - user will create one by sending first message
                             setChannel(null);

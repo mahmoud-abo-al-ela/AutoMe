@@ -46,8 +46,6 @@ export async function POST(req) {
     const eventType = evt.type;
     const { id, email_addresses, first_name, last_name, image_url, username } = evt.data;
 
-    console.log(`Webhook received: ${eventType}`);
-
     try {
         switch (eventType) {
             case "user.created":
@@ -64,7 +62,7 @@ export async function POST(req) {
                 break;
 
             default:
-                console.log(`Unhandled event type: ${eventType}`);
+                break;
         }
 
         return new Response("Webhook processed successfully", { status: 200 });
@@ -97,7 +95,6 @@ async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, i
     });
 
     if (existingUser) {
-        console.log(`User ${clerkId} already exists, skipping creation`);
         return;
     }
 
@@ -111,7 +108,6 @@ async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, i
         },
     });
 
-    console.log(`User created: ${clerkId}`);
 }
 
 async function handleUserUpdated(clerkId, emailAddresses, firstName, lastName, imageUrl, username) {
@@ -136,7 +132,6 @@ async function handleUserUpdated(clerkId, emailAddresses, firstName, lastName, i
         },
     });
 
-    console.log(`User updated: ${clerkId}`);
 }
 
 async function handleUserDeleted(clerkId) {
@@ -146,7 +141,6 @@ async function handleUserDeleted(clerkId) {
     });
 
     if (!user) {
-        console.log(`User ${clerkId} not found in database, skipping deletion`);
         return;
     }
 
@@ -155,5 +149,4 @@ async function handleUserDeleted(clerkId) {
         where: { clerkId },
     });
 
-    console.log(`User deleted: ${clerkId}`);
 }

@@ -146,7 +146,7 @@ export default function PlansGrid({ plans }) {
             onDelete={(plan) => setDeleteDialog({ open: true, plan })}
           />
         ))}
-        {!plans.length > 2 &&
+        {plans.length < 3 &&
           <AddPlanCard
             availableTypes={availableTypes}
             onClick={handleAddPlanClick}

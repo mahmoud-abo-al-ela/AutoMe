@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "./FieldInfo";
 
-const DetailsSection = ({ register, errors, watch, setValue }) => {
+const DetailsSection = ({ register, errors, watch, setValue, maxImages = 5 }) => {
   const watchImages = watch("images");
   const [imagePreviews, setImagePreviews] = useState({});
 
@@ -18,11 +18,11 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
     accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".webp"],
     },
-    maxFiles: 5,
+    maxFiles: maxImages,
     maxSize: 5242880, // 5MB
     onDrop: (acceptedFiles) => {
       const currentImages = watchImages || [];
-      const newImages = [...currentImages, ...acceptedFiles].slice(0, 5);
+      const newImages = [...currentImages, ...acceptedFiles].slice(0, maxImages);
       setValue("images", newImages, { shouldValidate: true });
     },
     onDropRejected: (fileRejections) => {
@@ -31,7 +31,7 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
           rejection.errors.some((error) => error.code === "too-many-files")
         )
       ) {
-        toast.error("You can only upload up to 5 images.");
+        toast.error(`You can only upload up to ${maxImages} images.`);
       } else {
         toast.error("Failed to upload image. Please try again.");
       }
@@ -124,9 +124,9 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
 
       <div className="space-y-2">
         <Label htmlFor="images" className="flex items-center">
-          Images <FieldInfo text="Add up to 5 images of the vehicle" />
+          Images <FieldInfo text={`Add up to ${maxImages} images of the vehicle`} />
         </Label>
-        {watchImages?.length < 5 ? (
+        {watchImages?.length < maxImages ? (
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
@@ -144,13 +144,13 @@ const DetailsSection = ({ register, errors, watch, setValue }) => {
                     ? "Drop the images here"
                     : "Drag & drop images here, or click to select"}
                 </p>
-                <p className="text-gray-500">Max 5 images, up to 5MB each</p>
+                <p className="text-gray-500">Max {maxImages} images, up to 5MB each</p>
               </div>
             </div>
           </div>
         ) : (
           <p className="text-gray-600 text-sm sm:text-base">
-            Maximum of 5 images uploaded. Remove an image to add a new one.
+            Maximum of {maxImages} images uploaded. Remove an image to add a new one.
           </p>
         )}
         {errors.images && (

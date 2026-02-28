@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -55,7 +56,22 @@ export default function MobileSidebar({ pathname, organization, userRole }) {
       >
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-sidebar-border">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {organization?.logo ? (
+                <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 relative">
+                  <Image
+                    src={organization.logo}
+                    alt={orgName}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                  />
+                </div>
+              ) : (
+                <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <CarFront className="h-6 w-6 text-white" />
+                </div>
+              )}
               <h2 className="text-xl font-bold text-sidebar-foreground truncate">
                 {orgName}
               </h2>

@@ -11,7 +11,8 @@ export const orgDetailsSchema = z.object({
     phone: z.string().min(1, "Phone number is required").min
         (8, "Phone must be at least 8 digits"),
     address: z.string().min
-        (1, "Address is required").min(5, "Address must be at least 5 characters")
+        (1, "Address is required").min(5, "Address must be at least 5 characters"),
+    logo: z.string().min(1, "Please upload a logo for your dealership"),
 });
 
 // Step 2: Plan Selection Schema

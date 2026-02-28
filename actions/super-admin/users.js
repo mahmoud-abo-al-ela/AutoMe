@@ -1,19 +1,16 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireSuperAdmin } from "@/lib/services/super-admin/auth";
 import * as userService from "@/lib/services/super-admin/user";
+import { withSuperAdmin } from "@/lib/middleware/with-auth";
+import { createSuccessResponse } from "@/lib/utils/response";
 
 /**
  * Update a user's role
  */
-export async function updateUserRole(userId, newRole) {
-  try {
-    const { userId: clerkId } = await auth();
-    const admin = await requireSuperAdmin(clerkId);
-
+export const updateUserRole = withSuperAdmin(
+  async (admin, userId, newRole) => {
     await userService.updateUserRole(userId, newRole, admin.id);
 
     await db.auditLog.create({
@@ -28,9 +25,6 @@ export async function updateUserRole(userId, newRole) {
     });
 
     revalidatePath("/super-admin/users");
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating user role:", error);
-    return { success: false, error: error.message };
+    return createSuccessResponse(null, "User role updated");
   }
-}
+);

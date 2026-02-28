@@ -28,7 +28,7 @@ class UnreadBadgeErrorBoundary extends Component {
     }
 }
 
-function UnreadBadgeInner({ className }) {
+function UnreadBadgeInner({ className, organizationId }) {
     const { client } = useChatContext();
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -37,11 +37,16 @@ function UnreadBadgeInner({ className }) {
 
         const updateUnreadCount = async () => {
             try {
-                // Query all channels for the user
+                // Query channels for the user, optionally scoped to organization
                 const filters = {
                     type: "messaging",
                     members: { $in: [client.userID] },
                 };
+
+                // On subdomain: only count unread from this organization's channels
+                if (organizationId) {
+                    filters.organization_id = organizationId;
+                }
 
                 const channels = await client.queryChannels(filters, { last_message_at: -1 }, { limit: 100 });
 
@@ -72,7 +77,7 @@ function UnreadBadgeInner({ className }) {
             client.off("notification.mark_read", updateUnreadCount);
             client.off("notification.mark_unread", updateUnreadCount);
         };
-    }, [client]);
+    }, [client, organizationId]);
 
     if (!client || unreadCount === 0) return null;
 
@@ -89,10 +94,10 @@ function UnreadBadgeInner({ className }) {
     );
 }
 
-export function UnreadBadge({ className }) {
+export function UnreadBadge({ className, organizationId }) {
     return (
         <UnreadBadgeErrorBoundary>
-            <UnreadBadgeInner className={className} />
+            <UnreadBadgeInner className={className} organizationId={organizationId} />
         </UnreadBadgeErrorBoundary>
     );
 }

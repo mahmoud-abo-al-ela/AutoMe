@@ -2,11 +2,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import * as testDriveService from "@/lib/services/test-drive";
+import * as carRepository from "@/lib/repositories/car";
 import {
   createSuccessResponse,
   createErrorResponse,
 } from "@/lib/utils/response";
-import { AuthenticationError } from "@/lib/utils/errors";
+import { AuthenticationError, NotFoundError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { checkUser } from "@/lib/checkUser";
 
@@ -15,6 +16,15 @@ export async function requestTestDrive(testDriveData) {
     const { userId } = await auth();
     if (!userId) {
       throw new AuthenticationError();
+    }
+
+    // Validate car belongs to current organization when on a subdomain
+    const organization = await getCurrentOrganization();
+    if (organization && testDriveData.carId) {
+      const car = await carRepository.findCarById(testDriveData.carId);
+      if (!car || car.organizationId !== organization.id) {
+        throw new NotFoundError("Car");
+      }
     }
 
     const testDrive = await testDriveService.requestTestDrive(
@@ -44,15 +54,12 @@ export async function getTestDrives({ status, page = 1, limit = 10 }) {
 
     await checkUser();
     const organization = await getCurrentOrganization();
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
 
     const result = await testDriveService.getTestDrives(
       { status },
       { page, limit },
       userId,
-      organization.id,
+      organization?.id || null,
     );
 
     return createSuccessResponse(result);

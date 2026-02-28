@@ -32,14 +32,14 @@ const Why = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-8 md:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 md:gap-10">
           {whyConfig.map((card, index) => (
             <WhyCard
               key={index}
               icon={card.icon}
               title={card.title}
               description={card.description}
-              delay={index * 0.2}
+              delay={index * 0.1}
             />
           ))}
         </div>

@@ -53,7 +53,6 @@ const StatusSection = ({ register, errors, watch, setValue, trigger }) => {
           checked={watch("featured")}
           onCheckedChange={(checked) => {
             setValue("featured", checked || false);
-            console.log("Featured value set to:", checked || false);
           }}
           className="mt-1 sm:mt-0"
         />

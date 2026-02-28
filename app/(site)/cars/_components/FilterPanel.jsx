@@ -2,10 +2,12 @@
 import React, {
   useEffect,
   useState,
+  useRef,
+  useCallback,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { Filter } from "lucide-react";
+import { Filter, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import useFetch from "@/hooks/use-fetch";
 import { getCarsFilters } from "@/actions/cars-listing";
@@ -20,14 +22,14 @@ import {
   BodyTypeFilter,
   FuelTypeFilter,
   TransmissionFilter,
-  SortByFilter,
-  FilterBtn,
 } from "./filter-components";
 
 const FilterPanel = forwardRef(
   ({ onFilter, isLoading = false, initialFilters = {} }, ref) => {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const debounceRef = useRef(null);
+    const isInitializedRef = useRef(false);
 
     const [searchQuery, setSearchQuery] = useState(initialFilters.search || "");
     const [selectedMakes, setSelectedMakes] = useState(
@@ -43,6 +45,10 @@ const FilterPanel = forwardRef(
       initialFilters.transmission ? [initialFilters.transmission] : []
     );
     const [priceRange, setPriceRange] = useState([
+      initialFilters.minPrice || 0,
+      initialFilters.maxPrice || 0,
+    ]);
+    const [committedPriceRange, setCommittedPriceRange] = useState([
       initialFilters.minPrice || 0,
       initialFilters.maxPrice || 0,
     ]);
@@ -65,24 +71,30 @@ const FilterPanel = forwardRef(
     }));
 
     useEffect(() => {
-      if (initialFilters.search) setSearchQuery(initialFilters.search);
+      if (initialFilters.search !== undefined) setSearchQuery(initialFilters.search || "");
       if (initialFilters.make) setSelectedMakes([initialFilters.make]);
+      else setSelectedMakes([]);
       if (initialFilters.bodyType)
         setSelectedBodyTypes([initialFilters.bodyType]);
+      else setSelectedBodyTypes([]);
       if (initialFilters.fuelType)
         setSelectedFuelTypes([initialFilters.fuelType]);
+      else setSelectedFuelTypes([]);
       if (initialFilters.transmission)
         setSelectedTransmissions([initialFilters.transmission]);
+      else setSelectedTransmissions([]);
       if (initialFilters.sortBy) setSortBy(initialFilters.sortBy);
 
       if (
         (initialFilters.minPrice || initialFilters.maxPrice) &&
         maxPriceValue > 0
       ) {
-        setPriceRange([
+        const newRange = [
           initialFilters.minPrice || 0,
           initialFilters.maxPrice || maxPriceValue,
-        ]);
+        ];
+        setPriceRange(newRange);
+        setCommittedPriceRange(newRange);
       }
     }, [initialFilters, maxPriceValue]);
 
@@ -92,7 +104,7 @@ const FilterPanel = forwardRef(
 
     useEffect(() => {
       if (filtersData?.success && filtersData?.data) {
-        const { makes, bodyTypes, fuelTypes, transmissions, priceRanges } =
+        const { makes, bodyTypes, fuelTypes, transmissions, priceRange: priceRangeData } =
           filtersData.data;
 
         setAvailableMakes(makes || []);
@@ -100,13 +112,15 @@ const FilterPanel = forwardRef(
         setAvailableFuelTypes(fuelTypes || []);
         setAvailableTransmissions(transmissions || []);
 
-        if (priceRanges?.max) {
-          setMaxPriceValue(priceRanges.max);
+        if (priceRangeData?.max) {
+          setMaxPriceValue(priceRangeData.max);
           if (priceRange[1] === 0) {
-            setPriceRange([
+            const newRange = [
               initialFilters.minPrice || 0,
-              initialFilters.maxPrice || priceRanges.max,
-            ]);
+              initialFilters.maxPrice || priceRangeData.max,
+            ];
+            setPriceRange(newRange);
+            setCommittedPriceRange(newRange);
           }
         }
       }
@@ -119,13 +133,12 @@ const FilterPanel = forwardRef(
         selectedBodyTypes.length,
         selectedFuelTypes.length,
         selectedTransmissions.length,
-        priceRange[0] > 0 ||
-        (priceRange[1] < maxPriceValue &&
-          priceRange[1] > 0 &&
-          maxPriceValue > 0)
+        committedPriceRange[0] > 0 ||
+          (committedPriceRange[1] < maxPriceValue &&
+            committedPriceRange[1] > 0 &&
+            maxPriceValue > 0)
           ? 1
           : 0,
-        sortBy !== "newest" ? 1 : 0,
       ].reduce((a, b) => a + b, 0);
 
       setActiveFiltersCount(count);
@@ -135,10 +148,63 @@ const FilterPanel = forwardRef(
       selectedBodyTypes,
       selectedFuelTypes,
       selectedTransmissions,
-      priceRange,
+      committedPriceRange,
       maxPriceValue,
-      sortBy,
     ]);
+
+    // Auto-apply filters with debounce when filter values change
+    useEffect(() => {
+      // Skip auto-apply on initial mount
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+        return;
+      }
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        applyFilters();
+      }, 400);
+
+      return () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+      };
+    }, [
+      searchQuery,
+      selectedMakes,
+      selectedBodyTypes,
+      selectedFuelTypes,
+      selectedTransmissions,
+    ]);
+
+    // Price range applies immediately on commit (slider release)
+    const handlePriceCommit = useCallback(
+      (value) => {
+        setCommittedPriceRange(value);
+        // Apply immediately on price commit without debounce
+        const filters = {
+          search: searchQuery || undefined,
+          make: selectedMakes.length > 0 ? selectedMakes[0] : undefined,
+          bodyType:
+            selectedBodyTypes.length > 0 ? selectedBodyTypes[0] : undefined,
+          fuelType:
+            selectedFuelTypes.length > 0 ? selectedFuelTypes[0] : undefined,
+          transmission:
+            selectedTransmissions.length > 0
+              ? selectedTransmissions[0]
+              : undefined,
+          minPrice: value[0] > 0 ? value[0] : undefined,
+          maxPrice:
+            value[1] < maxPriceValue && value[1] > 0
+              ? value[1]
+              : undefined,
+          sortBy: sortBy,
+        };
+
+        updateURLWithFilters(filters);
+        if (onFilter) onFilter(filters);
+      },
+      [searchQuery, selectedMakes, selectedBodyTypes, selectedFuelTypes, selectedTransmissions, sortBy, maxPriceValue, onFilter]
+    );
 
     const toggleFilter = (item, selectedItems, setSelectedItems) => {
       if (isLoading) return;
@@ -149,9 +215,7 @@ const FilterPanel = forwardRef(
 
     const handleSearch = (e) => {
       e.preventDefault();
-      if (!isLoading) {
-        applyFilters();
-      }
+      // Auto-apply handles this now, but keep for form submit accessibility
     };
 
     const updateURLWithFilters = (filters) => {
@@ -187,10 +251,10 @@ const FilterPanel = forwardRef(
           selectedTransmissions.length > 0
             ? selectedTransmissions[0]
             : undefined,
-        minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
+        minPrice: committedPriceRange[0] > 0 ? committedPriceRange[0] : undefined,
         maxPrice:
-          priceRange[1] < maxPriceValue && priceRange[1] > 0
-            ? priceRange[1]
+          committedPriceRange[1] < maxPriceValue && committedPriceRange[1] > 0
+            ? committedPriceRange[1]
             : undefined,
         sortBy: sortBy,
       };
@@ -209,6 +273,7 @@ const FilterPanel = forwardRef(
       setSelectedFuelTypes([]);
       setSelectedTransmissions([]);
       setPriceRange([0, maxPriceValue || 100000]);
+      setCommittedPriceRange([0, maxPriceValue || 100000]);
       setSortBy("newest");
 
       const resetFilterValues = {
@@ -245,14 +310,16 @@ const FilterPanel = forwardRef(
           <h2 className="font-semibold text-base sm:text-lg flex items-center">
             <Filter className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Filters
           </h2>
-          {activeFiltersCount > 0 && (
-            <Badge
-              variant="secondary"
-              className="bg-primary/10 text-primary text-xs sm:text-sm"
-            >
-              {activeFiltersCount} active
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {activeFiltersCount > 0 && (
+              <Badge
+                variant="secondary"
+                className="bg-primary/10 text-primary text-xs sm:text-sm"
+              >
+                {activeFiltersCount} active
+              </Badge>
+            )}
+          </div>
         </div>
 
         <SearchBar
@@ -274,6 +341,7 @@ const FilterPanel = forwardRef(
           <PriceRangeFilter
             priceRange={priceRange}
             setPriceRange={setPriceRange}
+            onPriceCommit={handlePriceCommit}
             maxPriceValue={maxPriceValue}
             formatPrice={formatPrice}
             isLoading={isLoading}
@@ -303,21 +371,21 @@ const FilterPanel = forwardRef(
             isLoading={isLoading}
           />
 
-          <SortByFilter
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            isLoading={isLoading}
-          />
         </Accordion>
 
-        <Separator className="my-3 sm:my-4" />
-
-        <FilterBtn
-          applyFilters={applyFilters}
-          resetFilters={resetFilters}
-          isLoading={isLoading}
-          activeFiltersCount={activeFiltersCount}
-        />
+        {activeFiltersCount > 0 && (
+          <>
+            <Separator className="my-3 sm:my-4" />
+            <button
+              onClick={resetFilters}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 mx-auto"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset all filters
+            </button>
+          </>
+        )}
       </div>
     );
   }

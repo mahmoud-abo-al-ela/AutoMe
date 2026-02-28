@@ -68,6 +68,16 @@ export type SavedCar = $Result.DefaultSelection<Prisma.$SavedCarPayload>
  * 
  */
 export type TestDrive = $Result.DefaultSelection<Prisma.$TestDrivePayload>
+/**
+ * Model OnboardingSession
+ * 
+ */
+export type OnboardingSession = $Result.DefaultSelection<Prisma.$OnboardingSessionPayload>
+/**
+ * Model DealershipReview
+ * 
+ */
+export type DealershipReview = $Result.DefaultSelection<Prisma.$DealershipReviewPayload>
 
 /**
  * Enums
@@ -122,6 +132,15 @@ export const PlanType: {
 export type PlanType = (typeof PlanType)[keyof typeof PlanType]
 
 
+export const OnboardingSessionStatus: {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  EXPIRED: 'EXPIRED'
+};
+
+export type OnboardingSessionStatus = (typeof OnboardingSessionStatus)[keyof typeof OnboardingSessionStatus]
+
+
 export const MemberRole: {
   OWNER: 'OWNER',
   MEMBER: 'MEMBER'
@@ -134,7 +153,8 @@ export const SubscriptionStatus: {
   ACTIVE: 'ACTIVE',
   PAST_DUE: 'PAST_DUE',
   CANCELED: 'CANCELED',
-  TRIALING: 'TRIALING'
+  TRIALING: 'TRIALING',
+  PENDING: 'PENDING'
 };
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
@@ -211,6 +231,10 @@ export const TestDriveStatus: typeof $Enums.TestDriveStatus
 export type PlanType = $Enums.PlanType
 
 export const PlanType: typeof $Enums.PlanType
+
+export type OnboardingSessionStatus = $Enums.OnboardingSessionStatus
+
+export const OnboardingSessionStatus: typeof $Enums.OnboardingSessionStatus
 
 export type MemberRole = $Enums.MemberRole
 
@@ -454,6 +478,26 @@ export class PrismaClient<
     * ```
     */
   get testDrive(): Prisma.TestDriveDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.onboardingSession`: Exposes CRUD operations for the **OnboardingSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OnboardingSessions
+    * const onboardingSessions = await prisma.onboardingSession.findMany()
+    * ```
+    */
+  get onboardingSession(): Prisma.OnboardingSessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.dealershipReview`: Exposes CRUD operations for the **DealershipReview** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DealershipReviews
+    * const dealershipReviews = await prisma.dealershipReview.findMany()
+    * ```
+    */
+  get dealershipReview(): Prisma.DealershipReviewDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -898,7 +942,9 @@ export namespace Prisma {
     Car: 'Car',
     WorkingHours: 'WorkingHours',
     SavedCar: 'SavedCar',
-    TestDrive: 'TestDrive'
+    TestDrive: 'TestDrive',
+    OnboardingSession: 'OnboardingSession',
+    DealershipReview: 'DealershipReview'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -914,7 +960,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "organization" | "plan" | "subscription" | "membership" | "auditLog" | "impersonationSession" | "user" | "car" | "workingHours" | "savedCar" | "testDrive"
+      modelProps: "organization" | "plan" | "subscription" | "membership" | "auditLog" | "impersonationSession" | "user" | "car" | "workingHours" | "savedCar" | "testDrive" | "onboardingSession" | "dealershipReview"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1732,6 +1778,154 @@ export namespace Prisma {
           }
         }
       }
+      OnboardingSession: {
+        payload: Prisma.$OnboardingSessionPayload<ExtArgs>
+        fields: Prisma.OnboardingSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OnboardingSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OnboardingSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.OnboardingSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OnboardingSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>
+          }
+          findMany: {
+            args: Prisma.OnboardingSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>[]
+          }
+          create: {
+            args: Prisma.OnboardingSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>
+          }
+          createMany: {
+            args: Prisma.OnboardingSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OnboardingSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.OnboardingSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>
+          }
+          update: {
+            args: Prisma.OnboardingSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.OnboardingSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OnboardingSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OnboardingSessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.OnboardingSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OnboardingSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.OnboardingSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOnboardingSession>
+          }
+          groupBy: {
+            args: Prisma.OnboardingSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OnboardingSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OnboardingSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<OnboardingSessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      DealershipReview: {
+        payload: Prisma.$DealershipReviewPayload<ExtArgs>
+        fields: Prisma.DealershipReviewFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DealershipReviewFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DealershipReviewFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>
+          }
+          findFirst: {
+            args: Prisma.DealershipReviewFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DealershipReviewFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>
+          }
+          findMany: {
+            args: Prisma.DealershipReviewFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>[]
+          }
+          create: {
+            args: Prisma.DealershipReviewCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>
+          }
+          createMany: {
+            args: Prisma.DealershipReviewCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DealershipReviewCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>[]
+          }
+          delete: {
+            args: Prisma.DealershipReviewDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>
+          }
+          update: {
+            args: Prisma.DealershipReviewUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>
+          }
+          deleteMany: {
+            args: Prisma.DealershipReviewDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DealershipReviewUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DealershipReviewUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>[]
+          }
+          upsert: {
+            args: Prisma.DealershipReviewUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DealershipReviewPayload>
+          }
+          aggregate: {
+            args: Prisma.DealershipReviewAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDealershipReview>
+          }
+          groupBy: {
+            args: Prisma.DealershipReviewGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DealershipReviewGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DealershipReviewCountArgs<ExtArgs>
+            result: $Utils.Optional<DealershipReviewCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1851,6 +2045,8 @@ export namespace Prisma {
     workingHours?: WorkingHoursOmit
     savedCar?: SavedCarOmit
     testDrive?: TestDriveOmit
+    onboardingSession?: OnboardingSessionOmit
+    dealershipReview?: DealershipReviewOmit
   }
 
   /* Types for Logging */
@@ -1937,6 +2133,7 @@ export namespace Prisma {
     testDrives: number
     auditLogs: number
     impersonationSessions: number
+    dealershipReviews: number
   }
 
   export type OrganizationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1946,6 +2143,7 @@ export namespace Prisma {
     testDrives?: boolean | OrganizationCountOutputTypeCountTestDrivesArgs
     auditLogs?: boolean | OrganizationCountOutputTypeCountAuditLogsArgs
     impersonationSessions?: boolean | OrganizationCountOutputTypeCountImpersonationSessionsArgs
+    dealershipReviews?: boolean | OrganizationCountOutputTypeCountDealershipReviewsArgs
   }
 
   // Custom InputTypes
@@ -2001,6 +2199,13 @@ export namespace Prisma {
     where?: ImpersonationSessionWhereInput
   }
 
+  /**
+   * OrganizationCountOutputType without action
+   */
+  export type OrganizationCountOutputTypeCountDealershipReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DealershipReviewWhereInput
+  }
+
 
   /**
    * Count Type PlanCountOutputType
@@ -2045,6 +2250,8 @@ export namespace Prisma {
     superAdminSessions: number
     impersonatedSessions: number
     auditLogs: number
+    onboardingSessions: number
+    dealershipReviews: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2055,6 +2262,8 @@ export namespace Prisma {
     superAdminSessions?: boolean | UserCountOutputTypeCountSuperAdminSessionsArgs
     impersonatedSessions?: boolean | UserCountOutputTypeCountImpersonatedSessionsArgs
     auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+    onboardingSessions?: boolean | UserCountOutputTypeCountOnboardingSessionsArgs
+    dealershipReviews?: boolean | UserCountOutputTypeCountDealershipReviewsArgs
   }
 
   // Custom InputTypes
@@ -2117,6 +2326,20 @@ export namespace Prisma {
     where?: AuditLogWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountOnboardingSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OnboardingSessionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDealershipReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DealershipReviewWhereInput
+  }
+
 
   /**
    * Count Type CarCountOutputType
@@ -2168,8 +2391,20 @@ export namespace Prisma {
 
   export type AggregateOrganization = {
     _count: OrganizationCountAggregateOutputType | null
+    _avg: OrganizationAvgAggregateOutputType | null
+    _sum: OrganizationSumAggregateOutputType | null
     _min: OrganizationMinAggregateOutputType | null
     _max: OrganizationMaxAggregateOutputType | null
+  }
+
+  export type OrganizationAvgAggregateOutputType = {
+    averageRating: number | null
+    totalReviews: number | null
+  }
+
+  export type OrganizationSumAggregateOutputType = {
+    averageRating: number | null
+    totalReviews: number | null
   }
 
   export type OrganizationMinAggregateOutputType = {
@@ -2184,6 +2419,8 @@ export namespace Prisma {
     description: string | null
     isActive: boolean | null
     pendingOwnerEmail: string | null
+    averageRating: number | null
+    totalReviews: number | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -2201,6 +2438,8 @@ export namespace Prisma {
     description: string | null
     isActive: boolean | null
     pendingOwnerEmail: string | null
+    averageRating: number | null
+    totalReviews: number | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -2220,12 +2459,24 @@ export namespace Prisma {
     pendingOwnerEmail: number
     theme: number
     settings: number
+    averageRating: number
+    totalReviews: number
     createdAt: number
     updatedAt: number
     deletedAt: number
     _all: number
   }
 
+
+  export type OrganizationAvgAggregateInputType = {
+    averageRating?: true
+    totalReviews?: true
+  }
+
+  export type OrganizationSumAggregateInputType = {
+    averageRating?: true
+    totalReviews?: true
+  }
 
   export type OrganizationMinAggregateInputType = {
     id?: true
@@ -2239,6 +2490,8 @@ export namespace Prisma {
     description?: true
     isActive?: true
     pendingOwnerEmail?: true
+    averageRating?: true
+    totalReviews?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -2256,6 +2509,8 @@ export namespace Prisma {
     description?: true
     isActive?: true
     pendingOwnerEmail?: true
+    averageRating?: true
+    totalReviews?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -2275,6 +2530,8 @@ export namespace Prisma {
     pendingOwnerEmail?: true
     theme?: true
     settings?: true
+    averageRating?: true
+    totalReviews?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -2319,6 +2576,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: OrganizationAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OrganizationSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: OrganizationMinAggregateInputType
@@ -2349,6 +2618,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: OrganizationCountAggregateInputType | true
+    _avg?: OrganizationAvgAggregateInputType
+    _sum?: OrganizationSumAggregateInputType
     _min?: OrganizationMinAggregateInputType
     _max?: OrganizationMaxAggregateInputType
   }
@@ -2367,10 +2638,14 @@ export namespace Prisma {
     pendingOwnerEmail: string | null
     theme: JsonValue | null
     settings: JsonValue | null
+    averageRating: number
+    totalReviews: number
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
     _count: OrganizationCountAggregateOutputType | null
+    _avg: OrganizationAvgAggregateOutputType | null
+    _sum: OrganizationSumAggregateOutputType | null
     _min: OrganizationMinAggregateOutputType | null
     _max: OrganizationMaxAggregateOutputType | null
   }
@@ -2403,6 +2678,8 @@ export namespace Prisma {
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
+    averageRating?: boolean
+    totalReviews?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -2413,6 +2690,7 @@ export namespace Prisma {
     testDrives?: boolean | Organization$testDrivesArgs<ExtArgs>
     auditLogs?: boolean | Organization$auditLogsArgs<ExtArgs>
     impersonationSessions?: boolean | Organization$impersonationSessionsArgs<ExtArgs>
+    dealershipReviews?: boolean | Organization$dealershipReviewsArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
@@ -2430,6 +2708,8 @@ export namespace Prisma {
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
+    averageRating?: boolean
+    totalReviews?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -2449,6 +2729,8 @@ export namespace Prisma {
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
+    averageRating?: boolean
+    totalReviews?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -2468,12 +2750,14 @@ export namespace Prisma {
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
+    averageRating?: boolean
+    totalReviews?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logo" | "email" | "phone" | "address" | "website" | "description" | "isActive" | "pendingOwnerEmail" | "theme" | "settings" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["organization"]>
+  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logo" | "email" | "phone" | "address" | "website" | "description" | "isActive" | "pendingOwnerEmail" | "theme" | "settings" | "averageRating" | "totalReviews" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["organization"]>
   export type OrganizationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subscription?: boolean | Organization$subscriptionArgs<ExtArgs>
     memberships?: boolean | Organization$membershipsArgs<ExtArgs>
@@ -2482,6 +2766,7 @@ export namespace Prisma {
     testDrives?: boolean | Organization$testDrivesArgs<ExtArgs>
     auditLogs?: boolean | Organization$auditLogsArgs<ExtArgs>
     impersonationSessions?: boolean | Organization$impersonationSessionsArgs<ExtArgs>
+    dealershipReviews?: boolean | Organization$dealershipReviewsArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2497,6 +2782,7 @@ export namespace Prisma {
       testDrives: Prisma.$TestDrivePayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
       impersonationSessions: Prisma.$ImpersonationSessionPayload<ExtArgs>[]
+      dealershipReviews: Prisma.$DealershipReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2512,6 +2798,8 @@ export namespace Prisma {
       pendingOwnerEmail: string | null
       theme: Prisma.JsonValue | null
       settings: Prisma.JsonValue | null
+      averageRating: number
+      totalReviews: number
       createdAt: Date
       updatedAt: Date
       deletedAt: Date | null
@@ -2916,6 +3204,7 @@ export namespace Prisma {
     testDrives<T extends Organization$testDrivesArgs<ExtArgs> = {}>(args?: Subset<T, Organization$testDrivesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestDrivePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends Organization$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     impersonationSessions<T extends Organization$impersonationSessionsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$impersonationSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImpersonationSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dealershipReviews<T extends Organization$dealershipReviewsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$dealershipReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2958,6 +3247,8 @@ export namespace Prisma {
     readonly pendingOwnerEmail: FieldRef<"Organization", 'String'>
     readonly theme: FieldRef<"Organization", 'Json'>
     readonly settings: FieldRef<"Organization", 'Json'>
+    readonly averageRating: FieldRef<"Organization", 'Float'>
+    readonly totalReviews: FieldRef<"Organization", 'Int'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
     readonly updatedAt: FieldRef<"Organization", 'DateTime'>
     readonly deletedAt: FieldRef<"Organization", 'DateTime'>
@@ -3512,6 +3803,30 @@ export namespace Prisma {
   }
 
   /**
+   * Organization.dealershipReviews
+   */
+  export type Organization$dealershipReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    where?: DealershipReviewWhereInput
+    orderBy?: DealershipReviewOrderByWithRelationInput | DealershipReviewOrderByWithRelationInput[]
+    cursor?: DealershipReviewWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DealershipReviewScalarFieldEnum | DealershipReviewScalarFieldEnum[]
+  }
+
+  /**
    * Organization without action
    */
   export type OrganizationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3566,6 +3881,9 @@ export namespace Prisma {
     type: $Enums.PlanType | null
     monthlyPrice: number | null
     yearlyPrice: number | null
+    stripeProductId: string | null
+    stripeMonthlyPriceId: string | null
+    stripeYearlyPriceId: string | null
     maxCars: number | null
     maxMembers: number | null
     maxImagesPerCar: number | null
@@ -3581,6 +3899,9 @@ export namespace Prisma {
     type: $Enums.PlanType | null
     monthlyPrice: number | null
     yearlyPrice: number | null
+    stripeProductId: string | null
+    stripeMonthlyPriceId: string | null
+    stripeYearlyPriceId: string | null
     maxCars: number | null
     maxMembers: number | null
     maxImagesPerCar: number | null
@@ -3596,6 +3917,9 @@ export namespace Prisma {
     type: number
     monthlyPrice: number
     yearlyPrice: number
+    stripeProductId: number
+    stripeMonthlyPriceId: number
+    stripeYearlyPriceId: number
     maxCars: number
     maxMembers: number
     maxImagesPerCar: number
@@ -3632,6 +3956,9 @@ export namespace Prisma {
     type?: true
     monthlyPrice?: true
     yearlyPrice?: true
+    stripeProductId?: true
+    stripeMonthlyPriceId?: true
+    stripeYearlyPriceId?: true
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
@@ -3647,6 +3974,9 @@ export namespace Prisma {
     type?: true
     monthlyPrice?: true
     yearlyPrice?: true
+    stripeProductId?: true
+    stripeMonthlyPriceId?: true
+    stripeYearlyPriceId?: true
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
@@ -3662,6 +3992,9 @@ export namespace Prisma {
     type?: true
     monthlyPrice?: true
     yearlyPrice?: true
+    stripeProductId?: true
+    stripeMonthlyPriceId?: true
+    stripeYearlyPriceId?: true
     maxCars?: true
     maxMembers?: true
     maxImagesPerCar?: true
@@ -3765,6 +4098,9 @@ export namespace Prisma {
     type: $Enums.PlanType
     monthlyPrice: number
     yearlyPrice: number
+    stripeProductId: string | null
+    stripeMonthlyPriceId: string | null
+    stripeYearlyPriceId: string | null
     maxCars: number
     maxMembers: number
     maxImagesPerCar: number
@@ -3800,6 +4136,9 @@ export namespace Prisma {
     type?: boolean
     monthlyPrice?: boolean
     yearlyPrice?: boolean
+    stripeProductId?: boolean
+    stripeMonthlyPriceId?: boolean
+    stripeYearlyPriceId?: boolean
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
@@ -3818,6 +4157,9 @@ export namespace Prisma {
     type?: boolean
     monthlyPrice?: boolean
     yearlyPrice?: boolean
+    stripeProductId?: boolean
+    stripeMonthlyPriceId?: boolean
+    stripeYearlyPriceId?: boolean
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
@@ -3834,6 +4176,9 @@ export namespace Prisma {
     type?: boolean
     monthlyPrice?: boolean
     yearlyPrice?: boolean
+    stripeProductId?: boolean
+    stripeMonthlyPriceId?: boolean
+    stripeYearlyPriceId?: boolean
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
@@ -3850,6 +4195,9 @@ export namespace Prisma {
     type?: boolean
     monthlyPrice?: boolean
     yearlyPrice?: boolean
+    stripeProductId?: boolean
+    stripeMonthlyPriceId?: boolean
+    stripeYearlyPriceId?: boolean
     maxCars?: boolean
     maxMembers?: boolean
     maxImagesPerCar?: boolean
@@ -3860,7 +4208,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "monthlyPrice" | "yearlyPrice" | "maxCars" | "maxMembers" | "maxImagesPerCar" | "auditLogRetentionDays" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+  export type PlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "monthlyPrice" | "yearlyPrice" | "stripeProductId" | "stripeMonthlyPriceId" | "stripeYearlyPriceId" | "maxCars" | "maxMembers" | "maxImagesPerCar" | "auditLogRetentionDays" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
   export type PlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subscriptions?: boolean | Plan$subscriptionsArgs<ExtArgs>
     _count?: boolean | PlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -3879,6 +4227,9 @@ export namespace Prisma {
       type: $Enums.PlanType
       monthlyPrice: number
       yearlyPrice: number
+      stripeProductId: string | null
+      stripeMonthlyPriceId: string | null
+      stripeYearlyPriceId: string | null
       maxCars: number
       maxMembers: number
       maxImagesPerCar: number
@@ -4316,6 +4667,9 @@ export namespace Prisma {
     readonly type: FieldRef<"Plan", 'PlanType'>
     readonly monthlyPrice: FieldRef<"Plan", 'Int'>
     readonly yearlyPrice: FieldRef<"Plan", 'Int'>
+    readonly stripeProductId: FieldRef<"Plan", 'String'>
+    readonly stripeMonthlyPriceId: FieldRef<"Plan", 'String'>
+    readonly stripeYearlyPriceId: FieldRef<"Plan", 'String'>
     readonly maxCars: FieldRef<"Plan", 'Int'>
     readonly maxMembers: FieldRef<"Plan", 'Int'>
     readonly maxImagesPerCar: FieldRef<"Plan", 'Int'>
@@ -4771,6 +5125,7 @@ export namespace Prisma {
     status: $Enums.SubscriptionStatus | null
     stripeCustomerId: string | null
     stripeSubscriptionId: string | null
+    stripeCheckoutSessionId: string | null
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     trialEndsAt: Date | null
@@ -4786,6 +5141,7 @@ export namespace Prisma {
     status: $Enums.SubscriptionStatus | null
     stripeCustomerId: string | null
     stripeSubscriptionId: string | null
+    stripeCheckoutSessionId: string | null
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     trialEndsAt: Date | null
@@ -4801,6 +5157,7 @@ export namespace Prisma {
     status: number
     stripeCustomerId: number
     stripeSubscriptionId: number
+    stripeCheckoutSessionId: number
     currentPeriodStart: number
     currentPeriodEnd: number
     trialEndsAt: number
@@ -4818,6 +5175,7 @@ export namespace Prisma {
     status?: true
     stripeCustomerId?: true
     stripeSubscriptionId?: true
+    stripeCheckoutSessionId?: true
     currentPeriodStart?: true
     currentPeriodEnd?: true
     trialEndsAt?: true
@@ -4833,6 +5191,7 @@ export namespace Prisma {
     status?: true
     stripeCustomerId?: true
     stripeSubscriptionId?: true
+    stripeCheckoutSessionId?: true
     currentPeriodStart?: true
     currentPeriodEnd?: true
     trialEndsAt?: true
@@ -4848,6 +5207,7 @@ export namespace Prisma {
     status?: true
     stripeCustomerId?: true
     stripeSubscriptionId?: true
+    stripeCheckoutSessionId?: true
     currentPeriodStart?: true
     currentPeriodEnd?: true
     trialEndsAt?: true
@@ -4936,6 +5296,7 @@ export namespace Prisma {
     status: $Enums.SubscriptionStatus
     stripeCustomerId: string | null
     stripeSubscriptionId: string | null
+    stripeCheckoutSessionId: string | null
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     trialEndsAt: Date | null
@@ -4968,6 +5329,7 @@ export namespace Prisma {
     status?: boolean
     stripeCustomerId?: boolean
     stripeSubscriptionId?: boolean
+    stripeCheckoutSessionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     trialEndsAt?: boolean
@@ -4985,6 +5347,7 @@ export namespace Prisma {
     status?: boolean
     stripeCustomerId?: boolean
     stripeSubscriptionId?: boolean
+    stripeCheckoutSessionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     trialEndsAt?: boolean
@@ -5002,6 +5365,7 @@ export namespace Prisma {
     status?: boolean
     stripeCustomerId?: boolean
     stripeSubscriptionId?: boolean
+    stripeCheckoutSessionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     trialEndsAt?: boolean
@@ -5019,6 +5383,7 @@ export namespace Prisma {
     status?: boolean
     stripeCustomerId?: boolean
     stripeSubscriptionId?: boolean
+    stripeCheckoutSessionId?: boolean
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     trialEndsAt?: boolean
@@ -5027,7 +5392,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "planId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "currentPeriodStart" | "currentPeriodEnd" | "trialEndsAt" | "canceledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
+  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "planId" | "status" | "stripeCustomerId" | "stripeSubscriptionId" | "stripeCheckoutSessionId" | "currentPeriodStart" | "currentPeriodEnd" | "trialEndsAt" | "canceledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
   export type SubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     plan?: boolean | PlanDefaultArgs<ExtArgs>
@@ -5054,6 +5419,7 @@ export namespace Prisma {
       status: $Enums.SubscriptionStatus
       stripeCustomerId: string | null
       stripeSubscriptionId: string | null
+      stripeCheckoutSessionId: string | null
       currentPeriodStart: Date | null
       currentPeriodEnd: Date | null
       trialEndsAt: Date | null
@@ -5491,6 +5857,7 @@ export namespace Prisma {
     readonly status: FieldRef<"Subscription", 'SubscriptionStatus'>
     readonly stripeCustomerId: FieldRef<"Subscription", 'String'>
     readonly stripeSubscriptionId: FieldRef<"Subscription", 'String'>
+    readonly stripeCheckoutSessionId: FieldRef<"Subscription", 'String'>
     readonly currentPeriodStart: FieldRef<"Subscription", 'DateTime'>
     readonly currentPeriodEnd: FieldRef<"Subscription", 'DateTime'>
     readonly trialEndsAt: FieldRef<"Subscription", 'DateTime'>
@@ -9581,6 +9948,8 @@ export namespace Prisma {
     superAdminSessions?: boolean | User$superAdminSessionsArgs<ExtArgs>
     impersonatedSessions?: boolean | User$impersonatedSessionsArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
+    onboardingSessions?: boolean | User$onboardingSessionsArgs<ExtArgs>
+    dealershipReviews?: boolean | User$dealershipReviewsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -9629,6 +9998,8 @@ export namespace Prisma {
     superAdminSessions?: boolean | User$superAdminSessionsArgs<ExtArgs>
     impersonatedSessions?: boolean | User$impersonatedSessionsArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
+    onboardingSessions?: boolean | User$onboardingSessionsArgs<ExtArgs>
+    dealershipReviews?: boolean | User$dealershipReviewsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -9644,6 +10015,8 @@ export namespace Prisma {
       superAdminSessions: Prisma.$ImpersonationSessionPayload<ExtArgs>[]
       impersonatedSessions: Prisma.$ImpersonationSessionPayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+      onboardingSessions: Prisma.$OnboardingSessionPayload<ExtArgs>[]
+      dealershipReviews: Prisma.$DealershipReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10056,6 +10429,8 @@ export namespace Prisma {
     superAdminSessions<T extends User$superAdminSessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$superAdminSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImpersonationSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     impersonatedSessions<T extends User$impersonatedSessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$impersonatedSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImpersonationSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    onboardingSessions<T extends User$onboardingSessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$onboardingSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    dealershipReviews<T extends User$dealershipReviewsArgs<ExtArgs> = {}>(args?: Subset<T, User$dealershipReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10647,6 +11022,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * User.onboardingSessions
+   */
+  export type User$onboardingSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    where?: OnboardingSessionWhereInput
+    orderBy?: OnboardingSessionOrderByWithRelationInput | OnboardingSessionOrderByWithRelationInput[]
+    cursor?: OnboardingSessionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OnboardingSessionScalarFieldEnum | OnboardingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * User.dealershipReviews
+   */
+  export type User$dealershipReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    where?: DealershipReviewWhereInput
+    orderBy?: DealershipReviewOrderByWithRelationInput | DealershipReviewOrderByWithRelationInput[]
+    cursor?: DealershipReviewWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DealershipReviewScalarFieldEnum | DealershipReviewScalarFieldEnum[]
   }
 
   /**
@@ -15329,6 +15752,2238 @@ export namespace Prisma {
 
 
   /**
+   * Model OnboardingSession
+   */
+
+  export type AggregateOnboardingSession = {
+    _count: OnboardingSessionCountAggregateOutputType | null
+    _min: OnboardingSessionMinAggregateOutputType | null
+    _max: OnboardingSessionMaxAggregateOutputType | null
+  }
+
+  export type OnboardingSessionMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    status: $Enums.OnboardingSessionStatus | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OnboardingSessionMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    status: $Enums.OnboardingSessionStatus | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OnboardingSessionCountAggregateOutputType = {
+    id: number
+    userId: number
+    data: number
+    status: number
+    expiresAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OnboardingSessionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    status?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OnboardingSessionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    status?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OnboardingSessionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    data?: true
+    status?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OnboardingSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OnboardingSession to aggregate.
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OnboardingSessions to fetch.
+     */
+    orderBy?: OnboardingSessionOrderByWithRelationInput | OnboardingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OnboardingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OnboardingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OnboardingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OnboardingSessions
+    **/
+    _count?: true | OnboardingSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OnboardingSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OnboardingSessionMaxAggregateInputType
+  }
+
+  export type GetOnboardingSessionAggregateType<T extends OnboardingSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateOnboardingSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOnboardingSession[P]>
+      : GetScalarType<T[P], AggregateOnboardingSession[P]>
+  }
+
+
+
+
+  export type OnboardingSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OnboardingSessionWhereInput
+    orderBy?: OnboardingSessionOrderByWithAggregationInput | OnboardingSessionOrderByWithAggregationInput[]
+    by: OnboardingSessionScalarFieldEnum[] | OnboardingSessionScalarFieldEnum
+    having?: OnboardingSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OnboardingSessionCountAggregateInputType | true
+    _min?: OnboardingSessionMinAggregateInputType
+    _max?: OnboardingSessionMaxAggregateInputType
+  }
+
+  export type OnboardingSessionGroupByOutputType = {
+    id: string
+    userId: string
+    data: JsonValue
+    status: $Enums.OnboardingSessionStatus
+    expiresAt: Date
+    createdAt: Date
+    updatedAt: Date
+    _count: OnboardingSessionCountAggregateOutputType | null
+    _min: OnboardingSessionMinAggregateOutputType | null
+    _max: OnboardingSessionMaxAggregateOutputType | null
+  }
+
+  type GetOnboardingSessionGroupByPayload<T extends OnboardingSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OnboardingSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OnboardingSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OnboardingSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], OnboardingSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OnboardingSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    data?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["onboardingSession"]>
+
+  export type OnboardingSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    data?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["onboardingSession"]>
+
+  export type OnboardingSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    data?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["onboardingSession"]>
+
+  export type OnboardingSessionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    data?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OnboardingSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "data" | "status" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["onboardingSession"]>
+  export type OnboardingSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type OnboardingSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type OnboardingSessionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $OnboardingSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OnboardingSession"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      data: Prisma.JsonValue
+      status: $Enums.OnboardingSessionStatus
+      expiresAt: Date
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["onboardingSession"]>
+    composites: {}
+  }
+
+  type OnboardingSessionGetPayload<S extends boolean | null | undefined | OnboardingSessionDefaultArgs> = $Result.GetResult<Prisma.$OnboardingSessionPayload, S>
+
+  type OnboardingSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OnboardingSessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OnboardingSessionCountAggregateInputType | true
+    }
+
+  export interface OnboardingSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OnboardingSession'], meta: { name: 'OnboardingSession' } }
+    /**
+     * Find zero or one OnboardingSession that matches the filter.
+     * @param {OnboardingSessionFindUniqueArgs} args - Arguments to find a OnboardingSession
+     * @example
+     * // Get one OnboardingSession
+     * const onboardingSession = await prisma.onboardingSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OnboardingSessionFindUniqueArgs>(args: SelectSubset<T, OnboardingSessionFindUniqueArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OnboardingSession that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OnboardingSessionFindUniqueOrThrowArgs} args - Arguments to find a OnboardingSession
+     * @example
+     * // Get one OnboardingSession
+     * const onboardingSession = await prisma.onboardingSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OnboardingSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, OnboardingSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OnboardingSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionFindFirstArgs} args - Arguments to find a OnboardingSession
+     * @example
+     * // Get one OnboardingSession
+     * const onboardingSession = await prisma.onboardingSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OnboardingSessionFindFirstArgs>(args?: SelectSubset<T, OnboardingSessionFindFirstArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OnboardingSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionFindFirstOrThrowArgs} args - Arguments to find a OnboardingSession
+     * @example
+     * // Get one OnboardingSession
+     * const onboardingSession = await prisma.onboardingSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OnboardingSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, OnboardingSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OnboardingSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OnboardingSessions
+     * const onboardingSessions = await prisma.onboardingSession.findMany()
+     * 
+     * // Get first 10 OnboardingSessions
+     * const onboardingSessions = await prisma.onboardingSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const onboardingSessionWithIdOnly = await prisma.onboardingSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OnboardingSessionFindManyArgs>(args?: SelectSubset<T, OnboardingSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OnboardingSession.
+     * @param {OnboardingSessionCreateArgs} args - Arguments to create a OnboardingSession.
+     * @example
+     * // Create one OnboardingSession
+     * const OnboardingSession = await prisma.onboardingSession.create({
+     *   data: {
+     *     // ... data to create a OnboardingSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends OnboardingSessionCreateArgs>(args: SelectSubset<T, OnboardingSessionCreateArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OnboardingSessions.
+     * @param {OnboardingSessionCreateManyArgs} args - Arguments to create many OnboardingSessions.
+     * @example
+     * // Create many OnboardingSessions
+     * const onboardingSession = await prisma.onboardingSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OnboardingSessionCreateManyArgs>(args?: SelectSubset<T, OnboardingSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OnboardingSessions and returns the data saved in the database.
+     * @param {OnboardingSessionCreateManyAndReturnArgs} args - Arguments to create many OnboardingSessions.
+     * @example
+     * // Create many OnboardingSessions
+     * const onboardingSession = await prisma.onboardingSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OnboardingSessions and only return the `id`
+     * const onboardingSessionWithIdOnly = await prisma.onboardingSession.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OnboardingSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, OnboardingSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OnboardingSession.
+     * @param {OnboardingSessionDeleteArgs} args - Arguments to delete one OnboardingSession.
+     * @example
+     * // Delete one OnboardingSession
+     * const OnboardingSession = await prisma.onboardingSession.delete({
+     *   where: {
+     *     // ... filter to delete one OnboardingSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OnboardingSessionDeleteArgs>(args: SelectSubset<T, OnboardingSessionDeleteArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OnboardingSession.
+     * @param {OnboardingSessionUpdateArgs} args - Arguments to update one OnboardingSession.
+     * @example
+     * // Update one OnboardingSession
+     * const onboardingSession = await prisma.onboardingSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OnboardingSessionUpdateArgs>(args: SelectSubset<T, OnboardingSessionUpdateArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OnboardingSessions.
+     * @param {OnboardingSessionDeleteManyArgs} args - Arguments to filter OnboardingSessions to delete.
+     * @example
+     * // Delete a few OnboardingSessions
+     * const { count } = await prisma.onboardingSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OnboardingSessionDeleteManyArgs>(args?: SelectSubset<T, OnboardingSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OnboardingSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OnboardingSessions
+     * const onboardingSession = await prisma.onboardingSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OnboardingSessionUpdateManyArgs>(args: SelectSubset<T, OnboardingSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OnboardingSessions and returns the data updated in the database.
+     * @param {OnboardingSessionUpdateManyAndReturnArgs} args - Arguments to update many OnboardingSessions.
+     * @example
+     * // Update many OnboardingSessions
+     * const onboardingSession = await prisma.onboardingSession.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OnboardingSessions and only return the `id`
+     * const onboardingSessionWithIdOnly = await prisma.onboardingSession.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OnboardingSessionUpdateManyAndReturnArgs>(args: SelectSubset<T, OnboardingSessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OnboardingSession.
+     * @param {OnboardingSessionUpsertArgs} args - Arguments to update or create a OnboardingSession.
+     * @example
+     * // Update or create a OnboardingSession
+     * const onboardingSession = await prisma.onboardingSession.upsert({
+     *   create: {
+     *     // ... data to create a OnboardingSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OnboardingSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OnboardingSessionUpsertArgs>(args: SelectSubset<T, OnboardingSessionUpsertArgs<ExtArgs>>): Prisma__OnboardingSessionClient<$Result.GetResult<Prisma.$OnboardingSessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OnboardingSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionCountArgs} args - Arguments to filter OnboardingSessions to count.
+     * @example
+     * // Count the number of OnboardingSessions
+     * const count = await prisma.onboardingSession.count({
+     *   where: {
+     *     // ... the filter for the OnboardingSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends OnboardingSessionCountArgs>(
+      args?: Subset<T, OnboardingSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OnboardingSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OnboardingSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OnboardingSessionAggregateArgs>(args: Subset<T, OnboardingSessionAggregateArgs>): Prisma.PrismaPromise<GetOnboardingSessionAggregateType<T>>
+
+    /**
+     * Group by OnboardingSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OnboardingSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OnboardingSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OnboardingSessionGroupByArgs['orderBy'] }
+        : { orderBy?: OnboardingSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OnboardingSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOnboardingSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OnboardingSession model
+   */
+  readonly fields: OnboardingSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OnboardingSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OnboardingSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OnboardingSession model
+   */
+  interface OnboardingSessionFieldRefs {
+    readonly id: FieldRef<"OnboardingSession", 'String'>
+    readonly userId: FieldRef<"OnboardingSession", 'String'>
+    readonly data: FieldRef<"OnboardingSession", 'Json'>
+    readonly status: FieldRef<"OnboardingSession", 'OnboardingSessionStatus'>
+    readonly expiresAt: FieldRef<"OnboardingSession", 'DateTime'>
+    readonly createdAt: FieldRef<"OnboardingSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"OnboardingSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OnboardingSession findUnique
+   */
+  export type OnboardingSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which OnboardingSession to fetch.
+     */
+    where: OnboardingSessionWhereUniqueInput
+  }
+
+  /**
+   * OnboardingSession findUniqueOrThrow
+   */
+  export type OnboardingSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which OnboardingSession to fetch.
+     */
+    where: OnboardingSessionWhereUniqueInput
+  }
+
+  /**
+   * OnboardingSession findFirst
+   */
+  export type OnboardingSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which OnboardingSession to fetch.
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OnboardingSessions to fetch.
+     */
+    orderBy?: OnboardingSessionOrderByWithRelationInput | OnboardingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OnboardingSessions.
+     */
+    cursor?: OnboardingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OnboardingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OnboardingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OnboardingSessions.
+     */
+    distinct?: OnboardingSessionScalarFieldEnum | OnboardingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * OnboardingSession findFirstOrThrow
+   */
+  export type OnboardingSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which OnboardingSession to fetch.
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OnboardingSessions to fetch.
+     */
+    orderBy?: OnboardingSessionOrderByWithRelationInput | OnboardingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OnboardingSessions.
+     */
+    cursor?: OnboardingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OnboardingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OnboardingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OnboardingSessions.
+     */
+    distinct?: OnboardingSessionScalarFieldEnum | OnboardingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * OnboardingSession findMany
+   */
+  export type OnboardingSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which OnboardingSessions to fetch.
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OnboardingSessions to fetch.
+     */
+    orderBy?: OnboardingSessionOrderByWithRelationInput | OnboardingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OnboardingSessions.
+     */
+    cursor?: OnboardingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OnboardingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OnboardingSessions.
+     */
+    skip?: number
+    distinct?: OnboardingSessionScalarFieldEnum | OnboardingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * OnboardingSession create
+   */
+  export type OnboardingSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OnboardingSession.
+     */
+    data: XOR<OnboardingSessionCreateInput, OnboardingSessionUncheckedCreateInput>
+  }
+
+  /**
+   * OnboardingSession createMany
+   */
+  export type OnboardingSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OnboardingSessions.
+     */
+    data: OnboardingSessionCreateManyInput | OnboardingSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OnboardingSession createManyAndReturn
+   */
+  export type OnboardingSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many OnboardingSessions.
+     */
+    data: OnboardingSessionCreateManyInput | OnboardingSessionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OnboardingSession update
+   */
+  export type OnboardingSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OnboardingSession.
+     */
+    data: XOR<OnboardingSessionUpdateInput, OnboardingSessionUncheckedUpdateInput>
+    /**
+     * Choose, which OnboardingSession to update.
+     */
+    where: OnboardingSessionWhereUniqueInput
+  }
+
+  /**
+   * OnboardingSession updateMany
+   */
+  export type OnboardingSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OnboardingSessions.
+     */
+    data: XOR<OnboardingSessionUpdateManyMutationInput, OnboardingSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which OnboardingSessions to update
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * Limit how many OnboardingSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OnboardingSession updateManyAndReturn
+   */
+  export type OnboardingSessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * The data used to update OnboardingSessions.
+     */
+    data: XOR<OnboardingSessionUpdateManyMutationInput, OnboardingSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which OnboardingSessions to update
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * Limit how many OnboardingSessions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OnboardingSession upsert
+   */
+  export type OnboardingSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OnboardingSession to update in case it exists.
+     */
+    where: OnboardingSessionWhereUniqueInput
+    /**
+     * In case the OnboardingSession found by the `where` argument doesn't exist, create a new OnboardingSession with this data.
+     */
+    create: XOR<OnboardingSessionCreateInput, OnboardingSessionUncheckedCreateInput>
+    /**
+     * In case the OnboardingSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OnboardingSessionUpdateInput, OnboardingSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * OnboardingSession delete
+   */
+  export type OnboardingSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+    /**
+     * Filter which OnboardingSession to delete.
+     */
+    where: OnboardingSessionWhereUniqueInput
+  }
+
+  /**
+   * OnboardingSession deleteMany
+   */
+  export type OnboardingSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OnboardingSessions to delete
+     */
+    where?: OnboardingSessionWhereInput
+    /**
+     * Limit how many OnboardingSessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OnboardingSession without action
+   */
+  export type OnboardingSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OnboardingSession
+     */
+    select?: OnboardingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OnboardingSession
+     */
+    omit?: OnboardingSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OnboardingSessionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DealershipReview
+   */
+
+  export type AggregateDealershipReview = {
+    _count: DealershipReviewCountAggregateOutputType | null
+    _avg: DealershipReviewAvgAggregateOutputType | null
+    _sum: DealershipReviewSumAggregateOutputType | null
+    _min: DealershipReviewMinAggregateOutputType | null
+    _max: DealershipReviewMaxAggregateOutputType | null
+  }
+
+  export type DealershipReviewAvgAggregateOutputType = {
+    rating: number | null
+  }
+
+  export type DealershipReviewSumAggregateOutputType = {
+    rating: number | null
+  }
+
+  export type DealershipReviewMinAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    userId: string | null
+    rating: number | null
+    title: string | null
+    comment: string | null
+    isApproved: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DealershipReviewMaxAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    userId: string | null
+    rating: number | null
+    title: string | null
+    comment: string | null
+    isApproved: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DealershipReviewCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    userId: number
+    rating: number
+    title: number
+    comment: number
+    isApproved: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DealershipReviewAvgAggregateInputType = {
+    rating?: true
+  }
+
+  export type DealershipReviewSumAggregateInputType = {
+    rating?: true
+  }
+
+  export type DealershipReviewMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    userId?: true
+    rating?: true
+    title?: true
+    comment?: true
+    isApproved?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DealershipReviewMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    userId?: true
+    rating?: true
+    title?: true
+    comment?: true
+    isApproved?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DealershipReviewCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    userId?: true
+    rating?: true
+    title?: true
+    comment?: true
+    isApproved?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DealershipReviewAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DealershipReview to aggregate.
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DealershipReviews to fetch.
+     */
+    orderBy?: DealershipReviewOrderByWithRelationInput | DealershipReviewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DealershipReviewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DealershipReviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DealershipReviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DealershipReviews
+    **/
+    _count?: true | DealershipReviewCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DealershipReviewAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DealershipReviewSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DealershipReviewMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DealershipReviewMaxAggregateInputType
+  }
+
+  export type GetDealershipReviewAggregateType<T extends DealershipReviewAggregateArgs> = {
+        [P in keyof T & keyof AggregateDealershipReview]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDealershipReview[P]>
+      : GetScalarType<T[P], AggregateDealershipReview[P]>
+  }
+
+
+
+
+  export type DealershipReviewGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DealershipReviewWhereInput
+    orderBy?: DealershipReviewOrderByWithAggregationInput | DealershipReviewOrderByWithAggregationInput[]
+    by: DealershipReviewScalarFieldEnum[] | DealershipReviewScalarFieldEnum
+    having?: DealershipReviewScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DealershipReviewCountAggregateInputType | true
+    _avg?: DealershipReviewAvgAggregateInputType
+    _sum?: DealershipReviewSumAggregateInputType
+    _min?: DealershipReviewMinAggregateInputType
+    _max?: DealershipReviewMaxAggregateInputType
+  }
+
+  export type DealershipReviewGroupByOutputType = {
+    id: string
+    organizationId: string
+    userId: string
+    rating: number
+    title: string | null
+    comment: string | null
+    isApproved: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: DealershipReviewCountAggregateOutputType | null
+    _avg: DealershipReviewAvgAggregateOutputType | null
+    _sum: DealershipReviewSumAggregateOutputType | null
+    _min: DealershipReviewMinAggregateOutputType | null
+    _max: DealershipReviewMaxAggregateOutputType | null
+  }
+
+  type GetDealershipReviewGroupByPayload<T extends DealershipReviewGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DealershipReviewGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DealershipReviewGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DealershipReviewGroupByOutputType[P]>
+            : GetScalarType<T[P], DealershipReviewGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DealershipReviewSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    userId?: boolean
+    rating?: boolean
+    title?: boolean
+    comment?: boolean
+    isApproved?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dealershipReview"]>
+
+  export type DealershipReviewSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    userId?: boolean
+    rating?: boolean
+    title?: boolean
+    comment?: boolean
+    isApproved?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dealershipReview"]>
+
+  export type DealershipReviewSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    userId?: boolean
+    rating?: boolean
+    title?: boolean
+    comment?: boolean
+    isApproved?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dealershipReview"]>
+
+  export type DealershipReviewSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    userId?: boolean
+    rating?: boolean
+    title?: boolean
+    comment?: boolean
+    isApproved?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DealershipReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "userId" | "rating" | "title" | "comment" | "isApproved" | "createdAt" | "updatedAt", ExtArgs["result"]["dealershipReview"]>
+  export type DealershipReviewInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type DealershipReviewIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type DealershipReviewIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $DealershipReviewPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DealershipReview"
+    objects: {
+      organization: Prisma.$OrganizationPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      organizationId: string
+      userId: string
+      rating: number
+      title: string | null
+      comment: string | null
+      isApproved: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["dealershipReview"]>
+    composites: {}
+  }
+
+  type DealershipReviewGetPayload<S extends boolean | null | undefined | DealershipReviewDefaultArgs> = $Result.GetResult<Prisma.$DealershipReviewPayload, S>
+
+  type DealershipReviewCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DealershipReviewFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DealershipReviewCountAggregateInputType | true
+    }
+
+  export interface DealershipReviewDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DealershipReview'], meta: { name: 'DealershipReview' } }
+    /**
+     * Find zero or one DealershipReview that matches the filter.
+     * @param {DealershipReviewFindUniqueArgs} args - Arguments to find a DealershipReview
+     * @example
+     * // Get one DealershipReview
+     * const dealershipReview = await prisma.dealershipReview.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DealershipReviewFindUniqueArgs>(args: SelectSubset<T, DealershipReviewFindUniqueArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DealershipReview that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DealershipReviewFindUniqueOrThrowArgs} args - Arguments to find a DealershipReview
+     * @example
+     * // Get one DealershipReview
+     * const dealershipReview = await prisma.dealershipReview.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DealershipReviewFindUniqueOrThrowArgs>(args: SelectSubset<T, DealershipReviewFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DealershipReview that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewFindFirstArgs} args - Arguments to find a DealershipReview
+     * @example
+     * // Get one DealershipReview
+     * const dealershipReview = await prisma.dealershipReview.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DealershipReviewFindFirstArgs>(args?: SelectSubset<T, DealershipReviewFindFirstArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DealershipReview that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewFindFirstOrThrowArgs} args - Arguments to find a DealershipReview
+     * @example
+     * // Get one DealershipReview
+     * const dealershipReview = await prisma.dealershipReview.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DealershipReviewFindFirstOrThrowArgs>(args?: SelectSubset<T, DealershipReviewFindFirstOrThrowArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DealershipReviews that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DealershipReviews
+     * const dealershipReviews = await prisma.dealershipReview.findMany()
+     * 
+     * // Get first 10 DealershipReviews
+     * const dealershipReviews = await prisma.dealershipReview.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const dealershipReviewWithIdOnly = await prisma.dealershipReview.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DealershipReviewFindManyArgs>(args?: SelectSubset<T, DealershipReviewFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DealershipReview.
+     * @param {DealershipReviewCreateArgs} args - Arguments to create a DealershipReview.
+     * @example
+     * // Create one DealershipReview
+     * const DealershipReview = await prisma.dealershipReview.create({
+     *   data: {
+     *     // ... data to create a DealershipReview
+     *   }
+     * })
+     * 
+     */
+    create<T extends DealershipReviewCreateArgs>(args: SelectSubset<T, DealershipReviewCreateArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DealershipReviews.
+     * @param {DealershipReviewCreateManyArgs} args - Arguments to create many DealershipReviews.
+     * @example
+     * // Create many DealershipReviews
+     * const dealershipReview = await prisma.dealershipReview.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DealershipReviewCreateManyArgs>(args?: SelectSubset<T, DealershipReviewCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DealershipReviews and returns the data saved in the database.
+     * @param {DealershipReviewCreateManyAndReturnArgs} args - Arguments to create many DealershipReviews.
+     * @example
+     * // Create many DealershipReviews
+     * const dealershipReview = await prisma.dealershipReview.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DealershipReviews and only return the `id`
+     * const dealershipReviewWithIdOnly = await prisma.dealershipReview.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DealershipReviewCreateManyAndReturnArgs>(args?: SelectSubset<T, DealershipReviewCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DealershipReview.
+     * @param {DealershipReviewDeleteArgs} args - Arguments to delete one DealershipReview.
+     * @example
+     * // Delete one DealershipReview
+     * const DealershipReview = await prisma.dealershipReview.delete({
+     *   where: {
+     *     // ... filter to delete one DealershipReview
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DealershipReviewDeleteArgs>(args: SelectSubset<T, DealershipReviewDeleteArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DealershipReview.
+     * @param {DealershipReviewUpdateArgs} args - Arguments to update one DealershipReview.
+     * @example
+     * // Update one DealershipReview
+     * const dealershipReview = await prisma.dealershipReview.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DealershipReviewUpdateArgs>(args: SelectSubset<T, DealershipReviewUpdateArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DealershipReviews.
+     * @param {DealershipReviewDeleteManyArgs} args - Arguments to filter DealershipReviews to delete.
+     * @example
+     * // Delete a few DealershipReviews
+     * const { count } = await prisma.dealershipReview.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DealershipReviewDeleteManyArgs>(args?: SelectSubset<T, DealershipReviewDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DealershipReviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DealershipReviews
+     * const dealershipReview = await prisma.dealershipReview.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DealershipReviewUpdateManyArgs>(args: SelectSubset<T, DealershipReviewUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DealershipReviews and returns the data updated in the database.
+     * @param {DealershipReviewUpdateManyAndReturnArgs} args - Arguments to update many DealershipReviews.
+     * @example
+     * // Update many DealershipReviews
+     * const dealershipReview = await prisma.dealershipReview.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DealershipReviews and only return the `id`
+     * const dealershipReviewWithIdOnly = await prisma.dealershipReview.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DealershipReviewUpdateManyAndReturnArgs>(args: SelectSubset<T, DealershipReviewUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DealershipReview.
+     * @param {DealershipReviewUpsertArgs} args - Arguments to update or create a DealershipReview.
+     * @example
+     * // Update or create a DealershipReview
+     * const dealershipReview = await prisma.dealershipReview.upsert({
+     *   create: {
+     *     // ... data to create a DealershipReview
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DealershipReview we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DealershipReviewUpsertArgs>(args: SelectSubset<T, DealershipReviewUpsertArgs<ExtArgs>>): Prisma__DealershipReviewClient<$Result.GetResult<Prisma.$DealershipReviewPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DealershipReviews.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewCountArgs} args - Arguments to filter DealershipReviews to count.
+     * @example
+     * // Count the number of DealershipReviews
+     * const count = await prisma.dealershipReview.count({
+     *   where: {
+     *     // ... the filter for the DealershipReviews we want to count
+     *   }
+     * })
+    **/
+    count<T extends DealershipReviewCountArgs>(
+      args?: Subset<T, DealershipReviewCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DealershipReviewCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DealershipReview.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DealershipReviewAggregateArgs>(args: Subset<T, DealershipReviewAggregateArgs>): Prisma.PrismaPromise<GetDealershipReviewAggregateType<T>>
+
+    /**
+     * Group by DealershipReview.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DealershipReviewGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DealershipReviewGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DealershipReviewGroupByArgs['orderBy'] }
+        : { orderBy?: DealershipReviewGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DealershipReviewGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDealershipReviewGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DealershipReview model
+   */
+  readonly fields: DealershipReviewFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DealershipReview.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DealershipReviewClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DealershipReview model
+   */
+  interface DealershipReviewFieldRefs {
+    readonly id: FieldRef<"DealershipReview", 'String'>
+    readonly organizationId: FieldRef<"DealershipReview", 'String'>
+    readonly userId: FieldRef<"DealershipReview", 'String'>
+    readonly rating: FieldRef<"DealershipReview", 'Int'>
+    readonly title: FieldRef<"DealershipReview", 'String'>
+    readonly comment: FieldRef<"DealershipReview", 'String'>
+    readonly isApproved: FieldRef<"DealershipReview", 'Boolean'>
+    readonly createdAt: FieldRef<"DealershipReview", 'DateTime'>
+    readonly updatedAt: FieldRef<"DealershipReview", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DealershipReview findUnique
+   */
+  export type DealershipReviewFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * Filter, which DealershipReview to fetch.
+     */
+    where: DealershipReviewWhereUniqueInput
+  }
+
+  /**
+   * DealershipReview findUniqueOrThrow
+   */
+  export type DealershipReviewFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * Filter, which DealershipReview to fetch.
+     */
+    where: DealershipReviewWhereUniqueInput
+  }
+
+  /**
+   * DealershipReview findFirst
+   */
+  export type DealershipReviewFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * Filter, which DealershipReview to fetch.
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DealershipReviews to fetch.
+     */
+    orderBy?: DealershipReviewOrderByWithRelationInput | DealershipReviewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DealershipReviews.
+     */
+    cursor?: DealershipReviewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DealershipReviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DealershipReviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DealershipReviews.
+     */
+    distinct?: DealershipReviewScalarFieldEnum | DealershipReviewScalarFieldEnum[]
+  }
+
+  /**
+   * DealershipReview findFirstOrThrow
+   */
+  export type DealershipReviewFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * Filter, which DealershipReview to fetch.
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DealershipReviews to fetch.
+     */
+    orderBy?: DealershipReviewOrderByWithRelationInput | DealershipReviewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DealershipReviews.
+     */
+    cursor?: DealershipReviewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DealershipReviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DealershipReviews.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DealershipReviews.
+     */
+    distinct?: DealershipReviewScalarFieldEnum | DealershipReviewScalarFieldEnum[]
+  }
+
+  /**
+   * DealershipReview findMany
+   */
+  export type DealershipReviewFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * Filter, which DealershipReviews to fetch.
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DealershipReviews to fetch.
+     */
+    orderBy?: DealershipReviewOrderByWithRelationInput | DealershipReviewOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DealershipReviews.
+     */
+    cursor?: DealershipReviewWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DealershipReviews from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DealershipReviews.
+     */
+    skip?: number
+    distinct?: DealershipReviewScalarFieldEnum | DealershipReviewScalarFieldEnum[]
+  }
+
+  /**
+   * DealershipReview create
+   */
+  export type DealershipReviewCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DealershipReview.
+     */
+    data: XOR<DealershipReviewCreateInput, DealershipReviewUncheckedCreateInput>
+  }
+
+  /**
+   * DealershipReview createMany
+   */
+  export type DealershipReviewCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DealershipReviews.
+     */
+    data: DealershipReviewCreateManyInput | DealershipReviewCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DealershipReview createManyAndReturn
+   */
+  export type DealershipReviewCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * The data used to create many DealershipReviews.
+     */
+    data: DealershipReviewCreateManyInput | DealershipReviewCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DealershipReview update
+   */
+  export type DealershipReviewUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DealershipReview.
+     */
+    data: XOR<DealershipReviewUpdateInput, DealershipReviewUncheckedUpdateInput>
+    /**
+     * Choose, which DealershipReview to update.
+     */
+    where: DealershipReviewWhereUniqueInput
+  }
+
+  /**
+   * DealershipReview updateMany
+   */
+  export type DealershipReviewUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DealershipReviews.
+     */
+    data: XOR<DealershipReviewUpdateManyMutationInput, DealershipReviewUncheckedUpdateManyInput>
+    /**
+     * Filter which DealershipReviews to update
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * Limit how many DealershipReviews to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DealershipReview updateManyAndReturn
+   */
+  export type DealershipReviewUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * The data used to update DealershipReviews.
+     */
+    data: XOR<DealershipReviewUpdateManyMutationInput, DealershipReviewUncheckedUpdateManyInput>
+    /**
+     * Filter which DealershipReviews to update
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * Limit how many DealershipReviews to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DealershipReview upsert
+   */
+  export type DealershipReviewUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DealershipReview to update in case it exists.
+     */
+    where: DealershipReviewWhereUniqueInput
+    /**
+     * In case the DealershipReview found by the `where` argument doesn't exist, create a new DealershipReview with this data.
+     */
+    create: XOR<DealershipReviewCreateInput, DealershipReviewUncheckedCreateInput>
+    /**
+     * In case the DealershipReview was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DealershipReviewUpdateInput, DealershipReviewUncheckedUpdateInput>
+  }
+
+  /**
+   * DealershipReview delete
+   */
+  export type DealershipReviewDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+    /**
+     * Filter which DealershipReview to delete.
+     */
+    where: DealershipReviewWhereUniqueInput
+  }
+
+  /**
+   * DealershipReview deleteMany
+   */
+  export type DealershipReviewDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DealershipReviews to delete
+     */
+    where?: DealershipReviewWhereInput
+    /**
+     * Limit how many DealershipReviews to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DealershipReview without action
+   */
+  export type DealershipReviewDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DealershipReview
+     */
+    select?: DealershipReviewSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DealershipReview
+     */
+    omit?: DealershipReviewOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DealershipReviewInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -15356,6 +18011,8 @@ export namespace Prisma {
     pendingOwnerEmail: 'pendingOwnerEmail',
     theme: 'theme',
     settings: 'settings',
+    averageRating: 'averageRating',
+    totalReviews: 'totalReviews',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -15370,6 +18027,9 @@ export namespace Prisma {
     type: 'type',
     monthlyPrice: 'monthlyPrice',
     yearlyPrice: 'yearlyPrice',
+    stripeProductId: 'stripeProductId',
+    stripeMonthlyPriceId: 'stripeMonthlyPriceId',
+    stripeYearlyPriceId: 'stripeYearlyPriceId',
     maxCars: 'maxCars',
     maxMembers: 'maxMembers',
     maxImagesPerCar: 'maxImagesPerCar',
@@ -15390,6 +18050,7 @@ export namespace Prisma {
     status: 'status',
     stripeCustomerId: 'stripeCustomerId',
     stripeSubscriptionId: 'stripeSubscriptionId',
+    stripeCheckoutSessionId: 'stripeCheckoutSessionId',
     currentPeriodStart: 'currentPeriodStart',
     currentPeriodEnd: 'currentPeriodEnd',
     trialEndsAt: 'trialEndsAt',
@@ -15533,6 +18194,34 @@ export namespace Prisma {
   export type TestDriveScalarFieldEnum = (typeof TestDriveScalarFieldEnum)[keyof typeof TestDriveScalarFieldEnum]
 
 
+  export const OnboardingSessionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    data: 'data',
+    status: 'status',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OnboardingSessionScalarFieldEnum = (typeof OnboardingSessionScalarFieldEnum)[keyof typeof OnboardingSessionScalarFieldEnum]
+
+
+  export const DealershipReviewScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    userId: 'userId',
+    rating: 'rating',
+    title: 'title',
+    comment: 'comment',
+    isApproved: 'isApproved',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DealershipReviewScalarFieldEnum = (typeof DealershipReviewScalarFieldEnum)[keyof typeof DealershipReviewScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -15622,6 +18311,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -15646,20 +18363,6 @@ export namespace Prisma {
    * Reference to a field of type 'PlanType[]'
    */
   export type ListEnumPlanTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanType[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Int'
-   */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
-   * Reference to a field of type 'Int[]'
-   */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -15790,16 +18493,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Float'
+   * Reference to a field of type 'OnboardingSessionStatus'
    */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+  export type EnumOnboardingSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OnboardingSessionStatus'>
     
 
 
   /**
-   * Reference to a field of type 'Float[]'
+   * Reference to a field of type 'OnboardingSessionStatus[]'
    */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+  export type ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OnboardingSessionStatus[]'>
     
   /**
    * Deep Input Types
@@ -15823,6 +18526,8 @@ export namespace Prisma {
     pendingOwnerEmail?: StringNullableFilter<"Organization"> | string | null
     theme?: JsonNullableFilter<"Organization">
     settings?: JsonNullableFilter<"Organization">
+    averageRating?: FloatFilter<"Organization"> | number
+    totalReviews?: IntFilter<"Organization"> | number
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
@@ -15833,6 +18538,7 @@ export namespace Prisma {
     testDrives?: TestDriveListRelationFilter
     auditLogs?: AuditLogListRelationFilter
     impersonationSessions?: ImpersonationSessionListRelationFilter
+    dealershipReviews?: DealershipReviewListRelationFilter
   }
 
   export type OrganizationOrderByWithRelationInput = {
@@ -15849,6 +18555,8 @@ export namespace Prisma {
     pendingOwnerEmail?: SortOrderInput | SortOrder
     theme?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -15859,6 +18567,7 @@ export namespace Prisma {
     testDrives?: TestDriveOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
     impersonationSessions?: ImpersonationSessionOrderByRelationAggregateInput
+    dealershipReviews?: DealershipReviewOrderByRelationAggregateInput
   }
 
   export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -15878,6 +18587,8 @@ export namespace Prisma {
     pendingOwnerEmail?: StringNullableFilter<"Organization"> | string | null
     theme?: JsonNullableFilter<"Organization">
     settings?: JsonNullableFilter<"Organization">
+    averageRating?: FloatFilter<"Organization"> | number
+    totalReviews?: IntFilter<"Organization"> | number
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
@@ -15888,6 +18599,7 @@ export namespace Prisma {
     testDrives?: TestDriveListRelationFilter
     auditLogs?: AuditLogListRelationFilter
     impersonationSessions?: ImpersonationSessionListRelationFilter
+    dealershipReviews?: DealershipReviewListRelationFilter
   }, "id" | "slug">
 
   export type OrganizationOrderByWithAggregationInput = {
@@ -15904,12 +18616,16 @@ export namespace Prisma {
     pendingOwnerEmail?: SortOrderInput | SortOrder
     theme?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: OrganizationCountOrderByAggregateInput
+    _avg?: OrganizationAvgOrderByAggregateInput
     _max?: OrganizationMaxOrderByAggregateInput
     _min?: OrganizationMinOrderByAggregateInput
+    _sum?: OrganizationSumOrderByAggregateInput
   }
 
   export type OrganizationScalarWhereWithAggregatesInput = {
@@ -15929,6 +18645,8 @@ export namespace Prisma {
     pendingOwnerEmail?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     theme?: JsonNullableWithAggregatesFilter<"Organization">
     settings?: JsonNullableWithAggregatesFilter<"Organization">
+    averageRating?: FloatWithAggregatesFilter<"Organization"> | number
+    totalReviews?: IntWithAggregatesFilter<"Organization"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
@@ -15943,6 +18661,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFilter<"Plan"> | $Enums.PlanType
     monthlyPrice?: IntFilter<"Plan"> | number
     yearlyPrice?: IntFilter<"Plan"> | number
+    stripeProductId?: StringNullableFilter<"Plan"> | string | null
+    stripeMonthlyPriceId?: StringNullableFilter<"Plan"> | string | null
+    stripeYearlyPriceId?: StringNullableFilter<"Plan"> | string | null
     maxCars?: IntFilter<"Plan"> | number
     maxMembers?: IntFilter<"Plan"> | number
     maxImagesPerCar?: IntFilter<"Plan"> | number
@@ -15960,6 +18681,9 @@ export namespace Prisma {
     type?: SortOrder
     monthlyPrice?: SortOrder
     yearlyPrice?: SortOrder
+    stripeProductId?: SortOrderInput | SortOrder
+    stripeMonthlyPriceId?: SortOrderInput | SortOrder
+    stripeYearlyPriceId?: SortOrderInput | SortOrder
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
@@ -15974,6 +18698,9 @@ export namespace Prisma {
   export type PlanWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     type?: $Enums.PlanType
+    stripeProductId?: string
+    stripeMonthlyPriceId?: string
+    stripeYearlyPriceId?: string
     AND?: PlanWhereInput | PlanWhereInput[]
     OR?: PlanWhereInput[]
     NOT?: PlanWhereInput | PlanWhereInput[]
@@ -15989,7 +18716,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Plan"> | Date | string
     updatedAt?: DateTimeFilter<"Plan"> | Date | string
     subscriptions?: SubscriptionListRelationFilter
-  }, "id" | "type">
+  }, "id" | "type" | "stripeProductId" | "stripeMonthlyPriceId" | "stripeYearlyPriceId">
 
   export type PlanOrderByWithAggregationInput = {
     id?: SortOrder
@@ -15997,6 +18724,9 @@ export namespace Prisma {
     type?: SortOrder
     monthlyPrice?: SortOrder
     yearlyPrice?: SortOrder
+    stripeProductId?: SortOrderInput | SortOrder
+    stripeMonthlyPriceId?: SortOrderInput | SortOrder
+    stripeYearlyPriceId?: SortOrderInput | SortOrder
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
@@ -16021,6 +18751,9 @@ export namespace Prisma {
     type?: EnumPlanTypeWithAggregatesFilter<"Plan"> | $Enums.PlanType
     monthlyPrice?: IntWithAggregatesFilter<"Plan"> | number
     yearlyPrice?: IntWithAggregatesFilter<"Plan"> | number
+    stripeProductId?: StringNullableWithAggregatesFilter<"Plan"> | string | null
+    stripeMonthlyPriceId?: StringNullableWithAggregatesFilter<"Plan"> | string | null
+    stripeYearlyPriceId?: StringNullableWithAggregatesFilter<"Plan"> | string | null
     maxCars?: IntWithAggregatesFilter<"Plan"> | number
     maxMembers?: IntWithAggregatesFilter<"Plan"> | number
     maxImagesPerCar?: IntWithAggregatesFilter<"Plan"> | number
@@ -16041,6 +18774,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
     stripeCustomerId?: StringNullableFilter<"Subscription"> | string | null
     stripeSubscriptionId?: StringNullableFilter<"Subscription"> | string | null
+    stripeCheckoutSessionId?: StringNullableFilter<"Subscription"> | string | null
     currentPeriodStart?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     currentPeriodEnd?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     trialEndsAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
@@ -16058,6 +18792,7 @@ export namespace Prisma {
     status?: SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     stripeSubscriptionId?: SortOrderInput | SortOrder
+    stripeCheckoutSessionId?: SortOrderInput | SortOrder
     currentPeriodStart?: SortOrderInput | SortOrder
     currentPeriodEnd?: SortOrderInput | SortOrder
     trialEndsAt?: SortOrderInput | SortOrder
@@ -16073,6 +18808,7 @@ export namespace Prisma {
     organizationId?: string
     stripeCustomerId?: string
     stripeSubscriptionId?: string
+    stripeCheckoutSessionId?: string
     AND?: SubscriptionWhereInput | SubscriptionWhereInput[]
     OR?: SubscriptionWhereInput[]
     NOT?: SubscriptionWhereInput | SubscriptionWhereInput[]
@@ -16086,7 +18822,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
     plan?: XOR<PlanScalarRelationFilter, PlanWhereInput>
-  }, "id" | "organizationId" | "stripeCustomerId" | "stripeSubscriptionId">
+  }, "id" | "organizationId" | "stripeCustomerId" | "stripeSubscriptionId" | "stripeCheckoutSessionId">
 
   export type SubscriptionOrderByWithAggregationInput = {
     id?: SortOrder
@@ -16095,6 +18831,7 @@ export namespace Prisma {
     status?: SortOrder
     stripeCustomerId?: SortOrderInput | SortOrder
     stripeSubscriptionId?: SortOrderInput | SortOrder
+    stripeCheckoutSessionId?: SortOrderInput | SortOrder
     currentPeriodStart?: SortOrderInput | SortOrder
     currentPeriodEnd?: SortOrderInput | SortOrder
     trialEndsAt?: SortOrderInput | SortOrder
@@ -16116,6 +18853,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusWithAggregatesFilter<"Subscription"> | $Enums.SubscriptionStatus
     stripeCustomerId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
     stripeSubscriptionId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
+    stripeCheckoutSessionId?: StringNullableWithAggregatesFilter<"Subscription"> | string | null
     currentPeriodStart?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
     currentPeriodEnd?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
     trialEndsAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
@@ -16405,6 +19143,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionListRelationFilter
     impersonatedSessions?: ImpersonationSessionListRelationFilter
     auditLogs?: AuditLogListRelationFilter
+    onboardingSessions?: OnboardingSessionListRelationFilter
+    dealershipReviews?: DealershipReviewListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -16424,6 +19164,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionOrderByRelationAggregateInput
     impersonatedSessions?: ImpersonationSessionOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
+    onboardingSessions?: OnboardingSessionOrderByRelationAggregateInput
+    dealershipReviews?: DealershipReviewOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -16446,6 +19188,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionListRelationFilter
     impersonatedSessions?: ImpersonationSessionListRelationFilter
     auditLogs?: AuditLogListRelationFilter
+    onboardingSessions?: OnboardingSessionListRelationFilter
+    dealershipReviews?: DealershipReviewListRelationFilter
   }, "id" | "clerkId" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -16837,6 +19581,152 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"TestDrive"> | Date | string
   }
 
+  export type OnboardingSessionWhereInput = {
+    AND?: OnboardingSessionWhereInput | OnboardingSessionWhereInput[]
+    OR?: OnboardingSessionWhereInput[]
+    NOT?: OnboardingSessionWhereInput | OnboardingSessionWhereInput[]
+    id?: StringFilter<"OnboardingSession"> | string
+    userId?: StringFilter<"OnboardingSession"> | string
+    data?: JsonFilter<"OnboardingSession">
+    status?: EnumOnboardingSessionStatusFilter<"OnboardingSession"> | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    createdAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    updatedAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type OnboardingSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    data?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type OnboardingSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OnboardingSessionWhereInput | OnboardingSessionWhereInput[]
+    OR?: OnboardingSessionWhereInput[]
+    NOT?: OnboardingSessionWhereInput | OnboardingSessionWhereInput[]
+    userId?: StringFilter<"OnboardingSession"> | string
+    data?: JsonFilter<"OnboardingSession">
+    status?: EnumOnboardingSessionStatusFilter<"OnboardingSession"> | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    createdAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    updatedAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type OnboardingSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    data?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OnboardingSessionCountOrderByAggregateInput
+    _max?: OnboardingSessionMaxOrderByAggregateInput
+    _min?: OnboardingSessionMinOrderByAggregateInput
+  }
+
+  export type OnboardingSessionScalarWhereWithAggregatesInput = {
+    AND?: OnboardingSessionScalarWhereWithAggregatesInput | OnboardingSessionScalarWhereWithAggregatesInput[]
+    OR?: OnboardingSessionScalarWhereWithAggregatesInput[]
+    NOT?: OnboardingSessionScalarWhereWithAggregatesInput | OnboardingSessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OnboardingSession"> | string
+    userId?: StringWithAggregatesFilter<"OnboardingSession"> | string
+    data?: JsonWithAggregatesFilter<"OnboardingSession">
+    status?: EnumOnboardingSessionStatusWithAggregatesFilter<"OnboardingSession"> | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeWithAggregatesFilter<"OnboardingSession"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"OnboardingSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OnboardingSession"> | Date | string
+  }
+
+  export type DealershipReviewWhereInput = {
+    AND?: DealershipReviewWhereInput | DealershipReviewWhereInput[]
+    OR?: DealershipReviewWhereInput[]
+    NOT?: DealershipReviewWhereInput | DealershipReviewWhereInput[]
+    id?: StringFilter<"DealershipReview"> | string
+    organizationId?: StringFilter<"DealershipReview"> | string
+    userId?: StringFilter<"DealershipReview"> | string
+    rating?: IntFilter<"DealershipReview"> | number
+    title?: StringNullableFilter<"DealershipReview"> | string | null
+    comment?: StringNullableFilter<"DealershipReview"> | string | null
+    isApproved?: BoolFilter<"DealershipReview"> | boolean
+    createdAt?: DateTimeFilter<"DealershipReview"> | Date | string
+    updatedAt?: DateTimeFilter<"DealershipReview"> | Date | string
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type DealershipReviewOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    userId?: SortOrder
+    rating?: SortOrder
+    title?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    isApproved?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    organization?: OrganizationOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type DealershipReviewWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    organizationId_userId?: DealershipReviewOrganizationIdUserIdCompoundUniqueInput
+    AND?: DealershipReviewWhereInput | DealershipReviewWhereInput[]
+    OR?: DealershipReviewWhereInput[]
+    NOT?: DealershipReviewWhereInput | DealershipReviewWhereInput[]
+    organizationId?: StringFilter<"DealershipReview"> | string
+    userId?: StringFilter<"DealershipReview"> | string
+    rating?: IntFilter<"DealershipReview"> | number
+    title?: StringNullableFilter<"DealershipReview"> | string | null
+    comment?: StringNullableFilter<"DealershipReview"> | string | null
+    isApproved?: BoolFilter<"DealershipReview"> | boolean
+    createdAt?: DateTimeFilter<"DealershipReview"> | Date | string
+    updatedAt?: DateTimeFilter<"DealershipReview"> | Date | string
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "organizationId_userId">
+
+  export type DealershipReviewOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    userId?: SortOrder
+    rating?: SortOrder
+    title?: SortOrderInput | SortOrder
+    comment?: SortOrderInput | SortOrder
+    isApproved?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DealershipReviewCountOrderByAggregateInput
+    _avg?: DealershipReviewAvgOrderByAggregateInput
+    _max?: DealershipReviewMaxOrderByAggregateInput
+    _min?: DealershipReviewMinOrderByAggregateInput
+    _sum?: DealershipReviewSumOrderByAggregateInput
+  }
+
+  export type DealershipReviewScalarWhereWithAggregatesInput = {
+    AND?: DealershipReviewScalarWhereWithAggregatesInput | DealershipReviewScalarWhereWithAggregatesInput[]
+    OR?: DealershipReviewScalarWhereWithAggregatesInput[]
+    NOT?: DealershipReviewScalarWhereWithAggregatesInput | DealershipReviewScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DealershipReview"> | string
+    organizationId?: StringWithAggregatesFilter<"DealershipReview"> | string
+    userId?: StringWithAggregatesFilter<"DealershipReview"> | string
+    rating?: IntWithAggregatesFilter<"DealershipReview"> | number
+    title?: StringNullableWithAggregatesFilter<"DealershipReview"> | string | null
+    comment?: StringNullableWithAggregatesFilter<"DealershipReview"> | string | null
+    isApproved?: BoolWithAggregatesFilter<"DealershipReview"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"DealershipReview"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DealershipReview"> | Date | string
+  }
+
   export type OrganizationCreateInput = {
     id?: string
     name: string
@@ -16851,6 +19741,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -16861,6 +19753,7 @@ export namespace Prisma {
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateInput = {
@@ -16877,6 +19770,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -16887,6 +19782,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUpdateInput = {
@@ -16903,6 +19799,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -16913,6 +19811,7 @@ export namespace Prisma {
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateInput = {
@@ -16929,6 +19828,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -16939,6 +19840,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationCreateManyInput = {
@@ -16955,6 +19857,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -16974,6 +19878,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -16993,6 +19899,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17004,6 +19912,9 @@ export namespace Prisma {
     type: $Enums.PlanType
     monthlyPrice?: number
     yearlyPrice?: number
+    stripeProductId?: string | null
+    stripeMonthlyPriceId?: string | null
+    stripeYearlyPriceId?: string | null
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
@@ -17021,6 +19932,9 @@ export namespace Prisma {
     type: $Enums.PlanType
     monthlyPrice?: number
     yearlyPrice?: number
+    stripeProductId?: string | null
+    stripeMonthlyPriceId?: string | null
+    stripeYearlyPriceId?: string | null
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
@@ -17038,6 +19952,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
     monthlyPrice?: IntFieldUpdateOperationsInput | number
     yearlyPrice?: IntFieldUpdateOperationsInput | number
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeMonthlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeYearlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
@@ -17055,6 +19972,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
     monthlyPrice?: IntFieldUpdateOperationsInput | number
     yearlyPrice?: IntFieldUpdateOperationsInput | number
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeMonthlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeYearlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
@@ -17072,6 +19992,9 @@ export namespace Prisma {
     type: $Enums.PlanType
     monthlyPrice?: number
     yearlyPrice?: number
+    stripeProductId?: string | null
+    stripeMonthlyPriceId?: string | null
+    stripeYearlyPriceId?: string | null
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
@@ -17088,6 +20011,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
     monthlyPrice?: IntFieldUpdateOperationsInput | number
     yearlyPrice?: IntFieldUpdateOperationsInput | number
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeMonthlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeYearlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
@@ -17104,6 +20030,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
     monthlyPrice?: IntFieldUpdateOperationsInput | number
     yearlyPrice?: IntFieldUpdateOperationsInput | number
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeMonthlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeYearlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
@@ -17119,6 +20048,7 @@ export namespace Prisma {
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -17136,6 +20066,7 @@ export namespace Prisma {
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -17149,6 +20080,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17166,6 +20098,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17181,6 +20114,7 @@ export namespace Prisma {
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -17194,6 +20128,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17209,6 +20144,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17506,6 +20442,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -17525,6 +20463,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -17544,6 +20484,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -17563,6 +20505,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -17994,6 +20938,157 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type OnboardingSessionCreateInput = {
+    id?: string
+    data: JsonNullValueInput | InputJsonValue
+    status?: $Enums.OnboardingSessionStatus
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutOnboardingSessionsInput
+  }
+
+  export type OnboardingSessionUncheckedCreateInput = {
+    id?: string
+    userId: string
+    data: JsonNullValueInput | InputJsonValue
+    status?: $Enums.OnboardingSessionStatus
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OnboardingSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutOnboardingSessionsNestedInput
+  }
+
+  export type OnboardingSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OnboardingSessionCreateManyInput = {
+    id?: string
+    userId: string
+    data: JsonNullValueInput | InputJsonValue
+    status?: $Enums.OnboardingSessionStatus
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OnboardingSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OnboardingSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DealershipReviewCreateInput = {
+    id?: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutDealershipReviewsInput
+    user: UserCreateNestedOneWithoutDealershipReviewsInput
+  }
+
+  export type DealershipReviewUncheckedCreateInput = {
+    id?: string
+    organizationId: string
+    userId: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DealershipReviewUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutDealershipReviewsNestedInput
+    user?: UserUpdateOneRequiredWithoutDealershipReviewsNestedInput
+  }
+
+  export type DealershipReviewUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DealershipReviewCreateManyInput = {
+    id?: string
+    organizationId: string
+    userId: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DealershipReviewUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DealershipReviewUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -18050,6 +21145,28 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -18115,6 +21232,12 @@ export namespace Prisma {
     none?: ImpersonationSessionWhereInput
   }
 
+  export type DealershipReviewListRelationFilter = {
+    every?: DealershipReviewWhereInput
+    some?: DealershipReviewWhereInput
+    none?: DealershipReviewWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -18144,6 +21267,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type DealershipReviewOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type OrganizationCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -18158,9 +21285,16 @@ export namespace Prisma {
     pendingOwnerEmail?: SortOrder
     theme?: SortOrder
     settings?: SortOrder
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
+  }
+
+  export type OrganizationAvgOrderByAggregateInput = {
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
   }
 
   export type OrganizationMaxOrderByAggregateInput = {
@@ -18175,6 +21309,8 @@ export namespace Prisma {
     description?: SortOrder
     isActive?: SortOrder
     pendingOwnerEmail?: SortOrder
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -18192,9 +21328,16 @@ export namespace Prisma {
     description?: SortOrder
     isActive?: SortOrder
     pendingOwnerEmail?: SortOrder
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
+  }
+
+  export type OrganizationSumOrderByAggregateInput = {
+    averageRating?: SortOrder
+    totalReviews?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -18267,6 +21410,38 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -18300,17 +21475,6 @@ export namespace Prisma {
     in?: $Enums.PlanType[] | ListEnumPlanTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.PlanType[] | ListEnumPlanTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumPlanTypeFilter<$PrismaModel> | $Enums.PlanType
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -18363,6 +21527,9 @@ export namespace Prisma {
     type?: SortOrder
     monthlyPrice?: SortOrder
     yearlyPrice?: SortOrder
+    stripeProductId?: SortOrder
+    stripeMonthlyPriceId?: SortOrder
+    stripeYearlyPriceId?: SortOrder
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
@@ -18388,6 +21555,9 @@ export namespace Prisma {
     type?: SortOrder
     monthlyPrice?: SortOrder
     yearlyPrice?: SortOrder
+    stripeProductId?: SortOrder
+    stripeMonthlyPriceId?: SortOrder
+    stripeYearlyPriceId?: SortOrder
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
@@ -18403,6 +21573,9 @@ export namespace Prisma {
     type?: SortOrder
     monthlyPrice?: SortOrder
     yearlyPrice?: SortOrder
+    stripeProductId?: SortOrder
+    stripeMonthlyPriceId?: SortOrder
+    stripeYearlyPriceId?: SortOrder
     maxCars?: SortOrder
     maxMembers?: SortOrder
     maxImagesPerCar?: SortOrder
@@ -18429,22 +21602,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPlanTypeFilter<$PrismaModel>
     _max?: NestedEnumPlanTypeFilter<$PrismaModel>
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -18513,6 +21670,7 @@ export namespace Prisma {
     status?: SortOrder
     stripeCustomerId?: SortOrder
     stripeSubscriptionId?: SortOrder
+    stripeCheckoutSessionId?: SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     trialEndsAt?: SortOrder
@@ -18528,6 +21686,7 @@ export namespace Prisma {
     status?: SortOrder
     stripeCustomerId?: SortOrder
     stripeSubscriptionId?: SortOrder
+    stripeCheckoutSessionId?: SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     trialEndsAt?: SortOrder
@@ -18543,6 +21702,7 @@ export namespace Prisma {
     status?: SortOrder
     stripeCustomerId?: SortOrder
     stripeSubscriptionId?: SortOrder
+    stripeCheckoutSessionId?: SortOrder
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     trialEndsAt?: SortOrder
@@ -18759,7 +21919,17 @@ export namespace Prisma {
     none?: SavedCarWhereInput
   }
 
+  export type OnboardingSessionListRelationFilter = {
+    every?: OnboardingSessionWhereInput
+    some?: OnboardingSessionWhereInput
+    none?: OnboardingSessionWhereInput
+  }
+
   export type SavedCarOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OnboardingSessionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -19077,6 +22247,100 @@ export namespace Prisma {
     _max?: NestedEnumTestDriveStatusFilter<$PrismaModel>
   }
 
+  export type EnumOnboardingSessionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingSessionStatus | EnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingSessionStatusFilter<$PrismaModel> | $Enums.OnboardingSessionStatus
+  }
+
+  export type OnboardingSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    data?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OnboardingSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OnboardingSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumOnboardingSessionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingSessionStatus | EnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingSessionStatusWithAggregatesFilter<$PrismaModel> | $Enums.OnboardingSessionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOnboardingSessionStatusFilter<$PrismaModel>
+    _max?: NestedEnumOnboardingSessionStatusFilter<$PrismaModel>
+  }
+
+  export type DealershipReviewOrganizationIdUserIdCompoundUniqueInput = {
+    organizationId: string
+    userId: string
+  }
+
+  export type DealershipReviewCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    userId?: SortOrder
+    rating?: SortOrder
+    title?: SortOrder
+    comment?: SortOrder
+    isApproved?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DealershipReviewAvgOrderByAggregateInput = {
+    rating?: SortOrder
+  }
+
+  export type DealershipReviewMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    userId?: SortOrder
+    rating?: SortOrder
+    title?: SortOrder
+    comment?: SortOrder
+    isApproved?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DealershipReviewMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    userId?: SortOrder
+    rating?: SortOrder
+    title?: SortOrder
+    comment?: SortOrder
+    isApproved?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DealershipReviewSumOrderByAggregateInput = {
+    rating?: SortOrder
+  }
+
   export type SubscriptionCreateNestedOneWithoutOrganizationInput = {
     create?: XOR<SubscriptionCreateWithoutOrganizationInput, SubscriptionUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: SubscriptionCreateOrConnectWithoutOrganizationInput
@@ -19123,6 +22387,13 @@ export namespace Prisma {
     connectOrCreate?: ImpersonationSessionCreateOrConnectWithoutOrganizationInput | ImpersonationSessionCreateOrConnectWithoutOrganizationInput[]
     createMany?: ImpersonationSessionCreateManyOrganizationInputEnvelope
     connect?: ImpersonationSessionWhereUniqueInput | ImpersonationSessionWhereUniqueInput[]
+  }
+
+  export type DealershipReviewCreateNestedManyWithoutOrganizationInput = {
+    create?: XOR<DealershipReviewCreateWithoutOrganizationInput, DealershipReviewUncheckedCreateWithoutOrganizationInput> | DealershipReviewCreateWithoutOrganizationInput[] | DealershipReviewUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutOrganizationInput | DealershipReviewCreateOrConnectWithoutOrganizationInput[]
+    createMany?: DealershipReviewCreateManyOrganizationInputEnvelope
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
   }
 
   export type SubscriptionUncheckedCreateNestedOneWithoutOrganizationInput = {
@@ -19173,6 +22444,13 @@ export namespace Prisma {
     connect?: ImpersonationSessionWhereUniqueInput | ImpersonationSessionWhereUniqueInput[]
   }
 
+  export type DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput = {
+    create?: XOR<DealershipReviewCreateWithoutOrganizationInput, DealershipReviewUncheckedCreateWithoutOrganizationInput> | DealershipReviewCreateWithoutOrganizationInput[] | DealershipReviewUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutOrganizationInput | DealershipReviewCreateOrConnectWithoutOrganizationInput[]
+    createMany?: DealershipReviewCreateManyOrganizationInputEnvelope
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -19183,6 +22461,22 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -19287,6 +22581,20 @@ export namespace Prisma {
     deleteMany?: ImpersonationSessionScalarWhereInput | ImpersonationSessionScalarWhereInput[]
   }
 
+  export type DealershipReviewUpdateManyWithoutOrganizationNestedInput = {
+    create?: XOR<DealershipReviewCreateWithoutOrganizationInput, DealershipReviewUncheckedCreateWithoutOrganizationInput> | DealershipReviewCreateWithoutOrganizationInput[] | DealershipReviewUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutOrganizationInput | DealershipReviewCreateOrConnectWithoutOrganizationInput[]
+    upsert?: DealershipReviewUpsertWithWhereUniqueWithoutOrganizationInput | DealershipReviewUpsertWithWhereUniqueWithoutOrganizationInput[]
+    createMany?: DealershipReviewCreateManyOrganizationInputEnvelope
+    set?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    disconnect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    delete?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    update?: DealershipReviewUpdateWithWhereUniqueWithoutOrganizationInput | DealershipReviewUpdateWithWhereUniqueWithoutOrganizationInput[]
+    updateMany?: DealershipReviewUpdateManyWithWhereWithoutOrganizationInput | DealershipReviewUpdateManyWithWhereWithoutOrganizationInput[]
+    deleteMany?: DealershipReviewScalarWhereInput | DealershipReviewScalarWhereInput[]
+  }
+
   export type SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput = {
     create?: XOR<SubscriptionCreateWithoutOrganizationInput, SubscriptionUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: SubscriptionCreateOrConnectWithoutOrganizationInput
@@ -19381,6 +22689,20 @@ export namespace Prisma {
     deleteMany?: ImpersonationSessionScalarWhereInput | ImpersonationSessionScalarWhereInput[]
   }
 
+  export type DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput = {
+    create?: XOR<DealershipReviewCreateWithoutOrganizationInput, DealershipReviewUncheckedCreateWithoutOrganizationInput> | DealershipReviewCreateWithoutOrganizationInput[] | DealershipReviewUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutOrganizationInput | DealershipReviewCreateOrConnectWithoutOrganizationInput[]
+    upsert?: DealershipReviewUpsertWithWhereUniqueWithoutOrganizationInput | DealershipReviewUpsertWithWhereUniqueWithoutOrganizationInput[]
+    createMany?: DealershipReviewCreateManyOrganizationInputEnvelope
+    set?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    disconnect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    delete?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    update?: DealershipReviewUpdateWithWhereUniqueWithoutOrganizationInput | DealershipReviewUpdateWithWhereUniqueWithoutOrganizationInput[]
+    updateMany?: DealershipReviewUpdateManyWithWhereWithoutOrganizationInput | DealershipReviewUpdateManyWithWhereWithoutOrganizationInput[]
+    deleteMany?: DealershipReviewScalarWhereInput | DealershipReviewScalarWhereInput[]
+  }
+
   export type SubscriptionCreateNestedManyWithoutPlanInput = {
     create?: XOR<SubscriptionCreateWithoutPlanInput, SubscriptionUncheckedCreateWithoutPlanInput> | SubscriptionCreateWithoutPlanInput[] | SubscriptionUncheckedCreateWithoutPlanInput[]
     connectOrCreate?: SubscriptionCreateOrConnectWithoutPlanInput | SubscriptionCreateOrConnectWithoutPlanInput[]
@@ -19397,14 +22719,6 @@ export namespace Prisma {
 
   export type EnumPlanTypeFieldUpdateOperationsInput = {
     set?: $Enums.PlanType
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -19654,6 +22968,20 @@ export namespace Prisma {
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
   }
 
+  export type OnboardingSessionCreateNestedManyWithoutUserInput = {
+    create?: XOR<OnboardingSessionCreateWithoutUserInput, OnboardingSessionUncheckedCreateWithoutUserInput> | OnboardingSessionCreateWithoutUserInput[] | OnboardingSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: OnboardingSessionCreateOrConnectWithoutUserInput | OnboardingSessionCreateOrConnectWithoutUserInput[]
+    createMany?: OnboardingSessionCreateManyUserInputEnvelope
+    connect?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+  }
+
+  export type DealershipReviewCreateNestedManyWithoutUserInput = {
+    create?: XOR<DealershipReviewCreateWithoutUserInput, DealershipReviewUncheckedCreateWithoutUserInput> | DealershipReviewCreateWithoutUserInput[] | DealershipReviewUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutUserInput | DealershipReviewCreateOrConnectWithoutUserInput[]
+    createMany?: DealershipReviewCreateManyUserInputEnvelope
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+  }
+
   export type SavedCarUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SavedCarCreateWithoutUserInput, SavedCarUncheckedCreateWithoutUserInput> | SavedCarCreateWithoutUserInput[] | SavedCarUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SavedCarCreateOrConnectWithoutUserInput | SavedCarCreateOrConnectWithoutUserInput[]
@@ -19701,6 +23029,20 @@ export namespace Prisma {
     connectOrCreate?: AuditLogCreateOrConnectWithoutUserInput | AuditLogCreateOrConnectWithoutUserInput[]
     createMany?: AuditLogCreateManyUserInputEnvelope
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
+  }
+
+  export type OnboardingSessionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<OnboardingSessionCreateWithoutUserInput, OnboardingSessionUncheckedCreateWithoutUserInput> | OnboardingSessionCreateWithoutUserInput[] | OnboardingSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: OnboardingSessionCreateOrConnectWithoutUserInput | OnboardingSessionCreateOrConnectWithoutUserInput[]
+    createMany?: OnboardingSessionCreateManyUserInputEnvelope
+    connect?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+  }
+
+  export type DealershipReviewUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<DealershipReviewCreateWithoutUserInput, DealershipReviewUncheckedCreateWithoutUserInput> | DealershipReviewCreateWithoutUserInput[] | DealershipReviewUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutUserInput | DealershipReviewCreateOrConnectWithoutUserInput[]
+    createMany?: DealershipReviewCreateManyUserInputEnvelope
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
   }
 
   export type EnumUserRoleFieldUpdateOperationsInput = {
@@ -19805,6 +23147,34 @@ export namespace Prisma {
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
   }
 
+  export type OnboardingSessionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<OnboardingSessionCreateWithoutUserInput, OnboardingSessionUncheckedCreateWithoutUserInput> | OnboardingSessionCreateWithoutUserInput[] | OnboardingSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: OnboardingSessionCreateOrConnectWithoutUserInput | OnboardingSessionCreateOrConnectWithoutUserInput[]
+    upsert?: OnboardingSessionUpsertWithWhereUniqueWithoutUserInput | OnboardingSessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: OnboardingSessionCreateManyUserInputEnvelope
+    set?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    disconnect?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    delete?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    connect?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    update?: OnboardingSessionUpdateWithWhereUniqueWithoutUserInput | OnboardingSessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: OnboardingSessionUpdateManyWithWhereWithoutUserInput | OnboardingSessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: OnboardingSessionScalarWhereInput | OnboardingSessionScalarWhereInput[]
+  }
+
+  export type DealershipReviewUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DealershipReviewCreateWithoutUserInput, DealershipReviewUncheckedCreateWithoutUserInput> | DealershipReviewCreateWithoutUserInput[] | DealershipReviewUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutUserInput | DealershipReviewCreateOrConnectWithoutUserInput[]
+    upsert?: DealershipReviewUpsertWithWhereUniqueWithoutUserInput | DealershipReviewUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DealershipReviewCreateManyUserInputEnvelope
+    set?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    disconnect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    delete?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    update?: DealershipReviewUpdateWithWhereUniqueWithoutUserInput | DealershipReviewUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DealershipReviewUpdateManyWithWhereWithoutUserInput | DealershipReviewUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DealershipReviewScalarWhereInput | DealershipReviewScalarWhereInput[]
+  }
+
   export type SavedCarUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SavedCarCreateWithoutUserInput, SavedCarUncheckedCreateWithoutUserInput> | SavedCarCreateWithoutUserInput[] | SavedCarUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SavedCarCreateOrConnectWithoutUserInput | SavedCarCreateOrConnectWithoutUserInput[]
@@ -19901,6 +23271,34 @@ export namespace Prisma {
     update?: AuditLogUpdateWithWhereUniqueWithoutUserInput | AuditLogUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: AuditLogUpdateManyWithWhereWithoutUserInput | AuditLogUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
+  }
+
+  export type OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<OnboardingSessionCreateWithoutUserInput, OnboardingSessionUncheckedCreateWithoutUserInput> | OnboardingSessionCreateWithoutUserInput[] | OnboardingSessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: OnboardingSessionCreateOrConnectWithoutUserInput | OnboardingSessionCreateOrConnectWithoutUserInput[]
+    upsert?: OnboardingSessionUpsertWithWhereUniqueWithoutUserInput | OnboardingSessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: OnboardingSessionCreateManyUserInputEnvelope
+    set?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    disconnect?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    delete?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    connect?: OnboardingSessionWhereUniqueInput | OnboardingSessionWhereUniqueInput[]
+    update?: OnboardingSessionUpdateWithWhereUniqueWithoutUserInput | OnboardingSessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: OnboardingSessionUpdateManyWithWhereWithoutUserInput | OnboardingSessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: OnboardingSessionScalarWhereInput | OnboardingSessionScalarWhereInput[]
+  }
+
+  export type DealershipReviewUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<DealershipReviewCreateWithoutUserInput, DealershipReviewUncheckedCreateWithoutUserInput> | DealershipReviewCreateWithoutUserInput[] | DealershipReviewUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: DealershipReviewCreateOrConnectWithoutUserInput | DealershipReviewCreateOrConnectWithoutUserInput[]
+    upsert?: DealershipReviewUpsertWithWhereUniqueWithoutUserInput | DealershipReviewUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: DealershipReviewCreateManyUserInputEnvelope
+    set?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    disconnect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    delete?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    connect?: DealershipReviewWhereUniqueInput | DealershipReviewWhereUniqueInput[]
+    update?: DealershipReviewUpdateWithWhereUniqueWithoutUserInput | DealershipReviewUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: DealershipReviewUpdateManyWithWhereWithoutUserInput | DealershipReviewUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: DealershipReviewScalarWhereInput | DealershipReviewScalarWhereInput[]
   }
 
   export type CarCreateimagesInput = {
@@ -20128,6 +23526,52 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTestDrivesInput, UserUpdateWithoutTestDrivesInput>, UserUncheckedUpdateWithoutTestDrivesInput>
   }
 
+  export type UserCreateNestedOneWithoutOnboardingSessionsInput = {
+    create?: XOR<UserCreateWithoutOnboardingSessionsInput, UserUncheckedCreateWithoutOnboardingSessionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutOnboardingSessionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumOnboardingSessionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.OnboardingSessionStatus
+  }
+
+  export type UserUpdateOneRequiredWithoutOnboardingSessionsNestedInput = {
+    create?: XOR<UserCreateWithoutOnboardingSessionsInput, UserUncheckedCreateWithoutOnboardingSessionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutOnboardingSessionsInput
+    upsert?: UserUpsertWithoutOnboardingSessionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutOnboardingSessionsInput, UserUpdateWithoutOnboardingSessionsInput>, UserUncheckedUpdateWithoutOnboardingSessionsInput>
+  }
+
+  export type OrganizationCreateNestedOneWithoutDealershipReviewsInput = {
+    create?: XOR<OrganizationCreateWithoutDealershipReviewsInput, OrganizationUncheckedCreateWithoutDealershipReviewsInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutDealershipReviewsInput
+    connect?: OrganizationWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDealershipReviewsInput = {
+    create?: XOR<UserCreateWithoutDealershipReviewsInput, UserUncheckedCreateWithoutDealershipReviewsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDealershipReviewsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type OrganizationUpdateOneRequiredWithoutDealershipReviewsNestedInput = {
+    create?: XOR<OrganizationCreateWithoutDealershipReviewsInput, OrganizationUncheckedCreateWithoutDealershipReviewsInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutDealershipReviewsInput
+    upsert?: OrganizationUpsertWithoutDealershipReviewsInput
+    connect?: OrganizationWhereUniqueInput
+    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutDealershipReviewsInput, OrganizationUpdateWithoutDealershipReviewsInput>, OrganizationUncheckedUpdateWithoutDealershipReviewsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutDealershipReviewsNestedInput = {
+    create?: XOR<UserCreateWithoutDealershipReviewsInput, UserUncheckedCreateWithoutDealershipReviewsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDealershipReviewsInput
+    upsert?: UserUpsertWithoutDealershipReviewsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDealershipReviewsInput, UserUpdateWithoutDealershipReviewsInput>, UserUncheckedUpdateWithoutDealershipReviewsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -20159,6 +23603,28 @@ export namespace Prisma {
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
@@ -20198,17 +23664,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
-  }
-
-  export type NestedIntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -20270,6 +23725,38 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -20313,33 +23800,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPlanTypeFilter<$PrismaModel>
     _max?: NestedEnumPlanTypeFilter<$PrismaModel>
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -20538,11 +23998,29 @@ export namespace Prisma {
     _max?: NestedEnumTestDriveStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumOnboardingSessionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingSessionStatus | EnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingSessionStatusFilter<$PrismaModel> | $Enums.OnboardingSessionStatus
+  }
+
+  export type NestedEnumOnboardingSessionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OnboardingSessionStatus | EnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OnboardingSessionStatus[] | ListEnumOnboardingSessionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOnboardingSessionStatusWithAggregatesFilter<$PrismaModel> | $Enums.OnboardingSessionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOnboardingSessionStatusFilter<$PrismaModel>
+    _max?: NestedEnumOnboardingSessionStatusFilter<$PrismaModel>
+  }
+
   export type SubscriptionCreateWithoutOrganizationInput = {
     id?: string
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -20558,6 +24036,7 @@ export namespace Prisma {
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -20801,6 +24280,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DealershipReviewCreateWithoutOrganizationInput = {
+    id?: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutDealershipReviewsInput
+  }
+
+  export type DealershipReviewUncheckedCreateWithoutOrganizationInput = {
+    id?: string
+    userId: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DealershipReviewCreateOrConnectWithoutOrganizationInput = {
+    where: DealershipReviewWhereUniqueInput
+    create: XOR<DealershipReviewCreateWithoutOrganizationInput, DealershipReviewUncheckedCreateWithoutOrganizationInput>
+  }
+
+  export type DealershipReviewCreateManyOrganizationInputEnvelope = {
+    data: DealershipReviewCreateManyOrganizationInput | DealershipReviewCreateManyOrganizationInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SubscriptionUpsertWithoutOrganizationInput = {
     update: XOR<SubscriptionUpdateWithoutOrganizationInput, SubscriptionUncheckedUpdateWithoutOrganizationInput>
     create: XOR<SubscriptionCreateWithoutOrganizationInput, SubscriptionUncheckedCreateWithoutOrganizationInput>
@@ -20817,6 +24328,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -20832,6 +24344,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21043,11 +24556,43 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"ImpersonationSession"> | string | null
   }
 
+  export type DealershipReviewUpsertWithWhereUniqueWithoutOrganizationInput = {
+    where: DealershipReviewWhereUniqueInput
+    update: XOR<DealershipReviewUpdateWithoutOrganizationInput, DealershipReviewUncheckedUpdateWithoutOrganizationInput>
+    create: XOR<DealershipReviewCreateWithoutOrganizationInput, DealershipReviewUncheckedCreateWithoutOrganizationInput>
+  }
+
+  export type DealershipReviewUpdateWithWhereUniqueWithoutOrganizationInput = {
+    where: DealershipReviewWhereUniqueInput
+    data: XOR<DealershipReviewUpdateWithoutOrganizationInput, DealershipReviewUncheckedUpdateWithoutOrganizationInput>
+  }
+
+  export type DealershipReviewUpdateManyWithWhereWithoutOrganizationInput = {
+    where: DealershipReviewScalarWhereInput
+    data: XOR<DealershipReviewUpdateManyMutationInput, DealershipReviewUncheckedUpdateManyWithoutOrganizationInput>
+  }
+
+  export type DealershipReviewScalarWhereInput = {
+    AND?: DealershipReviewScalarWhereInput | DealershipReviewScalarWhereInput[]
+    OR?: DealershipReviewScalarWhereInput[]
+    NOT?: DealershipReviewScalarWhereInput | DealershipReviewScalarWhereInput[]
+    id?: StringFilter<"DealershipReview"> | string
+    organizationId?: StringFilter<"DealershipReview"> | string
+    userId?: StringFilter<"DealershipReview"> | string
+    rating?: IntFilter<"DealershipReview"> | number
+    title?: StringNullableFilter<"DealershipReview"> | string | null
+    comment?: StringNullableFilter<"DealershipReview"> | string | null
+    isApproved?: BoolFilter<"DealershipReview"> | boolean
+    createdAt?: DateTimeFilter<"DealershipReview"> | Date | string
+    updatedAt?: DateTimeFilter<"DealershipReview"> | Date | string
+  }
+
   export type SubscriptionCreateWithoutPlanInput = {
     id?: string
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -21063,6 +24608,7 @@ export namespace Prisma {
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -21107,6 +24653,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
     stripeCustomerId?: StringNullableFilter<"Subscription"> | string | null
     stripeSubscriptionId?: StringNullableFilter<"Subscription"> | string | null
+    stripeCheckoutSessionId?: StringNullableFilter<"Subscription"> | string | null
     currentPeriodStart?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     currentPeriodEnd?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     trialEndsAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
@@ -21129,6 +24676,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21138,6 +24687,7 @@ export namespace Prisma {
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutSubscriptionInput = {
@@ -21154,6 +24704,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21163,6 +24715,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutSubscriptionInput = {
@@ -21176,6 +24729,9 @@ export namespace Prisma {
     type: $Enums.PlanType
     monthlyPrice?: number
     yearlyPrice?: number
+    stripeProductId?: string | null
+    stripeMonthlyPriceId?: string | null
+    stripeYearlyPriceId?: string | null
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
@@ -21192,6 +24748,9 @@ export namespace Prisma {
     type: $Enums.PlanType
     monthlyPrice?: number
     yearlyPrice?: number
+    stripeProductId?: string | null
+    stripeMonthlyPriceId?: string | null
+    stripeYearlyPriceId?: string | null
     maxCars?: number
     maxMembers?: number
     maxImagesPerCar?: number
@@ -21232,6 +24791,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21241,6 +24802,7 @@ export namespace Prisma {
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutSubscriptionInput = {
@@ -21257,6 +24819,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21266,6 +24830,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type PlanUpsertWithoutSubscriptionsInput = {
@@ -21285,6 +24850,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
     monthlyPrice?: IntFieldUpdateOperationsInput | number
     yearlyPrice?: IntFieldUpdateOperationsInput | number
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeMonthlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeYearlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
@@ -21301,6 +24869,9 @@ export namespace Prisma {
     type?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
     monthlyPrice?: IntFieldUpdateOperationsInput | number
     yearlyPrice?: IntFieldUpdateOperationsInput | number
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeMonthlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeYearlyPriceId?: NullableStringFieldUpdateOperationsInput | string | null
     maxCars?: IntFieldUpdateOperationsInput | number
     maxMembers?: IntFieldUpdateOperationsInput | number
     maxImagesPerCar?: IntFieldUpdateOperationsInput | number
@@ -21327,6 +24898,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -21345,6 +24918,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -21366,6 +24941,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21375,6 +24952,7 @@ export namespace Prisma {
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutMembershipsInput = {
@@ -21391,6 +24969,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21400,6 +24980,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutMembershipsInput = {
@@ -21423,6 +25004,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInvitedMembersInput = {
@@ -21441,6 +25024,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInvitedMembersInput = {
@@ -21475,6 +25060,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -21493,6 +25080,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type OrganizationUpsertWithoutMembershipsInput = {
@@ -21520,6 +25109,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21529,6 +25120,7 @@ export namespace Prisma {
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
@@ -21545,6 +25137,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21554,6 +25148,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type UserUpsertWithoutInvitedMembersInput = {
@@ -21583,6 +25178,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInvitedMembersInput = {
@@ -21601,6 +25198,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type OrganizationCreateWithoutAuditLogsInput = {
@@ -21617,6 +25216,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21626,6 +25227,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursCreateNestedManyWithoutOrganizationInput
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
@@ -21642,6 +25244,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21651,6 +25255,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutAuditLogsInput = {
@@ -21674,6 +25279,8 @@ export namespace Prisma {
     invitedMembers?: MembershipCreateNestedManyWithoutInvitedByInput
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -21692,6 +25299,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUncheckedCreateNestedManyWithoutInvitedByInput
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -21724,6 +25333,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21733,6 +25344,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUpdateManyWithoutOrganizationNestedInput
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
@@ -21749,6 +25361,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -21758,6 +25372,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type UserUpsertWithoutAuditLogsInput = {
@@ -21787,6 +25402,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUpdateManyWithoutInvitedByNestedInput
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -21805,6 +25422,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUncheckedUpdateManyWithoutInvitedByNestedInput
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSuperAdminSessionsInput = {
@@ -21823,6 +25442,8 @@ export namespace Prisma {
     invitedMembers?: MembershipCreateNestedManyWithoutInvitedByInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSuperAdminSessionsInput = {
@@ -21841,6 +25462,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUncheckedCreateNestedManyWithoutInvitedByInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSuperAdminSessionsInput = {
@@ -21864,6 +25487,8 @@ export namespace Prisma {
     invitedMembers?: MembershipCreateNestedManyWithoutInvitedByInput
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutImpersonatedSessionsInput = {
@@ -21882,6 +25507,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUncheckedCreateNestedManyWithoutInvitedByInput
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutImpersonatedSessionsInput = {
@@ -21903,6 +25530,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21912,6 +25541,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursCreateNestedManyWithoutOrganizationInput
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutImpersonationSessionsInput = {
@@ -21928,6 +25558,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -21937,6 +25569,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutImpersonationSessionsInput = {
@@ -21971,6 +25604,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUpdateManyWithoutInvitedByNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSuperAdminSessionsInput = {
@@ -21989,6 +25624,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUncheckedUpdateManyWithoutInvitedByNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutImpersonatedSessionsInput = {
@@ -22018,6 +25655,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUpdateManyWithoutInvitedByNestedInput
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutImpersonatedSessionsInput = {
@@ -22036,6 +25675,8 @@ export namespace Prisma {
     invitedMembers?: MembershipUncheckedUpdateManyWithoutInvitedByNestedInput
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type OrganizationUpsertWithoutImpersonationSessionsInput = {
@@ -22063,6 +25704,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22072,6 +25715,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUpdateManyWithoutOrganizationNestedInput
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutImpersonationSessionsInput = {
@@ -22088,6 +25732,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22097,6 +25743,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type SavedCarCreateWithoutUserInput = {
@@ -22325,6 +25972,66 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type OnboardingSessionCreateWithoutUserInput = {
+    id?: string
+    data: JsonNullValueInput | InputJsonValue
+    status?: $Enums.OnboardingSessionStatus
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OnboardingSessionUncheckedCreateWithoutUserInput = {
+    id?: string
+    data: JsonNullValueInput | InputJsonValue
+    status?: $Enums.OnboardingSessionStatus
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OnboardingSessionCreateOrConnectWithoutUserInput = {
+    where: OnboardingSessionWhereUniqueInput
+    create: XOR<OnboardingSessionCreateWithoutUserInput, OnboardingSessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type OnboardingSessionCreateManyUserInputEnvelope = {
+    data: OnboardingSessionCreateManyUserInput | OnboardingSessionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DealershipReviewCreateWithoutUserInput = {
+    id?: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutDealershipReviewsInput
+  }
+
+  export type DealershipReviewUncheckedCreateWithoutUserInput = {
+    id?: string
+    organizationId: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DealershipReviewCreateOrConnectWithoutUserInput = {
+    where: DealershipReviewWhereUniqueInput
+    create: XOR<DealershipReviewCreateWithoutUserInput, DealershipReviewUncheckedCreateWithoutUserInput>
+  }
+
+  export type DealershipReviewCreateManyUserInputEnvelope = {
+    data: DealershipReviewCreateManyUserInput | DealershipReviewCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SavedCarUpsertWithWhereUniqueWithoutUserInput = {
     where: SavedCarWhereUniqueInput
     update: XOR<SavedCarUpdateWithoutUserInput, SavedCarUncheckedUpdateWithoutUserInput>
@@ -22447,6 +26154,51 @@ export namespace Prisma {
     data: XOR<AuditLogUpdateManyMutationInput, AuditLogUncheckedUpdateManyWithoutUserInput>
   }
 
+  export type OnboardingSessionUpsertWithWhereUniqueWithoutUserInput = {
+    where: OnboardingSessionWhereUniqueInput
+    update: XOR<OnboardingSessionUpdateWithoutUserInput, OnboardingSessionUncheckedUpdateWithoutUserInput>
+    create: XOR<OnboardingSessionCreateWithoutUserInput, OnboardingSessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type OnboardingSessionUpdateWithWhereUniqueWithoutUserInput = {
+    where: OnboardingSessionWhereUniqueInput
+    data: XOR<OnboardingSessionUpdateWithoutUserInput, OnboardingSessionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type OnboardingSessionUpdateManyWithWhereWithoutUserInput = {
+    where: OnboardingSessionScalarWhereInput
+    data: XOR<OnboardingSessionUpdateManyMutationInput, OnboardingSessionUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type OnboardingSessionScalarWhereInput = {
+    AND?: OnboardingSessionScalarWhereInput | OnboardingSessionScalarWhereInput[]
+    OR?: OnboardingSessionScalarWhereInput[]
+    NOT?: OnboardingSessionScalarWhereInput | OnboardingSessionScalarWhereInput[]
+    id?: StringFilter<"OnboardingSession"> | string
+    userId?: StringFilter<"OnboardingSession"> | string
+    data?: JsonFilter<"OnboardingSession">
+    status?: EnumOnboardingSessionStatusFilter<"OnboardingSession"> | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    createdAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+    updatedAt?: DateTimeFilter<"OnboardingSession"> | Date | string
+  }
+
+  export type DealershipReviewUpsertWithWhereUniqueWithoutUserInput = {
+    where: DealershipReviewWhereUniqueInput
+    update: XOR<DealershipReviewUpdateWithoutUserInput, DealershipReviewUncheckedUpdateWithoutUserInput>
+    create: XOR<DealershipReviewCreateWithoutUserInput, DealershipReviewUncheckedCreateWithoutUserInput>
+  }
+
+  export type DealershipReviewUpdateWithWhereUniqueWithoutUserInput = {
+    where: DealershipReviewWhereUniqueInput
+    data: XOR<DealershipReviewUpdateWithoutUserInput, DealershipReviewUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DealershipReviewUpdateManyWithWhereWithoutUserInput = {
+    where: DealershipReviewScalarWhereInput
+    data: XOR<DealershipReviewUpdateManyMutationInput, DealershipReviewUncheckedUpdateManyWithoutUserInput>
+  }
+
   export type OrganizationCreateWithoutCarsInput = {
     id?: string
     name: string
@@ -22461,6 +26213,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -22470,6 +26224,7 @@ export namespace Prisma {
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutCarsInput = {
@@ -22486,6 +26241,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -22495,6 +26252,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutCarsInput = {
@@ -22585,6 +26343,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22594,6 +26354,7 @@ export namespace Prisma {
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutCarsInput = {
@@ -22610,6 +26371,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22619,6 +26382,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type SavedCarUpsertWithWhereUniqueWithoutCarInput = {
@@ -22667,6 +26431,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -22676,6 +26442,7 @@ export namespace Prisma {
     testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutWorkingHoursInput = {
@@ -22692,6 +26459,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -22701,6 +26470,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutWorkingHoursInput = {
@@ -22733,6 +26503,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22742,6 +26514,7 @@ export namespace Prisma {
     testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutWorkingHoursInput = {
@@ -22758,6 +26531,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -22767,6 +26542,7 @@ export namespace Prisma {
     testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type CarCreateWithoutSavedByInput = {
@@ -22840,6 +26616,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSavedCarsInput = {
@@ -22858,6 +26636,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSavedCarsInput = {
@@ -22953,6 +26733,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSavedCarsInput = {
@@ -22971,6 +26753,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type OrganizationCreateWithoutTestDrivesInput = {
@@ -22987,6 +26771,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -22996,6 +26782,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutTestDrivesInput = {
@@ -23012,6 +26799,8 @@ export namespace Prisma {
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -23021,6 +26810,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
     impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutTestDrivesInput = {
@@ -23099,6 +26889,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTestDrivesInput = {
@@ -23117,6 +26909,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
     impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTestDrivesInput = {
@@ -23149,6 +26943,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23158,6 +26954,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutTestDrivesInput = {
@@ -23174,6 +26971,8 @@ export namespace Prisma {
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23183,6 +26982,7 @@ export namespace Prisma {
     workingHours?: WorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
     impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type CarUpsertWithoutTestDriveInput = {
@@ -23273,6 +27073,8 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTestDrivesInput = {
@@ -23291,6 +27093,328 @@ export namespace Prisma {
     superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
     impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutOnboardingSessionsInput = {
+    id?: string
+    clerkId: string
+    email: string
+    name?: string | null
+    imageUrl?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.UserRole
+    savedCars?: SavedCarCreateNestedManyWithoutUserInput
+    testDrives?: TestDriveCreateNestedManyWithoutUserInput
+    memberships?: MembershipCreateNestedManyWithoutUserInput
+    invitedMembers?: MembershipCreateNestedManyWithoutInvitedByInput
+    superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
+    impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutOnboardingSessionsInput = {
+    id?: string
+    clerkId: string
+    email: string
+    name?: string | null
+    imageUrl?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.UserRole
+    savedCars?: SavedCarUncheckedCreateNestedManyWithoutUserInput
+    testDrives?: TestDriveUncheckedCreateNestedManyWithoutUserInput
+    memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
+    invitedMembers?: MembershipUncheckedCreateNestedManyWithoutInvitedByInput
+    superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
+    impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    dealershipReviews?: DealershipReviewUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutOnboardingSessionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutOnboardingSessionsInput, UserUncheckedCreateWithoutOnboardingSessionsInput>
+  }
+
+  export type UserUpsertWithoutOnboardingSessionsInput = {
+    update: XOR<UserUpdateWithoutOnboardingSessionsInput, UserUncheckedUpdateWithoutOnboardingSessionsInput>
+    create: XOR<UserCreateWithoutOnboardingSessionsInput, UserUncheckedCreateWithoutOnboardingSessionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutOnboardingSessionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutOnboardingSessionsInput, UserUncheckedUpdateWithoutOnboardingSessionsInput>
+  }
+
+  export type UserUpdateWithoutOnboardingSessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    savedCars?: SavedCarUpdateManyWithoutUserNestedInput
+    testDrives?: TestDriveUpdateManyWithoutUserNestedInput
+    memberships?: MembershipUpdateManyWithoutUserNestedInput
+    invitedMembers?: MembershipUpdateManyWithoutInvitedByNestedInput
+    superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
+    impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutOnboardingSessionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    savedCars?: SavedCarUncheckedUpdateManyWithoutUserNestedInput
+    testDrives?: TestDriveUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
+    invitedMembers?: MembershipUncheckedUpdateManyWithoutInvitedByNestedInput
+    superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
+    impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    dealershipReviews?: DealershipReviewUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type OrganizationCreateWithoutDealershipReviewsInput = {
+    id?: string
+    name: string
+    slug: string
+    logo?: string | null
+    email?: string | null
+    phone?: string | null
+    address?: string | null
+    website?: string | null
+    description?: string | null
+    isActive?: boolean
+    pendingOwnerEmail?: string | null
+    theme?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    subscription?: SubscriptionCreateNestedOneWithoutOrganizationInput
+    memberships?: MembershipCreateNestedManyWithoutOrganizationInput
+    cars?: CarCreateNestedManyWithoutOrganizationInput
+    workingHours?: WorkingHoursCreateNestedManyWithoutOrganizationInput
+    testDrives?: TestDriveCreateNestedManyWithoutOrganizationInput
+    auditLogs?: AuditLogCreateNestedManyWithoutOrganizationInput
+    impersonationSessions?: ImpersonationSessionCreateNestedManyWithoutOrganizationInput
+  }
+
+  export type OrganizationUncheckedCreateWithoutDealershipReviewsInput = {
+    id?: string
+    name: string
+    slug: string
+    logo?: string | null
+    email?: string | null
+    phone?: string | null
+    address?: string | null
+    website?: string | null
+    description?: string | null
+    isActive?: boolean
+    pendingOwnerEmail?: string | null
+    theme?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: number
+    totalReviews?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    subscription?: SubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+    memberships?: MembershipUncheckedCreateNestedManyWithoutOrganizationInput
+    cars?: CarUncheckedCreateNestedManyWithoutOrganizationInput
+    workingHours?: WorkingHoursUncheckedCreateNestedManyWithoutOrganizationInput
+    testDrives?: TestDriveUncheckedCreateNestedManyWithoutOrganizationInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutOrganizationInput
+    impersonationSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutOrganizationInput
+  }
+
+  export type OrganizationCreateOrConnectWithoutDealershipReviewsInput = {
+    where: OrganizationWhereUniqueInput
+    create: XOR<OrganizationCreateWithoutDealershipReviewsInput, OrganizationUncheckedCreateWithoutDealershipReviewsInput>
+  }
+
+  export type UserCreateWithoutDealershipReviewsInput = {
+    id?: string
+    clerkId: string
+    email: string
+    name?: string | null
+    imageUrl?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.UserRole
+    savedCars?: SavedCarCreateNestedManyWithoutUserInput
+    testDrives?: TestDriveCreateNestedManyWithoutUserInput
+    memberships?: MembershipCreateNestedManyWithoutUserInput
+    invitedMembers?: MembershipCreateNestedManyWithoutInvitedByInput
+    superAdminSessions?: ImpersonationSessionCreateNestedManyWithoutSuperAdminInput
+    impersonatedSessions?: ImpersonationSessionCreateNestedManyWithoutTargetUserInput
+    auditLogs?: AuditLogCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDealershipReviewsInput = {
+    id?: string
+    clerkId: string
+    email: string
+    name?: string | null
+    imageUrl?: string | null
+    phone?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.UserRole
+    savedCars?: SavedCarUncheckedCreateNestedManyWithoutUserInput
+    testDrives?: TestDriveUncheckedCreateNestedManyWithoutUserInput
+    memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
+    invitedMembers?: MembershipUncheckedCreateNestedManyWithoutInvitedByInput
+    superAdminSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutSuperAdminInput
+    impersonatedSessions?: ImpersonationSessionUncheckedCreateNestedManyWithoutTargetUserInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
+    onboardingSessions?: OnboardingSessionUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDealershipReviewsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDealershipReviewsInput, UserUncheckedCreateWithoutDealershipReviewsInput>
+  }
+
+  export type OrganizationUpsertWithoutDealershipReviewsInput = {
+    update: XOR<OrganizationUpdateWithoutDealershipReviewsInput, OrganizationUncheckedUpdateWithoutDealershipReviewsInput>
+    create: XOR<OrganizationCreateWithoutDealershipReviewsInput, OrganizationUncheckedCreateWithoutDealershipReviewsInput>
+    where?: OrganizationWhereInput
+  }
+
+  export type OrganizationUpdateToOneWithWhereWithoutDealershipReviewsInput = {
+    where?: OrganizationWhereInput
+    data: XOR<OrganizationUpdateWithoutDealershipReviewsInput, OrganizationUncheckedUpdateWithoutDealershipReviewsInput>
+  }
+
+  export type OrganizationUpdateWithoutDealershipReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    subscription?: SubscriptionUpdateOneWithoutOrganizationNestedInput
+    memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
+    cars?: CarUpdateManyWithoutOrganizationNestedInput
+    workingHours?: WorkingHoursUpdateManyWithoutOrganizationNestedInput
+    testDrives?: TestDriveUpdateManyWithoutOrganizationNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutOrganizationNestedInput
+    impersonationSessions?: ImpersonationSessionUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type OrganizationUncheckedUpdateWithoutDealershipReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    averageRating?: FloatFieldUpdateOperationsInput | number
+    totalReviews?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    subscription?: SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+    memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+    cars?: CarUncheckedUpdateManyWithoutOrganizationNestedInput
+    workingHours?: WorkingHoursUncheckedUpdateManyWithoutOrganizationNestedInput
+    testDrives?: TestDriveUncheckedUpdateManyWithoutOrganizationNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput
+    impersonationSessions?: ImpersonationSessionUncheckedUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type UserUpsertWithoutDealershipReviewsInput = {
+    update: XOR<UserUpdateWithoutDealershipReviewsInput, UserUncheckedUpdateWithoutDealershipReviewsInput>
+    create: XOR<UserCreateWithoutDealershipReviewsInput, UserUncheckedCreateWithoutDealershipReviewsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDealershipReviewsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDealershipReviewsInput, UserUncheckedUpdateWithoutDealershipReviewsInput>
+  }
+
+  export type UserUpdateWithoutDealershipReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    savedCars?: SavedCarUpdateManyWithoutUserNestedInput
+    testDrives?: TestDriveUpdateManyWithoutUserNestedInput
+    memberships?: MembershipUpdateManyWithoutUserNestedInput
+    invitedMembers?: MembershipUpdateManyWithoutInvitedByNestedInput
+    superAdminSessions?: ImpersonationSessionUpdateManyWithoutSuperAdminNestedInput
+    impersonatedSessions?: ImpersonationSessionUpdateManyWithoutTargetUserNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDealershipReviewsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkId?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    savedCars?: SavedCarUncheckedUpdateManyWithoutUserNestedInput
+    testDrives?: TestDriveUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
+    invitedMembers?: MembershipUncheckedUpdateManyWithoutInvitedByNestedInput
+    superAdminSessions?: ImpersonationSessionUncheckedUpdateManyWithoutSuperAdminNestedInput
+    impersonatedSessions?: ImpersonationSessionUncheckedUpdateManyWithoutTargetUserNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
+    onboardingSessions?: OnboardingSessionUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type MembershipCreateManyOrganizationInput = {
@@ -23374,6 +27498,17 @@ export namespace Prisma {
     endedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
+  }
+
+  export type DealershipReviewCreateManyOrganizationInput = {
+    id?: string
+    userId: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type MembershipUpdateWithoutOrganizationInput = {
@@ -23629,12 +27764,46 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type DealershipReviewUpdateWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutDealershipReviewsNestedInput
+  }
+
+  export type DealershipReviewUncheckedUpdateWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DealershipReviewUncheckedUpdateManyWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SubscriptionCreateManyPlanInput = {
     id?: string
     organizationId: string
     status?: $Enums.SubscriptionStatus
     stripeCustomerId?: string | null
     stripeSubscriptionId?: string | null
+    stripeCheckoutSessionId?: string | null
     currentPeriodStart?: Date | string | null
     currentPeriodEnd?: Date | string | null
     trialEndsAt?: Date | string | null
@@ -23648,6 +27817,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23663,6 +27833,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23677,6 +27848,7 @@ export namespace Prisma {
     status?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     stripeCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     currentPeriodStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     currentPeriodEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     trialEndsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23761,6 +27933,26 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     retainUntil?: Date | string | null
     createdAt?: Date | string
+  }
+
+  export type OnboardingSessionCreateManyUserInput = {
+    id?: string
+    data: JsonNullValueInput | InputJsonValue
+    status?: $Enums.OnboardingSessionStatus
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DealershipReviewCreateManyUserInput = {
+    id?: string
+    organizationId: string
+    rating: number
+    title?: string | null
+    comment?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type SavedCarUpdateWithoutUserInput = {
@@ -23995,6 +28187,66 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     retainUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OnboardingSessionUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OnboardingSessionUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OnboardingSessionUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    status?: EnumOnboardingSessionStatusFieldUpdateOperationsInput | $Enums.OnboardingSessionStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DealershipReviewUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutDealershipReviewsNestedInput
+  }
+
+  export type DealershipReviewUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DealershipReviewUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SavedCarCreateManyCarInput = {
