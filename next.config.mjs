@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -36,4 +38,18 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "mahmoud-ali-re",
+  project: "autome",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // Create a proxy API route to bypass ad-blockers
+  tunnelRoute: "/monitoring",
+
+  // Upload wider set of client source files for better stack trace resolution
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+});

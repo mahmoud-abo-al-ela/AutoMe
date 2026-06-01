@@ -11,13 +11,13 @@ const FilterBtn = ({
   return (
     <div className="flex gap-1.5 sm:gap-2">
       <Button
-        className="flex-1 cursor-pointer text-xs sm:text-sm py-1.5 sm:py-2 h-auto"
+        className="flex-1 cursor-pointer text-xs sm:text-sm py-1.5 sm:py-2 h-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
         onClick={applyFilters}
         disabled={isLoading}
       >
         {isLoading ? (
           <>
-            <span className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             Filtering...
           </>
         ) : (

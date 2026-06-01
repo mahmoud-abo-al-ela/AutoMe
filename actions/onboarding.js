@@ -9,6 +9,7 @@ import {
   markOnboardingSessionCompleted,
   resumeOnboardingSession as resumeSession,
 } from "@/lib/services/onboarding/session";
+import { sendWelcomeEmail } from "@/lib/services/notification";
 import { retrieveCheckoutSession } from "@/lib/services/stripe/subscription";
 import { findSubscriptionByCheckoutSessionId } from "@/lib/repositories/webhook";
 import Stripe from "stripe";
@@ -20,6 +21,11 @@ import {
   NotFoundError,
   ConflictError,
 } from "@/lib/utils/errors";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { organizationSchema } from "@/lib/validations/schemas";
+import aj from "@/lib/arcjet";
+import { request } from "@arcjet/next";
+import { RateLimitError } from "@/lib/utils/errors";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -108,6 +114,36 @@ export const createOrganization = withAuth(
       paymentIntentId,
     }
   ) => {
+    // Rate limit org creation
+    const req = await request();
+    const decision = await aj.protect(req, { requested: 1 });
+
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        const { remaining, reset } = decision.reason;
+        throw new RateLimitError(
+          `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
+            reset
+          ).toLocaleString()}`
+        );
+      }
+      throw new ValidationError("Request denied", "request");
+    }
+
+    // Validate payload
+    const validatedData = validateAction(organizationSchema, {
+      name,
+      slug,
+      email,
+      phone,
+      address,
+      logo,
+      planId,
+      workingHours,
+      userId,
+      subscriptionId,
+      paymentIntentId,
+    });
     // Validate slug availability
     const existing = await db.organization.findUnique({
       where: { slug },
@@ -249,6 +285,14 @@ export const createOrganization = withAuth(
       ctx.user.id,
       ctx.user.email
     );
+
+    // Send welcome email
+    sendWelcomeEmail({
+      to: ctx.user.email,
+      userName: ctx.user.name || "there",
+      dealershipName: organization.name,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
+    }).catch(console.error);
 
     return createSuccessResponse({
       organization: {
@@ -447,6 +491,14 @@ export const createOrganizationAfterCheckout = withAuth(
       ctx.user.id,
       ctx.user.email
     );
+
+    // Send welcome email
+    sendWelcomeEmail({
+      to: ctx.user.email,
+      userName: ctx.user.name || "there",
+      dealershipName: organization.name,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
+    }).catch(console.error);
 
     // 9. Mark onboarding session as completed
     await markOnboardingSessionCompleted(onboardingSessionId);

@@ -1,73 +1,35 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
+import { withOrgAuth } from "@/lib/middleware/with-auth";
 import * as dashboardService from "@/lib/services/dashboard";
-import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
-import { AuthenticationError } from "@/lib/utils/errors";
-import { getCurrentOrganization } from "@/lib/getOrganization";
-import { checkUser } from "@/lib/checkUser";
+import { createSuccessResponse } from "@/lib/utils/response";
 
-export async function getDashboardStats() {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
+export const getDashboardStats = withOrgAuth(async (ctx) => {
+  const stats = await dashboardService.getDashboardStats(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(stats);
+});
 
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
+export const getOverviewChartData = withOrgAuth(async (ctx) => {
+  const chartData = await dashboardService.getOverviewChartData(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(chartData);
+});
 
-    // Try to get organization from subdomain first
-    let organization = await getCurrentOrganization();
+export const getAnalytics = withOrgAuth(async (ctx) => {
+  const analytics = await dashboardService.getAnalytics(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(analytics);
+});
 
-    // If no organization from subdomain, get from user's first membership
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
+export const getConversionFunnel = withOrgAuth(async (ctx) => {
+  const funnel = await dashboardService.getConversionFunnel(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(funnel);
+});
 
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
+export const getPopularCarsData = withOrgAuth(async (ctx) => {
+  const cars = await dashboardService.getPopularCarsData(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(cars);
+});
 
-    const stats = await dashboardService.getDashboardStats(userId, organization.id);
-
-    return createSuccessResponse(stats);
-  } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
-    return createErrorResponse(error);
-  }
-}
-
-export async function getOverviewChartData() {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
-
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
-
-    let organization = await getCurrentOrganization();
-
-    // If no organization from subdomain, get from user's first membership
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
-
-    const chartData = await dashboardService.getOverviewChartData(userId, organization.id);
-
-    // Return just the array directly without nesting it in a data property
-    return chartData;
-  } catch (error) {
-    console.error("Error fetching overview chart data:", error);
-    return [];
-  }
-}
+export const getTestDriveTrendsData = withOrgAuth(async (ctx) => {
+  const days = 30; // default to 30 days, could be passed in payload
+  const trends = await dashboardService.getTestDriveTrendsData(ctx.userId, ctx.organization.id, days);
+  return createSuccessResponse(trends);
+});

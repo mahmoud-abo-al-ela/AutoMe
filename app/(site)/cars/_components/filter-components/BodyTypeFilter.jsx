@@ -33,14 +33,12 @@ const BodyTypeFilter = ({
             {availableBodyTypes.map((type) => (
               <Badge
                 key={type}
-                variant={
-                  selectedBodyTypes.includes(type) ? "default" : "outline"
-                }
-                className={`${
+                variant="outline"
+                className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
                   selectedBodyTypes.includes(type)
-                    ? ""
+                    ? "bg-sky-100 text-sky-700 border-sky-200 hover:bg-sky-200"
                     : "hover:bg-slate-100 cursor-pointer"
-                } ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                } ${isLoading ? "opacity-50 pointer-events-none" : ""} cursor-pointer`}
                 onClick={() =>
                   toggleFilter(type, selectedBodyTypes, setSelectedBodyTypes)
                 }

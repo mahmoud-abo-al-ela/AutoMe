@@ -79,7 +79,7 @@ const Footer = ({ user }) => {
           <ul className="space-y-1.5 text-sm">
             <li>
               <Link
-                href="#"
+                href="/terms"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Terms of Service
@@ -87,7 +87,7 @@ const Footer = ({ user }) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/privacy"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Privacy Policy
@@ -95,7 +95,7 @@ const Footer = ({ user }) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/cookies"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Cookie Policy

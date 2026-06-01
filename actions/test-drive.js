@@ -3,206 +3,198 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import * as testDriveService from "@/lib/services/test-drive";
 import * as carRepository from "@/lib/repositories/car";
-import {
-  createSuccessResponse,
-  createErrorResponse,
-} from "@/lib/utils/response";
-import { AuthenticationError, NotFoundError } from "@/lib/utils/errors";
+import { createSuccessResponse } from "@/lib/utils/response";
+import { withErrorHandling, withAuth, withOrgAuth } from "@/lib/middleware/with-auth";
+import { NotFoundError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
-import { checkUser } from "@/lib/checkUser";
 
-export async function requestTestDrive(testDriveData) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+import { db } from "@/lib/prisma";
+import {
+  sendTestDriveConfirmationEmail,
+  sendTestDriveAdminNotificationEmail,
+  sendTestDriveStatusUpdateEmail,
+} from "@/lib/services/notification";
+
+export const requestTestDrive = withAuth(async (ctx, testDriveData) => {
+  // Validate car belongs to current organization when on a subdomain
+  const organization = await getCurrentOrganization();
+  if (organization && testDriveData.carId) {
+    const car = await carRepository.findCarById(testDriveData.carId);
+    if (!car || car.organizationId !== organization.id) {
+      throw new NotFoundError("Car");
     }
-
-    // Validate car belongs to current organization when on a subdomain
-    const organization = await getCurrentOrganization();
-    if (organization && testDriveData.carId) {
-      const car = await carRepository.findCarById(testDriveData.carId);
-      if (!car || car.organizationId !== organization.id) {
-        throw new NotFoundError("Car");
-      }
-    }
-
-    const testDrive = await testDriveService.requestTestDrive(
-      testDriveData,
-      userId,
-    );
-
-    revalidatePath("/cars/[id]");
-    revalidatePath("/admin");
-
-    return createSuccessResponse(
-      testDrive,
-      "Test drive requested successfully",
-    );
-  } catch (error) {
-    console.error("Error requesting test drive:", error);
-    return createErrorResponse(error);
   }
-}
 
-export async function getTestDrives({ status, page = 1, limit = 10 }) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+  const testDrive = await testDriveService.requestTestDrive(
+    testDriveData,
+    ctx.userId,
+  );
+
+  // Fetch full data for email dispatch
+  const fullTestDrive = await db.testDrive.findUnique({
+    where: { id: testDrive.id },
+    include: {
+      car: true,
+      user: true,
+      organization: {
+        include: { memberships: { include: { user: true } } },
+      },
+    },
+  });
+
+  if (fullTestDrive && fullTestDrive.user) {
+    const org = fullTestDrive.organization;
+    const car = fullTestDrive.car;
+    const user = fullTestDrive.user;
+
+    const ownerEmail =
+      org.email ||
+      org.memberships.find((m) => m.role === "OWNER")?.user?.email;
+
+    const carName = car.title || `${car.make} ${car.model} ${car.year}`;
+    const userName = user.name || user.email.split("@")[0];
+
+    // Send confirmation to customer
+    sendTestDriveConfirmationEmail({
+      to: user.email,
+      customerName: userName,
+      carTitle: carName,
+      date: fullTestDrive.date,
+      startTime: fullTestDrive.startTime,
+      endTime: fullTestDrive.endTime,
+      dealershipName: org.name,
+      dealershipAddress: org.address,
+    }).catch(console.error);
+
+    // Send notification to dealership
+    if (ownerEmail) {
+      sendTestDriveAdminNotificationEmail({
+        to: ownerEmail,
+        dealerName: org.name,
+        customerName: userName,
+        carTitle: carName,
+        date: fullTestDrive.date,
+        startTime: fullTestDrive.startTime,
+        endTime: fullTestDrive.endTime,
+        orgSlug: org.slug,
+      }).catch(console.error);
     }
-
-    await checkUser();
-    const organization = await getCurrentOrganization();
-
-    const result = await testDriveService.getTestDrives(
-      { status },
-      { page, limit },
-      userId,
-      organization?.id || null,
-    );
-
-    return createSuccessResponse(result);
-  } catch (error) {
-    console.error("Error getting test drives:", error);
-    return createErrorResponse(error);
   }
-}
 
-export async function getTestDriveById(testDriveId) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
+  revalidatePath("/cars/[id]");
+  revalidatePath("/admin");
 
-    const testDrive = await testDriveService.getTestDriveById(
-      testDriveId,
-      userId,
-    );
+  return createSuccessResponse(
+    testDrive,
+    "Test drive requested successfully",
+  );
+});
 
-    return createSuccessResponse(testDrive);
-  } catch (error) {
-    console.error("Error getting test drive by id:", error);
-    return createErrorResponse(error);
-  }
-}
+export const getTestDrives = withAuth(async (ctx, { status, page = 1, limit = 10 }) => {
+  const organization = await getCurrentOrganization();
 
-export async function editTestDrive({
+  const result = await testDriveService.getTestDrives(
+    { status },
+    { page, limit },
+    ctx.userId,
+    organization?.id || null,
+  );
+
+  return createSuccessResponse(result);
+});
+
+export const getTestDriveById = withAuth(async (ctx, testDriveId) => {
+  const testDrive = await testDriveService.getTestDriveById(
+    testDriveId,
+    ctx.userId,
+  );
+
+  return createSuccessResponse(testDrive);
+});
+
+export const editTestDrive = withAuth(async (ctx, {
   testDriveId,
   date,
   startTime,
   endTime,
   notes = "",
-}) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
+}) => {
+  const updatedTestDrive = await testDriveService.editTestDrive(
+    testDriveId,
+    { date, startTime, endTime, notes },
+    ctx.userId,
+  );
+
+  revalidatePath("/cars/[id]");
+  revalidatePath("/admin");
+  revalidatePath("/admin/test-drives");
+
+  return createSuccessResponse(
+    updatedTestDrive,
+    "Test drive updated successfully",
+  );
+});
+
+export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId) => {
+  const cancelledTestDrive = await testDriveService.cancelTestDrive(
+    testDriveId,
+    ctx.userId,
+  );
+
+  revalidatePath("/cars/[id]");
+  revalidatePath("/admin");
+  revalidatePath("/admin/test-drives");
+
+  return createSuccessResponse(
+    cancelledTestDrive,
+    "Test drive cancelled successfully",
+  );
+});
+
+export const checkExistingTestDrive = withErrorHandling(async (carId) => {
+  const { userId } = await auth();
+  const result = await testDriveService.checkExistingTestDrive(carId, userId);
+  return result;
+});
+
+export const updateTestDriveStatus = withOrgAuth(async (ctx, { testDriveId, status }) => {
+  const updatedTestDrive = await testDriveService.updateTestDriveStatus(
+    testDriveId,
+    status,
+    ctx.userId,
+    ctx.organization.id,
+  );
+
+  if (["CONFIRMED", "CANCELLED"].includes(status)) {
+    const fullTestDrive = await db.testDrive.findUnique({
+      where: { id: testDriveId },
+      include: { car: true, user: true, organization: true },
+    });
+
+    if (fullTestDrive && fullTestDrive.user && fullTestDrive.user.email) {
+      const car = fullTestDrive.car;
+      const user = fullTestDrive.user;
+      sendTestDriveStatusUpdateEmail({
+        to: user.email,
+        customerName: user.name || user.email.split("@")[0],
+        carTitle: car.title || `${car.make} ${car.model} ${car.year}`,
+        status,
+        dealershipName: fullTestDrive.organization.name,
+      }).catch(console.error);
     }
-
-    const updatedTestDrive = await testDriveService.editTestDrive(
-      testDriveId,
-      { date, startTime, endTime, notes },
-      userId,
-    );
-
-    revalidatePath("/cars/[id]");
-    revalidatePath("/admin");
-    revalidatePath("/admin/test-drives");
-
-    return createSuccessResponse(
-      updatedTestDrive,
-      "Test drive updated successfully",
-    );
-  } catch (error) {
-    console.error("Error editing test drive:", error);
-    return createErrorResponse(error);
   }
-}
 
-export async function cancelTestDriveByUser(testDriveId) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
+  revalidatePath("/admin");
+  revalidatePath("/admin/test-drives");
+  revalidatePath("/reservation");
 
-    const cancelledTestDrive = await testDriveService.cancelTestDrive(
-      testDriveId,
-      userId,
-    );
+  return createSuccessResponse(
+    updatedTestDrive,
+    `Test drive ${status.toLowerCase()} successfully`,
+  );
+});
 
-    revalidatePath("/cars/[id]");
-    revalidatePath("/admin");
-    revalidatePath("/admin/test-drives");
-
-    return createSuccessResponse(
-      cancelledTestDrive,
-      "Test drive cancelled successfully",
-    );
-  } catch (error) {
-    console.error("Error cancelling test drive:", error);
-    return createErrorResponse(error);
-  }
-}
-
-export async function checkExistingTestDrive(carId) {
-  try {
-    const { userId } = await auth();
-
-    const result = await testDriveService.checkExistingTestDrive(carId, userId);
-
-    return result;
-  } catch (error) {
-    console.error("Error checking existing test drive:", error);
-    return {
-      exists: false,
-      testDriveId: null,
-    };
-  }
-}
-
-export async function updateTestDriveStatus({ testDriveId, status }) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
-
-    await checkUser();
-    const organization = await getCurrentOrganization();
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
-
-    const updatedTestDrive = await testDriveService.updateTestDriveStatus(
-      testDriveId,
-      status,
-      userId,
-      organization.id,
-    );
-
-    revalidatePath("/admin");
-    revalidatePath("/admin/test-drives");
-    revalidatePath("/reservation");
-
-    return createSuccessResponse(
-      updatedTestDrive,
-      `Test drive ${status.toLowerCase()} successfully`,
-    );
-  } catch (error) {
-    console.error("Error updating test drive status:", error);
-    return createErrorResponse(error);
-  }
-}
-
-export async function getBookedTimeSlots(carId, date) {
-  try {
-    const bookedSlots = await testDriveService.getBookedTimeSlots(carId, date);
-    return createSuccessResponse(bookedSlots);
-  } catch (error) {
-    console.error("Error getting booked time slots:", error);
-    return createErrorResponse(error);
-  }
-}
+export const getBookedTimeSlots = withErrorHandling(async (carId, date) => {
+  const bookedSlots = await testDriveService.getBookedTimeSlots(carId, date);
+  return createSuccessResponse(bookedSlots);
+});

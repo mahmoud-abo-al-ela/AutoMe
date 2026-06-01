@@ -58,8 +58,8 @@ export default async function OrganizationLayout({ children, params }) {
             <Toaster position="top-right" richColors />
             <AdminSidebar organization={organization} userRole={membership?.role} />
             <main
-                className="flex-1 transition-all duration-300 ease-in-out flex flex-col"
-                style={{ marginLeft: "var(--sidebar-width, 0)" }}
+                className="flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0"
+                style={{ paddingLeft: "var(--sidebar-width, 0)" }}
             >
                 {isImpersonating && impersonationSession && (
                     <ImpersonationBanner

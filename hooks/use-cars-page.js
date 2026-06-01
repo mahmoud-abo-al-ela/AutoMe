@@ -5,10 +5,13 @@ import { useSearchParams, useRouter } from "next/navigation";
 import useFetch from "@/hooks/use-fetch";
 import { getCars } from "@/actions/cars-listing";
 
-export const useCarsPage = () => {
+export const useCarsPage = (initialData = null) => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const [page, setPage] = useState(1);
+    
+    const pageFromUrl = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+    const [page, setPage] = useState(pageFromUrl);
+    
     const [filters, setFilters] = useState({
         search: undefined,
         make: undefined,
@@ -22,11 +25,14 @@ export const useCarsPage = () => {
     const filterPanelRef = useRef(null);
 
     const {
-        data: carsData,
-        loading,
+        data: fetchResult,
+        loading: fetchLoading,
         error,
         fn: fetchCars,
-    } = useFetch(getCars, true);
+    } = useFetch(getCars, !initialData);
+
+    const carsData = fetchResult || initialData;
+    const loading = fetchLoading;
 
     useEffect(() => {
         const initialFilters = {
@@ -42,18 +48,13 @@ export const useCarsPage = () => {
                 ? Number(searchParams.get("maxPrice"))
                 : undefined,
             sortBy: searchParams.get("sortBy") || "newest",
-            page: 1,
+            page: searchParams.get("page") ? Number(searchParams.get("page")) : 1,
         };
 
-        const hasFilters = Object.values(initialFilters).some(
-            (value) => value !== undefined
-        );
+        setFilters(initialFilters);
 
-        if (hasFilters) {
-            setFilters(initialFilters);
+        if (!initialData) {
             fetchCars(initialFilters);
-        } else {
-            fetchCars({ ...filters, page });
         }
     }, []);
 
@@ -74,8 +75,8 @@ export const useCarsPage = () => {
 
         const queryString = params.toString();
         const url = queryString ? `/cars?${queryString}` : "/cars";
-        router.push(url);
-    }, [router]);
+        window.history.replaceState(null, '', url);
+    }, []);
 
     const handleFilterChange = useCallback((newFilters) => {
         setPage(1);
@@ -152,8 +153,8 @@ export const useCarsPage = () => {
             filterPanelRef.current.resetFilters();
         }
 
-        router.push("/cars");
-    }, [fetchCars, router]);
+        window.history.replaceState(null, '', "/cars");
+    }, [fetchCars]);
 
     const getActiveFilters = useCallback(() => {
         const filterMap = {

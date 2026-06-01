@@ -3,126 +3,80 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
-import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
-import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
+import { createSuccessResponse } from "@/lib/utils/response";
+import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
+import { ValidationError } from "@/lib/utils/errors";
 
 /**
  * Get dealerships with filters and pagination
  */
-export async function getDealerships(filters = {}, pagination = {}) {
-    try {
-        const result = await dealershipService.getDealerships(filters, pagination);
-
-        return createSuccessResponse(result);
-    } catch (error) {
-        console.error("Error fetching dealerships", error);
-        return createErrorResponse(error);
-    }
-}
+export const getDealerships = withErrorHandling(async (filters = {}, pagination = {}) => {
+    const result = await dealershipService.getDealerships(filters, pagination);
+    return createSuccessResponse(result);
+});
 
 /**
  * Get dealership by slug
  */
-export async function getDealershipBySlug(slug) {
-    try {
-        const dealership = await dealershipService.getDealershipBySlug(slug);
-
-        return createSuccessResponse(dealership);
-    } catch (error) {
-        console.error("Error fetching dealership by slug", error);
-        return createErrorResponse(error);
-    }
-}
+export const getDealershipBySlug = withErrorHandling(async (slug) => {
+    const dealership = await dealershipService.getDealershipBySlug(slug);
+    return createSuccessResponse(dealership);
+});
 
 /**
  * Search dealerships
  */
-export async function searchDealerships(query, filters = {}, pagination = {}) {
-    try {
-        const result = await dealershipService.searchDealerships(
-            query,
-            filters,
-            pagination
-        );
-
-        return createSuccessResponse(result);
-    } catch (error) {
-        console.error("Error searching dealerships", error);
-        return createErrorResponse(error);
-    }
-}
+export const searchDealerships = withErrorHandling(async (query, filters = {}, pagination = {}) => {
+    const result = await dealershipService.searchDealerships(
+        query,
+        filters,
+        pagination
+    );
+    return createSuccessResponse(result);
+});
 
 /**
  * Get dealership filters
  */
-export async function getDealershipFilters() {
-    try {
-        const filters = await dealershipService.getDealershipFilters();
-
-        return createSuccessResponse(filters);
-    } catch (error) {
-        console.error("Error fetching dealership filters", error);
-        return createErrorResponse(error);
-    }
-}
+export const getDealershipFilters = withErrorHandling(async () => {
+    const filters = await dealershipService.getDealershipFilters();
+    return createSuccessResponse(filters);
+});
 
 /**
  * Get dealership cars
  */
-export async function getDealershipCars(organizationId, filters = {}, pagination = {}) {
-    try {
-        const result = await dealershipService.getDealershipCars(
-            organizationId,
-            filters,
-            pagination
-        );
-
-        return createSuccessResponse(result);
-    } catch (error) {
-        console.error("Error fetching dealership cars", error);
-        return createErrorResponse(error);
-    }
-}
+export const getDealershipCars = withErrorHandling(async (organizationId, filters = {}, pagination = {}) => {
+    const result = await dealershipService.getDealershipCars(
+        organizationId,
+        filters,
+        pagination
+    );
+    return createSuccessResponse(result);
+});
 
 /**
  * Get dealership reviews
  */
-export async function getDealershipReviews(organizationId, pagination = {}) {
-    try {
-        const result = await dealershipService.getDealershipReviews(
-            organizationId,
-            pagination
-        );
-
-        return createSuccessResponse(result);
-    } catch (error) {
-        console.error("Error fetching dealership reviews", error);
-        return createErrorResponse(error);
-    }
-}
+export const getDealershipReviews = withErrorHandling(async (organizationId, pagination = {}) => {
+    const result = await dealershipService.getDealershipReviews(
+        organizationId,
+        pagination
+    );
+    return createSuccessResponse(result);
+});
 
 /**
  * Create dealership review
  */
-export async function createDealershipReview(organizationId, reviewData) {
-    try {
-        const { userId } = await auth();
+export const createDealershipReview = withAuth(async (ctx, organizationId, reviewData) => {
+    const result = await dealershipService.createDealershipReview(
+        organizationId,
+        ctx.userId,
+        reviewData
+    );
 
-        if (!userId) {
-            throw new AuthenticationError();
-        }
+    revalidatePath(`/dealerships/${organizationId}`);
 
-        const result = await dealershipService.createDealershipReview(
-            organizationId,
-            userId,
-            reviewData
-        );
-
-        revalidatePath(`/dealerships/${organizationId}`);
-
-        return createSuccessResponse(result, result.message);
-    } catch (error) {
-        console.error("Error creating dealership review", error);
-        return createErrorResponse(error);
-    }
-}
+    return createSuccessResponse(result, result.message);
+});

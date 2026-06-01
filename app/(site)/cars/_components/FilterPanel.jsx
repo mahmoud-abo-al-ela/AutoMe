@@ -16,7 +16,6 @@ import { Accordion } from "@/components/ui/accordion";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
-  SearchBar,
   MakesFilter,
   PriceRangeFilter,
   BodyTypeFilter,
@@ -305,16 +304,16 @@ const FilterPanel = forwardRef(
     };
 
     return (
-      <div className="bg-white rounded-lg md:shadow-md p-3 sm:p-4 w-full">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="font-semibold text-base sm:text-lg flex items-center">
-            <Filter className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Filters
+      <div className="bg-white/80 backdrop-blur-md rounded-2xl md:shadow-lg p-4 sm:p-5 w-full border-l-4 border-l-primary border-t border-r border-b border-white/20">
+        <div className="flex items-center justify-between mb-4 sm:mb-5 pb-3 border-b border-slate-100">
+          <h2 className="font-bold text-base sm:text-lg flex items-center bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
+            <Filter className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5 text-blue-600" /> Filters
           </h2>
           <div className="flex items-center gap-2">
             {activeFiltersCount > 0 && (
               <Badge
                 variant="secondary"
-                className="bg-primary/10 text-primary text-xs sm:text-sm"
+                className="bg-primary/10 text-primary text-xs font-semibold px-2"
               >
                 {activeFiltersCount} active
               </Badge>
@@ -322,12 +321,7 @@ const FilterPanel = forwardRef(
           </div>
         </div>
 
-        <SearchBar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleSearch={handleSearch}
-          isLoading={isLoading}
-        />
+
 
         <Accordion type="multiple" className="space-y-1 sm:space-y-2">
           <MakesFilter

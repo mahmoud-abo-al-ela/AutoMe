@@ -33,14 +33,14 @@ const MakesFilter = ({
           {availableMakes.slice(0, 12).map((make) => (
             <Badge
               key={make}
-              variant={selectedMakes.includes(make) ? "default" : "outline"}
-              className={`${
+              variant="outline"
+              className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
                 selectedMakes.includes(make)
-                  ? ""
+                  ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
                   : "hover:bg-slate-100 cursor-pointer"
               } ${
                 isLoading ? "opacity-50 pointer-events-none" : ""
-              } text-xs py-0.5 px-1.5 sm:px-2`}
+              } text-xs py-0.5 px-1.5 sm:px-2 cursor-pointer`}
               onClick={() =>
                 toggleFilter(make, selectedMakes, setSelectedMakes)
               }

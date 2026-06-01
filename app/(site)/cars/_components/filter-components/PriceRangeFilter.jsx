@@ -32,10 +32,15 @@ const PriceRangeFilter = ({
           )}
       </AccordionTrigger>
       <AccordionContent>
-        <div className="pt-1 pb-3">
-          <div className="flex justify-between text-sm mb-2 text-muted-foreground">
-            <span>{formatPrice(priceRange[0] || 0)}</span>
-            <span>{formatPrice(priceRange[1] || maxPriceValue || 0)}</span>
+        <div className="pt-2 pb-3">
+          <div className="flex justify-between items-center mb-4">
+            <div className="bg-slate-100 border border-slate-200 rounded-md px-3 py-1.5 text-xs font-semibold text-slate-700">
+              {formatPrice(priceRange[0] || 0)}
+            </div>
+            <div className="h-px bg-slate-300 w-4 mx-2"></div>
+            <div className="bg-slate-100 border border-slate-200 rounded-md px-3 py-1.5 text-xs font-semibold text-slate-700">
+              {formatPrice(priceRange[1] || maxPriceValue || 0)}
+            </div>
           </div>
           <Slider
             defaultValue={[0, maxPriceValue || 100000]}

@@ -1,12 +1,14 @@
 "use server";
-import { auth } from "@clerk/nextjs/server";
+import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidatePath } from "next/cache";
 import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
-import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
-import { getCurrentOrganization } from "@/lib/getOrganization";
-import { checkUser } from "@/lib/checkUser";
+import { logError, RateLimitError, ValidationError } from "@/lib/utils/errors";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { carSchema, updateCarSchema } from "@/lib/validations/schemas";
+import aj from "@/lib/arcjet";
+import { request } from "@arcjet/next";
 
 export async function fileToBase64(file) {
   const buffer = await file.arrayBuffer();
@@ -19,6 +21,21 @@ const ai = new GoogleGenAI({
 
 export async function processCarImageWithAI(file) {
   try {
+    const req = await request();
+    const decision = await aj.protect(req, { requested: 1 });
+
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        const { remaining, reset } = decision.reason;
+        throw new RateLimitError(
+          `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
+            reset
+          ).toLocaleString()}`
+        );
+      }
+      throw new ValidationError("Request denied", "request");
+    }
+
     if (!process.env.GEMINI_API_KEY) {
       throw new ValidationError("GEMINI_API_KEY is not defined");
     }
@@ -115,191 +132,69 @@ Schema:
 
     return createSuccessResponse(parsed);
   } catch (error) {
-    console.error("Error processing car image:", error.message);
+    logError(error);
     return createErrorResponse(error);
   }
 }
 
 
-export async function getCarPlanLimits() {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
+export const getCarPlanLimits = withOrgAuth(async (ctx) => {
+  const plan = ctx.organization.subscription?.plan;
+  const maxImages = plan?.maxImagesPerCar ?? 5;
+  const features = plan?.features || {};
+  const aiProcessingEnabled = features.aiProcessing?.enabled ?? false;
 
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
-
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
-
-    const plan = organization.subscription?.plan;
-    const maxImages = plan?.maxImagesPerCar ?? 5;
-    const features = plan?.features || {};
-    const aiProcessingEnabled = features.aiProcessing?.enabled ?? false;
-
-    return createSuccessResponse({
-      maxImagesPerCar: maxImages,
-      aiProcessingEnabled,
-    });
-  } catch (error) {
-    console.error("Error getting car plan limits", error);
-    return createErrorResponse(error);
-  }
-}
+  return createSuccessResponse({
+    maxImagesPerCar: maxImages,
+    aiProcessingEnabled,
+  });
+});
 
 // Backward-compatible alias
 export async function getMaxImagesPerCar() {
   return getCarPlanLimits();
 }
 
-export async function addCar(payload) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
+export const addCar = withOrgAuth(async (ctx, payload) => {
+  const rawData = payload.data || payload;
+  const carData = validateAction(carSchema, rawData);
+  const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
 
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
+  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  return createSuccessResponse(car, "Car added successfully");
+});
 
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
+export const getCars = withOrgAuth(async (ctx, search = "", status = "all", page = 1, limit = 10) => {
+  const filters = {
+    search: search || undefined,
+    status: status === "all" ? undefined : status.toUpperCase(),
+    onlyAvailable: false,
+  };
 
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
+  const result = await carService.getCars(filters, { page, limit }, ctx.userId, ctx.organization.id);
 
-    const carData = payload.data || payload;
-    const car = await carService.createCar(carData, userId, organization.id);
+  return createSuccessResponse({
+    data: result.cars,
+    pagination: result.pagination,
+  });
+});
 
-    revalidatePath(`/org/${organization.slug}/cars`);
-    return createSuccessResponse(car, "Car added successfully");
-  } catch (error) {
-    console.error("Error adding car", error);
-    return createErrorResponse(error);
-  }
-}
+export const deleteCar = withOrgAuth(async (ctx, carId) => {
+  await carService.deleteCar(carId, ctx.userId, ctx.organization.id);
 
-export async function getCars(
-  search = "",
-  status = "all",
-  page = 1,
-  limit = 10
-) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
+  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  return createSuccessResponse(null, "Car deleted successfully");
+});
 
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
+export const updateCar = withOrgAuth(async (ctx, carId, { status, featured }) => {
+  const updateData = {};
+  if (status !== undefined) updateData.status = status;
+  if (featured !== undefined) updateData.featured = featured;
 
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
+  const validatedUpdate = validateAction(updateCarSchema, updateData);
 
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
+  const updatedCar = await carService.updateCar(carId, validatedUpdate, ctx.userId, ctx.organization.id);
 
-    const filters = {
-      search: search || undefined,
-      status: status === "all" ? undefined : status.toUpperCase(),
-      onlyAvailable: false,
-    };
-
-    const result = await carService.getCars(filters, { page, limit }, userId, organization.id);
-
-    return createSuccessResponse({
-      data: result.cars,
-      pagination: result.pagination,
-    });
-  } catch (error) {
-    console.error("Error getting cars", error);
-    return createErrorResponse(error);
-  }
-}
-
-export async function deleteCar(carId) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
-
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
-
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
-
-    await carService.deleteCar(carId, userId, organization.id);
-
-    revalidatePath(`/org/${organization.slug}/cars`);
-    return createSuccessResponse(null, "Car deleted successfully");
-  } catch (error) {
-    console.error("Error deleting car", error);
-    return createErrorResponse(error);
-  }
-}
-
-export async function updateCar(carId, { status, featured }) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new AuthenticationError();
-    }
-
-    const user = await checkUser();
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
-
-    let organization = await getCurrentOrganization();
-    if (!organization && user.memberships?.length > 0) {
-      organization = user.memberships[0].organization;
-    }
-
-    if (!organization) {
-      throw new AuthenticationError("No organization found");
-    }
-
-    const updateData = {};
-    if (status !== undefined) updateData.status = status;
-    if (featured !== undefined) updateData.featured = featured;
-
-    const updatedCar = await carService.updateCar(carId, updateData, userId, organization.id);
-
-    revalidatePath(`/org/${organization.slug}/cars`);
-    return createSuccessResponse(updatedCar, "Car updated successfully");
-  } catch (error) {
-    console.error("Error updating car", error);
-    return createErrorResponse(error);
-  }
-}
+  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  return createSuccessResponse(updatedCar, "Car updated successfully");
+});

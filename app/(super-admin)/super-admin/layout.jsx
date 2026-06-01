@@ -26,8 +26,8 @@ export default async function SuperAdminLayout({ children }) {
       <Toaster position="top-right" richColors />
       <SuperAdminSidebar user={user} />
       <main
-        className="flex-1 transition-all duration-300 ease-in-out flex flex-col"
-        style={{ marginLeft: "var(--sidebar-width, 0)" }}
+        className="flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0"
+        style={{ paddingLeft: "var(--sidebar-width, 0)" }}
       >
         {/* Mobile header spacer */}
         <div className="md:hidden h-16" />

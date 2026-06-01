@@ -83,13 +83,21 @@ export const CarsPagePresenter = ({
     };
 
     return (
-        <div className="container mx-auto py-4 px-4 mt-18">
-            <CarsHero
-                searchQuery={heroSearch}
-                onSearchChange={handleHeroSearchChange}
-                onClearSearch={handleClearHeroSearch}
-                totalCount={pagination.total}
-            />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30">
+            <div className="container mx-auto py-4 px-4 pt-8 mt-14">
+                <CarsHero
+                    searchQuery={heroSearch}
+                    onSearchChange={handleHeroSearchChange}
+                    onClearSearch={handleClearHeroSearch}
+                    totalCount={pagination.total}
+                    onQuickSearch={(term) => {
+                        setHeroSearch(term);
+                        handlers.handleFilterChange({
+                            ...filters,
+                            search: term,
+                        });
+                    }}
+                />
 
             <div className="lg:hidden mb-4">
                 <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -212,7 +220,7 @@ export const CarsPagePresenter = ({
                                 transition={{ duration: 0.3 }}
                             >
                                 <motion.div
-                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7"
                                     initial="hidden"
                                     animate="visible"
                                     variants={{
@@ -254,6 +262,7 @@ export const CarsPagePresenter = ({
                         )}
                     </AnimatePresence>
                 </div>
+            </div>
             </div>
         </div>
     );

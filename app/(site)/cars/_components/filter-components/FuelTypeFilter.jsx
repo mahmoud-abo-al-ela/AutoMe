@@ -33,14 +33,12 @@ const FuelTypeFilter = ({
             {availableFuelTypes.map((fuel) => (
               <Badge
                 key={fuel}
-                variant={
-                  selectedFuelTypes.includes(fuel) ? "default" : "outline"
-                }
-                className={`${
+                variant="outline"
+                className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
                   selectedFuelTypes.includes(fuel)
-                    ? ""
+                    ? "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200"
                     : "hover:bg-slate-100 cursor-pointer"
-                } ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                } ${isLoading ? "opacity-50 pointer-events-none" : ""} cursor-pointer`}
                 onClick={() =>
                   toggleFilter(fuel, selectedFuelTypes, setSelectedFuelTypes)
                 }

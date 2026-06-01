@@ -129,20 +129,24 @@ export default function MobileMenu({
   // Whether we're on a subdomain (tenant context)
   const isOnSubdomain = !!organizationSlug;
 
-  // Check if user can manage the organization (OWNER role in any org)
+  // Check if user is a platform super admin (UserRole.ADMIN)
+  const isSuperAdmin = user?.role === "ADMIN";
+
+  // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
-    hasOrgMembership && user.memberships.some((m) => m.role === "OWNER");
+    isSuperAdmin ||
+    (hasOrgMembership && user.memberships.some((m) => m.role === "OWNER"));
 
   const menuRef = useRef(null);
   const { signOut } = useClerk();
-  const isOnAdminPath = pathname?.startsWith("/admin");
+  const isOnAdminPath = pathname?.startsWith("/super-admin");
   const isOnOrgPath = pathname?.startsWith("/org/");
 
-  // Show admin nav for org members when on subdomain and not already on admin path
-  const showAdminNav = hasOrgMembership && organizationSlug && !isOnAdminPath;
+  // Show admin nav for org members/admins when on subdomain and not already on admin path
+  const showAdminNav = (hasOrgMembership || isSuperAdmin) && organizationSlug && !isOnAdminPath;
 
   // Dashboard link for org members (used on main domain)
-  const orgDashboardHref = userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/admin";
+  const orgDashboardHref = userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/super-admin";
 
   // Use subdomain-specific nav items when on a tenant subdomain
   const publicNavItems = isOnSubdomain ? subdomainNavItems : navItems;
@@ -245,7 +249,7 @@ export default function MobileMenu({
               style={{ maxHeight: "calc(100vh - 14rem)" }}
             >
               {/* Context switcher for org members */}
-              {hasOrgMembership && !isOnOrgPath && (
+              {(hasOrgMembership || isSuperAdmin) && !isOnOrgPath && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

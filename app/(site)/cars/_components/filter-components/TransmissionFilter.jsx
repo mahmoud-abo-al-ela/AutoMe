@@ -33,14 +33,12 @@ const TransmissionFilter = ({
             {availableTransmissions.map((trans) => (
               <Badge
                 key={trans}
-                variant={
-                  selectedTransmissions.includes(trans) ? "default" : "outline"
-                }
-                className={`${
+                variant="outline"
+                className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
                   selectedTransmissions.includes(trans)
-                    ? ""
+                    ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200"
                     : "hover:bg-slate-100 cursor-pointer"
-                } ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                } ${isLoading ? "opacity-50 pointer-events-none" : ""} cursor-pointer`}
                 onClick={() =>
                   toggleFilter(
                     trans,

@@ -10,15 +10,15 @@ export const EmptyState = ({
     onAction,
 }) => {
     return (
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm">
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white/50 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-sm">
             {Icon && (
-                <div className="bg-primary/10 p-4 rounded-full mb-6">
-                    <Icon className="h-8 w-8 md:h-10 md:w-10 text-primary" />
+                <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-5 rounded-full mb-6 shadow-inner">
+                    <Icon className="h-10 w-10 md:h-12 md:w-12 text-blue-600" strokeWidth={1.5} />
                 </div>
             )}
-            <h3 className="text-xl font-medium text-gray-900 mb-3">{title}</h3>
+            <h3 className="text-xl md:text-2xl font-semibold text-slate-800 mb-3">{title}</h3>
             {description && (
-                <p className="text-base text-muted-foreground mb-8 max-w-md">
+                <p className="text-base text-slate-500 mb-8 max-w-md mx-auto leading-relaxed">
                     {description}
                 </p>
             )}

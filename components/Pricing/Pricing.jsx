@@ -157,6 +157,7 @@ const Pricing = ({ plans: dbPlans }) => {
   const savingsPercentage = calculateSavingsPercentage();
 
   const formatPrice = (plan) => {
+    if (plan.monthlyPrice === null) return "Custom";
     const price =
       billingPeriod === "monthly"
         ? plan.monthlyPrice
@@ -165,6 +166,7 @@ const Pricing = ({ plans: dbPlans }) => {
   };
 
   const formatPeriod = (plan) => {
+    if (plan.monthlyPrice === null) return "";
     if (plan.monthlyPrice === 0) return "forever";
     return billingPeriod === "monthly" ? "per month" : "per year";
   };
