@@ -1,15 +1,18 @@
 
 import React from "react";
 import { CarsList } from "./_components/car-list";
+import { CarsPlanBanner } from "./_components/cars-plan-banner";
 
 export const metadata = {
   title: "Cars | AutoMe Admin",
   description: "Manage your cars",
 };
 
-const CarsPage = () => {
+const CarsPage = async ({ params }) => {
+  const { slug } = await params;
   return (
     <div>
+      <CarsPlanBanner orgSlug={slug} />
       <div className="mb-6 md:mb-8">
         <div className="flex items-center justify-between">
           <div>

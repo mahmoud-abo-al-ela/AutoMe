@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { processCarImageWithAI } from "@/actions/cars";
+import { processCarImageGated } from "@/actions/cars";
 import { toast } from "sonner";
 import CarFormShared from "../shared/CarFormShared";
 import AIUploadSection from "../sections/AIUploadSection";
@@ -30,7 +30,7 @@ const AICarForm = () => {
       }
 
       setUploadedImage(file);
-      const result = await processCarImageWithAI(file);
+      const result = await processCarImageGated(file);
       if (result.success) {
         setCarData(result.data);
         setShowForm(true);

@@ -2,12 +2,12 @@
 
 import { db } from "@/lib/prisma";
 import {
-  getCurrentOrganization,
   getUserMembership,
 } from "@/lib/getOrganization";
 import { revalidatePath } from "next/cache";
 import { auditHelpers } from "@/lib/services/audit/audit";
-import { withAuth } from "@/lib/middleware/with-auth";
+import { withOrgAuth } from "@/lib/middleware/with-auth";
+import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 import { createSuccessResponse } from "@/lib/utils/response";
 import {
   AuthorizationError,
@@ -16,44 +16,15 @@ import {
   ConflictError,
 } from "@/lib/utils/errors";
 
-export const inviteTeamMember = withAuth(
-  async (ctx, { organizationId, email, role }) => {
-    const organization = await getCurrentOrganization();
-    if (!organization || organization.id !== organizationId) {
-      throw new NotFoundError("Organization");
-    }
-
+export const inviteTeamMember = withOrgAuth(
+  withUsageLimit("members", async (ctx, { organizationId, email, role }) => {
+    // Note: organizationId is maintained in the signature for backward compatibility
+    // with existing client calls, but we use ctx.organization.id for security.
     // Check if user has permission (only OWNER can invite)
-    const membership = await getUserMembership(ctx.user.id, organizationId);
+    const membership = await getUserMembership(ctx.user.id, ctx.organization.id);
     if (!membership || membership.role !== "OWNER") {
       throw new AuthorizationError(
         "You don't have permission to invite members"
-      );
-    }
-
-    // Check plan limits
-    const memberCount = await db.membership.count({
-      where: { organizationId },
-    });
-
-    const subscription = await db.subscription.findFirst({
-      where: {
-        organizationId,
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
-      include: { plan: true },
-    });
-
-    const planLimits = {
-      STARTER: 3,
-      PRO: 10,
-      ENTERPRISE: -1,
-    };
-
-    const limit = planLimits[subscription?.plan?.type || "STARTER"];
-    if (limit !== -1 && memberCount >= limit) {
-      throw new ValidationError(
-        "Member limit reached. Upgrade your plan to add more members."
       );
     }
 
@@ -72,7 +43,7 @@ export const inviteTeamMember = withAuth(
     const existingMembership = await db.membership.findFirst({
       where: {
         userId: invitedUser.id,
-        organizationId,
+        organizationId: ctx.organization.id,
       },
     });
 
@@ -84,7 +55,7 @@ export const inviteTeamMember = withAuth(
     const newMembership = await db.membership.create({
       data: {
         userId: invitedUser.id,
-        organizationId,
+        organizationId: ctx.organization.id,
         role,
       },
     });
@@ -99,20 +70,15 @@ export const inviteTeamMember = withAuth(
     revalidatePath("/admin/team");
 
     return createSuccessResponse(null, "Team member invited successfully");
-  }
+  })
 );
 
-export const updateMemberRole = withAuth(
-  async (ctx, { organizationId, memberId, newRole }) => {
-    const organization = await getCurrentOrganization();
-    if (!organization || organization.id !== organizationId) {
-      throw new NotFoundError("Organization");
-    }
-
+export const updateMemberRole = withOrgAuth(
+  async (ctx, { memberId, newRole }) => {
     // Check if user has permission (only OWNER can change roles)
     const currentMembership = await getUserMembership(
       ctx.user.id,
-      organizationId
+      ctx.organization.id
     );
     if (!currentMembership || currentMembership.role !== "OWNER") {
       throw new AuthorizationError(
@@ -128,7 +94,7 @@ export const updateMemberRole = withAuth(
 
     if (
       !targetMembership ||
-      targetMembership.organizationId !== organizationId
+      targetMembership.organizationId !== ctx.organization.id
     ) {
       throw new NotFoundError("Member");
     }
@@ -160,17 +126,12 @@ export const updateMemberRole = withAuth(
   }
 );
 
-export const removeMember = withAuth(
-  async (ctx, { organizationId, memberId }) => {
-    const organization = await getCurrentOrganization();
-    if (!organization || organization.id !== organizationId) {
-      throw new NotFoundError("Organization");
-    }
-
+export const removeMember = withOrgAuth(
+  async (ctx, { memberId }) => {
     // Check if user has permission (only OWNER can remove members)
     const currentMembership = await getUserMembership(
       ctx.user.id,
-      organizationId
+      ctx.organization.id
     );
     if (!currentMembership || currentMembership.role !== "OWNER") {
       throw new AuthorizationError(
@@ -186,7 +147,7 @@ export const removeMember = withAuth(
 
     if (
       !targetMembership ||
-      targetMembership.organizationId !== organizationId
+      targetMembership.organizationId !== ctx.organization.id
     ) {
       throw new NotFoundError("Member");
     }

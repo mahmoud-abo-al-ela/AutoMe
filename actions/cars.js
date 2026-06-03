@@ -3,12 +3,15 @@ import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidatePath } from "next/cache";
 import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
-import { createSuccessResponse, createErrorResponse } from "@/lib/utils/response";
-import { logError, RateLimitError, ValidationError } from "@/lib/utils/errors";
+import { createSuccessResponse } from "@/lib/utils/response";
+import { RateLimitError, ValidationError } from "@/lib/utils/errors";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carSchema, updateCarSchema } from "@/lib/validations/schemas";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
+import { withPlanGate } from "@/lib/middleware/with-plan-gate";
+import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
+
 
 export async function fileToBase64(file) {
   const buffer = await file.arrayBuffer();
@@ -20,7 +23,6 @@ const ai = new GoogleGenAI({
 });
 
 export async function processCarImageWithAI(file) {
-  try {
     const req = await request();
     const decision = await aj.protect(req, { requested: 1 });
 
@@ -130,12 +132,18 @@ Schema:
       throw new ValidationError(`Missing required fields: ${missing.join(", ")}`, "ai_response");
     }
 
-    return createSuccessResponse(parsed);
-  } catch (error) {
-    logError(error);
-    return createErrorResponse(error);
-  }
+    return parsed;
 }
+
+export const processCarImageGated = withOrgAuth(
+  withPlanGate(
+    "aiProcessing",
+    withUsageLimit("aiProcessing", async (ctx, file) => {
+      const parsed = await processCarImageWithAI(file);
+      return createSuccessResponse(parsed);
+    })
+  )
+);
 
 
 export const getCarPlanLimits = withOrgAuth(async (ctx) => {
@@ -155,14 +163,16 @@ export async function getMaxImagesPerCar() {
   return getCarPlanLimits();
 }
 
-export const addCar = withOrgAuth(async (ctx, payload) => {
-  const rawData = payload.data || payload;
-  const carData = validateAction(carSchema, rawData);
-  const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
+export const addCar = withOrgAuth(
+  withUsageLimit("cars", async (ctx, payload) => {
+    const rawData = payload.data || payload;
+    const carData = validateAction(carSchema, rawData);
+    const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
 
-  revalidatePath(`/org/${ctx.organization.slug}/cars`);
-  return createSuccessResponse(car, "Car added successfully");
-});
+    revalidatePath(`/org/${ctx.organization.slug}/cars`);
+    return createSuccessResponse(car, "Car added successfully");
+  })
+);
 
 export const getCars = withOrgAuth(async (ctx, search = "", status = "all", page = 1, limit = 10) => {
   const filters = {

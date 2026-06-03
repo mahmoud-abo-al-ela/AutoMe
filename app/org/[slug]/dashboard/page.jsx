@@ -7,6 +7,7 @@ import ConversionFunnel from "../_components/ConversionFunnel";
 import PopularCars from "../_components/PopularCars";
 import InventoryBreakdown from "../_components/InventoryBreakdown";
 import TestDriveTrends from "../_components/TestDriveTrends";
+import { DashboardPlanBanners } from "./_components/dashboard-plan-banners";
 import { 
   getDashboardStats, 
   getOverviewChartData,
@@ -20,7 +21,8 @@ export const metadata = {
   description: "Dashboard for AutoMe",
 };
 
-const DashboardPage = async () => {
+const DashboardPage = async ({ params }) => {
+  const { slug } = await params;
   // Fetch data in parallel
   const results = await Promise.allSettled([
     getDashboardStats(),
@@ -42,23 +44,25 @@ const DashboardPage = async () => {
   const trendsData = extract(results[5], []);
 
   return (
-    <Tabs defaultValue="overview" className="w-full">
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Welcome back, here's what's happening with your platform
-            </p>
+    <div className="w-full">
+      <DashboardPlanBanners orgSlug={slug} />
+      <Tabs defaultValue="overview" className="w-full">
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Admin Dashboard
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Welcome back, here's what's happening with your platform
+              </p>
+            </div>
+            <TabsList>
+              <TabsTrigger value="overview" className="cursor-pointer">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" className="cursor-pointer">Analytics</TabsTrigger>
+            </TabsList>
           </div>
-          <TabsList>
-            <TabsTrigger value="overview" className="cursor-pointer">Overview</TabsTrigger>
-            <TabsTrigger value="analytics" className="cursor-pointer">Analytics</TabsTrigger>
-          </TabsList>
         </div>
-      </div>
       
       <TabsContent value="overview" className="flex flex-col gap-4 mt-0">
         <StatsCards data={data} />
@@ -79,6 +83,7 @@ const DashboardPage = async () => {
         <TestDriveTrends data={trendsData} />
       </TabsContent>
     </Tabs>
+    </div>
   );
 };
 
