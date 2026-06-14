@@ -57,7 +57,7 @@ const Footer = ({ user }) => {
           <ul className="space-y-1.5 text-sm">
             <li>
               <Link
-                href="#"
+                href="/about"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 About Us
@@ -65,10 +65,18 @@ const Footer = ({ user }) => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/contact"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Contact Us
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dealerships"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Dealerships
               </Link>
             </li>
           </ul>
@@ -110,30 +118,36 @@ const Footer = ({ user }) => {
           © {new Date().getFullYear()} AutoMe. All rights reserved.
         </p>
         <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-          <Link
-            href="#"
-            className="text-muted-foreground hover:text-primary"
+          <a
+            href="https://facebook.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Facebook"
           >
             <span className="sr-only">Facebook</span>
             <Facebook size={18} />
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground hover:text-primary"
+          </a>
+          <a
+            href="https://x.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Twitter"
           >
             <span className="sr-only">Twitter</span>
             <Twitter size={18} />
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground hover:text-primary"
+          </a>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Instagram"
           >
             <span className="sr-only">Instagram</span>
             <Instagram size={18} />
-          </Link>
+          </a>
         </div>
       </div>
     </footer>

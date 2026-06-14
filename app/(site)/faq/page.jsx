@@ -46,7 +46,7 @@ export default function FAQ() {
           is here to help with any questions you might have.
         </p>
         <Button size="lg">
-          <Link href="#">Contact Support</Link>
+          <Link href="/contact">Contact Support</Link>
         </Button>
       </div>
     </div>
