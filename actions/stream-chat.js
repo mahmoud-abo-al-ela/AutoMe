@@ -6,6 +6,7 @@ import {
     upsertStreamUser,
     createCarInquiryChannel,
     addMembersToChannel,
+    ensureOrgMembersInStream,
 } from "@/lib/stream-chat";
 import { getOrganization } from "@/lib/getOrganization";
 import { withAuth } from "@/lib/middleware/with-auth";
@@ -83,18 +84,7 @@ export const startCarConversation = withAuth(async (ctx, carId) => {
 
     // Ensure all organization members exist in Stream Chat
     const orgMembers = car.organization.memberships.map(m => m.user);
-    for (const member of orgMembers) {
-        await upsertStreamUser({
-            id: member.id,
-            name: member.name || member.email,
-            image: member.imageUrl,
-            email: member.email,
-            custom: {
-                clerk_id: member.clerkId,
-                user_role: member.role,
-            },
-        });
-    }
+    await ensureOrgMembersInStream(orgMembers);
 
     // Create channel in Stream Chat
     const channel = await createCarInquiryChannel({
@@ -159,18 +149,7 @@ export const startOrganizationConversation = withAuth(async (ctx, organizationId
 
     // Ensure all organization members exist in Stream Chat
     const orgMembers = organization.memberships.map(m => m.user);
-    for (const member of orgMembers) {
-        await upsertStreamUser({
-            id: member.id,
-            name: member.name || member.email,
-            image: member.imageUrl,
-            email: member.email,
-            custom: {
-                clerk_id: member.clerkId,
-                user_role: member.role,
-            },
-        });
-    }
+    await ensureOrgMembersInStream(orgMembers);
 
     // Create channel in Stream Chat
     const channel = await createCarInquiryChannel({

@@ -1,4 +1,5 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 
 import { useEffect, useState } from "react";
 import { ChannelList } from "stream-chat-react";
@@ -28,7 +29,7 @@ export function OrganizationChannelList({ organizationSlug }) {
                     });
                 }
             } catch (error) {
-                console.error("Error loading organization channels:", error);
+                logError("Error loading organization channels:", error);
             } finally {
                 setLoading(false);
             }

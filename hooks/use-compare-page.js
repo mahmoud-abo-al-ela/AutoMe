@@ -1,4 +1,5 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { compareUtils } from "@/lib/utils";
@@ -8,12 +9,11 @@ import {
     computeWinners,
     handleRemoveCar,
 } from "@/app/(site)/compare/_components/utils";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 
 export const useComparePage = () => {
     const [compareList, setCompareList] = useState([]);
-    const [cars, setCars] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [highlightDifferences, setHighlightDifferences] = useState(false);
     const [activeCategory, setActiveCategory] = useState("basic");
 
@@ -39,38 +39,14 @@ export const useComparePage = () => {
 
     // ─── Fetch car data when compare list changes ───────────────────────────
 
-    const fetchCars = useCallback(async () => {
-        if (compareList.length === 0) {
-            setCars([]);
-            setLoading(false);
-            setError(null);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await getCarsByIds(compareList);
-            if (response.success) {
-                setCars(response.data);
-            } else {
-                console.error("Error fetching cars:", response.error);
-                setCars([]);
-                setError(response.error || "Failed to load comparison data.");
-            }
-        } catch (err) {
-            console.error("Error fetching cars:", err);
-            setCars([]);
-            setError("An unexpected error occurred. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    }, [compareList]);
-
-    useEffect(() => {
-        fetchCars();
-    }, [fetchCars]);
+    const { data: carsData, isLoading: loading, error, refetch: fetchCars } = useQuery({
+        queryKey: queryKeys.compare.byIds(compareList),
+        queryFn: () => getCarsByIds(compareList),
+        enabled: compareList.length > 0,
+        select: (res) => res.success ? res.data : [],
+    });
+    
+    const cars = compareList.length === 0 ? [] : (carsData || []);
 
     // ─── Derived data (memoised) ────────────────────────────────────────────
 
@@ -111,7 +87,7 @@ export const useComparePage = () => {
             return { success: true, method: "clipboard" };
         } catch (err) {
             // User cancelled share or clipboard failed
-            console.error("Share failed:", err);
+            logError("Share failed:", err);
             return { success: false, error: err.message };
         }
     }, []);

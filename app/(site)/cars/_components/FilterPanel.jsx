@@ -9,7 +9,8 @@ import React, {
 } from "react";
 import { Filter, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import useFetch from "@/hooks/use-fetch";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 import { getCarsFilters } from "@/actions/cars-listing";
 import { Separator } from "@/components/ui/separator";
 import { Accordion } from "@/components/ui/accordion";
@@ -27,6 +28,7 @@ const FilterPanel = forwardRef(
   ({ onFilter, isLoading = false, initialFilters = {} }, ref) => {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const queryClient = useQueryClient();
     const debounceRef = useRef(null);
     const isInitializedRef = useRef(false);
 
@@ -61,28 +63,45 @@ const FilterPanel = forwardRef(
 
     const {
       data: filtersData,
-      loading: filtersLoading,
-      fn: fetchFilters,
-    } = useFetch(getCarsFilters);
+      isLoading: filtersLoading,
+    } = useQuery({
+      queryKey: queryKeys.cars.filters(),
+      queryFn: () => getCarsFilters(),
+      staleTime: Infinity,
+    });
 
     useImperativeHandle(ref, () => ({
       resetFilters,
     }));
 
     useEffect(() => {
-      if (initialFilters.search !== undefined) setSearchQuery(initialFilters.search || "");
-      if (initialFilters.make) setSelectedMakes([initialFilters.make]);
-      else setSelectedMakes([]);
-      if (initialFilters.bodyType)
-        setSelectedBodyTypes([initialFilters.bodyType]);
-      else setSelectedBodyTypes([]);
-      if (initialFilters.fuelType)
-        setSelectedFuelTypes([initialFilters.fuelType]);
-      else setSelectedFuelTypes([]);
-      if (initialFilters.transmission)
-        setSelectedTransmissions([initialFilters.transmission]);
-      else setSelectedTransmissions([]);
-      if (initialFilters.sortBy) setSortBy(initialFilters.sortBy);
+      if (initialFilters.search !== undefined) {
+        setSearchQuery(prev => prev !== (initialFilters.search || "") ? (initialFilters.search || "") : prev);
+      }
+      
+      setSelectedMakes(prev => {
+        const next = initialFilters.make ? [initialFilters.make] : [];
+        return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+      });
+      
+      setSelectedBodyTypes(prev => {
+        const next = initialFilters.bodyType ? [initialFilters.bodyType] : [];
+        return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+      });
+      
+      setSelectedFuelTypes(prev => {
+        const next = initialFilters.fuelType ? [initialFilters.fuelType] : [];
+        return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+      });
+      
+      setSelectedTransmissions(prev => {
+        const next = initialFilters.transmission ? [initialFilters.transmission] : [];
+        return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+      });
+
+      if (initialFilters.sortBy) {
+        setSortBy(prev => prev !== initialFilters.sortBy ? initialFilters.sortBy : prev);
+      }
 
       if (
         (initialFilters.minPrice || initialFilters.maxPrice) &&
@@ -92,14 +111,12 @@ const FilterPanel = forwardRef(
           initialFilters.minPrice || 0,
           initialFilters.maxPrice || maxPriceValue,
         ];
-        setPriceRange(newRange);
-        setCommittedPriceRange(newRange);
+        setPriceRange(prev => JSON.stringify(prev) === JSON.stringify(newRange) ? prev : newRange);
+        setCommittedPriceRange(prev => JSON.stringify(prev) === JSON.stringify(newRange) ? prev : newRange);
       }
     }, [initialFilters, maxPriceValue]);
 
-    useEffect(() => {
-      fetchFilters();
-    }, []);
+    // Fetch automatically handled by React Query
 
     useEffect(() => {
       if (filtersData?.success && filtersData?.data) {
@@ -291,8 +308,6 @@ const FilterPanel = forwardRef(
       if (onFilter) {
         onFilter(resetFilterValues);
       }
-
-      fetchFilters();
     };
 
     const formatPrice = (price) => {

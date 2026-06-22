@@ -5,7 +5,7 @@ import { Star, MessageSquare, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReviewCard } from "./ReviewCard";
-import { ReviewForm } from "./ReviewForm";
+import ReviewForm from "./ReviewForm";
 import { getDealershipReviews, createDealershipReview } from "@/actions/dealerships";
 import { Pagination } from "@/components/common/Pagination";
 import { useUser } from "@clerk/nextjs";

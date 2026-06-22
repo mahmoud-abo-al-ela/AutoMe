@@ -5,6 +5,7 @@ import { StreamChat } from "stream-chat";
 import { Chat } from "stream-chat-react";
 import { useUser } from "@clerk/nextjs";
 import { getStreamToken } from "@/actions/stream-chat";
+import { logError } from "@/lib/utils/errors";
 
 import "stream-chat-react/dist/css/v2/index.css";
 
@@ -29,7 +30,7 @@ export function StreamChatProvider({ children }) {
                 const result = await getStreamToken();
 
                 if (!result.success) {
-                    console.error("Failed to get Stream token:", result.error);
+                    logError("Failed to get Stream token:", result.error);
                     setIsConnecting(false);
                     return;
                 }
@@ -55,7 +56,7 @@ export function StreamChatProvider({ children }) {
 
                 setClient(chatClient);
             } catch (error) {
-                console.error("Error initializing Stream Chat:", error);
+                logError(error);
             } finally {
                 setIsConnecting(false);
             }
@@ -66,7 +67,10 @@ export function StreamChatProvider({ children }) {
         // Cleanup on unmount
         return () => {
             if (chatClient && chatClient.userID) {
-                chatClient.disconnectUser().catch(console.error);
+                chatClient.disconnectUser().catch((err) => {
+                    // Non-blocking disconnect on unmount
+                    logError(err);
+                });
                 chatClient = null;
             }
         };

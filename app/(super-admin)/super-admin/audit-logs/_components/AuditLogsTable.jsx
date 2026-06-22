@@ -38,6 +38,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ScrollText } from "lucide-react";
 
 // Helper to get action category from detailed action name
 const getActionCategory = (action) => {
@@ -118,8 +120,8 @@ export default function AuditLogsTable({ logs, pagination }) {
           <TableBody>
             {logs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No audit logs found.
+                <TableCell colSpan={6} className="h-48 p-0">
+                  <EmptyState variant="inline" icon={ScrollText} title="No audit logs found" />
                 </TableCell>
               </TableRow>
             ) : (

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import useFetch from "@/hooks/use-fetch";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 import { getCars } from "@/actions/cars-listing";
 
 export const useCarsPage = (initialData = null) => {
@@ -24,15 +25,19 @@ export const useCarsPage = (initialData = null) => {
     });
     const filterPanelRef = useRef(null);
 
-    const {
-        data: fetchResult,
-        loading: fetchLoading,
-        error,
-        fn: fetchCars,
-    } = useFetch(getCars, !initialData);
+    const queryClient = useQueryClient();
 
-    const carsData = fetchResult || initialData;
-    const loading = fetchLoading;
+    const {
+        data: queryData,
+        isLoading: loading,
+        error,
+    } = useQuery({
+        queryKey: queryKeys.cars.list({ ...filters, page }),
+        queryFn: () => getCars({ ...filters, page }),
+        placeholderData: keepPreviousData,
+    });
+
+    const carsData = queryData || initialData;
 
     useEffect(() => {
         const initialFilters = {
@@ -53,8 +58,11 @@ export const useCarsPage = (initialData = null) => {
 
         setFilters(initialFilters);
 
-        if (!initialData) {
-            fetchCars(initialFilters);
+        if (initialData) {
+            queryClient.setQueryData(
+                queryKeys.cars.list({ ...initialFilters, page: initialFilters.page }),
+                initialData
+            );
         }
     }, []);
 
@@ -82,20 +90,18 @@ export const useCarsPage = (initialData = null) => {
         setPage(1);
         const updatedFilters = { ...newFilters, page: 1 };
         setFilters(updatedFilters);
-        fetchCars(updatedFilters);
         updateURL(updatedFilters, 1);
-    }, [fetchCars, updateURL]);
+    }, [updateURL]);
 
     const handlePageChange = useCallback((newPage) => {
         setPage(newPage);
-        fetchCars({ ...filters, page: newPage });
         updateURL(filters, newPage);
 
         window.scrollTo({
             top: 0,
             behavior: "smooth",
         });
-    }, [filters, fetchCars, updateURL]);
+    }, [filters, updateURL]);
 
     const clearFilter = useCallback((filterType) => {
         const updatedFilters = { ...filters };
@@ -129,9 +135,8 @@ export const useCarsPage = (initialData = null) => {
 
         setPage(1);
         setFilters(updatedFilters);
-        fetchCars({ ...updatedFilters, page: 1 });
         updateURL(updatedFilters, 1);
-    }, [filters, fetchCars, updateURL]);
+    }, [filters, updateURL]);
 
     const resetAllFilters = useCallback(() => {
         const resetFilters = {
@@ -147,14 +152,13 @@ export const useCarsPage = (initialData = null) => {
 
         setPage(1);
         setFilters(resetFilters);
-        fetchCars({ ...resetFilters, page: 1 });
 
         if (filterPanelRef.current) {
             filterPanelRef.current.resetFilters();
         }
 
         window.history.replaceState(null, '', "/cars");
-    }, [fetchCars]);
+    }, []);
 
     const getActiveFilters = useCallback(() => {
         const filterMap = {

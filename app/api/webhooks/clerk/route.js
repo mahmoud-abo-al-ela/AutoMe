@@ -1,6 +1,7 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { db } from "@/lib/prisma";
+import { logError } from "@/lib/utils/errors";
 
 // Disable body parsing for webhook verification
 export const runtime = "nodejs";
@@ -36,7 +37,7 @@ export async function POST(req) {
             "svix-signature": svix_signature,
         });
     } catch (err) {
-        console.error("Error verifying webhook:", err);
+        logError("Error verifying webhook:", err);
         return new Response("Error occurred", {
             status: 400,
         });
@@ -67,7 +68,7 @@ export async function POST(req) {
 
         return new Response("Webhook processed successfully", { status: 200 });
     } catch (error) {
-        console.error(`Error processing webhook ${eventType}:`, error);
+        logError(`Error processing webhook ${eventType}:`, error);
         return new Response("Error processing webhook", { status: 500 });
     }
 }

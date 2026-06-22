@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Receipt, ArrowUpCircle, ArrowDownCircle, XCircle, RefreshCw, PlusCircle, Loader2 } from "lucide-react";
 import { getBillingHistory } from "@/actions/billing";
+import { EmptyState } from "@/components/common/EmptyState";
 
 const actionIcons = {
   SUBSCRIPTION_CREATED: PlusCircle,
@@ -125,9 +126,7 @@ export default function BillingHistory({ organizationId }) {
       </CardHeader>
       <CardContent>
         {billingHistory.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No billing history yet
-          </div>
+          <EmptyState variant="inline" icon={Receipt} title="No billing history yet" />
         ) : (
           <Table>
             <TableHeader>

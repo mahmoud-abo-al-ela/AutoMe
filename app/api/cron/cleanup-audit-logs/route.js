@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cleanupExpiredAuditLogs } from "@/lib/services/audit";
+import { logError } from "@/lib/utils/errors";
 
 /**
  * Cron job to clean up expired audit logs
@@ -32,7 +33,7 @@ export async function GET(request) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Audit log cleanup error:", error);
+    logError("Audit log cleanup error:", error);
     return NextResponse.json(
       { error: "Failed to cleanup audit logs" },
       { status: 500 }

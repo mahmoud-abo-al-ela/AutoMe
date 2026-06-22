@@ -7,7 +7,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { processImagesSearch } from "@/actions/home";
-import useFetch from "@/hooks/use-fetch";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -34,10 +34,12 @@ const HeroSearch = () => {
 
   const {
     data: imageSearch,
-    loading,
+    isPending: loading,
     error,
-    fn: fetchImageSearch,
-  } = useFetch(processImagesSearch);
+    mutateAsync: fetchImageSearch,
+  } = useMutation({
+    mutationFn: processImagesSearch,
+  });
 
   const handleImageSearch = async (e) => {
     e.preventDefault();

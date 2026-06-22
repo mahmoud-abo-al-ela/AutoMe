@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import useFetch from "@/hooks/use-fetch";
+import { useState, useMemo, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 import { getCars, deleteCar, updateCar } from "@/actions/cars";
 import { toast } from "sonner";
-import useDebounce from "@/app/org/[slug]/cars/_components/car-list/hooks/useDebounce";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export const useAdminCarsList = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -14,27 +15,36 @@ export const useAdminCarsList = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const isInitialMount = useRef(true);
-
+    const queryClient = useQueryClient();
     const debouncedSearch = useDebounce(searchTerm, 500);
 
     const {
         data: fetchedCars,
-        loading: isFetchingCars,
+        isLoading: isFetchingCars,
         error: fetchCarsError,
-        fn: fetchCarsFn,
-    } = useFetch(getCars);
+        refetch: fetchCarsFn,
+    } = useQuery({
+        queryKey: queryKeys.cars.list({ search: debouncedSearch, status: statusFilter.toLowerCase(), page: currentPage, pageSize }),
+        queryFn: () => getCars(debouncedSearch, statusFilter.toLowerCase(), currentPage, pageSize),
+        placeholderData: keepPreviousData,
+    });
 
     const {
-        loading: deleteCarLoading,
-        fn: deleteCarFn,
-    } = useFetch(deleteCar);
+        isPending: deleteCarLoading,
+        mutateAsync: deleteCarFn,
+    } = useMutation({
+        mutationFn: deleteCar,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.cars.all }),
+    });
 
     const {
         data: updatedCar,
-        loading: updateCarLoading,
-        fn: updateCarFn,
-    } = useFetch(updateCar);
+        isPending: updateCarLoading,
+        mutateAsync: updateCarFn,
+    } = useMutation({
+        mutationFn: ({ carId, updates }) => updateCar(carId, updates),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.cars.all }),
+    });
 
     const carStats = useMemo(() => {
         const carsData = fetchedCars?.data?.data;
@@ -76,51 +86,18 @@ export const useAdminCarsList = () => {
         };
     }, [fetchedCars?.data]);
 
-    // Initial fetch on component mount
-    useEffect(() => {
-        if (isInitialMount.current) {
-            fetchCarsFn(
-                debouncedSearch,
-                statusFilter.toLowerCase(),
-                currentPage,
-                pageSize
-            );
-            isInitialMount.current = false;
-        }
-    }, []);
-
-    // Fetch cars only when search, filter, or pagination changes
-    useEffect(() => {
-        if (!isInitialMount.current) {
-            const timer = setTimeout(() => {
-                fetchCarsFn(
-                    debouncedSearch,
-                    statusFilter.toLowerCase(),
-                    currentPage,
-                    pageSize
-                );
-            }, 100);
-            return () => clearTimeout(timer);
-        }
-    }, [debouncedSearch, statusFilter, currentPage, pageSize]);
-
     // Manual refresh function with visual feedback
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         try {
-            await fetchCarsFn(
-                debouncedSearch,
-                statusFilter.toLowerCase(),
-                currentPage,
-                pageSize
-            );
+            await fetchCarsFn();
             toast.success("Data refreshed successfully");
         } catch (error) {
             toast.error("Failed to refresh data");
         } finally {
             setIsRefreshing(false);
         }
-    }, [debouncedSearch, statusFilter, currentPage, pageSize, fetchCarsFn]);
+    }, [fetchCarsFn]);
 
     // Delete car handler
     const handleDeleteCar = async (carId) => {
@@ -130,12 +107,6 @@ export const useAdminCarsList = () => {
                 toast.success("Car deleted successfully", {
                     description: "The car has been removed from your inventory.",
                 });
-                await fetchCarsFn(
-                    debouncedSearch,
-                    statusFilter.toLowerCase(),
-                    currentPage,
-                    pageSize
-                );
             } else {
                 throw new Error(response.error || "Delete operation failed");
             }
@@ -159,17 +130,11 @@ export const useAdminCarsList = () => {
     // Update car handler
     const handleUpdateCar = async (carId, updates) => {
         try {
-            const response = await updateCarFn(carId, updates);
+            const response = await updateCarFn({ carId, updates });
             if (response.success) {
                 toast.success("Car updated successfully", {
                     description: "The car details have been updated.",
                 });
-                await fetchCarsFn(
-                    debouncedSearch,
-                    statusFilter.toLowerCase(),
-                    currentPage,
-                    pageSize
-                );
             } else {
                 throw new Error(response.error || "Update operation failed");
             }

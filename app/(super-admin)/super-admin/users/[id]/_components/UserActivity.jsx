@@ -3,6 +3,7 @@ import { FileText, Calendar, Car } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export default function UserActivity({ activity, testDrives }) {
   return (
@@ -19,9 +20,7 @@ export default function UserActivity({ activity, testDrives }) {
 
           <TabsContent value="audit">
             {activity.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No activity recorded
-              </p>
+              <EmptyState variant="inline" icon={FileText} title="No activity recorded" />
             ) : (
               <div className="space-y-3">
                 {activity.map((log) => (
@@ -57,9 +56,7 @@ export default function UserActivity({ activity, testDrives }) {
 
           <TabsContent value="testdrives">
             {testDrives.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No test drives booked
-              </p>
+              <EmptyState variant="inline" icon={Car} title="No test drives booked" />
             ) : (
               <div className="space-y-3">
                 {testDrives.map((td) => (

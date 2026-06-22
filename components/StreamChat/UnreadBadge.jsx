@@ -1,4 +1,5 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 
 import { useEffect, useState, Component } from "react";
 import { useChatContext } from "stream-chat-react";
@@ -57,7 +58,7 @@ function UnreadBadgeInner({ className, organizationId }) {
 
                 setUnreadCount(totalUnread);
             } catch (error) {
-                console.error("Error updating unread count:", error);
+                logError("Error updating unread count:", error);
             }
         };
 

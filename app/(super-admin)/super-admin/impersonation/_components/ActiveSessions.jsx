@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { endImpersonation } from "@/actions/super-admin";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Shield } from "lucide-react";
 
 export default function ActiveSessions({ sessions }) {
   const router = useRouter();
@@ -53,9 +55,7 @@ export default function ActiveSessions({ sessions }) {
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
-            No active impersonation sessions
-          </p>
+          <EmptyState variant="inline" icon={Shield} title="No active impersonation sessions" />
         ) : (
           <div className="space-y-4">
             {sessions.map((session) => (

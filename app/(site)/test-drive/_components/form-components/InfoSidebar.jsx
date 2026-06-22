@@ -4,21 +4,23 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CalendarDays, Clock, Info } from "lucide-react";
-import useFetch from "@/hooks/use-fetch";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 
 const InfoSidebar = ({ car, carId }) => {
   const [carData, setCarData] = useState(car || null);
 
-  const { data } = useFetch(async () => {
-    if (carId && !car) {
+  const { data } = useQuery({
+    queryKey: queryKeys.cars.detail(carId),
+    queryFn: async () => {
       const response = await fetch(`/api/cars/${carId}`);
       if (!response.ok) {
         throw new Error("Failed to fetch car data");
       }
       return await response.json();
-    }
-    return null;
-  }, Boolean(carId && !car));
+    },
+    enabled: Boolean(carId && !car),
+  });
 
   useEffect(() => {
     if (data?.success) {

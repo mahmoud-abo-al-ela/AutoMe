@@ -1,10 +1,11 @@
 "use client";
 
 import { formatDistanceToNow, differenceInMinutes } from "date-fns";
-import { Clock, Building2, CheckCircle } from "lucide-react";
+import { Clock, Building2, CheckCircle, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export default function SessionHistory({ sessions }) {
   return (
@@ -14,9 +15,7 @@ export default function SessionHistory({ sessions }) {
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
-            No impersonation history
-          </p>
+          <EmptyState variant="inline" icon={History} title="No impersonation history" />
         ) : (
           <div className="space-y-3">
             {sessions.map((session) => {

@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
     title: "Setup Complete | AutoMe",
     description: "Your dealership has been set up successfully.",

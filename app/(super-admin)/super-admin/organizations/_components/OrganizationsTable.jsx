@@ -27,6 +27,8 @@ import {
   updateOrganizationStatus,
   deleteOrganization,
 } from "@/actions/super-admin";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Building2 } from "lucide-react";
 
 export default function OrganizationsTable({ organizations, pagination }) {
   const router = useRouter();
@@ -135,11 +137,8 @@ export default function OrganizationsTable({ organizations, pagination }) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-12 text-muted-foreground"
-                  >
-                    No organizations found
+                  <TableCell colSpan={8} className="h-48 p-0">
+                    <EmptyState variant="inline" icon={Building2} title="No organizations found" />
                   </TableCell>
                 </TableRow>
               )}

@@ -6,8 +6,6 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 
-// ============ HEADER SKELETON ============
-
 function BillingHeaderSkeleton() {
     return (
         <div className="flex items-center gap-3">
@@ -19,8 +17,6 @@ function BillingHeaderSkeleton() {
         </div>
     );
 }
-
-// ============ CURRENT PLAN SKELETON ============
 
 function CurrentPlanSkeleton() {
     return (
@@ -67,8 +63,6 @@ function CurrentPlanSkeleton() {
     );
 }
 
-// ============ PAYMENT METHOD SKELETON ============
-
 function PaymentMethodSkeleton() {
   return (
     <Card>
@@ -99,8 +93,6 @@ function PaymentMethodSkeleton() {
     </Card>
   );
 }
-
-// ============ PLAN COMPARISON SKELETON ============
 
 function PlanComparisonSkeleton() {
     return (
@@ -156,8 +148,6 @@ function PlanComparisonSkeleton() {
     );
 }
 
-// ============ INVOICE HISTORY SKELETON ============
-
 function InvoiceHistorySkeleton() {
     return (
         <Card>
@@ -188,8 +178,6 @@ function InvoiceHistorySkeleton() {
         </Card>
     );
 }
-
-// ============ BILLING HISTORY SKELETON ============
 
 function BillingHistorySkeleton() {
     return (
@@ -224,8 +212,6 @@ function BillingHistorySkeleton() {
         </Card>
     );
 }
-
-// ============ MAIN LOADING COMPONENT ============
 
 export default function BillingLoading() {
     return (

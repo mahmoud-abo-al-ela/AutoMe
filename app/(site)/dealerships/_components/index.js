@@ -1,7 +1,7 @@
 // Dealerships components exports
 export { default as DealershipCard } from "./DealershipCard";
 export { default as DealershipsPagePresenter } from "./DealershipsPagePresenter";
-export { default as ReviewCard } from "./ReviewCard";
+export { ReviewCard } from "./ReviewCard";
 export { default as ReviewForm } from "./ReviewForm";
 export { default as DealershipReviews } from "./DealershipReviews";
 export {

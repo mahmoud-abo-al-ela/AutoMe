@@ -12,6 +12,8 @@ import {
 import AuditLogTableRow from "./audit-table/AuditLogTableRow";
 import AuditLogDetailsDialog from "./audit-table/AuditLogDetailsDialog";
 import AuditLogsPagination from "./audit-table/AuditLogsPagination";
+import { EmptyState } from "@/components/common/EmptyState";
+import { ScrollText } from "lucide-react";
 
 export default function AuditLogsTable({ logs, pagination }) {
   const router = useRouter();
@@ -27,9 +29,7 @@ export default function AuditLogsTable({ logs, pagination }) {
 
   if (!logs || logs.length === 0) {
     return (
-      <div className="border rounded-lg p-12 text-center">
-        <p className="text-muted-foreground">No audit logs found</p>
-      </div>
+      <EmptyState variant="inline" icon={ScrollText} title="No audit logs found" className="border rounded-lg" />
     );
   }
 

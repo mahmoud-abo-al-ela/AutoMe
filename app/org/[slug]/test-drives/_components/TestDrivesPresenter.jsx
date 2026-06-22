@@ -16,6 +16,8 @@ import { TestDriveFilters } from "./TestDriveFilters";
 import { TestDriveMobileSkeleton } from "./TestDriveMobileSkeleton";
 import { TestDriveMobileCard } from "./TestDriveMobileCard";
 import { TestDriveStatsDisplay } from "./TestDriveStatsDisplay";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Calendar } from "lucide-react";
 
 export const TestDrivesPresenter = ({
     testDrives,
@@ -156,28 +158,17 @@ export const TestDrivesPresenter = ({
 
                 <CardContent className="p-0 relative">
                     {testDrives.length === 0 ? (
-                        <div className="text-center py-10 px-4">
-                            <div className="max-w-md mx-auto">
-                                <p className="text-gray-500 text-lg mb-2">
-                                    No test drive requests found
-                                </p>
-                                <p className="text-gray-400 text-sm">
-                                    {searchTerm || statusFilter !== "all"
-                                        ? "Try adjusting your search or filter criteria"
-                                        : "Test drive requests will appear here when customers book appointments"}
-                                </p>
-                                {(searchTerm || statusFilter !== "all") && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handlers.handleClearFilters}
-                                        className="mt-4"
-                                    >
-                                        Clear filters
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
+                        <EmptyState 
+                            variant={searchTerm || statusFilter !== "all" ? "filtered" : "standalone"}
+                            icon={Calendar}
+                            title="No test drive requests found"
+                            description={searchTerm || statusFilter !== "all" 
+                                ? "Try adjusting your search or filter criteria"
+                                : "Test drive requests will appear here when customers book appointments"
+                            }
+                            onClearFilters={searchTerm || statusFilter !== "all" ? handlers.handleClearFilters : undefined}
+                            className="py-16 border-0 shadow-none bg-transparent"
+                        />
                     ) : (
                         <>
                             {/* Desktop Table View */}

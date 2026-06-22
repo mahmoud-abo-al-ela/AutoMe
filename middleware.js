@@ -2,8 +2,6 @@ import arcjet, { createMiddleware, detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// ============ ROUTE MATCHERS ============
-
 const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
   "/saved-cars(.*)",
@@ -28,8 +26,6 @@ const isPublicApiRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
 ]);
-
-// ============ SUBDOMAIN PARSING ============
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost";
 
@@ -59,8 +55,6 @@ function getSubdomain(request) {
   return null;
 }
 
-// ============ IMPERSONATION DETECTION ============
-
 function getImpersonationContext(request) {
   const impersonatedOrg = request.cookies.get("x-impersonated-org")?.value;
   const impersonatedUser = request.cookies.get("x-impersonated-user")?.value;
@@ -79,8 +73,6 @@ function getImpersonationContext(request) {
   return null;
 }
 
-// ============ ARCJET CONFIGURATION ============
-
 // Use DRY_RUN in development to avoid blocking browser requests locally;
 // LIVE mode is used in production for full protection.
 const arcjetMode =
@@ -98,8 +90,6 @@ const aj = arcjet({
     }),
   ],
 });
-
-// ============ CLERK MIDDLEWARE WITH SUBDOMAIN SUPPORT ============
 
 const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();

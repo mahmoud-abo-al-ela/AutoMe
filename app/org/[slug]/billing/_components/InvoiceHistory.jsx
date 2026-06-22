@@ -28,8 +28,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { getInvoices } from "@/actions/billing";
-
-// ============ STATUS BADGE CONFIG ============
+import { EmptyState } from "@/components/common/EmptyState";
 
 const STATUS_STYLES = {
     PAID: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
@@ -40,8 +39,6 @@ const STATUS_STYLES = {
         "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
     UNKNOWN: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
 };
-
-// ============ HELPER FUNCTIONS ============
 
 function formatCurrency(amount, currency = "usd") {
     return new Intl.NumberFormat("en-US", {
@@ -58,8 +55,6 @@ function formatDate(dateString) {
         day: "numeric",
     });
 }
-
-// ============ LOADING SKELETON ============
 
 function InvoicesSkeleton() {
     return (
@@ -81,21 +76,16 @@ function InvoicesSkeleton() {
     );
 }
 
-// ============ EMPTY STATE ============
-
 function EmptyInvoices() {
     return (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-            <Receipt className="h-12 w-12 text-muted-foreground/40 mb-3" />
-            <p className="text-sm text-muted-foreground">No invoices yet</p>
-            <p className="text-xs text-muted-foreground mt-1">
-                Invoices will appear here after your first payment
-            </p>
-        </div>
+        <EmptyState 
+            variant="inline" 
+            icon={Receipt} 
+            title="No invoices yet" 
+            description="Invoices will appear here after your first payment" 
+        />
     );
 }
-
-// ============ ERROR STATE ============
 
 function InvoicesError({ onRetry }) {
     return (
@@ -110,8 +100,6 @@ function InvoicesError({ onRetry }) {
         </div>
     );
 }
-
-// ============ MAIN COMPONENT ============
 
 export default function InvoiceHistory({ organizationId }) {
     const [invoices, setInvoices] = useState([]);

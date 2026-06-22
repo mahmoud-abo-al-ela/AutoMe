@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/common/EmptyState";
 
 // Helper to get action category from detailed action name
 const getActionCategory = (action) => {
@@ -72,9 +73,7 @@ export default function OrgActivity({ activity }) {
       </CardHeader>
       <CardContent>
         {activity.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
-            No activity recorded
-          </p>
+          <EmptyState variant="inline" icon={FileText} title="No activity recorded" />
         ) : (
           <div className="space-y-3">
             {activity.map((log) => {

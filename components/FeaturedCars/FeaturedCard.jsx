@@ -11,8 +11,8 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import AutoPlay from "embla-carousel-autoplay";
-import useFetch from "@/hooks/use-fetch";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 
 const FeaturedCard = ({
   title = "Featured Cars",
@@ -20,13 +20,12 @@ const FeaturedCard = ({
 }) => {
   const {
     data: featuredCars,
-    loading,
+    isLoading: loading,
     error,
-    fn: fetchFeaturedCars,
-  } = useFetch(getFeaturedCars, true);
-  useEffect(() => {
-    fetchFeaturedCars();
-  }, []);
+  } = useQuery({
+    queryKey: queryKeys.cars.featured(),
+    queryFn: () => getFeaturedCars(),
+  });
 
   return (
     <section id="featured" className="py-8 sm:py-16 bg-gray-100">

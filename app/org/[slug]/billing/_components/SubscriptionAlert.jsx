@@ -15,8 +15,6 @@ import {
 import { toast } from "sonner";
 import { createBillingPortalSession } from "@/actions/billing";
 
-// ============ HELPER ============
-
 function getDaysRemaining(endDate) {
     if (!endDate) return null;
     const now = new Date();
@@ -32,8 +30,6 @@ function formatDate(date) {
         day: "numeric",
     });
 }
-
-// ============ MAIN COMPONENT ============
 
 /**
  * Top-level subscription status alert banner.

@@ -22,8 +22,6 @@ import { toast } from "sonner";
 import { getPaymentMethod } from "@/actions/billing";
 import { createBillingPortalSession } from "@/actions/billing";
 
-// ============ CARD BRAND ICONS ============
-
 const BRAND_COLORS = {
     Visa: "text-blue-600 dark:text-blue-400",
     Mastercard: "text-orange-600 dark:text-orange-400",
@@ -34,8 +32,6 @@ const BRAND_COLORS = {
     UnionPay: "text-red-600 dark:text-red-400",
     Card: "text-muted-foreground",
 };
-
-// ============ LOADING SKELETON ============
 
 function PaymentMethodSkeleton() {
     return (
@@ -51,8 +47,6 @@ function PaymentMethodSkeleton() {
         </div>
     );
 }
-
-// ============ EMPTY STATE ============
 
 function NoPaymentMethod({ isOwner, onManage, isLoading }) {
     return (
@@ -88,8 +82,6 @@ function NoPaymentMethod({ isOwner, onManage, isLoading }) {
         </div>
     );
 }
-
-// ============ CARD DISPLAY ============
 
 function CardDisplay({ paymentMethod, isOwner, onManage, isLoading }) {
     const brandColor = BRAND_COLORS[paymentMethod.brand] || BRAND_COLORS.Card;
@@ -153,8 +145,6 @@ function CardDisplay({ paymentMethod, isOwner, onManage, isLoading }) {
     );
 }
 
-// ============ HELPERS ============
-
 function isCardExpiringSoon(expMonth, expYear) {
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
@@ -166,8 +156,6 @@ function isCardExpiringSoon(expMonth, expYear) {
 
     return expDate <= twoMonthsFromNow;
 }
-
-// ============ MAIN COMPONENT ============
 
 /**
  * Displays the current payment method on file.

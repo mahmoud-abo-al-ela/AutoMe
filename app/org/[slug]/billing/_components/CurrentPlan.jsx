@@ -35,8 +35,6 @@ import {
 } from "@/components/ui/tooltip";
 import { createBillingPortalSession } from "@/actions/billing";
 
-// ============ STATUS CONFIGURATION ============
-
 const STATUS_CONFIG = {
   ACTIVE: {
     badge: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
@@ -74,8 +72,6 @@ const PLAN_COLORS = {
   ENTERPRISE:
     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
 };
-
-// ============ HELPER FUNCTIONS ============
 
 function getDaysRemaining(endDate) {
   if (!endDate) return null;
@@ -116,8 +112,6 @@ function getUsageTextColor(percent) {
   if (percent >= 60) return "text-amber-600 dark:text-amber-400";
   return "";
 }
-
-// ============ STATUS BANNER COMPONENT ============
 
 function StatusBanner({ subscription, isOwner, onManageSubscription, isPortalLoading }) {
   const status = subscription?.status;
@@ -260,8 +254,6 @@ function StatusBanner({ subscription, isOwner, onManageSubscription, isPortalLoa
   return null;
 }
 
-// ============ USAGE BAR COMPONENT ============
-
 function UsageBar({ icon: Icon, label, current, limit }) {
   const percent = getUsagePercent(current, limit);
   const isUnlimited = limit === -1;
@@ -317,8 +309,6 @@ function UsageBar({ icon: Icon, label, current, limit }) {
     </div>
   );
 }
-
-// ============ MAIN COMPONENT ============
 
 export default function CurrentPlan({
   subscription,

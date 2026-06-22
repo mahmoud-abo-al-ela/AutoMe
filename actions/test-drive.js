@@ -5,7 +5,7 @@ import * as testDriveService from "@/lib/services/test-drive";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth, withOrgAuth } from "@/lib/middleware/with-auth";
-import { NotFoundError } from "@/lib/utils/errors";
+import { NotFoundError, logError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
 import { db } from "@/lib/prisma";
@@ -64,7 +64,10 @@ export const requestTestDrive = withAuth(async (ctx, testDriveData) => {
       endTime: fullTestDrive.endTime,
       dealershipName: org.name,
       dealershipAddress: org.address,
-    }).catch(console.error);
+    }).catch((error) => {
+      // Non-blocking: email failure should not fail the main operation
+      logError(error);
+    });
 
     // Send notification to dealership
     if (ownerEmail) {
@@ -77,7 +80,10 @@ export const requestTestDrive = withAuth(async (ctx, testDriveData) => {
         startTime: fullTestDrive.startTime,
         endTime: fullTestDrive.endTime,
         orgSlug: org.slug,
-      }).catch(console.error);
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
     }
   }
 
@@ -151,9 +157,8 @@ export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId) => {
   );
 });
 
-export const checkExistingTestDrive = withErrorHandling(async (carId) => {
-  const { userId } = await auth();
-  const result = await testDriveService.checkExistingTestDrive(carId, userId);
+export const checkExistingTestDrive = withAuth(async (ctx, carId) => {
+  const result = await testDriveService.checkExistingTestDrive(carId, ctx.userId);
   return result;
 });
 
@@ -180,7 +185,10 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, { testDriveId, stat
         carTitle: car.title || `${car.make} ${car.model} ${car.year}`,
         status,
         dealershipName: fullTestDrive.organization.name,
-      }).catch(console.error);
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
     }
   }
 

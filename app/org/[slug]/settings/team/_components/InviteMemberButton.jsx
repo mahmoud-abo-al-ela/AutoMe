@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/select";
 import { UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import useFetch from "@/hooks/use-fetch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { inviteTeamMember } from "@/actions/team";
+import { queryKeys } from "@/lib/query-client";
 
 export default function InviteMemberButton({
   organizationId,
@@ -31,8 +32,11 @@ export default function InviteMemberButton({
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("MEMBER");
+  const queryClient = useQueryClient();
 
-  const { loading, fn: inviteFn } = useFetch(inviteTeamMember);
+  const { isPending: loading, mutateAsync: inviteFn } = useMutation({
+    mutationFn: inviteTeamMember,
+  });
 
   const handleInvite = async () => {
     if (!email) {
@@ -52,7 +56,7 @@ export default function InviteMemberButton({
         setOpen(false);
         setEmail("");
         setRole("MEMBER");
-        window.location.reload(); // Refresh to show new member
+        queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) }); // Refresh to show new member
       } else {
         toast.error(response?.error || "Failed to invite member");
       }

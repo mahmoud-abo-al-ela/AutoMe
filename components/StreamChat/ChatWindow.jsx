@@ -1,4 +1,5 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 
 import { useEffect } from "react";
 import {
@@ -110,7 +111,7 @@ export function ChatWindow() {
         if (channel) {
             // Mark the channel as read when user opens it
             channel.markRead().catch((error) => {
-                console.error("Error marking channel as read:", error);
+                logError("Error marking channel as read:", error);
             });
         }
     }, [channel]);

@@ -1,30 +1,15 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getTestDrives, updateTestDriveStatus } from "@/actions/test-drive";
 import { toast } from "sonner";
-
-// Debounce hook
-const useDebounce = (value, delay) => {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [value, delay]);
-
-    return debouncedValue;
-};
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export const useAdminTestDrives = () => {
-    const [testDrives, setTestDrives] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const queryClient = useQueryClient();
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [pagination, setPagination] = useState({
@@ -37,63 +22,72 @@ export const useAdminTestDrives = () => {
     // Debounce search term to avoid too many API calls
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-    const fetchTestDrives = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await getTestDrives({
-                status: statusFilter,
-                search: debouncedSearchTerm,
-                page: pagination.page,
-                limit: pagination.limit,
-            });
+    const {
+        data: queryData,
+        isLoading: loading,
+        error,
+        refetch: fetchTestDrives,
+    } = useQuery({
+        queryKey: queryKeys.testDrives.list({
+            status: statusFilter,
+            search: debouncedSearchTerm,
+            page: pagination.page,
+            limit: pagination.limit,
+        }),
+        queryFn: () => getTestDrives({
+            status: statusFilter,
+            search: debouncedSearchTerm,
+            page: pagination.page,
+            limit: pagination.limit,
+        }),
+        placeholderData: keepPreviousData,
+    });
 
-            if (response.success) {
-                setTestDrives(response.data?.testDrives || []);
-                setPagination((prev) => ({
-                    ...prev,
-                    ...response.data?.pagination,
-                }));
-                setError(null);
-            } else {
-                setError(response.error);
-                toast.error(response.error || "Failed to fetch test drives");
-            }
-        } catch (error) {
-            console.error("Error fetching test drives:", error);
-            setError("An error occurred while fetching test drives");
-            toast.error("Failed to fetch test drives");
-        } finally {
-            setLoading(false);
-        }
-    }, [statusFilter, debouncedSearchTerm, pagination.page, pagination.limit]);
-
+    const testDrives = queryData?.success ? queryData.data?.testDrives || [] : [];
+    
+    // Update pagination state when query data changes
     useEffect(() => {
-        fetchTestDrives();
-    }, [fetchTestDrives]);
+        if (queryData?.success && queryData.data?.pagination) {
+            setPagination((prev) => {
+                const newPagination = { ...prev, ...queryData.data.pagination };
+                // Only update if something actually changed to avoid infinite loops
+                if (prev.totalItems !== newPagination.totalItems || prev.totalPages !== newPagination.totalPages) {
+                     return newPagination;
+                }
+                return prev;
+            });
+        }
+    }, [queryData]);
 
     // Reset to first page when search term or filter changes
     useEffect(() => {
         setPagination((prev) => ({ ...prev, page: 1 }));
     }, [debouncedSearchTerm, statusFilter]);
 
+    const { mutateAsync: updateStatusFn } = useMutation({
+        mutationFn: updateTestDriveStatus,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.testDrives.all });
+        },
+    });
+
     const handleStatusChange = useCallback(async (testDriveId, newStatus) => {
         try {
-            const response = await updateTestDriveStatus({
+            const response = await updateStatusFn({
                 testDriveId,
                 status: newStatus,
             });
 
             if (response.success) {
                 toast.success(`Test drive ${newStatus.toLowerCase()} successfully`);
-                fetchTestDrives();
             } else {
                 toast.error(response.error || "Failed to update test drive status");
             }
         } catch (error) {
-            console.error("Error updating test drive status:", error);
+            logError("Error updating test drive status:", error);
             toast.error("An error occurred while updating test drive status");
         }
-    }, [fetchTestDrives]);
+    }, [updateStatusFn]);
 
     const handleFilterChange = useCallback((value) => {
         setStatusFilter(value);

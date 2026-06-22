@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+
 import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";

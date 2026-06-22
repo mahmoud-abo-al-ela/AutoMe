@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import useFetch from "@/hooks/use-fetch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 import { addCar } from "@/actions/cars";
 import { VALIDATION_RULES, ERROR_MESSAGES } from "@/lib/constants/validation";
 
@@ -80,7 +81,13 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
         mode: "onChange",
     });
 
-    const { loading, fn } = useFetch(addCar);
+    const queryClient = useQueryClient();
+    const { isPending: loading, mutateAsync: fn } = useMutation({
+        mutationFn: (payload) => addCar(payload.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
+        },
+    });
 
     const watchMake = form.watch("make");
     const watchModel = form.watch("model");

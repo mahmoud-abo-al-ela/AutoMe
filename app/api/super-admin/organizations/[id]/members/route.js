@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkUser } from "@/lib/checkUser";
 import { db } from "@/lib/prisma";
+import { logError } from "@/lib/utils/errors";
 
 export async function GET(request, { params }) {
   try {
@@ -32,7 +33,7 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({ members });
   } catch (error) {
-    console.error("Error fetching organization members:", error);
+    logError("Error fetching organization members:", error);
     return NextResponse.json(
       { error: "Failed to fetch members" },
       { status: 500 }

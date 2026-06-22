@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase";
 import { checkUser } from "@/lib/checkUser";
+import { logError } from "@/lib/utils/errors";
 
 export async function POST(request) {
   try {
@@ -53,7 +54,7 @@ export async function POST(request) {
       });
 
     if (error) {
-      console.error("Supabase upload error:", error);
+      logError("Supabase upload error:", error);
       return NextResponse.json(
         { error: "Failed to upload file" },
         { status: 500 }
@@ -67,7 +68,7 @@ export async function POST(request) {
 
     return NextResponse.json({ url: urlData.publicUrl });
   } catch (error) {
-    console.error("Upload error:", error);
+    logError("Upload error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

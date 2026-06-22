@@ -5,6 +5,8 @@ import OnboardingWizard from "./_components/OnboardingWizard";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+export const dynamic = 'force-dynamic';
+
 function OnboardingLoader() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">

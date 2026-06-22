@@ -1,4 +1,5 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 
 import { useEffect, useState, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -65,14 +66,14 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                             setChannelCreated(false);
                         }
                     } catch (channelError) {
-                        console.error("Error checking for existing channel:", channelError);
+                        logError("Error checking for existing channel:", channelError);
                         // If there's an error checking, just proceed as if no channel exists
                         setChannel(null);
                         setChannelCreated(false);
                     }
                 }
             } catch (error) {
-                console.error("Error loading car info:", error);
+                logError("Error loading car info:", error);
                 toast.error("Failed to load car information");
             } finally {
                 setLoading(false);
@@ -115,7 +116,7 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                 setMessageText("");
                 toast.success("Message sent!");
             } catch (error) {
-                console.error("Error creating channel:", error);
+                logError("Error creating channel:", error);
                 toast.error("Failed to send message");
             } finally {
                 setLoading(false);

@@ -16,15 +16,8 @@ export const metadata = {
 };
 
 export default async function SiteLayout({ children }) {
-  let user = null;
-  let organization = null;
-
-  try {
-    user = await checkUser();
-    organization = await getCurrentOrganization();
-  } catch (error) {
-    console.error("Error in layout when checking user:", error);
-  }
+  const user = await checkUser();
+  const organization = await getCurrentOrganization();
 
   return (
     <div className="flex flex-col min-h-screen">

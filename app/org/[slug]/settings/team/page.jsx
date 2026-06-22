@@ -4,7 +4,10 @@ import {
   getUserMembership,
 } from "@/lib/getOrganization";
 import { notFound } from "next/navigation";
-import { getTeamMembers, getSubscriptionDetails } from "@/actions/team";
+import {
+  getTeamMembersService as getTeamMembers,
+  getSubscriptionDetailsService as getSubscriptionDetails,
+} from "@/lib/services/team";
 import TeamHeader from "./_components/TeamHeader";
 import TeamMembersTable from "./_components/TeamMembersTable";
 import InviteMemberButton from "./_components/InviteMemberButton";

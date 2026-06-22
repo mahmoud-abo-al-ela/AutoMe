@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import useFetch from "@/hooks/use-fetch";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 import { getWishlist } from "@/actions/cars-listing";
 
 export const useWishlistPage = (limit = 6) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data, loading, fn, error, setData } = useFetch(getWishlist, true);
-
-    useEffect(() => {
-        fn({ page: currentPage, limit });
-    }, [currentPage]);
+    const queryClient = useQueryClient();
+    const { data: queryData, isLoading: loading, error, refetch } = useQuery({
+        queryKey: queryKeys.wishlist.list({ page: currentPage, limit }),
+        queryFn: () => getWishlist({ page: currentPage, limit }),
+        placeholderData: keepPreviousData,
+    });
+    
+    const data = queryData || { success: false, data: null };
 
     const handlePageChange = useCallback((newPage) => {
         setCurrentPage(newPage);
@@ -28,28 +32,31 @@ export const useWishlistPage = (limit = 6) => {
             const updatedTotal = data.data.pagination.total - 1;
             const updatedTotalPages = Math.ceil(updatedTotal / limit);
 
-            setData({
-                ...data,
-                data: {
-                    ...data.data,
-                    cars: updatedCars,
-                    pagination: {
-                        ...data.data.pagination,
-                        total: updatedTotal,
-                        totalPages: updatedTotalPages,
+            queryClient.setQueryData(
+                queryKeys.wishlist.list({ page: currentPage, limit }),
+                {
+                    ...data,
+                    data: {
+                        ...data.data,
+                        cars: updatedCars,
+                        pagination: {
+                            ...data.data.pagination,
+                            total: updatedTotal,
+                            totalPages: updatedTotalPages,
+                        },
                     },
-                },
-            });
+                }
+            );
 
             if (updatedCars.length === 0 && currentPage > 1) {
                 setCurrentPage(currentPage - 1);
             } else if (currentPage > updatedTotalPages) {
                 setCurrentPage(updatedTotalPages || 1);
-            } else {
-                fn({ page: currentPage, limit });
             }
+
+            queryClient.invalidateQueries({ queryKey: queryKeys.wishlist.all });
         }
-    }, [data, currentPage, limit, fn, setData]);
+    }, [data, currentPage, limit, queryClient]);
 
     return {
         cars: data?.success ? data.data?.cars : [],
@@ -61,7 +68,7 @@ export const useWishlistPage = (limit = 6) => {
         handlers: {
             handlePageChange,
             handleWishlistChange,
-            retry: () => fn({ page: 1, limit }),
+            retry: () => refetch(),
         },
     };
 };

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { startImpersonation } from "@/actions/super-admin";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export default function QuickImpersonate({ organizations }) {
   const router = useRouter();
@@ -107,9 +108,7 @@ export default function QuickImpersonate({ organizations }) {
           ))}
 
           {filteredOrgs.length === 0 && (
-            <p className="text-center text-muted-foreground py-4">
-              No organizations found
-            </p>
+            <EmptyState variant="filtered" title="No organizations found" />
           )}
 
           {filteredOrgs.length > 10 && (

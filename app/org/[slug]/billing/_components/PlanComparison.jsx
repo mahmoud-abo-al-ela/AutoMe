@@ -41,8 +41,6 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPlanChangeSession } from "@/actions/billing";
 
-// ============ PLAN CONFIG ============
-
 const PLAN_CONFIG = {
   STARTER: {
     icon: Sparkles,
@@ -61,8 +59,6 @@ const PLAN_CONFIG = {
     border: "border-purple-500",
   },
 };
-
-// ============ HELPERS ============
 
 function formatPrice(price) {
   return new Intl.NumberFormat("en-US", {
@@ -154,8 +150,6 @@ function getFeatureLookup(plan) {
   });
   return lookup;
 }
-
-// ============ PLAN CARD COMPONENT ============
 
 function PlanCard({
   plan,
@@ -268,8 +262,6 @@ function PlanCard({
     </Card>
   );
 }
-
-// ============ FEATURE COMPARISON TABLE ============
 
 function FeatureComparisonTable({
   plans,
@@ -389,8 +381,6 @@ function FeatureComparisonTable({
     </div>
   );
 }
-
-// ============ MAIN COMPONENT ============
 
 export default function PlanComparison({
   plans,

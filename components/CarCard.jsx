@@ -1,4 +1,5 @@
 "use client";
+import { logError } from "@/lib/utils/errors";
 import {
   Building2,
   Calendar,
@@ -61,7 +62,7 @@ const CarCard = ({ car, onWishlistChange }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to toggle wishlist", error);
+      logError("Failed to toggle wishlist", error);
     } finally {
       setIsLoading(false);
     }

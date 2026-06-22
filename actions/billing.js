@@ -1,7 +1,7 @@
 "use server";
 
 import { checkUser } from "@/lib/checkUser";
-import { getOrganizationById, getUserMembership } from "@/lib/getOrganization";
+import { getOrganizationById, getUserMembership, requireOwner } from "@/lib/getOrganization";
 import * as billingService from "@/lib/services/billing";
 import { createBillingPortalSession as createPortalSession } from "@/lib/services/stripe/portal";
 import {
@@ -19,7 +19,6 @@ import {
   ValidationError,
 } from "@/lib/utils/errors";
 
-// ============ PLAN ACTIONS ============
 
 /**
  * Get all active plans
@@ -40,7 +39,6 @@ export const getPlanById = withErrorHandling(async (planId) => {
   return createSuccessResponse(plan);
 });
 
-// ============ BILLING DATA ACTIONS ============
 
 /**
  * Get billing data for an organization
@@ -64,10 +62,7 @@ export const getBillingHistory = withAuth(async (ctx, organizationId) => {
     throw new NotFoundError("Organization");
   }
 
-  const membership = await getUserMembership(ctx.user.id, organization.id);
-  if (!membership || membership.role !== "OWNER") {
-    throw new AuthorizationError("Only owners can view billing history");
-  }
+  await requireOwner(ctx.user.id, organization.id);
 
   const history = await billingService.getBillingHistory(organization.id);
   return createSuccessResponse({ history });
@@ -99,7 +94,7 @@ export const getUsageStats = withAuth(async (ctx, organizationId) => {
   return createSuccessResponse(stats);
 });
 
-// ============ STRIPE PORTAL ACTIONS ============
+
 
 export const createBillingPortalSession = withAuth(
   async (ctx, organizationId, returnPath) => {
@@ -108,10 +103,7 @@ export const createBillingPortalSession = withAuth(
       throw new NotFoundError("Organization");
     }
 
-    const membership = await getUserMembership(ctx.user.id, organization.id);
-    if (!membership || membership.role !== "OWNER") {
-      throw new AuthorizationError("Only owners can manage billing");
-    }
+    await requireOwner(ctx.user.id, organization.id);
 
     const subscription = organization.subscription;
     if (!subscription?.stripeCustomerId) {
@@ -139,7 +131,7 @@ export const createBillingPortalSession = withAuth(
   }
 );
 
-// ============ PLAN CHANGE ACTIONS ============
+
 
 export const createPlanChangeSession = withAuth(
   async (ctx, organizationId, newPlanId, billingCycle, billingPagePath) => {
@@ -148,10 +140,7 @@ export const createPlanChangeSession = withAuth(
       throw new NotFoundError("Organization");
     }
 
-    const membership = await getUserMembership(ctx.user.id, organization.id);
-    if (!membership || membership.role !== "OWNER") {
-      throw new AuthorizationError("Only owners can change plans");
-    }
+    await requireOwner(ctx.user.id, organization.id);
 
     // Get the new plan details
     const newPlan = await billingService.getPlanById(newPlanId);
@@ -238,7 +227,7 @@ export const createPlanChangeSession = withAuth(
   }
 );
 
-// ============ PAYMENT METHOD ACTIONS ============
+
 
 /**
  * Get the default payment method for an organization's Stripe customer
@@ -265,7 +254,7 @@ export const getPaymentMethod = withAuth(async (ctx, organizationId) => {
   return createSuccessResponse(paymentMethod);
 });
 
-// ============ INVOICE ACTIONS ============
+
 
 export const getInvoices = withAuth(async (ctx, organizationId, options = {}) => {
   const organization = await getOrganizationById(organizationId);
@@ -273,10 +262,7 @@ export const getInvoices = withAuth(async (ctx, organizationId, options = {}) =>
     throw new NotFoundError("Organization");
   }
 
-  const membership = await getUserMembership(ctx.user.id, organization.id);
-  if (!membership || membership.role !== "OWNER") {
-    throw new AuthorizationError("Only owners can view invoices");
-  }
+  await requireOwner(ctx.user.id, organization.id);
 
   const subscription = organization.subscription;
   if (!subscription?.stripeCustomerId) {

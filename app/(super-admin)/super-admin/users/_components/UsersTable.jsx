@@ -15,6 +15,8 @@ import { updateUserRole } from "@/actions/super-admin";
 import UserRow from "./UserRow";
 import ChangeRoleDialog from "./ChangeRoleDialog";
 import UsersPagination from "./UsersPagination";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Users } from "lucide-react";
 
 const roleConfig = {
   ADMIN: {
@@ -89,8 +91,8 @@ export default function UsersTable({ users, pagination }) {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No users found.
+                <TableCell colSpan={6} className="h-48 p-0">
+                  <EmptyState variant="inline" icon={Users} title="No users found" />
                 </TableCell>
               </TableRow>
             ) : (

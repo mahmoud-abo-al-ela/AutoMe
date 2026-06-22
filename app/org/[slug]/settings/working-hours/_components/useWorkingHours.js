@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import useFetch from "@/hooks/use-fetch";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 import { getDealershipInfo, updateWorkingHours } from "@/actions/settings";
 
 const DAYS = [
@@ -26,23 +27,25 @@ const DEFAULT_WORKING_HOURS = DAYS.reduce((acc, day) => {
 export function useWorkingHours() {
     const [workingHours, setWorkingHours] = useState(DEFAULT_WORKING_HOURS);
 
+    const queryClient = useQueryClient();
+
     const {
         data: dealershipData,
-        loading: loadingDealershipData,
-        error: dealershipError,
-        fn: fetchDealershipData,
-    } = useFetch(getDealershipInfo, true);
+        isLoading: loadingDealershipData,
+    } = useQuery({
+        queryKey: queryKeys.dashboard.dealership(),
+        queryFn: () => getDealershipInfo(),
+    });
 
     const {
-        data: updateWorkingHoursData,
-        loading: loadingUpdateWorkingHours,
-        error: updateWorkingHoursError,
-        fn: updateWorkingHoursFn,
-    } = useFetch(updateWorkingHours);
-
-    useEffect(() => {
-        fetchDealershipData();
-    }, []);
+        mutateAsync: updateWorkingHoursFn,
+        isPending: loadingUpdateWorkingHours,
+    } = useMutation({
+        mutationFn: updateWorkingHours,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.dealership() });
+        },
+    });
 
     useEffect(() => {
         if (dealershipData?.data?.workingHours && dealershipData.data.workingHours.length > 0) {

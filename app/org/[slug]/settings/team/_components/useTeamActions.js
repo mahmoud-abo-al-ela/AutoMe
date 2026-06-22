@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import useFetch from "@/hooks/use-fetch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMemberRole, removeMember } from "@/actions/team";
+import { queryKeys } from "@/lib/query-client";
 
 export function useTeamActions(organizationId) {
     const [memberToRemove, setMemberToRemove] = useState(null);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+    const queryClient = useQueryClient();
 
-    const { loading: loadingRoleUpdate, fn: updateRoleFn } = useFetch(updateMemberRole);
-    const { loading: loadingRemove, fn: removeMemberFn } = useFetch(removeMember);
+    const { isPending: loadingRoleUpdate, mutateAsync: updateRoleFn } = useMutation({
+        mutationFn: updateMemberRole,
+    });
+    const { isPending: loadingRemove, mutateAsync: removeMemberFn } = useMutation({
+        mutationFn: removeMember,
+    });
 
     const handleRemoveMember = (member) => {
         if (member.role === "OWNER") {
@@ -34,7 +40,7 @@ export function useTeamActions(organizationId) {
 
             if (response?.success) {
                 toast.success("Member removed successfully");
-                window.location.reload();
+                queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
                 toast.error(response?.error || "Failed to remove member");
             }
@@ -56,7 +62,7 @@ export function useTeamActions(organizationId) {
 
             if (response?.success) {
                 toast.success("Member role updated successfully");
-                window.location.reload();
+                queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
                 toast.error(response?.error || "Failed to update member role");
             }

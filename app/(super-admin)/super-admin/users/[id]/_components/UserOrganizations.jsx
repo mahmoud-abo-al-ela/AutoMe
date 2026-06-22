@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export default function UserOrganizations({ memberships }) {
   return (
@@ -15,9 +16,7 @@ export default function UserOrganizations({ memberships }) {
       </CardHeader>
       <CardContent>
         {memberships.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">
-            Not a member of any organization
-          </p>
+          <EmptyState variant="inline" icon={Building2} title="Not a member of any organization" />
         ) : (
           <div className="space-y-3">
             {memberships.map((m) => (

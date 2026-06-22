@@ -4,6 +4,8 @@ import ActiveSessions from "./_components/ActiveSessions";
 import SessionHistory from "./_components/SessionHistory";
 import QuickImpersonate from "./_components/QuickImpersonate";
 
+export const dynamic = "force-dynamic";
+
 async function getImpersonationData() {
   const [activeSessions, recentSessions, organizations] = await Promise.all([
     // Active impersonation sessions

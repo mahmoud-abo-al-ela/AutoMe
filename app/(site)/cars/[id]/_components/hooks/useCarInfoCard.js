@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { compareUtils } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import useFetch from "@/hooks/use-fetch";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
 
 export const useCarInfoCard = (car) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -48,15 +49,12 @@ export const useCarInfoCard = (car) => {
 
   const {
     data: testDriveData,
-    loading: isCheckingTestDrive,
-    fn: checkTestDrive,
-  } = useFetch(checkExistingTestDrive, false);
-
-  useEffect(() => {
-    if (isSignedIn) {
-      checkTestDrive(car.id);
-    }
-  }, [car.id, isSignedIn]);
+    isLoading: isCheckingTestDrive,
+  } = useQuery({
+    queryKey: queryKeys.testDrives.check(car.id),
+    queryFn: () => checkExistingTestDrive(car.id),
+    enabled: !!isSignedIn,
+  });
 
   useEffect(() => {
     if (testDriveData?.exists) {

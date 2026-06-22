@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/table";
 import { TestDriveRow } from "./TestDriveRow";
 import { TestDriveTableSkeleton } from "./TestDriveTableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export const TestDriveTable = ({
     testDrives,
@@ -16,8 +17,8 @@ export const TestDriveTable = ({
 }) => {
     if (testDrives.length === 0 && !isLoading) {
         return (
-            <div className="text-center py-10 px-4">
-                <p className="text-gray-500 text-sm md:text-base">No test drive requests found</p>
+            <div className="w-full">
+                <EmptyState variant="inline" title="No test drive requests found" />
             </div>
         );
     }

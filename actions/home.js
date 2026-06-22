@@ -1,7 +1,7 @@
 "use server";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { fileToBase64 } from "./cars";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -45,16 +45,8 @@ export const processImagesSearch = withErrorHandling(async (file) => {
     throw new ValidationError("GEMINI_API_KEY is not set", "config");
   }
 
-  const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const base64Image = await fileToBase64(file);
-
-  const imagePart = {
-    inlineData: {
-      data: base64Image,
-      mimeType: file.type,
-    },
-  };
 
   const prompt = `
 Analyze this car image and extract the following information for a search query:
@@ -87,12 +79,31 @@ Only respond with the JSON object, nothing else.
     }
   };
 
-  const result = await retryWithBackoff(() =>
-    model.generateContent([imagePart, prompt])
+  const response = await retryWithBackoff(() =>
+    ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: base64Image,
+                mimeType: file.type,
+              },
+            },
+            { text: prompt },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        responseMimeType: "application/json",
+      },
+    })
   );
 
-  const response = await result.response;
-  const json = response.text();
+  const json = response.text;
 
   // Clean response
   let cleanData = json
