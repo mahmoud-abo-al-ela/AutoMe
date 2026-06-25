@@ -1,4 +1,4 @@
-import { Clock, Users } from "lucide-react";
+import { Building2, Clock, Users } from "lucide-react";
 import React from "react";
 import SharedSettingCard from "./_components/SharedSettingCard";
 
@@ -10,6 +10,13 @@ export const metadata = {
 const SettingsPage = async ({ params }) => {
   const { slug } = await params;
   const settingsPages = [
+    {
+      title: "Organization Profile",
+      description: "Manage public dealership details and discovery location",
+      icon: Building2,
+      path: `/org/${slug}/settings/profile`,
+      color: "bg-purple-50 text-purple-600",
+    },
     {
       title: "Working Hours",
       description: "Configure business operating hours and availability",

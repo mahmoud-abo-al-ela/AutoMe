@@ -129,6 +129,11 @@ model Organization {
   description String?
   isActive    Boolean @default(true)
 
+  // Location fields for platform discovery and filtering
+  city    String?
+  region  String?
+  country String? @default("EG")
+
   // Pending owner invitation (email of user who should become owner when they sign up)
   pendingOwnerEmail String?
 
@@ -157,6 +162,8 @@ model Organization {
   @@index([slug])
   @@index([isActive])
   @@index([averageRating])
+  @@index([city])
+  @@index([isActive, deletedAt])
 }
 
 model Plan {

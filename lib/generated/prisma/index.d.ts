@@ -2418,6 +2418,9 @@ export namespace Prisma {
     website: string | null
     description: string | null
     isActive: boolean | null
+    city: string | null
+    region: string | null
+    country: string | null
     pendingOwnerEmail: string | null
     averageRating: number | null
     totalReviews: number | null
@@ -2437,6 +2440,9 @@ export namespace Prisma {
     website: string | null
     description: string | null
     isActive: boolean | null
+    city: string | null
+    region: string | null
+    country: string | null
     pendingOwnerEmail: string | null
     averageRating: number | null
     totalReviews: number | null
@@ -2456,6 +2462,9 @@ export namespace Prisma {
     website: number
     description: number
     isActive: number
+    city: number
+    region: number
+    country: number
     pendingOwnerEmail: number
     theme: number
     settings: number
@@ -2489,6 +2498,9 @@ export namespace Prisma {
     website?: true
     description?: true
     isActive?: true
+    city?: true
+    region?: true
+    country?: true
     pendingOwnerEmail?: true
     averageRating?: true
     totalReviews?: true
@@ -2508,6 +2520,9 @@ export namespace Prisma {
     website?: true
     description?: true
     isActive?: true
+    city?: true
+    region?: true
+    country?: true
     pendingOwnerEmail?: true
     averageRating?: true
     totalReviews?: true
@@ -2527,6 +2542,9 @@ export namespace Prisma {
     website?: true
     description?: true
     isActive?: true
+    city?: true
+    region?: true
+    country?: true
     pendingOwnerEmail?: true
     theme?: true
     settings?: true
@@ -2635,6 +2653,9 @@ export namespace Prisma {
     website: string | null
     description: string | null
     isActive: boolean
+    city: string | null
+    region: string | null
+    country: string | null
     pendingOwnerEmail: string | null
     theme: JsonValue | null
     settings: JsonValue | null
@@ -2675,6 +2696,9 @@ export namespace Prisma {
     website?: boolean
     description?: boolean
     isActive?: boolean
+    city?: boolean
+    region?: boolean
+    country?: boolean
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
@@ -2705,6 +2729,9 @@ export namespace Prisma {
     website?: boolean
     description?: boolean
     isActive?: boolean
+    city?: boolean
+    region?: boolean
+    country?: boolean
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
@@ -2726,6 +2753,9 @@ export namespace Prisma {
     website?: boolean
     description?: boolean
     isActive?: boolean
+    city?: boolean
+    region?: boolean
+    country?: boolean
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
@@ -2747,6 +2777,9 @@ export namespace Prisma {
     website?: boolean
     description?: boolean
     isActive?: boolean
+    city?: boolean
+    region?: boolean
+    country?: boolean
     pendingOwnerEmail?: boolean
     theme?: boolean
     settings?: boolean
@@ -2757,7 +2790,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logo" | "email" | "phone" | "address" | "website" | "description" | "isActive" | "pendingOwnerEmail" | "theme" | "settings" | "averageRating" | "totalReviews" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["organization"]>
+  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logo" | "email" | "phone" | "address" | "website" | "description" | "isActive" | "city" | "region" | "country" | "pendingOwnerEmail" | "theme" | "settings" | "averageRating" | "totalReviews" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["organization"]>
   export type OrganizationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     subscription?: boolean | Organization$subscriptionArgs<ExtArgs>
     memberships?: boolean | Organization$membershipsArgs<ExtArgs>
@@ -2795,6 +2828,9 @@ export namespace Prisma {
       website: string | null
       description: string | null
       isActive: boolean
+      city: string | null
+      region: string | null
+      country: string | null
       pendingOwnerEmail: string | null
       theme: Prisma.JsonValue | null
       settings: Prisma.JsonValue | null
@@ -3244,6 +3280,9 @@ export namespace Prisma {
     readonly website: FieldRef<"Organization", 'String'>
     readonly description: FieldRef<"Organization", 'String'>
     readonly isActive: FieldRef<"Organization", 'Boolean'>
+    readonly city: FieldRef<"Organization", 'String'>
+    readonly region: FieldRef<"Organization", 'String'>
+    readonly country: FieldRef<"Organization", 'String'>
     readonly pendingOwnerEmail: FieldRef<"Organization", 'String'>
     readonly theme: FieldRef<"Organization", 'Json'>
     readonly settings: FieldRef<"Organization", 'Json'>
@@ -18008,6 +18047,9 @@ export namespace Prisma {
     website: 'website',
     description: 'description',
     isActive: 'isActive',
+    city: 'city',
+    region: 'region',
+    country: 'country',
     pendingOwnerEmail: 'pendingOwnerEmail',
     theme: 'theme',
     settings: 'settings',
@@ -18523,6 +18565,9 @@ export namespace Prisma {
     website?: StringNullableFilter<"Organization"> | string | null
     description?: StringNullableFilter<"Organization"> | string | null
     isActive?: BoolFilter<"Organization"> | boolean
+    city?: StringNullableFilter<"Organization"> | string | null
+    region?: StringNullableFilter<"Organization"> | string | null
+    country?: StringNullableFilter<"Organization"> | string | null
     pendingOwnerEmail?: StringNullableFilter<"Organization"> | string | null
     theme?: JsonNullableFilter<"Organization">
     settings?: JsonNullableFilter<"Organization">
@@ -18552,6 +18597,9 @@ export namespace Prisma {
     website?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     isActive?: SortOrder
+    city?: SortOrderInput | SortOrder
+    region?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
     pendingOwnerEmail?: SortOrderInput | SortOrder
     theme?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
@@ -18584,6 +18632,9 @@ export namespace Prisma {
     website?: StringNullableFilter<"Organization"> | string | null
     description?: StringNullableFilter<"Organization"> | string | null
     isActive?: BoolFilter<"Organization"> | boolean
+    city?: StringNullableFilter<"Organization"> | string | null
+    region?: StringNullableFilter<"Organization"> | string | null
+    country?: StringNullableFilter<"Organization"> | string | null
     pendingOwnerEmail?: StringNullableFilter<"Organization"> | string | null
     theme?: JsonNullableFilter<"Organization">
     settings?: JsonNullableFilter<"Organization">
@@ -18613,6 +18664,9 @@ export namespace Prisma {
     website?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     isActive?: SortOrder
+    city?: SortOrderInput | SortOrder
+    region?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
     pendingOwnerEmail?: SortOrderInput | SortOrder
     theme?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
@@ -18642,6 +18696,9 @@ export namespace Prisma {
     website?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     description?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     isActive?: BoolWithAggregatesFilter<"Organization"> | boolean
+    city?: StringNullableWithAggregatesFilter<"Organization"> | string | null
+    region?: StringNullableWithAggregatesFilter<"Organization"> | string | null
+    country?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     pendingOwnerEmail?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     theme?: JsonNullableWithAggregatesFilter<"Organization">
     settings?: JsonNullableWithAggregatesFilter<"Organization">
@@ -19738,6 +19795,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -19767,6 +19827,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -19796,6 +19859,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -19825,6 +19891,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -19854,6 +19923,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -19875,6 +19947,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -19896,6 +19971,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -21282,6 +21360,9 @@ export namespace Prisma {
     website?: SortOrder
     description?: SortOrder
     isActive?: SortOrder
+    city?: SortOrder
+    region?: SortOrder
+    country?: SortOrder
     pendingOwnerEmail?: SortOrder
     theme?: SortOrder
     settings?: SortOrder
@@ -21308,6 +21389,9 @@ export namespace Prisma {
     website?: SortOrder
     description?: SortOrder
     isActive?: SortOrder
+    city?: SortOrder
+    region?: SortOrder
+    country?: SortOrder
     pendingOwnerEmail?: SortOrder
     averageRating?: SortOrder
     totalReviews?: SortOrder
@@ -21327,6 +21411,9 @@ export namespace Prisma {
     website?: SortOrder
     description?: SortOrder
     isActive?: SortOrder
+    city?: SortOrder
+    region?: SortOrder
+    country?: SortOrder
     pendingOwnerEmail?: SortOrder
     averageRating?: SortOrder
     totalReviews?: SortOrder
@@ -24673,6 +24760,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -24701,6 +24791,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -24788,6 +24881,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -24816,6 +24912,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -24938,6 +25037,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -24966,6 +25068,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25106,6 +25211,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25134,6 +25242,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25213,6 +25324,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25241,6 +25355,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25330,6 +25447,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25358,6 +25478,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25527,6 +25650,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25555,6 +25681,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25701,6 +25830,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -25729,6 +25861,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26210,6 +26345,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26238,6 +26376,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26340,6 +26481,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26368,6 +26512,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26428,6 +26575,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26456,6 +26606,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26500,6 +26653,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26528,6 +26684,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26768,6 +26927,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26796,6 +26958,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26940,6 +27105,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -26968,6 +27136,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -27204,6 +27375,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -27232,6 +27406,9 @@ export namespace Prisma {
     website?: string | null
     description?: string | null
     isActive?: boolean
+    city?: string | null
+    region?: string | null
+    country?: string | null
     pendingOwnerEmail?: string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -27321,6 +27498,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue
@@ -27349,6 +27529,9 @@ export namespace Prisma {
     website?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     pendingOwnerEmail?: NullableStringFieldUpdateOperationsInput | string | null
     theme?: NullableJsonNullValueInput | InputJsonValue
     settings?: NullableJsonNullValueInput | InputJsonValue

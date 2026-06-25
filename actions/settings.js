@@ -3,6 +3,30 @@ import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { organizationProfileSchema } from "@/lib/validations/schemas";
+
+export const getOrganizationProfile = withOrgAuth(async (ctx) => {
+  const profileData = await dealershipService.getOrganizationProfile(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(profileData);
+});
+
+export const updateOrganizationProfile = withOrgAuth(async (ctx, payload) => {
+  const profileData = validateAction(organizationProfileSchema, payload);
+  const updatedProfile = await dealershipService.updateOrganizationProfile(
+    profileData,
+    ctx.userId,
+    ctx.organization.id
+  );
+
+  revalidatePath(`/org/${ctx.organization.slug}/settings/profile`);
+  revalidatePath(`/dealerships/${ctx.organization.slug}`);
+  revalidatePath("/dealerships");
+  revalidatePath("/cars");
+  revalidatePath("/");
+
+  return createSuccessResponse(updatedProfile, "Organization profile updated successfully");
+});
 
 export const getDealershipInfo = withOrgAuth(async (ctx) => {
   const workingHoursData = await dealershipService.getWorkingHours(ctx.userId, ctx.organization.id);

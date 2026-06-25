@@ -9,12 +9,12 @@ import React, {
 } from "react";
 import { Filter, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCarsFilters } from "@/actions/cars-listing";
 import { Separator } from "@/components/ui/separator";
 import { Accordion } from "@/components/ui/accordion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import {
   MakesFilter,
@@ -22,13 +22,13 @@ import {
   BodyTypeFilter,
   FuelTypeFilter,
   TransmissionFilter,
+  DealershipFilter,
+  CityFilter,
 } from "./filter-components";
 
 const FilterPanel = forwardRef(
   ({ onFilter, isLoading = false, initialFilters = {} }, ref) => {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const queryClient = useQueryClient();
     const debounceRef = useRef(null);
     const isInitializedRef = useRef(false);
 
@@ -45,6 +45,12 @@ const FilterPanel = forwardRef(
     const [selectedTransmissions, setSelectedTransmissions] = useState(
       initialFilters.transmission ? [initialFilters.transmission] : []
     );
+    const [selectedDealership, setSelectedDealership] = useState(
+      initialFilters.dealership || undefined
+    );
+    const [selectedCity, setSelectedCity] = useState(
+      initialFilters.city || undefined
+    );
     const [priceRange, setPriceRange] = useState([
       initialFilters.minPrice || 0,
       initialFilters.maxPrice || 0,
@@ -60,13 +66,30 @@ const FilterPanel = forwardRef(
     const [availableBodyTypes, setAvailableBodyTypes] = useState([]);
     const [availableFuelTypes, setAvailableFuelTypes] = useState([]);
     const [availableTransmissions, setAvailableTransmissions] = useState([]);
+    const [availableDealerships, setAvailableDealerships] = useState([]);
+    const [availableCities, setAvailableCities] = useState([]);
+
+    const optionFilters = {
+      search: searchQuery || undefined,
+      make: selectedMakes.length > 0 ? selectedMakes[0] : undefined,
+      bodyType: selectedBodyTypes.length > 0 ? selectedBodyTypes[0] : undefined,
+      fuelType: selectedFuelTypes.length > 0 ? selectedFuelTypes[0] : undefined,
+      transmission: selectedTransmissions.length > 0 ? selectedTransmissions[0] : undefined,
+      dealership: selectedDealership || undefined,
+      city: selectedCity || undefined,
+      minPrice: committedPriceRange[0] > 0 ? committedPriceRange[0] : undefined,
+      maxPrice:
+        committedPriceRange[1] < maxPriceValue && committedPriceRange[1] > 0
+          ? committedPriceRange[1]
+          : undefined,
+    };
 
     const {
       data: filtersData,
       isLoading: filtersLoading,
     } = useQuery({
-      queryKey: queryKeys.cars.filters(),
-      queryFn: () => getCarsFilters(),
+      queryKey: queryKeys.cars.filters(optionFilters),
+      queryFn: () => getCarsFilters(optionFilters),
       staleTime: Infinity,
     });
 
@@ -75,9 +98,7 @@ const FilterPanel = forwardRef(
     }));
 
     useEffect(() => {
-      if (initialFilters.search !== undefined) {
-        setSearchQuery(prev => prev !== (initialFilters.search || "") ? (initialFilters.search || "") : prev);
-      }
+      setSearchQuery(prev => prev !== (initialFilters.search || "") ? (initialFilters.search || "") : prev);
       
       setSelectedMakes(prev => {
         const next = initialFilters.make ? [initialFilters.make] : [];
@@ -98,6 +119,9 @@ const FilterPanel = forwardRef(
         const next = initialFilters.transmission ? [initialFilters.transmission] : [];
         return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
       });
+
+      setSelectedDealership(prev => prev !== initialFilters.dealership ? initialFilters.dealership : prev);
+      setSelectedCity(prev => prev !== initialFilters.city ? initialFilters.city : prev);
 
       if (initialFilters.sortBy) {
         setSortBy(prev => prev !== initialFilters.sortBy ? initialFilters.sortBy : prev);
@@ -120,13 +144,15 @@ const FilterPanel = forwardRef(
 
     useEffect(() => {
       if (filtersData?.success && filtersData?.data) {
-        const { makes, bodyTypes, fuelTypes, transmissions, priceRange: priceRangeData } =
+        const { makes, bodyTypes, fuelTypes, transmissions, dealerships, cities, priceRange: priceRangeData } =
           filtersData.data;
 
         setAvailableMakes(makes || []);
         setAvailableBodyTypes(bodyTypes || []);
         setAvailableFuelTypes(fuelTypes || []);
         setAvailableTransmissions(transmissions || []);
+        setAvailableDealerships(dealerships || []);
+        setAvailableCities(cities || []);
 
         if (priceRangeData?.max) {
           setMaxPriceValue(priceRangeData.max);
@@ -149,6 +175,8 @@ const FilterPanel = forwardRef(
         selectedBodyTypes.length,
         selectedFuelTypes.length,
         selectedTransmissions.length,
+        selectedDealership ? 1 : 0,
+        selectedCity ? 1 : 0,
         committedPriceRange[0] > 0 ||
           (committedPriceRange[1] < maxPriceValue &&
             committedPriceRange[1] > 0 &&
@@ -164,6 +192,8 @@ const FilterPanel = forwardRef(
       selectedBodyTypes,
       selectedFuelTypes,
       selectedTransmissions,
+      selectedDealership,
+      selectedCity,
       committedPriceRange,
       maxPriceValue,
     ]);
@@ -190,6 +220,8 @@ const FilterPanel = forwardRef(
       selectedBodyTypes,
       selectedFuelTypes,
       selectedTransmissions,
+      selectedDealership,
+      selectedCity,
     ]);
 
     // Price range applies immediately on commit (slider release)
@@ -208,6 +240,8 @@ const FilterPanel = forwardRef(
             selectedTransmissions.length > 0
               ? selectedTransmissions[0]
               : undefined,
+          dealership: selectedDealership || undefined,
+          city: selectedCity || undefined,
           minPrice: value[0] > 0 ? value[0] : undefined,
           maxPrice:
             value[1] < maxPriceValue && value[1] > 0
@@ -219,7 +253,7 @@ const FilterPanel = forwardRef(
         updateURLWithFilters(filters);
         if (onFilter) onFilter(filters);
       },
-      [searchQuery, selectedMakes, selectedBodyTypes, selectedFuelTypes, selectedTransmissions, sortBy, maxPriceValue, onFilter]
+      [searchQuery, selectedMakes, selectedBodyTypes, selectedFuelTypes, selectedTransmissions, selectedDealership, selectedCity, sortBy, maxPriceValue, onFilter]
     );
 
     const toggleFilter = (item, selectedItems, setSelectedItems) => {
@@ -227,11 +261,6 @@ const FilterPanel = forwardRef(
       setSelectedItems((prev) =>
         prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
       );
-    };
-
-    const handleSearch = (e) => {
-      e.preventDefault();
-      // Auto-apply handles this now, but keep for form submit accessibility
     };
 
     const updateURLWithFilters = (filters) => {
@@ -243,6 +272,8 @@ const FilterPanel = forwardRef(
       if (filters.fuelType) params.set("fuelType", filters.fuelType);
       if (filters.transmission)
         params.set("transmission", filters.transmission);
+      if (filters.dealership) params.set("dealership", filters.dealership);
+      if (filters.city) params.set("city", filters.city);
       if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
       if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
       if (filters.sortBy && filters.sortBy !== "newest")
@@ -267,6 +298,8 @@ const FilterPanel = forwardRef(
           selectedTransmissions.length > 0
             ? selectedTransmissions[0]
             : undefined,
+        dealership: selectedDealership || undefined,
+        city: selectedCity || undefined,
         minPrice: committedPriceRange[0] > 0 ? committedPriceRange[0] : undefined,
         maxPrice:
           committedPriceRange[1] < maxPriceValue && committedPriceRange[1] > 0
@@ -288,6 +321,8 @@ const FilterPanel = forwardRef(
       setSelectedBodyTypes([]);
       setSelectedFuelTypes([]);
       setSelectedTransmissions([]);
+      setSelectedDealership(undefined);
+      setSelectedCity(undefined);
       setPriceRange([0, maxPriceValue || 100000]);
       setCommittedPriceRange([0, maxPriceValue || 100000]);
       setSortBy("newest");
@@ -298,6 +333,8 @@ const FilterPanel = forwardRef(
         bodyType: undefined,
         fuelType: undefined,
         transmission: undefined,
+        dealership: undefined,
+        city: undefined,
         minPrice: undefined,
         maxPrice: undefined,
         sortBy: "newest",
@@ -339,6 +376,20 @@ const FilterPanel = forwardRef(
 
 
         <Accordion type="multiple" className="space-y-1 sm:space-y-2">
+          <DealershipFilter
+            selectedDealership={selectedDealership}
+            availableDealerships={availableDealerships}
+            onSelect={setSelectedDealership}
+            isLoading={isLoading || filtersLoading}
+          />
+
+          <CityFilter
+            selectedCity={selectedCity}
+            availableCities={availableCities}
+            onSelect={setSelectedCity}
+            isLoading={isLoading || filtersLoading}
+          />
+
           <MakesFilter
             selectedMakes={selectedMakes}
             availableMakes={availableMakes}

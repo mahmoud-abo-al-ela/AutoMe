@@ -128,6 +128,9 @@ const DEMO_ORGANIZATIONS = [
     email: "cairo@autome.com",
     phone: "+201012345678",
     address: "Nasr City, Cairo, Egypt",
+    city: "Cairo",
+    region: "Greater Cairo",
+    country: "EG",
     description:
       "Premier car dealership in Cairo with the best selection of vehicles.",
   },
@@ -137,6 +140,9 @@ const DEMO_ORGANIZATIONS = [
     email: "alex@autome.com",
     phone: "+201123456789",
     address: "Stanley, Alexandria, Egypt",
+    city: "Alexandria",
+    region: "Alexandria Governorate",
+    country: "EG",
     description: "Your trusted partner for quality vehicles in Alexandria.",
   },
   {
@@ -145,6 +151,9 @@ const DEMO_ORGANIZATIONS = [
     email: "giza@autome.com",
     phone: "+201234567890",
     address: "6th of October, Giza, Egypt",
+    city: "Giza",
+    region: "Greater Cairo",
+    country: "EG",
     description:
       "Giza's leading automotive destination with exceptional service.",
   },
@@ -343,6 +352,9 @@ async function main() {
         email: orgData.email,
         phone: orgData.phone,
         address: orgData.address,
+        city: orgData.city,
+        region: orgData.region,
+        country: orgData.country,
         description: orgData.description,
         isActive: true,
         theme: {

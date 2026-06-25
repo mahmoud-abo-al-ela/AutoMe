@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCars } from "@/actions/cars-listing";
 
 export const useCarsPage = (initialData = null) => {
     const searchParams = useSearchParams();
-    const router = useRouter();
     
     const pageFromUrl = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
     const [page, setPage] = useState(pageFromUrl);
@@ -19,6 +18,8 @@ export const useCarsPage = (initialData = null) => {
         bodyType: undefined,
         fuelType: undefined,
         transmission: undefined,
+        dealership: undefined,
+        city: undefined,
         minPrice: undefined,
         maxPrice: undefined,
         sortBy: "newest",
@@ -46,6 +47,8 @@ export const useCarsPage = (initialData = null) => {
             bodyType: searchParams.get("bodyType") || undefined,
             fuelType: searchParams.get("fuelType") || undefined,
             transmission: searchParams.get("transmission") || undefined,
+            dealership: searchParams.get("dealership") || undefined,
+            city: searchParams.get("city") || undefined,
             minPrice: searchParams.get("minPrice")
                 ? Number(searchParams.get("minPrice"))
                 : undefined,
@@ -74,6 +77,8 @@ export const useCarsPage = (initialData = null) => {
         if (updatedFilters.bodyType) params.set("bodyType", updatedFilters.bodyType);
         if (updatedFilters.fuelType) params.set("fuelType", updatedFilters.fuelType);
         if (updatedFilters.transmission) params.set("transmission", updatedFilters.transmission);
+        if (updatedFilters.dealership) params.set("dealership", updatedFilters.dealership);
+        if (updatedFilters.city) params.set("city", updatedFilters.city);
         if (updatedFilters.minPrice) params.set("minPrice", updatedFilters.minPrice.toString());
         if (updatedFilters.maxPrice) params.set("maxPrice", updatedFilters.maxPrice.toString());
         if (updatedFilters.sortBy && updatedFilters.sortBy !== "newest") {
@@ -103,6 +108,30 @@ export const useCarsPage = (initialData = null) => {
         });
     }, [filters, updateURL]);
 
+    const resetAllFilters = useCallback(() => {
+        const resetFilters = {
+            search: undefined,
+            make: undefined,
+            bodyType: undefined,
+            fuelType: undefined,
+            transmission: undefined,
+            dealership: undefined,
+            city: undefined,
+            minPrice: undefined,
+            maxPrice: undefined,
+            sortBy: "newest",
+        };
+
+        setPage(1);
+        setFilters(resetFilters);
+
+        if (filterPanelRef.current) {
+            filterPanelRef.current.resetFilters();
+        }
+
+        window.history.replaceState(null, '', "/cars");
+    }, []);
+
     const clearFilter = useCallback((filterType) => {
         const updatedFilters = { ...filters };
 
@@ -122,6 +151,15 @@ export const useCarsPage = (initialData = null) => {
             case "transmission":
                 updatedFilters.transmission = undefined;
                 break;
+            case "dealership":
+                updatedFilters.dealership = undefined;
+                break;
+            case "city":
+                updatedFilters.city = undefined;
+                break;
+            case "all":
+                resetAllFilters();
+                return;
             case "price":
                 updatedFilters.minPrice = undefined;
                 updatedFilters.maxPrice = undefined;
@@ -136,29 +174,7 @@ export const useCarsPage = (initialData = null) => {
         setPage(1);
         setFilters(updatedFilters);
         updateURL(updatedFilters, 1);
-    }, [filters, updateURL]);
-
-    const resetAllFilters = useCallback(() => {
-        const resetFilters = {
-            search: undefined,
-            make: undefined,
-            bodyType: undefined,
-            fuelType: undefined,
-            transmission: undefined,
-            minPrice: undefined,
-            maxPrice: undefined,
-            sortBy: "newest",
-        };
-
-        setPage(1);
-        setFilters(resetFilters);
-
-        if (filterPanelRef.current) {
-            filterPanelRef.current.resetFilters();
-        }
-
-        window.history.replaceState(null, '', "/cars");
-    }, []);
+    }, [filters, resetAllFilters, updateURL]);
 
     const getActiveFilters = useCallback(() => {
         const filterMap = {
@@ -167,6 +183,8 @@ export const useCarsPage = (initialData = null) => {
             bodyType: (val) => ({ type: "bodyType", value: val }),
             fuelType: (val) => ({ type: "fuelType", value: val }),
             transmission: (val) => ({ type: "transmission", value: val }),
+            dealership: (val) => ({ type: "dealership", value: val }),
+            city: (val) => ({ type: "city", value: val }),
         };
 
         const activeFilters = Object.entries(filters)

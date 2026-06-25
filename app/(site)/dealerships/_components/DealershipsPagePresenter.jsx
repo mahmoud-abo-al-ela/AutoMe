@@ -26,6 +26,7 @@ export const DealershipsPagePresenter = () => {
   const [filters, setFilters] = useState({
     search: "",
     minRating: undefined,
+    city: undefined,
     sortBy: "rating",
     sortOrder: "desc",
   });
@@ -100,6 +101,14 @@ export const DealershipsPagePresenter = () => {
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
+  const handleCityChange = (city) => {
+    setFilters((prev) => ({
+      ...prev,
+      city: prev.city === city ? undefined : city,
+    }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  };
+
   const handleSortChange = (sortBy, sortOrder) => {
     setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
     setPagination((prev) => ({ ...prev, page: 1 }));
@@ -114,6 +123,7 @@ export const DealershipsPagePresenter = () => {
     const clearedFilters = {
       search: "",
       minRating: undefined,
+      city: undefined,
       sortBy: "rating",
       sortOrder: "desc",
     };
@@ -129,6 +139,7 @@ export const DealershipsPagePresenter = () => {
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onClearSearch={clearSearch}
+        stats={filterOptions?.stats}
       />
 
       {/* Inline Toolbar: result count + rating chips + sort */}
@@ -137,6 +148,7 @@ export const DealershipsPagePresenter = () => {
         filters={filters}
         filterOptions={filterOptions}
         onRatingChange={handleRatingChange}
+        onCityChange={handleCityChange}
         onSortChange={handleSortChange}
       />
 

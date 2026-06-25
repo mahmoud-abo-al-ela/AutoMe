@@ -4,5 +4,7 @@ export { default as PriceRangeFilter } from "./PriceRangeFilter";
 export { default as BodyTypeFilter } from "./BodyTypeFilter";
 export { default as FuelTypeFilter } from "./FuelTypeFilter";
 export { default as TransmissionFilter } from "./TransmissionFilter";
+export { default as DealershipFilter } from "./DealershipFilter";
+export { default as CityFilter } from "./CityFilter";
 export { default as SortByFilter } from "./SortByFilter";
 export { default as FilterBtn } from "./FilterBtn";

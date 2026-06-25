@@ -12,6 +12,8 @@ const getFilterColor = (type) => {
         case "bodyType": return "bg-sky-100 text-sky-700 border-sky-200";
         case "fuelType": return "bg-amber-100 text-amber-700 border-amber-200";
         case "transmission": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+        case "dealership": return "bg-violet-100 text-violet-700 border-violet-200";
+        case "city": return "bg-cyan-100 text-cyan-700 border-cyan-200";
         case "price": return "bg-green-100 text-green-700 border-green-200";
         default: return "bg-slate-100 text-slate-700 border-slate-200";
     }

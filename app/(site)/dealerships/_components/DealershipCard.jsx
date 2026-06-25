@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
 const DealershipCard = ({ dealership }) => {
-    const { name, slug, logo, address, averageRating, totalReviews, carCount } =
+    const { name, slug, logo, address, city, averageRating, totalReviews, carCount } =
         dealership;
 
     const formatRating = (rating) => {
@@ -68,10 +68,10 @@ const DealershipCard = ({ dealership }) => {
                 {/* Metadata */}
                 <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-4">
                     {/* Location */}
-                    {address && (
+                    {(city || address) && (
                         <div className="flex items-start gap-2 text-xs text-muted-foreground">
                             <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
-                            <span className="line-clamp-1">{address}</span>
+                            <span className="line-clamp-1">{city || address}</span>
                         </div>
                     )}
 

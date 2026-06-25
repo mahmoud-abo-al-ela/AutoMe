@@ -11,6 +11,8 @@ export default async function BrowseCarsPage({ searchParams }) {
     bodyType: params.bodyType || undefined,
     fuelType: params.fuelType || undefined,
     transmission: params.transmission || undefined,
+    dealership: params.dealership || undefined,
+    city: params.city || undefined,
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     sortBy: params.sortBy || "newest",

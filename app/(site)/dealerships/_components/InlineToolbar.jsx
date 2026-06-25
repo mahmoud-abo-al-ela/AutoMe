@@ -21,6 +21,7 @@ export const InlineToolbar = ({
     filters,
     filterOptions,
     onRatingChange,
+    onCityChange,
     onSortChange,
 }) => {
     const sortValue = `${filters.sortBy}-${filters.sortOrder}`;
@@ -40,6 +41,27 @@ export const InlineToolbar = ({
 
             {/* Rating chips + Sort */}
             <div className="flex flex-wrap items-center gap-3">
+                {filterOptions?.cities?.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                        {filterOptions.cities.slice(0, 5).map((city) => {
+                            const isActive = filters.city === city;
+                            return (
+                                <Badge
+                                    key={city}
+                                    variant={isActive ? "default" : "outline"}
+                                    className={`cursor-pointer select-none transition-colors ${isActive
+                                            ? "bg-primary text-primary-foreground"
+                                            : "hover:bg-accent hover:text-accent-foreground"
+                                        }`}
+                                    onClick={() => onCityChange(city)}
+                                >
+                                    {city}
+                                </Badge>
+                            );
+                        })}
+                    </div>
+                )}
+
                 {/* Rating filter chips */}
                 <div className="flex items-center gap-1.5">
                     {RATING_CHIPS.map((chip) => {
