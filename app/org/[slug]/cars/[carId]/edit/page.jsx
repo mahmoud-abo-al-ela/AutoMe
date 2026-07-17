@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCarForEdit } from "@/actions/cars";
-import CarFormShared from "../../../_components/car-forms/shared/CarFormShared";
+import CarFormShared from "../../_components/car-forms/shared/CarFormShared";
 import { STATUS_DB_TO_FORM } from "@/lib/constants/car-options";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
