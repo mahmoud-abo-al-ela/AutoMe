@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CarsList } from "./_components/car-list";
+import CarsList from "./_components/car-list/CarsList";
 import { CarsPlanBanner } from "./_components/cars-plan-banner";
 
 export const metadata = {

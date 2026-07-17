@@ -1,3 +1,5 @@
+"use client";
+
 // Export car list components
 export { default as CarsList } from "./CarsList";
 export { default as CarTableRow } from "./CarTableRow";
