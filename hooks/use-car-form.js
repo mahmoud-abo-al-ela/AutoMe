@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
-import { addCar } from "@/actions/cars";
+import { addCar, updateCarFull } from "@/actions/cars";
 import { VALIDATION_RULES, ERROR_MESSAGES } from "@/lib/constants/validation";
 
-const createCarFormSchema = (maxImages = VALIDATION_RULES.CAR.MAX_IMAGES) =>
+const createCarFormSchema = (maxImages = VALIDATION_RULES.CAR.MAX_IMAGES, isEditMode = false) =>
     z.object({
         title: z.string().min(1, ERROR_MESSAGES.CAR.TITLE_REQUIRED),
         make: z.string().min(1, ERROR_MESSAGES.CAR.MAKE_REQUIRED),
@@ -38,7 +38,7 @@ const createCarFormSchema = (maxImages = VALIDATION_RULES.CAR.MAX_IMAGES) =>
         status: z.enum(["Available", "Sold", "Unavailable"]),
         featured: z.boolean().default(false),
         images: z
-            .array(z.instanceof(File))
+            .array(isEditMode ? z.union([z.instanceof(File), z.string()]) : z.instanceof(File))
             .min(VALIDATION_RULES.CAR.MIN_IMAGES, ERROR_MESSAGES.CAR.IMAGES_REQUIRED)
             .max(maxImages, `Maximum of ${maxImages} images allowed`),
     });
@@ -50,11 +50,11 @@ const formSections = [
     { id: "status", label: "Status & Visibility" },
 ];
 
-export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MAX_IMAGES) => {
+export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MAX_IMAGES, isEditMode = false, carId = null) => {
     const [currentSection, setCurrentSection] = useState("basic");
     const router = useRouter();
 
-    const carFormSchema = useMemo(() => createCarFormSchema(maxImages), [maxImages]);
+    const carFormSchema = useMemo(() => createCarFormSchema(maxImages, isEditMode), [maxImages, isEditMode]);
     const resolver = useMemo(() => zodResolver(carFormSchema), [carFormSchema]);
 
     const form = useForm({
@@ -82,12 +82,23 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
     });
 
     const queryClient = useQueryClient();
-    const { isPending: loading, mutateAsync: fn } = useMutation({
+    
+    const { isPending: adding, mutateAsync: addCarFn } = useMutation({
         mutationFn: (payload) => addCar(payload.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
         },
     });
+
+    const { isPending: updating, mutateAsync: updateCarFn } = useMutation({
+        mutationFn: (payload) => updateCarFull(carId, payload.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
+            queryClient.invalidateQueries({ queryKey: [...queryKeys.cars.all, carId] });
+        },
+    });
+
+    const loading = isEditMode ? updating : adding;
 
     const watchMake = form.watch("make");
     const watchModel = form.watch("model");
@@ -103,7 +114,7 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
         }
     }, [watchMake, watchModel, watchYear, form]);
 
-    // Update form when initialData changes (for AI mode)
+    // Update form when initialData changes (for AI mode or edit mode pre-fill)
     useEffect(() => {
         if (Object.keys(initialData).length > 0) {
             Object.entries(initialData).forEach(([key, value]) => {
@@ -189,13 +200,14 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
                 .filter(Boolean);
         }
 
+        const fn = isEditMode ? updateCarFn : addCarFn;
         const response = await fn({ data });
         if (response?.success) {
-            toast.success("Car added successfully");
+            toast.success(isEditMode ? "Car updated successfully" : "Car added successfully");
             const slug = window.location.pathname.split('/')[2];
             router.push(`/org/${slug}/cars`);
         } else {
-            const errorMessage = response?.error || "Failed to add car";
+            const errorMessage = response?.error || (isEditMode ? "Failed to update car" : "Failed to add car");
             toast.error(errorMessage);
         }
     };

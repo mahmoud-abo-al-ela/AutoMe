@@ -12,6 +12,8 @@ const CarFormShared = ({
   onStartOver = null,
   aiConfidence = null,
   uploadedImage = null,
+  isEditMode = false,
+  carId = null,
 }) => {
   const [maxImages, setMaxImages] = useState(VALIDATION_RULES.CAR.MAX_IMAGES);
 
@@ -29,7 +31,12 @@ const CarFormShared = ({
     fetchMaxImages();
   }, []);
 
-  const { form, currentSection, formSections, loading, handlers } = useCarForm(initialData, maxImages);
+  const { form, currentSection, formSections, loading, handlers } = useCarForm(
+    initialData,
+    maxImages,
+    isEditMode,
+    carId
+  );
 
   return (
     <CarFormPresenter
@@ -43,6 +50,7 @@ const CarFormShared = ({
       uploadedImage={uploadedImage}
       handlers={handlers}
       maxImages={maxImages}
+      isEditMode={isEditMode}
     />
   );
 };

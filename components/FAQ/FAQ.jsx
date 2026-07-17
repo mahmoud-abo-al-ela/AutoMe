@@ -4,19 +4,19 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
 
-const FAQ = () => {
+const FAQ = ({ brandName = "AutoMe" }) => {
     const [openIndex, setOpenIndex] = useState(0);
 
     const faqs = [
         {
-            question: "How does AutoMe's AI recommendation system work?",
+            question: `How does ${brandName}'s AI recommendation system work?`,
             answer:
-                "Our AI analyzes thousands of data points including your budget, preferences, driving habits, and market trends to recommend the perfect car for you. The system learns from millions of successful car purchases to provide increasingly accurate suggestions.",
+                `Our AI analyzes thousands of data points including your budget, preferences, driving habits, and market trends to recommend the perfect car for you. The system learns from millions of successful car purchases to provide increasingly accurate suggestions.`,
         },
         {
-            question: "Is it free to use AutoMe as a buyer?",
+            question: `Is it free to use ${brandName} as a buyer?`,
             answer:
-                "Yes! AutoMe is completely free for car buyers. You can browse listings, get AI recommendations, schedule test drives, and communicate with dealers at no cost. We only charge dealerships for premium features.",
+                `Yes! ${brandName} is completely free for car buyers. You can browse listings, get AI recommendations, schedule test drives, and communicate with dealers at no cost. We only charge dealerships for premium features.`,
         },
         {
             question: "How do I schedule a test drive?",
@@ -24,19 +24,19 @@ const FAQ = () => {
                 "Simply find a car you're interested in, click the 'Schedule Test Drive' button, and choose your preferred date and time. The dealership will confirm your appointment, and the car will be ready when you arrive. No waiting, no hassle.",
         },
         {
-            question: "Are the cars on AutoMe verified?",
+            question: `Are the cars on ${brandName} verified?`,
             answer:
-                "Yes, all vehicles listed on AutoMe go through a rigorous verification process. Our team checks vehicle history, condition reports, and dealer credentials. We also provide market price analysis to ensure you're getting a fair deal.",
+                `Yes, all vehicles listed on ${brandName} go through a rigorous verification process. Our team checks vehicle history, condition reports, and dealer credentials. We also provide market price analysis to ensure you're getting a fair deal.`,
         },
         {
-            question: "Can I sell my car on AutoMe?",
+            question: `Can I sell my car on ${brandName}?`,
             answer:
-                "Currently, AutoMe focuses on connecting buyers with verified dealerships. However, we're working on a peer-to-peer marketplace feature that will allow individual sellers to list their vehicles. Stay tuned for updates!",
+                `Currently, ${brandName} focuses on connecting buyers with verified dealerships. However, we're working on a peer-to-peer marketplace feature that will allow individual sellers to list their vehicles. Stay tuned for updates!`,
         },
         {
             question: "What payment methods are accepted?",
             answer:
-                "AutoMe supports various payment methods including bank transfers, financing through our partner lenders, and dealership payment plans. All transactions are secured with advanced encryption and buyer protection.",
+                `${brandName} supports various payment methods including bank transfers, financing through our partner lenders, and dealership payment plans. All transactions are secured with advanced encryption and buyer protection.`,
         },
     ];
 
@@ -61,7 +61,7 @@ const FAQ = () => {
                         </span>
                     </h2>
                     <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-                        Everything you need to know about AutoMe. Can't find your answer?
+                        Everything you need to know about {brandName}. Can't find your answer?
                         <a href="/contact" className="text-blue-600 hover:text-blue-700 font-semibold ml-1">
                             Contact us
                         </a>

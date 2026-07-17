@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Home, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getDealershipBySlug, getDealershipCars } from "@/actions/dealerships";
+import { getDealershipBySlug, getDealershipCars, getDealershipCarFilters } from "@/actions/dealerships";
 import { DealershipDetailSkeleton } from "../../_components/DealershipSkeleton";
 import {
     generateDealershipStructuredData,
@@ -28,9 +28,11 @@ export const DealershipDetailPresenter = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [carsLoading, setCarsLoading] = useState(false);
+    const [filters, setFilters] = useState({ sortBy: "newest" });
+    const [availableFilters, setAvailableFilters] = useState(null);
     const [carsPagination, setCarsPagination] = useState({
         page: 1,
-        limit: 12,
+        limit: 6,
         total: 0,
         totalPages: 0,
     });
@@ -43,8 +45,13 @@ export const DealershipDetailPresenter = () => {
                 const response = await getDealershipBySlug(slug);
                 if (response.success) {
                     setDealership(response.data);
+                    // Fetch filter options
+                    const filterResponse = await getDealershipCarFilters(response.data.id);
+                    if (filterResponse.success) {
+                        setAvailableFilters(filterResponse.data);
+                    }
                     // Fetch cars for this dealership
-                    await fetchCars(response.data.id);
+                    await fetchCars(response.data.id, { sortBy: "newest" }, 1);
                 } else {
                     setError(response.error?.message || "Failed to load dealership");
                 }
@@ -58,10 +65,10 @@ export const DealershipDetailPresenter = () => {
         fetchDealership();
     }, [slug]);
 
-    const fetchCars = async (organizationId, page = 1) => {
+    const fetchCars = async (organizationId, currentFilters = {}, page = 1) => {
         setCarsLoading(true);
         try {
-            const response = await getDealershipCars(organizationId, {}, {
+            const response = await getDealershipCars(organizationId, currentFilters, {
                 page,
                 limit: carsPagination.limit,
             });
@@ -76,10 +83,18 @@ export const DealershipDetailPresenter = () => {
         }
     };
 
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+        setCarsPagination((prev) => ({ ...prev, page: 1 }));
+        if (dealership) {
+            fetchCars(dealership.id, newFilters, 1);
+        }
+    };
+
     const handlePageChange = (newPage) => {
         setCarsPagination((prev) => ({ ...prev, page: newPage }));
         if (dealership) {
-            fetchCars(dealership.id, newPage);
+            fetchCars(dealership.id, filters, newPage);
         }
         window.scrollTo({ top: 400, behavior: "smooth" });
     };
@@ -147,6 +162,9 @@ export const DealershipDetailPresenter = () => {
                     carsLoading={carsLoading}
                     carsPagination={carsPagination}
                     onPageChange={handlePageChange}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    availableFilters={availableFilters}
                 />
             </div>
         </>

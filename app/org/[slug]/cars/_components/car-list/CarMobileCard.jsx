@@ -13,7 +13,9 @@ import {
     CheckCircle,
     XCircle,
     Clock,
+    Pencil,
 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,6 +34,9 @@ const CarMobileCard = ({
     onUpdateCar,
     onConfirmDelete,
 }) => {
+    const params = useParams();
+    const router = useRouter();
+    const slug = params?.slug;
     const carStatus = car.status.toLowerCase();
     return (
         <Card className={`overflow-hidden transition-all duration-200 p-0 ${isCarDisabled ? "opacity-60" : ""
@@ -118,6 +123,14 @@ const CarMobileCard = ({
                             >
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => router.push(`/org/${slug}/cars/${car.id}/edit`)}
+                                className="cursor-pointer"
+                                disabled={isCarDisabled}
+                            >
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() =>

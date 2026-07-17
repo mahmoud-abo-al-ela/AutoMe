@@ -13,7 +13,9 @@ import {
   Eye,
   CheckCircle,
   Clock,
+  Pencil,
 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +34,10 @@ const CarTableRow = ({
   onUpdateCar,
   onConfirmDelete,
 }) => {
+  const params = useParams();
+  const router = useRouter();
+  const slug = params?.slug;
+  
   // Normalize status to lowercase for consistent comparison
   const carStatus = car.status.toLowerCase();
 
@@ -165,6 +171,14 @@ const CarTableRow = ({
               >
                 <Eye className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">View</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(`/org/${slug}/cars/${car.id}/edit`)}
+                className="cursor-pointer"
+                disabled={isCarDisabled}
+              >
+                <Pencil className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm">Edit</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>

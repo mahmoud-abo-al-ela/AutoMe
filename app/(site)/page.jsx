@@ -9,9 +9,13 @@ import Testimonials from "@/components/Testimonials/Testimonials";
 import Pricing from "@/components/Pricing/Pricing";
 import FAQ from "@/components/FAQ/FAQ";
 import { getActivePlans } from "@/actions/billing";
+import { getCurrentOrganization } from "@/lib/getOrganization";
 
 export default async function Home() {
-  const plans = await getActivePlans();
+  const organization = await getCurrentOrganization();
+  const isOnSubdomain = !!organization;
+  const plans = !isOnSubdomain ? await getActivePlans() : [];
+  const brandName = organization?.name || "AutoMe";
 
   return (
     <>
@@ -22,10 +26,10 @@ export default async function Home() {
         <Why />
         <Testimonials />
         <ReservationCTA />
-        <Pricing plans={plans} />
-        <DealerCTA />
-        <FAQ />
-        <CTA />
+        {!isOnSubdomain && <Pricing plans={plans} />}
+        {!isOnSubdomain && <DealerCTA />}
+        <FAQ brandName={brandName} />
+        {!isOnSubdomain && <CTA />}
       </main>
     </>
   );

@@ -56,6 +56,14 @@ export const getDealershipCars = withErrorHandling(async (organizationId, filter
 });
 
 /**
+ * Get filter options for a dealership's cars
+ */
+export const getDealershipCarFilters = withErrorHandling(async (organizationId) => {
+    const filters = await dealershipService.getDealershipCarFilters(organizationId);
+    return createSuccessResponse(filters);
+});
+
+/**
  * Get dealership reviews
  */
 export const getDealershipReviews = withErrorHandling(async (organizationId, pagination = {}) => {

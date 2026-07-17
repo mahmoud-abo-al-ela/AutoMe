@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { RateLimitError, ValidationError } from "@/lib/utils/errors";
+import { RateLimitError, ValidationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { carSchema, updateCarSchema } from "@/lib/validations/schemas";
+import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
+import { z } from "zod";
 
 
 export async function fileToBase64(file) {
@@ -204,6 +205,33 @@ export const updateCar = withOrgAuth(async (ctx, carId, { status, featured }) =>
   const validatedUpdate = validateAction(updateCarSchema, updateData);
 
   const updatedCar = await carService.updateCar(carId, validatedUpdate, ctx.userId, ctx.organization.id);
+
+  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  return createSuccessResponse(updatedCar, "Car updated successfully");
+});
+
+export const getCarForEdit = withOrgAuth(async (ctx, carId) => {
+  const car = await carService.getCarById(carId);
+  if (!car) {
+    throw new NotFoundError("Car");
+  }
+  // Verify car belongs to user's organization
+  if (car.organizationId !== ctx.organization.id && ctx.role !== "ADMIN") {
+    throw new AuthorizationError("You don't have access to this car");
+  }
+  return createSuccessResponse(car);
+});
+
+export const updateCarFull = withOrgAuth(async (ctx, carId, payload) => {
+  const rawData = payload.data || payload;
+  const carData = validateAction(updateCarFullSchema, rawData);
+
+  const updatedCar = await carService.updateCarFull(
+    carId,
+    carData,
+    ctx.userId,
+    ctx.organization.id
+  );
 
   revalidatePath(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse(updatedCar, "Car updated successfully");

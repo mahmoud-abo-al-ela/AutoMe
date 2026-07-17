@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Home, ChevronRight } from "lucide-react";
 
 const Breadcrumbs = ({ car }) => {
-    const label = car.title;
+    const label = car.title || `${car.year} ${car.make} ${car.model}`;
 
     return (
         <nav

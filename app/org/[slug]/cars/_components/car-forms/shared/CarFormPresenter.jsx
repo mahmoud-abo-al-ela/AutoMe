@@ -51,6 +51,7 @@ export const CarFormPresenter = ({
     uploadedImage = null,
     handlers,
     maxImages = 5,
+    isEditMode = false,
 }) => {
     const themeColors = getThemeColors(isAIMode);
     const { register, formState: { errors }, watch, setValue, trigger } = form;
@@ -121,10 +122,16 @@ export const CarFormPresenter = ({
                                         className={`h-4 w-4 sm:h-5 sm:w-5 ${themeColors.iconColor}`}
                                     />
                                 )}
-                                {isAIMode ? "AI-Extracted Car Information" : "Car Information"}
+                                {isEditMode
+                                    ? "Edit Car Information"
+                                    : isAIMode
+                                    ? "AI-Extracted Car Information"
+                                    : "Car Information"}
                             </CardTitle>
                             <CardDescription className="text-sm">
-                                {isAIMode
+                                {isEditMode
+                                    ? "Update the details for this vehicle listing"
+                                    : isAIMode
                                     ? "Review and edit the AI-extracted details before submitting"
                                     : "Enter all the details about the car you want to list"}
                             </CardDescription>
@@ -265,7 +272,13 @@ export const CarFormPresenter = ({
                                     className={`${themeColors.buttonPrimary} text-sm sm:text-base px-3 sm:px-4 h-10`}
                                     disabled={loading || Object.keys(errors).length > 0}
                                 >
-                                    {loading ? "Adding Car..." : "Add Car"}
+                                    {loading
+                                        ? isEditMode
+                                            ? "Updating Car..."
+                                            : "Adding Car..."
+                                        : isEditMode
+                                        ? "Update Car"
+                                        : "Add Car"}
                                 </Button>
                             )}
                         </div>

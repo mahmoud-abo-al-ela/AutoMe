@@ -20,6 +20,9 @@ export const DealershipTabs = ({
     carsPagination,
     onPageChange,
     defaultTab = "inventory",
+    filters,
+    onFilterChange,
+    availableFilters,
 }) => {
     return (
         <Tabs defaultValue={defaultTab} className="w-full">
@@ -74,6 +77,9 @@ export const DealershipTabs = ({
                         carsLoading={carsLoading}
                         carsPagination={carsPagination}
                         onPageChange={onPageChange}
+                        filters={filters}
+                        onFilterChange={onFilterChange}
+                        availableFilters={availableFilters}
                     />
                 </div>
             </TabsContent>

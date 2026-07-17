@@ -8,3 +8,4 @@ export { DealershipDetailPresenter } from "./DealershipDetailPresenter";
 export { OpenStatusBadge } from "./OpenStatusBadge";
 export { ShareDealershipButton } from "./ShareDealershipButton";
 export { DealershipTabs } from "./DealershipTabs";
+export { DealershipInventoryFilters } from "./DealershipInventoryFilters";

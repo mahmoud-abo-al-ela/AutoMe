@@ -8,14 +8,19 @@ import { faqConfig } from "@/lib/FaqConfig";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function FAQ() {
+import { getCurrentOrganization } from "@/lib/getOrganization";
+
+export default async function FAQ() {
+  const organization = await getCurrentOrganization();
+  const brandName = organization?.name || "AutoMe";
+
   return (
     <div className="container py-12 max-w-4xl mx-auto mt-12">
       <h1 className="text-4xl font-bold text-center mb-2">
         Frequently Asked Questions
       </h1>
       <p className="text-center text-muted-foreground mb-8">
-        Find answers to common questions about DriveAI and our services
+        Find answers to common questions about {brandName} and our services
       </p>
 
       <div className="space-y-10">
