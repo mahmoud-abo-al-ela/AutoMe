@@ -5,6 +5,7 @@ import { Car, Search } from "lucide-react";
 import CarCard from "@/components/CarCard";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { DealershipInventoryFilters } from "./DealershipInventoryFilters";
+import { LoadingGrid } from "@/components/common/LoadingStates";
 
 export const DealershipCarsSection = ({
     cars,
@@ -25,7 +26,7 @@ export const DealershipCarsSection = ({
         filters.transmission;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" id="dealership-cars-section">
             {/* Inline filters bar */}
             {carCount > 0 && (
                 <DealershipInventoryFilters
@@ -38,19 +39,7 @@ export const DealershipCarsSection = ({
             )}
 
             {/* Loading skeleton */}
-            {carsLoading && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="animate-pulse bg-white border border-slate-100 rounded-2xl p-4 space-y-4">
-                            <div className="bg-slate-200 h-48 rounded-xl w-full" />
-                            <div className="space-y-2">
-                                <div className="bg-slate-200 h-4 w-3/4 rounded" />
-                                <div className="bg-slate-200 h-4 w-1/2 rounded" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {carsLoading && <LoadingGrid count={6} />}
 
             {/* Empty state - no cars at all in dealership */}
             {!carsLoading && carCount === 0 && (

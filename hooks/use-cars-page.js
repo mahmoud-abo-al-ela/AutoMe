@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCars } from "@/actions/cars-listing";
 
@@ -11,6 +11,7 @@ export const useCarsPage = (initialData = null) => {
     
     const pageFromUrl = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
     const [page, setPage] = useState(pageFromUrl);
+    const [isPageLoading, setIsPageLoading] = useState(false);
     
     const [filters, setFilters] = useState({
         search: undefined,
@@ -30,15 +31,23 @@ export const useCarsPage = (initialData = null) => {
 
     const {
         data: queryData,
-        isLoading: loading,
+        isLoading,
+        isFetching,
         error,
     } = useQuery({
         queryKey: queryKeys.cars.list({ ...filters, page }),
         queryFn: () => getCars({ ...filters, page }),
-        placeholderData: keepPreviousData,
     });
 
-    const carsData = queryData || initialData;
+    useEffect(() => {
+        if (!isFetching) {
+            setIsPageLoading(false);
+        }
+    }, [isFetching]);
+
+    const loading = isLoading || isFetching || isPageLoading;
+
+    const carsData = queryData || (page === 1 && !filters.search ? initialData : null);
 
     useEffect(() => {
         const initialFilters = {
@@ -92,6 +101,7 @@ export const useCarsPage = (initialData = null) => {
     }, []);
 
     const handleFilterChange = useCallback((newFilters) => {
+        setIsPageLoading(true);
         setPage(1);
         const updatedFilters = { ...newFilters, page: 1 };
         setFilters(updatedFilters);
@@ -99,13 +109,19 @@ export const useCarsPage = (initialData = null) => {
     }, [updateURL]);
 
     const handlePageChange = useCallback((newPage) => {
+        setIsPageLoading(true);
         setPage(newPage);
         updateURL(filters, newPage);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        const section = document.getElementById("cars-results-section");
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            window.scrollTo({
+                top: 300,
+                behavior: "smooth",
+            });
+        }
     }, [filters, updateURL]);
 
     const resetAllFilters = useCallback(() => {
@@ -122,6 +138,7 @@ export const useCarsPage = (initialData = null) => {
             sortBy: "newest",
         };
 
+        setIsPageLoading(true);
         setPage(1);
         setFilters(resetFilters);
 
@@ -171,6 +188,7 @@ export const useCarsPage = (initialData = null) => {
                 break;
         }
 
+        setIsPageLoading(true);
         setPage(1);
         setFilters(updatedFilters);
         updateURL(updatedFilters, 1);

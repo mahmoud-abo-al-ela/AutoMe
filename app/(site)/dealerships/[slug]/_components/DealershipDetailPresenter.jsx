@@ -96,7 +96,12 @@ export const DealershipDetailPresenter = () => {
         if (dealership) {
             fetchCars(dealership.id, filters, newPage);
         }
-        window.scrollTo({ top: 400, behavior: "smooth" });
+        const section = document.getElementById("dealership-cars-section");
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            window.scrollTo({ top: 400, behavior: "smooth" });
+        }
     };
 
     if (loading) {

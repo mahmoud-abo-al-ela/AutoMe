@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import FilterPanel from "./FilterPanel";
 import CarsHero from "./CarsHero";
 import ResultsSummary from "./ResultsSummary";
@@ -16,7 +16,7 @@ import {
     SheetTitle,
     SheetClose,
 } from "@/components/ui/sheet";
-import { Pagination } from "@/components/common/Pagination";
+import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { ActiveFilters } from "./ActiveFilters";
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingGrid } from "@/components/common/LoadingStates";
@@ -170,13 +170,13 @@ export const CarsPagePresenter = ({
                     />
                 </div>
 
-                <div className="w-full lg:w-3/4">
+                <div className="w-full lg:w-3/4" id="cars-results-section">
                     <ActiveFilters
                         filters={activeFilters}
                         onClearFilter={handlers.clearFilter}
                     />
 
-                    {!loading && !error && cars.length > 0 && (
+                    {!error && (cars.length > 0 || loading) && (
                         <ResultsSummary
                             currentPage={pagination.page}
                             limit={pagination.limit}
@@ -210,57 +210,63 @@ export const CarsPagePresenter = ({
                         />
                     )}
 
-                    <AnimatePresence mode="wait">
-                        {!loading && !error && cars.length > 0 && (
+                    {!loading && !error && cars.length > 0 && (
+                        <motion.div
+                            key={`cars-${pagination.page}-${filters.sortBy}`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
                             <motion.div
-                                key={`cars-${pagination.page}-${filters.sortBy}`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <motion.div
-                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7"
-                                    initial="hidden"
-                                    animate="visible"
-                                    variants={{
-                                        hidden: {},
-                                        visible: {
-                                            transition: {
-                                                staggerChildren: 0.06,
-                                            },
+                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7"
+                                initial="hidden"
+                                animate="visible"
+                                variants={{
+                                    hidden: {},
+                                    visible: {
+                                        transition: {
+                                            staggerChildren: 0.06,
                                         },
-                                    }}
-                                >
-                                    {cars.map((car) => (
-                                        <motion.div
-                                            key={car.id}
-                                            variants={{
-                                                hidden: { opacity: 0, y: 20 },
-                                                visible: {
-                                                    opacity: 1,
-                                                    y: 0,
-                                                    transition: {
-                                                        duration: 0.4,
-                                                        ease: "easeOut",
-                                                    },
+                                    },
+                                }}
+                            >
+                                {cars.map((car) => (
+                                    <motion.div
+                                        key={car.id}
+                                        variants={{
+                                            hidden: { opacity: 0, y: 20 },
+                                            visible: {
+                                                opacity: 1,
+                                                y: 0,
+                                                transition: {
+                                                    duration: 0.4,
+                                                    ease: "easeOut",
                                                 },
-                                            }}
-                                        >
-                                            <CarCard car={car} />
-                                        </motion.div>
-                                    ))}
-                                </motion.div>
-
-                                <Pagination
-                                    currentPage={pagination.page}
-                                    totalPages={pagination.totalPages}
-                                    onPageChange={handlers.handlePageChange}
-                                    disabled={loading}
-                                />
+                                            },
+                                        }}
+                                    >
+                                        <CarCard car={car} />
+                                    </motion.div>
+                                ))}
                             </motion.div>
-                        )}
-                    </AnimatePresence>
+
+                            {pagination.totalPages > 1 && (
+                                <div className="mt-8 space-y-4 pt-4 border-t border-slate-100">
+                                    <Pagination
+                                        currentPage={pagination.page}
+                                        totalPages={pagination.totalPages}
+                                        onPageChange={handlers.handlePageChange}
+                                        disabled={loading}
+                                    />
+                                    <PaginationInfo
+                                        currentPage={pagination.page}
+                                        limit={pagination.limit}
+                                        total={pagination.total}
+                                    />
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
                 </div>
             </div>
             </div>

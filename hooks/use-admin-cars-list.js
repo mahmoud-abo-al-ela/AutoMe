@@ -20,7 +20,8 @@ export const useAdminCarsList = () => {
 
     const {
         data: fetchedCars,
-        isLoading: isFetchingCars,
+        isLoading,
+        isFetching,
         error: fetchCarsError,
         refetch: fetchCarsFn,
     } = useQuery({
@@ -28,6 +29,8 @@ export const useAdminCarsList = () => {
         queryFn: () => getCars(debouncedSearch, statusFilter.toLowerCase(), currentPage, pageSize),
         placeholderData: keepPreviousData,
     });
+
+    const isFetchingCars = isLoading || isFetching;
 
     const {
         isPending: deleteCarLoading,
