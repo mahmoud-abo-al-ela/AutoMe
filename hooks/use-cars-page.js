@@ -115,12 +115,11 @@ export const useCarsPage = (initialData = null) => {
 
         const section = document.getElementById("cars-results-section");
         if (section) {
-            section.scrollIntoView({ behavior: "smooth", block: "start" });
+            const yOffset = -100;
+            const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
         } else {
-            window.scrollTo({
-                top: 300,
-                behavior: "smooth",
-            });
+            window.scrollTo({ top: 300, behavior: "smooth" });
         }
     }, [filters, updateURL]);
 

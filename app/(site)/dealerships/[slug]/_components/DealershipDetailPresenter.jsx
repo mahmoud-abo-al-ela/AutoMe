@@ -98,7 +98,9 @@ export const DealershipDetailPresenter = () => {
         }
         const section = document.getElementById("dealership-cars-section");
         if (section) {
-            section.scrollIntoView({ behavior: "smooth", block: "start" });
+            const yOffset = -100;
+            const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
         } else {
             window.scrollTo({ top: 400, behavior: "smooth" });
         }
