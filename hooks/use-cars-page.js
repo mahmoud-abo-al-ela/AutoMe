@@ -131,10 +131,12 @@ export const useCarsPage = (initialData = null, initialState = null) => {
     isInitialKeyRef.current = false;
   }, [filters, page, perPage]);
 
-  // Clear the paging flag once the new page has finished loading.
+  // Clear the paging flag once the new page's data is settled. Depends on
+  // queryData/page/perPage too, so it also clears when navigating to a page
+  // that is already cached fresh (no refetch → isFetching never toggles).
   useEffect(() => {
     if (!isFetching) setIsPaging(false);
-  }, [isFetching]);
+  }, [isFetching, queryData, page, perPage]);
 
   // Back/forward: our URL writes bypass the router, so re-read on popstate.
   useEffect(() => {
