@@ -1,42 +1,43 @@
-import { SkeletonCarGrid } from "@/components/common/Skeletons";
+import CarCardSkeleton from "@/components/CarCardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PublicCarsLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30">
-      <div className="container mx-auto py-4 px-4 pt-8 mt-14">
-        {/* Hero Section Skeleton */}
-        <div className="w-full bg-white rounded-2xl shadow-sm border p-8 mb-8 flex flex-col items-center">
-          <Skeleton className="h-10 sm:h-12 w-64 sm:w-96 mb-6" />
-          <Skeleton className="h-14 w-full max-w-2xl rounded-full" />
+    <div className="min-h-screen">
+      <div className="container mx-auto mt-14 px-4 pb-24 pt-8">
+        {/* Hero skeleton — matches the real gradient hero */}
+        <div className="mb-8 flex flex-col items-center rounded-2xl bg-gradient-to-br from-primary via-primary to-brand-accent px-6 py-8 shadow-lg sm:py-10">
+          <Skeleton className="mb-4 h-8 w-64 bg-white/25 sm:h-10 sm:w-96" />
+          <Skeleton className="mb-5 h-4 w-48 bg-white/20" />
+          <Skeleton className="h-14 w-full max-w-xl rounded-xl bg-white/30" />
         </div>
-        
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar Skeleton (Hidden on Mobile) */}
-          <div className="hidden lg:block w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start space-y-8 bg-white p-6 rounded-xl border">
-            {Array.from({ length: 5 }).map((_, sectionIndex) => (
-              <div key={sectionIndex} className="space-y-4">
-                <Skeleton className="h-6 w-32" />
-                <div className="space-y-2">
-                  {Array.from({ length: 4 }).map((_, itemIndex) => (
-                    <div key={itemIndex} className="flex items-center gap-3">
-                      <Skeleton className="h-4 w-4 rounded-sm" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
+
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Sidebar skeleton */}
+          <div className="hidden w-full space-y-6 rounded-2xl border border-border bg-card p-5 lg:sticky lg:top-24 lg:block lg:w-1/4 lg:self-start">
+            {Array.from({ length: 5 }).map((_, s) => (
+              <div key={s} className="space-y-3">
+                <Skeleton className="h-5 w-32" />
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-6 w-16 rounded-full" />
                   ))}
                 </div>
               </div>
             ))}
           </div>
-          
-          {/* Main Content Area */}
-          <div className="w-full lg:w-3/4 space-y-6">
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-10 w-40 rounded-md" />
+
+          {/* Results */}
+          <div className="w-full space-y-6 lg:w-3/4">
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-9 w-40 rounded-md" />
             </div>
-            
-            <SkeletonCarGrid count={6} columns="lg:grid-cols-3" />
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <CarCardSkeleton key={i} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

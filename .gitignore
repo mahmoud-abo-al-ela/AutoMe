@@ -46,3 +46,4 @@ lib/generated/
 /plans/
 
 .agent/
+.claude/

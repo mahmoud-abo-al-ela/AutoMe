@@ -36,7 +36,7 @@ export const Pagination = ({
     if (totalPages <= 1) return null;
 
     return (
-        <div className="flex justify-center mt-6 sm:mt-8">
+        <nav className="flex justify-center mt-6 sm:mt-8" aria-label="Pagination">
             <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                     variant="outline"
@@ -44,6 +44,7 @@ export const Pagination = ({
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1 || disabled}
                     className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
+                    aria-label="Previous page"
                 >
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -57,6 +58,8 @@ export const Pagination = ({
                             onClick={() => onPageChange(pageNum)}
                             disabled={disabled}
                             className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer"
+                            aria-label={`Page ${pageNum}`}
+                            aria-current={currentPage === pageNum ? "page" : undefined}
                         >
                             {pageNum}
                         </Button>
@@ -69,11 +72,12 @@ export const Pagination = ({
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages || disabled}
                     className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
+                    aria-label="Next page"
                 >
                     <ChevronRight className="h-4 w-4" />
                 </Button>
             </div>
-        </div>
+        </nav>
     );
 };
 

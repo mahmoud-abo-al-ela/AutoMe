@@ -1,66 +1,32 @@
-import React from "react";
-import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+"use client";
 
-const TransmissionFilter = ({
-  selectedTransmissions,
-  availableTransmissions,
-  toggleFilter,
-  setSelectedTransmissions,
-  isLoading,
-}) => {
+import { Cog } from "lucide-react";
+import { FilterSection } from "./FilterSection";
+import { FilterChip } from "./FilterChip";
+
+const TransmissionFilter = ({ selected = [], options = [], onToggle, isLoading }) => {
   return (
-    <AccordionItem value="transmission" className="border-none">
-      <AccordionTrigger className="py-2 hover:no-underline cursor-pointer">
-        <span className="text-sm font-medium">Transmission</span>
-        {selectedTransmissions.length > 0 && (
-          <Badge
-            variant="secondary"
-            className="ml-2 bg-primary/10 text-primary"
-          >
-            {selectedTransmissions.length}
-          </Badge>
-        )}
-      </AccordionTrigger>
-      <AccordionContent>
-        {availableTransmissions.length > 0 ? (
-          <div className="flex flex-wrap gap-2 pt-1 pb-2">
-            {availableTransmissions.map((trans) => (
-              <Badge
-                key={trans}
-                variant="outline"
-                className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
-                  selectedTransmissions.includes(trans)
-                    ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200"
-                    : "hover:bg-slate-100 cursor-pointer"
-                } ${isLoading ? "opacity-50 pointer-events-none" : ""} cursor-pointer`}
-                onClick={() =>
-                  toggleFilter(
-                    trans,
-                    selectedTransmissions,
-                    setSelectedTransmissions
-                  )
-                }
-              >
-                {trans}
-                {selectedTransmissions.includes(trans) && (
-                  <X className="ml-1 h-3 w-3" />
-                )}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <div className="text-sm text-muted-foreground py-1">
-            No transmissions available
-          </div>
-        )}
-      </AccordionContent>
-    </AccordionItem>
+    <FilterSection
+      value="transmission"
+      icon={Cog}
+      label="Transmission"
+      count={selected.length}
+      isEmpty={options.length === 0}
+      emptyLabel="No transmissions available"
+    >
+      <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
+        {options.map(({ value, count }) => (
+          <FilterChip
+            key={value}
+            label={value}
+            count={count}
+            selected={selected.includes(value)}
+            disabled={isLoading}
+            onClick={() => onToggle(value)}
+          />
+        ))}
+      </div>
+    </FilterSection>
   );
 };
 

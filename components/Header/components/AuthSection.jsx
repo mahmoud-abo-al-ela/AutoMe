@@ -16,7 +16,7 @@ export default function AuthSection({
         <SignInButton mode="modal" forceRedirectUrl="/auth-redirect">
           <Button
             variant="default"
-            className="cursor-pointer bg-[#0532a3] text-white hover:bg-[#0532a3]/90 hover:text-white transition-all duration-300 hover:shadow-md"
+            className="cursor-pointer transition-all duration-300 hover:shadow-md"
           >
             Sign In
           </Button>

@@ -140,7 +140,7 @@ export default function MainHeader({ user, organizationSlug, organization }) {
         `}
     >
       <>
-        <div className="container flex h-12 md:h-16 items-center mx-auto">
+        <div className="container flex h-14 md:h-16 items-center mx-auto">
           <Link
             href="/"
             className="mr-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
@@ -205,7 +205,7 @@ export default function MainHeader({ user, organizationSlug, organization }) {
                 {pathname !== "/sign-in" && pathname !== "/sign-up" && (
                   <Button
                     variant="default"
-                    className="cursor-pointer bg-[#0532a3] text-white hover:bg-[#0532a3]/90 hover:text-white transition-all duration-300 hover:shadow-md"
+                    className="cursor-pointer transition-all duration-300 hover:shadow-md"
                   >
                     <Link
                       href="/sign-in"

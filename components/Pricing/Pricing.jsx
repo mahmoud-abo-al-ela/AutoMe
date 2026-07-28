@@ -172,7 +172,7 @@ const Pricing = ({ plans: dbPlans }) => {
   };
 
   return (
-    <section id="pricing" className="py-16 sm:py-24 bg-white">
+    <section id="pricing" className="py-16 sm:py-24 bg-background">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -181,17 +181,17 @@ const Pricing = ({ plans: dbPlans }) => {
           viewport={{ once: true }}
           className="text-center mb-12 sm:mb-16"
         >
-          <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
             <Shield className="h-4 w-4" />
             <span>Pricing Plans</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
             Simple, Transparent{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-brand-accent">
               Pricing
             </span>
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Choose the perfect plan for your dealership. No hidden fees, cancel
             anytime.
           </p>
@@ -218,8 +218,8 @@ const Pricing = ({ plans: dbPlans }) => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 className={`relative rounded-2xl p-6 sm:p-8 ${plan.popular
-                    ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-2xl scale-105"
-                    : "bg-white border border-gray-200 shadow-lg hover:shadow-xl"
+                    ? "bg-primary text-primary-foreground shadow-2xl scale-105"
+                    : "bg-card border border-border shadow-lg hover:shadow-xl"
                   } transition-all duration-300`}
               >
                 {plan.popular && (
@@ -234,23 +234,23 @@ const Pricing = ({ plans: dbPlans }) => {
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan.popular
                         ? "bg-white/20"
-                        : "bg-gradient-to-br from-blue-100 to-indigo-100"
+                        : "bg-primary/10"
                       }`}
                   >
                     <Icon
-                      className={`h-6 w-6 ${plan.popular ? "text-white" : "text-blue-600"
+                      className={`h-6 w-6 ${plan.popular ? "text-white" : "text-primary"
                         }`}
                     />
                   </div>
                   <div>
                     <h3
-                      className={`text-xl font-bold ${plan.popular ? "text-white" : "text-gray-900"
+                      className={`text-xl font-bold ${plan.popular ? "text-white" : "text-foreground"
                         }`}
                     >
                       {plan.name}
                     </h3>
                     <p
-                      className={`text-sm ${plan.popular ? "text-blue-100" : "text-gray-500"
+                      className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
                         }`}
                     >
                       {plan.description}
@@ -261,13 +261,13 @@ const Pricing = ({ plans: dbPlans }) => {
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
                     <span
-                      className={`text-4xl sm:text-5xl font-bold ${plan.popular ? "text-white" : "text-gray-900"
+                      className={`text-4xl sm:text-5xl font-bold ${plan.popular ? "text-white" : "text-foreground"
                         }`}
                     >
                       {formatPrice(plan)}
                     </span>
                     <span
-                      className={`text-sm ${plan.popular ? "text-blue-100" : "text-gray-500"
+                      className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
                         }`}
                     >
                       /{formatPeriod(plan)}
@@ -289,14 +289,14 @@ const Pricing = ({ plans: dbPlans }) => {
                         />
                       ) : (
                         <X
-                          className={`h-5 w-5 flex-shrink-0 mt-0.5 ${plan.popular ? "text-red-300" : "text-gray-400"
+                          className={`h-5 w-5 flex-shrink-0 mt-0.5 ${plan.popular ? "text-red-300" : "text-muted-foreground"
                             }`}
                         />
                       )}
                       <span
-                        className={`text-sm ${plan.popular ? "text-white" : "text-gray-700"
+                        className={`text-sm ${plan.popular ? "text-white" : "text-foreground"
                           } ${!feature.included && !plan.popular
-                            ? "line-through text-gray-400"
+                            ? "line-through text-muted-foreground"
                             : ""
                           }`}
                       >
@@ -310,8 +310,8 @@ const Pricing = ({ plans: dbPlans }) => {
                   <Button
                     asChild
                     className={`w-full ${plan.popular
-                        ? "bg-white text-blue-600 hover:bg-gray-100"
-                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+                        ? "bg-white text-primary hover:bg-white/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
                       }`}
                     size="lg"
                   >
@@ -328,8 +328,8 @@ const Pricing = ({ plans: dbPlans }) => {
                   <Button
                     asChild
                     className={`w-full ${plan.popular
-                        ? "bg-white text-blue-600 hover:bg-gray-100"
-                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+                        ? "bg-white text-primary hover:bg-white/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
                       }`}
                     size="lg"
                   >

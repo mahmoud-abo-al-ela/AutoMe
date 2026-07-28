@@ -24,6 +24,7 @@ import {
   Building2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { submitContactForm } from "@/actions/contact";
 
 const contactMethods = [
   {
@@ -100,12 +101,23 @@ export default function ContactPage() {
 
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const result = await submitContactForm(formState);
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success("Message sent! We'll get back to you soon.");
+      if (result?.success) {
+        setIsSubmitted(true);
+        toast.success("Message sent! We'll get back to you soon.");
+      } else {
+        toast.error(
+          result?.error?.message ||
+            "Something went wrong. Please try again later."
+        );
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

@@ -43,7 +43,7 @@ const Testimonials = () => {
     ];
 
     return (
-        <section className="py-16 sm:py-24 bg-gradient-to-b from-gray-50 to-white">
+        <section className="py-16 sm:py-24 bg-gradient-to-b from-muted to-background">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -52,17 +52,17 @@ const Testimonials = () => {
                     viewport={{ once: true }}
                     className="text-center mb-12 sm:mb-16"
                 >
-                    <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
                         <Star className="h-4 w-4 fill-current" />
                         <span>Customer Reviews</span>
                     </div>
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
                         Loved by Thousands of{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-brand-accent">
                             Happy Customers
                         </span>
                     </h2>
-                    <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
                         See what our customers have to say about their experience with AutoMe
                     </p>
                 </motion.div>
@@ -87,7 +87,7 @@ const Testimonials = () => {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     viewport={{ once: true }}
-                                    className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col"
+                                    className="bg-card rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-border h-full flex flex-col"
                                 >
                                     <div className="flex items-center gap-1 mb-4">
                                         {[...Array(testimonial.rating)].map((_, i) => (
@@ -98,23 +98,23 @@ const Testimonials = () => {
                                         ))}
                                     </div>
 
-                                    <Quote className="h-8 w-8 text-blue-200 mb-4 flex-shrink-0" />
+                                    <Quote className="h-8 w-8 text-primary/30 mb-4 flex-shrink-0" />
 
-                                    <p className="text-gray-700 mb-6 flex-grow leading-relaxed text-sm sm:text-base">
+                                    <p className="text-muted-foreground mb-6 flex-grow leading-relaxed text-sm sm:text-base">
                                         "{testimonial.content}"
                                     </p>
 
-                                    <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                                    <div className="flex items-center gap-3 pt-4 border-t border-border">
                                         <img
                                             src={testimonial.image}
                                             alt={testimonial.name}
-                                            className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-100"
+                                            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
                                         />
                                         <div>
-                                            <div className="font-semibold text-gray-900 text-sm sm:text-base">
+                                            <div className="font-semibold text-foreground text-sm sm:text-base">
                                                 {testimonial.name}
                                             </div>
-                                            <div className="text-xs sm:text-sm text-gray-500">
+                                            <div className="text-xs sm:text-sm text-muted-foreground">
                                                 {testimonial.role}
                                             </div>
                                         </div>

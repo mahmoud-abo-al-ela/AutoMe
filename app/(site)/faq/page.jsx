@@ -44,7 +44,7 @@ export default async function FAQ() {
       </div>
 
       {/* Contact support section */}
-      <div className="mt-16 bg-[#F1F0FB] rounded-lg p-8 text-center">
+      <div className="mt-16 bg-muted rounded-lg p-8 text-center">
         <h3 className="text-2xl font-semibold mb-3">Still have questions?</h3>
         <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
           If you couldn't find the answer you were looking for, our support team

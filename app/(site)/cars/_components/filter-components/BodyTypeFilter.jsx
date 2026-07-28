@@ -1,62 +1,32 @@
-import React from "react";
-import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+"use client";
 
-const BodyTypeFilter = ({
-  selectedBodyTypes,
-  availableBodyTypes,
-  toggleFilter,
-  setSelectedBodyTypes,
-  isLoading,
-}) => {
+import { CarFront } from "lucide-react";
+import { FilterSection } from "./FilterSection";
+import { FilterChip } from "./FilterChip";
+
+const BodyTypeFilter = ({ selected = [], options = [], onToggle, isLoading }) => {
   return (
-    <AccordionItem value="body" className="border-none">
-      <AccordionTrigger className="py-2 hover:no-underline cursor-pointer">
-        <span className="text-sm font-medium">Body Type</span>
-        {selectedBodyTypes.length > 0 && (
-          <Badge
-            variant="secondary"
-            className="ml-2 bg-primary/10 text-primary"
-          >
-            {selectedBodyTypes.length}
-          </Badge>
-        )}
-      </AccordionTrigger>
-      <AccordionContent>
-        {availableBodyTypes.length > 0 ? (
-          <div className="flex flex-wrap gap-2 pt-1 pb-2">
-            {availableBodyTypes.map((type) => (
-              <Badge
-                key={type}
-                variant="outline"
-                className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
-                  selectedBodyTypes.includes(type)
-                    ? "bg-sky-100 text-sky-700 border-sky-200 hover:bg-sky-200"
-                    : "hover:bg-slate-100 cursor-pointer"
-                } ${isLoading ? "opacity-50 pointer-events-none" : ""} cursor-pointer`}
-                onClick={() =>
-                  toggleFilter(type, selectedBodyTypes, setSelectedBodyTypes)
-                }
-              >
-                {type}
-                {selectedBodyTypes.includes(type) && (
-                  <X className="ml-1 h-3 w-3" />
-                )}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <div className="text-sm text-muted-foreground py-1">
-            No body types available
-          </div>
-        )}
-      </AccordionContent>
-    </AccordionItem>
+    <FilterSection
+      value="body"
+      icon={CarFront}
+      label="Body Type"
+      count={selected.length}
+      isEmpty={options.length === 0}
+      emptyLabel="No body types available"
+    >
+      <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
+        {options.map(({ value, count }) => (
+          <FilterChip
+            key={value}
+            label={value}
+            count={count}
+            selected={selected.includes(value)}
+            disabled={isLoading}
+            onClick={() => onToggle(value)}
+          />
+        ))}
+      </div>
+    </FilterSection>
   );
 };
 

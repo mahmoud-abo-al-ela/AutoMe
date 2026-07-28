@@ -5,7 +5,11 @@ import LoadingProvider from "@/components/LoadingProvider";
 import { StreamChatProvider } from "@/components/StreamChat";
 import QueryProvider from "@/components/providers/QueryProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata = {
   title: "AutoMe",
@@ -15,13 +19,12 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en" className="scroll-smooth h-full">
+      <html lang="en" className={`${inter.variable} scroll-smooth h-full`}>
         <body className={`${inter.className} flex flex-col min-h-screen`}>
           <LoadingProvider>
             <QueryProvider>

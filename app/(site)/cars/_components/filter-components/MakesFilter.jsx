@@ -1,68 +1,75 @@
-import React from "react";
-import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+"use client";
 
-const MakesFilter = ({
-  selectedMakes,
-  availableMakes,
-  toggleFilter,
-  setSelectedMakes,
-  isLoading,
-}) => {
+import { useState } from "react";
+import { Car, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { FilterSection } from "./FilterSection";
+import { FilterChip } from "./FilterChip";
+
+const COLLAPSED_COUNT = 12;
+
+const MakesFilter = ({ selected = [], options = [], onToggle, isLoading }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filtered = query
+    ? options.filter((o) => o.value.toLowerCase().includes(query.toLowerCase()))
+    : options;
+  const visible = expanded ? filtered : filtered.slice(0, COLLAPSED_COUNT);
+  const hiddenCount = filtered.length - visible.length;
+
   return (
-    <AccordionItem value="makes" className="border-none">
-      <AccordionTrigger className="py-1.5 sm:py-2 hover:no-underline cursor-pointer">
-        <span className="text-xs sm:text-sm font-medium">Makes</span>
-        {selectedMakes.length > 0 && (
-          <Badge
-            variant="secondary"
-            className="ml-1.5 sm:ml-2 bg-primary/10 text-primary text-xs"
-          >
-            {selectedMakes.length}
-          </Badge>
-        )}
-      </AccordionTrigger>
-      <AccordionContent>
-        <div className="flex flex-wrap gap-1 sm:gap-2 pt-1 pb-2">
-          {availableMakes.slice(0, 12).map((make) => (
-            <Badge
-              key={make}
-              variant="outline"
-              className={`transition-all duration-200 hover:scale-105 active:scale-95 ${
-                selectedMakes.includes(make)
-                  ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200"
-                  : "hover:bg-slate-100 cursor-pointer"
-              } ${
-                isLoading ? "opacity-50 pointer-events-none" : ""
-              } text-xs py-0.5 px-1.5 sm:px-2 cursor-pointer`}
-              onClick={() =>
-                toggleFilter(make, selectedMakes, setSelectedMakes)
-              }
-            >
-              {make}
-              {selectedMakes.includes(make) && (
-                <X className="ml-1 h-2.5 w-2.5 sm:h-3 sm:w-3" />
-              )}
-            </Badge>
-          ))}
-          {availableMakes.length > 12 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[10px] sm:text-xs h-5 sm:h-6 px-1.5 sm:px-2"
-            >
-              +{availableMakes.length - 12} more
-            </Button>
-          )}
+    <FilterSection
+      value="makes"
+      icon={Car}
+      label="Makes"
+      count={selected.length}
+      isEmpty={options.length === 0}
+      emptyLabel="No makes available"
+    >
+      {options.length > COLLAPSED_COUNT && (
+        <div className="relative mb-2">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search makes..."
+            className="h-8 pl-8 text-xs"
+            aria-label="Search makes"
+          />
         </div>
-      </AccordionContent>
-    </AccordionItem>
+      )}
+      <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
+        {visible.map(({ value, count }) => (
+          <FilterChip
+            key={value}
+            label={value}
+            count={count}
+            selected={selected.includes(value)}
+            disabled={isLoading}
+            onClick={() => onToggle(value)}
+          />
+        ))}
+        {!expanded && hiddenCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="rounded-full px-2 text-xs font-medium text-primary hover:underline"
+          >
+            +{hiddenCount} more
+          </button>
+        )}
+        {expanded && filtered.length > COLLAPSED_COUNT && (
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="rounded-full px-2 text-xs font-medium text-muted-foreground hover:underline"
+          >
+            Show less
+          </button>
+        )}
+      </div>
+    </FilterSection>
   );
 };
 

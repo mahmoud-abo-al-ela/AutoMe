@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { CheckCircle, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -18,12 +19,24 @@ const Hero = () => {
   return (
     <section
       id="main-content"
-      className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#1A1F2C] text-white min-h-screen flex items-center overflow-hidden"
+      className="relative bg-slate-950 text-white min-h-screen flex items-center overflow-hidden"
     >
-      {/* Animated background elements */}
+      {/* Self-hosted, optimized background image + brand-tinted ambient glows */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1470')] bg-cover bg-center opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0f1a]/70 to-[#0a0f1a]/95"></div>
+        <Image
+          src="/hero-car.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        {/* Darkening overlays keep the white hero text legible over the photo */}
+        <div className="absolute inset-0 bg-slate-950/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/60 to-slate-950/95" />
+        {/* Brand glows inherit tenant --primary / --brand-accent */}
+        <div className="absolute -top-1/4 right-1/4 w-[32rem] h-[32rem] bg-primary/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-[28rem] h-[28rem] bg-brand-accent/15 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto relative z-10 px-4 md:px-6 -mt-20 md:mt-0">
@@ -35,7 +48,7 @@ const Hero = () => {
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 sm:mb-6 md:mb-8 leading-tight"
           >
             Find Your Perfect Car{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-primary">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-brand-accent">
               Powered by AI
             </span>
           </motion.h1>

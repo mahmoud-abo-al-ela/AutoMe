@@ -1,275 +1,208 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import FilterPanel from "./FilterPanel";
 import CarsHero from "./CarsHero";
 import ResultsSummary from "./ResultsSummary";
+import { ActiveFilters } from "./ActiveFilters";
+import { CompareTray } from "./CompareTray";
 import CarCard from "@/components/CarCard";
-import { Filter, Car, SlidersHorizontal, X } from "lucide-react";
+import CarCardSkeleton from "@/components/CarCardSkeleton";
+import { Car, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-    Sheet,
-    SheetContent,
-    SheetTrigger,
-    SheetHeader,
-    SheetTitle,
-    SheetClose,
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
-import { ActiveFilters } from "./ActiveFilters";
 import { EmptyState } from "@/components/common/EmptyState";
-import { LoadingGrid } from "@/components/common/LoadingStates";
 
 export const CarsPagePresenter = ({
-    cars,
-    pagination,
-    loading,
-    error,
-    filters,
-    activeFilters,
-    filterPanelRef,
-    handlers,
+  cars,
+  pagination,
+  loading,
+  isFetching,
+  isError,
+  errorMessage,
+  refetch,
+  isPaging,
+  filters,
+  searchValue,
+  perPage,
+  filterOptions,
+  optionsLoading,
+  activeFilters,
+  handlers,
 }) => {
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [heroSearch, setHeroSearch] = useState(filters.search || "");
-    const debounceRef = useRef(null);
-    const hasActiveFilters = activeFilters.length > 0;
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const hasActiveFilters = activeFilters.length > 0;
+  const gridCols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
-    // Sync hero search with external filter changes (e.g. clear filter chip)
-    useEffect(() => {
-        setHeroSearch(filters.search || "");
-    }, [filters.search]);
+  const panelProps = {
+    filters,
+    options: filterOptions,
+    handlers,
+    isLoading: isFetching,
+    optionsLoading,
+    onReset: handlers.resetAllFilters,
+  };
 
-    const handleHeroSearchChange = useCallback(
-        (e) => {
-            const value = e.target.value;
-            setHeroSearch(value);
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto mt-14 px-4 pb-24 pt-8">
+        <CarsHero
+          searchQuery={searchValue}
+          onSearchChange={handlers.setSearch}
+          onClearSearch={() => handlers.setSearch("")}
+          totalCount={pagination.total}
+          onQuickPick={handlers.applyPatch}
+        />
 
-            // Debounce the filter application
-            if (debounceRef.current) clearTimeout(debounceRef.current);
-            debounceRef.current = setTimeout(() => {
-                handlers.handleFilterChange({
-                    ...filters,
-                    search: value || undefined,
-                });
-            }, 400);
-        },
-        [filters, handlers]
-    );
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Desktop sidebar */}
+          <aside className="hidden w-full lg:sticky lg:top-24 lg:block lg:w-1/4 lg:self-start">
+            <FilterPanel {...panelProps} />
+          </aside>
 
-    const handleClearHeroSearch = useCallback(() => {
-        setHeroSearch("");
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        handlers.handleFilterChange({
-            ...filters,
-            search: undefined,
-        });
-    }, [filters, handlers]);
+          {/* Results */}
+          <div className="w-full lg:w-3/4" id="cars-results-section">
+            <ActiveFilters filters={activeFilters} onClearFilter={handlers.clearFilter} />
 
-    const handleSortChange = useCallback(
-        (value) => {
-            handlers.handleFilterChange({
-                ...filters,
-                sortBy: value,
-            });
-        },
-        [filters, handlers]
-    );
+            {!isError && (cars.length > 0 || loading) && (
+              <ResultsSummary
+                currentPage={pagination.page}
+                limit={pagination.limit}
+                total={pagination.total}
+                sortBy={filters.sortBy || "newest"}
+                onSortChange={handlers.setSort}
+                perPage={perPage}
+                onPerPageChange={handlers.changePerPage}
+                isLoading={isFetching}
+              />
+            )}
 
-    const handleFilterChange = (newFilters) => {
-        handlers.handleFilterChange(newFilters);
-        setIsFilterOpen(false);
-    };
-
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50/50 via-white to-blue-50/30">
-            <div className="container mx-auto py-4 px-4 pt-8 mt-14">
-                <CarsHero
-                    searchQuery={heroSearch}
-                    onSearchChange={handleHeroSearchChange}
-                    onClearSearch={handleClearHeroSearch}
-                    totalCount={pagination.total}
-                    onQuickSearch={(term) => {
-                        setHeroSearch(term);
-                        handlers.handleFilterChange({
-                            ...filters,
-                            search: term,
-                        });
-                    }}
+            {loading || isPaging ? (
+              <div className={`grid ${gridCols} gap-5 sm:gap-7`}>
+                {Array.from({ length: perPage > 12 ? 12 : perPage }).map((_, i) => (
+                  <CarCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-16 text-center">
+                <h3 className="mb-2 text-lg font-semibold text-destructive">
+                  Something went wrong
+                </h3>
+                <p className="mb-6 max-w-md text-sm text-muted-foreground">
+                  {errorMessage || "We couldn't load cars right now. Please try again."}
+                </p>
+                <Button onClick={() => refetch()} variant="outline" className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Retry
+                </Button>
+              </div>
+            ) : cars.length === 0 ? (
+              hasActiveFilters ? (
+                <EmptyState
+                  variant="filtered"
+                  title="No cars match your filters"
+                  description="Try widening your price range or removing a filter to see more results."
+                  onClearFilters={handlers.resetAllFilters}
                 />
-
-            <div className="lg:hidden mb-4">
-                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                    <SheetTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-full flex items-center justify-center gap-2"
-                        >
-                            <SlidersHorizontal className="h-4 w-4" />
-                            <span>Filters</span>
-                            {hasActiveFilters && (
-                                <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-white text-xs font-medium">
-                                    {activeFilters.length}
-                                </span>
-                            )}
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent
-                        side="left"
-                        className="w-[85%] sm:w-[350px] p-0 flex flex-col"
+              ) : (
+                <EmptyState
+                  icon={Car}
+                  title="No cars listed yet"
+                  description="There are no vehicles available right now. Please check back soon."
+                />
+              )
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className={isFetching ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"}
+              >
+                <motion.div
+                  className={`grid ${gridCols} gap-5 sm:gap-7`}
+                  initial={reduceMotion ? false : "hidden"}
+                  animate="visible"
+                  variants={{
+                    hidden: {},
+                    visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.05 } },
+                  }}
+                >
+                  {cars.map((car, i) => (
+                    <motion.div
+                      key={car.id}
+                      variants={{
+                        hidden: { opacity: 0, y: 16 },
+                        visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+                      }}
                     >
-                        {/* Sticky Header */}
-                        <SheetHeader className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex flex-row items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <SheetTitle className="text-base font-semibold">
-                                    Filters
-                                </SheetTitle>
-                                {hasActiveFilters && (
-                                    <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                                        {activeFilters.length}
-                                    </span>
-                                )}
-                            </div>
-                            <SheetClose className="rounded-full p-1 hover:bg-muted transition-colors">
-                                <X className="h-4 w-4" />
-                                <span className="sr-only">Close</span>
-                            </SheetClose>
-                        </SheetHeader>
+                      <CarCard car={car} index={i} />
+                    </motion.div>
+                  ))}
+                </motion.div>
 
-                        {/* Scrollable Filter Content */}
-                        <div className="flex-1 overflow-y-auto p-4">
-                            <FilterPanel
-                                ref={filterPanelRef}
-                                onFilter={handleFilterChange}
-                                isLoading={loading}
-                                initialFilters={filters}
-                            />
-                        </div>
-
-                        {/* Sticky Footer */}
-                        <div className="sticky bottom-0 z-10 bg-white border-t px-4 py-3">
-                            <Button
-                                className="w-full"
-                                onClick={() => setIsFilterOpen(false)}
-                            >
-                                Show {pagination.total.toLocaleString()} results
-                            </Button>
-                        </div>
-                    </SheetContent>
-                </Sheet>
-            </div>
-
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="hidden lg:block w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
-                    <FilterPanel
-                        ref={filterPanelRef}
-                        onFilter={handlers.handleFilterChange}
-                        isLoading={loading}
-                        initialFilters={filters}
+                {pagination.totalPages > 1 && (
+                  <div className="mt-8 space-y-4 border-t border-border pt-4">
+                    <Pagination
+                      currentPage={pagination.page}
+                      totalPages={pagination.totalPages}
+                      onPageChange={handlers.changePage}
+                      disabled={isFetching}
                     />
-                </div>
-
-                <div className="w-full lg:w-3/4" id="cars-results-section">
-                    <ActiveFilters
-                        filters={activeFilters}
-                        onClearFilter={handlers.clearFilter}
+                    <PaginationInfo
+                      currentPage={pagination.page}
+                      limit={pagination.limit}
+                      total={pagination.total}
                     />
-
-                    {!error && (cars.length > 0 || loading) && (
-                        <ResultsSummary
-                            currentPage={pagination.page}
-                            limit={pagination.limit}
-                            total={pagination.total}
-                            sortBy={filters.sortBy || "newest"}
-                            onSortChange={handleSortChange}
-                            isLoading={loading}
-                        />
-                    )}
-
-                    {loading && <LoadingGrid count={6} />}
-
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                            <h3 className="text-lg font-semibold text-red-800 mb-2">
-                                Error loading cars
-                            </h3>
-                            <p className="text-red-600">
-                                Please try again later or adjust your filters.
-                            </p>
-                        </div>
-                    )}
-
-                    {!loading && !error && cars.length === 0 && (
-                        <EmptyState
-                            icon={Car}
-                            title="No cars found"
-                            description="We couldn't find any cars matching your current filters."
-                            actionLabel="Reset Filters"
-                            onAction={handlers.resetAllFilters}
-                        />
-                    )}
-
-                    {!loading && !error && cars.length > 0 && (
-                        <motion.div
-                            key={`cars-${pagination.page}-${filters.sortBy}`}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <motion.div
-                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7"
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: {},
-                                    visible: {
-                                        transition: {
-                                            staggerChildren: 0.06,
-                                        },
-                                    },
-                                }}
-                            >
-                                {cars.map((car) => (
-                                    <motion.div
-                                        key={car.id}
-                                        variants={{
-                                            hidden: { opacity: 0, y: 20 },
-                                            visible: {
-                                                opacity: 1,
-                                                y: 0,
-                                                transition: {
-                                                    duration: 0.4,
-                                                    ease: "easeOut",
-                                                },
-                                            },
-                                        }}
-                                    >
-                                        <CarCard car={car} />
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-
-                            {pagination.totalPages > 1 && (
-                                <div className="mt-8 space-y-4 pt-4 border-t border-slate-100">
-                                    <Pagination
-                                        currentPage={pagination.page}
-                                        totalPages={pagination.totalPages}
-                                        onPageChange={handlers.handlePageChange}
-                                        disabled={loading}
-                                    />
-                                    <PaginationInfo
-                                        currentPage={pagination.page}
-                                        limit={pagination.limit}
-                                        total={pagination.total}
-                                    />
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
-                </div>
-            </div>
-            </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Mobile filter trigger — sticky bottom bar */}
+      <div className="safe-area-inset-bottom fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 p-3 backdrop-blur-md lg:hidden">
+        <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="w-full gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Filters</span>
+              {hasActiveFilters && (
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-white">
+                  {activeFilters.length}
+                </span>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="flex w-[88%] flex-col p-0 sm:w-[360px]">
+            <SheetHeader className="sticky top-0 z-10 border-b border-border bg-background px-4 py-3">
+              <SheetTitle className="text-base font-semibold">Filters</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto p-4">
+              <FilterPanel {...panelProps} />
+            </div>
+            <div className="sticky bottom-0 z-10 border-t border-border bg-background px-4 py-3">
+              <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
+                Show {pagination.total.toLocaleString()} results
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <CompareTray />
+    </div>
+  );
 };
+
+export default CarsPagePresenter;

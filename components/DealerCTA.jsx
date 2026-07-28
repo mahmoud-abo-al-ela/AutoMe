@@ -15,7 +15,7 @@ function DealerCTA() {
   ];
 
   return (
-    <section className="py-16 sm:py-20 bg-gradient-to-br from-blue-900 to-[#1A1F2C] text-white relative overflow-hidden">
+    <section className="py-16 sm:py-20 bg-gradient-to-br from-blue-900 to-slate-950 text-white relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -right-20 -top-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
@@ -40,7 +40,7 @@ function DealerCTA() {
 
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 Start Your Own{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-brand-accent">
                   Digital Dealership
                 </span>
               </h2>
