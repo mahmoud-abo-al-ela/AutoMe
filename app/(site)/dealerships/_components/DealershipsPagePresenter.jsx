@@ -1,183 +1,108 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Building2 } from "lucide-react";
 import {
   DealershipGridSkeleton,
   DealershipsErrorState,
   DealershipsGridView,
   HeroBanner,
-  InlineToolbar,
+  DealershipFilterBar,
 } from "./index";
 import { EmptyState } from "@/components/common/EmptyState";
-import { getDealerships, getDealershipFilters } from "@/actions/dealerships";
-import { useDebounce } from "@/hooks/use-debounce";
 
-export const DealershipsPagePresenter = () => {
-  const [dealerships, setDealerships] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 12,
-    total: 0,
-    totalPages: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    search: "",
-    minRating: undefined,
-    city: undefined,
-    sortBy: "rating",
-    sortOrder: "desc",
-  });
-  const [filterOptions, setFilterOptions] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const debouncedSearch = useDebounce(searchQuery, 300);
-
-  // Fetch filter options on mount
-  useEffect(() => {
-    const fetchFilterOptions = async () => {
-      try {
-        const response = await getDealershipFilters();
-        if (response.success) {
-          setFilterOptions(response.data);
-        }
-      } catch (err) {
-        console.error("Error fetching filter options:", err);
-      }
-    };
-    fetchFilterOptions();
-  }, []);
-
-  // Fetch dealerships when filters or pagination changes
-  useEffect(() => {
-    const fetchDealerships = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await getDealerships(filters, {
-          page: pagination.page,
-          limit: pagination.limit,
-        });
-        if (response.success) {
-          setDealerships(response.data.dealerships);
-          setPagination(response.data.pagination);
-        } else {
-          setError(response.error?.message || "Failed to load dealerships");
-        }
-      } catch (err) {
-        console.error("Error fetching dealerships:", err);
-        setError("Failed to load dealerships. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDealerships();
-  }, [filters, pagination.page]);
-
-  // Update search filter when debounced search changes
-  useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      search: debouncedSearch,
-    }));
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  }, [debouncedSearch]);
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const clearSearch = () => {
-    setSearchQuery("");
-  };
-
-  const handleRatingChange = (value) => {
-    setFilters((prev) => ({
-      ...prev,
-      minRating: prev.minRating === value ? undefined : value,
-    }));
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  };
-
-  const handleCityChange = (city) => {
-    setFilters((prev) => ({
-      ...prev,
-      city: prev.city === city ? undefined : city,
-    }));
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  };
-
-  const handleSortChange = (sortBy, sortOrder) => {
-    setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  };
-
-  const handlePageChange = (newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const resetAllFilters = () => {
-    const clearedFilters = {
-      search: "",
-      minRating: undefined,
-      city: undefined,
-      sortBy: "rating",
-      sortOrder: "desc",
-    };
-    setFilters(clearedFilters);
-    setSearchQuery("");
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  };
+/**
+ * Presentational shell for the dealerships listing. All state lives in
+ * useDealershipsPage (via ClientPage); this component only renders.
+ */
+export const DealershipsPagePresenter = ({
+  dealerships,
+  pagination,
+  loading,
+  isFetching,
+  isPaging,
+  isError,
+  errorMessage,
+  refetch,
+  filters,
+  searchValue,
+  perPage,
+  filterOptions,
+  activeFilters,
+  handlers,
+}) => {
+  const hasActiveFilters = activeFilters.length > 0;
+  // Keep the previous grid mounted (dimmed) while re-fetching after the first
+  // load, so filtering/paging doesn't flash the whole grid to skeletons.
+  const showGrid = !loading && !isError && dealerships.length > 0;
+  const showEmpty = !loading && !isError && dealerships.length === 0;
 
   return (
     <div className="container mx-auto py-4 px-4 mt-18">
-      {/* Hero Banner with integrated search */}
       <HeroBanner
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onClearSearch={clearSearch}
+        searchQuery={searchValue}
+        onSearchChange={handlers.setSearch}
+        onClearSearch={() => handlers.setSearch("")}
         stats={filterOptions?.stats}
       />
 
-      {/* Inline Toolbar: result count + rating chips + sort */}
-      <InlineToolbar
+      <DealershipFilterBar
         totalCount={pagination.total}
         filters={filters}
         filterOptions={filterOptions}
-        onRatingChange={handleRatingChange}
-        onCityChange={handleCityChange}
-        onSortChange={handleSortChange}
+        perPage={perPage}
+        activeFilters={activeFilters}
+        onToggleFilter={handlers.toggleFilter}
+        onSortChange={handlers.setSort}
+        onPerPageChange={handlers.changePerPage}
+        onClearFilter={handlers.clearFilter}
+        onResetAll={handlers.resetAllFilters}
       />
 
-      {/* Loading State */}
-      {loading && <DealershipGridSkeleton count={8} />}
+      <div id="dealerships-results">
+        {/* Loading (first load only) */}
+        {loading && <DealershipGridSkeleton count={perPage} />}
 
-      {/* Error State */}
-      {error && <DealershipsErrorState error={error} />}
+        {/* Error */}
+        {!loading && isError && (
+          <DealershipsErrorState error={errorMessage} onRetry={refetch} />
+        )}
 
-      {/* Empty State */}
-      {!loading && !error && dealerships.length === 0 && (
-        <EmptyState
-          icon={Building2}
-          title="No dealerships found"
-          description="We couldn't find any dealerships matching your current filters."
-          actionLabel="Reset Filters"
-          onAction={resetAllFilters}
-        />
-      )}
+        {/* Empty */}
+        {showEmpty && (
+          <EmptyState
+            variant={hasActiveFilters ? "filtered" : "standalone"}
+            icon={Building2}
+            title={hasActiveFilters ? "No matching dealerships" : "No dealerships yet"}
+            description={
+              hasActiveFilters
+                ? "Try adjusting your search or filters to find what you're looking for."
+                : "There are no dealerships to show right now. Check back soon."
+            }
+            onClearFilters={hasActiveFilters ? handlers.resetAllFilters : undefined}
+            actionLabel={hasActiveFilters ? undefined : "Browse cars"}
+            actionHref={hasActiveFilters ? undefined : "/cars"}
+          />
+        )}
 
-      {/* Full-width Grid View */}
-      {!loading && !error && dealerships.length > 0 && (
-        <DealershipsGridView
-          dealerships={dealerships}
-          pagination={pagination}
-          loading={loading}
-          onPageChange={handlePageChange}
-        />
-      )}
+        {/* Grid */}
+        {showGrid && (
+          <div
+            className={
+              isFetching && !isPaging
+                ? "opacity-60 transition-opacity pointer-events-none"
+                : "transition-opacity"
+            }
+            aria-busy={isFetching}
+          >
+            <DealershipsGridView
+              dealerships={dealerships}
+              pagination={pagination}
+              loading={isFetching}
+              onPageChange={handlers.changePage}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

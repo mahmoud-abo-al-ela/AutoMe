@@ -12,4 +12,4 @@ export {
 export { DealershipsErrorState } from "./DealershipsErrorState";
 export { DealershipsGridView } from "./DealershipsGridView";
 export { HeroBanner } from "./HeroBanner";
-export { InlineToolbar } from "./InlineToolbar";
+export { DealershipFilterBar } from "./DealershipFilterBar";

@@ -1,54 +1,34 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function DealershipCardSkeleton() {
     return (
-        <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-            <CardHeader className="space-y-3">
-                <div className="flex items-start gap-4">
-                    {/* Logo skeleton */}
-                    <Skeleton className="h-16 w-16 rounded-lg flex-shrink-0" />
-
-                    <div className="flex-1 space-y-2">
-                        {/* Name skeleton */}
-                        <Skeleton className="h-6 w-3/4" />
-
-                        {/* Rating skeleton */}
-                        <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-4 w-16" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Plan badge skeleton */}
-                <Skeleton className="h-5 w-20" />
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-                {/* Description skeleton */}
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                </div>
-
-                {/* Contact info skeleton */}
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                    <Skeleton className="h-4 w-3/4" />
-                </div>
-
-                {/* Car count skeleton */}
-                <Skeleton className="h-4 w-32" />
-            </CardContent>
-        </Card>
+        <div className="flex h-full flex-col items-center rounded-xl border border-border bg-card p-5 text-center sm:p-6">
+            {/* Logo */}
+            <Skeleton className="mb-4 h-20 w-20 rounded-xl" />
+            {/* Name */}
+            <Skeleton className="h-5 w-2/3" />
+            {/* Rating */}
+            <Skeleton className="mt-3 h-4 w-24" />
+            {/* Location */}
+            <Skeleton className="mt-3 h-3 w-28" />
+            {/* Brand pills */}
+            <div className="mt-3 flex gap-1.5">
+                <Skeleton className="h-5 w-10 rounded-full" />
+                <Skeleton className="h-5 w-12 rounded-full" />
+                <Skeleton className="h-5 w-10 rounded-full" />
+            </div>
+            {/* Footer */}
+            <div className="mt-auto w-full border-t border-border pt-4">
+                <Skeleton className="mx-auto h-4 w-32" />
+            </div>
+        </div>
     );
 }
 
-export function DealershipGridSkeleton({ count = 6 }) {
+export function DealershipGridSkeleton({ count = 8 }) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: count }).map((_, index) => (
                 <DealershipCardSkeleton key={index} />
             ))}

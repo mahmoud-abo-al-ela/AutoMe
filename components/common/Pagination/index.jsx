@@ -81,7 +81,7 @@ export const Pagination = ({
     );
 };
 
-export const PaginationInfo = ({ currentPage, limit, total }) => {
+export const PaginationInfo = ({ currentPage, limit, total, noun = "items" }) => {
     if (!total) return null;
 
     const start = Math.min((currentPage - 1) * limit + 1, total);
@@ -89,7 +89,7 @@ export const PaginationInfo = ({ currentPage, limit, total }) => {
 
     return (
         <div className="text-center text-sm text-muted-foreground mt-4">
-            Showing {start} to {end} of {total} items
+            Showing {start} to {end} of {total.toLocaleString()} {noun}
         </div>
     );
 };

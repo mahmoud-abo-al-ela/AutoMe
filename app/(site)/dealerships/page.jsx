@@ -1,9 +1,29 @@
-"use client";
+import { Suspense } from "react";
+import { getDealerships } from "@/actions/dealerships";
+import { parseFiltersFromSearch } from "@/hooks/dealerships-url";
+import ClientPage from "./ClientPage";
 
-import { DealershipsPagePresenter } from "./_components";
+export default async function DealershipsPage({ searchParams }) {
+    const params = await searchParams;
 
-const DealershipsPage = () => {
-    return <DealershipsPagePresenter />;
-};
+    // Reuse the client parser by rebuilding a query string from the params
+    // object, so server and client derive identical initial state.
+    const sp = new URLSearchParams();
+    for (const [key, value] of Object.entries(params || {})) {
+        if (value == null) continue;
+        sp.set(key, Array.isArray(value) ? value[0] : value);
+    }
 
-export default DealershipsPage;
+    const { filters, page, perPage } = parseFiltersFromSearch(sp.toString());
+
+    const initialData = await getDealerships(filters, { page, limit: perPage });
+
+    return (
+        <Suspense>
+            <ClientPage
+                initialData={initialData}
+                initialState={{ filters, page, perPage }}
+            />
+        </Suspense>
+    );
+}

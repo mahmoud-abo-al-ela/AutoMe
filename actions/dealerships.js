@@ -38,9 +38,9 @@ export const searchDealerships = withErrorHandling(async (query, filters = {}, p
 /**
  * Get dealership filters
  */
-export const getDealershipFilters = withErrorHandling(async () => {
-    const filters = await dealershipService.getDealershipFilters();
-    return createSuccessResponse(filters);
+export const getDealershipFilters = withErrorHandling(async (filters = {}) => {
+    const options = await dealershipService.getDealershipFilters(filters);
+    return createSuccessResponse(options);
 });
 
 /**
