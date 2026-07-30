@@ -3,11 +3,12 @@
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { RESOURCE_CONFIG } from "@/lib/middleware/plan-limits";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { ValidationError } from "@/lib/utils/errors";
 
 export const getPlanGateStatus = withOrgAuth(async (ctx, resource) => {
   const config = RESOURCE_CONFIG[resource];
   if (!config) {
-    throw new Error(`Unknown resource: ${resource}`);
+    throw new ValidationError(`Unknown resource: ${resource}`, "resource");
   }
 
   const plan = ctx.organization?.subscription?.plan;

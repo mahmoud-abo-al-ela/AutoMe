@@ -2,6 +2,12 @@
 
 import * as paymentService from "@/lib/services/payment";
 import { withAuth } from "@/lib/middleware/with-auth";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { validateAction } from "@/lib/middleware/with-validation";
+import {
+  createSubscriptionSchema,
+  createCheckoutSessionSchema,
+} from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { ValidationError } from "@/lib/utils/errors";
 
@@ -36,11 +42,17 @@ function handleStripeError(error) {
 
 export const createSubscription = withAuth(
   async (ctx, planId, billingInterval = "month") => {
+    await enforceRateLimit();
+    const validated = validateAction(createSubscriptionSchema, {
+      planId,
+      billingInterval,
+    });
+
     try {
       const result = await paymentService.createSubscription(
         ctx.user,
-        planId,
-        billingInterval
+        validated.planId,
+        validated.billingInterval
       );
 
       return createSuccessResponse(result);
@@ -52,12 +64,19 @@ export const createSubscription = withAuth(
 
 export const createCheckoutSession = withAuth(
   async (ctx, planId, billingPeriod, onboardingSessionId) => {
+    await enforceRateLimit();
+    const validated = validateAction(createCheckoutSessionSchema, {
+      planId,
+      billingPeriod,
+      onboardingSessionId,
+    });
+
     try {
       const result = await paymentService.createCheckoutSession(
         ctx.user,
-        planId,
-        billingPeriod,
-        onboardingSessionId
+        validated.planId,
+        validated.billingPeriod,
+        validated.onboardingSessionId
       );
 
       return createSuccessResponse({ url: result.url });

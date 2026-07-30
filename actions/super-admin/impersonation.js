@@ -4,6 +4,9 @@ import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import * as impersonationService from "@/lib/services/super-admin/impersonation";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { startImpersonationSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 
 /**
@@ -11,6 +14,14 @@ import { createSuccessResponse } from "@/lib/utils/response";
  */
 export const startImpersonation = withSuperAdmin(
   async (admin, organizationId, targetUserId) => {
+    await enforceRateLimit();
+    const validated = validateAction(startImpersonationSchema, {
+      organizationId,
+      targetUserId,
+    });
+    organizationId = validated.organizationId;
+    targetUserId = validated.targetUserId;
+
     const { session, targetUser } =
       await impersonationService.startImpersonation(
         organizationId,

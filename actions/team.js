@@ -8,6 +8,13 @@ import { revalidatePath } from "next/cache";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { validateAction } from "@/lib/middleware/with-validation";
+import {
+  inviteTeamMemberSchema,
+  updateMemberRoleSchema,
+  memberIdSchema,
+} from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 import {
   AuthorizationError,
@@ -17,9 +24,12 @@ import {
 } from "@/lib/utils/errors";
 
 export const inviteTeamMember = withOrgAuth(
-  withUsageLimit("members", async (ctx, { organizationId, email, role }) => {
-    // Note: organizationId is maintained in the signature for backward compatibility
-    // with existing client calls, but we use ctx.organization.id for security.
+  withUsageLimit("members", async (ctx, input) => {
+    await enforceRateLimit();
+    // organizationId in the payload is ignored for security; we always use
+    // ctx.organization.id.
+    const { email, role } = validateAction(inviteTeamMemberSchema, input);
+
     // Check if user has permission (only OWNER can invite)
     const membership = await getUserMembership(ctx.user.id, ctx.organization.id);
     if (!membership || membership.role !== "OWNER") {
@@ -74,7 +84,9 @@ export const inviteTeamMember = withOrgAuth(
 );
 
 export const updateMemberRole = withOrgAuth(
-  async (ctx, { memberId, newRole }) => {
+  async (ctx, input) => {
+    const { memberId, newRole } = validateAction(updateMemberRoleSchema, input);
+
     // Check if user has permission (only OWNER can change roles)
     const currentMembership = await getUserMembership(
       ctx.user.id,
@@ -127,7 +139,9 @@ export const updateMemberRole = withOrgAuth(
 );
 
 export const removeMember = withOrgAuth(
-  async (ctx, { memberId }) => {
+  async (ctx, input) => {
+    const { memberId } = validateAction(memberIdSchema, input);
+
     // Check if user has permission (only OWNER can remove members)
     const currentMembership = await getUserMembership(
       ctx.user.id,

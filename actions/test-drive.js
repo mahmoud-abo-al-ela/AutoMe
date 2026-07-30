@@ -5,6 +5,13 @@ import * as testDriveService from "@/lib/services/test-drive";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth, withOrgAuth } from "@/lib/middleware/with-auth";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { validateAction } from "@/lib/middleware/with-validation";
+import {
+  requestTestDriveSchema,
+  editTestDriveSchema,
+  updateTestDriveStatusSchema,
+} from "@/lib/validations/schemas";
 import { NotFoundError, logError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
@@ -15,7 +22,10 @@ import {
   sendTestDriveStatusUpdateEmail,
 } from "@/lib/services/notification";
 
-export const requestTestDrive = withAuth(async (ctx, testDriveData) => {
+export const requestTestDrive = withAuth(async (ctx, rawData) => {
+  await enforceRateLimit();
+  const testDriveData = validateAction(requestTestDriveSchema, rawData);
+
   // Validate car belongs to current organization when on a subdomain
   const organization = await getCurrentOrganization();
   if (organization && testDriveData.carId) {
@@ -118,13 +128,12 @@ export const getTestDriveById = withAuth(async (ctx, testDriveId) => {
   return createSuccessResponse(testDrive);
 });
 
-export const editTestDrive = withAuth(async (ctx, {
-  testDriveId,
-  date,
-  startTime,
-  endTime,
-  notes = "",
-}) => {
+export const editTestDrive = withAuth(async (ctx, input) => {
+  const { testDriveId, date, startTime, endTime, notes } = validateAction(
+    editTestDriveSchema,
+    input,
+  );
+
   const updatedTestDrive = await testDriveService.editTestDrive(
     testDriveId,
     { date, startTime, endTime, notes },
@@ -162,7 +171,9 @@ export const checkExistingTestDrive = withAuth(async (ctx, carId) => {
   return result;
 });
 
-export const updateTestDriveStatus = withOrgAuth(async (ctx, { testDriveId, status }) => {
+export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
+  const { testDriveId, status } = validateAction(updateTestDriveStatusSchema, input);
+
   const updatedTestDrive = await testDriveService.updateTestDriveStatus(
     testDriveId,
     status,
