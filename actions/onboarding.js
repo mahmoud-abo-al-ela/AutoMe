@@ -1,8 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auditHelpers } from "@/lib/services/audit/audit";
-import { createAdminClient } from "@/lib/supabase";
+import { resolveLogoUrl } from "@/lib/services/onboarding/logo";
 import {
   saveOnboardingSession as saveSession,
   getOnboardingSessionForUser,
@@ -30,57 +29,6 @@ import { request } from "@arcjet/next";
 import { RateLimitError } from "@/lib/utils/errors";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key");
-
-/**
- * Upload base64 image to Supabase Storage
- */
-async function uploadLogoToStorage(base64Data, organizationSlug) {
-  if (!base64Data || !base64Data.startsWith("data:image")) {
-    return null;
-  }
-
-  const supabase = createAdminClient();
-
-  // Extract the base64 content and mime type
-  const matches = base64Data.match(/^data:(.+);base64,(.+)$/);
-  if (!matches) {
-    return null;
-  }
-
-  const mimeType = matches[1];
-  const base64Content = matches[2];
-  const buffer = Buffer.from(base64Content, "base64");
-
-  // Determine file extension
-  const extMap = {
-    "image/jpeg": "jpg",
-    "image/jpg": "jpg",
-    "image/png": "png",
-    "image/gif": "gif",
-    "image/webp": "webp",
-  };
-  const ext = extMap[mimeType] || "png";
-  const fileName = `${organizationSlug}-${Date.now()}.${ext}`;
-
-  // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
-    .from("organization-logos")
-    .upload(fileName, buffer, {
-      contentType: mimeType,
-      upsert: false,
-    });
-
-  if (error) {
-    throw error;
-  }
-
-  // Get public URL
-  const { data: urlData } = supabase.storage
-    .from("organization-logos")
-    .getPublicUrl(fileName);
-
-  return urlData.publicUrl;
-}
 
 export const checkSlugAvailability = withErrorHandling(async (slug) => {
   if (!slug || slug.length < 3) {
@@ -167,12 +115,7 @@ export const createOrganization = withAuth(
     }
 
     // Upload logo to storage if provided (base64)
-    let logoUrl = null;
-    if (logo && logo.startsWith("data:image")) {
-      logoUrl = await uploadLogoToStorage(logo, slug);
-    } else if (logo) {
-      logoUrl = logo;
-    }
+    const logoUrl = await resolveLogoUrl(logo, slug);
 
     const stripeData = {
       subscriptionId: stripeSubscription?.id || subscriptionId,
@@ -290,12 +233,7 @@ export const createOrganizationAfterCheckout = withAuth(
       );
     }
 
-    let logoUrl = null;
-    if (logo && logo.startsWith("data:image")) {
-      logoUrl = await uploadLogoToStorage(logo, slug);
-    } else if (logo) {
-      logoUrl = logo;
-    }
+    const logoUrl = await resolveLogoUrl(logo, slug);
 
     const stripeData = {
       subscriptionId: stripeSubscription?.id || session.subscription,
