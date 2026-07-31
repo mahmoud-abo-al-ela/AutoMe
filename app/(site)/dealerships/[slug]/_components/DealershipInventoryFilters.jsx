@@ -1,24 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Search, ChevronDown, SlidersHorizontal, X, RotateCcw } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose, SheetFooter } from "@/components/ui/sheet";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ChevronDown } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { motion, AnimatePresence } from "framer-motion";
-
-const formatPrice = (price) => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-    }).format(price);
-};
+import { formatPrice, buildActiveChips } from "./inventory-filters/filter-utils";
+import FilterCheckboxPopover from "./inventory-filters/FilterCheckboxPopover";
+import FilterCheckboxGroup from "./inventory-filters/FilterCheckboxGroup";
+import ActiveFilterChips from "./inventory-filters/ActiveFilterChips";
 
 export const DealershipInventoryFilters = ({
     filters,
@@ -124,23 +119,7 @@ export const DealershipInventoryFilters = ({
         }
     };
 
-    // Calculate active filters counts and list for chips
-    const activeChips = [];
-    if (filters.search) {
-        activeChips.push({ type: "search", label: `Search: "${filters.search}"`, field: "search" });
-    }
-    if (filters.minPrice || filters.maxPrice) {
-        const minStr = filters.minPrice ? formatPrice(filters.minPrice) : "$0";
-        const maxStr = filters.maxPrice ? formatPrice(filters.maxPrice) : formatPrice(availableFilters?.priceRange?.max || 100000);
-        activeChips.push({ type: "price", label: `Price: ${minStr} - ${maxStr}`, field: "price" });
-    }
-    ["bodyType", "fuelType", "transmission"].forEach((field) => {
-        if (filters[field]) {
-            filters[field].split(",").forEach((val) => {
-                activeChips.push({ type: field, label: val, field, value: val });
-            });
-        }
-    });
+    const activeChips = buildActiveChips(filters, availableFilters);
 
     const bodyTypes = availableFilters?.bodyTypes || [];
     const fuelTypes = availableFilters?.fuelTypes || [];
@@ -243,68 +222,9 @@ export const DealershipInventoryFilters = ({
                                     </div>
                                 </div>
 
-                                {/* Body Type Options */}
-                                {bodyTypes.length > 0 && (
-                                    <div className="space-y-3">
-                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Body Type</h4>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {bodyTypes.map((type) => {
-                                                const isChecked = (filters.bodyType || "").split(",").includes(type);
-                                                return (
-                                                    <label key={type} className={`flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 cursor-pointer transition-colors ${isChecked ? 'bg-primary/5 border-primary/20 text-primary' : 'bg-white hover:bg-slate-50 text-slate-700'}`}>
-                                                        <Checkbox
-                                                            checked={isChecked}
-                                                            onCheckedChange={() => handleCheckboxToggle("bodyType", type)}
-                                                        />
-                                                        <span className="text-xs font-semibold truncate">{type}</span>
-                                                    </label>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Fuel Type Options */}
-                                {fuelTypes.length > 0 && (
-                                    <div className="space-y-3">
-                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Fuel Type</h4>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {fuelTypes.map((fuel) => {
-                                                const isChecked = (filters.fuelType || "").split(",").includes(fuel);
-                                                return (
-                                                    <label key={fuel} className={`flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 cursor-pointer transition-colors ${isChecked ? 'bg-primary/5 border-primary/20 text-primary' : 'bg-white hover:bg-slate-50 text-slate-700'}`}>
-                                                        <Checkbox
-                                                            checked={isChecked}
-                                                            onCheckedChange={() => handleCheckboxToggle("fuelType", fuel)}
-                                                        />
-                                                        <span className="text-xs font-semibold truncate">{fuel}</span>
-                                                    </label>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Transmission Options */}
-                                {transmissions.length > 0 && (
-                                    <div className="space-y-3">
-                                        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Transmission</h4>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {transmissions.map((trans) => {
-                                                const isChecked = (filters.transmission || "").split(",").includes(trans);
-                                                return (
-                                                    <label key={trans} className={`flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 cursor-pointer transition-colors ${isChecked ? 'bg-primary/5 border-primary/20 text-primary' : 'bg-white hover:bg-slate-50 text-slate-700'}`}>
-                                                        <Checkbox
-                                                            checked={isChecked}
-                                                            onCheckedChange={() => handleCheckboxToggle("transmission", trans)}
-                                                        />
-                                                        <span className="text-xs font-semibold truncate">{trans}</span>
-                                                    </label>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
+                                <FilterCheckboxGroup label="Body Type" field="bodyType" options={bodyTypes} selectedCsv={filters.bodyType} onToggle={handleCheckboxToggle} />
+                                <FilterCheckboxGroup label="Fuel Type" field="fuelType" options={fuelTypes} selectedCsv={filters.fuelType} onToggle={handleCheckboxToggle} />
+                                <FilterCheckboxGroup label="Transmission" field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} />
                             </div>
 
                             <SheetFooter className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-row gap-3">
@@ -323,72 +243,11 @@ export const DealershipInventoryFilters = ({
 
                 {/* Popover Filters (Desktop) */}
                 <div className="hidden md:flex items-center gap-2">
-                    {/* Body Type Popover */}
                     {bodyTypes.length > 0 && (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={`h-9.5 gap-1.5 px-3 rounded-lg bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-all ${filters.bodyType ? 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10' : ''}`}>
-                                    <span className="text-xs">Body Type</span>
-                                    {filters.bodyType && (
-                                        <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-[10px] rounded-full">
-                                            {filters.bodyType.split(",").length}
-                                        </Badge>
-                                    )}
-                                    <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent align="start" className="w-[200px] p-3 rounded-xl border border-slate-100 shadow-xl bg-white space-y-2">
-                                {bodyTypes.map((type) => {
-                                    const isChecked = (filters.bodyType || "").split(",").includes(type);
-                                    return (
-                                        <div key={type} className="flex items-center gap-2.5 px-1 py-1">
-                                            <Checkbox
-                                                id={`body-${type}`}
-                                                checked={isChecked}
-                                                onCheckedChange={() => handleCheckboxToggle("bodyType", type)}
-                                            />
-                                            <label htmlFor={`body-${type}`} className="text-xs font-semibold text-slate-700 cursor-pointer select-none truncate">
-                                                {type}
-                                            </label>
-                                        </div>
-                                    );
-                                })}
-                            </PopoverContent>
-                        </Popover>
+                        <FilterCheckboxPopover label="Body Type" field="bodyType" options={bodyTypes} selectedCsv={filters.bodyType} onToggle={handleCheckboxToggle} idPrefix="body" contentWidthClass="w-[200px]" />
                     )}
-
-                    {/* Fuel Type Popover */}
                     {fuelTypes.length > 0 && (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={`h-9.5 gap-1.5 px-3 rounded-lg bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-all ${filters.fuelType ? 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10' : ''}`}>
-                                    <span className="text-xs">Fuel Type</span>
-                                    {filters.fuelType && (
-                                        <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-[10px] rounded-full">
-                                            {filters.fuelType.split(",").length}
-                                        </Badge>
-                                    )}
-                                    <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent align="start" className="w-[200px] p-3 rounded-xl border border-slate-100 shadow-xl bg-white space-y-2">
-                                {fuelTypes.map((fuel) => {
-                                    const isChecked = (filters.fuelType || "").split(",").includes(fuel);
-                                    return (
-                                        <div key={fuel} className="flex items-center gap-2.5 px-1 py-1">
-                                            <Checkbox
-                                                id={`fuel-${fuel}`}
-                                                checked={isChecked}
-                                                onCheckedChange={() => handleCheckboxToggle("fuelType", fuel)}
-                                            />
-                                            <label htmlFor={`fuel-${fuel}`} className="text-xs font-semibold text-slate-700 cursor-pointer select-none truncate">
-                                                {fuel}
-                                            </label>
-                                        </div>
-                                    );
-                                })}
-                            </PopoverContent>
-                        </Popover>
+                        <FilterCheckboxPopover label="Fuel Type" field="fuelType" options={fuelTypes} selectedCsv={filters.fuelType} onToggle={handleCheckboxToggle} idPrefix="fuel" contentWidthClass="w-[200px]" />
                     )}
 
                     {/* Price Range Popover */}
@@ -429,83 +288,14 @@ export const DealershipInventoryFilters = ({
                         </PopoverContent>
                     </Popover>
 
-                    {/* Transmission Popover */}
                     {transmissions.length > 0 && (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={`h-9.5 gap-1.5 px-3 rounded-lg bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-all ${filters.transmission ? 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10' : ''}`}>
-                                    <span className="text-xs">Transmission</span>
-                                    {filters.transmission && (
-                                        <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-[10px] rounded-full">
-                                            {filters.transmission.split(",").length}
-                                        </Badge>
-                                    )}
-                                    <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent align="start" className="w-[180px] p-3 rounded-xl border border-slate-100 shadow-xl bg-white space-y-2">
-                                {transmissions.map((trans) => {
-                                    const isChecked = (filters.transmission || "").split(",").includes(trans);
-                                    return (
-                                        <div key={trans} className="flex items-center gap-2.5 px-1 py-1">
-                                            <Checkbox
-                                                id={`trans-${trans}`}
-                                                checked={isChecked}
-                                                onCheckedChange={() => handleCheckboxToggle("transmission", trans)}
-                                            />
-                                            <label htmlFor={`trans-${trans}`} className="text-xs font-semibold text-slate-700 cursor-pointer select-none truncate">
-                                                {trans}
-                                            </label>
-                                        </div>
-                                    );
-                                })}
-                            </PopoverContent>
-                        </Popover>
+                        <FilterCheckboxPopover label="Transmission" field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} idPrefix="trans" contentWidthClass="w-[180px]" />
                     )}
                 </div>
             </div>
 
             {/* Row 3: Active Filter Chips */}
-            <AnimatePresence>
-                {activeChips.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        className="flex flex-wrap items-center gap-1.5 pt-1"
-                    >
-                        {activeChips.map((chip, idx) => (
-                            <motion.div
-                                key={`${chip.field}-${chip.value || idx}`}
-                                layout
-                                initial={{ scale: 0.85, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.85, opacity: 0 }}
-                                transition={{ duration: 0.15 }}
-                            >
-                                <Badge variant="outline" className="flex items-center gap-1 py-1 pl-2.5 pr-1.5 bg-slate-50 border-slate-200 text-slate-600 rounded-full font-medium text-[11px] select-none hover:bg-slate-100 transition-colors">
-                                    <span>{chip.label}</span>
-                                    <button
-                                        onClick={() => handleRemoveChip(chip.field, chip.value)}
-                                        className="h-4 w-4 bg-slate-200/60 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
-                                    >
-                                        <X className="h-2.5 w-2.5" />
-                                    </button>
-                                </Badge>
-                            </motion.div>
-                        ))}
-
-                        <Button
-                            variant="ghost"
-                            onClick={handleClearAll}
-                            className="h-7 gap-1.5 px-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all font-semibold text-[11px] cursor-pointer"
-                        >
-                            <RotateCcw className="h-3 w-3" />
-                            Clear All
-                        </Button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <ActiveFilterChips chips={activeChips} onRemove={handleRemoveChip} onClearAll={handleClearAll} />
         </div>
     );
 };

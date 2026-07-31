@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Camera, ZoomIn } from "lucide-react";
@@ -10,123 +9,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useCarImageGallery } from "./useCarImageGallery";
 
 const CarImageGallery = ({ images, make, model, title }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const galleryRef = useRef(null);
-  const thumbnailContainerRef = useRef(null);
-  const modalThumbnailRef = useRef(null);
-  const touchStartRef = useRef(null);
-  const touchEndRef = useRef(null);
-
-  const nextImage = useCallback(() => {
-    if (!images?.length) return;
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  }, [images]);
-
-  const prevImage = useCallback(() => {
-    if (!images?.length) return;
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  }, [images]);
-
-  // Keyboard navigation for the gallery
-  const handleGalleryKeyDown = useCallback(
-    (e) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        prevImage();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        nextImage();
-      } else if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        setIsImageModalOpen(true);
-      }
-    },
-    [prevImage, nextImage]
-  );
-
-  // Keyboard navigation for the modal
-  useEffect(() => {
-    if (!isImageModalOpen) return;
-
-    const handleModalKeyDown = (e) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        prevImage();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        nextImage();
-      }
-    };
-
-    window.addEventListener("keydown", handleModalKeyDown);
-    return () => window.removeEventListener("keydown", handleModalKeyDown);
-  }, [isImageModalOpen, prevImage, nextImage]);
-
-  // Touch swipe gesture handling
-  const handleTouchStart = useCallback((e) => {
-    touchStartRef.current = e.targetTouches[0].clientX;
-    touchEndRef.current = null;
-  }, []);
-
-  const handleTouchMove = useCallback((e) => {
-    touchEndRef.current = e.targetTouches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (!touchStartRef.current || !touchEndRef.current) return;
-    const distance = touchStartRef.current - touchEndRef.current;
-    const minSwipeDistance = 50;
-
-    if (Math.abs(distance) >= minSwipeDistance) {
-      if (distance > 0) {
-        nextImage();
-      } else {
-        prevImage();
-      }
-    }
-
-    touchStartRef.current = null;
-    touchEndRef.current = null;
-  }, [nextImage, prevImage]);
-
-  // Preload adjacent images
-  useEffect(() => {
-    if (!images?.length || images.length <= 1) return;
-
-    const preloadImage = (index) => {
-      const src = images[index]?.url || images[index];
-      if (src) {
-        const img = new window.Image();
-        img.src = src;
-      }
-    };
-
-    const nextIdx = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1;
-    const prevIdx = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
-
-    preloadImage(nextIdx);
-    preloadImage(prevIdx);
-  }, [currentImageIndex, images]);
-
-  // Auto-scroll active thumbnail into view
-  useEffect(() => {
-    const container = isImageModalOpen
-      ? modalThumbnailRef.current
-      : thumbnailContainerRef.current;
-    if (!container) return;
-
-    const activeThumb = container.children[currentImageIndex];
-    if (activeThumb) {
-      activeThumb.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-    }
-  }, [currentImageIndex, isImageModalOpen]);
+  const {
+    currentImageIndex,
+    setCurrentImageIndex,
+    isImageModalOpen,
+    setIsImageModalOpen,
+    nextImage,
+    prevImage,
+    handleGalleryKeyDown,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    galleryRef,
+    thumbnailContainerRef,
+    modalThumbnailRef,
+  } = useCarImageGallery(images);
 
   if (!images || images.length === 0) {
     return (
