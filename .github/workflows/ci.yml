@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# A new push cancels the previous run on the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # `next build` executes application code: module-scope constructors run and
+      # pages are prerendered. These placeholders exist to get the build to run,
+      # never to reach a real service. CI compiles and throws the artifact away.
+      #
+      # Pointed at localhost on purpose: `app/(site)/dealerships/sitemap.js` calls
+      # getDealerships() at build time, so the build does try to reach Postgres.
+      # localhost fails fast with connection-refused instead of hanging on DNS,
+      # and the sitemap try/catches into a minimal fallback either way.
+      DATABASE_URL: postgresql://user:pass@localhost:5432/autome
+      DIRECT_URL: postgresql://user:pass@localhost:5432/autome
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: placeholder
+      SUPABASE_SERVICE_ROLE_KEY: placeholder
+      NEXT_PUBLIC_STREAM_API_KEY: placeholder
+      STREAM_API_SECRET: placeholder
+      # Stripe's constructor throws on an undefined key (module scope in lib/services/stripe/*).
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      # arcjet({ key }) runs at module scope in lib/arcjet.js.
+      ARCJET_KEY: ajkey_placeholder
+      GEMINI_API_KEY: placeholder
+      # Clerk validates the publishable key *format*, so a random string fails.
+      # Public by design: NEXT_PUBLIC_* values are inlined into the browser bundle.
+      # Use your Clerk DEVELOPMENT instance key.
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ vars.CLERK_PUBLISHABLE_KEY }}
+      # The only real secret here. Settings > Secrets and variables > Actions.
+      # DEVELOPMENT instance key — never production.
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Reads the `packageManager` field from package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          # Must come after pnpm is installed.
+          cache: pnpm
+
+      # Fails if package.json was edited without regenerating the lockfile.
+      # Also runs `postinstall` -> `prisma generate`, which reads DATABASE_URL
+      # via prisma.config.ts.
+      - run: pnpm install --frozen-lockfile
+
+      # Exits 0 on warnings, non-zero on errors — so this blocks on real problems
+      # without holding the gate hostage to the existing warning backlog.
+      - run: pnpm lint
+
+      - run: pnpm build
