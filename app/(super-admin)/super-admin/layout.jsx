@@ -3,6 +3,12 @@ import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
 import SuperAdminSidebar from "./_components/SuperAdminSidebar";
 
+// Super-admin pages query the database during server render but, unlike tenant
+// pages, never call getCurrentOrganization() (which reads headers() and forces
+// dynamic rendering). Without this, Next tries to statically prerender them at
+// build time and the DB calls fail wherever no live database is reachable (CI).
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Super Admin | AutoMe Platform",
   description: "Platform administration dashboard",
