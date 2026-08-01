@@ -5,6 +5,9 @@ import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { dealershipReviewSchema } from "@/lib/validations/schemas";
 import { ValidationError } from "@/lib/utils/errors";
 
 /**
@@ -78,10 +81,13 @@ export const getDealershipReviews = withErrorHandling(async (organizationId, pag
  * Create dealership review
  */
 export const createDealershipReview = withAuth(async (ctx, organizationId, reviewData) => {
+    await enforceRateLimit();
+    const validatedReview = validateAction(dealershipReviewSchema, reviewData);
+
     const result = await dealershipService.createDealershipReview(
         organizationId,
         ctx.userId,
-        reviewData
+        validatedReview
     );
 
     revalidatePath(`/dealerships/${organizationId}`);
