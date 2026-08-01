@@ -1,12 +1,21 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { db } from "@/lib/prisma";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/repositories/webhook";
 import { logError } from "@/lib/utils/errors";
 
 // Disable body parsing for webhook verification
 export const runtime = "nodejs";
 
+const clerkWebhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+
 export async function POST(req) {
+    // Fail closed: without the signing secret we cannot verify authenticity.
+    if (!clerkWebhookSecret) {
+        logError("CLERK_WEBHOOK_SECRET is not configured; rejecting webhook.");
+        return new Response("Webhook not configured", { status: 500 });
+    }
+
     // Get the headers
     const headerPayload = await headers();
     const svix_id = headerPayload.get("svix-id");
@@ -25,7 +34,7 @@ export async function POST(req) {
     const body = JSON.stringify(payload);
 
     // Create a new Svix instance with your webhook secret
-    const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+    const wh = new Webhook(clerkWebhookSecret);
 
     let evt;
 
@@ -41,6 +50,16 @@ export async function POST(req) {
         return new Response("Error occurred", {
             status: 400,
         });
+    }
+
+    // Idempotency: the Svix message id is stable across retries of the same event.
+    const claimed = await claimWebhookEvent({
+        id: svix_id,
+        provider: "clerk",
+        type: evt.type,
+    });
+    if (!claimed) {
+        return new Response("Webhook already processed", { status: 200 });
     }
 
     // Handle the webhook
@@ -68,6 +87,10 @@ export async function POST(req) {
 
         return new Response("Webhook processed successfully", { status: 200 });
     } catch (error) {
+        // Release the claim so Svix's retry can re-process this event.
+        await releaseWebhookEvent(svix_id).catch((releaseErr) =>
+            logError("Failed to release webhook claim:", releaseErr)
+        );
         logError(`Error processing webhook ${eventType}:`, error);
         return new Response("Error processing webhook", { status: 500 });
     }

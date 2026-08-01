@@ -487,3 +487,17 @@ model DealershipReview {
   @@index([isApproved])
   @@index([rating])
 }
+
+// ============ WEBHOOKS ============
+
+// Idempotency ledger for incoming provider webhooks (Stripe, Clerk).
+// `id` is the provider's own event id, so a duplicate delivery collides on the PK.
+model WebhookEvent {
+  id          String   @id // provider event id (e.g. Stripe `evt_...`, Svix `msg_...`)
+  provider    String // "stripe" | "clerk"
+  type        String
+  processedAt DateTime @default(now())
+
+  @@index([provider])
+  @@index([type])
+}
