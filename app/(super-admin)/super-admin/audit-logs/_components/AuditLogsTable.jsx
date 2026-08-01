@@ -7,13 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Plus,
-  Pencil,
-  Trash2,
-  LogIn,
-  LogOut,
   Building2,
-  User,
+  ScrollText,
 } from "lucide-react";
 import {
   Table,
@@ -27,68 +22,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/common/EmptyState";
-import { ScrollText } from "lucide-react";
-
-// Helper to get action category from detailed action name
-const getActionCategory = (action) => {
-  if (action.includes("CREATED") || action.includes("INVITED")) return "CREATE";
-  if (
-    action.includes("UPDATED") ||
-    action.includes("CHANGED") ||
-    action.includes("TOGGLED") ||
-    action.includes("UPGRADED") ||
-    action.includes("DOWNGRADED") ||
-    action.includes("RENEWED") ||
-    action.includes("CONFIRMED") ||
-    action.includes("COMPLETED") ||
-    action.includes("ACTIVATED") ||
-    action.includes("ACCEPTED")
-  )
-    return "UPDATE";
-  if (
-    action.includes("DELETED") ||
-    action.includes("REMOVED") ||
-    action.includes("CANCELED") ||
-    action.includes("SUSPENDED")
-  )
-    return "DELETE";
-  if (action.includes("STARTED") || action.includes("SENT")) return "LOGIN";
-  if (action.includes("ENDED")) return "LOGOUT";
-  return "VIEW";
-};
-
-const actionIcons = {
-  CREATE: Plus,
-  UPDATE: Pencil,
-  DELETE: Trash2,
-  VIEW: Eye,
-  LOGIN: LogIn,
-  LOGOUT: LogOut,
-};
-
-const actionColors = {
-  CREATE:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  UPDATE: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  DELETE: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  VIEW: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-  LOGIN:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  LOGOUT:
-    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-};
+import {
+  getActionCategory,
+  actionIcons,
+  actionColors,
+} from "./audit-log-actions";
+import AuditLogDetailsDialog from "./AuditLogDetailsDialog";
 
 export default function AuditLogsTable({ logs, pagination }) {
   const router = useRouter();
@@ -251,90 +196,13 @@ export default function AuditLogsTable({ logs, pagination }) {
       )}
 
       {/* Details Dialog */}
-      <Dialog
+      <AuditLogDetailsDialog
+        log={detailsDialog.log}
         open={detailsDialog.open}
         onOpenChange={(open) =>
           !open && setDetailsDialog({ open: false, log: null })
         }
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Audit Log Details</DialogTitle>
-          </DialogHeader>
-          {detailsDialog.log && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Action
-                  </label>
-                  <p className="font-medium">{detailsDialog.log.action}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Entity Type
-                  </label>
-                  <p className="font-medium">{detailsDialog.log.entityType}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Entity ID
-                  </label>
-                  <p className="font-mono text-sm">
-                    {detailsDialog.log.entityId}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Timestamp
-                  </label>
-                  <p className="text-sm">
-                    {format(new Date(detailsDialog.log.createdAt), "PPpp")}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    IP Address
-                  </label>
-                  <p className="font-mono text-sm">
-                    {detailsDialog.log.ipAddress || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    User Agent
-                  </label>
-                  <p className="text-sm truncate">
-                    {detailsDialog.log.userAgent || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {detailsDialog.log.metadata && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Metadata
-                  </label>
-                  <pre className="mt-1 p-3 bg-muted rounded-lg overflow-auto text-xs">
-                    {JSON.stringify(detailsDialog.log.metadata, null, 2)}
-                  </pre>
-                </div>
-              )}
-
-              {detailsDialog.log.changes && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Changes
-                  </label>
-                  <pre className="mt-1 p-3 bg-muted rounded-lg overflow-auto text-xs">
-                    {JSON.stringify(detailsDialog.log.changes, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      />
     </div>
   );
 }

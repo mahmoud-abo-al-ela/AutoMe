@@ -3,112 +3,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
-import {
-  Heart,
-  CarFront,
-  LayoutDashboard,
-  ArrowLeft,
-  ChevronRight,
-  MessageSquare,
-  Home,
-  Search,
-  Scale,
-  HelpCircle,
-  Calendar,
-  LogOut,
-  Building2,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UnreadBadge } from "@/components/StreamChat";
-
-// Icon map for nav items
-const iconMap = {
-  Heart,
-  CarFront,
-  LayoutDashboard,
-  ArrowLeft,
-  MessageSquare,
-  Home,
-  Search,
-  Scale,
-  HelpCircle,
-  Calendar,
-};
-
-// Get icon for nav item based on label
-function getNavIcon(label) {
-  const icons = {
-    "Browse Cars": Search,
-    Dealerships: Building2,
-    Compare: Scale,
-    FAQ: HelpCircle,
-    Dashboard: LayoutDashboard,
-    Cars: CarFront,
-    "Test Drives": Calendar,
-    Messages: MessageSquare,
-  };
-  return icons[label] || Home;
-}
-
-// Reusable NavLink component
-function NavLink({
-  href,
-  label,
-  icon,
-  iconClass,
-  size = 18,
-  onClick,
-  isActive,
-  animationDelay = 0,
-  showUnreadBadge = false,
-  IconComponent = null,
-  organizationId,
-}) {
-  const Icon = IconComponent || (icon ? iconMap[icon] : null);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, delay: animationDelay / 1000 }}
-    >
-      <Link
-        href={href}
-        className={`group flex items-center justify-between w-full text-sm font-medium transition-all duration-200 py-3.5 px-4 rounded-2xl ${isActive
-          ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/25"
-          : "text-foreground hover:bg-muted"
-          }`}
-        onClick={onClick}
-        aria-current={isActive ? "page" : undefined}
-      >
-        <div className="flex items-center gap-3">
-          {Icon && (
-            <Icon
-              size={size}
-              className={`${isActive
-                ? "text-white"
-                : "text-muted-foreground group-hover:text-foreground"
-                } transition-colors`}
-            />
-          )}
-          <span>{label}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {showUnreadBadge && <UnreadBadge organizationId={organizationId} />}
-          {!isActive && (
-            <ChevronRight
-              size={16}
-              className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5"
-            />
-          )}
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
+import { getNavIcon } from "./mobile-menu-icons";
+import NavLink from "./MobileMenuNavLink";
 
 export default function MobileMenu({
   isMenuOpen,
