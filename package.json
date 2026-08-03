@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "smoke:ai-search": "node --experimental-loader ./scripts/_alias-loader.mjs scripts/ai-nl-search-smoke.mjs",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
