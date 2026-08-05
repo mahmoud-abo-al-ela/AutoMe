@@ -11,6 +11,7 @@ import {
   buildCarsUrl,
   buildActiveFilterChips,
 } from "./cars-page-filters";
+import { useAiSearch } from "./use-ai-search";
 
 // Re-exported for backward-compatible import sites.
 export { DEFAULT_PER_PAGE, parseFiltersFromSearch, buildCarsUrl };
@@ -121,11 +122,16 @@ export const useCarsPage = (initialData = null, initialState = null) => {
     [filters, applyFilters]
   );
 
-  // Merge a partial filters patch (used by hero quick-picks) and apply.
+  // Merge a partial filters patch (used by hero quick-picks and AI search) and apply.
   const applyPatch = useCallback(
     (patch) => applyFilters({ ...filters, ...patch }),
     [filters, applyFilters]
   );
+
+  // Natural-language "Ask AI" search — composed here rather than inlined to keep
+  // this hook focused (see hooks/use-ai-search.js). It drives filters through the
+  // same applyPatch as the quick-picks, so pagination/SSR/URL all come for free.
+  const ai = useAiSearch({ applyPatch, filters });
 
   // Toggle one value in a multi-select array field.
   const toggleMulti = useCallback(
@@ -283,6 +289,9 @@ export const useCarsPage = (initialData = null, initialState = null) => {
     filterOptions: optionsData?.success ? optionsData.data : null,
     optionsLoading,
     activeFilters: getActiveFilters(),
+    aiResult: ai.aiResult,
+    aiLoading: ai.aiLoading,
+    aiError: ai.aiError,
     handlers: {
       setFilter,
       applyPatch,
@@ -294,6 +303,9 @@ export const useCarsPage = (initialData = null, initialState = null) => {
       changePerPage,
       clearFilter,
       resetAllFilters,
+      askAi: ai.runAiSearch,
+      searchAsPlainText: ai.searchAsPlainText,
+      dismissAi: ai.dismissAiResult,
     },
   };
 };

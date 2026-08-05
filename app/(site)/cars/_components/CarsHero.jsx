@@ -1,7 +1,7 @@
 "use client";
 
-import { Search, X, Flame } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Flame } from "lucide-react";
+import { AiSearchBar } from "./AiSearchBar";
 
 // Structured quick-picks map to real filters, not free-text search — so
 // "Under $30k" and "Luxury" actually return matching cars.
@@ -16,6 +16,9 @@ export const CarsHero = ({
   searchQuery,
   onSearchChange,
   onClearSearch,
+  onAskAi,
+  aiLoading,
+  aiError,
   totalCount,
   onQuickPick,
 }) => {
@@ -35,27 +38,15 @@ export const CarsHero = ({
           Browse {totalCount > 0 ? totalCount.toLocaleString() : ""} {totalCount === 1 ? "vehicle" : "vehicles"} from trusted dealerships
         </p>
 
-        {/* Search */}
-        <div className="group relative mx-auto mt-6 max-w-xl">
-          <Search className="absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-gray-500" />
-          <Input
-            type="text"
-            placeholder="Search cars, models, or keywords..."
-            value={searchQuery || ""}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="h-14 w-full rounded-xl border border-white/40 bg-white/95 pl-12 pr-12 text-base text-gray-900 shadow-lg placeholder:text-gray-500 focus-visible:border-white focus-visible:ring-4 focus-visible:ring-white/20"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={onClearSearch}
-              className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700"
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+        {/* Search — plain text by default, with an explicit "Ask AI" affordance */}
+        <AiSearchBar
+          value={searchQuery}
+          onChange={onSearchChange}
+          onClear={onClearSearch}
+          onAskAi={onAskAi}
+          loading={aiLoading}
+          error={aiError}
+        />
 
         {/* Quick picks */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
