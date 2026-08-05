@@ -63,6 +63,20 @@ check(
     sanitizeFilters({ color: "Red", minSeats: 7, confidence: 0.9 }, { rawQuery: "x" }).filters.color === "Red" &&
         sanitizeFilters({ minSeats: 99, confidence: 0.9 }, { rawQuery: "x" }).filters.minSeats === 12
 );
+// Regression: the model returns explicit null for fields it didn't fill. Those must
+// stay absent — a null year must NOT become 1900 (Number(null) === 0 → clampYear),
+// nor a null seat count become 1, which would silently filter out every result.
+{
+    const absent = sanitizeFilters(
+        { bodyType: ["SUV"], maxPrice: 30000, minYear: null, maxYear: null, minSeats: null, confidence: 0.9 },
+        { rawQuery: "family suv under 30k" }
+    ).filters;
+    check(
+        "null year / seats stay absent (no phantom 1900 / 1+ filter)",
+        absent.minYear === null && absent.maxYear === null && absent.minSeats === null,
+        absent
+    );
+}
 
 // --- Schema contract ---
 check(
