@@ -10,6 +10,8 @@ import { applyRules } from "@/lib/services/ai/rules.js";
 import { sanitizeFilters } from "@/lib/services/ai/normalize.js";
 import { carSearchFiltersSchema, nlSearchQuerySchema } from "@/lib/validations/schemas.js";
 import { SEARCH_FILTERS_PROMPT } from "@/lib/ai/prompts/search-filters.js";
+import { parseFiltersFromSearch, buildCarsUrl } from "@/hooks/cars-page-filters.js";
+import { buildCarWhereClause } from "@/lib/repositories/car/filters.js";
 
 let pass = 0;
 let fail = 0;
@@ -56,12 +58,18 @@ check(
     "snaps known make, drops unknown",
     sanitizeFilters({ make: ["toyota", "ferrari"], confidence: 0.9 }, { rawQuery: "x", knownMakes: ["Toyota", "BMW"] }).filters.make.join() === "Toyota"
 );
+check(
+    "color passes through, minSeats clamped to <= 12",
+    sanitizeFilters({ color: "Red", minSeats: 7, confidence: 0.9 }, { rawQuery: "x" }).filters.color === "Red" &&
+        sanitizeFilters({ minSeats: 99, confidence: 0.9 }, { rawQuery: "x" }).filters.minSeats === 12
+);
 
 // --- Schema contract ---
 check(
     "valid filters parse",
     carSearchFiltersSchema.safeParse({
         make: ["Toyota"], bodyType: ["SUV"], fuelType: [], transmission: [],
+        color: "red", minSeats: null,
         minPrice: null, maxPrice: 30000, minYear: null, maxYear: null,
         minMileage: null, maxMileage: 60000, sortBy: "newest", search: "Corolla",
         interpretation: "x", unmapped: [], confidence: 0.8,
@@ -73,6 +81,18 @@ check("200+ char query rejected before any API call", !nlSearchQuerySchema.safeP
 check(
     "prompt embeds vocabulary (SUV / Automatic / sort keys)",
     SEARCH_FILTERS_PROMPT.includes('"SUV"') && SEARCH_FILTERS_PROMPT.includes('"Automatic"') && SEARCH_FILTERS_PROMPT.includes('"mileageAsc"')
+);
+
+// --- Filter plumbing: color + minSeats round-trip through URL and where clause ---
+const parsed = parseFiltersFromSearch("color=red&minSeats=7").filters;
+check("parses color + minSeats from URL", parsed.color === "red" && parsed.minSeats === 7, parsed);
+const url = buildCarsUrl({ color: "red", minSeats: 7 }, 1);
+check("serializes color + minSeats to URL", url.includes("color=red") && url.includes("minSeats=7"), url);
+const where = buildCarWhereClause({ color: "red", minSeats: 7, organizationId: "org1" });
+check(
+    "where clause honours color (contains) + minSeats (gte)",
+    where.color?.contains === "red" && where.color?.mode === "insensitive" && where.seats?.gte === 7,
+    where
 );
 
 console.log(`\n${pass} passed, ${fail} failed`);
