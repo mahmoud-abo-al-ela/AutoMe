@@ -92,7 +92,7 @@ export function buildActiveFilterChips(filters) {
   if (filters.dealership) chips.push({ type: "dealership", value: filters.dealership, label: filters.dealership });
   if (filters.city) chips.push({ type: "city", value: filters.city, label: filters.city });
   if (filters.color) chips.push({ type: "color", value: filters.color, label: filters.color });
-  if (filters.minSeats) chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${filters.minSeats}+ seats` });
+  if (filters.minSeats) chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${filters.minSeats}+` });
   if (filters.minPrice || filters.maxPrice) {
     const min = filters.minPrice ? `$${filters.minPrice.toLocaleString()}` : "$0";
     const max = filters.maxPrice ? `$${filters.maxPrice.toLocaleString()}` : "Any";

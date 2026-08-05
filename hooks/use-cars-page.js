@@ -232,6 +232,12 @@ export const useCarsPage = (initialData = null, initialState = null) => {
         case "city":
           next.city = undefined;
           break;
+        case "color":
+          next.color = undefined;
+          break;
+        case "minSeats":
+          next.minSeats = undefined;
+          break;
         case "price":
           next.minPrice = undefined;
           next.maxPrice = undefined;
