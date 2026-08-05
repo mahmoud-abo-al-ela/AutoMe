@@ -11,6 +11,8 @@ export const DEFAULT_FILTERS = {
   transmission: [],
   dealership: undefined,
   city: undefined,
+  color: undefined,
+  minSeats: undefined,
   minPrice: undefined,
   maxPrice: undefined,
   minYear: undefined,
@@ -39,6 +41,8 @@ export function parseFiltersFromSearch(search) {
       transmission: csv("transmission"),
       dealership: p.get("dealership") || undefined,
       city: p.get("city") || undefined,
+      color: p.get("color") || undefined,
+      minSeats: num(p.get("minSeats")),
       minPrice: num(p.get("minPrice")),
       maxPrice: num(p.get("maxPrice")),
       minYear: num(p.get("minYear")),
@@ -62,6 +66,8 @@ export function buildCarsUrl(filters, page, perPage) {
   });
   if (filters.dealership) params.set("dealership", filters.dealership);
   if (filters.city) params.set("city", filters.city);
+  if (filters.color) params.set("color", filters.color);
+  if (filters.minSeats) params.set("minSeats", String(filters.minSeats));
   if (filters.minPrice) params.set("minPrice", String(filters.minPrice));
   if (filters.maxPrice) params.set("maxPrice", String(filters.maxPrice));
   if (filters.minYear) params.set("minYear", String(filters.minYear));
@@ -85,6 +91,8 @@ export function buildActiveFilterChips(filters) {
   });
   if (filters.dealership) chips.push({ type: "dealership", value: filters.dealership, label: filters.dealership });
   if (filters.city) chips.push({ type: "city", value: filters.city, label: filters.city });
+  if (filters.color) chips.push({ type: "color", value: filters.color, label: filters.color });
+  if (filters.minSeats) chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${filters.minSeats}+` });
   if (filters.minPrice || filters.maxPrice) {
     const min = filters.minPrice ? `$${filters.minPrice.toLocaleString()}` : "$0";
     const max = filters.maxPrice ? `$${filters.maxPrice.toLocaleString()}` : "Any";

@@ -7,3 +7,5 @@ export { default as FuelTypeFilter } from "./FuelTypeFilter";
 export { default as TransmissionFilter } from "./TransmissionFilter";
 export { default as DealershipFilter } from "./DealershipFilter";
 export { default as CityFilter } from "./CityFilter";
+export { default as ColorFilter } from "./ColorFilter";
+export { default as SeatsFilter } from "./SeatsFilter";

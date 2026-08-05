@@ -20,6 +20,9 @@ export default async function BrowseCarsPage({ searchParams }) {
     transmission: csv(params.transmission),
     dealership: params.dealership || undefined,
     city: params.city || undefined,
+    // Keep this map in sync with parseFiltersFromSearch in hooks/cars-page-filters.js.
+    color: params.color || undefined,
+    minSeats: num(params.minSeats),
     minPrice: num(params.minPrice),
     maxPrice: num(params.maxPrice),
     minYear: num(params.minYear),

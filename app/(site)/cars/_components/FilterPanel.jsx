@@ -13,6 +13,8 @@ import {
   TransmissionFilter,
   DealershipFilter,
   CityFilter,
+  ColorFilter,
+  SeatsFilter,
 } from "./filter-components";
 
 const formatPrice = (v) =>
@@ -47,6 +49,8 @@ const FilterPanel = ({
     (filters.transmission?.length || 0) +
     (filters.dealership ? 1 : 0) +
     (filters.city ? 1 : 0) +
+    (filters.color ? 1 : 0) +
+    (filters.minSeats ? 1 : 0) +
     (filters.minPrice || filters.maxPrice ? 1 : 0) +
     (filters.minYear || filters.maxYear ? 1 : 0) +
     (filters.minMileage || filters.maxMileage ? 1 : 0);
@@ -141,6 +145,19 @@ const FilterPanel = ({
           selected={filters.transmission}
           options={opts.transmissions}
           onToggle={(v) => handlers.toggleMulti("transmission", v)}
+          isLoading={disabled}
+        />
+
+        <ColorFilter
+          selected={filters.color}
+          options={opts.colors}
+          onSelect={(v) => handlers.setFilter("color", v)}
+          isLoading={disabled}
+        />
+
+        <SeatsFilter
+          selected={filters.minSeats}
+          onSelect={(v) => handlers.setFilter("minSeats", v)}
           isLoading={disabled}
         />
       </Accordion>

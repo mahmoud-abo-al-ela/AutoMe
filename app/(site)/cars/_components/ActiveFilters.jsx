@@ -11,6 +11,8 @@ const TYPE_LABEL = {
   transmission: "Transmission",
   dealership: "Dealer",
   city: "Location",
+  color: "Color",
+  minSeats: "Seats",
   price: "Price",
   year: "Year",
   mileage: "Mileage",
