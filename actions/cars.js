@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { parseFirstJsonObject } from "@/lib/utils/ai-json";
 import { RateLimitError, ValidationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
@@ -22,6 +23,11 @@ export async function fileToBase64(file) {
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
+
+// Vision model for image extraction. Overridable via env because the default
+// can be retired for an API key without notice (gemini-2.5-flash already 404s
+// for new users). gemini-3.5-flash is the current stable flash for this key.
+const VISION_MODEL = process.env.GEMINI_MODEL_VISION || "gemini-3.5-flash";
 
 export async function processCarImageWithAI(file) {
     const req = await request();
@@ -79,7 +85,7 @@ Schema:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: VISION_MODEL,
       contents: [
         {
           role: "user",
@@ -94,17 +100,15 @@ Schema:
           ],
         },
       ],
-      generationConfig: {
+      config: {
         temperature: 0.2,
         responseMimeType: "application/json",
       },
     });
 
-    const text = response.text;
-
     let parsed;
     try {
-      parsed = JSON.parse(text);
+      parsed = parseFirstJsonObject(response.text);
     } catch {
       throw new ValidationError("AI response is not valid JSON", "ai_response");
     }

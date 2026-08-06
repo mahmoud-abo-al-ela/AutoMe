@@ -5,9 +5,15 @@ import { GoogleGenAI } from "@google/genai";
 import { fileToBase64 } from "./cars";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { parseFirstJsonObject } from "@/lib/utils/ai-json";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
 import { ValidationError, RateLimitError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
+
+// Vision model for image search. Overridable via env because the default can be
+// retired for an API key without notice; gemini-3.5-flash is the current stable
+// flash for this key. Keep in sync with processCarImageWithAI in actions/cars.js.
+const VISION_MODEL = process.env.GEMINI_MODEL_VISION || "gemini-3.5-flash";
 
 export const getFeaturedCars = withErrorHandling(async (limit = 4) => {
   const organization = await getCurrentOrganization();
@@ -81,7 +87,7 @@ Only respond with the JSON object, nothing else.
 
   const response = await retryWithBackoff(() =>
     ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: VISION_MODEL,
       contents: [
         {
           role: "user",
@@ -96,28 +102,19 @@ Only respond with the JSON object, nothing else.
           ],
         },
       ],
-      generationConfig: {
+      config: {
         temperature: 0.2,
         responseMimeType: "application/json",
       },
     })
   );
 
-  const json = response.text;
-
-  // Clean response
-  let cleanData = json
-    .replace(/```(json)?\n?/g, "")
-    .replace(/```\n?/g, "")
-    .trim();
-
-  const jsonMatch = cleanData.match(/{[\s\S]*}/);
-  if (jsonMatch) {
-    cleanData = jsonMatch[0];
-  } else {
+  let parsedData;
+  try {
+    parsedData = parseFirstJsonObject(response.text);
+  } catch {
     throw new ValidationError("No valid JSON object found in response", "ai_response");
   }
 
-  const parsedData = JSON.parse(cleanData);
   return createSuccessResponse(parsedData);
 });
