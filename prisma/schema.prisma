@@ -374,6 +374,11 @@ model Car {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
+  // Full-text search vector. The GENERATED-ALWAYS expression is defined in the
+  // 20260806120000_add_car_search migration (Prisma can't express it), so this
+  // is declared Unsupported and populated entirely by the database.
+  searchVector  Unsupported("tsvector")?
+
   savedBy       SavedCar[]
   testDrive     TestDrive[]
 
@@ -386,6 +391,10 @@ model Car {
   @@index([color])
   @@index([featured])
   @@index([bodyType])
+  // Tier 2 search indexes (see 20260806120000_add_car_search migration).
+  @@index([searchVector], type: Gin)
+  @@index([make(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([model(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 // ============ WORKING HOURS ============
