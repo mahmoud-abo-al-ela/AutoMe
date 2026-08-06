@@ -30,6 +30,7 @@ export const CarsPagePresenter = ({
   errorMessage,
   refetch,
   isPaging,
+  isFilterPending,
   filters,
   searchValue,
   perPage,
@@ -86,7 +87,7 @@ export const CarsPagePresenter = ({
               />
             )}
 
-            {loading || isPaging ? (
+            {loading || isPaging || isFilterPending ? (
               <div className={`grid ${gridCols} gap-5 sm:gap-7`}>
                 {Array.from({ length: perPage > 12 ? 12 : perPage }).map((_, i) => (
                   <CarCardSkeleton key={i} />

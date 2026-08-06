@@ -31,6 +31,12 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   // for the new page instead of dimming the previous page in place.
   const [isPaging, setIsPaging] = useState(false);
 
+  // True while a search or filter change is fetching. These produce a different
+  // result set (not a slice of the same one), so — like paging — we show skeletons
+  // rather than dimming stale results the user is no longer looking for. Sort is
+  // excluded: it reorders the same set, so dimming reads better there.
+  const [isFilterPending, setIsFilterPending] = useState(false);
+
   // Only seed react-query with SSR data while the key still matches the server's.
   const isInitialKeyRef = useRef(true);
   const searchDebounceRef = useRef(null);
@@ -67,7 +73,10 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   // queryData/page/perPage too, so it also clears when navigating to a page
   // that is already cached fresh (no refetch → isFetching never toggles).
   useEffect(() => {
-    if (!isFetching) setIsPaging(false);
+    if (!isFetching) {
+      setIsPaging(false);
+      setIsFilterPending(false);
+    }
   }, [isFetching, queryData, page, perPage]);
 
   // Back/forward: our URL writes bypass the router, so re-read on popstate.
@@ -108,6 +117,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   // Apply a whole filters object (resets to page 1). Discrete → pushState.
   const applyFilters = useCallback(
     (nextFilters, { replace = false } = {}) => {
+      setIsFilterPending(true);
       setFilters(nextFilters);
       setPage(1);
       pushUrl(nextFilters, 1, perPage, replace);
@@ -147,7 +157,12 @@ export const useCarsPage = (initialData = null, initialState = null) => {
       setSearchInput(value);
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
       searchDebounceRef.current = setTimeout(() => {
-        const next = { ...filtersRef.current, search: value || undefined };
+        const nextSearch = value || undefined;
+        // No-op commits (debounce fired but the term is unchanged) shouldn't
+        // flash skeletons over identical results.
+        if (nextSearch === filtersRef.current.search) return;
+        const next = { ...filtersRef.current, search: nextSearch };
+        setIsFilterPending(true);
         setFilters(next);
         setPage(1);
         pushUrl(next, 1, perPage, true);
@@ -274,6 +289,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
     loading: isLoading,
     isFetching,
     isPaging,
+    isFilterPending,
     isError,
     errorMessage: queryData?.error?.message,
     refetch,
