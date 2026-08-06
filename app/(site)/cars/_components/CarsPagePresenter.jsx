@@ -6,7 +6,6 @@ import FilterPanel from "./FilterPanel";
 import CarsHero from "./CarsHero";
 import ResultsSummary from "./ResultsSummary";
 import { ActiveFilters } from "./ActiveFilters";
-import { AiInterpretationBanner } from "./AiInterpretationBanner";
 import { CompareTray } from "./CompareTray";
 import CarCard from "@/components/CarCard";
 import CarCardSkeleton from "@/components/CarCardSkeleton";
@@ -37,9 +36,6 @@ export const CarsPagePresenter = ({
   filterOptions,
   optionsLoading,
   activeFilters,
-  aiResult,
-  aiLoading,
-  aiError,
   handlers,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -63,9 +59,6 @@ export const CarsPagePresenter = ({
           searchQuery={searchValue}
           onSearchChange={handlers.setSearch}
           onClearSearch={() => handlers.setSearch("")}
-          onAskAi={handlers.askAi}
-          aiLoading={aiLoading}
-          aiError={aiError}
           totalCount={pagination.total}
           onQuickPick={handlers.applyPatch}
         />
@@ -78,11 +71,6 @@ export const CarsPagePresenter = ({
 
           {/* Results */}
           <div className="w-full lg:w-3/4" id="cars-results-section">
-            <AiInterpretationBanner
-              result={aiResult}
-              onSearchPlainText={handlers.searchAsPlainText}
-              onDismiss={handlers.dismissAi}
-            />
             <ActiveFilters filters={activeFilters} onClearFilter={handlers.clearFilter} />
 
             {!isError && (cars.length > 0 || loading) && (
