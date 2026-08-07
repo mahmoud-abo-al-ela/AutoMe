@@ -5,7 +5,8 @@ import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
-import { RateLimitError, ValidationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
+import { RateLimitError, ValidationError, NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
+import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
 import aj from "@/lib/arcjet";
@@ -29,7 +30,7 @@ const ai = new GoogleGenAI({
 // for new users). gemini-3.5-flash is the current stable flash for this key.
 const VISION_MODEL = process.env.GEMINI_MODEL_VISION || "gemini-3.5-flash";
 
-export async function processCarImageWithAI(file) {
+export async function processCarImageWithAI(file, ctx) {
     const req = await request();
     const decision = await aj.protect(req, { requested: 1 });
 
@@ -84,31 +85,69 @@ Schema:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: VISION_MODEL,
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              inlineData: {
-                data: base64Image,
-                mimeType: file.type,
+    // Meter the provider call: exactly one AiUsage row per call, on success and
+    // on failure. Without this the plan quota never enforces and the platform
+    // rate-limit breaker reads an empty table (see ai-metering skill).
+    const started = Date.now();
+    let usageMeta = null;
+    let success = true;
+    let errorCode = null;
+    let responseText;
+
+    try {
+      const response = await ai.models.generateContent({
+        model: VISION_MODEL,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  data: base64Image,
+                  mimeType: file.type,
+                },
               },
-            },
-            { text: prompt },
-          ],
+              { text: prompt },
+            ],
+          },
+        ],
+        config: {
+          temperature: 0.2,
+          responseMimeType: "application/json",
         },
-      ],
-      config: {
-        temperature: 0.2,
-        responseMimeType: "application/json",
-      },
-    });
+      });
+      usageMeta = response.usageMetadata ?? null;
+      responseText = response.text;
+    } catch (error) {
+      success = false;
+      errorCode = error?.code ?? error?.name ?? "UNKNOWN";
+      throw error;
+    } finally {
+      // Metering must never take down the request it is measuring. `await` it
+      // (a detached promise dies when the serverless function returns) but
+      // swallow its own failure.
+      try {
+        await createAiUsage({
+          organizationId: ctx?.organization?.id ?? null,
+          userId: ctx?.userId ?? null,
+          feature: "carListingFromImage",
+          model: VISION_MODEL,
+          inputTokens: usageMeta?.promptTokenCount ?? 0,
+          outputTokens: usageMeta?.candidatesTokenCount ?? 0,
+          thinkingTokens: usageMeta?.thoughtsTokenCount ?? 0,
+          cachedTokens: usageMeta?.cachedContentTokenCount ?? 0,
+          latencyMs: Date.now() - started,
+          success,
+          errorCode,
+        });
+      } catch (meteringError) {
+        logError("AiUsage write failed", meteringError);
+      }
+    }
 
     let parsed;
     try {
-      parsed = parseFirstJsonObject(response.text);
+      parsed = parseFirstJsonObject(responseText);
     } catch {
       throw new ValidationError("AI response is not valid JSON", "ai_response");
     }
@@ -144,7 +183,7 @@ export const processCarImageGated = withOrgAuth(
   withPlanGate(
     "aiProcessing",
     withUsageLimit("aiProcessing", async (ctx, file) => {
-      const parsed = await processCarImageWithAI(file);
+      const parsed = await processCarImageWithAI(file, ctx);
       return createSuccessResponse(parsed);
     })
   )
@@ -220,7 +259,10 @@ export const getCarForEdit = withOrgAuth(async (ctx, carId) => {
     throw new NotFoundError("Car");
   }
   // Verify car belongs to user's organization
-  if (car.organizationId !== ctx.organization.id && ctx.role !== "ADMIN") {
+  // Platform admins (UserRole.ADMIN) may reach across orgs for support; regular
+  // members may not. `ctx.role` never existed, and MemberRole has no ADMIN value,
+  // so the escape hatch has to read the platform role off ctx.user.
+  if (car.organizationId !== ctx.organization.id && ctx.user?.role !== "ADMIN") {
     throw new AuthorizationError("You don't have access to this car");
   }
   return createSuccessResponse(car);

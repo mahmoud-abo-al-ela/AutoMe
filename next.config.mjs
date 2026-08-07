@@ -1,13 +1,19 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
+// Derive the Supabase storage hostname from the configured URL rather than
+// hardcoding one project's subdomain — that breaks any non-prod/self-hosted
+// deployment. Falls back to undefined (dropped below) when unset.
+const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : undefined;
+
 const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "okrloefgsswtpefsobqe.supabase.co",
-      },
+      ...(supabaseHostname
+        ? [{ protocol: "https", hostname: supabaseHostname }]
+        : []),
       {
         protocol: "https",
         hostname: "img.clerk.com",
@@ -23,19 +29,13 @@ const nextConfig = {
     ],
   },
 
-  async headers() {
-    return [
-      {
-        source: "/embed",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value:
-              "frame-src https://roadsidecoder.created.app; frame-ancestors https://roadsidecoder.created.app;",
-          },
-        ],
-      },
-    ];
+  webpack: (config) => {
+    // @supabase/realtime-js loads its WebSocket impl via a dynamic require, which
+    // webpack can't statically analyze ("Critical dependency: the request of a
+    // dependency is an expression"). We only use Supabase for storage, never
+    // realtime, so this warning is a harmless false positive — silence it.
+    config.ignoreWarnings = [{ module: /@supabase\/realtime-js/ }];
+    return config;
   },
 };
 
