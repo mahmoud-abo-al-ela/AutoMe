@@ -19,7 +19,7 @@ function startOfCurrentMonthUtc() {
  * getCurrentOrganization() — never a client argument (see tenant-isolation skill).
  * Failed calls are excluded so a provider error never burns a customer's quota.
  */
-export async function countOrgAiCallsThisMonth(organizationId, features) {
+export async function countOrgAiCallsThisMonth(organizationId: string, features: string[]) {
     return db.aiUsage.count({
         where: {
             organizationId,
@@ -36,7 +36,7 @@ export async function countOrgAiCallsThisMonth(organizationId, features) {
  * is per project key regardless of feature, so this counts every recorded attempt
  * (success or failure) since each represents a request sent to the provider.
  */
-export async function countPlatformCallsSince(since) {
+export async function countPlatformCallsSince(since: Date) {
     return db.aiUsage.count({
         where: {
             createdAt: { gte: since },

@@ -15,9 +15,12 @@ const createPrismaClient = () => {
     return new PrismaClient({ adapter });
 };
 
-export const db = globalThis.prisma || createPrismaClient();
+// Reuse a single client across HMR reloads in dev (a new client per reload
+// exhausts connections). Typed so `db` is a full PrismaClient everywhere.
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+export const db = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
-    globalThis.prisma = db;
+    globalForPrisma.prisma = db;
 }
-
