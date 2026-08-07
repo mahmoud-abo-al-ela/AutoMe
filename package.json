@@ -86,14 +86,17 @@
     "@faker-js/faker": "^10.2.0",
     "@prisma/client": "7.2.0",
     "@tailwindcss/postcss": "^4",
+    "@vitest/coverage-v8": "^4.1.10",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.8",
+    "jsdom": "^30.0.1",
     "mini-css-extract-plugin": "^2.9.2",
     "prisma": "^7.2.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.2.9",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "vitest-mock-extended": "^5.1.1"
   }
 }
