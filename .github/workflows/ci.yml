@@ -82,8 +82,11 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: autome_test
+          # Ephemeral, localhost-only service container — no password. `trust`
+          # auth keeps a credential out of the connection strings entirely (and
+          # out of secret scanners) since nothing outside the runner can reach it.
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
@@ -95,9 +98,9 @@ jobs:
     env:
       # migrate deploy + the app's Prisma client read DATABASE_URL; the DB test
       # files copy TEST_DATABASE_URL over it before importing @/lib/prisma.
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/autome_test
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/autome_test
-      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/autome_test
+      DATABASE_URL: postgresql://postgres@localhost:5432/autome_test
+      DIRECT_URL: postgresql://postgres@localhost:5432/autome_test
+      TEST_DATABASE_URL: postgresql://postgres@localhost:5432/autome_test
       # Module-scope constructors run when test files import app modules. Same
       # placeholders as the build job — never reach a real service.
       NEXT_PUBLIC_APP_URL: http://localhost:3000
