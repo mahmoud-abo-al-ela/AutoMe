@@ -6,7 +6,7 @@ import { db } from "@/lib/prisma";
  * @param {string} id - The session ID
  * @returns {Promise<Object|null>} The onboarding session or null
  */
-export async function findOnboardingSessionById(id) {
+export async function findOnboardingSessionById(id: string) {
     return db.onboardingSession.findUnique({
         where: { id },
     });
@@ -18,7 +18,7 @@ export async function findOnboardingSessionById(id) {
  * @param {string} userId - The user ID
  * @returns {Promise<Object|null>} The onboarding session or null
  */
-export async function findPendingOnboardingSession(userId) {
+export async function findPendingOnboardingSession(userId: string) {
     return db.onboardingSession.findFirst({
         where: {
             userId,
@@ -35,7 +35,7 @@ export async function findPendingOnboardingSession(userId) {
  * @param {string} userId - The user ID
  * @returns {Promise<Object|null>} The onboarding session or null
  */
-export async function findOnboardingSessionByIdAndUser(id, userId) {
+export async function findOnboardingSessionByIdAndUser(id: string, userId: string) {
     return db.onboardingSession.findFirst({
         where: {
             id,

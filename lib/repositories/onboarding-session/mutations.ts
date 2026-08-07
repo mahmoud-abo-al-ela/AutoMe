@@ -1,4 +1,5 @@
 // Onboarding session mutation functions
+import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 const SESSION_TTL_HOURS = 24;
@@ -9,7 +10,7 @@ const SESSION_TTL_HOURS = 24;
  * @param {Object} data - The onboarding form data (JSON)
  * @returns {Promise<Object>} The created onboarding session
  */
-export async function createOnboardingSession(userId, data) {
+export async function createOnboardingSession(userId: string, data: Prisma.InputJsonValue) {
     const expiresAt = new Date(
         Date.now() + SESSION_TTL_HOURS * 60 * 60 * 1000,
     );
@@ -30,7 +31,7 @@ export async function createOnboardingSession(userId, data) {
  * @param {Object} data - The updated onboarding form data (JSON)
  * @returns {Promise<Object>} The updated onboarding session
  */
-export async function updateOnboardingSessionData(id, data) {
+export async function updateOnboardingSessionData(id: string, data: Prisma.InputJsonValue) {
     return db.onboardingSession.update({
         where: { id },
         data: { data },
@@ -42,7 +43,7 @@ export async function updateOnboardingSessionData(id, data) {
  * @param {string} id - The session ID
  * @returns {Promise<Object>} The updated onboarding session
  */
-export async function markOnboardingSessionCompleted(id) {
+export async function markOnboardingSessionCompleted(id: string) {
     return db.onboardingSession.update({
         where: { id },
         data: { status: "COMPLETED" },
@@ -54,7 +55,7 @@ export async function markOnboardingSessionCompleted(id) {
  * @param {string} userId - The user ID
  * @returns {Promise<Object>} Prisma batch update result
  */
-export async function expirePendingSessionsForUser(userId) {
+export async function expirePendingSessionsForUser(userId: string) {
     return db.onboardingSession.updateMany({
         where: {
             userId,
