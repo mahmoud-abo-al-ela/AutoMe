@@ -3,7 +3,7 @@ import { db } from "@/lib/prisma";
 /**
  * Find all members in an organization
  */
-export async function findManyMembers(organizationId) {
+export async function findManyMembers(organizationId: string) {
   return db.membership.findMany({
     where: {
       organizationId,
@@ -26,7 +26,7 @@ export async function findManyMembers(organizationId) {
 /**
  * Find membership by user and organization
  */
-export async function findMembership(userId, organizationId) {
+export async function findMembership(userId: string, organizationId: string) {
   return db.membership.findFirst({
     where: {
       userId,
@@ -38,7 +38,7 @@ export async function findMembership(userId, organizationId) {
 /**
  * Find membership by ID
  */
-export async function findMembershipById(id) {
+export async function findMembershipById(id: string) {
   return db.membership.findUnique({
     where: { id },
     include: { user: true },
@@ -48,7 +48,7 @@ export async function findMembershipById(id) {
 /**
  * Count members in an organization
  */
-export async function countMembers(organizationId) {
+export async function countMembers(organizationId: string) {
   return db.membership.count({
     where: { organizationId },
   });
@@ -57,7 +57,7 @@ export async function countMembers(organizationId) {
 /**
  * Find user by email
  */
-export async function findUserByEmail(email) {
+export async function findUserByEmail(email: string) {
   return db.user.findUnique({
     where: { email },
   });

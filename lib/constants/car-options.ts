@@ -99,7 +99,8 @@ export const CAR_COLOR_HEX = {
  * Resolve a car colour name to a hex value for the swatch. Falls back to a
  * neutral slate when the colour is unknown.
  */
-export const getCarColorHex = (color) => {
+export const getCarColorHex = (color?: string | null): string => {
     if (!color) return "#94a3b8";
-    return CAR_COLOR_HEX[color.toLowerCase().trim()] || "#94a3b8";
+    const key = color.toLowerCase().trim() as keyof typeof CAR_COLOR_HEX;
+    return CAR_COLOR_HEX[key] || "#94a3b8";
 };

@@ -1,7 +1,11 @@
 // Dealership repository - mutations (data access layer)
+import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
-export async function updateOrganizationProfile(organizationId, data) {
+export async function updateOrganizationProfile(
+    organizationId: string,
+    data: Prisma.OrganizationUncheckedUpdateInput,
+) {
     return db.organization.update({
         where: { id: organizationId },
         data,
@@ -26,7 +30,13 @@ export async function updateOrganizationProfile(organizationId, data) {
  * Count dealerships with filters
  */
 
-export async function createDealershipReview(data) {
+export async function createDealershipReview(data: {
+    organizationId: string;
+    userId: string;
+    rating: number;
+    title?: string | null;
+    comment?: string | null;
+}) {
     const { organizationId, userId, rating, title, comment } = data;
 
     return db.dealershipReview.create({
@@ -45,7 +55,7 @@ export async function createDealershipReview(data) {
  * Update dealership average rating
  */
 
-export async function updateDealershipRating(organizationId) {
+export async function updateDealershipRating(organizationId: string) {
     // Get all approved reviews
     const reviews = await db.dealershipReview.findMany({
         where: {

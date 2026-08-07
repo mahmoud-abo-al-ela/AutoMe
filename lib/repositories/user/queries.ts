@@ -5,7 +5,7 @@ import { serializeUser } from "@/lib/utils/serializers";
 /**
  * Find user by Clerk ID
  */
-export async function findUserByClerkId(clerkId) {
+export async function findUserByClerkId(clerkId: string) {
   const user = await db.user.findUnique({
     where: { clerkId },
   });
@@ -16,7 +16,7 @@ export async function findUserByClerkId(clerkId) {
 /**
  * Find user by Clerk ID with memberships (for role checking)
  */
-export async function findUserByClerkIdWithMemberships(clerkId) {
+export async function findUserByClerkIdWithMemberships(clerkId: string) {
   const user = await db.user.findUnique({
     where: { clerkId },
     include: {
@@ -39,7 +39,7 @@ export async function findUserByClerkIdWithMemberships(clerkId) {
 /**
  * Find user by ID
  */
-export async function findUserById(id) {
+export async function findUserById(id: string) {
   const user = await db.user.findUnique({
     where: { id },
   });
@@ -50,7 +50,7 @@ export async function findUserById(id) {
 /**
  * Find user by email
  */
-export async function findUserByEmail(email) {
+export async function findUserByEmail(email: string) {
   const user = await db.user.findUnique({
     where: { email },
   });
@@ -63,7 +63,7 @@ export async function findUserByEmail(email) {
  * @param {string} userId - The user ID
  * @returns {Promise<Object|null>} The membership with organization or null
  */
-export async function findUserOwnedOrganization(userId) {
+export async function findUserOwnedOrganization(userId: string) {
   const membership = await db.membership.findFirst({
     where: {
       userId,

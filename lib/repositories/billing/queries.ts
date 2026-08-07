@@ -1,4 +1,5 @@
 // Billing repository - Data access layer for plans, subscriptions, and billing
+import { PlanType } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 /**
@@ -14,7 +15,7 @@ export async function findActivePlans() {
 /**
  * Find a plan by ID
  */
-export async function findPlanById(planId) {
+export async function findPlanById(planId: string) {
   return db.plan.findUnique({
     where: { id: planId },
   });
@@ -23,7 +24,7 @@ export async function findPlanById(planId) {
 /**
  * Find a plan by type
  */
-export async function findPlanByType(type) {
+export async function findPlanByType(type: PlanType) {
   return db.plan.findUnique({
     where: { type },
   });
@@ -32,7 +33,7 @@ export async function findPlanByType(type) {
 /**
  * Find active subscription for an organization
  */
-export async function findActiveSubscription(organizationId) {
+export async function findActiveSubscription(organizationId: string) {
   return db.subscription.findFirst({
     where: {
       organizationId,
@@ -50,7 +51,7 @@ export async function findActiveSubscription(organizationId) {
 /**
  * Find subscription by organization ID
  */
-export async function findSubscriptionByOrgId(organizationId) {
+export async function findSubscriptionByOrgId(organizationId: string) {
   return db.subscription.findUnique({
     where: { organizationId },
     include: {
@@ -62,7 +63,7 @@ export async function findSubscriptionByOrgId(organizationId) {
 /**
  * Get usage counts for an organization
  */
-export async function getUsageCounts(organizationId) {
+export async function getUsageCounts(organizationId: string) {
   const [carCount, memberCount, testDriveCount] = await Promise.all([
     db.car.count({
       where: { organizationId },
@@ -86,7 +87,7 @@ export async function getUsageCounts(organizationId) {
 /**
  * Find billing-related audit logs for an organization
  */
-export async function findBillingEvents(organizationId, limit = 10) {
+export async function findBillingEvents(organizationId: string, limit = 10) {
   return db.auditLog.findMany({
     where: {
       organizationId,

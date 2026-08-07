@@ -68,6 +68,10 @@ jobs:
       # without holding the gate hostage to the existing warning backlog.
       - run: pnpm lint
 
+      # Type gate for the incremental JS->TS migration. Cheap, fast feedback, and
+      # keeps converted files honest even before `next build` type-checks them.
+      - run: pnpm typecheck
+
       - run: pnpm build
 
   test:
