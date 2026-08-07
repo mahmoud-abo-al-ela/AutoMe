@@ -16,11 +16,18 @@ import { logError } from "@/lib/utils/errors";
  */
 export async function GET(request) {
   try {
-    // Verify cron secret in production
+    // Fail closed: a missing secret must reject, never skip the check. With the
+    // old `if (cronSecret && …)` guard, an unset CRON_SECRET let anyone trigger
+    // audit-log deletion. The Stripe webhook already fails closed — match it.
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret) {
+      logError("CRON_SECRET is not configured; refusing audit-log cleanup");
+      return NextResponse.json({ error: "Not configured" }, { status: 500 });
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

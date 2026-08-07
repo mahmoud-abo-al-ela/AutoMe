@@ -104,25 +104,41 @@ const clerk = clerkMiddleware(async (auth, req) => {
   // Determine effective organization slug
   const effectiveOrgSlug = impersonation?.organizationSlug || subdomain;
 
-  // Create response with custom headers
-  const response = NextResponse.next();
+  // Forward tenant context on the *request* headers so server components and
+  // actions can read it back via next/headers `headers()`. Setting them on the
+  // response (the previous behaviour) never reached the app, so
+  // getCurrentOrganization() always returned null and resolveTenantContext fell
+  // back to an arbitrary membership.
+  const requestHeaders = new Headers(req.headers);
 
-  // Set organization context headers for downstream use
+  // A client can send any header it likes. Strip our internal ones before we
+  // trust anything downstream — otherwise forwarding them turns
+  // x-organization-slug into a client-controlled tenant selector.
+  requestHeaders.delete("x-organization-slug");
+  requestHeaders.delete("x-subdomain");
+  requestHeaders.delete("x-impersonation-active");
+  requestHeaders.delete("x-impersonated-org");
+  requestHeaders.delete("x-impersonated-user");
+  requestHeaders.delete("x-impersonation-session");
+
   if (effectiveOrgSlug) {
-    response.headers.set("x-organization-slug", effectiveOrgSlug);
+    requestHeaders.set("x-organization-slug", effectiveOrgSlug);
   }
 
   if (subdomain) {
-    response.headers.set("x-subdomain", subdomain);
+    requestHeaders.set("x-subdomain", subdomain);
   }
 
   // Set impersonation headers if active
   if (impersonation) {
-    response.headers.set("x-impersonation-active", "true");
-    response.headers.set("x-impersonated-org", impersonation.organizationSlug);
-    response.headers.set("x-impersonated-user", impersonation.userId);
-    response.headers.set("x-impersonation-session", impersonation.sessionId);
+    requestHeaders.set("x-impersonation-active", "true");
+    requestHeaders.set("x-impersonated-org", impersonation.organizationSlug);
+    requestHeaders.set("x-impersonated-user", impersonation.userId);
+    requestHeaders.set("x-impersonation-session", impersonation.sessionId);
   }
+
+  // Create response, forwarding the sanitized request headers downstream.
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
 
   // Skip auth for public API routes (webhooks, cron)
   if (isPublicApiRoute(req)) {
