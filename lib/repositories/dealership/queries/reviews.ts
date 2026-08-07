@@ -2,8 +2,8 @@
 import { db } from "@/lib/prisma";
 
 export async function findDealershipReviews(
-    organizationId,
-    pagination = {}
+    organizationId: string,
+    pagination: { page?: number; limit?: number } = {}
 ) {
     const { page = 1, limit = 10 } = pagination;
     const skip = (page - 1) * limit;
@@ -51,8 +51,8 @@ export async function findDealershipReviews(
  */
 
 export async function findUserReviewForDealership(
-    organizationId,
-    userId
+    organizationId: string,
+    userId: string
 ) {
     return db.dealershipReview.findUnique({
         where: {

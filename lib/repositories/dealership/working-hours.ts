@@ -1,10 +1,18 @@
 // Working hours repository functions
+import { DayOfWeek } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
+
+interface WorkingHourInput {
+  dayOfWeek: DayOfWeek | DayOfWeek[];
+  openTime?: string;
+  closeTime?: string;
+  isOpen?: boolean;
+}
 
 /**
  * Get working hours for an organization
  */
-export async function findWorkingHours(organizationId) {
+export async function findWorkingHours(organizationId: string) {
   const workingHours = await db.workingHours.findMany({
     where: { organizationId },
     orderBy: { dayOfWeek: "asc" },
@@ -16,7 +24,7 @@ export async function findWorkingHours(organizationId) {
 /**
  * Update working hours for an organization
  */
-export async function updateWorkingHours(organizationId, workingHours) {
+export async function updateWorkingHours(organizationId: string, workingHours: WorkingHourInput[]) {
   // Validate input
   if (!Array.isArray(workingHours) || workingHours.length === 0) {
     throw new Error("Working hours must be a non-empty array");

@@ -1,23 +1,24 @@
 import { db } from "@/lib/prisma";
+import { Prisma } from "@/lib/generated/prisma";
 
 /**
  * Subscription repository for Super Admin operations
  */
 
-export async function createSubscription(data) {
+export async function createSubscription(data: Prisma.SubscriptionUncheckedCreateInput) {
   return db.subscription.create({
     data,
   });
 }
 
-export async function updateSubscription(subscriptionId, data) {
+export async function updateSubscription(subscriptionId: string, data: Prisma.SubscriptionUncheckedUpdateInput) {
   return db.subscription.update({
     where: { id: subscriptionId },
     data,
   });
 }
 
-export async function updateOrCreateSubscription(orgId, planId) {
+export async function updateOrCreateSubscription(orgId: string, planId: string) {
   const org = await db.organization.findUnique({
     where: { id: orgId },
     include: { subscription: true },
