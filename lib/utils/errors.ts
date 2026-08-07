@@ -1,7 +1,11 @@
 // Standardized error handling
 
 export class AppError extends Error {
-    constructor(message, statusCode = 500, code = "INTERNAL_ERROR") {
+    statusCode: number;
+    code: string;
+    isOperational: boolean;
+
+    constructor(message: string, statusCode = 500, code = "INTERNAL_ERROR") {
         super(message);
         this.name = this.constructor.name;
         this.statusCode = statusCode;
@@ -12,7 +16,9 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-    constructor(message, field = null) {
+    field: string | null;
+
+    constructor(message: string, field: string | null = null) {
         super(message, 400, "VALIDATION_ERROR");
         this.field = field;
     }
@@ -31,6 +37,8 @@ export class AuthorizationError extends AppError {
 }
 
 export class NotFoundError extends AppError {
+    resource: string;
+
     constructor(resource = "Resource") {
         super(`${resource} not found`, 404, "NOT_FOUND");
         this.resource = resource;
@@ -49,8 +57,23 @@ export class RateLimitError extends AppError {
     }
 }
 
+export interface PlanLimitErrorInput {
+    resource?: string;
+    planType?: string;
+    limit?: number;
+    currentUsage?: number;
+    upgradeUrl?: string;
+    message?: string;
+}
+
 export class PlanLimitError extends AppError {
-    constructor({ resource, planType, limit, currentUsage, upgradeUrl, message }) {
+    resource?: string;
+    planType?: string;
+    limit?: number;
+    currentUsage?: number;
+    upgradeUrl?: string;
+
+    constructor({ resource, planType, limit, currentUsage, upgradeUrl, message }: PlanLimitErrorInput) {
         super(message || `Plan limit exceeded for ${resource}`, 403, "PLAN_LIMIT_EXCEEDED");
         this.resource = resource;
         this.planType = planType;
@@ -63,7 +86,7 @@ export class PlanLimitError extends AppError {
 /**
  * Check if error is operational (expected) or programming error
  */
-export function isOperationalError(error) {
+export function isOperationalError(error: unknown): boolean {
     if (error instanceof AppError) {
         return error.isOperational;
     }
@@ -73,13 +96,13 @@ export function isOperationalError(error) {
 /**
  * Log error with appropriate level
  */
-export function logError(errorOrMessage, ...args) {
-    let actualError = errorOrMessage;
-    let context = undefined;
+export function logError(errorOrMessage: unknown, ...args: unknown[]): void {
+    let actualError: unknown = errorOrMessage;
+    let context: string | undefined = undefined;
 
     if (typeof errorOrMessage === 'string') {
         context = errorOrMessage;
-        const foundError = args.find(arg => arg instanceof Error);
+        const foundError = args.find((arg) => arg instanceof Error);
         if (foundError) {
             actualError = foundError;
         } else {
@@ -92,19 +115,21 @@ export function logError(errorOrMessage, ...args) {
         actualError = new Error("Unknown error logged");
     }
 
-    const details = args.filter(arg => arg !== actualError);
+    const details = args.filter((arg) => arg !== actualError);
 
     if (isOperationalError(actualError)) {
+        const opError = actualError as AppError;
         console.warn(context || "Operational error:", {
-            message: actualError.message,
-            code: actualError.code,
-            statusCode: actualError.statusCode,
+            message: opError.message,
+            code: opError.code,
+            statusCode: opError.statusCode,
             ...(details.length > 0 ? { details } : {})
         });
     } else {
+        const err = actualError as Error;
         console.error(context || "Programming error:", {
-            message: actualError.message || String(actualError),
-            stack: actualError.stack,
+            message: err.message || String(actualError),
+            stack: err.stack,
             ...(details.length > 0 ? { details } : {})
         });
     }

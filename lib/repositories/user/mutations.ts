@@ -1,11 +1,12 @@
 // User mutation functions
+import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 import { serializeUser } from "@/lib/utils/serializers";
 
 /**
  * Create a new user
  */
-export async function createUser(userData) {
+export async function createUser(userData: Prisma.UserUncheckedCreateInput) {
   const user = await db.user.create({
     data: userData,
   });
@@ -16,7 +17,7 @@ export async function createUser(userData) {
 /**
  * Update a user
  */
-export async function updateUser(id, userData) {
+export async function updateUser(id: string, userData: Prisma.UserUncheckedUpdateInput) {
   const user = await db.user.update({
     where: { id },
     data: userData,

@@ -1,4 +1,5 @@
 // AI usage repository - Data access layer for AI usage mutations
+import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 /**
@@ -10,6 +11,6 @@ import { db } from "@/lib/prisma";
  * input. Failures should be recorded too (`success: false`, `errorCode`) — that
  * error rate is the repo's only telemetry.
  */
-export async function createAiUsage(data) {
+export async function createAiUsage(data: Prisma.AiUsageUncheckedCreateInput) {
     return db.aiUsage.create({ data });
 }

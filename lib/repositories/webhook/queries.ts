@@ -4,7 +4,7 @@ import { db } from "@/lib/prisma";
 /**
  * Find organization by user ID (for webhook processing)
  */
-export async function findOrganizationByUserId(userId) {
+export async function findOrganizationByUserId(userId: string) {
     const membership = await db.membership.findFirst({
         where: {
             userId,
@@ -21,7 +21,7 @@ export async function findOrganizationByUserId(userId) {
 /**
  * Find subscription by Stripe subscription ID
  */
-export async function findSubscriptionByStripeId(stripeSubscriptionId) {
+export async function findSubscriptionByStripeId(stripeSubscriptionId: string) {
     return db.subscription.findUnique({
         where: { stripeSubscriptionId },
     });
@@ -30,7 +30,7 @@ export async function findSubscriptionByStripeId(stripeSubscriptionId) {
 /**
  * Find subscription by organization ID
  */
-export async function findSubscriptionByOrgId(organizationId) {
+export async function findSubscriptionByOrgId(organizationId: string) {
     return db.subscription.findUnique({
         where: { organizationId },
     });
@@ -39,7 +39,7 @@ export async function findSubscriptionByOrgId(organizationId) {
 /**
  * Find subscription by Stripe Checkout Session ID (for idempotency)
  */
-export async function findSubscriptionByCheckoutSessionId(stripeCheckoutSessionId) {
+export async function findSubscriptionByCheckoutSessionId(stripeCheckoutSessionId: string) {
     return db.subscription.findUnique({
         where: { stripeCheckoutSessionId },
         include: {
@@ -55,7 +55,7 @@ export async function findSubscriptionByCheckoutSessionId(stripeCheckoutSessionI
  * For the atomic processing guard use `claimWebhookEvent` (mutations) instead;
  * this read is for diagnostics/observability.
  */
-export async function hasProcessedEvent(eventId) {
+export async function hasProcessedEvent(eventId: string) {
     const existing = await db.webhookEvent.findUnique({
         where: { id: eventId },
         select: { id: true },

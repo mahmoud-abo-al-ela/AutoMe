@@ -3,8 +3,9 @@ import { ValidationError } from "@/lib/utils/errors";
 
 /**
  * Validates data against a Zod schema and throws a standardized ValidationError if it fails.
+ * Returns the parsed, typed value (z.infer of the schema).
  */
-export function validateAction(schema, data) {
+export function validateAction<T>(schema: z.ZodType<T>, data: unknown): T {
   try {
     return schema.parse(data);
   } catch (error) {
