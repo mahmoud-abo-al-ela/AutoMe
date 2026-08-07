@@ -64,7 +64,7 @@ export const organizationSchema = z.object({
   paymentIntentId: z.string().optional().nullable(),
 });
 
-const optionalText = (max) =>
+const optionalText = (max: number) =>
   z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? null : value),
     z.string().trim().max(max).optional().nullable()
@@ -155,4 +155,24 @@ export const startImpersonationSchema = z.object({
   organizationId: z.string().min(1, "Organization is required"),
   targetUserId: z.string().min(1, "Target user is required"),
 });
+
+// ============ INFERRED INPUT TYPES ============
+// The Zod schema is the runtime contract; z.infer makes it the compile-time one
+// too, so action inputs never get hand-written a second time (they'd drift).
+
+export type CarInput = z.infer<typeof carSchema>;
+export type UpdateCarInput = z.infer<typeof updateCarSchema>;
+export type UpdateCarFullInput = z.infer<typeof updateCarFullSchema>;
+export type OrganizationInput = z.infer<typeof organizationSchema>;
+export type OrganizationProfileInput = z.infer<typeof organizationProfileSchema>;
+export type InviteTeamMemberInput = z.infer<typeof inviteTeamMemberSchema>;
+export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
+export type MemberIdInput = z.infer<typeof memberIdSchema>;
+export type RequestTestDriveInput = z.infer<typeof requestTestDriveSchema>;
+export type EditTestDriveInput = z.infer<typeof editTestDriveSchema>;
+export type UpdateTestDriveStatusInput = z.infer<typeof updateTestDriveStatusSchema>;
+export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
+export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
+export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
+export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
