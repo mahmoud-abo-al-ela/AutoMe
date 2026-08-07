@@ -69,3 +69,59 @@ jobs:
       - run: pnpm lint
 
       - run: pnpm build
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Real Postgres for the DB-backed suites (webhook idempotency race + FTS/
+    # trigram search). The mock-based suites ignore it. TEST_DATABASE_URL is what
+    # flips the `describe.skipIf(!TEST_DATABASE_URL)` gates on.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: autome_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # migrate deploy + the app's Prisma client read DATABASE_URL; the DB test
+      # files copy TEST_DATABASE_URL over it before importing @/lib/prisma.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/autome_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/autome_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/autome_test
+      # Module-scope constructors run when test files import app modules. Same
+      # placeholders as the build job — never reach a real service.
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: placeholder
+      SUPABASE_SERVICE_ROLE_KEY: placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+      ARCJET_KEY: ajkey_placeholder
+      GEMINI_API_KEY: placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Apply all migrations to the service DB: schema, the pg_trgm extension, the
+      # generated searchVector column, and the GIN indexes the search suite needs.
+      - run: pnpm exec prisma migrate deploy
+
+      - run: pnpm test
