@@ -8,7 +8,19 @@ import { sendOrganizationInvitationEmail } from "./email";
  * Organization service for Super Admin operations
  */
 
-export async function createOrganization(data) {
+export interface CreateOrganizationInput {
+  name: string;
+  slug?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  website?: string | null;
+  description?: string | null;
+  planId: string;
+  ownerEmail?: string | null;
+}
+
+export async function createOrganization(data: CreateOrganizationInput) {
   // Generate slug from name if not provided
   const slug =
     data.slug ||
@@ -82,10 +94,10 @@ export async function createOrganization(data) {
       });
     } catch (emailError) {
       // Don't fail the creation if email fails, but re-throw if it's a config error
-      if (emailError.message.includes("EmailJS")) {
-        throw new Error(
-          `Organization created but email failed: ${emailError.message}`
-        );
+      const message =
+        emailError instanceof Error ? emailError.message : String(emailError);
+      if (message.includes("EmailJS")) {
+        throw new Error(`Organization created but email failed: ${message}`);
       }
     }
   }
@@ -93,11 +105,11 @@ export async function createOrganization(data) {
   return { organization, plan };
 }
 
-export async function updateOrganizationStatus(orgId, isActive) {
+export async function updateOrganizationStatus(orgId: string, isActive: boolean) {
   return orgRepo.updateOrganizationStatus(orgId, isActive);
 }
 
-export async function deleteOrganization(orgId) {
+export async function deleteOrganization(orgId: string) {
   // Get org info before deletion
   const org = await orgRepo.findOrganizationForDeletion(orgId);
 
@@ -111,7 +123,7 @@ export async function deleteOrganization(orgId) {
   return org;
 }
 
-export async function changeOrganizationPlan(orgId, planId) {
+export async function changeOrganizationPlan(orgId: string, planId: string) {
   const org = await orgRepo.findOrganizationWithSubscription(orgId);
 
   if (!org) {

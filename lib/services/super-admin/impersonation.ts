@@ -6,9 +6,9 @@ import * as membershipRepo from "@/lib/repositories/super-admin/membership";
  */
 
 export async function startImpersonation(
-  organizationId,
-  targetUserId,
-  adminId
+  organizationId: string,
+  targetUserId: string,
+  adminId: string
 ) {
   // Verify target user exists and belongs to org
   const targetUser = await membershipRepo.findUserMembershipInOrganization(
@@ -31,6 +31,6 @@ export async function startImpersonation(
   return { session, targetUser };
 }
 
-export async function endImpersonation(sessionId) {
+export async function endImpersonation(sessionId: string) {
   return impersonationRepo.endImpersonationSession(sessionId);
 }

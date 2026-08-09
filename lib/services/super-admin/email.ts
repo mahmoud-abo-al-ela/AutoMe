@@ -1,6 +1,17 @@
 /**
  * Email service for Super Admin operations
  */
+import type { Plan, User } from "@/lib/generated/prisma";
+
+export interface OrganizationInvitationParams {
+  ownerEmail: string;
+  organizationName: string;
+  organizationSlug: string;
+  /** Only the plan limits quoted in the email body are needed here. */
+  plan: Pick<Plan, "name" | "maxCars" | "maxMembers" | "maxImagesPerCar">;
+  /** Present when the invitee already has an account; only truthiness matters. */
+  existingUser: User | null;
+}
 
 export async function sendOrganizationInvitationEmail({
   ownerEmail,
@@ -8,7 +19,7 @@ export async function sendOrganizationInvitationEmail({
   organizationSlug,
   plan,
   existingUser,
-}) {
+}: OrganizationInvitationParams) {
   const { sendEmail, FROM_EMAIL } = await import("@/lib/resend");
 
   // Check if EmailJS is configured

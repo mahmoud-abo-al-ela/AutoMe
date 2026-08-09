@@ -1,10 +1,15 @@
+import type { UserRole } from "@/lib/generated/prisma";
 import * as userRepo from "@/lib/repositories/super-admin/user";
 
 /**
  * User service for Super Admin operations
  */
 
-export async function updateUserRole(userId, newRole, adminId) {
+export async function updateUserRole(
+  userId: string,
+  newRole: UserRole,
+  adminId: string
+) {
   // Validate role
   if (!["USER", "ADMIN"].includes(newRole)) {
     throw new Error("Invalid role");
@@ -18,10 +23,10 @@ export async function updateUserRole(userId, newRole, adminId) {
   return userRepo.updateUserRole(userId, newRole);
 }
 
-export async function getUserById(userId) {
+export async function getUserById(userId: string) {
   return userRepo.findUserById(userId);
 }
 
-export async function getUserByEmail(email) {
+export async function getUserByEmail(email: string) {
   return userRepo.findUserByEmail(email);
 }

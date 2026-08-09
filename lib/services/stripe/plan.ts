@@ -3,7 +3,11 @@ import { logError } from "@/lib/utils/errors";
 
 /** The plan fields these helpers read when creating/updating Stripe resources. */
 export interface StripePlanInput {
-    id: string;
+    /**
+     * Absent when creating a plan — the row does not exist yet, so the Stripe
+     * product's metadata.planId is simply omitted, as it always has been.
+     */
+    id?: string;
     name: string;
     type: string;
     monthlyPrice: number;
@@ -42,7 +46,7 @@ export async function createStripeProduct(plan: StripePlanInput): Promise<string
             name: plan.name,
             description: `${plan.type} plan - ${plan.name}`,
             metadata: {
-                planId: plan.id,
+                planId: plan.id ?? null,
                 planType: plan.type,
             },
         });
@@ -91,7 +95,7 @@ export async function updateStripeProduct(
             name: data.name,
             description: `${data.type} plan - ${data.name}`,
             metadata: {
-                planId: data.id,
+                planId: data.id ?? null,
                 planType: data.type,
             },
         });

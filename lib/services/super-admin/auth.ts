@@ -5,7 +5,7 @@ import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
  * Authentication helper for Super Admin operations
  */
 
-export async function requireSuperAdmin(clerkId) {
+export async function requireSuperAdmin(clerkId: string | null | undefined) {
   if (!clerkId) {
     throw new AuthenticationError();
   }
