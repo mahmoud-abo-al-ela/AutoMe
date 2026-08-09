@@ -5,7 +5,10 @@ import { createAdminClient } from "@/lib/supabase";
  * Upload a base64 data-URL logo to Supabase Storage and return its public URL.
  * Returns null when the input is not a base64 image.
  */
-export async function uploadLogoToStorage(base64Data, organizationSlug) {
+export async function uploadLogoToStorage(
+  base64Data: string | null | undefined,
+  organizationSlug: string
+): Promise<string | null> {
   if (!base64Data || !base64Data.startsWith("data:image")) {
     return null;
   }
@@ -23,7 +26,7 @@ export async function uploadLogoToStorage(base64Data, organizationSlug) {
   const buffer = Buffer.from(base64Content, "base64");
 
   // Determine file extension
-  const extMap = {
+  const extMap: Record<string, string> = {
     "image/jpeg": "jpg",
     "image/jpg": "jpg",
     "image/png": "png",
@@ -57,7 +60,10 @@ export async function uploadLogoToStorage(base64Data, organizationSlug) {
  * Resolve the logo value from an onboarding payload into a stored URL:
  * base64 data-URLs are uploaded, existing URLs pass through, empty -> null.
  */
-export async function resolveLogoUrl(logo, slug) {
+export async function resolveLogoUrl(
+  logo: string | null | undefined,
+  slug: string
+): Promise<string | null> {
   if (logo && logo.startsWith("data:image")) {
     return uploadLogoToStorage(logo, slug);
   }

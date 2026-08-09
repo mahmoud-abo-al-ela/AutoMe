@@ -8,6 +8,21 @@ import {
     markOnboardingSessionCompleted as markCompleted,
     expirePendingSessionsForUser,
 } from "@/lib/repositories/onboarding-session";
+import type { Prisma } from "@/lib/generated/prisma";
+import type { OrganizationInput } from "@/lib/validations/schemas";
+
+/**
+ * What the onboarding form stores in OnboardingSession.data. Prisma types the
+ * column as opaque JSON, so the read helpers below assert this shape once, at
+ * the boundary, rather than leaving every consumer to guess at it.
+ */
+export type OnboardingSessionData = OrganizationInput & {
+    billingPeriod?: "monthly" | "yearly";
+};
+
+function asSessionData(data: Prisma.JsonValue): OnboardingSessionData {
+    return data as unknown as OnboardingSessionData;
+}
 
 /**
  * Save onboarding form data to a session.
@@ -17,7 +32,10 @@ import {
  * @param {Object} formData - The full onboarding form data (org details, working hours, plan selection)
  * @returns {Promise<{ sessionId: string }>} The created session ID
  */
-export async function saveOnboardingSession(userId, formData) {
+export async function saveOnboardingSession(
+    userId: string,
+    formData: OnboardingSessionData
+): Promise<{ sessionId: string }> {
     // Expire any previous pending sessions for this user
     await expirePendingSessionsForUser(userId);
 
@@ -34,14 +52,16 @@ export async function saveOnboardingSession(userId, formData) {
  * @param {string} sessionId - The onboarding session ID
  * @returns {Promise<Object|null>} The session data (JSON) or null if invalid/expired
  */
-export async function getOnboardingSession(sessionId) {
+export async function getOnboardingSession(
+    sessionId: string
+): Promise<OnboardingSessionData | null> {
     const session = await findOnboardingSessionById(sessionId);
 
     if (!session) return null;
     if (session.status !== "PENDING") return null;
     if (new Date(session.expiresAt) < new Date()) return null;
 
-    return session.data;
+    return asSessionData(session.data);
 }
 
 /**
@@ -52,12 +72,15 @@ export async function getOnboardingSession(sessionId) {
  * @param {string} userId - The authenticated user's ID
  * @returns {Promise<Object|null>} The session data (JSON) or null if invalid
  */
-export async function getOnboardingSessionForUser(sessionId, userId) {
+export async function getOnboardingSessionForUser(
+    sessionId: string,
+    userId: string
+): Promise<OnboardingSessionData | null> {
     const session = await findOnboardingSessionByIdAndUser(sessionId, userId);
 
     if (!session) return null;
 
-    return session.data;
+    return asSessionData(session.data);
 }
 
 /**
@@ -69,7 +92,11 @@ export async function getOnboardingSessionForUser(sessionId, userId) {
  * @param {Object} formData - The updated form data
  * @returns {Promise<{ sessionId: string }|null>} The session ID or null if not found
  */
-export async function updateOnboardingSession(sessionId, userId, formData) {
+export async function updateOnboardingSession(
+    sessionId: string,
+    userId: string,
+    formData: OnboardingSessionData
+): Promise<{ sessionId: string } | null> {
     // Verify the session belongs to this user and is still valid
     const session = await findOnboardingSessionByIdAndUser(sessionId, userId);
 
@@ -87,7 +114,7 @@ export async function updateOnboardingSession(sessionId, userId, formData) {
  * @param {string} sessionId - The onboarding session ID
  * @returns {Promise<void>}
  */
-export async function markOnboardingSessionCompleted(sessionId) {
+export async function markOnboardingSessionCompleted(sessionId: string): Promise<void> {
     await markCompleted(sessionId);
 }
 
@@ -98,13 +125,15 @@ export async function markOnboardingSessionCompleted(sessionId) {
  * @param {string} userId - The authenticated user's ID
  * @returns {Promise<{ sessionId: string, data: Object }|null>} The session or null
  */
-export async function resumeOnboardingSession(userId) {
+export async function resumeOnboardingSession(
+    userId: string
+): Promise<{ sessionId: string; data: OnboardingSessionData } | null> {
     const session = await findPendingOnboardingSession(userId);
 
     if (!session) return null;
 
     return {
         sessionId: session.id,
-        data: session.data,
+        data: asSessionData(session.data),
     };
 }

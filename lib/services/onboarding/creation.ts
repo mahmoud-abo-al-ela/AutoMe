@@ -1,11 +1,51 @@
+import type Stripe from "stripe";
+import type { DayOfWeek, Organization, SubscriptionStatus } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { sendWelcomeEmail } from "@/lib/services/notification";
 import { mapStripeStatusToSubscriptionStatus } from "@/lib/services/webhook/stripe/subscription-events";
 import { logError } from "@/lib/utils/errors";
+import type { OrganizationInput } from "@/lib/validations/schemas";
+
+export type WorkingHoursInput = NonNullable<OrganizationInput["workingHours"]>;
 
 /**
- * Shared transaction block to create an organization, working hours, 
+ * The Stripe-derived facts the subscription row is built from. `period_start`
+ * and `period_end` moved off Subscription onto its items in the 2025 Basil API
+ * release, so they are optional here and simply fall back to a 30-day window —
+ * matching what this code already did. Reconciling that is a separate PR.
+ */
+export interface OnboardingStripeData {
+  subscriptionId?: string | null;
+  customerId?: string | null;
+  checkoutSessionId?: string | null;
+  paymentIntentId?: string | null;
+  trialDays?: number | null;
+  stripeSubscription?:
+    | (Pick<Stripe.Subscription, "status"> & {
+        trial_end?: number | null;
+        current_period_start?: number | null;
+        current_period_end?: number | null;
+      })
+    | null;
+}
+
+export interface CreateOrganizationInput {
+  name: string;
+  slug: string;
+  email: string;
+  phone?: string | null;
+  address?: string | null;
+  logoUrl?: string | null;
+  workingHours?: WorkingHoursInput | null;
+  userId: string;
+  userEmail?: string | null;
+  planId: string;
+  stripeData?: OnboardingStripeData;
+}
+
+/**
+ * Shared transaction block to create an organization, working hours,
  * owner membership, and subscription.
  */
 export async function createOrganizationInTransaction({
@@ -20,7 +60,7 @@ export async function createOrganizationInTransaction({
   userEmail,
   planId,
   stripeData = {}, // { subscriptionId, customerId, checkoutSessionId, stripeSubscription }
-}) {
+}: CreateOrganizationInput): Promise<Organization> {
   // Transaction creates: org → working hours → owner membership → subscription → audit log
   return await db.$transaction(async (tx) => {
     const org = await tx.organization.create({
@@ -38,7 +78,9 @@ export async function createOrganizationInTransaction({
       const workingHoursData = Object.entries(workingHours).map(
         ([day, hours]) => ({
           organizationId: org.id,
-          dayOfWeek: [day.toUpperCase()],
+          // Form keys are lowercase day names, so the uppercased key is the
+          // DayOfWeek member; the record's key type can't express that.
+          dayOfWeek: [day.toUpperCase() as DayOfWeek],
           openTime: hours.open,
           closeTime: hours.close,
           isOpen: !hours.closed,
@@ -60,8 +102,8 @@ export async function createOrganizationInTransaction({
 
     // Subscription setup
     const now = new Date();
-    let trialEndsAt = null;
-    let status = "ACTIVE";
+    let trialEndsAt: Date | null = null;
+    let status: SubscriptionStatus = "ACTIVE";
     let currentPeriodStart = now;
     let currentPeriodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 

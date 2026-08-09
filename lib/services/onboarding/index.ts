@@ -17,7 +17,7 @@ export {
  * @param {string} userId - The user ID
  * @returns {Promise<Object>} Object containing plans and existing organization if any
  */
-export async function getOnboardingData(userId) {
+export async function getOnboardingData(userId: string) {
   const [plans, existingOwnership] = await Promise.all([
     billingService.getActivePlans(),
     findUserOwnedOrganization(userId),
@@ -34,6 +34,6 @@ export async function getOnboardingData(userId) {
  * @param {string} userId - The user ID
  * @returns {Promise<Object|null>} The owned organization membership or null
  */
-export async function getUserOwnedOrganization(userId) {
+export async function getUserOwnedOrganization(userId: string) {
   return findUserOwnedOrganization(userId);
 }
