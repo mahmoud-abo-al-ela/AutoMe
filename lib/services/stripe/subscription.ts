@@ -10,7 +10,7 @@ import Stripe from "stripe";
  * the fix (read `invoice.confirmation_secret`, or pin an older `apiVersion`)
  * belongs in its own PR.
  */
-type InvoiceWithLegacyPaymentIntent = Stripe.Invoice & {
+export type InvoiceWithLegacyPaymentIntent = Stripe.Invoice & {
     payment_intent?: string | Stripe.PaymentIntent | null;
 };
 

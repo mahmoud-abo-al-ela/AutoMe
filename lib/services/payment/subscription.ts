@@ -2,11 +2,26 @@ import { logError } from "@/lib/utils/errors";
 // Payment service - Business logic for subscription creation
 import * as billingRepo from "@/lib/repositories/billing";
 import * as stripeService from "@/lib/services/stripe/subscription";
+import type { PaymentUser } from "./checkout";
+
+export type CreateSubscriptionResult =
+    | { isFree: true }
+    | {
+          isFree: false;
+          subscriptionId: string;
+          clientSecret: string | null;
+          paymentIntentId?: string;
+          invoiceId?: string;
+      };
 
 /**
  * Create a subscription for a user
  */
-export async function createSubscription(user, planId, billingInterval = "month") {
+export async function createSubscription(
+    user: PaymentUser,
+    planId: string,
+    billingInterval: "month" | "year" = "month"
+): Promise<CreateSubscriptionResult> {
     // Get plan details
     const plan = await billingRepo.findPlanById(planId);
 
@@ -57,10 +72,13 @@ export async function createSubscription(user, planId, billingInterval = "month"
 
     // If no client secret and invoice is open, create payment intent manually
     if (!clientSecret) {
-        const latestInvoice =
-            typeof subscription.latest_invoice === "string"
-                ? await stripeService.retrieveInvoiceWithPaymentIntent(subscription.latest_invoice)
-                : subscription.latest_invoice;
+        // Same removed-field caveat as extractClientSecret — see the comment on
+        // InvoiceWithLegacyPaymentIntent. Behaviour preserved, fix is its own PR.
+        const latestInvoice = (typeof subscription.latest_invoice === "string"
+            ? await stripeService.retrieveInvoiceWithPaymentIntent(subscription.latest_invoice)
+            : subscription.latest_invoice) as
+            | stripeService.InvoiceWithLegacyPaymentIntent
+            | null;
 
         if (latestInvoice && latestInvoice.status === "open" && !latestInvoice.payment_intent) {
             const paymentIntent = await stripeService.createPaymentIntentForInvoice(

@@ -1,4 +1,5 @@
 // Billing service - Business logic layer for plans, subscriptions, and billing
+import type { AuditAction, PlanType, Prisma } from "@/lib/generated/prisma";
 import * as billingRepo from "@/lib/repositories/billing";
 
 /**
@@ -14,7 +15,7 @@ export async function getActivePlans() {
  * @param {string} planId - The plan ID
  * @returns {Promise<Object|null>} The plan or null if not found
  */
-export async function getPlanById(planId) {
+export async function getPlanById(planId: string) {
   return billingRepo.findPlanById(planId);
 }
 
@@ -23,7 +24,7 @@ export async function getPlanById(planId) {
  * @param {string} type - The plan type (e.g., 'STARTER', 'PRO', 'ENTERPRISE')
  * @returns {Promise<Object|null>} The plan or null if not found
  */
-export async function getPlanByType(type) {
+export async function getPlanByType(type: PlanType) {
   return billingRepo.findPlanByType(type);
 }
 
@@ -32,7 +33,7 @@ export async function getPlanByType(type) {
  * @param {string} organizationId - The organization ID
  * @returns {Promise<Object|null>} The active subscription with plan details
  */
-export async function getActiveSubscription(organizationId) {
+export async function getActiveSubscription(organizationId: string) {
   return billingRepo.findActiveSubscription(organizationId);
 }
 
@@ -41,7 +42,7 @@ export async function getActiveSubscription(organizationId) {
  * @param {string} organizationId - The organization ID
  * @returns {Promise<Object|null>} The subscription with plan details
  */
-export async function getSubscription(organizationId) {
+export async function getSubscription(organizationId: string) {
   return billingRepo.findSubscriptionByOrgId(organizationId);
 }
 
@@ -50,7 +51,7 @@ export async function getSubscription(organizationId) {
  * @param {string} organizationId - The organization ID
  * @returns {Promise<Object>} Usage stats including car count, member count, etc.
  */
-export async function getUsageStats(organizationId) {
+export async function getUsageStats(organizationId: string) {
   return billingRepo.getUsageCounts(organizationId);
 }
 
@@ -59,7 +60,7 @@ export async function getUsageStats(organizationId) {
  * @param {string} organizationId - The organization ID
  * @returns {Promise<Object>} Complete billing data including subscription, plans, and usage
  */
-export async function getBillingData(organizationId) {
+export async function getBillingData(organizationId: string) {
   const [subscription, plans, usage] = await Promise.all([
     getActiveSubscription(organizationId),
     getActivePlans(),
@@ -79,7 +80,7 @@ export async function getBillingData(organizationId) {
  * @param {number} limit - Maximum number of records to return
  * @returns {Promise<Array>} List of billing-related audit logs
  */
-export async function getBillingHistory(organizationId, limit = 10) {
+export async function getBillingHistory(organizationId: string, limit = 10) {
   const billingEvents = await billingRepo.findBillingEvents(organizationId, limit);
 
   return billingEvents.map((event) => ({
@@ -97,8 +98,21 @@ export async function getBillingHistory(organizationId, limit = 10) {
 /**
  * Format billing action for display
  */
-function formatBillingAction(action, newValue) {
-  const planName = newValue?.planName || newValue?.plan?.name || "Plan";
+function formatBillingAction(
+  action: AuditAction,
+  newValue: Prisma.JsonValue
+): string {
+  // newValue is free-form JSON on the audit row; read the two shapes the
+  // subscription loggers write, falling back to a generic label.
+  const record =
+    newValue && typeof newValue === "object" && !Array.isArray(newValue)
+      ? (newValue as Record<string, unknown>)
+      : {};
+  const nestedPlan =
+    record.plan && typeof record.plan === "object" && !Array.isArray(record.plan)
+      ? (record.plan as Record<string, unknown>)
+      : {};
+  const planName = record.planName || nestedPlan.name || "Plan";
 
   switch (action) {
     case "SUBSCRIPTION_CREATED":

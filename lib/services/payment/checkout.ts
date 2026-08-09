@@ -2,21 +2,24 @@
 import * as billingRepo from "@/lib/repositories/billing";
 import * as stripeService from "@/lib/services/stripe/subscription";
 
+/** The authenticated-user fields the payment services read. */
+export interface PaymentUser {
+    id: string;
+    email: string;
+    name?: string | null;
+}
+
+export type BillingPeriod = "monthly" | "yearly";
+
 /**
  * Create a Stripe Checkout Session for onboarding subscription.
- *
- * @param {Object} user - The authenticated user
- * @param {string} planId - The plan ID
- * @param {string} billingPeriod - "monthly" or "yearly"
- * @param {string} onboardingSessionId - The saved onboarding session ID
- * @returns {Promise<{ url: string }>} The Checkout Session URL
  */
 export async function createCheckoutSession(
-    user,
-    planId,
-    billingPeriod,
-    onboardingSessionId,
-) {
+    user: PaymentUser,
+    planId: string,
+    billingPeriod: BillingPeriod,
+    onboardingSessionId: string,
+): Promise<{ url: string | null }> {
     // Get plan details
     const plan = await billingRepo.findPlanById(planId);
 
