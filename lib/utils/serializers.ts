@@ -1,6 +1,35 @@
 // Data serialization utilities
+import type { User, Car, TestDrive } from "@/lib/generated/prisma";
 
-export function serializeCar(car) {
+/** Organization summary as the car/dealership queries select it. */
+interface OrgSummary {
+  name: string;
+  logo: string | null;
+  slug: string;
+  phone?: string | null;
+  address?: string | null;
+}
+
+/** A full car row (Prisma model) with the organization relation optionally joined. */
+type CarInput = Car & { organization?: OrgSummary | null };
+
+/** A user row carrying the fields serializeUser reads. */
+type SerializableUser = Pick<
+  User,
+  "id" | "clerkId" | "email" | "name" | "imageUrl" | "role"
+> & {
+  createdAt: Date | string;
+  updatedAt: Date | string;
+};
+
+/** Loosely-shaped car used where only some fields are selected. */
+type PartialCarInput = Record<string, unknown> & {
+  price?: unknown;
+  createdAt?: Date | string | null;
+  updatedAt?: Date | string | null;
+};
+
+export function serializeCar(car: CarInput | null) {
   if (!car) return null;
 
   return {
@@ -29,21 +58,16 @@ export function serializeCar(car) {
 
 /**
  * Serialize an array of cars
- * @param {Array} cars - Array of car objects
- * @returns {Array} Array of serialized car objects
  */
-export function serializeCars(cars) {
+export function serializeCars(cars: CarInput[]) {
   if (!Array.isArray(cars)) return [];
   return cars.map(serializeCar);
 }
 
 /**
  * Serialize car with wishlist status
- * @param {Object} car - Car object
- * @param {boolean} isWishlisted - Whether car is in user's wishlist
- * @returns {Object} Serialized car with wishlist status
  */
-export function serializeCarWithWishlist(car, isWishlisted = false) {
+export function serializeCarWithWishlist(car: CarInput | null, isWishlisted = false) {
   return {
     ...serializeCar(car),
     isWishlisted,
@@ -52,25 +76,23 @@ export function serializeCarWithWishlist(car, isWishlisted = false) {
 
 /**
  * Serialize partial car object (for cases where only some fields are selected)
- * @param {Object} car - Partial car object from database
- * @returns {Object} Serialized partial car object
  */
-export function serializePartialCar(car) {
+export function serializePartialCar(car: PartialCarInput | null) {
   if (!car) return null;
 
-  const serialized = { ...car };
+  const serialized: Record<string, unknown> = { ...car };
 
   // Only serialize fields that exist
   if (car.price !== undefined) {
-    serialized.price = parseFloat(car.price.toString());
+    serialized.price = parseFloat(String(car.price));
   }
-  if (car.createdAt !== undefined) {
+  if (car.createdAt !== undefined && car.createdAt !== null) {
     serialized.createdAt =
       car.createdAt instanceof Date
         ? car.createdAt.toISOString()
         : car.createdAt;
   }
-  if (car.updatedAt !== undefined) {
+  if (car.updatedAt !== undefined && car.updatedAt !== null) {
     serialized.updatedAt =
       car.updatedAt instanceof Date
         ? car.updatedAt.toISOString()
@@ -82,27 +104,24 @@ export function serializePartialCar(car) {
 
 /**
  * Serialize car with images formatted for display
- * @param {Object} car - Car object
- * @returns {Object} Serialized car with formatted images
  */
-export function serializeCarWithImages(car) {
+export function serializeCarWithImages(car: CarInput | null) {
   const serialized = serializeCar(car);
+  if (!serialized) return null;
 
   return {
     ...serialized,
     images: serialized.images.map((url) => ({
       url,
-      alt: `${car.make} ${car.model}`,
+      alt: `${car?.make} ${car?.model}`,
     })),
   };
 }
 
 /**
  * Serialize user object (remove sensitive data)
- * @param {Object|null} user - User object from database (may be null)
- * @returns {Object} Serialized user object
  */
-export function serializeUser(user) {
+export function serializeUser(user: SerializableUser | null) {
   if (!user) return null;
 
   return {
@@ -123,12 +142,17 @@ export function serializeUser(user) {
   };
 }
 
+/** A test drive row with car/user relations optionally joined. */
+type TestDriveInput = TestDrive & {
+  car?: PartialCarInput | null;
+  user?: SerializableUser | null;
+  date?: Date | string | null;
+};
+
 /**
  * Serialize test drive object
- * @param {Object} testDrive - Test drive object from database
- * @returns {Object} Serialized test drive object
  */
-export function serializeTestDrive(testDrive) {
+export function serializeTestDrive(testDrive: TestDriveInput | null) {
   if (!testDrive) return null;
 
   return {
@@ -150,16 +174,37 @@ export function serializeTestDrive(testDrive) {
   };
 }
 
+/** Participant / message / conversation shapes (legacy chat serializers). */
+interface ParticipantInput {
+  id: string;
+  name: string | null;
+  email: string | null;
+  imageUrl: string | null;
+  role: unknown;
+}
+
+interface MessageInput extends Record<string, unknown> {
+  createdAt?: Date | string | null;
+  readAt?: Date | string | null;
+  sender?: SerializableUser | null;
+}
+
+interface ConversationInput extends Record<string, unknown> {
+  createdAt?: Date | string | null;
+  updatedAt?: Date | string | null;
+  car?: PartialCarInput | null;
+  participants?: ParticipantInput[];
+  messages?: MessageInput[];
+}
+
 /**
  * Serialize conversation object
- * @param {Object} conversation - Conversation object from database
- * @returns {Object} Serialized conversation object
  */
-export function serializeConversation(conversation) {
+export function serializeConversation(conversation: ConversationInput | null) {
   if (!conversation) return null;
 
   // Participants are partial user objects, don't use full serializeUser
-  const serializeParticipant = (p) => ({
+  const serializeParticipant = (p: ParticipantInput) => ({
     id: p.id,
     name: p.name,
     email: p.email,
@@ -192,10 +237,8 @@ export function serializeConversation(conversation) {
 
 /**
  * Serialize message object
- * @param {Object} message - Message object from database
- * @returns {Object} Serialized message object
  */
-export function serializeMessage(message) {
+export function serializeMessage(message: MessageInput | null) {
   if (!message) return null;
 
   return {
