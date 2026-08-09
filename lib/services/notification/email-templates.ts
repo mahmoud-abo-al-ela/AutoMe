@@ -2,17 +2,19 @@
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-const escapeHtml = (unsafe) => {
+// Generic so a required string stays a string for callers that chain onto it,
+// while a nullable field passes through unchanged, exactly as before.
+const escapeHtml = <T extends string | null | undefined>(unsafe: T): T => {
   if (typeof unsafe !== 'string') return unsafe;
   return unsafe
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/'/g, "&#039;") as T;
 };
 
-const formatDate = (date) => {
+const formatDate = (date: Date | string | number): string => {
   return new Date(date).toLocaleDateString('en-EG', {
     weekday: 'long',
     year: 'numeric',
@@ -21,7 +23,7 @@ const formatDate = (date) => {
   });
 };
 
-const baseEmailHtml = (title, content) => `
+const baseEmailHtml = (title: string, content: string): string => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -67,6 +69,47 @@ const baseEmailHtml = (title, content) => `
 </html>
 `;
 
+export interface NewMessageEmailParams {
+  recipientName: string;
+  senderName: string;
+  messagePreview: string;
+  carTitle?: string | null;
+  messagesUrl: string;
+}
+
+export interface TestDriveConfirmationParams {
+  customerName: string;
+  carTitle: string;
+  date: Date | string;
+  startTime: string;
+  endTime: string;
+  dealershipName: string;
+  dealershipAddress?: string | null;
+}
+
+export interface TestDriveNotificationParams {
+  dealerName: string;
+  customerName: string;
+  carTitle: string;
+  date: Date | string;
+  startTime: string;
+  endTime: string;
+  orgSlug: string;
+}
+
+export interface WelcomeEmailParams {
+  userName: string;
+  dealershipName: string;
+  dashboardUrl: string;
+}
+
+export interface TestDriveStatusUpdateParams {
+  customerName: string;
+  carTitle: string;
+  status: string;
+  dealershipName: string;
+}
+
 /**
  * Generate HTML for new message email
  */
@@ -76,7 +119,7 @@ export function generateNewMessageEmailHtml({
   messagePreview,
   carTitle,
   messagesUrl,
-}) {
+}: NewMessageEmailParams): string {
   const safeRecipient = escapeHtml(recipientName);
   const safeSender = escapeHtml(senderName);
   const safeMessage = escapeHtml(messagePreview);
@@ -119,11 +162,11 @@ export function generateNewMessageEmailHtml({
 /**
  * Build messages URL for email
  */
-export function buildMessagesUrl(conversationId) {
+export function buildMessagesUrl(conversationId: string): string {
   return `${APP_URL}/messages?conversation=${conversationId}`;
 }
 
-export function generateTestDriveConfirmationHtml({ customerName, carTitle, date, startTime, endTime, dealershipName, dealershipAddress }) {
+export function generateTestDriveConfirmationHtml({ customerName, carTitle, date, startTime, endTime, dealershipName, dealershipAddress }: TestDriveConfirmationParams): string {
   const safeCustomer = escapeHtml(customerName);
   const safeCarTitle = escapeHtml(carTitle);
   const safeDealership = escapeHtml(dealershipName);
@@ -146,7 +189,7 @@ export function generateTestDriveConfirmationHtml({ customerName, carTitle, date
   return baseEmailHtml('Test Drive Requested', content);
 }
 
-export function generateTestDriveNotificationHtml({ dealerName, customerName, carTitle, date, startTime, endTime, orgSlug }) {
+export function generateTestDriveNotificationHtml({ dealerName, customerName, carTitle, date, startTime, endTime, orgSlug }: TestDriveNotificationParams): string {
   const safeDealer = escapeHtml(dealerName);
   const safeCustomer = escapeHtml(customerName);
   const safeCarTitle = escapeHtml(carTitle);
@@ -171,7 +214,7 @@ export function generateTestDriveNotificationHtml({ dealerName, customerName, ca
   return baseEmailHtml('New Test Drive Request', content);
 }
 
-export function generateWelcomeEmailHtml({ userName, dealershipName, dashboardUrl }) {
+export function generateWelcomeEmailHtml({ userName, dealershipName, dashboardUrl }: WelcomeEmailParams): string {
   const safeUser = escapeHtml(userName);
   const safeDealership = escapeHtml(dealershipName);
 
@@ -191,7 +234,7 @@ export function generateWelcomeEmailHtml({ userName, dealershipName, dashboardUr
   return baseEmailHtml('Welcome to AutoMe', content);
 }
 
-export function generateTestDriveStatusUpdateHtml({ customerName, carTitle, status, dealershipName }) {
+export function generateTestDriveStatusUpdateHtml({ customerName, carTitle, status, dealershipName }: TestDriveStatusUpdateParams): string {
   const safeCustomer = escapeHtml(customerName);
   const safeCarTitle = escapeHtml(carTitle);
   const safeStatus = escapeHtml(status).toUpperCase();

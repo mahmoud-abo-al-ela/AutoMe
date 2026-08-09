@@ -5,7 +5,21 @@
 export const FROM_EMAIL =
   process.env.FROM_EMAIL || "AutoMe <noreply@autome.com>";
 
-export async function sendEmail({ to, subject, html }) {
+export interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
+}
+
+export type SendEmailResult =
+  | { data: string; error: null }
+  | { data: null; error: unknown };
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: SendEmailParams): Promise<SendEmailResult> {
   // Check if EmailJS is configured
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) {
     throw new Error(
@@ -56,7 +70,11 @@ export async function sendEmail({ to, subject, html }) {
 // For backward compatibility with existing code that imports 'resend'
 export const resend = {
   emails: {
-    send: async ({ from, to, subject, html }) => {
+    send: async ({
+      to,
+      subject,
+      html,
+    }: SendEmailParams & { from?: string }) => {
       return sendEmail({ to, subject, html });
     },
   },

@@ -9,6 +9,16 @@ import {
   generateWelcomeEmailHtml,
   generateTestDriveStatusUpdateHtml,
 } from "./email-templates";
+import type {
+  NewMessageEmailParams,
+  TestDriveConfirmationParams,
+  TestDriveNotificationParams,
+  TestDriveStatusUpdateParams,
+  WelcomeEmailParams,
+} from "./email-templates";
+
+/** Every sender returns the EmailJS response body, or null when unsent. */
+type SendResult = Promise<string | null>;
 
 /**
  * Send email notification for new message
@@ -20,7 +30,7 @@ export async function sendNewMessageEmail({
   messagePreview,
   conversationId,
   carTitle,
-}) {
+}: Omit<NewMessageEmailParams, "messagesUrl"> & { to: string; conversationId: string }): SendResult {
   // Skip if EmailJS not configured
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) {
     return null;
@@ -69,7 +79,7 @@ export async function sendTestDriveConfirmationEmail({
   endTime,
   dealershipName,
   dealershipAddress,
-}) {
+}: TestDriveConfirmationParams & { to: string }): SendResult {
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) return null;
 
   try {
@@ -106,7 +116,7 @@ export async function sendTestDriveAdminNotificationEmail({
   startTime,
   endTime,
   orgSlug,
-}) {
+}: TestDriveNotificationParams & { to: string }): SendResult {
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) return null;
 
   try {
@@ -139,7 +149,7 @@ export async function sendWelcomeEmail({
   userName,
   dealershipName,
   dashboardUrl,
-}) {
+}: WelcomeEmailParams & { to: string }): SendResult {
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) return null;
 
   try {
@@ -169,7 +179,7 @@ export async function sendTestDriveStatusUpdateEmail({
   carTitle,
   status,
   dealershipName,
-}) {
+}: TestDriveStatusUpdateParams & { to: string }): SendResult {
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) return null;
 
   try {
