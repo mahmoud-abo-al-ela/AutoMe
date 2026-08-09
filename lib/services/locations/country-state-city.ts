@@ -13,7 +13,31 @@ function getApiKey() {
   return apiKey;
 }
 
-async function fetchLocationResource(path) {
+/** The shape of an api.countrystatecity.in row — every field is optional. */
+interface LocationApiRow {
+  id?: number;
+  iso2?: string | null;
+  name?: string | null;
+  emoji?: string | null;
+}
+
+export interface CountryOption {
+  code: string;
+  name: string;
+  emoji?: string | null;
+}
+
+export interface StateOption {
+  code: string;
+  name: string;
+}
+
+export interface CityOption {
+  id?: number;
+  name: string;
+}
+
+async function fetchLocationResource(path: string): Promise<LocationApiRow[]> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "X-CSCAPI-KEY": getApiKey(),
@@ -36,7 +60,17 @@ async function fetchLocationResource(path) {
   return response.json();
 }
 
-export async function getCountries() {
+// The API omits fields on some rows, so each list drops incomplete entries.
+// Written as type predicates so the sort below sees non-null names.
+const hasCodeAndName = <T extends { code?: string | null; name?: string | null }>(
+  row: T
+): row is T & { code: string; name: string } => Boolean(row.code && row.name);
+
+const hasName = <T extends { name?: string | null }>(
+  row: T
+): row is T & { name: string } => Boolean(row.name);
+
+export async function getCountries(): Promise<CountryOption[]> {
   const countries = await fetchLocationResource("/countries");
 
   return countries
@@ -45,11 +79,13 @@ export async function getCountries() {
       name: country.name,
       emoji: country.emoji,
     }))
-    .filter((country) => country.code && country.name)
+    .filter(hasCodeAndName)
     .sort((firstCountry, secondCountry) => firstCountry.name.localeCompare(secondCountry.name));
 }
 
-export async function getStates(countryCode) {
+export async function getStates(
+  countryCode: string | null | undefined
+): Promise<StateOption[]> {
   if (!countryCode) return [];
 
   const states = await fetchLocationResource(`/countries/${countryCode}/states`);
@@ -59,11 +95,14 @@ export async function getStates(countryCode) {
       code: state.iso2,
       name: state.name,
     }))
-    .filter((state) => state.code && state.name)
+    .filter(hasCodeAndName)
     .sort((firstState, secondState) => firstState.name.localeCompare(secondState.name));
 }
 
-export async function getCities(countryCode, stateCode) {
+export async function getCities(
+  countryCode: string | null | undefined,
+  stateCode: string | null | undefined
+): Promise<CityOption[]> {
   if (!countryCode || !stateCode) return [];
 
   const cities = await fetchLocationResource(
@@ -75,6 +114,6 @@ export async function getCities(countryCode, stateCode) {
       id: city.id,
       name: city.name,
     }))
-    .filter((city) => city.name)
+    .filter(hasName)
     .sort((firstCity, secondCity) => firstCity.name.localeCompare(secondCity.name));
 }

@@ -10,8 +10,9 @@ interface AuditSession {
   superAdminId?: string | null;
   targetUserId?: string;
   reason?: string | null;
-  endedAt?: Date;
-  startedAt?: Date;
+  // Nullable to match the Prisma row these are called with.
+  endedAt?: Date | null;
+  startedAt?: Date | null;
 }
 
 export async function logImpersonationStarted(session: AuditSession, superAdminEmail?: string | null) {

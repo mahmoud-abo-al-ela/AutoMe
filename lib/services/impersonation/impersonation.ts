@@ -29,6 +29,12 @@ export async function startImpersonation({
   targetUserId,
   targetOrganizationId,
   reason,
+}: {
+  superAdminId: string;
+  superAdminEmail?: string | null;
+  targetUserId: string;
+  targetOrganizationId: string;
+  reason: string;
 }) {
   // Validate Super Admin
   await validateSuperAdmin(superAdminId);
@@ -76,7 +82,10 @@ export async function startImpersonation({
  * @param {string} sessionId - The impersonation session ID
  * @param {string} superAdminEmail - The Super Admin's email for logging
  */
-export async function endImpersonation(sessionId, superAdminEmail) {
+export async function endImpersonation(
+  sessionId: string,
+  superAdminEmail?: string | null
+) {
   // Update session with end time
   const session = await db.impersonationSession.update({
     where: { id: sessionId },

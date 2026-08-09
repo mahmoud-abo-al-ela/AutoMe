@@ -3,13 +3,17 @@ import { cookies } from "next/headers";
 /**
  * Set impersonation cookies
  */
-export async function setImpersonationCookies(sessionId, targetUserId, organizationSlug) {
+export async function setImpersonationCookies(
+  sessionId: string,
+  targetUserId: string,
+  organizationSlug: string
+): Promise<void> {
   const cookieStore = await cookies();
-  
+
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 60 * 60 * 4, // 4 hours max
   };
@@ -22,7 +26,7 @@ export async function setImpersonationCookies(sessionId, targetUserId, organizat
 /**
  * Clear impersonation cookies
  */
-export async function clearImpersonationCookies() {
+export async function clearImpersonationCookies(): Promise<void> {
   const cookieStore = await cookies();
   
   cookieStore.delete("x-impersonated-org");
@@ -33,7 +37,7 @@ export async function clearImpersonationCookies() {
 /**
  * Get impersonation session ID from cookies
  */
-export async function getSessionIdFromCookies() {
+export async function getSessionIdFromCookies(): Promise<string | undefined> {
   const cookieStore = await cookies();
   return cookieStore.get("x-impersonation-session")?.value;
 }

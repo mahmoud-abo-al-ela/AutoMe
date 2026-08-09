@@ -1,4 +1,13 @@
+import type { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
+
+export interface ImpersonationSessionFilters {
+  superAdminId?: string;
+  targetOrganizationId?: string;
+  activeOnly?: boolean;
+  startDate?: Date | string;
+  endDate?: Date | string;
+}
 
 /**
  * Get all impersonation sessions (for Super Admin view)
@@ -6,11 +15,14 @@ import { db } from "@/lib/prisma";
 export async function getImpersonationSessions({
   filters = {},
   pagination = { page: 1, limit: 50 },
+}: {
+  filters?: ImpersonationSessionFilters;
+  pagination?: { page: number; limit: number };
 }) {
   const { page, limit } = pagination;
   const skip = (page - 1) * limit;
 
-  const where = {
+  const where: Prisma.ImpersonationSessionWhereInput = {
     ...(filters.superAdminId && { superAdminId: filters.superAdminId }),
     ...(filters.targetOrganizationId && { targetOrganizationId: filters.targetOrganizationId }),
     ...(filters.activeOnly && { endedAt: null }),
