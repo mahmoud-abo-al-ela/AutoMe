@@ -14,9 +14,10 @@ import { request } from "@arcjet/next";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 import { z } from "zod";
+import type { TenantContext } from "@/lib/auth/context";
 
 
-export async function fileToBase64(file) {
+export async function fileToBase64(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
   return Buffer.from(buffer).toString("base64");
 }
@@ -30,7 +31,10 @@ const ai = new GoogleGenAI({
 // for new users). gemini-3.5-flash is the current stable flash for this key.
 const VISION_MODEL = process.env.GEMINI_MODEL_VISION || "gemini-3.5-flash";
 
-export async function processCarImageWithAI(file, ctx) {
+export async function processCarImageWithAI(
+  file: File,
+  ctx?: TenantContext | null
+) {
     const req = await request();
     const decision = await aj.protect(req, { requested: 1 });
 
@@ -120,7 +124,10 @@ Schema:
       responseText = response.text;
     } catch (error) {
       success = false;
-      errorCode = error?.code ?? error?.name ?? "UNKNOWN";
+      errorCode =
+        (error as { code?: string })?.code ??
+        (error as Error)?.name ??
+        "UNKNOWN";
       throw error;
     } finally {
       // Metering must never take down the request it is measuring. `await` it
@@ -182,7 +189,7 @@ Schema:
 export const processCarImageGated = withOrgAuth(
   withPlanGate(
     "aiProcessing",
-    withUsageLimit("aiProcessing", async (ctx, file) => {
+    withUsageLimit("aiProcessing", async (ctx, file: File) => {
       const parsed = await processCarImageWithAI(file, ctx);
       return createSuccessResponse(parsed);
     })
@@ -193,7 +200,10 @@ export const processCarImageGated = withOrgAuth(
 export const getCarPlanLimits = withOrgAuth(async (ctx) => {
   const plan = ctx.organization.subscription?.plan;
   const maxImages = plan?.maxImagesPerCar ?? 5;
-  const features = plan?.features || {};
+  // Plan.features is free-form JSON; narrow before reading the AI entitlement.
+  const features = (plan?.features ?? {}) as {
+    aiProcessing?: { enabled?: boolean };
+  };
   const aiProcessingEnabled = features.aiProcessing?.enabled ?? false;
 
   return createSuccessResponse({
@@ -208,7 +218,7 @@ export async function getMaxImagesPerCar() {
 }
 
 export const addCar = withOrgAuth(
-  withUsageLimit("cars", async (ctx, payload) => {
+  withUsageLimit("cars", async (ctx, payload: { data?: unknown } & Record<string, unknown>) => {
     const rawData = payload.data || payload;
     const carData = validateAction(carSchema, rawData);
     const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
@@ -218,7 +228,14 @@ export const addCar = withOrgAuth(
   })
 );
 
-export const getCars = withOrgAuth(async (ctx, search = "", status = "all", page = 1, limit = 10) => {
+export const getCars = withOrgAuth(
+  async (
+    ctx,
+    search: string = "",
+    status: string = "all",
+    page: number = 1,
+    limit: number = 10
+  ) => {
   const filters = {
     search: search || undefined,
     status: status === "all" ? undefined : status.toUpperCase(),
@@ -233,15 +250,20 @@ export const getCars = withOrgAuth(async (ctx, search = "", status = "all", page
   });
 });
 
-export const deleteCar = withOrgAuth(async (ctx, carId) => {
+export const deleteCar = withOrgAuth(async (ctx, carId: string) => {
   await carService.deleteCar(carId, ctx.userId, ctx.organization.id);
 
   revalidatePath(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse(null, "Car deleted successfully");
 });
 
-export const updateCar = withOrgAuth(async (ctx, carId, { status, featured }) => {
-  const updateData = {};
+export const updateCar = withOrgAuth(
+  async (
+    ctx,
+    carId: string,
+    { status, featured }: { status?: string; featured?: boolean }
+  ) => {
+  const updateData: { status?: string; featured?: boolean } = {};
   if (status !== undefined) updateData.status = status;
   if (featured !== undefined) updateData.featured = featured;
 
@@ -253,7 +275,7 @@ export const updateCar = withOrgAuth(async (ctx, carId, { status, featured }) =>
   return createSuccessResponse(updatedCar, "Car updated successfully");
 });
 
-export const getCarForEdit = withOrgAuth(async (ctx, carId) => {
+export const getCarForEdit = withOrgAuth(async (ctx, carId: string) => {
   const car = await carService.getCarById(carId);
   if (!car) {
     throw new NotFoundError("Car");
@@ -268,7 +290,12 @@ export const getCarForEdit = withOrgAuth(async (ctx, carId) => {
   return createSuccessResponse(car);
 });
 
-export const updateCarFull = withOrgAuth(async (ctx, carId, payload) => {
+export const updateCarFull = withOrgAuth(
+  async (
+    ctx,
+    carId: string,
+    payload: { data?: unknown } & Record<string, unknown>
+  ) => {
   const rawData = payload.data || payload;
   const carData = validateAction(updateCarFullSchema, rawData);
 

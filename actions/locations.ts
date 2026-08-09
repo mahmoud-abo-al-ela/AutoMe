@@ -9,12 +9,12 @@ export const getCountries = withErrorHandling(async () => {
   return createSuccessResponse(countries);
 });
 
-export const getStates = withErrorHandling(async (countryCode) => {
+export const getStates = withErrorHandling(async (countryCode: string) => {
   const states = await locationService.getStates(countryCode);
   return createSuccessResponse(states);
 });
 
-export const getCities = withErrorHandling(async (countryCode, stateCode) => {
+export const getCities = withErrorHandling(async (countryCode: string, stateCode: string) => {
   const cities = await locationService.getCities(countryCode, stateCode);
   return createSuccessResponse(cities);
 });

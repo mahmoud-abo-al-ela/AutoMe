@@ -40,8 +40,7 @@ export function withSuperAdmin<TArgs extends unknown[], TResult>(
     return async (...args: TArgs) => {
         try {
             const { userId: clerkId } = await auth();
-            // requireSuperAdmin is still JS; it returns the admin User row.
-            const admin = (await requireSuperAdmin(clerkId)) as User;
+            const admin: User = await requireSuperAdmin(clerkId);
             return await action(admin, ...args);
         } catch (error) {
             logError(error);

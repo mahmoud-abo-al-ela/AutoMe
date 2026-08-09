@@ -10,8 +10,25 @@ interface OrgSummary {
   address?: string | null;
 }
 
-/** A full car row (Prisma model) with the organization relation optionally joined. */
-type CarInput = Car & { organization?: OrgSummary | null };
+/**
+ * A full car row with the organization relation optionally joined. The three
+ * serialized columns are widened because these helpers are idempotent and are
+ * genuinely called with both raw Prisma rows and already-serialized cars.
+ */
+type CarInput = Omit<Car, "price" | "createdAt" | "updatedAt"> & {
+  price: Car["price"] | number | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  organization?: OrgSummary | null;
+};
+
+/** A car as it leaves serializeCar — JSON-safe: number price, ISO timestamps. */
+export type SerializedCar = NonNullable<ReturnType<typeof serializeCar>>;
+
+/** serializeCarWithImages output: a SerializedCar with images as {url, alt}. */
+export type SerializedCarWithImages = NonNullable<
+  ReturnType<typeof serializeCarWithImages>
+>;
 
 /** A user row carrying the fields serializeUser reads. */
 type SerializableUser = Pick<

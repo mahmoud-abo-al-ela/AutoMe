@@ -20,7 +20,7 @@ const contactSchema = z.object({
     .max(5000, "Message is too long"),
 });
 
-function escapeHtml(value = "") {
+function escapeHtml(value: string = "") {
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -29,7 +29,7 @@ function escapeHtml(value = "") {
     .replace(/'/g, "&#039;");
 }
 
-export const submitContactForm = withErrorHandling(async (formData) => {
+export const submitContactForm = withErrorHandling(async (formData: unknown) => {
   // Rate limiting (per IP) to prevent contact-form abuse
   const req = await request();
   const decision = await aj.protect(req, { requested: 1 });
@@ -45,9 +45,11 @@ export const submitContactForm = withErrorHandling(async (formData) => {
   const parsed = contactSchema.safeParse(formData);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
+    // Zod path segments can be array indices; ValidationError names a field.
+    const field = issue?.path?.[0];
     throw new ValidationError(
       issue?.message || "Please check the form and try again.",
-      issue?.path?.[0]
+      typeof field === "string" ? field : null
     );
   }
 
@@ -77,7 +79,8 @@ export const submitContactForm = withErrorHandling(async (formData) => {
 
   if (error) {
     throw new AppError(
-      error.message || "Failed to send your message.",
+      (error instanceof Error && error.message) ||
+        "Failed to send your message.",
       502,
       "EMAIL_SEND_FAILED"
     );

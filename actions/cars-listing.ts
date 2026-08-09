@@ -8,9 +8,13 @@ import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
 import { ValidationError, NotFoundError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
-import { serializeCarWithImages } from "@/lib/utils/serializers";
+import { serializeCarWithImages, type SerializedCar } from "@/lib/utils/serializers";
+import type { CarFilters } from "@/lib/services/car/listing";
 
-export const getCars = withErrorHandling(async (filters) => {
+/** The listing filters plus the page/limit the client sends alongside them. */
+type CarListingInput = CarFilters & { page?: number; limit?: number };
+
+export const getCars = withErrorHandling(async (filters: CarListingInput) => {
   const { userId } = await auth();
   const organization = await getCurrentOrganization();
 
@@ -20,15 +24,19 @@ export const getCars = withErrorHandling(async (filters) => {
     limit: filters.limit,
   }, userId, organization?.id);
 
+  // serializeCars maps a nullable serializer, but findManyCars only ever feeds
+  // it real rows, so the nulls are not reachable here.
+  const cars = result.cars as SerializedCar[];
+
   // Add wishlist status if user is logged in
   if (userId) {
     const wishlistIds = await wishlistService.getWishlistCarIds(userId);
-    result.cars = result.cars.map((car) => ({
+    result.cars = cars.map((car) => ({
       ...car,
       isWishlisted: wishlistIds.has(car.id),
     }));
   } else {
-    result.cars = result.cars.map((car) => ({
+    result.cars = cars.map((car) => ({
       ...car,
       isWishlisted: false,
     }));
@@ -37,7 +45,7 @@ export const getCars = withErrorHandling(async (filters) => {
   return createSuccessResponse(result);
 });
 
-export const getCarById = withErrorHandling(async (id) => {
+export const getCarById = withErrorHandling(async (id: string) => {
   const { userId } = await auth();
 
   const car = await carService.getCarById(id);
@@ -62,7 +70,7 @@ export const getCarById = withErrorHandling(async (id) => {
   });
 });
 
-export const getCarsFilters = withErrorHandling(async (filters = {}) => {
+export const getCarsFilters = withErrorHandling(async (filters: CarFilters = {}) => {
   const { userId } = await auth();
   const organization = await getCurrentOrganization();
   const filterOptions = await carService.getFilterOptions(filters, userId, organization?.id);
@@ -73,7 +81,7 @@ export const getCarsFilters = withErrorHandling(async (filters = {}) => {
   });
 });
 
-export const toggleWishlist = withAuth(async (ctx, carId) => {
+export const toggleWishlist = withAuth(async (ctx, carId: string) => {
   const result = await wishlistService.toggleWishlist(carId, ctx.userId);
 
   revalidatePath("/wishlist");
@@ -82,7 +90,8 @@ export const toggleWishlist = withAuth(async (ctx, carId) => {
   return createSuccessResponse(result, result.message);
 });
 
-export const getWishlist = withAuth(async (ctx, { page = 1, limit = 6 } = {}) => {
+export const getWishlist = withAuth(
+  async (ctx, { page = 1, limit = 6 }: { page?: number; limit?: number } = {}) => {
   // Scope to current organization when on a subdomain
   const organization = await getCurrentOrganization();
   const result = await wishlistService.getUserWishlist(ctx.userId, { page, limit }, organization?.id || null);
@@ -90,7 +99,7 @@ export const getWishlist = withAuth(async (ctx, { page = 1, limit = 6 } = {}) =>
   return createSuccessResponse(result);
 });
 
-export const getCarsByIds = withErrorHandling(async (carIds) => {
+export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {
   if (!carIds || !Array.isArray(carIds) || carIds.length === 0) {
     throw new ValidationError("No car IDs provided", "carIds");
   }

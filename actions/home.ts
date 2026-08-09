@@ -30,7 +30,7 @@ export const getFeaturedCars = withErrorHandling(async (limit = 4) => {
   return createSuccessResponse(result.cars);
 });
 
-export const processImagesSearch = withErrorHandling(async (file) => {
+export const processImagesSearch = withErrorHandling(async (file: File) => {
   // Rate limiting check
   const req = await request();
   const decision = await aj.protect(req, { requested: 1 });
@@ -73,13 +73,17 @@ Only respond with the JSON object, nothing else.
 `;
 
   // Retry logic
-  const retryWithBackoff = async (fn, retries = 3, delay = 1000) => {
+  const retryWithBackoff = async <T>(
+    fn: () => Promise<T>,
+    retries = 3,
+    delay = 1000
+  ): Promise<T | undefined> => {
     for (let i = 0; i < retries; i++) {
       try {
         return await fn();
       } catch (error) {
         if (i === retries - 1) throw error;
-        console.warn(`Retry ${i + 1} failed:`, error.message);
+        console.warn(`Retry ${i + 1} failed:`, (error as Error)?.message);
         await new Promise((resolve) => setTimeout(resolve, delay * 2 ** i));
       }
     }
@@ -111,7 +115,9 @@ Only respond with the JSON object, nothing else.
 
   let parsedData;
   try {
-    parsedData = parseFirstJsonObject(response.text);
+    // retryWithBackoff's loop can in principle fall through; either way a
+    // missing body lands in the same catch below.
+    parsedData = parseFirstJsonObject(response?.text);
   } catch {
     throw new ValidationError("No valid JSON object found in response", "ai_response");
   }
