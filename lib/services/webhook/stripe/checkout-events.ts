@@ -1,5 +1,7 @@
 // Stripe checkout.session.completed handlers
+import type Stripe from "stripe";
 import { logError } from "@/lib/utils/errors";
+import type { StripeEventOf, WebhookHandlerResult } from "./subscription-events";
 import * as webhookRepo from "@/lib/repositories/webhook";
 import {
   getOnboardingSession,
@@ -9,9 +11,22 @@ import { auditHelpers } from "@/lib/services/audit/audit";
 import { db } from "@/lib/prisma";
 import { createOrganizationInTransaction } from "@/lib/services/onboarding/creation";
 
-export async function handleCheckoutSessionCompleted(event) {
+/**
+ * Checkout sessions carry customer/subscription unexpanded, so these arrive as
+ * ID strings; the object branch exists only to narrow the expandable union.
+ */
+function idOf(
+    value: string | { id: string } | null | undefined
+): string | null {
+    if (!value) return null;
+    return typeof value === "string" ? value : value.id;
+}
+
+export async function handleCheckoutSessionCompleted(
+    event: StripeEventOf<Stripe.Checkout.Session>
+): Promise<WebhookHandlerResult> {
     const session = event.data.object;
-    const metadata = session.metadata || {};
+    const metadata: Stripe.Metadata = session.metadata || {};
 
     // Route plan change checkouts to their own handler
     if (metadata.type === "plan_change") {
@@ -26,7 +41,10 @@ export async function handleCheckoutSessionCompleted(event) {
  * Handle checkout.session.completed for plan change sessions.
  * Updates the existing subscription with the new plan.
  */
-async function handlePlanChangeCheckoutCompleted(session, metadata) {
+async function handlePlanChangeCheckoutCompleted(
+    session: Stripe.Checkout.Session,
+    metadata: Stripe.Metadata
+): Promise<WebhookHandlerResult> {
     const { userId, planId, organizationId } = metadata;
 
     if (!userId || !planId || !organizationId) {
@@ -53,8 +71,9 @@ async function handlePlanChangeCheckoutCompleted(session, metadata) {
         await webhookRepo.updateSubscriptionById(subscription.id, {
             planId,
             status: "ACTIVE",
-            stripeSubscriptionId: session.subscription || subscription.stripeSubscriptionId,
-            stripeCustomerId: session.customer || subscription.stripeCustomerId,
+            stripeSubscriptionId:
+                idOf(session.subscription) || subscription.stripeSubscriptionId,
+            stripeCustomerId: idOf(session.customer) || subscription.stripeCustomerId,
             stripeCheckoutSessionId: session.id,
         });
     } else {
@@ -64,8 +83,8 @@ async function handlePlanChangeCheckoutCompleted(session, metadata) {
             organizationId,
             planId,
             status: "ACTIVE",
-            stripeSubscriptionId: session.subscription || null,
-            stripeCustomerId: session.customer || null,
+            stripeSubscriptionId: idOf(session.subscription),
+            stripeCustomerId: idOf(session.customer),
             stripeCheckoutSessionId: session.id,
             currentPeriodStart: now,
             currentPeriodEnd: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
@@ -104,7 +123,10 @@ async function handlePlanChangeCheckoutCompleted(session, metadata) {
  * This is the fallback path — if the user closes the browser after payment
  * but before the /onboarding/success page loads, this webhook creates the org.
  */
-async function handleOnboardingCheckoutCompleted(session, metadata) {
+async function handleOnboardingCheckoutCompleted(
+    session: Stripe.Checkout.Session,
+    metadata: Stripe.Metadata
+): Promise<WebhookHandlerResult> {
     const { userId, planId, onboardingSessionId, billingPeriod } = metadata;
 
     if (!userId || !planId || !onboardingSessionId) {
@@ -155,10 +177,15 @@ async function handleOnboardingCheckoutCompleted(session, metadata) {
     }
 
     const stripeData = {
-        subscriptionId: session.subscription || null,
-        customerId: session.customer || null,
+        subscriptionId: idOf(session.subscription),
+        customerId: idOf(session.customer),
         checkoutSessionId: session.id,
-        trialDays: plan.trialDays,
+        // BUG (surfaced by this conversion, NOT fixed here): the Plan model has
+        // no trialDays column, so this is always undefined and the TRIALING
+        // branch in createOrganizationInTransaction is dead. actions/onboarding
+        // reads the same non-existent field twice. Behaviour preserved; adding
+        // the column (or dropping the branch) belongs in its own PR.
+        trialDays: (plan as { trialDays?: number }).trialDays,
     };
 
     const user = await db.user.findUnique({

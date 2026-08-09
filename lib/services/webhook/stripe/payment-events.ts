@@ -1,7 +1,11 @@
 // Stripe payment-intent event handlers
+import type Stripe from "stripe";
 import * as webhookRepo from "@/lib/repositories/webhook";
+import type { StripeEventOf, WebhookHandlerResult } from "./subscription-events";
 
-export async function handlePaymentIntentSucceeded(event) {
+export async function handlePaymentIntentSucceeded(
+    event: StripeEventOf<Stripe.PaymentIntent>
+): Promise<WebhookHandlerResult> {
     const paymentIntent = event.data.object;
     const { userId, planId } = paymentIntent.metadata || {};
 
