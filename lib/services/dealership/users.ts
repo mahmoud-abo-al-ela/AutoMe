@@ -1,4 +1,5 @@
 // Dealership user management service functions
+import type { Prisma, UserRole } from "@/lib/generated/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
 import * as userRepository from "@/lib/repositories/user";
 import { db } from "@/lib/prisma";
@@ -11,7 +12,12 @@ import {
 /**
  * Get organization members with search and pagination
  */
-export async function getUsers(search, pagination, userId, organizationId) {
+export async function getUsers(
+  search: string | null | undefined,
+  pagination: { page?: number; limit?: number },
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -28,13 +34,13 @@ export async function getUsers(search, pagination, userId, organizationId) {
   const { page = 1, limit = 10 } = pagination;
   const skip = (page - 1) * limit;
 
-  const where = {
+  const where: Prisma.MembershipWhereInput = {
     organizationId,
     ...(search && {
       user: {
         OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
+          { name: { contains: search, mode: "insensitive" as const } },
+          { email: { contains: search, mode: "insensitive" as const } },
         ],
       },
     }),
@@ -85,7 +91,12 @@ export async function getUsers(search, pagination, userId, organizationId) {
 /**
  * Update user role (within organization context, this updates membership role)
  */
-export async function updateUserRole(targetUserId, role, userId, organizationId) {
+export async function updateUserRole(
+  targetUserId: string,
+  role: UserRole,
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -118,7 +129,11 @@ export async function updateUserRole(targetUserId, role, userId, organizationId)
 /**
  * Delete user (remove from organization)
  */
-export async function deleteUser(targetUserId, userId, organizationId) {
+export async function deleteUser(
+  targetUserId: string,
+  userId: string,
+  organizationId: string
+) {
   const adminUser = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!adminUser) {
     throw new AuthenticationError("User not found");

@@ -2,11 +2,67 @@
 import * as dealershipRepo from "@/lib/repositories/dealership";
 import { formatWorkingHours } from "@/lib/utils/working-hours";
 import { DEFAULT_DEALERSHIP_SORT } from "@/lib/constants/dealership-options";
+import type { PlanType } from "@/lib/generated/prisma";
+
+/**
+ * The dealership listing filter set. Declared here rather than in the
+ * repository because lib/repositories/dealership/queries/listing.js is still
+ * JavaScript (its where-builder is deferred); move this there on conversion.
+ * Numeric bounds arrive as query-string values and are coerced below.
+ */
+export interface DealershipFilters {
+    search?: string;
+    planType?: PlanType;
+    city?: string;
+    region?: string;
+    minRating?: string | number;
+    maxRating?: string | number;
+    minCarCount?: string | number;
+    maxCarCount?: string | number;
+    sort?: string;
+}
+
+export interface DealershipPagination {
+    page?: number;
+    limit?: number;
+}
+
+/**
+ * The listing row this service reshapes. Only the fields read below are
+ * declared; the repository still being JS means this is the contract between
+ * the two until it converts.
+ */
+interface DealershipListRow {
+    id: string;
+    name: string;
+    slug: string;
+    logo: string | null;
+    description: string | null;
+    address: string | null;
+    city: string | null;
+    region: string | null;
+    country: string | null;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    averageRating?: number | null;
+    totalReviews?: number | null;
+    carCount?: number | null;
+    brands?: string[] | null;
+    priceFrom?: number | null;
+    workingHours?: Parameters<typeof formatWorkingHours>[0];
+    subscription?: { plan?: { type?: PlanType; name?: string } | null } | null;
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 /**
  * Get dealerships with filters and pagination
  */
-export async function getDealerships(filters = {}, pagination = {}) {
+export async function getDealerships(
+    filters: DealershipFilters = {},
+    pagination: DealershipPagination = {}
+) {
     const {
         search,
         planType,
@@ -40,7 +96,7 @@ export async function getDealerships(filters = {}, pagination = {}) {
 
     // Format response
     return {
-        dealerships: result.dealerships.map((dealership) => ({
+        dealerships: result.dealerships.map((dealership: DealershipListRow) => ({
             id: dealership.id,
             name: dealership.name,
             slug: dealership.slug,
@@ -77,7 +133,11 @@ export async function getDealerships(filters = {}, pagination = {}) {
 /**
  * Search dealerships with query
  */
-export async function searchDealerships(query, filters = {}, pagination = {}) {
+export async function searchDealerships(
+    query: string | null | undefined,
+    filters: DealershipFilters = {},
+    pagination: DealershipPagination = {}
+) {
     if (!query || query.trim().length === 0) {
         return getDealerships(filters, pagination);
     }
@@ -98,7 +158,7 @@ export async function searchDealerships(query, filters = {}, pagination = {}) {
  * filters (so counts reflect what selecting them would return); platform stats
  * are global and independent of filters.
  */
-export async function getDealershipFilters(filters = {}) {
+export async function getDealershipFilters(filters: DealershipFilters = {}) {
     const [facets, stats] = await Promise.all([
         dealershipRepo.getDealershipFacetCounts(filters),
         dealershipRepo.getPlatformStats(),

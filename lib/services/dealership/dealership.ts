@@ -3,8 +3,14 @@ import * as workingHoursRepository from "@/lib/repositories/dealership/working-h
 import * as dealershipRepository from "@/lib/repositories/dealership";
 import * as userRepository from "@/lib/repositories/user";
 import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
+import type { OrganizationProfileInput } from "@/lib/validations/schemas";
+import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
 
-async function getAuthorizedUser(userId, organizationId, ownerOnly = false) {
+async function getAuthorizedUser(
+  userId: string,
+  organizationId: string,
+  ownerOnly = false
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -29,7 +35,7 @@ async function getAuthorizedUser(userId, organizationId, ownerOnly = false) {
 /**
  * Get organization profile for settings
  */
-export async function getOrganizationProfile(userId, organizationId) {
+export async function getOrganizationProfile(userId: string, organizationId: string) {
   await getAuthorizedUser(userId, organizationId);
   const profile = await dealershipRepository.findOrganizationProfile(organizationId);
   return { profile };
@@ -38,7 +44,11 @@ export async function getOrganizationProfile(userId, organizationId) {
 /**
  * Update organization profile for settings
  */
-export async function updateOrganizationProfile(profileData, userId, organizationId) {
+export async function updateOrganizationProfile(
+  profileData: OrganizationProfileInput,
+  userId: string,
+  organizationId: string
+) {
   await getAuthorizedUser(userId, organizationId, true);
   return dealershipRepository.updateOrganizationProfile(organizationId, profileData);
 }
@@ -46,7 +56,7 @@ export async function updateOrganizationProfile(profileData, userId, organizatio
 /**
  * Get working hours for an organization
  */
-export async function getWorkingHours(userId, organizationId) {
+export async function getWorkingHours(userId: string, organizationId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -66,7 +76,11 @@ export async function getWorkingHours(userId, organizationId) {
 /**
  * Update working hours for an organization
  */
-export async function updateWorkingHours(workingHours, userId, organizationId) {
+export async function updateWorkingHours(
+  workingHours: WorkingHourInput[],
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");

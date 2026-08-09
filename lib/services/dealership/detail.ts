@@ -3,11 +3,13 @@ import * as dealershipRepo from "@/lib/repositories/dealership";
 import { serializeCars } from "@/lib/utils/serializers";
 import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
 import { formatWorkingHours } from "@/lib/utils/working-hours";
+import type { CarFilters, CarPagination } from "@/lib/services/car/listing";
+import type { DealershipReviewInput } from "@/lib/validations/schemas";
 
 /**
  * Get dealership by slug with full details
  */
-export async function getDealershipBySlug(slug) {
+export async function getDealershipBySlug(slug: string | null | undefined) {
     if (!slug || slug.trim().length === 0) {
         throw new ValidationError("Slug is required", "slug");
     }
@@ -49,9 +51,9 @@ export async function getDealershipBySlug(slug) {
  * Get dealership cars with pagination
  */
 export async function getDealershipCars(
-    organizationId,
-    filters = {},
-    pagination = {}
+    organizationId: string,
+    filters: CarFilters = {},
+    pagination: CarPagination = {}
 ) {
     if (!organizationId) {
         throw new ValidationError("Organization ID is required", "organizationId");
@@ -77,7 +79,7 @@ export async function getDealershipCars(
 /**
  * Get dealership car filters options
  */
-export async function getDealershipCarFilters(organizationId) {
+export async function getDealershipCarFilters(organizationId: string) {
     if (!organizationId) {
         throw new ValidationError("Organization ID is required", "organizationId");
     }
@@ -90,8 +92,8 @@ export async function getDealershipCarFilters(organizationId) {
  * Get dealership reviews with pagination
  */
 export async function getDealershipReviews(
-    organizationId,
-    pagination = {}
+    organizationId: string,
+    pagination: { page?: number; limit?: number } = {}
 ) {
     if (!organizationId) {
         throw new ValidationError("Organization ID is required", "organizationId");
@@ -129,9 +131,9 @@ export async function getDealershipReviews(
  * Create dealership review
  */
 export async function createDealershipReview(
-    organizationId,
-    userId,
-    reviewData
+    organizationId: string,
+    userId: string,
+    reviewData: DealershipReviewInput
 ) {
     if (!organizationId) {
         throw new ValidationError("Organization ID is required", "organizationId");

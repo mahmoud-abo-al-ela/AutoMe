@@ -3,7 +3,25 @@
 // service, which previously read only wh.dayOfWeek[0] and silently dropped the
 // other days of a multi-day WorkingHours row (the column is DayOfWeek[]).
 
-const DAY_ORDER = [
+import type { DayOfWeek } from "@/lib/generated/prisma";
+
+/** A WorkingHours row, or anything shaped like one. */
+export interface WorkingHoursRow {
+    dayOfWeek: DayOfWeek[] | DayOfWeek;
+    openTime: string;
+    closeTime: string;
+    isOpen: boolean;
+}
+
+export interface WorkingHoursEntry {
+    day: string;
+    dayKey: DayOfWeek;
+    openTime: string;
+    closeTime: string;
+    isOpen: boolean;
+}
+
+const DAY_ORDER: DayOfWeek[] = [
     "MONDAY",
     "TUESDAY",
     "WEDNESDAY",
@@ -13,7 +31,7 @@ const DAY_ORDER = [
     "SUNDAY",
 ];
 
-const DAY_NAMES = {
+const DAY_NAMES: Record<DayOfWeek, string> = {
     MONDAY: "Monday",
     TUESDAY: "Tuesday",
     WEDNESDAY: "Wednesday",
@@ -26,14 +44,15 @@ const DAY_NAMES = {
 /**
  * Flatten WorkingHours rows into one entry per day, sorted Mon→Sun. A single
  * row may cover several days (dayOfWeek is an array), so every day is emitted.
- * @returns {{ day: string, dayKey: string, openTime: string, closeTime: string, isOpen: boolean }[]}
  */
-export function formatWorkingHours(workingHours) {
+export function formatWorkingHours(
+    workingHours: WorkingHoursRow[] | null | undefined
+): WorkingHoursEntry[] {
     if (!workingHours || workingHours.length === 0) {
         return [];
     }
 
-    const entries = [];
+    const entries: WorkingHoursEntry[] = [];
     for (const wh of workingHours) {
         const days = Array.isArray(wh.dayOfWeek) ? wh.dayOfWeek : [wh.dayOfWeek];
         for (const dayKey of days) {
