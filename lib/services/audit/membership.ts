@@ -4,7 +4,14 @@ import { createAuditLog } from "./audit";
  * Membership audit log helpers
  */
 
-export async function logMemberInvited(membership, inviterId, inviterEmail) {
+interface AuditMembership {
+  id: string;
+  organizationId: string;
+  userId?: string;
+  role?: string;
+}
+
+export async function logMemberInvited(membership: AuditMembership, inviterId?: string | null, inviterEmail?: string | null) {
   return createAuditLog({
     action: "MEMBER_INVITED",
     entityType: "MEMBERSHIP",
@@ -17,10 +24,10 @@ export async function logMemberInvited(membership, inviterId, inviterEmail) {
 }
 
 export async function logMemberRoleChanged(
-  membership,
-  oldRole,
-  userId,
-  userEmail
+  membership: AuditMembership,
+  oldRole: string,
+  userId?: string | null,
+  userEmail?: string | null
 ) {
   return createAuditLog({
     action: "MEMBER_ROLE_CHANGED",
@@ -34,7 +41,7 @@ export async function logMemberRoleChanged(
   });
 }
 
-export async function logMemberRemoved(membership, userId, userEmail) {
+export async function logMemberRemoved(membership: AuditMembership, userId?: string | null, userEmail?: string | null) {
   return createAuditLog({
     action: "MEMBER_REMOVED",
     entityType: "MEMBERSHIP",

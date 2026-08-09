@@ -1,10 +1,19 @@
 import { createAuditLog } from "./audit";
+import { AuditAction } from "@/lib/generated/prisma";
 
 /**
  * Test drive audit log helpers
  */
 
-export async function logTestDriveCreated(testDrive, userId, userEmail) {
+interface AuditTestDrive {
+  id: string;
+  organizationId: string;
+  date?: unknown;
+  carId?: string;
+  status?: string;
+}
+
+export async function logTestDriveCreated(testDrive: AuditTestDrive, userId?: string | null, userEmail?: string | null) {
   return createAuditLog({
     action: "TEST_DRIVE_CREATED",
     entityType: "TEST_DRIVE",
@@ -17,19 +26,19 @@ export async function logTestDriveCreated(testDrive, userId, userEmail) {
 }
 
 export async function logTestDriveStatusChanged(
-  testDrive,
-  oldStatus,
-  userId,
-  userEmail
+  testDrive: AuditTestDrive,
+  oldStatus: string,
+  userId?: string | null,
+  userEmail?: string | null
 ) {
-  const actionMap = {
+  const actionMap: Record<string, AuditAction> = {
     CONFIRMED: "TEST_DRIVE_CONFIRMED",
     CANCELLED: "TEST_DRIVE_CANCELED",
     COMPLETED: "TEST_DRIVE_COMPLETED",
   };
 
   return createAuditLog({
-    action: actionMap[testDrive.status] || "TEST_DRIVE_UPDATED",
+    action: actionMap[testDrive.status ?? ""] || "TEST_DRIVE_UPDATED",
     entityType: "TEST_DRIVE",
     entityId: testDrive.id,
     organizationId: testDrive.organizationId,

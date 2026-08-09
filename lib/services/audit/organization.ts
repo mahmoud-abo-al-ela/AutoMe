@@ -4,7 +4,14 @@ import { createAuditLog } from "./audit";
  * Organization audit log helpers
  */
 
-export async function logOrgCreated(org, userId, userEmail) {
+interface AuditOrg {
+  id: string;
+  name?: string;
+  slug?: string;
+  isActive?: boolean;
+}
+
+export async function logOrgCreated(org: AuditOrg, userId?: string | null, userEmail?: string | null) {
   return createAuditLog({
     action: "ORG_CREATED",
     entityType: "ORGANIZATION",
@@ -16,7 +23,7 @@ export async function logOrgCreated(org, userId, userEmail) {
   });
 }
 
-export async function logOrgUpdated(org, oldData, userId, userEmail) {
+export async function logOrgUpdated(org: AuditOrg, oldData: Record<string, unknown>, userId?: string | null, userEmail?: string | null) {
   return createAuditLog({
     action: "ORG_UPDATED",
     entityType: "ORGANIZATION",

@@ -18,7 +18,7 @@ export async function getRequestMetadata() {
     : null;
 
   // Get actual super admin ID if impersonating
-  let actualSuperAdminId = null;
+  let actualSuperAdminId: string | null | undefined = null;
   if (impersonatedBy) {
     const sessionId = headersList.get("x-impersonation-session");
     if (sessionId) {
@@ -44,7 +44,7 @@ export async function getRequestMetadata() {
 /**
  * Calculate retention date based on organization plan
  */
-export async function calculateRetentionDate(organizationId) {
+export async function calculateRetentionDate(organizationId?: string | null) {
   if (!organizationId) {
     return null;
   }

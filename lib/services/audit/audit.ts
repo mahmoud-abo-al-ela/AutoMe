@@ -1,5 +1,6 @@
 import { logError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
+import { AuditAction, EntityType } from "@/lib/generated/prisma";
 import { getRequestMetadata, calculateRetentionDate } from "./metadata";
 import {
   getAuditLogs,
@@ -31,6 +32,18 @@ import * as impersonationLogs from "./impersonation";
  * @param {Object} params.newValue - New state
  * @param {Object} params.metadata - Additional context (IP, userAgent, reason, etc.)
  */
+interface CreateAuditLogParams {
+  action: AuditAction;
+  entityType: EntityType;
+  entityId: string;
+  organizationId?: string | null;
+  userId?: string | null;
+  userEmail?: string | null;
+  oldValue?: unknown;
+  newValue?: unknown;
+  metadata?: Record<string, unknown>;
+}
+
 export async function createAuditLog({
   action,
   entityType,
@@ -41,7 +54,7 @@ export async function createAuditLog({
   oldValue,
   newValue,
   metadata = {},
-}) {
+}: CreateAuditLogParams) {
   try {
     // Get request metadata
     const requestMetadata = await getRequestMetadata();

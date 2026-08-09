@@ -4,7 +4,17 @@ import { createAuditLog } from "./audit";
  * Impersonation audit log helpers
  */
 
-export async function logImpersonationStarted(session, superAdminEmail) {
+interface AuditSession {
+  id: string;
+  targetOrganizationId?: string | null;
+  superAdminId?: string | null;
+  targetUserId?: string;
+  reason?: string | null;
+  endedAt?: Date;
+  startedAt?: Date;
+}
+
+export async function logImpersonationStarted(session: AuditSession, superAdminEmail?: string | null) {
   return createAuditLog({
     action: "IMPERSONATION_STARTED",
     entityType: "IMPERSONATION_SESSION",
@@ -20,7 +30,7 @@ export async function logImpersonationStarted(session, superAdminEmail) {
   });
 }
 
-export async function logImpersonationEnded(session, superAdminEmail) {
+export async function logImpersonationEnded(session: AuditSession, superAdminEmail?: string | null) {
   return createAuditLog({
     action: "IMPERSONATION_ENDED",
     entityType: "IMPERSONATION_SESSION",
@@ -29,7 +39,7 @@ export async function logImpersonationEnded(session, superAdminEmail) {
     userId: session.superAdminId,
     userEmail: superAdminEmail,
     newValue: {
-      duration: session.endedAt - session.startedAt,
+      duration: Number(session.endedAt) - Number(session.startedAt),
     },
   });
 }
