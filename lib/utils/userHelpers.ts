@@ -1,6 +1,18 @@
 /**
  * Helper functions for user role and membership checks
  */
+import type { MemberRole } from "@/lib/generated/prisma";
+
+/** A membership joined with just enough of its organization to match by slug. */
+export interface MembershipWithOrgSlug {
+  role: MemberRole;
+  organization?: { slug: string } | null;
+}
+
+/** Any user-shaped object carrying memberships. */
+export interface UserWithMemberships {
+  memberships?: MembershipWithOrgSlug[] | null;
+}
 
 /**
  * Check if user has an organization membership (any role)
@@ -8,7 +20,10 @@
  * @param {string} organizationSlug - Optional organization slug to check specific org
  * @returns {boolean}
  */
-export function isOrgMember(user, organizationSlug = null) {
+export function isOrgMember(
+  user: UserWithMemberships | null | undefined,
+  organizationSlug: string | null = null
+): boolean {
   if (!user?.memberships || user.memberships.length === 0) {
     return false;
   }
@@ -28,7 +43,10 @@ export function isOrgMember(user, organizationSlug = null) {
  * @param {string} organizationSlug - Organization slug
  * @returns {string|null} - Returns 'OWNER', 'ADMIN', 'MEMBER', or null
  */
-export function getOrgRole(user, organizationSlug) {
+export function getOrgRole(
+  user: UserWithMemberships | null | undefined,
+  organizationSlug: string | null | undefined
+): MemberRole | null {
   if (!user?.memberships || !organizationSlug) {
     return null;
   }
@@ -46,9 +64,17 @@ export function getOrgRole(user, organizationSlug) {
  * @param {string} organizationSlug - Organization slug
  * @returns {boolean}
  */
-export function canManageOrg(user, organizationSlug) {
+export function canManageOrg(
+  user: UserWithMemberships | null | undefined,
+  organizationSlug: string | null | undefined
+): boolean {
   const role = getOrgRole(user, organizationSlug);
-  return role === 'OWNER' || role === 'ADMIN';
+  // BUG (surfaced by this conversion, NOT fixed here): MemberRole is only
+  // OWNER | MEMBER — there is no org-level ADMIN — so the second branch is
+  // dead and canManageOrg is really isOrgOwner. This is the same defect class
+  // as the ctx.role one that motivated the migration. Behaviour preserved;
+  // deciding between adding the role and dropping the branch is its own PR.
+  return role === 'OWNER' || (role as string) === 'ADMIN';
 }
 
 /**
@@ -57,7 +83,10 @@ export function canManageOrg(user, organizationSlug) {
  * @param {string} organizationSlug - Organization slug
  * @returns {boolean}
  */
-export function isOrgOwner(user, organizationSlug) {
+export function isOrgOwner(
+  user: UserWithMemberships | null | undefined,
+  organizationSlug: string | null | undefined
+): boolean {
   const role = getOrgRole(user, organizationSlug);
   return role === 'OWNER';
 }
@@ -68,7 +97,10 @@ export function isOrgOwner(user, organizationSlug) {
  * @param {string} organizationSlug - Organization slug
  * @returns {Object|null} - Membership object or null
  */
-export function getOrgMembership(user, organizationSlug) {
+export function getOrgMembership(
+  user: UserWithMemberships | null | undefined,
+  organizationSlug: string | null | undefined
+): MembershipWithOrgSlug | null {
   if (!user?.memberships || !organizationSlug) {
     return null;
   }

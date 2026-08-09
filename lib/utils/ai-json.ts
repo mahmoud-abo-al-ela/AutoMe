@@ -12,7 +12,7 @@
  * @returns {object} The parsed object.
  * @throws {SyntaxError} If no complete, parseable object is found.
  */
-export function parseFirstJsonObject(text) {
+export function parseFirstJsonObject(text: unknown): Record<string, unknown> {
   if (typeof text !== "string") {
     throw new SyntaxError("AI response is empty");
   }

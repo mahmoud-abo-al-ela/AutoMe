@@ -3,7 +3,7 @@ import { cache } from "react";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
-export const getOrganizationBySlug = cache(async (slug) => {
+export const getOrganizationBySlug = cache(async (slug: string | null | undefined) => {
   if (!slug) return null;
 
   return db.organization.findUnique({
@@ -16,7 +16,7 @@ export const getOrganizationBySlug = cache(async (slug) => {
   });
 });
 
-export async function getOrganization(slug) {
+export async function getOrganization(slug: string) {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -49,7 +49,7 @@ export async function getOrganization(slug) {
   return { organization, membership };
 }
 
-export const getOrganizationById = cache(async (id) => {
+export const getOrganizationById = cache(async (id: string | null | undefined) => {
   if (!id) return null;
 
   return db.organization.findUnique({
@@ -84,7 +84,7 @@ export async function getImpersonationContext() {
   };
 }
 
-export async function getUserOrganizations(userId) {
+export async function getUserOrganizations(userId: string) {
   const memberships = await db.membership.findMany({
     where: { userId },
     include: {

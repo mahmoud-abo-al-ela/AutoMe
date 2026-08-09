@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
+import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 const userIncludeQuery = {
@@ -14,13 +15,28 @@ const userIncludeQuery = {
       },
     },
   },
+} satisfies Prisma.UserInclude;
+
+/** A User row with memberships → organization → subscription → plan joined. */
+export type UserWithOrganizations = Prisma.UserGetPayload<{
+  include: typeof userIncludeQuery;
+}>;
+
+/**
+ * What checkUser resolves to: the user row, plus the impersonation marker when
+ * an admin is viewing as someone else. Both extras are optional because the
+ * non-impersonating path returns the row unchanged.
+ */
+export type CurrentUser = UserWithOrganizations & {
+  isImpersonated?: boolean;
+  actualUser?: Pick<UserWithOrganizations, "id" | "email" | "name" | "role">;
 };
 
 /**
  * Get the current authenticated user, creating them if they don't exist
  * Also checks for impersonation context for Super Admins
  */
-export async function checkUser() {
+export async function checkUser(): Promise<CurrentUser | null> {
   const { userId } = await auth();
   if (!userId) {
     return null;
@@ -59,7 +75,7 @@ export async function getActualUser() {
  * INTERNAL HELPERS
  */
 
-async function findOrCreateUser(clerkId) {
+async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations> {
   let userData = await db.user.findUnique({
     where: { clerkId },
     include: userIncludeQuery,
@@ -88,7 +104,9 @@ async function findOrCreateUser(clerkId) {
   return userData;
 }
 
-async function assignPendingOrganizations(userData) {
+async function assignPendingOrganizations(
+  userData: UserWithOrganizations
+): Promise<UserWithOrganizations> {
   const pendingOrgs = await db.organization.findMany({
     where: { pendingOwnerEmail: userData.email },
   });
@@ -125,14 +143,17 @@ async function assignPendingOrganizations(userData) {
     });
   }
 
-  // Refetch user with updated memberships
-  return await db.user.findUnique({
+  // Refetch user with updated memberships. Read by primary key for a row this
+  // request just loaded, so the null branch is unreachable.
+  return (await db.user.findUnique({
     where: { id: userData.id },
     include: userIncludeQuery,
-  });
+  })) as UserWithOrganizations;
 }
 
-async function resolveImpersonation(userData) {
+async function resolveImpersonation(
+  userData: UserWithOrganizations
+): Promise<CurrentUser> {
   const headersList = await headers();
   const isImpersonating = headersList.get("x-impersonation-active") === "true";
   const impersonatedUserId = headersList.get("x-impersonated-user");

@@ -7,7 +7,7 @@ import { RateLimitError, ValidationError } from "@/lib/utils/errors";
  * typed error if denied. Shared by the enforcers below so every call site
  * rate-limits and maps errors identically.
  */
-async function enforce(instance, requested) {
+async function enforce(instance: typeof aj, requested: number) {
   const req = await request();
   const decision = await instance.protect(req, { requested });
 

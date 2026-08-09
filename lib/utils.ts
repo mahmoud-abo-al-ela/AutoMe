@@ -1,18 +1,18 @@
-import { clsx } from "clsx";
+import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export function cn(...inputs) {
+export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 // Car comparison utilities
 export const compareUtils = {
-  getCompareList: () => {
+  getCompareList: (): string[] => {
     const compareList = localStorage.getItem("compareList");
     return compareList ? JSON.parse(compareList) : [];
   },
 
-  addToCompare: (carId) => {
+  addToCompare: (carId: string): boolean => {
     const compareList = compareUtils.getCompareList();
     if (compareList.includes(carId)) return false;
     if (compareList.length >= 3) return false;
@@ -21,7 +21,7 @@ export const compareUtils = {
     return true;
   },
 
-  removeFromCompare: (carId) => {
+  removeFromCompare: (carId: string): boolean => {
     const compareList = compareUtils.getCompareList();
     const index = compareList.indexOf(carId);
     if (index === -1) return false;

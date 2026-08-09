@@ -1,11 +1,13 @@
+import type { MemberRole } from "@/lib/generated/prisma";
+import type { OrganizationWithPlan } from "@/lib/auth/context";
 import { db } from "@/lib/prisma";
 import { AuthorizationError } from "@/lib/utils/errors";
 
 export async function checkOrganizationAccess(
-  userId,
-  organizationId,
-  requiredRole = null
-) {
+  userId: string,
+  organizationId: string,
+  requiredRole: MemberRole | null = null
+): Promise<boolean> {
   const membership = await db.membership.findUnique({
     where: {
       userId_organizationId: {
@@ -18,7 +20,7 @@ export async function checkOrganizationAccess(
   if (!membership) return false;
 
   if (requiredRole) {
-    const roleHierarchy = { OWNER: 3, ADMIN: 2, MEMBER: 1 };
+    const roleHierarchy: Record<string, number> = { OWNER: 3, ADMIN: 2, MEMBER: 1 };
     const userRoleLevel = roleHierarchy[membership.role] || 0;
     const requiredLevel = roleHierarchy[requiredRole] || 0;
     return userRoleLevel >= requiredLevel;
@@ -27,7 +29,7 @@ export async function checkOrganizationAccess(
   return true;
 }
 
-export async function getUserMembership(userId, organizationId) {
+export async function getUserMembership(userId: string, organizationId: string) {
   return db.membership.findUnique({
     where: {
       userId_organizationId: {
@@ -51,7 +53,7 @@ export async function getUserMembership(userId, organizationId) {
  * Ensures the user is the OWNER of the organization.
  * Throws an AuthorizationError if not.
  */
-export async function requireOwner(userId, organizationId) {
+export async function requireOwner(userId: string, organizationId: string) {
   const membership = await getUserMembership(userId, organizationId);
   if (!membership || membership.role !== "OWNER") {
     throw new AuthorizationError("Only owners can perform this action");
@@ -59,16 +61,28 @@ export async function requireOwner(userId, organizationId) {
   return membership;
 }
 
-export function checkPlanFeature(organization, featureName) {
+export function checkPlanFeature(
+  organization: OrganizationWithPlan | null | undefined,
+  featureName: string
+): boolean {
   if (!organization?.subscription?.plan?.features) {
     return false;
   }
 
+  // Plan.features is free-form JSON; narrow to an object before indexing.
   const features = organization.subscription.plan.features;
-  return features[featureName] ?? false;
+  if (typeof features !== "object" || Array.isArray(features)) {
+    return false;
+  }
+
+  return Boolean((features as Record<string, unknown>)[featureName] ?? false);
 }
 
-export function checkPlanLimit(organization, limitName, currentCount) {
+export function checkPlanLimit(
+  organization: OrganizationWithPlan | null | undefined,
+  limitName: "maxCars" | "maxMembers" | "maxImagesPerCar",
+  currentCount: number
+): boolean {
   if (!organization?.subscription?.plan) {
     return false;
   }
@@ -80,7 +94,7 @@ export function checkPlanLimit(organization, limitName, currentCount) {
   return currentCount < limit;
 }
 
-export function getPlanLimits(organization) {
+export function getPlanLimits(organization: OrganizationWithPlan | null | undefined) {
   if (!organization?.subscription?.plan) {
     return {
       maxCars: 0,

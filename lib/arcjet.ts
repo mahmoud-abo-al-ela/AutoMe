@@ -1,7 +1,9 @@
 import arcjet, { tokenBucket } from "@arcjet/next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  // Arcjet's own client warns and no-ops on a missing key; keep that behaviour
+  // rather than throwing at import time.
+  key: process.env.ARCJET_KEY ?? "",
   characteristics: ["ip.src"], // track requests by IP address
   rules: [
     tokenBucket({

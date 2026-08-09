@@ -1,4 +1,4 @@
-export function getOrgSlugFromPath(pathname) {
+export function getOrgSlugFromPath(pathname: string): string | null {
   const segments = pathname.split("/").filter(Boolean);
   if (segments[0] === "org" && segments[1]) {
     return segments[1];
