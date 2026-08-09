@@ -2,6 +2,17 @@
 import Stripe from "stripe";
 
 /**
+ * Metadata carried onto the checkout session and the resulting subscription.
+ * Stripe stores metadata as strings, and the three keys below are read back by
+ * the webhook handlers, so they are required rather than an open record.
+ */
+export type PlanChangeMetadata = {
+    userId: string;
+    planId: string;
+    organizationId: string;
+} & Record<string, string>;
+
+/**
  * Initialize Stripe with validation
  */
 function getStripeClient() {
@@ -19,7 +30,13 @@ export async function createNewSubscriptionCheckout({
     successUrl,
     cancelUrl,
     metadata,
-}) {
+}: {
+    customerEmail: string;
+    stripePriceId: string;
+    successUrl: string;
+    cancelUrl: string;
+    metadata: PlanChangeMetadata;
+}): Promise<{ url: string | null; sessionId: string }> {
     const stripe = getStripeClient();
 
     const session = await stripe.checkout.sessions.create({
@@ -45,7 +62,11 @@ export async function updateSubscriptionPlan({
     stripeSubscriptionId,
     newStripePriceId,
     newPlanId,
-}) {
+}: {
+    stripeSubscriptionId: string;
+    newStripePriceId: string;
+    newPlanId: string;
+}): Promise<Stripe.Subscription> {
     const stripe = getStripeClient();
 
     // Retrieve the current subscription to get the item ID

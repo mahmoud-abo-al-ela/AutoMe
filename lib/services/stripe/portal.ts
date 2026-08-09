@@ -13,9 +13,9 @@ function getStripeClient() {
 }
 
 export async function createBillingPortalSession(
-    stripeCustomerId,
-    returnUrl
-) {
+    stripeCustomerId: string | null | undefined,
+    returnUrl: string
+): Promise<{ url: string }> {
     const stripe = getStripeClient();
 
     if (!stripeCustomerId) {

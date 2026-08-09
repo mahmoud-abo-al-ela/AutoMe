@@ -12,7 +12,39 @@ function getStripeClient() {
     return new Stripe(secretKey);
 }
 
-export async function getCustomerInvoices(stripeCustomerId, options = {}) {
+export type InvoiceStatus =
+    | "PAID"
+    | "OPEN"
+    | "DRAFT"
+    | "VOID"
+    | "UNCOLLECTIBLE"
+    | "UNKNOWN";
+
+export interface InvoiceDto {
+    id: string | undefined;
+    number: string | null;
+    date: string;
+    dueDate: string | null;
+    amount: number;
+    currency: string;
+    status: InvoiceStatus;
+    pdfUrl: string | null;
+    hostedUrl: string | null;
+    description: string;
+    periodStart: string | null;
+    periodEnd: string | null;
+}
+
+export interface CustomerInvoicesResult {
+    invoices: InvoiceDto[];
+    hasMore: boolean;
+    nextCursor: string | null;
+}
+
+export async function getCustomerInvoices(
+    stripeCustomerId: string | null | undefined,
+    options: { limit?: number; startingAfter?: string } = {}
+): Promise<CustomerInvoicesResult> {
     const stripe = getStripeClient();
     const { limit = 10, startingAfter } = options;
 
@@ -20,7 +52,7 @@ export async function getCustomerInvoices(stripeCustomerId, options = {}) {
         return { invoices: [], hasMore: false, nextCursor: null };
     }
 
-    const params = {
+    const params: Stripe.InvoiceListParams = {
         customer: stripeCustomerId,
         limit,
         expand: ["data.charge"],
@@ -68,8 +100,10 @@ export async function getCustomerInvoices(stripeCustomerId, options = {}) {
 /**
  * Map Stripe invoice status to a display-friendly status
  */
-function mapInvoiceStatus(stripeStatus) {
-    const statusMap = {
+function mapInvoiceStatus(
+    stripeStatus: Stripe.Invoice.Status | null
+): InvoiceStatus {
+    const statusMap: Record<Stripe.Invoice.Status, InvoiceStatus> = {
         paid: "PAID",
         open: "OPEN",
         draft: "DRAFT",
@@ -77,5 +111,5 @@ function mapInvoiceStatus(stripeStatus) {
         uncollectible: "UNCOLLECTIBLE",
     };
 
-    return statusMap[stripeStatus] || "UNKNOWN";
+    return (stripeStatus && statusMap[stripeStatus]) || "UNKNOWN";
 }

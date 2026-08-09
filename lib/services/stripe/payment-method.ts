@@ -12,14 +12,23 @@ function getStripeClient() {
     return new Stripe(secretKey);
 }
 
+export interface PaymentMethodDto {
+    id: string;
+    type: "card";
+    brand: string;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+    funding: string | null;
+}
+
 /**
  * Get the default payment method for a Stripe customer.
  * Returns card brand, last 4 digits, expiry month/year, or null if none found.
- *
- * @param {string} stripeCustomerId - The Stripe customer ID
- * @returns {Promise<Object|null>} Payment method details or null
  */
-export async function getDefaultPaymentMethod(stripeCustomerId) {
+export async function getDefaultPaymentMethod(
+    stripeCustomerId: string | null | undefined
+): Promise<PaymentMethodDto | null> {
     const stripe = getStripeClient();
 
     if (!stripeCustomerId) {
@@ -42,12 +51,18 @@ export async function getDefaultPaymentMethod(stripeCustomerId) {
         return formatPaymentMethod(defaultPm);
     }
 
-    // Fallback: check the customer's default_source
-    if (customer.default_source) {
+    // Fallback: check the customer's default_source. It is unexpanded here, so
+    // it arrives as an ID string; the object branch is only for type narrowing.
+    const defaultSourceId =
+        typeof customer.default_source === "string"
+            ? customer.default_source
+            : customer.default_source?.id;
+
+    if (defaultSourceId) {
         try {
             const source = await stripe.customers.retrieveSource(
                 stripeCustomerId,
-                customer.default_source
+                defaultSourceId
             );
             if (source.object === "card") {
                 return {
@@ -82,7 +97,7 @@ export async function getDefaultPaymentMethod(stripeCustomerId) {
 /**
  * Format a Stripe PaymentMethod object into a simplified structure
  */
-function formatPaymentMethod(pm) {
+function formatPaymentMethod(pm: Stripe.PaymentMethod): PaymentMethodDto | null {
     if (!pm?.card) return null;
 
     return {
@@ -99,8 +114,8 @@ function formatPaymentMethod(pm) {
 /**
  * Normalize card brand names for consistent display
  */
-function normalizeBrand(brand) {
-    const brandMap = {
+function normalizeBrand(brand: string | null | undefined): string {
+    const brandMap: Record<string, string> = {
         visa: "Visa",
         mastercard: "Mastercard",
         amex: "American Express",
@@ -110,5 +125,5 @@ function normalizeBrand(brand) {
         unionpay: "UnionPay",
     };
 
-    return brandMap[brand?.toLowerCase()] || brand || "Card";
+    return (brand && brandMap[brand.toLowerCase()]) || brand || "Card";
 }

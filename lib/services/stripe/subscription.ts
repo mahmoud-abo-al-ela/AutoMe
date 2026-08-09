@@ -1,6 +1,19 @@
 // Stripe subscription service - Business logic for Stripe subscription operations
 import Stripe from "stripe";
 
+/**
+ * BUG (surfaced by this conversion, NOT fixed here — conversion-only):
+ * `Invoice.payment_intent` and the `latest_invoice.payment_intent` expansion
+ * were removed from the Stripe API in the 2025 "Basil" release, and stripe@20's
+ * types no longer declare the field. `extractClientSecret` below therefore reads
+ * something the API no longer returns. This alias preserves today's behaviour;
+ * the fix (read `invoice.confirmation_secret`, or pin an older `apiVersion`)
+ * belongs in its own PR.
+ */
+type InvoiceWithLegacyPaymentIntent = Stripe.Invoice & {
+    payment_intent?: string | Stripe.PaymentIntent | null;
+};
+
 // Initialize Stripe with validation
 function getStripeClient() {
     const secretKey = process.env.STRIPE_SECRET_KEY || "dummy_key";
@@ -13,7 +26,11 @@ function getStripeClient() {
 /**
  * Find or create a Stripe customer
  */
-export async function findOrCreateCustomer(email, name, userId) {
+export async function findOrCreateCustomer(
+    email: string,
+    name: string | null | undefined,
+    userId: string
+): Promise<Stripe.Customer> {
     const stripe = getStripeClient();
 
     const existingCustomers = await stripe.customers.list({
@@ -35,7 +52,10 @@ export async function findOrCreateCustomer(email, name, userId) {
 /**
  * Cancel incomplete subscriptions for a customer and plan
  */
-export async function cancelIncompleteSubscriptions(customerId, stripePriceId) {
+export async function cancelIncompleteSubscriptions(
+    customerId: string,
+    stripePriceId: string
+): Promise<void> {
     const stripe = getStripeClient();
 
     const existingSubscriptions = await stripe.subscriptions.list({
@@ -56,7 +76,11 @@ export async function cancelIncompleteSubscriptions(customerId, stripePriceId) {
 /**
  * Create a Stripe subscription
  */
-export async function createStripeSubscription(customerId, stripePriceId, metadata) {
+export async function createStripeSubscription(
+    customerId: string,
+    stripePriceId: string,
+    metadata: Stripe.MetadataParam
+): Promise<Stripe.Subscription> {
     const stripe = getStripeClient();
 
     return stripe.subscriptions.create({
@@ -65,10 +89,14 @@ export async function createStripeSubscription(customerId, stripePriceId, metada
         payment_behavior: "default_incomplete",
         payment_settings: {
             save_default_payment_method: "on_subscription",
-            payment_method_types:
-                process.env.NODE_ENV === "production"
-                    ? ["card", "link", "amazon_pay", "apple_pay", "google_pay", "paypal"]
-                    : ["card", "link"],
+            // BUG (surfaced by this conversion, NOT fixed here — conversion-only):
+            // "apple_pay" and "google_pay" are not Stripe payment_method_types —
+            // they are card wallets, delivered under "card". Stripe rejects them,
+            // so this create call fails whenever NODE_ENV === "production".
+            // The cast preserves today's behaviour; the fix belongs in its own PR.
+            payment_method_types: (process.env.NODE_ENV === "production"
+                ? ["card", "link", "amazon_pay", "apple_pay", "google_pay", "paypal"]
+                : ["card", "link"]) as Stripe.SubscriptionCreateParams.PaymentSettings.PaymentMethodType[],
         },
         expand: ["latest_invoice.payment_intent"],
         metadata,
@@ -78,7 +106,9 @@ export async function createStripeSubscription(customerId, stripePriceId, metada
 /**
  * Retrieve invoice with payment intent
  */
-export async function retrieveInvoiceWithPaymentIntent(invoiceId) {
+export async function retrieveInvoiceWithPaymentIntent(
+    invoiceId: string
+): Promise<Stripe.Invoice> {
     const stripe = getStripeClient();
 
     return stripe.invoices.retrieve(invoiceId, {
@@ -89,7 +119,9 @@ export async function retrieveInvoiceWithPaymentIntent(invoiceId) {
 /**
  * Retrieve payment intent
  */
-export async function retrievePaymentIntent(paymentIntentId) {
+export async function retrievePaymentIntent(
+    paymentIntentId: string
+): Promise<Stripe.PaymentIntent> {
     const stripe = getStripeClient();
 
     return stripe.paymentIntents.retrieve(paymentIntentId);
@@ -98,7 +130,11 @@ export async function retrievePaymentIntent(paymentIntentId) {
 /**
  * Create a payment intent for an invoice
  */
-export async function createPaymentIntentForInvoice(invoice, customerId, metadata) {
+export async function createPaymentIntentForInvoice(
+    invoice: Stripe.Invoice,
+    customerId: string,
+    metadata: Stripe.MetadataParam
+): Promise<Stripe.PaymentIntent> {
     const stripe = getStripeClient();
 
     return stripe.paymentIntents.create({
@@ -107,12 +143,13 @@ export async function createPaymentIntentForInvoice(invoice, customerId, metadat
         customer: customerId,
         metadata: {
             ...metadata,
-            invoiceId: invoice.id,
+            invoiceId: invoice.id ?? null,
         },
-        payment_method_types:
-            process.env.NODE_ENV === "production"
-                ? ["card", "link", "amazon_pay", "apple_pay", "google_pay", "paypal"]
-                : ["card", "link"],
+        // Same invalid-wallet bug as createStripeSubscription above — see the
+        // comment there. Cast preserves behaviour; the fix is a separate PR.
+        payment_method_types: (process.env.NODE_ENV === "production"
+            ? ["card", "link", "amazon_pay", "apple_pay", "google_pay", "paypal"]
+            : ["card", "link"]) as string[],
     });
 }
 
@@ -121,7 +158,11 @@ export async function createStripeCheckoutSession({
     customerEmail,
     stripePriceId,
     metadata,
-}) {
+}: {
+    customerEmail: string;
+    stripePriceId: string;
+    metadata: { userId: string; planId: string } & Record<string, string>;
+}): Promise<Stripe.Checkout.Session> {
     const stripe = getStripeClient();
     const appUrl =
         process.env.NEXT_PUBLIC_APP_URL ||
@@ -152,7 +193,9 @@ export async function createStripeCheckoutSession({
 }
 
 
-export async function retrieveCheckoutSession(sessionId) {
+export async function retrieveCheckoutSession(
+    sessionId: string
+): Promise<Stripe.Checkout.Session> {
     const stripe = getStripeClient();
 
     return stripe.checkout.sessions.retrieve(sessionId);
@@ -161,7 +204,9 @@ export async function retrieveCheckoutSession(sessionId) {
 /**
  * Cancel a Stripe subscription
  */
-export async function cancelStripeSubscription(subscriptionId) {
+export async function cancelStripeSubscription(
+    subscriptionId: string
+): Promise<Stripe.Subscription> {
     const stripe = getStripeClient();
 
     return stripe.subscriptions.cancel(subscriptionId);
@@ -170,8 +215,10 @@ export async function cancelStripeSubscription(subscriptionId) {
 /**
  * Extract client secret from subscription
  */
-export async function extractClientSecret(subscription) {
-    let latestInvoice = subscription.latest_invoice;
+export async function extractClientSecret(
+    subscription: Stripe.Subscription
+): Promise<string | null> {
+    let latestInvoice: string | Stripe.Invoice | null = subscription.latest_invoice;
 
     // Handle case where expansion might have failed or returned ID
     if (typeof latestInvoice === "string") {
@@ -182,18 +229,20 @@ export async function extractClientSecret(subscription) {
         return null;
     }
 
+    const invoice = latestInvoice as InvoiceWithLegacyPaymentIntent;
+
     // If no payment intent exists on the invoice
-    if (!latestInvoice.payment_intent && latestInvoice.status === "open") {
+    if (!invoice.payment_intent && invoice.status === "open") {
         return null;
     }
 
     // Extract client secret from payment intent
-    if (latestInvoice.payment_intent) {
-        if (typeof latestInvoice.payment_intent === "string") {
-            const paymentIntent = await retrievePaymentIntent(latestInvoice.payment_intent);
+    if (invoice.payment_intent) {
+        if (typeof invoice.payment_intent === "string") {
+            const paymentIntent = await retrievePaymentIntent(invoice.payment_intent);
             return paymentIntent.client_secret;
         }
-        return latestInvoice.payment_intent.client_secret;
+        return invoice.payment_intent.client_secret;
     }
 
     return null;
