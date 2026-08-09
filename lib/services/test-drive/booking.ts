@@ -9,10 +9,18 @@ import {
   AuthorizationError,
 } from "@/lib/utils/errors";
 
+interface TestDriveFormData {
+  carId: string;
+  date: string | Date;
+  startTime: string;
+  endTime: string;
+  notes?: string;
+}
+
 /**
  * Request a test drive
  */
-export async function requestTestDrive(testDriveData, userId) {
+export async function requestTestDrive(testDriveData: TestDriveFormData, userId: string) {
   const user = await userRepository.findUserByClerkId(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -42,7 +50,7 @@ export async function requestTestDrive(testDriveData, userId) {
 /**
  * Edit test drive
  */
-export async function editTestDrive(testDriveId, updateData, userId) {
+export async function editTestDrive(testDriveId: string, updateData: Omit<TestDriveFormData, "carId">, userId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -86,7 +94,7 @@ export async function editTestDrive(testDriveId, updateData, userId) {
 /**
  * Cancel test drive
  */
-export async function cancelTestDrive(testDriveId, userId) {
+export async function cancelTestDrive(testDriveId: string, userId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -122,7 +130,7 @@ export async function cancelTestDrive(testDriveId, userId) {
 /**
  * Check if user has existing test drive for a car
  */
-export async function checkExistingTestDrive(carId, userId) {
+export async function checkExistingTestDrive(carId: string, userId?: string | null) {
   if (!userId) {
     return { exists: false, testDriveId: null };
   }
@@ -146,6 +154,6 @@ export async function checkExistingTestDrive(carId, userId) {
 /**
  * Get booked time slots for a car
  */
-export async function getBookedTimeSlots(carId, date) {
+export async function getBookedTimeSlots(carId: string, date: string | Date) {
   return await testDriveRepository.getBookedTimeSlots(carId, date);
 }

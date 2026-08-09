@@ -13,10 +13,10 @@ import {
  * When organizationId is null (main domain), shows only the user's own test drives
  */
 export async function getTestDrives(
-  filters,
-  pagination,
-  userId,
-  organizationId,
+  filters: Record<string, unknown>,
+  pagination: { page?: number; limit?: number },
+  userId: string,
+  organizationId?: string | null,
 ) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
@@ -49,7 +49,7 @@ export async function getTestDrives(
 /**
  * Get test drive by ID
  */
-export async function getTestDriveById(testDriveId, userId) {
+export async function getTestDriveById(testDriveId: string, userId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -79,10 +79,10 @@ export async function getTestDriveById(testDriveId, userId) {
  * Update test drive status (admin only)
  */
 export async function updateTestDriveStatus(
-  testDriveId,
-  status,
-  userId,
-  organizationId,
+  testDriveId: string,
+  status: string,
+  userId: string,
+  organizationId?: string | null,
 ) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {

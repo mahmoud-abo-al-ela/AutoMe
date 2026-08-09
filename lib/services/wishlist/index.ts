@@ -6,7 +6,7 @@ import { AuthenticationError, NotFoundError } from "@/lib/utils/errors";
 /**
  * Get user's wishlist, optionally filtered by organization
  */
-export async function getUserWishlist(userId, pagination, organizationId = null) {
+export async function getUserWishlist(userId: string, pagination: { page?: number; limit?: number }, organizationId: string | null = null) {
   const user = await userRepository.findUserByClerkId(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -18,7 +18,7 @@ export async function getUserWishlist(userId, pagination, organizationId = null)
 /**
  * Toggle car in wishlist
  */
-export async function toggleWishlist(carId, userId) {
+export async function toggleWishlist(carId: string, userId: string) {
   const user = await userRepository.findUserByClerkId(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -43,7 +43,7 @@ export async function toggleWishlist(carId, userId) {
 /**
  * Check if car is in user's wishlist
  */
-export async function isCarInUserWishlist(carId, userId) {
+export async function isCarInUserWishlist(carId: string, userId: string) {
   const user = await userRepository.findUserByClerkId(userId);
   if (!user) {
     return false;
@@ -55,7 +55,7 @@ export async function isCarInUserWishlist(carId, userId) {
 /**
  * Get wishlist car IDs for user
  */
-export async function getWishlistCarIds(userId) {
+export async function getWishlistCarIds(userId: string) {
   const user = await userRepository.findUserByClerkId(userId);
   if (!user) {
     return new Set();
