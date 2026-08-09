@@ -11,14 +11,14 @@ const PLAN_LIMITS = {
 /**
  * Get team members for an organization
  */
-export async function getTeamMembersService(organizationId) {
+export async function getTeamMembersService(organizationId: string) {
   return teamRepo.findManyMembers(organizationId);
 }
 
 /**
  * Get subscription details for an organization
  */
-export async function getSubscriptionDetailsService(organizationId) {
+export async function getSubscriptionDetailsService(organizationId: string) {
   return billingRepo.findActiveSubscription(organizationId);
 }
 

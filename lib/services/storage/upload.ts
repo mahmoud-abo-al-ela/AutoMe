@@ -6,7 +6,7 @@ import { VALIDATION_RULES } from "@/lib/constants/validation";
 /**
  * Process image file (File object or base64 string)
  */
-export async function processImageFile(imageFile) {
+export async function processImageFile(imageFile: File | string) {
   if (imageFile instanceof File) {
     return processFileObject(imageFile);
   } else if (
@@ -21,7 +21,7 @@ export async function processImageFile(imageFile) {
 /**
  * Process File object
  */
-async function processFileObject(file) {
+async function processFileObject(file: File) {
   const arrayBuffer = await file.arrayBuffer();
   return {
     buffer: Buffer.from(arrayBuffer),
@@ -33,7 +33,7 @@ async function processFileObject(file) {
 /**
  * Process base64 string
  */
-function processBase64String(base64String) {
+function processBase64String(base64String: string) {
   const base64 = base64String.split(",")[1];
   const mimeMatch = base64String.match(/data:image\/([a-zA-Z0-9]+);/);
   const extension = mimeMatch ? mimeMatch[1] : "jpeg";
@@ -48,7 +48,7 @@ function processBase64String(base64String) {
 /**
  * Get public URL for uploaded file
  */
-export function getPublicUrl(bucketName, filePath) {
+export function getPublicUrl(bucketName: string, filePath: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
 }
 
@@ -56,9 +56,9 @@ export function getPublicUrl(bucketName, filePath) {
  * Upload a single image
  */
 export async function uploadImage(
-  imageFile,
-  folderPath,
-  index,
+  imageFile: File | string,
+  folderPath: string,
+  index: number,
   bucketName = "car-images"
 ) {
   const { buffer, extension, contentType } = await processImageFile(imageFile);
@@ -82,8 +82,8 @@ export async function uploadImage(
  * Upload multiple car images
  */
 export async function uploadCarImages(
-  images,
-  carId,
+  images: Array<File | string>,
+  carId: string,
   bucketName = "car-images",
   maxImages = VALIDATION_RULES.CAR.MAX_IMAGES
 ) {
@@ -109,8 +109,8 @@ export async function uploadCarImages(
 /**
  * Upload car images in batches (for better performance)
  */
-export async function uploadCarImagesInBatches(images, carId, batchSize = 3) {
-  const results = [];
+export async function uploadCarImagesInBatches(images: Array<File | string>, carId: string, batchSize = 3) {
+  const results: string[] = [];
 
   for (let i = 0; i < images.length; i += batchSize) {
     const batch = images.slice(i, i + batchSize);

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase";
 /**
  * Delete car images
  */
-export async function deleteCarImages(imageUrls, bucketName = "car-images") {
+export async function deleteCarImages(imageUrls: string[], bucketName = "car-images") {
   if (!imageUrls || imageUrls.length === 0) {
     return;
   }
@@ -25,7 +25,7 @@ export async function deleteCarImages(imageUrls, bucketName = "car-images") {
 /**
  * Delete entire car folder
  */
-export async function deleteCarFolder(carId, bucketName = "car-images") {
+export async function deleteCarFolder(carId: string, bucketName = "car-images") {
   const folderPath = `cars/${carId}`;
   const supabase = await createClient();
 
