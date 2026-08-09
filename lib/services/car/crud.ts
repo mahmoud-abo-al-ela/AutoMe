@@ -6,11 +6,24 @@ import * as storageService from "@/lib/services/storage";
 import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
 import { STATUS_FORM_TO_DB } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
+import type { CarStatus } from "@/lib/generated/prisma";
+import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
+
+/**
+ * Map a form status label to its DB enum, defaulting to AVAILABLE. The form
+ * value is a free string at this boundary, so the lookup is indexed loosely.
+ */
+function toCarStatus(formStatus: string | null | undefined): CarStatus {
+  return (
+    (STATUS_FORM_TO_DB as Record<string, CarStatus>)[formStatus ?? ""] ||
+    "AVAILABLE"
+  );
+}
 
 /**
  * Get car by ID
  */
-export async function getCarById(id) {
+export async function getCarById(id: string) {
   const car = await carRepository.findCarById(id);
 
   if (!car) {
@@ -23,7 +36,11 @@ export async function getCarById(id) {
 /**
  * Create a new car (organization-scoped)
  */
-export async function createCar(carData, userId, organizationId) {
+export async function createCar(
+  carData: CarInput,
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -41,12 +58,17 @@ export async function createCar(carData, userId, organizationId) {
 
   const carId = uuidv4();
   const imageUrls = await storageService.uploadCarImages(carData.images, carId, "car-images", maxImagesPerCar);
-  const status = STATUS_FORM_TO_DB[carData.status] || "AVAILABLE";
+  const status = toCarStatus(carData.status);
 
   const car = await carRepository.createCar({
     id: carId,
     organizationId,
-    title: carData.title,
+    // BUG (surfaced by this conversion, NOT fixed here): carSchema has no
+    // `title` field, so validateAction strips it before this point and every
+    // car created through addCar lands with a null title — even though the
+    // form collects one and updateCarFullSchema does declare it. Behaviour
+    // preserved; adding title to carSchema belongs in its own PR.
+    title: (carData as { title?: string }).title,
     make: carData.make,
     model: carData.model,
     year: carData.year,
@@ -71,7 +93,12 @@ export async function createCar(carData, userId, organizationId) {
 /**
  * Update a car (organization-scoped)
  */
-export async function updateCar(carId, updateData, userId, organizationId) {
+export async function updateCar(
+  carId: string,
+  updateData: UpdateCarInput,
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -87,10 +114,13 @@ export async function updateCar(carId, updateData, userId, organizationId) {
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  const dataToUpdate = { ...updateData };
+  // Unlike the create/full-update paths this keeps an unmapped status as-is
+  // rather than falling back to AVAILABLE, so it does not use toCarStatus.
+  const dataToUpdate: UpdateCarInput & { status?: string } = { ...updateData };
   if (updateData.status) {
     dataToUpdate.status =
-      STATUS_FORM_TO_DB[updateData.status] || updateData.status;
+      (STATUS_FORM_TO_DB as Record<string, CarStatus>)[updateData.status] ||
+      updateData.status;
   }
 
   return await carRepository.updateCar(carId, dataToUpdate);
@@ -99,7 +129,11 @@ export async function updateCar(carId, updateData, userId, organizationId) {
 /**
  * Delete a car (organization-scoped)
  */
-export async function deleteCar(carId, userId, organizationId) {
+export async function deleteCar(
+  carId: string,
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -127,7 +161,11 @@ export async function deleteCar(carId, userId, organizationId) {
 /**
  * Toggle featured status (organization-scoped)
  */
-export async function toggleFeatured(carId, userId, organizationId) {
+export async function toggleFeatured(
+  carId: string,
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -149,7 +187,12 @@ export async function toggleFeatured(carId, userId, organizationId) {
 /**
  * Update all car details including images (organization-scoped)
  */
-export async function updateCarFull(carId, carData, userId, organizationId) {
+export async function updateCarFull(
+  carId: string,
+  carData: UpdateCarFullInput,
+  userId: string,
+  organizationId: string
+) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -178,7 +221,7 @@ export async function updateCarFull(carId, carData, userId, organizationId) {
   }
 
   // Upload new images to Supabase
-  let newImageUrls = [];
+  let newImageUrls: string[] = [];
   if (newImageFiles.length > 0) {
     const organization = await getOrganizationById(organizationId);
     const maxImagesPerCar = organization?.subscription?.plan?.maxImagesPerCar ?? 5;
@@ -190,7 +233,7 @@ export async function updateCarFull(carId, carData, userId, organizationId) {
   // Combine existing image URLs and new uploaded URLs
   const finalImages = [...existingImages, ...newImageUrls];
 
-  const status = STATUS_FORM_TO_DB[carData.status] || "AVAILABLE";
+  const status = toCarStatus(carData.status);
 
   const updatedCar = await carRepository.updateCar(carId, {
     title: carData.title,

@@ -6,14 +6,14 @@ import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
 /**
  * Get dashboard statistics for an organization
  */
-export async function getDashboardStats(userId, organizationId) {
+export async function getDashboardStats(userId: string, organizationId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
   }
 
   // Verify user has access to this organization
-  const hasAccess = user.memberships?.some(m => m.organizationId === organizationId);
+  const hasAccess = user.memberships?.some((m) => m.organizationId === organizationId);
   if (!hasAccess && user.role !== "ADMIN") {
     throw new AuthorizationError("You don't have access to this organization");
   }
@@ -24,14 +24,14 @@ export async function getDashboardStats(userId, organizationId) {
 /**
  * Get overview chart data for an organization
  */
-export async function getOverviewChartData(userId, organizationId) {
+export async function getOverviewChartData(userId: string, organizationId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
   }
 
   // Verify user has access to this organization
-  const hasAccess = user.memberships?.some(m => m.organizationId === organizationId);
+  const hasAccess = user.memberships?.some((m) => m.organizationId === organizationId);
   if (!hasAccess && user.role !== "ADMIN") {
     throw new AuthorizationError("You don't have access to this organization");
   }
@@ -45,13 +45,13 @@ export async function getOverviewChartData(userId, organizationId) {
 /**
  * Helper to verify user access to an organization
  */
-async function verifyAccess(userId, organizationId) {
+async function verifyAccess(userId: string, organizationId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
   }
 
-  const hasAccess = user.memberships?.some(m => m.organizationId === organizationId);
+  const hasAccess = user.memberships?.some((m) => m.organizationId === organizationId);
   if (!hasAccess && user.role !== "ADMIN") {
     throw new AuthorizationError("You don't have access to this organization");
   }
@@ -62,7 +62,7 @@ async function verifyAccess(userId, organizationId) {
 /**
  * Get aggregated analytics data for dashboard
  */
-export async function getAnalytics(userId, organizationId) {
+export async function getAnalytics(userId: string, organizationId: string) {
   await verifyAccess(userId, organizationId);
 
   const [inventory, revenue] = await Promise.all([
@@ -76,7 +76,7 @@ export async function getAnalytics(userId, organizationId) {
 /**
  * Get conversion funnel metrics
  */
-export async function getConversionFunnel(userId, organizationId) {
+export async function getConversionFunnel(userId: string, organizationId: string) {
   await verifyAccess(userId, organizationId);
 
   const metrics = await dashboardRepository.getConversionMetrics(organizationId);
@@ -95,7 +95,7 @@ export async function getConversionFunnel(userId, organizationId) {
 /**
  * Get popular cars data
  */
-export async function getPopularCarsData(userId, organizationId) {
+export async function getPopularCarsData(userId: string, organizationId: string) {
   await verifyAccess(userId, organizationId);
   return await dashboardRepository.getPopularCars(organizationId, 5);
 }
@@ -103,7 +103,11 @@ export async function getPopularCarsData(userId, organizationId) {
 /**
  * Get test drive trends
  */
-export async function getTestDriveTrendsData(userId, organizationId, days = 30) {
+export async function getTestDriveTrendsData(
+  userId: string,
+  organizationId: string,
+  days = 30
+) {
   await verifyAccess(userId, organizationId);
   return await dashboardRepository.getTestDriveTrends(organizationId, days);
 }

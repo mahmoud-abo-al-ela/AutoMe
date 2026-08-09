@@ -1,12 +1,49 @@
 // Car listing and filter service functions
 import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
-import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
+
+/**
+ * The car listing filter set, as understood by buildCarWhereClause. Declared
+ * here rather than in the repository because lib/repositories/car/* is still
+ * JavaScript (its where-builder is deferred); move this there on conversion.
+ */
+export interface CarFilters {
+  organizationId?: string;
+  dealership?: string;
+  city?: string;
+  status?: string;
+  onlyAvailable?: boolean;
+  search?: string;
+  make?: string | string[];
+  bodyType?: string | string[];
+  fuelType?: string | string[];
+  transmission?: string | string[];
+  color?: string;
+  minSeats?: number | null;
+  minPrice?: number;
+  maxPrice?: number;
+  minYear?: number;
+  maxYear?: number;
+  minMileage?: number;
+  maxMileage?: number;
+  featured?: boolean;
+  sortBy?: string;
+}
+
+export interface CarPagination {
+  page?: number;
+  limit?: number;
+}
 
 /**
  * Get cars with filters and pagination (organization-scoped)
  */
-export async function getCars(filters, pagination, userId, organizationId) {
+export async function getCars(
+  filters: CarFilters,
+  pagination: CarPagination,
+  userId?: string | null,
+  organizationId?: string | null
+) {
   // If we have a user and they are accessing a specific organization, 
   // we could check permissions, but for public listings we don't need to.
   // However, if this is intended for the dashboard, we should check.
@@ -39,7 +76,11 @@ export async function getCars(filters, pagination, userId, organizationId) {
 /**
  * Get filter options (organization-scoped)
  */
-export async function getFilterOptions(baseFilters = {}, userId, organizationId) {
+export async function getFilterOptions(
+  baseFilters: CarFilters = {},
+  userId?: string | null,
+  organizationId?: string | null
+) {
   // Add organization filter if provided
   const queryFilters = { ...baseFilters };
   if (organizationId) {
