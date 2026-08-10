@@ -1,5 +1,10 @@
 import type Stripe from "stripe";
-import type { DayOfWeek, Organization, SubscriptionStatus } from "@/lib/generated/prisma";
+import type {
+  DayOfWeek,
+  Organization,
+  Prisma,
+  SubscriptionStatus,
+} from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { sendWelcomeEmail } from "@/lib/services/notification";
@@ -19,6 +24,10 @@ export interface OnboardingStripeData {
   subscriptionId?: string | null;
   customerId?: string | null;
   checkoutSessionId?: string | null;
+  /**
+   * Accepted because callers have it to hand, but NOT persisted: Subscription
+   * has no stripePaymentIntentId column. Storing it would need a migration.
+   */
   paymentIntentId?: string | null;
   trialDays?: number | null;
   stripeSubscription?:
@@ -75,7 +84,9 @@ export async function createOrganizationInTransaction({
     });
 
     if (workingHours) {
-      const workingHoursData = Object.entries(workingHours).map(
+      const workingHoursData: Prisma.WorkingHoursCreateManyInput[] = Object.entries(
+        workingHours
+      ).map(
         ([day, hours]) => ({
           organizationId: org.id,
           // Form keys are lowercase day names, so the uppercased key is the
@@ -129,7 +140,12 @@ export async function createOrganizationInTransaction({
       status = "TRIALING";
     }
 
-    const subscriptionData = {
+    // Typed explicitly: this is passed to tx.subscription.create as a variable,
+    // and excess-property checking only fires on fresh object literals at the
+    // call site. Without the annotation a column that does not exist compiles
+    // fine and throws at runtime — which is exactly what stripePaymentIntentId
+    // did (Subscription has no such column; persisting it needs a migration).
+    const subscriptionData: Prisma.SubscriptionUncheckedCreateInput = {
       organizationId: org.id,
       planId,
       status,
@@ -137,7 +153,6 @@ export async function createOrganizationInTransaction({
       stripeSubscriptionId: stripeData.subscriptionId || null,
       stripeCustomerId: stripeData.customerId || null,
       stripeCheckoutSessionId: stripeData.checkoutSessionId || null,
-      stripePaymentIntentId: stripeData.paymentIntentId || null,
       currentPeriodStart,
       currentPeriodEnd,
     };
