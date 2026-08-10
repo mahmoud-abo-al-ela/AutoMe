@@ -172,9 +172,12 @@ model Plan {
   name String // "Starter", "Pro", "Enterprise"
   type PlanType @unique
 
-  // Pricing (in cents)
+  // Pricing (in minor units)
   monthlyPrice Int @default(0)
   yearlyPrice  Int @default(0)
+
+  // Free-trial length granted when a subscription is created. 0 = no trial.
+  trialDays Int @default(0)
 
   // Stripe Integration
   stripeProductId      String? @unique

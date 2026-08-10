@@ -41,16 +41,6 @@ function idOf(value: string | { id: string } | null | undefined): string | null 
   return typeof value === "string" ? value : value.id;
 }
 
-/**
- * BUG (surfaced by this conversion, NOT fixed here): the Plan model has no
- * trialDays column, so this is always undefined and the TRIALING branch in
- * createOrganizationInTransaction never runs. Same defect as the one flagged
- * in the checkout webhook handler; the fix belongs in its own PR.
- */
-function planTrialDays(plan: object): number | undefined {
-  return (plan as { trialDays?: number }).trialDays;
-}
-
 export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
   if (!slug || slug.length < 3) {
     return createSuccessResponse({ available: false });
@@ -143,7 +133,7 @@ export const createOrganization = withAuth(
       customerId: idOf(stripeSubscription?.customer),
       paymentIntentId,
       stripeSubscription,
-      trialDays: planTrialDays(plan),
+      trialDays: plan.trialDays,
     };
 
     const organization = await createOrganizationInTransaction({
@@ -263,7 +253,7 @@ export const createOrganizationAfterCheckout = withAuth(
       customerId: idOf(session.customer),
       checkoutSessionId: stripeSessionId,
       stripeSubscription,
-      trialDays: planTrialDays(plan),
+      trialDays: plan.trialDays,
     };
 
     const organization = await createOrganizationInTransaction({

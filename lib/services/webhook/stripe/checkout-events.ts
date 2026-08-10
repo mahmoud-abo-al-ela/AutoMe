@@ -180,12 +180,7 @@ async function handleOnboardingCheckoutCompleted(
         subscriptionId: idOf(session.subscription),
         customerId: idOf(session.customer),
         checkoutSessionId: session.id,
-        // BUG (surfaced by this conversion, NOT fixed here): the Plan model has
-        // no trialDays column, so this is always undefined and the TRIALING
-        // branch in createOrganizationInTransaction is dead. actions/onboarding
-        // reads the same non-existent field twice. Behaviour preserved; adding
-        // the column (or dropping the branch) belongs in its own PR.
-        trialDays: (plan as { trialDays?: number }).trialDays,
+        trialDays: plan.trialDays,
     };
 
     const user = await db.user.findUnique({
