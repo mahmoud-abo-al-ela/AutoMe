@@ -19,7 +19,16 @@ export default function StepIndicators({ steps, currentStep }) {
 
             <div className="flex items-start">
                 {steps.map((step, index) => (
-                    <div key={step.id} className="flex flex-1 items-start">
+                    // Only the segments that carry a connector may grow. When
+                    // the last one grew too it absorbed an equal share of the
+                    // row with nothing to fill it, so the stepper stopped short
+                    // of the right edge and the connectors came out uneven.
+                    <div
+                        key={step.id}
+                        className={`flex items-start ${
+                            index < steps.length - 1 ? "flex-1" : "flex-none"
+                        }`}
+                    >
                         <StepIndicator
                             step={step}
                             index={index}

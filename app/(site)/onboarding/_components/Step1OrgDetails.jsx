@@ -37,35 +37,24 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     address: watchedAddress,
   });
 
-  // Name is paired with the logo above; the rest fill a single two-column grid
-  // in reading order: contact, then location, with the optional street line
-  // last so it does not sit alone in a half-empty row.
   const [nameField, emailField, phoneField, addressField] = inputFields;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Logo sits beside the name: they are the same decision (how the
-          dealership presents itself), and pairing them removes the dead
-          column the old 1fr/2fr split left under the dropzone. */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-        <div className="shrink-0">
-          <LogoUpload value={logo} onChange={setLogo} error={logoError} compact />
-        </div>
+      {/* One grid for the whole step. Every control is 48px tall and every
+          cell is half the width, so each row lines up with the one above it —
+          the logo used to be a 112px tile in a flex row of its own, which left
+          a block of empty space no other row had. */}
+      <div className="grid items-start gap-6 sm:grid-cols-2">
+        <FormFields
+          fields={[nameField]}
+          register={register}
+          errors={errors}
+          bare
+          footerSlot={<SlugPreview slug={generatedSlug} status={slugStatus} />}
+        />
+        <LogoUpload value={logo} onChange={setLogo} error={logoError} compact />
 
-        <div className="flex-1 min-w-0">
-          <FormFields
-            fields={[nameField]}
-            register={register}
-            errors={errors}
-            columns={1}
-            footerSlot={
-              <SlugPreview slug={generatedSlug} status={slugStatus} />
-            }
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2">
         <FormFields
           fields={[emailField, phoneField]}
           register={register}

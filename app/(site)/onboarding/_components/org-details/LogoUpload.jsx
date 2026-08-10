@@ -7,10 +7,10 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
 /**
- * `compact` renders a square tile sized to sit beside the Dealership Name
- * field. The old full-width dropzone lived in its own grid column and left a
- * large dead area beneath it, since the box is much shorter than the field
- * stack next to it.
+ * `compact` renders the control as a 48px row, the same height as an Input, so
+ * the logo occupies one cell of the form grid like every other field. The
+ * square tile it replaced was 112px tall and sat beside a 48px name field,
+ * leaving a block of dead space that no other row had.
  */
 export default function LogoUpload({ value, onChange, error, compact = false }) {
   const [isUploading, setIsUploading] = useState(false);
@@ -94,21 +94,51 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-green-200 bg-green-50"
+            className={
+              compact
+                ? "flex h-12 items-center gap-3 rounded-md border border-green-200 bg-green-50 px-3"
+                : "relative w-28 h-28 rounded-xl overflow-hidden border-2 border-green-200 bg-green-50"
+            }
           >
-            <Image
-              src={value}
-              alt="Organization logo"
-              fill
-              className="object-contain p-2"
-            />
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-            >
-              <X className="h-3 w-3" />
-            </button>
+            {compact ? (
+              <>
+                <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-white">
+                  <Image
+                    src={value}
+                    alt="Organization logo"
+                    fill
+                    className="object-contain p-0.5"
+                  />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
+                  Logo added
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  aria-label="Remove logo"
+                  className="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:bg-red-500 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <Image
+                  src={value}
+                  alt="Organization logo"
+                  fill
+                  className="object-contain p-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -116,10 +146,10 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`relative border-2 border-dashed rounded-xl text-center transition-colors cursor-pointer ${
+            className={`relative border-2 border-dashed text-center transition-colors cursor-pointer ${
               compact
-                ? "w-28 h-28 flex items-center justify-center p-2"
-                : "p-4"
+                ? "flex h-12 items-center rounded-md px-3"
+                : "rounded-xl p-4"
             } ${
               error
                 ? "border-red-400 bg-red-50"
@@ -146,16 +176,14 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
                 <p className="text-sm text-gray-500">Uploading...</p>
               </div>
             ) : compact ? (
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="p-2 bg-gray-100 rounded-full">
-                  <ImageIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <p className="text-xs font-medium leading-tight text-gray-600">
+              <div className="flex w-full items-center gap-2">
+                <ImageIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                <span className="text-sm font-medium text-gray-600">
                   Add logo
-                </p>
-                <p className="text-[10px] leading-tight text-gray-400">
+                </span>
+                <span className="ml-auto text-xs text-gray-400">
                   PNG/JPG · 5MB
-                </p>
+                </span>
               </div>
             ) : (
               <div className="flex items-center gap-4">
