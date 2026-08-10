@@ -37,7 +37,10 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     address: watchedAddress,
   });
 
-  const [nameField, ...otherFields] = inputFields;
+  // Name is paired with the logo above; the rest fill a single two-column grid
+  // in reading order: contact, then location, with the optional street line
+  // last so it does not sit alone in a half-empty row.
+  const [nameField, emailField, phoneField, addressField] = inputFields;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -62,9 +65,21 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
         </div>
       </div>
 
-      <FormFields fields={otherFields} register={register} errors={errors} />
-
-      <LocationFields value={location} onChange={updateLocation} />
+      <div className="grid gap-6 sm:grid-cols-2">
+        <FormFields
+          fields={[emailField, phoneField]}
+          register={register}
+          errors={errors}
+          bare
+        />
+        <LocationFields value={location} onChange={updateLocation} />
+        <FormFields
+          fields={[addressField]}
+          register={register}
+          errors={errors}
+          bare
+        />
+      </div>
 
       <OrgDetailsFooter
         disabled={isDisabled}

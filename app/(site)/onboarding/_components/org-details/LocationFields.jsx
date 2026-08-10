@@ -59,8 +59,10 @@ export default function LocationFields({ value, onChange }) {
         },
     ];
 
+    // Cells only — Step 1 owns the grid, so these line up with the text fields
+    // above rather than sitting in a second grid with its own column edges.
     return (
-        <div className="grid gap-6 sm:grid-cols-3">
+        <>
             {fields.map((field, index) => (
                 <motion.div
                     key={field.id}
@@ -85,9 +87,10 @@ export default function LocationFields({ value, onChange }) {
                         emptyMessage={field.emptyMessage}
                         disabled={field.disabled}
                         onValueChange={field.onValueChange}
+                        triggerClassName="h-12 text-base border-gray-300"
                     />
                 </motion.div>
             ))}
-        </div>
+        </>
     );
 }

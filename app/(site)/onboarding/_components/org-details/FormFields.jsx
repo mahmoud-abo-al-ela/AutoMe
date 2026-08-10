@@ -5,9 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { XCircle } from "lucide-react";
 
-export default function FormFields({ fields, register, errors, columns = 2, footerSlot }) {
-    return (
-        <div className={`grid gap-6 ${columns === 2 ? "sm:grid-cols-2" : ""}`}>
+/**
+ * `bare` drops the grid wrapper so the fields become cells of a grid the caller
+ * owns. Step 1 needs that: contact, location and address fields come from three
+ * different components, and nesting a grid per component left their column edges
+ * out of line with each other.
+ */
+export default function FormFields({ fields, register, errors, columns = 2, footerSlot, bare = false }) {
+    const cells = (
+        <>
             {fields.map((field, index) => {
                 const Icon = field.icon;
                 return (
@@ -57,6 +63,14 @@ export default function FormFields({ fields, register, errors, columns = 2, foot
                     </motion.div>
                 );
             })}
+        </>
+    );
+
+    if (bare) return cells;
+
+    return (
+        <div className={`grid gap-6 ${columns === 2 ? "sm:grid-cols-2" : ""}`}>
+            {cells}
         </div>
     );
 }

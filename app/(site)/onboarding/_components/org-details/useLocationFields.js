@@ -19,9 +19,11 @@ export function useLocationFields({ value, onChange }) {
     const [loadingStates, setLoadingStates] = useState(false);
     const [loadingCities, setLoadingCities] = useState(false);
 
+    // No flag emoji: Windows ships no glyphs for regional-indicator pairs, so
+    // the flag renders as the literal letters "EG" in front of "Egypt".
     const countryOptions = countries.map((country) => ({
         value: country.code,
-        label: `${country.emoji ? `${country.emoji} ` : ""}${country.name}`,
+        label: country.name,
     }));
     const stateOptions = states.map((state) => ({
         value: state.code,

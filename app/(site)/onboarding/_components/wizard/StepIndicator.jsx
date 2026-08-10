@@ -47,7 +47,7 @@ export default function StepIndicator({ step, index, currentStep }) {
                 )}
             </motion.div>
             <div className="text-center">
-                <span className="text-xs sm:text-sm font-semibold block">
+                <span className="text-xs sm:text-sm font-semibold block whitespace-nowrap">
                     {step.name}
                 </span>
                 <span className="text-[10px] sm:text-xs text-gray-500 block">
