@@ -63,7 +63,11 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
 
             const timeout = setTimeout(async () => {
                 const result = await checkSlugAvailability(slug);
-                setSlugStatus(result.available ? "available" : "taken");
+                // `available` lives under the ActionResponse envelope; reading
+                // it off the top level made every name report as taken.
+                setSlugStatus(
+                    result.success && result.data.available ? "available" : "taken"
+                );
             }, 500);
             setSlugCheckTimeout(timeout);
         } else {
