@@ -117,7 +117,10 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
                   type="button"
                   onClick={handleRemove}
                   aria-label="Remove logo"
-                  className="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:bg-red-500 hover:text-white"
+                  // A solid red fill on hover was heavier than the green row it
+                  // sits in; tinting the icon reads as destructive without
+                  // becoming the loudest thing on the form.
+                  className="shrink-0 cursor-pointer rounded-full p-1 text-green-700/70 transition-colors hover:bg-red-100 hover:text-red-600"
                 >
                   <X className="h-4 w-4" />
                 </button>
