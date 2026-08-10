@@ -5,7 +5,7 @@ import { RESOURCE_CONFIG } from "@/lib/middleware/plan-limits";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { ValidationError } from "@/lib/utils/errors";
 
-export const getPlanGateStatus = withOrgAuth(async (ctx, resource) => {
+export const getPlanGateStatus = withOrgAuth(async (ctx, resource: string) => {
   const config = RESOURCE_CONFIG[resource];
   if (!config) {
     throw new ValidationError(`Unknown resource: ${resource}`, "resource");
@@ -22,12 +22,17 @@ export const getPlanGateStatus = withOrgAuth(async (ctx, resource) => {
     });
   }
 
-  let limit;
+  let limit: number | null | undefined;
   if (config.planField) {
     limit = plan[config.planField];
   } else if (config.featureKey) {
-    const featureConfig = plan.features?.[config.featureKey];
-    limit = typeof featureConfig === "object" ? featureConfig?.limit : 0;
+    // Plan.features is free-form JSON; narrow before reading the nested limit.
+    const features = (plan.features ?? {}) as Record<string, unknown>;
+    const featureConfig = features[config.featureKey];
+    limit =
+      featureConfig && typeof featureConfig === "object"
+        ? (featureConfig as { limit?: number }).limit
+        : 0;
   }
 
   if (limit === undefined || limit === null) {

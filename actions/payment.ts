@@ -11,27 +11,28 @@ import {
 import { createSuccessResponse } from "@/lib/utils/response";
 import { ValidationError } from "@/lib/utils/errors";
 
-function handleStripeError(error) {
-  if (error.message?.includes("STRIPE_SECRET_KEY is not configured")) {
+function handleStripeError(error: unknown): never {
+  const err = error as { message?: string; type?: string; code?: string };
+  if (err.message?.includes("STRIPE_SECRET_KEY is not configured")) {
     throw new ValidationError(
       "Payment system is not configured. Please contact support."
     );
   }
 
-  if (error.type === "StripeInvalidRequestError") {
-    if (error.message?.includes("No such price")) {
+  if (err.type === "StripeInvalidRequestError") {
+    if (err.message?.includes("No such price")) {
       throw new ValidationError(
         "The selected plan has an invalid Stripe configuration. Please contact support."
       );
     }
-    if (error.message?.includes("No such customer")) {
+    if (err.message?.includes("No such customer")) {
       throw new ValidationError(
         "Customer account issue. Please try again."
       );
     }
   }
 
-  if (error.type === "StripeAuthenticationError") {
+  if (err.type === "StripeAuthenticationError") {
     throw new ValidationError(
       "Payment system configuration error. Please contact support."
     );
@@ -41,7 +42,7 @@ function handleStripeError(error) {
 }
 
 export const createSubscription = withAuth(
-  async (ctx, planId, billingInterval = "month") => {
+  async (ctx, planId: string, billingInterval: string = "month") => {
     await enforceRateLimit();
     const validated = validateAction(createSubscriptionSchema, {
       planId,
@@ -63,7 +64,12 @@ export const createSubscription = withAuth(
 );
 
 export const createCheckoutSession = withAuth(
-  async (ctx, planId, billingPeriod, onboardingSessionId) => {
+  async (
+    ctx,
+    planId: string,
+    billingPeriod: string,
+    onboardingSessionId: string
+  ) => {
     await enforceRateLimit();
     const validated = validateAction(createCheckoutSessionSchema, {
       planId,

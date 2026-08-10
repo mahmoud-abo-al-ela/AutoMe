@@ -35,10 +35,12 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
     }
   }
 
-  const testDrive = await testDriveService.requestTestDrive(
+  // serializeTestDrive is nullable for callers that may pass nothing, but
+  // createTestDrive always hands it a freshly created row.
+  const testDrive = (await testDriveService.requestTestDrive(
     testDriveData,
     ctx.userId,
-  );
+  ))!;
 
   // Fetch full data for email dispatch
   const fullTestDrive = await db.testDrive.findUnique({
@@ -119,7 +121,7 @@ export const getTestDrives = withAuth(async (ctx, { status, page = 1, limit = 10
   return createSuccessResponse(result);
 });
 
-export const getTestDriveById = withAuth(async (ctx, testDriveId) => {
+export const getTestDriveById = withAuth(async (ctx, testDriveId: string) => {
   const testDrive = await testDriveService.getTestDriveById(
     testDriveId,
     ctx.userId,
@@ -150,7 +152,7 @@ export const editTestDrive = withAuth(async (ctx, input) => {
   );
 });
 
-export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId) => {
+export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId: string) => {
   const cancelledTestDrive = await testDriveService.cancelTestDrive(
     testDriveId,
     ctx.userId,
@@ -166,7 +168,7 @@ export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId) => {
   );
 });
 
-export const checkExistingTestDrive = withAuth(async (ctx, carId) => {
+export const checkExistingTestDrive = withAuth(async (ctx, carId: string) => {
   const result = await testDriveService.checkExistingTestDrive(carId, ctx.userId);
   return result;
 });
@@ -213,7 +215,8 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
   );
 });
 
-export const getBookedTimeSlots = withErrorHandling(async (carId, date) => {
+export const getBookedTimeSlots = withErrorHandling(
+  async (carId: string, date: string) => {
   const bookedSlots = await testDriveService.getBookedTimeSlots(carId, date);
   return createSuccessResponse(bookedSlots);
 });

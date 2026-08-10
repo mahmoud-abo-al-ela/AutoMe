@@ -5,13 +5,15 @@ import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { organizationProfileSchema } from "@/lib/validations/schemas";
+import type { UserRole } from "@/lib/generated/prisma";
+import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
 
 export const getOrganizationProfile = withOrgAuth(async (ctx) => {
   const profileData = await dealershipService.getOrganizationProfile(ctx.userId, ctx.organization.id);
   return createSuccessResponse(profileData);
 });
 
-export const updateOrganizationProfile = withOrgAuth(async (ctx, payload) => {
+export const updateOrganizationProfile = withOrgAuth(async (ctx, payload: unknown) => {
   const profileData = validateAction(organizationProfileSchema, payload);
   const updatedProfile = await dealershipService.updateOrganizationProfile(
     profileData,
@@ -33,7 +35,8 @@ export const getDealershipInfo = withOrgAuth(async (ctx) => {
   return createSuccessResponse(workingHoursData);
 });
 
-export const updateWorkingHours = withOrgAuth(async (ctx, workingHours) => {
+export const updateWorkingHours = withOrgAuth(
+  async (ctx, workingHours: WorkingHourInput[]) => {
   await dealershipService.updateWorkingHours(workingHours, ctx.userId, ctx.organization.id);
 
   revalidatePath(`/org/${ctx.organization.slug}/settings/working-hours`);
@@ -42,12 +45,14 @@ export const updateWorkingHours = withOrgAuth(async (ctx, workingHours) => {
   return createSuccessResponse(null, "Working hours updated successfully");
 });
 
-export const getUsers = withOrgAuth(async (ctx, search = "", page = 1, limit = 10) => {
+export const getUsers = withOrgAuth(
+  async (ctx, search: string = "", page: number = 1, limit: number = 10) => {
   const result = await dealershipService.getUsers(search, { page, limit }, ctx.userId, ctx.organization.id);
   return createSuccessResponse(result);
 });
 
-export const updateUserRole = withOrgAuth(async (ctx, targetUserId, role) => {
+export const updateUserRole = withOrgAuth(
+  async (ctx, targetUserId: string, role: UserRole) => {
   await dealershipService.updateUserRole(targetUserId, role, ctx.userId, ctx.organization.id);
 
   revalidatePath("/admin/settings/users");
@@ -56,7 +61,7 @@ export const updateUserRole = withOrgAuth(async (ctx, targetUserId, role) => {
   return createSuccessResponse(null, "User role updated successfully");
 });
 
-export const deleteUser = withOrgAuth(async (ctx, targetUserId) => {
+export const deleteUser = withOrgAuth(async (ctx, targetUserId: string) => {
   await dealershipService.deleteUser(targetUserId, ctx.userId, ctx.organization.id);
 
   revalidatePath("/admin/settings/users");

@@ -31,7 +31,7 @@ export const getActivePlans = withErrorHandling(async () => {
 /**
  * Get a plan by ID
  */
-export const getPlanById = withErrorHandling(async (planId) => {
+export const getPlanById = withErrorHandling(async (planId: string) => {
   const plan = await billingService.getPlanById(planId);
   if (!plan) {
     throw new NotFoundError("Plan");
@@ -43,7 +43,7 @@ export const getPlanById = withErrorHandling(async (planId) => {
 /**
  * Get billing data for an organization
  */
-export const getBillingData = withAuth(async (ctx, organizationId) => {
+export const getBillingData = withAuth(async (ctx, organizationId: string) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError("Organization");
@@ -56,7 +56,7 @@ export const getBillingData = withAuth(async (ctx, organizationId) => {
 /**
  * Get billing history for an organization
  */
-export const getBillingHistory = withAuth(async (ctx, organizationId) => {
+export const getBillingHistory = withAuth(async (ctx, organizationId: string) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError("Organization");
@@ -71,7 +71,7 @@ export const getBillingHistory = withAuth(async (ctx, organizationId) => {
 /**
  * Get current subscription for an organization
  */
-export const getCurrentSubscription = withAuth(async (ctx, organizationId) => {
+export const getCurrentSubscription = withAuth(async (ctx, organizationId: string) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError("Organization");
@@ -84,7 +84,7 @@ export const getCurrentSubscription = withAuth(async (ctx, organizationId) => {
 /**
  * Get usage stats for an organization
  */
-export const getUsageStats = withAuth(async (ctx, organizationId) => {
+export const getUsageStats = withAuth(async (ctx, organizationId: string) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError("Organization");
@@ -97,7 +97,7 @@ export const getUsageStats = withAuth(async (ctx, organizationId) => {
 
 
 export const createBillingPortalSession = withAuth(
-  async (ctx, organizationId, returnPath) => {
+  async (ctx, organizationId: string, returnPath: string) => {
     const organization = await getOrganizationById(organizationId);
     if (!organization) {
       throw new NotFoundError("Organization");
@@ -134,7 +134,13 @@ export const createBillingPortalSession = withAuth(
 
 
 export const createPlanChangeSession = withAuth(
-  async (ctx, organizationId, newPlanId, billingCycle, billingPagePath) => {
+  async (
+    ctx,
+    organizationId: string,
+    newPlanId: string,
+    billingCycle: string,
+    billingPagePath: string
+  ) => {
     const organization = await getOrganizationById(organizationId);
     if (!organization) {
       throw new NotFoundError("Organization");
@@ -232,7 +238,7 @@ export const createPlanChangeSession = withAuth(
 /**
  * Get the default payment method for an organization's Stripe customer
  */
-export const getPaymentMethod = withAuth(async (ctx, organizationId) => {
+export const getPaymentMethod = withAuth(async (ctx, organizationId: string) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError("Organization");
@@ -256,7 +262,12 @@ export const getPaymentMethod = withAuth(async (ctx, organizationId) => {
 
 
 
-export const getInvoices = withAuth(async (ctx, organizationId, options = {}) => {
+export const getInvoices = withAuth(
+  async (
+    ctx,
+    organizationId: string,
+    options: { limit?: number; startingAfter?: string } = {}
+  ) => {
   const organization = await getOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError("Organization");

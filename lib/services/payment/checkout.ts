@@ -9,7 +9,15 @@ export interface PaymentUser {
     name?: string | null;
 }
 
-export type BillingPeriod = "monthly" | "yearly";
+/**
+ * BUG (surfaced by this conversion, NOT fixed here): the only caller validates
+ * this through createCheckoutSessionSchema, whose enum is ["month", "year"] —
+ * so "yearly" never arrives and the yearly branch below is unreachable. A
+ * customer choosing the yearly plan is checked out at the MONTHLY price. Both
+ * spellings are accepted here to preserve current behaviour exactly; picking
+ * one vocabulary is its own PR.
+ */
+export type BillingPeriod = "monthly" | "yearly" | "month" | "year";
 
 /**
  * Create a Stripe Checkout Session for onboarding subscription.
@@ -18,7 +26,9 @@ export async function createCheckoutSession(
     user: PaymentUser,
     planId: string,
     billingPeriod: BillingPeriod,
-    onboardingSessionId: string,
+    // Optional/nullable to match createCheckoutSessionSchema; it is only
+    // forwarded into the session metadata.
+    onboardingSessionId: string | null | undefined,
 ): Promise<{ url: string | null }> {
     // Get plan details
     const plan = await billingRepo.findPlanById(planId);
@@ -47,7 +57,9 @@ export async function createCheckoutSession(
             userId: user.id,
             planId: plan.id,
             billingPeriod,
-            onboardingSessionId,
+            // Omitted when absent, matching how Stripe already dropped an
+            // undefined value from the form-encoded metadata.
+            ...(onboardingSessionId ? { onboardingSessionId } : {}),
         },
     });
 
