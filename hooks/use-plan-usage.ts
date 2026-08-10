@@ -5,7 +5,7 @@ import { getPlanGateStatus } from "@/actions/plan";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 
-export function usePlanUsage(resource) {
+export function usePlanUsage(resource: string) {
   const { data: usageData, isLoading, error } = useQuery({
     queryKey: queryKeys.dashboard.planUsage(resource),
     queryFn: () => getPlanGateStatus(resource),

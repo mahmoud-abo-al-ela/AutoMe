@@ -13,7 +13,7 @@ function makeQueryClient() {
   });
 }
 
-let browserQueryClient = undefined;
+let browserQueryClient: QueryClient | undefined = undefined;
 
 export function getQueryClient() {
   if (typeof window === "undefined") {
@@ -28,35 +28,35 @@ export function getQueryClient() {
 export const queryKeys = {
   cars: {
     all: ["cars"],
-    list: (filters) => ["cars", "list", filters],
-    detail: (id) => ["cars", "detail", id],
-    filters: (filters = {}) => ["cars", "filters", filters],
+    list: (filters: unknown) => ["cars", "list", filters],
+    detail: (id: string) => ["cars", "detail", id],
+    filters: (filters: unknown = {}) => ["cars", "filters", filters],
     featured: () => ["cars", "featured"],
   },
   dealerships: {
     all: ["dealerships"],
-    list: (filters) => ["dealerships", "list", filters],
-    detail: (slug) => ["dealerships", "detail", slug],
-    filters: (filters = {}) => ["dealerships", "filters", filters],
+    list: (filters: unknown) => ["dealerships", "list", filters],
+    detail: (slug: string) => ["dealerships", "detail", slug],
+    filters: (filters: unknown = {}) => ["dealerships", "filters", filters],
   },
   testDrives: {
     all: ["testDrives"],
-    list: (filters) => ["testDrives", "list", filters],
-    detail: (id) => ["testDrives", "detail", id],
-    check: (carId) => ["testDrives", "check", carId],
+    list: (filters: unknown) => ["testDrives", "list", filters],
+    detail: (id: string) => ["testDrives", "detail", id],
+    check: (carId: string) => ["testDrives", "check", carId],
   },
   wishlist: {
     all: ["wishlist"],
-    list: (params) => ["wishlist", "list", params],
+    list: (params: unknown) => ["wishlist", "list", params],
   },
   compare: {
-    byIds: (ids) => ["compare", [...ids].sort()],
+    byIds: (ids: string[]) => ["compare", [...ids].sort()],
   },
   team: {
-    members: (orgId) => ["team", "members", orgId],
+    members: (orgId: string) => ["team", "members", orgId],
   },
   dashboard: {
-    planUsage: (resource) => ["dashboard", "planUsage", resource],
+    planUsage: (resource: string) => ["dashboard", "planUsage", resource],
     dealership: () => ["dashboard", "dealership"],
   },
 };

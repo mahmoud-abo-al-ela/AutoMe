@@ -1,9 +1,38 @@
 // Pure filter/URL helpers for the cars listing page — no React, fully testable.
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
 
-export const MULTI_KEYS = ["make", "bodyType", "fuelType", "transmission"];
+/** The filter keys the cars page holds as comma-joined multi-selects. */
+export const MULTI_KEYS = ["make", "bodyType", "fuelType", "transmission"] as const;
 
-export const DEFAULT_FILTERS = {
+export type MultiKey = (typeof MULTI_KEYS)[number];
+
+/** The cars page's URL-backed filter state. */
+export interface CarPageFilters {
+  search?: string;
+  make: string[];
+  bodyType: string[];
+  fuelType: string[];
+  transmission: string[];
+  dealership?: string;
+  city?: string;
+  color?: string;
+  minSeats?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minYear?: number;
+  maxYear?: number;
+  minMileage?: number;
+  maxMileage?: number;
+  sortBy: string;
+}
+
+export interface ActiveFilterChip {
+  type: string;
+  value: string;
+  label: string;
+}
+
+export const DEFAULT_FILTERS: CarPageFilters = {
   search: undefined,
   make: [],
   bodyType: [],
@@ -22,12 +51,16 @@ export const DEFAULT_FILTERS = {
   sortBy: "newest",
 };
 
-const num = (v) => (v !== null && v !== undefined && v !== "" ? Number(v) : undefined);
+const num = (v: string | null | undefined) => (v !== null && v !== undefined && v !== "" ? Number(v) : undefined);
 
 /** Parse a `?query=string` (with or without leading ?) into a filters object + page/perPage. */
-export function parseFiltersFromSearch(search) {
+export function parseFiltersFromSearch(search: string): {
+  filters: CarPageFilters;
+  page: number;
+  perPage: number;
+} {
   const p = new URLSearchParams(search);
-  const csv = (key) => {
+  const csv = (key: string): string[] => {
     const raw = p.get(key);
     return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
   };
@@ -57,7 +90,11 @@ export function parseFiltersFromSearch(search) {
 }
 
 /** Serialize filters + page/perPage back into a `/cars?...` URL. */
-export function buildCarsUrl(filters, page, perPage) {
+export function buildCarsUrl(
+  filters: CarPageFilters,
+  page: number,
+  perPage?: number
+): string {
   const params = new URLSearchParams();
 
   if (filters.search) params.set("search", filters.search);
@@ -83,11 +120,11 @@ export function buildCarsUrl(filters, page, perPage) {
 }
 
 /** Build the active-filter chip list shown above the results grid. */
-export function buildActiveFilterChips(filters) {
-  const chips = [];
+export function buildActiveFilterChips(filters: CarPageFilters): ActiveFilterChip[] {
+  const chips: ActiveFilterChip[] = [];
   if (filters.search) chips.push({ type: "search", value: filters.search, label: `“${filters.search}”` });
   MULTI_KEYS.forEach((key) => {
-    (filters[key] || []).forEach((v) => chips.push({ type: key, value: v, label: v }));
+    (filters[key] || []).forEach((v: string) => chips.push({ type: key, value: v, label: v }));
   });
   if (filters.dealership) chips.push({ type: "dealership", value: filters.dealership, label: filters.dealership });
   if (filters.city) chips.push({ type: "city", value: filters.city, label: filters.city });
