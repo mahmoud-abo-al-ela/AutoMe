@@ -14,12 +14,7 @@ import type { OrganizationInput } from "@/lib/validations/schemas";
 
 export type WorkingHoursInput = NonNullable<OrganizationInput["workingHours"]>;
 
-/**
- * The Stripe-derived facts the subscription row is built from. `period_start`
- * and `period_end` moved off Subscription onto its items in the 2025 Basil API
- * release, so they are optional here and simply fall back to a 30-day window —
- * matching what this code already did. Reconciling that is a separate PR.
- */
+/** The Stripe-derived facts the subscription row is built from. */
 export interface OnboardingStripeData {
   subscriptionId?: string | null;
   customerId?: string | null;
@@ -30,13 +25,7 @@ export interface OnboardingStripeData {
    */
   paymentIntentId?: string | null;
   trialDays?: number | null;
-  stripeSubscription?:
-    | (Pick<Stripe.Subscription, "status"> & {
-        trial_end?: number | null;
-        current_period_start?: number | null;
-        current_period_end?: number | null;
-      })
-    | null;
+  stripeSubscription?: Stripe.Subscription | null;
 }
 
 export interface CreateOrganizationInput {
@@ -125,15 +114,13 @@ export async function createOrganizationInTransaction({
       if (stripeData.stripeSubscription.trial_end) {
         trialEndsAt = new Date(stripeData.stripeSubscription.trial_end * 1000);
       }
-      if (stripeData.stripeSubscription.current_period_start) {
-        currentPeriodStart = new Date(
-          stripeData.stripeSubscription.current_period_start * 1000
-        );
-      }
-      if (stripeData.stripeSubscription.current_period_end) {
-        currentPeriodEnd = new Date(
-          stripeData.stripeSubscription.current_period_end * 1000
-        );
+      // The billing period lives on the subscription's items since the 2025
+      // Basil API release; every item shares the same period. Falls back to the
+      // 30-day window above if the subscription somehow has no items.
+      const item = stripeData.stripeSubscription.items?.data?.[0];
+      if (item) {
+        currentPeriodStart = new Date(item.current_period_start * 1000);
+        currentPeriodEnd = new Date(item.current_period_end * 1000);
       }
     } else if (stripeData.trialDays && stripeData.trialDays > 0) {
       trialEndsAt = new Date(now.getTime() + stripeData.trialDays * 24 * 60 * 60 * 1000);

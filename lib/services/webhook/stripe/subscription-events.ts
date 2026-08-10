@@ -18,16 +18,22 @@ export type WebhookHandlerResult =
     | { success: false; reason: string };
 
 /**
- * BUG (surfaced by this conversion, NOT fixed here): current_period_start and
- * current_period_end moved from Subscription onto its items in the 2025 Basil
- * API release, so stripe@20 no longer declares them. The handler below still
- * reads them, which would leave both period columns at the epoch. Behaviour is
- * preserved; the fix belongs in its own PR.
+ * The billing period moved from Subscription onto its items in the 2025 Basil
+ * API release. Every item on a given subscription shares the same period, so
+ * the first one is representative. Verified against a live subscription:
+ * sub.current_period_start is undefined, items.data[0].current_period_start is
+ * the timestamp.
  */
-type SubscriptionWithLegacyPeriods = Stripe.Subscription & {
-    current_period_start?: number;
-    current_period_end?: number;
-};
+function billingPeriodOf(subscription: Stripe.Subscription): {
+    start: Date | null;
+    end: Date | null;
+} {
+    const item = subscription.items?.data?.[0];
+    return {
+        start: item ? new Date(item.current_period_start * 1000) : null,
+        end: item ? new Date(item.current_period_end * 1000) : null,
+    };
+}
 
 export function mapStripeStatusToSubscriptionStatus(
     stripeStatus: Stripe.Subscription.Status | string
@@ -51,7 +57,7 @@ export function mapStripeStatusToSubscriptionStatus(
 export async function handleSubscriptionEvent(
     event: StripeEventOf<Stripe.Subscription>
 ): Promise<WebhookHandlerResult> {
-    const subscription = event.data.object as SubscriptionWithLegacyPeriods;
+    const subscription = event.data.object;
     const { userId, planId, organizationId: metaOrgId } = subscription.metadata || {};
 
     if (!userId || !planId) {
@@ -81,14 +87,8 @@ export async function handleSubscriptionEvent(
                 ? subscription.customer
                 : subscription.customer.id,
         stripeSubscriptionId: subscription.id,
-        // See SubscriptionWithLegacyPeriods above — these are undefined on the
-        // current API version. Cast preserves today's behaviour, bug flagged.
-        currentPeriodStart: new Date(
-            (subscription.current_period_start as number) * 1000
-        ),
-        currentPeriodEnd: new Date(
-            (subscription.current_period_end as number) * 1000
-        ),
+        currentPeriodStart: billingPeriodOf(subscription).start,
+        currentPeriodEnd: billingPeriodOf(subscription).end,
         canceledAt: subscription.canceled_at
             ? new Date(subscription.canceled_at * 1000)
             : null,
