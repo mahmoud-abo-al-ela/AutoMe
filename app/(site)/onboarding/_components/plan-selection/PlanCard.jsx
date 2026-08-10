@@ -54,7 +54,10 @@ export function PlanCard({
                     // the footer sits at the bottom regardless of how many
                     // features the plan lists (Enterprise has one more).
                     "relative flex h-full flex-col cursor-pointer transition-all duration-300 hover:shadow-2xl",
-                    config.border,
+                    // While selected the plan's own accent colour is dropped so
+                    // the green selection reads as a single state, rather than
+                    // a purple/blue border competing with the green ring.
+                    isSelected ? "border-green-500" : config.border,
                     isSelected
                         ? "ring-4 ring-green-500 shadow-2xl scale-105 z-10"
                         : "hover:scale-102",
