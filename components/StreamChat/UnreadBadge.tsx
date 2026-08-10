@@ -6,18 +6,26 @@ import { useChatContext } from "stream-chat-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+type UnreadBadgeProps = {
+    className?: string;
+    organizationId?: string | null;
+};
+
 // Error boundary to catch context errors
-class UnreadBadgeErrorBoundary extends Component {
-    constructor(props) {
+class UnreadBadgeErrorBoundary extends Component<
+    { children: React.ReactNode },
+    { hasError: boolean }
+> {
+    constructor(props: { children: React.ReactNode }) {
         super(props);
         this.state = { hasError: false };
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError(error: Error) {
         return { hasError: true };
     }
 
-    componentDidCatch(error, errorInfo) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         // Silently catch - this is expected when chat context is not available
     }
 
@@ -29,7 +37,7 @@ class UnreadBadgeErrorBoundary extends Component {
     }
 }
 
-function UnreadBadgeInner({ className, organizationId }) {
+function UnreadBadgeInner({ className, organizationId }: UnreadBadgeProps) {
     const { client } = useChatContext();
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -39,7 +47,10 @@ function UnreadBadgeInner({ className, organizationId }) {
         const updateUnreadCount = async () => {
             try {
                 // Query channels for the user, optionally scoped to organization
-                const filters = {
+                // Stream types channel filters as a closed union of its own
+                // operators; `organization_id` is a custom field this app sets
+                // on channels, which that union has no way to know about.
+                const filters: Record<string, unknown> = {
                     type: "messaging",
                     members: { $in: [client.userID] },
                 };
@@ -95,7 +106,7 @@ function UnreadBadgeInner({ className, organizationId }) {
     );
 }
 
-export function UnreadBadge({ className, organizationId }) {
+export function UnreadBadge({ className, organizationId }: UnreadBadgeProps) {
     return (
         <UnreadBadgeErrorBoundary>
             <UnreadBadgeInner className={className} organizationId={organizationId} />

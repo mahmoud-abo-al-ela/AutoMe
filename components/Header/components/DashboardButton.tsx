@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+/** Only the slug is read here; the rest of the Clerk/Prisma user is irrelevant. */
+type UserWithMemberships = {
+  memberships?: { organization?: { slug?: string | null } | null }[] | null;
+} | null;
+
 export default function DashboardButton({
   user,
   hasOrgMembership,
@@ -9,6 +14,14 @@ export default function DashboardButton({
   buttonClassName,
   onClick,
   variant = "default",
+}: {
+  user?: UserWithMemberships;
+  hasOrgMembership?: boolean;
+  isAdmin?: boolean;
+  className?: string;
+  buttonClassName?: string;
+  onClick?: () => void;
+  variant?: React.ComponentProps<typeof Button>["variant"];
 }) {
   if (!hasOrgMembership && !isAdmin) return null;
 

@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { SignedOut, SignInButton } from "@clerk/nextjs";
 
-export default function MobileSignedOutSection({ setIsMenuOpen }) {
+export default function MobileSignedOutSection({
+  setIsMenuOpen,
+}: {
+  setIsMenuOpen: (open: boolean) => void;
+}) {
   return (
     <SignedOut>
       <motion.div

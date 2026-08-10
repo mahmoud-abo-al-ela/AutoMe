@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { UnreadBadge } from "@/components/StreamChat";
+import type { LucideIcon } from "lucide-react";
 
 export default function MobileNavLink({
   href,
@@ -14,6 +15,15 @@ export default function MobileNavLink({
   animationDelay = 0,
   showUnreadBadge = false,
   size = 18,
+}: {
+  href: string;
+  label: string;
+  IconComponent?: LucideIcon | null;
+  onClick?: () => void;
+  isActive?: boolean;
+  animationDelay?: number;
+  showUnreadBadge?: boolean;
+  size?: number;
 }) {
   return (
     <motion.div

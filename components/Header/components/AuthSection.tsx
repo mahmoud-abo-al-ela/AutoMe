@@ -9,6 +9,10 @@ export default function AuthSection({
   pathname,
   hasOrgMembership,
   isAdmin,
+}: {
+  pathname: string;
+  hasOrgMembership?: boolean;
+  isAdmin?: boolean;
 }) {
   return (
     <div className="space-x-6">

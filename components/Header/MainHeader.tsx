@@ -19,6 +19,22 @@ import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib
 import { UnreadBadge } from "@/components/StreamChat";
 import { cn } from "@/lib/utils";
 
+const NAV_ICONS = { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare };
+
+type NavLinkProps = {
+  href: string;
+  label: string;
+  /** Key into NAV_ICONS. A link with no icon renders as a text nav item. */
+  icon?: string;
+  iconClass?: string;
+  size?: number;
+  isMobile?: boolean;
+  onClick?: () => void;
+  isActive?: boolean;
+  showUnreadBadge?: boolean;
+  organizationId?: string | null;
+};
+
 function NavLink({
   href,
   label,
@@ -30,10 +46,8 @@ function NavLink({
   isActive,
   showUnreadBadge,
   organizationId,
-}) {
-  const Icon = icon
-    ? { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare }[icon]
-    : null;
+}: NavLinkProps) {
+  const Icon = icon ? NAV_ICONS[icon as keyof typeof NAV_ICONS] : null;
 
   // Special styling for messages icon
   const isMessagesIcon = icon === "MessageSquare";
@@ -95,9 +109,33 @@ function NavLink({
   );
 }
 
-export default function MainHeader({ user, organizationSlug, organization }) {
+export type HeaderUser = {
+  name?: string | null;
+  email?: string | null;
+  role?: string | null;
+  memberships?: {
+    role?: string | null;
+    organization?: { slug?: string | null } | null;
+  }[];
+} | null;
+
+export type HeaderOrganization = {
+  id?: string | null;
+  name?: string | null;
+  logo?: string | null;
+} | null;
+
+export default function MainHeader({
+  user,
+  organizationSlug,
+  organization,
+}: {
+  user?: HeaderUser;
+  organizationSlug?: string | null;
+  organization?: HeaderOrganization;
+}) {
   // Check if user has any organization membership
-  const hasOrgMembership = user?.memberships?.length > 0;
+  const hasOrgMembership = (user?.memberships?.length ?? 0) > 0;
 
   // Get user's first organization (for admin link)
   const userOrg = user?.memberships?.[0]?.organization;
@@ -112,7 +150,7 @@ export default function MainHeader({ user, organizationSlug, organization }) {
   // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
     isSuperAdmin ||
-    (hasOrgMembership && user.memberships.some((m) => m.role === "OWNER"));
+    (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -150,7 +188,7 @@ export default function MainHeader({ user, organizationSlug, organization }) {
             {isOnSubdomain && organization?.logo ? (
               <img
                 src={organization.logo}
-                alt={organization.name}
+                alt={organization.name ?? ""}
                 className="h-8 w-8 rounded-full object-cover ml-4 md:ml-0"
               />
             ) : null}
@@ -220,7 +258,17 @@ export default function MainHeader({ user, organizationSlug, organization }) {
                 <div className="flex items-center space-x-6">
                   {signedInLinks
                     .filter(
-                      (link) =>
+                      // BUG (surfaced by this conversion, NOT fixed here): no
+                      // entry in signedInLinks defines adminOnly or adminPath,
+                      // so both of those clauses are constant-true and only the
+                      // notAdmin check does any filtering. Either the config
+                      // lost those fields or the filter was written against a
+                      // shape that never existed.
+                      (link: (typeof signedInLinks)[number] & {
+                        adminOnly?: boolean;
+                        adminPath?: string;
+                        showUnreadBadge?: boolean;
+                      }) =>
                         (!link.adminOnly || isOwner) &&
                         (!link.notAdmin || !isOwner) &&
                         (!link.adminPath || pathname === link.adminPath),

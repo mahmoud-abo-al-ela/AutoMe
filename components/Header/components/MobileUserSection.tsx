@@ -3,7 +3,13 @@
 import { UserButton, SignedIn, useClerk } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 
-export default function MobileUserSection({ user, setIsMenuOpen }) {
+export default function MobileUserSection({
+  user,
+  setIsMenuOpen,
+}: {
+  user?: { name?: string | null; email?: string | null } | null;
+  setIsMenuOpen: (open: boolean) => void;
+}) {
   const { signOut } = useClerk();
 
   return (

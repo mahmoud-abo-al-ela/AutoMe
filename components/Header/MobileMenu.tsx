@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getNavIcon } from "./mobile-menu-icons";
 import NavLink from "./MobileMenuNavLink";
+import type { HeaderUser, HeaderOrganization } from "./MainHeader";
 
 export default function MobileMenu({
   isMenuOpen,
@@ -17,11 +18,17 @@ export default function MobileMenu({
   user,
   organizationSlug,
   organization,
+}: {
+  isMenuOpen: boolean;
+  setIsMenuOpen: (open: boolean) => void;
+  user?: HeaderUser;
+  organizationSlug?: string | null;
+  organization?: HeaderOrganization;
 }) {
   const pathname = usePathname();
 
   // Check if user has any organization membership
-  const hasOrgMembership = user?.memberships?.length > 0;
+  const hasOrgMembership = (user?.memberships?.length ?? 0) > 0;
 
   // Get user's first organization (for dashboard link)
   const userOrg = user?.memberships?.[0]?.organization;
@@ -36,9 +43,9 @@ export default function MobileMenu({
   // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
     isSuperAdmin ||
-    (hasOrgMembership && user.memberships.some((m) => m.role === "OWNER"));
+    (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { signOut } = useClerk();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
   const isOnOrgPath = pathname?.startsWith("/org/");
@@ -71,10 +78,10 @@ export default function MobileMenu({
   }, [isMenuOpen]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         menuRef.current &&
-        !menuRef.current.contains(event.target) &&
+        !menuRef.current.contains(event.target as Node) &&
         isMenuOpen
       ) {
         setIsMenuOpen(false);
@@ -200,7 +207,15 @@ export default function MobileMenu({
                 <div className="space-y-1">
                   {filteredSignedInLinks
                     .filter(
-                      (link) =>
+                      // BUG (surfaced by this conversion, NOT fixed here): same
+                      // dead filter as MainHeader — no signedInLinks entry
+                      // defines adminOnly or adminPath, so those two clauses
+                      // are constant-true.
+                      (link: (typeof filteredSignedInLinks)[number] & {
+                        adminOnly?: boolean;
+                        adminPath?: string;
+                        showUnreadBadge?: boolean;
+                      }) =>
                         (!link.adminOnly || isOwner) &&
                         (!link.notAdmin || !isOwner) &&
                         (!link.adminPath || pathname === link.adminPath),

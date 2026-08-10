@@ -3,7 +3,7 @@
 import { navItems } from "@/lib/HeaderConfig";
 import HeaderNavLink from "./HeaderNavLink";
 
-export default function DesktopNav({ pathname }) {
+export default function DesktopNav({ pathname }: { pathname: string }) {
   return (
     <nav className="flex justify-center space-x-1 lg:space-x-2 mx-6 flex-1">
       {navItems.map((item) => (

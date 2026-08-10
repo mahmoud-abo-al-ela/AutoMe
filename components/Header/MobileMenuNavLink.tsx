@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { UnreadBadge } from "@/components/StreamChat";
 import { iconMap } from "./mobile-menu-icons";
+import type { LucideIcon } from "lucide-react";
 
 // Reusable animated nav link for the mobile menu.
 export default function MobileMenuNavLink({
@@ -19,8 +20,22 @@ export default function MobileMenuNavLink({
   showUnreadBadge = false,
   IconComponent = null,
   organizationId,
+}: {
+  href: string;
+  label: string;
+  /** Key into iconMap; ignored when IconComponent is supplied directly. */
+  icon?: string;
+  iconClass?: string;
+  size?: number;
+  onClick?: () => void;
+  isActive?: boolean;
+  animationDelay?: number;
+  showUnreadBadge?: boolean;
+  IconComponent?: LucideIcon | null;
+  organizationId?: string | null;
 }) {
-  const Icon = IconComponent || (icon ? iconMap[icon] : null);
+  const Icon =
+    IconComponent || (icon ? iconMap[icon as keyof typeof iconMap] : null);
 
   return (
     <motion.div

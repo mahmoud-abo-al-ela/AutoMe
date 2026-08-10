@@ -5,6 +5,21 @@ import { cn } from "@/lib/utils";
 import { Heart, CarFront, MessageSquare } from "lucide-react";
 import { UnreadBadge } from "@/components/StreamChat";
 
+const ICONS = { Heart, CarFront, MessageSquare };
+
+export type HeaderNavLinkProps = {
+  href: string;
+  label: string;
+  /** Key into ICONS. A link with no icon renders as a text nav item. */
+  icon?: string;
+  iconClass?: string;
+  size?: number;
+  isMobile?: boolean;
+  onClick?: () => void;
+  isActive?: boolean;
+  showUnreadBadge?: boolean;
+};
+
 export default function HeaderNavLink({
   href,
   label,
@@ -15,8 +30,8 @@ export default function HeaderNavLink({
   onClick,
   isActive,
   showUnreadBadge,
-}) {
-  const Icon = icon ? { Heart, CarFront, MessageSquare }[icon] : null;
+}: HeaderNavLinkProps) {
+  const Icon = icon ? ICONS[icon as keyof typeof ICONS] : null;
 
   // Special styling for messages icon
   const isMessagesIcon = icon === "MessageSquare";
