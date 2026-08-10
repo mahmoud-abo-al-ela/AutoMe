@@ -6,12 +6,23 @@ import { queryKeys } from "@/lib/query-client";
 import { getCars, deleteCar, updateCar } from "@/actions/cars";
 import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
+import type { SerializedCar } from "@/lib/utils/serializers";
+
+/** The car-row fields this list reads. */
+type AdminCar = SerializedCar;
+
+type CarUpdates = { status?: string; featured?: boolean };
+
+/** Message from a caught unknown, for the toast descriptions below. */
+function messageOf(error: unknown): string | undefined {
+    return error instanceof Error ? error.message : undefined;
+}
 
 export const useAdminCarsList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [carToDelete, setCarToDelete] = useState(null);
+    const [carToDelete, setCarToDelete] = useState<AdminCar | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -45,12 +56,18 @@ export const useAdminCarsList = () => {
         isPending: updateCarLoading,
         mutateAsync: updateCarFn,
     } = useMutation({
-        mutationFn: ({ carId, updates }) => updateCar(carId, updates),
+        mutationFn: ({ carId, updates }: { carId: string; updates: CarUpdates }) =>
+            updateCar(carId, updates),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.cars.all }),
     });
 
+    // ActionResponse is a discriminated union: narrow on .success before
+    // touching .data. Previously this read fetchedCars?.data?.data blind,
+    // which silently yielded undefined on the error branch.
+    const carsPayload = fetchedCars?.success ? fetchedCars.data : null;
+
     const carStats = useMemo(() => {
-        const carsData = fetchedCars?.data?.data;
+        const carsData = carsPayload?.data;
         if (!carsData || !Array.isArray(carsData))
             return {
                 count: 0,
@@ -64,8 +81,10 @@ export const useAdminCarsList = () => {
                 totalPages: 1,
             };
 
-        const cars = carsData;
-        const pagination = fetchedCars.data.pagination || {
+        // serializeCars maps a nullable serializer; the listing query only ever
+        // feeds it real rows, so the nulls are not reachable.
+        const cars = carsData as AdminCar[];
+        const pagination = carsPayload?.pagination || {
             total: cars.length,
             page: 1,
             totalPages: 1,
@@ -87,7 +106,7 @@ export const useAdminCarsList = () => {
             currentPage: pagination.page || 1,
             totalPages: pagination.totalPages || 1,
         };
-    }, [fetchedCars?.data]);
+    }, [carsPayload]);
 
     // Manual refresh function with visual feedback
     const handleRefresh = useCallback(async () => {
@@ -103,7 +122,7 @@ export const useAdminCarsList = () => {
     }, [fetchCarsFn]);
 
     // Delete car handler
-    const handleDeleteCar = async (carId) => {
+    const handleDeleteCar = async (carId: string) => {
         try {
             const response = await deleteCarFn(carId);
             if (response.success) {
@@ -111,12 +130,17 @@ export const useAdminCarsList = () => {
                     description: "The car has been removed from your inventory.",
                 });
             } else {
-                throw new Error(response.error || "Delete operation failed");
+                // BUG (surfaced by this conversion, NOT fixed here): `error` is
+                // the ErrorResponse object, not a string, so this Error's
+                // message stringifies to "[object Object]" and that is what the
+                // catch below shows the user. The read should be
+                // response.error.message; fixing it is its own PR.
+                throw new Error(String(response.error) || "Delete operation failed");
             }
         } catch (error) {
             toast.error("Delete operation failed", {
                 description:
-                    error.message || "Unable to delete the car. Please try again.",
+                    messageOf(error) || "Unable to delete the car. Please try again.",
             });
         } finally {
             setDeleteDialogOpen(false);
@@ -125,13 +149,13 @@ export const useAdminCarsList = () => {
     };
 
     // Confirm delete handler
-    const confirmDelete = (car) => {
+    const confirmDelete = (car: AdminCar) => {
         setCarToDelete(car);
         setDeleteDialogOpen(true);
     };
 
     // Update car handler
-    const handleUpdateCar = async (carId, updates) => {
+    const handleUpdateCar = async (carId: string, updates: CarUpdates) => {
         try {
             const response = await updateCarFn({ carId, updates });
             if (response.success) {
@@ -139,12 +163,13 @@ export const useAdminCarsList = () => {
                     description: "The car details have been updated.",
                 });
             } else {
-                throw new Error(response.error || "Update operation failed");
+                // Same "[object Object]" defect as in handleDeleteCar above.
+                throw new Error(String(response.error) || "Update operation failed");
             }
         } catch (error) {
             toast.error("Update operation failed", {
                 description:
-                    error.message || "Unable to update the car. Please try again.",
+                    messageOf(error) || "Unable to update the car. Please try again.",
             });
         }
     };
@@ -158,18 +183,18 @@ export const useAdminCarsList = () => {
 
     // Calculate paginated data
     const paginatedCars = useMemo(() => {
-        if (!fetchedCars?.data?.data) return [];
-        return fetchedCars.data.data;
-    }, [fetchedCars?.data]);
+        if (!carsPayload?.data) return [];
+        return carsPayload.data;
+    }, [carsPayload]);
 
     // Pagination handlers
-    const handlePageChange = (page) => {
+    const handlePageChange = (page: number) => {
         if (page < 1 || page > carStats.totalPages || page === currentPage) return;
         setCurrentPage(page);
         window.scrollTo(0, 0);
     };
 
-    const handleItemsPerPageChange = (value) => {
+    const handleItemsPerPageChange = (value: string) => {
         const newPageSize = parseInt(value);
         setPageSize(newPageSize);
         setCurrentPage(1);

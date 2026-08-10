@@ -11,9 +11,10 @@ import {
 } from "@/app/(site)/compare/_components/utils";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
+import type { SerializedCarWithImages } from "@/lib/utils/serializers";
 
 export const useComparePage = () => {
-    const [compareList, setCompareList] = useState([]);
+    const [compareList, setCompareList] = useState<string[]>([]);
     const [highlightDifferences, setHighlightDifferences] = useState(false);
     const [activeCategory, setActiveCategory] = useState("basic");
 
@@ -43,7 +44,9 @@ export const useComparePage = () => {
         queryKey: queryKeys.compare.byIds(compareList),
         queryFn: () => getCarsByIds(compareList),
         enabled: compareList.length > 0,
-        select: (res) => res.success ? res.data : [],
+        // serializeCarWithImages is nullable for callers that may pass nothing;
+        // findCarsByIds only ever feeds it real rows.
+        select: (res) => (res.success ? (res.data as SerializedCarWithImages[]) : []),
     });
     
     const cars = compareList.length === 0 ? [] : (carsData || []);
@@ -60,7 +63,7 @@ export const useComparePage = () => {
         window.dispatchEvent(new Event("compareListUpdated"));
     }, []);
 
-    const removeCar = useCallback((carId) => {
+    const removeCar = useCallback((carId: string) => {
         handleRemoveCar(carId);
     }, []);
 
@@ -88,7 +91,7 @@ export const useComparePage = () => {
         } catch (err) {
             // User cancelled share or clipboard failed
             logError("Share failed:", err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
     }, []);
 

@@ -108,7 +108,26 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
   );
 });
 
-export const getTestDrives = withAuth(async (ctx, { status, page = 1, limit = 10 }) => {
+export const getTestDrives = withAuth(
+  async (
+    ctx,
+    {
+      status,
+      page = 1,
+      limit = 10,
+    }: {
+      status?: string;
+      page?: number;
+      limit?: number;
+      // BUG (surfaced by this conversion, NOT fixed here): useAdminTestDrives
+      // sends `search` and puts it in the query key, but it is neither
+      // destructured here nor forwarded to the service — so the admin
+      // test-drives search box has never filtered anything. Declared so the
+      // call site still type-checks against what it actually sends; wiring it
+      // through is its own PR.
+      search?: string;
+    }
+  ) => {
   const organization = await getCurrentOrganization();
 
   const result = await testDriveService.getTestDrives(

@@ -42,8 +42,9 @@ export const useTestDrivePage = () => {
         isLoading: loadingTestDrive,
         refetch: fetchTestDrive,
     } = useQuery({
-        queryKey: queryKeys.testDrives.detail(testDriveId),
-        queryFn: () => getTestDriveById(testDriveId),
+        queryKey: queryKeys.testDrives.detail(testDriveId ?? ""),
+        // Guarded by `enabled` below, so this only runs with a real id.
+        queryFn: () => getTestDriveById(testDriveId!),
         enabled: !!testDriveId,
     });
 
@@ -69,7 +70,9 @@ export const useTestDrivePage = () => {
 
     useEffect(() => {
         if (testDriveData && !testDriveData.success) {
-            toast.error(testDriveData.error || "Failed to load test drive details");
+            // BUG (flagged, not fixed): `error` is the ErrorResponse object, so
+            // this renders "[object Object]". Should read .error.message.
+            toast.error(String(testDriveData.error) || "Failed to load test drive details");
             router.push("/test-drive");
         }
     }, [testDriveData, router]);
@@ -97,11 +100,11 @@ export const useTestDrivePage = () => {
         }
     }, [queryClient]);
 
-    const handleFilterChange = useCallback((newStatus) => {
+    const handleFilterChange = useCallback((newStatus: string) => {
         setStatusFilter(newStatus);
     }, []);
 
-    const handlePageChange = useCallback((newPage) => {
+    const handlePageChange = useCallback((newPage: number) => {
         setCurrentPage(newPage);
     }, []);
 

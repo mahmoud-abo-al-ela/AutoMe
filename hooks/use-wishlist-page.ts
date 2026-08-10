@@ -16,7 +16,7 @@ export const useWishlistPage = (limit = 6) => {
     
     const data = queryData || { success: false, data: null };
 
-    const handlePageChange = useCallback((newPage) => {
+    const handlePageChange = useCallback((newPage: number) => {
         setCurrentPage(newPage);
         window.scrollTo({
             top: 0,
@@ -24,7 +24,7 @@ export const useWishlistPage = (limit = 6) => {
         });
     }, []);
 
-    const handleWishlistChange = useCallback((removedCarId) => {
+    const handleWishlistChange = useCallback((removedCarId: string) => {
         if (data?.success && data.data?.cars) {
             const updatedCars = data.data.cars.filter(
                 (car) => car.id !== removedCarId

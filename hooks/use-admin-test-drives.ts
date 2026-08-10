@@ -71,7 +71,7 @@ export const useAdminTestDrives = () => {
         },
     });
 
-    const handleStatusChange = useCallback(async (testDriveId, newStatus) => {
+    const handleStatusChange = useCallback(async (testDriveId: string, newStatus: string) => {
         try {
             const response = await updateStatusFn({
                 testDriveId,
@@ -81,7 +81,9 @@ export const useAdminTestDrives = () => {
             if (response.success) {
                 toast.success(`Test drive ${newStatus.toLowerCase()} successfully`);
             } else {
-                toast.error(response.error || "Failed to update test drive status");
+                // BUG (flagged, not fixed): `error` is the ErrorResponse object, so
+                // this renders "[object Object]". Should read response.error.message.
+                toast.error(String(response.error) || "Failed to update test drive status");
             }
         } catch (error) {
             logError("Error updating test drive status:", error);
@@ -89,11 +91,11 @@ export const useAdminTestDrives = () => {
         }
     }, [updateStatusFn]);
 
-    const handleFilterChange = useCallback((value) => {
+    const handleFilterChange = useCallback((value: string) => {
         setStatusFilter(value);
     }, []);
 
-    const handlePageChange = useCallback((newPage) => {
+    const handlePageChange = useCallback((newPage: number) => {
         setPagination((prev) => ({ ...prev, page: newPage }));
     }, []);
 
@@ -111,11 +113,15 @@ export const useAdminTestDrives = () => {
                 cancelledCount: 0,
             };
 
+        // serializeTestDrive is nullable for callers that may pass nothing; the
+        // list query only ever feeds it real rows.
+        const rows = testDrives as { status: string }[];
+
         return {
-            count: testDrives.length,
-            pendingCount: testDrives.filter((td) => td.status === "PENDING").length,
-            confirmedCount: testDrives.filter((td) => td.status === "CONFIRMED").length,
-            cancelledCount: testDrives.filter((td) => td.status === "CANCELLED").length,
+            count: rows.length,
+            pendingCount: rows.filter((td) => td.status === "PENDING").length,
+            confirmedCount: rows.filter((td) => td.status === "CONFIRMED").length,
+            cancelledCount: rows.filter((td) => td.status === "CANCELLED").length,
         };
     }, [testDrives]);
 
