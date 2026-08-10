@@ -51,7 +51,7 @@ export default function OrgDetailsHeader({ org }) {
         });
       } else {
         toast.error("Failed to update status", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {
@@ -74,7 +74,7 @@ export default function OrgDetailsHeader({ org }) {
         router.push("/super-admin/organizations");
       } else {
         toast.error("Failed to delete organization", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {

@@ -62,7 +62,7 @@ export default function UsersTable({ users, pagination }) {
       } else {
         toast.error("Failed to update role", {
           description:
-            result.error || "An error occurred while updating the role.",
+            result.error?.message || "An error occurred while updating the role.",
         });
       }
     } catch (error) {

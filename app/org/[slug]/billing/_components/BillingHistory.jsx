@@ -46,7 +46,10 @@ export default function BillingHistory({ organizationId }) {
     async function fetchBillingHistory() {
       try {
         const result = await getBillingHistory(organizationId);
-        setBillingHistory(result.history || []);
+        if (!result.success) {
+          throw new Error(result.error?.message || "Failed to load billing history");
+        }
+        setBillingHistory(result.data.history || []);
       } catch (err) {
         setError(err.message);
       } finally {

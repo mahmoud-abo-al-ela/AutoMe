@@ -41,7 +41,7 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
         });
       } else {
         toast.error("Failed to update plan", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {

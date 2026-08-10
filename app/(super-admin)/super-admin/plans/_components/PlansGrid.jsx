@@ -53,7 +53,7 @@ export default function PlansGrid({ plans }) {
         });
       } else {
         toast.error("Failed to create plan", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {
@@ -82,7 +82,7 @@ export default function PlansGrid({ plans }) {
         });
       } else {
         toast.error("Failed to update plan", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {
@@ -111,7 +111,7 @@ export default function PlansGrid({ plans }) {
         });
       } else {
         toast.error("Failed to delete plan", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {

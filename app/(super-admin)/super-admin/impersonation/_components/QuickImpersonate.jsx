@@ -41,7 +41,7 @@ export default function QuickImpersonate({ organizations }) {
         window.location.href = `/org/${org.slug}/dashboard`;
       } else {
         toast.error("Failed to start impersonation", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {

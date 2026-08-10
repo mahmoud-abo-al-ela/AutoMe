@@ -31,7 +31,7 @@ export default function ActiveSessions({ sessions }) {
         });
       } else {
         toast.error("Failed to end session", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {

@@ -65,7 +65,7 @@ export default function CreateOrganizationForm({ plans }) {
         router.push("/super-admin/organizations");
       } else {
         toast.error("Failed to create organization", {
-          description: result.error || "An error occurred",
+          description: result.error?.message || "An error occurred",
         });
       }
     });

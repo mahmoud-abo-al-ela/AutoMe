@@ -98,7 +98,7 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                 const result = await startCarConversation(carId);
 
                 if (!result.success) {
-                    toast.error(result.error || "Failed to start conversation");
+                    toast.error(result.error?.message || "Failed to start conversation");
                     return;
                 }
 

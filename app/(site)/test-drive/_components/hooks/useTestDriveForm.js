@@ -201,7 +201,7 @@ export const useTestDriveForm = ({ carId, workingHours, onSuccess }) => {
                 toast.success("Test drive scheduled successfully!");
                 onSuccess();
             } else {
-                toast.error(result.error || "Failed to schedule test drive");
+                toast.error(result.error?.message || "Failed to schedule test drive");
             }
         } catch (error) {
             console.error("Error scheduling test drive:", error);

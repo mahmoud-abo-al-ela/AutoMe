@@ -55,7 +55,7 @@ export default function OrganizationsTable({ organizations, pagination }) {
         });
       } else {
         toast.error("Failed to update status", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {
@@ -86,7 +86,7 @@ export default function OrganizationsTable({ organizations, pagination }) {
         });
       } else {
         toast.error("Failed to delete organization", {
-          description: result.error || "An error occurred.",
+          description: result.error?.message || "An error occurred.",
         });
       }
     } catch (error) {

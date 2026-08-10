@@ -123,13 +123,19 @@ export default function InvoiceHistory({ organizationId }) {
                 startingAfter: cursor || undefined,
             });
 
-            if (cursor) {
-                setInvoices((prev) => [...prev, ...result.invoices]);
-            } else {
-                setInvoices(result.invoices);
+            if (!result.success) {
+                throw new Error(result.error?.message || "Failed to load invoices");
             }
-            setHasMore(result.hasMore);
-            setNextCursor(result.nextCursor);
+
+            const { invoices: fetched, hasMore, nextCursor } = result.data;
+
+            if (cursor) {
+                setInvoices((prev) => [...prev, ...fetched]);
+            } else {
+                setInvoices(fetched);
+            }
+            setHasMore(hasMore);
+            setNextCursor(nextCursor);
         } catch (err) {
             console.error("Failed to fetch invoices:", err);
             setError(err.message || "Failed to load invoices");
