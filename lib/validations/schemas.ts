@@ -138,18 +138,12 @@ export const dealershipReviewSchema = z.object({
 
 // ============ PAYMENT ============
 
-export const createSubscriptionSchema = z.object({
-  planId: z.string().min(1, "Plan is required"),
-  billingInterval: z.enum(["month", "year"]).default("month"),
-});
 
 export const createCheckoutSessionSchema = z.object({
   planId: z.string().min(1, "Plan is required"),
   // "monthly"/"yearly" is the onboarding UI's vocabulary — it is what the plan
   // toggle holds, what is persisted in the onboarding session, and what
-  // createCheckoutSession compares against. Distinct from createSubscription's
-  // `billingInterval`, which is "month"/"year" because it maps onto Stripe's
-  // recurring interval directly.
+  // createCheckoutSession compares against.
   billingPeriod: z.enum(["monthly", "yearly"]),
   onboardingSessionId: z.string().min(1).optional().nullable(),
 });
@@ -177,7 +171,6 @@ export type RequestTestDriveInput = z.infer<typeof requestTestDriveSchema>;
 export type EditTestDriveInput = z.infer<typeof editTestDriveSchema>;
 export type UpdateTestDriveStatusInput = z.infer<typeof updateTestDriveStatusSchema>;
 export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
-export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
 export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
