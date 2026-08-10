@@ -30,21 +30,21 @@ export default async function OnboardingSuccessPage({ searchParams }) {
     const result = await createOrganizationAfterCheckout(session_id);
 
     // If org was already created (idempotency), show success with redirect link
-    if (result.success && result.redirect) {
+    if (result.success && result.data.redirect) {
         return (
             <SuccessPage
-                orgSlug={result.organization?.slug}
-                dashboardUrl={result.redirect}
+                orgSlug={result.data.organization?.slug}
+                dashboardUrl={result.data.redirect}
             />
         );
     }
 
     // If org was just created, show success page
-    if (result.success && result.organization) {
+    if (result.success && result.data.organization) {
         return (
             <SuccessPage
-                orgSlug={result.organization.slug}
-                dashboardUrl={`/org/${result.organization.slug}/dashboard`}
+                orgSlug={result.data.organization.slug}
+                dashboardUrl={`/org/${result.data.organization.slug}/dashboard`}
             />
         );
     }
@@ -59,7 +59,7 @@ export default async function OnboardingSuccessPage({ searchParams }) {
                     </div>
                     <h1 className="text-xl font-semibold">Setup Failed</h1>
                     <p className="text-muted-foreground text-sm">
-                        {result.error ||
+                        {result.error?.message ||
                             "Something went wrong while setting up your dealership."}
                     </p>
                     <p className="text-muted-foreground text-sm">

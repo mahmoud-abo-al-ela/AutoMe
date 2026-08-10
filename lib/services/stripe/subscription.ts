@@ -2,13 +2,16 @@
 import Stripe from "stripe";
 
 /**
- * BUG (surfaced by this conversion, NOT fixed here — conversion-only):
- * `Invoice.payment_intent` and the `latest_invoice.payment_intent` expansion
- * were removed from the Stripe API in the 2025 "Basil" release, and stripe@20's
- * types no longer declare the field. `extractClientSecret` below therefore reads
- * something the API no longer returns. This alias preserves today's behaviour;
- * the fix (read `invoice.confirmation_secret`, or pin an older `apiVersion`)
- * belongs in its own PR.
+ * BUG (still open — NOT fixed here): `Invoice.payment_intent` was removed from
+ * the Stripe API in the 2025 "Basil" release and stripe@20 no longer declares
+ * it, so `extractClientSecret` below always resolves to null.
+ *
+ * Verified against the live test API: the `latest_invoice.payment_intent`
+ * *expand* is still accepted without error — it is the field that is absent, so
+ * this fails silently rather than throwing. The fix (read
+ * `invoice.confirmation_secret`, or pin an older `apiVersion`) needs a decision
+ * about which API version to target, so it is deliberately left for its own PR.
+ * Only reachable via the currently-orphaned Stripe Elements path.
  */
 export type InvoiceWithLegacyPaymentIntent = Stripe.Invoice & {
     payment_intent?: string | Stripe.PaymentIntent | null;
@@ -89,14 +92,15 @@ export async function createStripeSubscription(
         payment_behavior: "default_incomplete",
         payment_settings: {
             save_default_payment_method: "on_subscription",
-            // BUG (surfaced by this conversion, NOT fixed here — conversion-only):
-            // "apple_pay" and "google_pay" are not Stripe payment_method_types —
-            // they are card wallets, delivered under "card". Stripe rejects them,
-            // so this create call fails whenever NODE_ENV === "production".
-            // The cast preserves today's behaviour; the fix belongs in its own PR.
-            payment_method_types: (process.env.NODE_ENV === "production"
-                ? ["card", "link", "amazon_pay", "apple_pay", "google_pay", "paypal"]
-                : ["card", "link"]) as Stripe.SubscriptionCreateParams.PaymentSettings.PaymentMethodType[],
+            // "apple_pay" / "google_pay" were removed here: they are card
+            // wallets delivered under "card", not payment_method_types, and
+            // Stripe rejects the whole request with
+            // `Invalid payment_settings[payment_method_types][3]`. Verified
+            // against the live test API. "amazon_pay" and "paypal" are valid.
+            payment_method_types:
+                process.env.NODE_ENV === "production"
+                    ? ["card", "link", "amazon_pay", "paypal"]
+                    : ["card", "link"],
         },
         expand: ["latest_invoice.payment_intent"],
         metadata,
@@ -145,11 +149,11 @@ export async function createPaymentIntentForInvoice(
             ...metadata,
             invoiceId: invoice.id ?? null,
         },
-        // Same invalid-wallet bug as createStripeSubscription above — see the
-        // comment there. Cast preserves behaviour; the fix is a separate PR.
-        payment_method_types: (process.env.NODE_ENV === "production"
-            ? ["card", "link", "amazon_pay", "apple_pay", "google_pay", "paypal"]
-            : ["card", "link"]) as string[],
+        // Same wallet correction as createStripeSubscription above.
+        payment_method_types:
+            process.env.NODE_ENV === "production"
+                ? ["card", "link", "amazon_pay", "paypal"]
+                : ["card", "link"],
     });
 }
 

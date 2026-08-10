@@ -68,9 +68,9 @@ export function usePlanSelection({
             if (result.success) {
                 updateFormData({ planId: selectedPlanId, billingPeriod });
                 // Redirect to dashboard with onboarding complete flag
-                router.push(`/org/${result.organization.slug}/dashboard?onboarding=complete`);
+                router.push(`/org/${result.data.organization.slug}/dashboard?onboarding=complete`);
             } else {
-                toast.error(result.error || "Failed to create organization");
+                toast.error(result.error?.message || "Failed to create organization");
             }
         } catch (error) {
             console.error("Error creating organization:", error);
@@ -99,7 +99,7 @@ export function usePlanSelection({
                 });
 
                 if (!sessionRes.success) {
-                    toast.error(sessionRes.error || "Failed to save onboarding data");
+                    toast.error(sessionRes.error?.message || "Failed to save onboarding data");
                     setLoading(false);
                     return;
                 }
@@ -108,14 +108,14 @@ export function usePlanSelection({
                 const res = await createCheckoutSession(
                     plan.id,
                     billingPeriod,
-                    sessionRes.sessionId,
+                    sessionRes.data.sessionId,
                 );
 
                 if (res.success) {
                     // 3. Redirect to Stripe Checkout
-                    window.location.href = res.url;
+                    window.location.href = res.data.url;
                 } else {
-                    toast.error(res.error || "Failed to initiate payment");
+                    toast.error(res.error?.message || "Failed to initiate payment");
                     setLoading(false);
                 }
             } catch (error) {

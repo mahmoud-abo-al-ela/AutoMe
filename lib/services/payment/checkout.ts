@@ -9,15 +9,8 @@ export interface PaymentUser {
     name?: string | null;
 }
 
-/**
- * BUG (surfaced by this conversion, NOT fixed here): the only caller validates
- * this through createCheckoutSessionSchema, whose enum is ["month", "year"] —
- * so "yearly" never arrives and the yearly branch below is unreachable. A
- * customer choosing the yearly plan is checked out at the MONTHLY price. Both
- * spellings are accepted here to preserve current behaviour exactly; picking
- * one vocabulary is its own PR.
- */
-export type BillingPeriod = "monthly" | "yearly" | "month" | "year";
+/** Matches createCheckoutSessionSchema and the onboarding plan toggle. */
+export type BillingPeriod = "monthly" | "yearly";
 
 /**
  * Create a Stripe Checkout Session for onboarding subscription.

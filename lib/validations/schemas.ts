@@ -145,7 +145,12 @@ export const createSubscriptionSchema = z.object({
 
 export const createCheckoutSessionSchema = z.object({
   planId: z.string().min(1, "Plan is required"),
-  billingPeriod: z.enum(["month", "year"]),
+  // "monthly"/"yearly" is the onboarding UI's vocabulary — it is what the plan
+  // toggle holds, what is persisted in the onboarding session, and what
+  // createCheckoutSession compares against. Distinct from createSubscription's
+  // `billingInterval`, which is "month"/"year" because it maps onto Stripe's
+  // recurring interval directly.
+  billingPeriod: z.enum(["monthly", "yearly"]),
   onboardingSessionId: z.string().min(1).optional().nullable(),
 });
 
