@@ -2,7 +2,7 @@
 import { DayOfWeek } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
-interface WorkingHourInput {
+export interface WorkingHourInput {
   dayOfWeek: DayOfWeek | DayOfWeek[];
   openTime?: string;
   closeTime?: string;
