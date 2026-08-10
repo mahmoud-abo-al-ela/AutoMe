@@ -14,16 +14,18 @@ vi.mock("@/lib/repositories/ai-usage", () => ({
 }));
 
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
+import type { TenantContext } from "@/lib/auth/context";
 
-function ctxWithAiLimit(limit) {
-  return {
+// Partial fixture: the gate only reads userId and the plan feature limit.
+function ctxWithAiLimit(limit: number): TenantContext {
+  return ({
     userId: "u1",
     organization: {
       id: "org-1",
       slug: "dealer-a",
       subscription: { plan: { name: "Free", features: { aiProcessing: { limit } } } },
     },
-  };
+  } as unknown) as TenantContext;
 }
 
 beforeEach(() => {

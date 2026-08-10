@@ -25,8 +25,8 @@ describe("validateAction", () => {
       throw new Error("expected validateAction to throw");
     } catch (err) {
       expect(err).toBeInstanceOf(ValidationError);
-      expect(err.field).toBe("make");
-      expect(err.code).toBe("VALIDATION_ERROR");
+      expect((err as { field?: unknown }).field).toBe("make");
+      expect((err as { code?: unknown }).code).toBe("VALIDATION_ERROR");
     }
   });
 
@@ -36,7 +36,7 @@ describe("validateAction", () => {
       throw new Error("expected validateAction to throw");
     } catch (err) {
       expect(err).toBeInstanceOf(ValidationError);
-      expect(err.field).toBe("year");
+      expect((err as { field?: unknown }).field).toBe("year");
     }
   });
 });

@@ -3,10 +3,16 @@
  * Generates structured data (JSON-LD) for better search engine visibility
  */
 
-export function generateDealershipStructuredData(dealership) {
+/** JSON-LD is free-form by nature; these builders assemble untyped documents. */
+type StructuredDataDoc = Record<string, unknown>;
+
+/** The dealership fields the builders below read, all optional. */
+type SeoDealership = Record<string, any>;
+
+export function generateDealershipStructuredData(dealership: SeoDealership | null) {
     if (!dealership) return null;
 
-    const structuredData = {
+    const structuredData: StructuredDataDoc = {
         "@context": "https://schema.org",
         "@type": "AutoDealer",
         name: dealership.name,
@@ -59,8 +65,8 @@ export function generateDealershipStructuredData(dealership) {
     // Add opening hours if available
     if (dealership.workingHours && dealership.workingHours.length > 0) {
         structuredData.openingHoursSpecification = dealership.workingHours
-            .filter(wh => wh.isOpen)
-            .map(wh => ({
+            .filter((wh: SeoDealership) => wh.isOpen)
+            .map((wh: SeoDealership) => ({
                 "@type": "OpeningHoursSpecification",
                 dayOfWeek: wh.day,
                 opens: wh.openTime,
@@ -86,7 +92,10 @@ export function generateDealershipStructuredData(dealership) {
  * @param {Object} dealership - Dealership data
  * @returns {Array} Array of JSON-LD review objects
  */
-export function generateReviewsStructuredData(reviews, dealership) {
+export function generateReviewsStructuredData(
+    reviews: SeoDealership[] | null,
+    dealership: SeoDealership | null
+) {
     if (!reviews || reviews.length === 0) return [];
 
     return reviews.map(review => ({
@@ -94,7 +103,7 @@ export function generateReviewsStructuredData(reviews, dealership) {
         "@type": "Review",
         itemReviewed: {
             "@type": "AutoDealer",
-            name: dealership.name,
+            name: dealership?.name,
         },
         author: {
             "@type": "Person",
@@ -116,7 +125,7 @@ export function generateReviewsStructuredData(reviews, dealership) {
  * @param {Array} items - Array of breadcrumb items { name, url }
  * @returns {Object} JSON-LD breadcrumb data
  */
-export function generateBreadcrumbStructuredData(items) {
+export function generateBreadcrumbStructuredData(items: { name: string; url: string }[]) {
     if (!items || items.length === 0) return null;
 
     return {
@@ -136,7 +145,7 @@ export function generateBreadcrumbStructuredData(items) {
  * @param {Object} dealership - Dealership data
  * @returns {Object} Meta tags object
  */
-export function generateDealershipMetaTags(dealership) {
+export function generateDealershipMetaTags(dealership: SeoDealership | null) {
     if (!dealership) return {};
 
     const title = `${dealership.name} - AutoMe Dealership`;
@@ -186,7 +195,7 @@ export function generateDealershipMetaTags(dealership) {
  * @param {Object} data - Structured data object
  * @returns {JSX.Element} Script tag with JSON-LD
  */
-export function StructuredData({ data }) {
+export function StructuredData({ data }: { data: unknown }) {
     if (!data) return null;
 
     return (

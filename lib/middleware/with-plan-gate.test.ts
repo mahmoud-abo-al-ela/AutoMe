@@ -1,15 +1,17 @@
 import { describe, it, expect, vi } from "vitest";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { PlanLimitError } from "@/lib/utils/errors";
+import type { TenantContext } from "@/lib/auth/context";
 
-function ctxWith(features) {
-  return {
+// Partial fixture: the gate only reads organization.subscription.plan.features.
+function ctxWith(features: unknown): TenantContext {
+  return ({
     organization: {
       id: "org-1",
       slug: "dealer-a",
       subscription: { plan: { name: "Pro", features } },
     },
-  };
+  } as unknown) as TenantContext;
 }
 
 describe("withPlanGate", () => {
@@ -45,7 +47,9 @@ describe("withPlanGate", () => {
 
   it("blocks when the org has no plan", async () => {
     const guarded = withPlanGate("aiProcessing", vi.fn());
-    await expect(guarded({ organization: { subscription: {} } })).rejects.toBeInstanceOf(
+    await expect(
+      guarded({ organization: { subscription: {} } } as unknown as TenantContext)
+    ).rejects.toBeInstanceOf(
       PlanLimitError,
     );
   });
