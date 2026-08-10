@@ -90,15 +90,36 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
     const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
     const email = clerkUser.emailAddresses[0]?.emailAddress;
 
-    userData = await db.user.create({
-      data: {
-        clerkId,
-        name,
-        imageUrl: clerkUser.imageUrl,
-        email,
-      },
-      include: userIncludeQuery,
-    });
+    try {
+      userData = await db.user.create({
+        data: {
+          clerkId,
+          name,
+          imageUrl: clerkUser.imageUrl,
+          email,
+        },
+        include: userIncludeQuery,
+      });
+    } catch (error) {
+      // find-then-create is not atomic. A first page load renders several
+      // server components concurrently, each calling checkUser; they all miss
+      // on the lookup above and race to insert. Whoever loses gets P2002 on the
+      // unique clerkId — the row now exists, so re-read it instead of throwing.
+      // Read `code` structurally: the generated client re-exports
+      // PrismaClientKnownRequestError via `export import`, which is a type
+      // alias, so `instanceof` does not narrow against it.
+      const isDuplicateClerkId =
+        typeof error === "object" &&
+        error !== null &&
+        (error as { code?: string }).code === "P2002";
+      if (!isDuplicateClerkId) throw error;
+
+      userData = await db.user.findUnique({
+        where: { clerkId },
+        include: userIncludeQuery,
+      });
+      if (!userData) throw error;
+    }
   }
 
   return userData;
