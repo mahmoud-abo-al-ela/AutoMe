@@ -5,7 +5,14 @@ import * as ProgressPrimitive from "@radix-ui/react-progress";
 
 import { cn } from "@/lib/utils";
 
-const Progress = React.forwardRef(({ className, indicatorClassName, value, ...props }, ref) => (
+const Progress = React.forwardRef<
+  React.ComponentRef<typeof ProgressPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
+    // Local addition to the shadcn original, so the fill can be recoloured
+    // without a wrapper.
+    indicatorClassName?: string;
+  }
+>(({ className, indicatorClassName, value, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
     className={cn(
