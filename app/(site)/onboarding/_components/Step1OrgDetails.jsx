@@ -2,6 +2,7 @@
 
 import {
   FormFields,
+  LocationFields,
   SlugPreview,
   OrgDetailsFooter,
   LogoUpload,
@@ -22,6 +23,8 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     watchedEmail,
     watchedPhone,
     watchedAddress,
+    location,
+    updateLocation,
     logo,
     setLogo,
     logoError,
@@ -61,16 +64,16 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
 
       <FormFields fields={otherFields} register={register} errors={errors} />
 
+      <LocationFields value={location} onChange={updateLocation} />
+
       <OrgDetailsFooter
         disabled={isDisabled}
         hint={
-          !logo
-            ? "Add a logo to continue"
-            : slugStatus === "checking"
-              ? "Checking name availability…"
-              : slugStatus === "taken"
-                ? "Choose an available dealership name"
-                : null
+          slugStatus === "checking"
+            ? "Checking name availability…"
+            : slugStatus === "taken"
+              ? "Choose an available dealership name"
+              : null
         }
       />
     </form>

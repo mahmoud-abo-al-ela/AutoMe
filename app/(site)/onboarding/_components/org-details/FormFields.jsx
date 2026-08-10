@@ -20,10 +20,9 @@ export default function FormFields({ fields, register, errors, columns = 2, foot
                     >
                         <Label htmlFor={field.id} className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                             {field.label}
-                            {/* Everything on this step is required, so asterisks
-                                on every row were pure noise. Optional fields are
-                                the ones worth marking. */}
-                            {field.optional && (
+                            {field.required ? (
+                                <span className="text-red-500">*</span>
+                            ) : (
                                 <span className="text-xs font-normal text-gray-400">
                                     Optional
                                 </span>

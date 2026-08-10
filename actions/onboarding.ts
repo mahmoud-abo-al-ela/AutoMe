@@ -63,6 +63,9 @@ export const createOrganization = withAuth(
       email,
       phone,
       address,
+      country,
+      region,
+      city,
       logo,
       planId,
       workingHours,
@@ -94,6 +97,9 @@ export const createOrganization = withAuth(
       email,
       phone,
       address,
+      country,
+      region,
+      city,
       logo,
       planId,
       workingHours,
@@ -142,6 +148,9 @@ export const createOrganization = withAuth(
       email,
       phone,
       address,
+      country,
+      region,
+      city,
       logoUrl,
       workingHours,
       userId: ctx.user.id,
@@ -219,8 +228,19 @@ export const createOrganizationAfterCheckout = withAuth(
       );
     }
 
-    const { name, slug, email, phone, address, logo, planId, workingHours } =
-      onboardingData;
+    const {
+      name,
+      slug,
+      email,
+      phone,
+      address,
+      country,
+      region,
+      city,
+      logo,
+      planId,
+      workingHours,
+    } = onboardingData;
 
     const existing = await db.organization.findUnique({
       where: { slug },
@@ -262,6 +282,9 @@ export const createOrganizationAfterCheckout = withAuth(
       email,
       phone,
       address,
+      country,
+      region,
+      city,
       logoUrl,
       workingHours,
       userId: ctx.user.id,

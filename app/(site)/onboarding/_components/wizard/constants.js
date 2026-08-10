@@ -21,6 +21,9 @@ export const DEFAULT_FORM_DATA = {
     email: "",
     phone: "",
     address: "",
+    country: "EG",
+    region: "",
+    city: "",
     logo: "",
     planId: null,
     workingHours: {

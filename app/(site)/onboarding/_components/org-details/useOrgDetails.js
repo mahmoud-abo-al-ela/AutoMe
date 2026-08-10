@@ -27,6 +27,9 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
             email: formData.email || "",
             phone: formData.phone || "",
             address: formData.address || "",
+            country: formData.country || "EG",
+            region: formData.region || "",
+            city: formData.city || "",
             logo: formData.logo || "",
         },
     });
@@ -43,6 +46,19 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
     const watchedEmail = watch("email");
     const watchedPhone = watch("phone");
     const watchedAddress = watch("address");
+    const location = {
+        country: watch("country"),
+        region: watch("region"),
+        city: watch("city"),
+    };
+
+    // LocationFields hands back a partial patch (picking a country clears the
+    // state and city beneath it), so apply whatever keys it sends.
+    const updateLocation = (patch) => {
+        Object.entries(patch).forEach(([key, value]) => {
+            setValue(key, value, { shouldValidate: true });
+        });
+    };
 
     const generateSlug = (name) => {
         return name
@@ -99,7 +115,9 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
         !watchedName?.trim() ||
         !watchedEmail?.trim() ||
         !watchedPhone?.trim() ||
-        !watchedAddress?.trim() ||
+        !location.country ||
+        !location.region ||
+        !location.city ||
         !logo;
 
     return {
@@ -114,6 +132,8 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
         watchedEmail,
         watchedPhone,
         watchedAddress,
+        location,
+        updateLocation,
         logo,
         setLogo,
         logoError,

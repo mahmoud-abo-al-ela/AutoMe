@@ -84,6 +84,7 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
     <div className="space-y-2">
       <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
         Dealership Logo
+        <span className="text-red-500">*</span>
       </Label>
 
       <AnimatePresence mode="wait">

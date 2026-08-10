@@ -50,6 +50,11 @@ export const organizationSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
+  // Structured location, captured in onboarding step 1 so an organization is
+  // filterable by city from the moment it is created.
+  country: z.string().optional().nullable(),
+  region: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
   logo: z.string().optional().nullable(),
   planId: z.string().min(1, "Plan ID is required"),
   workingHours: z.record(

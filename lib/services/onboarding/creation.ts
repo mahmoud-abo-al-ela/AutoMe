@@ -34,6 +34,9 @@ export interface CreateOrganizationInput {
   email: string;
   phone?: string | null;
   address?: string | null;
+  country?: string | null;
+  region?: string | null;
+  city?: string | null;
   logoUrl?: string | null;
   workingHours?: WorkingHoursInput | null;
   userId: string;
@@ -52,6 +55,9 @@ export async function createOrganizationInTransaction({
   email,
   phone,
   address,
+  country,
+  region,
+  city,
   logoUrl,
   workingHours,
   userId,
@@ -68,6 +74,10 @@ export async function createOrganizationInTransaction({
         email,
         phone: phone || null,
         address: address || null,
+        // Prisma defaults country to "EG"; passing null would override that.
+        ...(country ? { country } : {}),
+        region: region || null,
+        city: city || null,
         logo: logoUrl || null,
       },
     });
