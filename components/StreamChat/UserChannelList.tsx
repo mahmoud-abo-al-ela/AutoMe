@@ -3,9 +3,12 @@
 import { ChannelList } from "stream-chat-react";
 import { useChatContext } from "stream-chat-react";
 import { UserChannelPreview } from "./UserChannelPreview";
+import type { ChannelFilters, ChannelSort } from "stream-chat";
 
-const buildFilters = (userId, organizationId) => {
-    const filters = {
+const buildFilters = (userId: string, organizationId?: string | null) => {
+    // organization_id is a custom channel field, outside Stream's closed
+    // ChannelFilters union.
+    const filters: Record<string, unknown> = {
         type: "messaging",
         members: { $in: [userId] },
     };
@@ -15,13 +18,17 @@ const buildFilters = (userId, organizationId) => {
         filters.organization_id = organizationId;
     }
 
-    return filters;
+    return filters as unknown as ChannelFilters;
 };
 
-const sort = { last_message_at: -1 };
+const sort: ChannelSort = { last_message_at: -1 };
 const options = { limit: 20 };
 
-export function UserChannelList({ organizationId }) {
+export function UserChannelList({
+    organizationId,
+}: {
+    organizationId?: string | null;
+}) {
     const { client } = useChatContext();
 
     if (!client?.userID) {

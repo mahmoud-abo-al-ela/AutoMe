@@ -10,16 +10,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { startCarConversation } from "@/actions/stream-chat";
 import { toast } from "sonner";
 import { getCarById } from "@/actions/cars-listing";
+import type { Channel as StreamChannel, ChannelFilters, ChannelSort } from "stream-chat";
 
-export function ChatSidebar({ open, onOpenChange, carId }) {
+export function ChatSidebar({
+    open,
+    onOpenChange,
+    carId,
+}: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    carId: string;
+}) {
     const { client } = useChatContext();
-    const [channel, setChannel] = useState(null);
+    const [channel, setChannel] = useState<StreamChannel | null>(null);
     const [loading, setLoading] = useState(false);
-    const [carInfo, setCarInfo] = useState(null);
+    type SidebarCar = Extract<
+        Awaited<ReturnType<typeof getCarById>>,
+        { success: true }
+    >["data"];
+    const [carInfo, setCarInfo] = useState<SidebarCar | null>(null);
     const [channelCreated, setChannelCreated] = useState(false);
     const [messageText, setMessageText] = useState("");
     const [checkingChannel, setCheckingChannel] = useState(true); // New state to track channel check
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Load car info and check for existing channel when sidebar opens
     useEffect(() => {
@@ -45,13 +58,15 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                     // Check if a channel already exists for this car and user
                     // The channel ID format is deterministic: car-{carHash}-{userHash}
                     try {
+                        // car_id is a custom channel field this app sets, which
+                        // Stream's closed ChannelFilters union cannot express.
                         const filters = {
                             type: 'messaging',
                             members: { $in: [client.userID] },
                             car_id: carId,
-                        };
+                        } as unknown as ChannelFilters;
 
-                        const sort = [{ last_message_at: -1 }];
+                        const sort: ChannelSort = [{ last_message_at: -1 }];
                         const channels = await client.queryChannels(filters, sort, { limit: 1 });
 
                         if (channels.length > 0) {
@@ -85,7 +100,7 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
     }, [open, carId, client]);
 
     // Handle sending the first message - this creates the channel
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
 
         if (!messageText.trim() || loading) return;
@@ -98,7 +113,11 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                 const result = await startCarConversation(carId);
 
                 if (!result.success) {
-                    toast.error(result.error || "Failed to start conversation");
+                    // `result.error` is the ActionResponse error object, not a
+                    // string — passing it whole rendered "[object Object]".
+                    toast.error(
+                        result.error?.message || "Failed to start conversation"
+                    );
                     return;
                 }
 
@@ -148,7 +167,7 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                                 {carInfo.images?.[0] ? (
                                     <AvatarImage
                                         src={carInfo.images[0].url}
-                                        alt={carInfo.title}
+                                        alt={carInfo.title ?? ""}
                                         className="object-cover"
                                     />
                                 ) : null}
@@ -197,7 +216,9 @@ export function ChatSidebar({ open, onOpenChange, carId }) {
                     ) : channel ? (
                         <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <Channel channel={channel}>
-                                <Window hideOnThread>
+                                {/* hideOnThread is accepted at runtime but is
+                                    absent from this version's WindowProps. */}
+                                <Window {...({ hideOnThread: true } as object)}>
                                     <MessageList />
                                     <MessageInput focus />
                                 </Window>

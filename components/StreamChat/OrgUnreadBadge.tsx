@@ -5,19 +5,28 @@ import { useEffect, useState, Component } from "react";
 import { useChatContext } from "stream-chat-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import type { ChannelFilters } from "stream-chat";
+
+type OrgUnreadBadgeProps = {
+    organizationId?: string | null;
+    className?: string;
+};
 
 // Error boundary to catch context errors
-class OrgUnreadBadgeErrorBoundary extends Component {
-    constructor(props) {
+class OrgUnreadBadgeErrorBoundary extends Component<
+    { children: React.ReactNode },
+    { hasError: boolean }
+> {
+    constructor(props: { children: React.ReactNode }) {
         super(props);
         this.state = { hasError: false };
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError(error: Error) {
         return { hasError: true };
     }
 
-    componentDidCatch(error, errorInfo) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         // Silently catch - this is expected when chat context is not available
     }
 
@@ -29,7 +38,7 @@ class OrgUnreadBadgeErrorBoundary extends Component {
     }
 }
 
-function OrgUnreadBadgeInner({ organizationId, className }) {
+function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps) {
     const { client, channel: activeChannel } = useChatContext();
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -39,11 +48,13 @@ function OrgUnreadBadgeInner({ organizationId, className }) {
         const updateUnreadCount = async () => {
             try {
                 // Get all channels for this organization
+                // organization_id is a custom channel field, which Stream's
+                // closed ChannelFilters union cannot express.
                 const filter = {
                     type: "messaging",
                     organization_id: organizationId,
                     members: { $in: [client.userID] },
-                };
+                } as unknown as ChannelFilters;
 
                 const channels = await client.queryChannels(filter);
 
@@ -91,7 +102,7 @@ function OrgUnreadBadgeInner({ organizationId, className }) {
     );
 }
 
-export function OrgUnreadBadge({ organizationId, className }) {
+export function OrgUnreadBadge({ organizationId, className }: OrgUnreadBadgeProps) {
     return (
         <OrgUnreadBadgeErrorBoundary>
             <OrgUnreadBadgeInner organizationId={organizationId} className={className} />

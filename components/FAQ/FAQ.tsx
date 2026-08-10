@@ -61,7 +61,7 @@ const FAQ = ({ brandName = "AutoMe" }) => {
                         </span>
                     </h2>
                     <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-                        Everything you need to know about {brandName}. Can't find your answer?
+                        Everything you need to know about {brandName}. Can&apos;t find your answer?
                         <a href="/contact" className="text-blue-600 hover:text-blue-700 font-semibold ml-1">
                             Contact us
                         </a>

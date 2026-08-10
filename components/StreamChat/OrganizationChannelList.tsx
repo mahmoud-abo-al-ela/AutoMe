@@ -7,10 +7,15 @@ import { useChatContext } from "stream-chat-react";
 import { getOrganizationMemberIds } from "@/actions/stream-chat";
 import { Loader2, MessageSquare } from "lucide-react";
 import { DMChannelPreview } from "./DMChannelPreview";
+import type { ChannelFilters, ChannelSort } from "stream-chat";
 
-export function OrganizationChannelList({ organizationSlug }) {
+export function OrganizationChannelList({
+    organizationSlug,
+}: {
+    organizationSlug: string;
+}) {
     const { client } = useChatContext();
-    const [filters, setFilters] = useState(null);
+    const [filters, setFilters] = useState<ChannelFilters | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,11 +27,13 @@ export function OrganizationChannelList({ organizationSlug }) {
                     const { memberIds, organizationId } = result.data;
 
                     // Filter channels where organization members are participants
+                    // organization_id is a custom channel field, outside
+                    // Stream's closed ChannelFilters union.
                     setFilters({
                         type: "messaging",
                         members: { $in: memberIds },
                         organization_id: organizationId,
-                    });
+                    } as unknown as ChannelFilters);
                 }
             } catch (error) {
                 logError("Error loading organization channels:", error);
@@ -56,7 +63,7 @@ export function OrganizationChannelList({ organizationSlug }) {
         );
     }
 
-    const sort = { last_message_at: -1 };
+    const sort: ChannelSort = { last_message_at: -1 };
     const options = { limit: 20 };
 
     return (
@@ -75,7 +82,13 @@ export function OrganizationChannelList({ organizationSlug }) {
                     filters={filters}
                     sort={sort}
                     options={options}
-                    Preview={(props) => <DMChannelPreview {...props} />}
+                    Preview={(props) => (
+                        <DMChannelPreview
+                            channel={props.channel}
+                            setActiveChannel={props.setActiveChannel}
+                            activeChannel={props.activeChannel}
+                        />
+                    )}
                     setActiveChannelOnMount={false}
                 />
             </div>

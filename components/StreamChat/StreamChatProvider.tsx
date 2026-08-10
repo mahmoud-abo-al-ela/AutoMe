@@ -9,11 +9,11 @@ import { logError } from "@/lib/utils/errors";
 
 import "stream-chat-react/dist/css/v2/index.css";
 
-let chatClient = null;
+let chatClient: StreamChat | null = null;
 
-export function StreamChatProvider({ children }) {
+export function StreamChatProvider({ children }: { children: React.ReactNode }) {
     const { user: clerkUser, isLoaded } = useUser();
-    const [client, setClient] = useState(null);
+    const [client, setClient] = useState<StreamChat | null>(null);
     const [isConnecting, setIsConnecting] = useState(true);
 
     useEffect(() => {
@@ -36,6 +36,15 @@ export function StreamChatProvider({ children }) {
                 }
 
                 const { token, userId, apiKey } = result.data;
+
+                // apiKey is process.env.NEXT_PUBLIC_STREAM_API_KEY passed
+                // straight through, so it is undefined when unset — which
+                // getInstance would have thrown on further down.
+                if (!apiKey) {
+                    logError("Stream API key is not configured");
+                    setIsConnecting(false);
+                    return;
+                }
 
                 // Create or reuse client
                 if (!chatClient) {

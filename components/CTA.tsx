@@ -11,7 +11,7 @@ function CTA() {
             Ready to find your perfect car?
           </h2>
           <p className="text-base sm:text-lg text-primary-foreground/80 mb-6 sm:mb-8 max-w-3xl mx-auto px-2 sm:px-0">
-            Let's Discover Your Dream Car, and Make Your Driving Experience
+            Let&apos;s Discover Your Dream Car, and Make Your Driving Experience
             Unforgettable!
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
