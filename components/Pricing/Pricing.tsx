@@ -4,10 +4,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
 import { BillingToggle } from "./BillingToggle";
-import { resolvePlans, calculateSavingsPercentage } from "./pricing-plans";
+import {
+  resolvePlans,
+  calculateSavingsPercentage,
+  type DbPlan,
+} from "./pricing-plans";
 import PricingCard from "./PricingCard";
 
-const Pricing = ({ plans: dbPlans }) => {
+const Pricing = ({ plans: dbPlans }: { plans?: DbPlan[] | null }) => {
   const [billingPeriod, setBillingPeriod] = useState("monthly");
 
   const plans = resolvePlans(dbPlans);

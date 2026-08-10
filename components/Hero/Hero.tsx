@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import HeroSearch from "./HeroSearch";
 
 const Hero = () => {
-  const scrollToFeatures = (e) => {
+  const scrollToFeatures = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const featuresSection = document.getElementById("featured");
     if (featuresSection) {

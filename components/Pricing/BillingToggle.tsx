@@ -2,7 +2,15 @@
 
 import { motion } from "framer-motion";
 
-export function BillingToggle({ billingPeriod, onToggle, savingsPercentage }) {
+export function BillingToggle({
+    billingPeriod,
+    onToggle,
+    savingsPercentage,
+}: {
+    billingPeriod: string;
+    onToggle: () => void;
+    savingsPercentage?: number;
+}) {
     return (
         <div className="flex items-center justify-center gap-4 mb-8">
             <span
@@ -30,7 +38,7 @@ export function BillingToggle({ billingPeriod, onToggle, savingsPercentage }) {
             >
                 Yearly
             </span>
-            {billingPeriod === "yearly" && savingsPercentage > 0 && (
+            {billingPeriod === "yearly" && (savingsPercentage ?? 0) > 0 && (
                 <motion.span
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}

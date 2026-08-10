@@ -5,10 +5,22 @@ import { Check, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { formatPlanPrice, formatPlanPeriod } from "./pricing-plans";
+import {
+  formatPlanPrice,
+  formatPlanPeriod,
+  type UiPlan,
+} from "./pricing-plans";
 
 // A single pricing plan card.
-export default function PricingCard({ plan, billingPeriod, index }) {
+export default function PricingCard({
+  plan,
+  billingPeriod,
+  index,
+}: {
+  plan: UiPlan;
+  billingPeriod: string;
+  index: number;
+}) {
   const Icon = plan.icon;
 
   return (

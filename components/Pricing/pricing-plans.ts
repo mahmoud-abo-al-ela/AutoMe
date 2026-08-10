@@ -1,7 +1,44 @@
 // Pricing plan data + pure mapping/format helpers.
-import { Zap, Shield, Headphones } from "lucide-react";
+import { Zap, Shield, Headphones, type LucideIcon } from "lucide-react";
 
-export const defaultPlans = [
+export type PlanFeature = {
+  name: string;
+  included: boolean;
+};
+
+/** The shape the pricing cards render, whether it came from the DB or the defaults. */
+export type UiPlan = {
+  name: string;
+  description: string;
+  /** Cents. null means "contact us" pricing, which renders as "Custom". */
+  monthlyPrice: number | null;
+  yearlyPrice?: number | null;
+  popular: boolean;
+  features: PlanFeature[];
+  cta: string;
+  ctaLink: string;
+  icon: LucideIcon;
+  type?: string | null;
+};
+
+/** A Plan row as it arrives from the server, before mapDbPlanToUi reshapes it. */
+export type DbPlan = {
+  type?: string | null;
+  name: string;
+  monthlyPrice: number | null;
+  yearlyPrice?: number | null;
+  maxCars?: number | null;
+  maxMembers?: number | null;
+  maxImagesPerCar?: number | null;
+  auditLogRetentionDays?: number | null;
+  features?: {
+    chat?: boolean;
+    aiProcessing?: { enabled?: boolean };
+    prioritySupport?: boolean;
+  } | null;
+};
+
+export const defaultPlans: UiPlan[] = [
   {
     name: "Starter",
     description: "Perfect for small dealerships",
@@ -64,7 +101,7 @@ export const defaultPlans = [
   },
 ];
 
-function mapDbPlanToUi(plan) {
+function mapDbPlanToUi(plan: DbPlan): UiPlan {
   const isPro = plan.type === "PRO";
   const isEnterprise = plan.type === "ENTERPRISE";
 
@@ -116,14 +153,15 @@ function mapDbPlanToUi(plan) {
 }
 
 /** Resolve the plans to render: DB plans mapped to UI shape, or the defaults. */
-export function resolvePlans(dbPlans) {
+export function resolvePlans(dbPlans?: DbPlan[] | null): UiPlan[] {
   return dbPlans && dbPlans.length > 0 ? dbPlans.map(mapDbPlanToUi) : defaultPlans;
 }
 
 /** Average yearly savings percentage across paid plans. */
-export function calculateSavingsPercentage(plans) {
+export function calculateSavingsPercentage(plans: UiPlan[]): number {
   const paidPlans = plans.filter(
-    (plan) => plan.monthlyPrice > 0 && plan.monthlyPrice !== null,
+    (plan): plan is UiPlan & { monthlyPrice: number } =>
+      plan.monthlyPrice !== null && plan.monthlyPrice > 0,
   );
   if (paidPlans.length === 0) return 0;
 
@@ -137,7 +175,7 @@ export function calculateSavingsPercentage(plans) {
   return Math.round(totalSavings / paidPlans.length);
 }
 
-export function formatPlanPrice(plan, billingPeriod) {
+export function formatPlanPrice(plan: UiPlan, billingPeriod: string): string {
   if (plan.monthlyPrice === null) return "Custom";
   const price =
     billingPeriod === "monthly"
@@ -146,7 +184,7 @@ export function formatPlanPrice(plan, billingPeriod) {
   return `$${Math.floor(price / 100)}`;
 }
 
-export function formatPlanPeriod(plan, billingPeriod) {
+export function formatPlanPeriod(plan: UiPlan, billingPeriod: string): string {
   if (plan.monthlyPrice === null) return "";
   if (plan.monthlyPrice === 0) return "forever";
   return billingPeriod === "monthly" ? "per month" : "per year";

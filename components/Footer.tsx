@@ -2,7 +2,19 @@ import { Twitter, Instagram, Facebook } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-const Footer = ({ user, organization }) => {
+const Footer = ({
+  user,
+  organization,
+}: {
+  user?: unknown;
+  organization?: {
+    name?: string | null;
+    description?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    address?: string | null;
+  } | null;
+}) => {
   const isOnSubdomain = !!organization;
   const brandName = organization?.name || "AutoMe";
   const brandDescription = organization?.description || 

@@ -1,8 +1,21 @@
 import { motion } from "framer-motion";
 import { Zap, Shield, Clock, ChevronRight } from "lucide-react";
 
-const WhyCard = ({ icon, title, description, delay }) => {
-  const Icon = icon ? { Zap, Shield, Clock }[icon] : null;
+const ICONS = { Zap, Shield, Clock };
+
+const WhyCard = ({
+  icon,
+  title,
+  description,
+  delay,
+}: {
+  /** Key into ICONS. */
+  icon?: string;
+  title: string;
+  description: string;
+  delay?: number;
+}) => {
+  const Icon = icon ? ICONS[icon as keyof typeof ICONS] : null;
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}

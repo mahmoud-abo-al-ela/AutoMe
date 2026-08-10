@@ -101,7 +101,7 @@ const Testimonials = () => {
                                     <Quote className="h-8 w-8 text-primary/30 mb-4 flex-shrink-0" />
 
                                     <p className="text-muted-foreground mb-6 flex-grow leading-relaxed text-sm sm:text-base">
-                                        "{testimonial.content}"
+                                        &quot;{testimonial.content}&quot;
                                     </p>
 
                                     <div className="flex items-center gap-3 pt-4 border-t border-border">

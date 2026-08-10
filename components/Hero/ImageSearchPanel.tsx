@@ -19,6 +19,15 @@ const ImageSearchPanel = ({
   onCancel,
   onChangeImage,
   onSearch,
+}: {
+  imagePreview?: string | null;
+  fileName?: string | null;
+  loading?: boolean;
+  changeImageRef: React.RefObject<HTMLInputElement | null>;
+  onFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onCancel: () => void;
+  onChangeImage: () => void;
+  onSearch: () => void;
 }) => {
   return (
     <motion.div

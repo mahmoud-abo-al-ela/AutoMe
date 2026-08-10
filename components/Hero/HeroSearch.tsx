@@ -15,7 +15,7 @@ const HeroSearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
 
-  const handleSearch = (e) => {
+  const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) {
       toast.error("Please enter a search term");

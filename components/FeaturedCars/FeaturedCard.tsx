@@ -71,7 +71,16 @@ const FeaturedCard = ({
                       </div>
                     </CarouselItem>
                   ))
-              : featuredCars?.data?.map((car) => (
+              : // getFeaturedCars returns an ActionResponse, so `.data` only
+                // exists on the success branch. The old unnarrowed read
+                // produced undefined on failure and rendered nothing; so does
+                // this, but now the failure case is visible in the code.
+                // serializeCar maps null rows to null, so the action's array is
+                // nullable per element; those entries never rendered anything
+                // useful and are dropped rather than guarded at every field.
+                (featuredCars?.success ? featuredCars.data : [])
+                  ?.filter((car) => car !== null)
+                  .map((car) => (
                   <CarouselItem
                     key={car.id}
                     className="p-5 basis-full sm:basis-1/2 md:basis-1/3"

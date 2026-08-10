@@ -27,6 +27,12 @@ export default function CarCardActions({
   isWishlisted = false,
   onWishlistChange,
   isWishlistPage = false,
+}: {
+  carId: string;
+  isWishlisted?: boolean;
+  /** Called after a successful toggle so a list can drop the removed card. */
+  onWishlistChange?: (removedCarId: string) => void;
+  isWishlistPage?: boolean;
 }) {
   const [isFavorite, setIsFavorite] = useState(isWishlisted);
   const [isInCompare, setIsInCompare] = useState(false);
@@ -43,7 +49,7 @@ export default function CarCardActions({
     setIsInCompare(compareUtils.getCompareList().includes(carId));
   }, [carId]);
 
-  const handleToggleFavorite = async (e) => {
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isLoading) return;
@@ -75,7 +81,7 @@ export default function CarCardActions({
     }
   };
 
-  const handleToggleCompare = (e) => {
+  const handleToggleCompare = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 

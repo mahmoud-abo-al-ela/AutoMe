@@ -18,20 +18,36 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getCarColorHex } from "@/lib/constants/car-options";
 import CarCardActions from "./CarCardActions";
+import type { SerializedCar } from "@/lib/utils/serializers";
 
-const CarCard = ({ car, onWishlistChange, index = 0 }) => {
+/**
+ * Cards are rendered from several sources (featured, listings, wishlist), which
+ * agree on the serialized car but differ on whether the wishlist flag rode
+ * along, so it is optional here rather than part of SerializedCar.
+ */
+type CarCardCar = SerializedCar & { isWishlisted?: boolean };
+
+const CarCard = ({
+  car,
+  onWishlistChange,
+  index = 0,
+}: {
+  car: CarCardCar;
+  onWishlistChange?: (removedCarId: string) => void;
+  index?: number;
+}) => {
   const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
-  const formatPrice = (price) =>
+  const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 0,
     }).format(price);
 
-  const formatMileage = (mileage) =>
+  const formatMileage = (mileage: number) =>
     new Intl.NumberFormat("en-US", {
       style: "unit",
       unit: "mile",
