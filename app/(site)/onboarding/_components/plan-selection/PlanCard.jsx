@@ -46,11 +46,14 @@ export function PlanCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             whileHover={{ y: -8 }}
-            className="relative"
+            className="relative h-full"
         >
             <Card
                 className={cn(
-                    "relative cursor-pointer transition-all duration-300 hover:shadow-2xl",
+                    // h-full + column flex so every card fills the grid row and
+                    // the footer sits at the bottom regardless of how many
+                    // features the plan lists (Enterprise has one more).
+                    "relative flex h-full flex-col cursor-pointer transition-all duration-300 hover:shadow-2xl",
                     config.border,
                     isSelected
                         ? "ring-4 ring-green-500 shadow-2xl scale-105 z-10"
@@ -117,11 +120,13 @@ export function PlanCard({
                     </div>
                 </CardHeader>
 
-                <CardContent className="pb-4 relative z-10">
+                {/* flex-1 absorbs the height difference, so shorter feature
+                    lists pad out instead of shrinking the card. */}
+                <CardContent className="pb-4 relative z-10 flex-1">
                     <PlanFeatureList plan={plan} />
                 </CardContent>
 
-                <CardFooter className="relative z-10">
+                <CardFooter className="relative z-10 mt-auto">
                     <Button
                         type="button"
                         className={`w-full h-12 text-base font-semibold transition-all duration-300 cursor-pointer hover:bg-transparent ${isSelected
