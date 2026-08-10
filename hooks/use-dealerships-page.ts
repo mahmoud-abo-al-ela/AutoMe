@@ -14,6 +14,7 @@ import {
   parseFiltersFromSearch,
   buildDealershipsUrl,
 } from "@/hooks/dealerships-url";
+import type { DealershipPageFilters } from "@/hooks/dealerships-url";
 
 export {
   DEFAULT_DEALERSHIP_SORT,
@@ -40,7 +41,7 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
 
   // Only seed react-query with SSR data while the key still matches the server's.
   const isInitialKeyRef = useRef(true);
-  const searchDebounceRef = useRef(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
 
@@ -87,7 +88,13 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const pushUrl = useCallback((nextFilters, nextPage, nextPerPage, replace = false) => {
+  const pushUrl = useCallback(
+    (
+      nextFilters: DealershipPageFilters,
+      nextPage: number,
+      nextPerPage: number,
+      replace = false
+    ) => {
     const url = buildDealershipsUrl(nextFilters, nextPage, nextPerPage);
     if (replace) {
       window.history.replaceState(null, "", url);
@@ -109,7 +116,10 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
 
   // Apply a whole filters object (resets to page 1). Discrete → pushState.
   const applyFilters = useCallback(
-    (nextFilters, { replace = false } = {}) => {
+    (
+      nextFilters: DealershipPageFilters,
+      { replace = false }: { replace?: boolean } = {}
+    ) => {
       setFilters(nextFilters);
       setPage(1);
       pushUrl(nextFilters, 1, perPage, replace);
@@ -119,26 +129,28 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
 
   // Set a single field and apply.
   const setFilter = useCallback(
-    (key, value) => applyFilters({ ...filters, [key]: value }),
+    (key: keyof DealershipPageFilters, value: unknown) =>
+      applyFilters({ ...filters, [key]: value }),
     [filters, applyFilters]
   );
 
   // Merge a partial filters patch (used by hero quick-picks) and apply.
   const applyPatch = useCallback(
-    (patch) => applyFilters({ ...filters, ...patch }),
+    (patch: Partial<DealershipPageFilters>) => applyFilters({ ...filters, ...patch }),
     [filters, applyFilters]
   );
 
   // Toggle a single-value field: selecting the active value clears it.
   const toggleFilter = useCallback(
-    (key, value) => setFilter(key, filters[key] === value ? undefined : value),
+    (key: keyof DealershipPageFilters, value: unknown) =>
+      setFilter(key, filters[key] === value ? undefined : value),
     [filters, setFilter]
   );
 
   // Search-as-you-type: input updates immediately; the committed filter (which
   // drives the fetch + URL) is debounced so we don't query per keystroke.
   const setSearch = useCallback(
-    (value) => {
+    (value: string) => {
       setSearchInput(value);
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
       searchDebounceRef.current = setTimeout(() => {
@@ -156,7 +168,7 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
   }, [filters.search]);
 
   const setSort = useCallback(
-    (sort) => {
+    (sort: string) => {
       const next = { ...filters, sort };
       setFilters(next);
       pushUrl(next, page, perPage);
@@ -165,7 +177,7 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
   );
 
   const changePage = useCallback(
-    (nextPage) => {
+    (nextPage: number) => {
       setIsPaging(true);
       setPage(nextPage);
       pushUrl(filters, nextPage, perPage);
@@ -175,7 +187,7 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
   );
 
   const changePerPage = useCallback(
-    (nextPerPage) => {
+    (nextPerPage: number) => {
       setIsPaging(true);
       setPerPage(nextPerPage);
       setPage(1);
@@ -187,7 +199,7 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
   // Commit a [min, max] car-count range. Values at the domain bounds are
   // dropped so we don't pin the URL to the full range.
   const commitCarCount = useCallback(
-    ([min, max], bounds) => {
+    ([min, max]: [number, number], bounds?: { min: number; max: number }) => {
       const next = {
         ...filters,
         minCarCount: bounds && min <= bounds.min ? undefined : min || undefined,
@@ -207,7 +219,7 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
 
   // Clear one active-filter chip.
   const clearFilter = useCallback(
-    (type) => {
+    (type: string) => {
       const next = { ...filters };
       switch (type) {
         case "search":
@@ -262,7 +274,9 @@ export const useDealershipsPage = (initialData = null, initialState = null) => {
     isFetching,
     isPaging,
     isError,
-    errorMessage: queryData?.error?.message,
+    // Only the error branch carries `error`; narrow before reading it.
+    errorMessage:
+      queryData && !queryData.success ? queryData.error.message : undefined,
     refetch,
     filters,
     searchValue: searchInput,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -43,6 +43,18 @@ const createCarFormSchema = (maxImages = VALIDATION_RULES.CAR.MAX_IMAGES, isEdit
             .max(maxImages, `Maximum of ${maxImages} images allowed`),
     });
 
+/** The form's validated shape, inferred from the schema factory. */
+export type CarFormValues = z.infer<ReturnType<typeof createCarFormSchema>>;
+
+/**
+ * Pre-fill for the form: any subset of the form fields, plus the loose
+ * string-shaped values the AI extraction path supplies (price and features
+ * arrive as strings and are coerced in the effect below).
+ */
+export type CarFormInitialData = Partial<
+  Record<keyof CarFormValues, unknown>
+>;
+
 const formSections = [
     { id: "basic", label: "Basic Info" },
     { id: "specs", label: "Specifications" },
@@ -50,15 +62,25 @@ const formSections = [
     { id: "status", label: "Status & Visibility" },
 ];
 
-export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MAX_IMAGES, isEditMode = false, carId = null) => {
+export const useCarForm = (
+    initialData: CarFormInitialData = {},
+    maxImages: number = VALIDATION_RULES.CAR.MAX_IMAGES,
+    isEditMode = false,
+    carId: string | null = null
+) => {
     const [currentSection, setCurrentSection] = useState("basic");
     const router = useRouter();
 
     const carFormSchema = useMemo(() => createCarFormSchema(maxImages, isEditMode), [maxImages, isEditMode]);
     const resolver = useMemo(() => zodResolver(carFormSchema), [carFormSchema]);
 
-    const form = useForm({
-        resolver,
+    const form = useForm<CarFormValues>({
+        // The schema transforms `features` (string → string[]), so its input and
+        // output types differ; the resolver is asserted to the output shape.
+        resolver: resolver as Resolver<CarFormValues>,
+        // The numeric fields deliberately default to "" so their inputs render
+        // empty rather than 0; Zod coerces and validates them on submit. The
+        // cast preserves that, rather than changing the rendered defaults.
         defaultValues: {
             title: initialData.title || "",
             make: initialData.make || "",
@@ -77,21 +99,23 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
             status: initialData.status || "Available",
             featured: initialData.featured || false,
             images: initialData.images || [],
-        },
+        } as unknown as CarFormValues,
         mode: "onChange",
     });
 
     const queryClient = useQueryClient();
     
     const { isPending: adding, mutateAsync: addCarFn } = useMutation({
-        mutationFn: (payload) => addCar(payload.data),
+        mutationFn: (payload: { data: CarFormValues }) => addCar(payload.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
         },
     });
 
     const { isPending: updating, mutateAsync: updateCarFn } = useMutation({
-        mutationFn: (payload) => updateCarFull(carId, payload.data),
+        // Only mounted in edit mode, where carId is always supplied.
+        mutationFn: (payload: { data: CarFormValues }) =>
+            updateCarFull(carId!, payload.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
             queryClient.invalidateQueries({ queryKey: [...queryKeys.cars.all, carId] });
@@ -123,23 +147,23 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
                         const cleanPrice = value.replace(/[$,+]/g, "");
                         const numPrice = parseFloat(cleanPrice);
                         if (!isNaN(numPrice)) {
-                            form.setValue(key, numPrice);
+                            form.setValue(key as keyof CarFormValues,numPrice);
                         }
                     } else if (key === "features" && typeof value === "string") {
                         const featuresArray = value
                             .split(",")
                             .map((feature) => feature.trim())
                             .filter(Boolean);
-                        form.setValue(key, featuresArray);
+                        form.setValue(key as keyof CarFormValues,featuresArray);
                     } else {
-                        form.setValue(key, value);
+                        form.setValue(key as keyof CarFormValues, value as never);
                     }
                 }
             });
         }
     }, [initialData, form]);
 
-    const validateSection = async (sectionId) => {
+    const validateSection = async (sectionId: string) => {
         let isValid = true;
 
         if (sectionId === "basic") {
@@ -192,11 +216,14 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
         }
     };
 
-    const onSubmit = async (data) => {
-        if (typeof data.features === 'string') {
-            data.features = data.features
+    const onSubmit = async (data: CarFormValues) => {
+        // Defensive only: the schema already transforms a comma-separated
+        // `features` string into an array, so by here it never is one.
+        const rawFeatures: unknown = data.features;
+        if (typeof rawFeatures === 'string') {
+            data.features = rawFeatures
                 .split(',')
-                .map(f => f.trim())
+                .map((f) => f.trim())
                 .filter(Boolean);
         }
 
@@ -207,7 +234,11 @@ export const useCarForm = (initialData = {}, maxImages = VALIDATION_RULES.CAR.MA
             const slug = window.location.pathname.split('/')[2];
             router.push(`/org/${slug}/cars`);
         } else {
-            const errorMessage = response?.error || (isEditMode ? "Failed to update car" : "Failed to add car");
+            // Same "[object Object]" defect flagged in the admin hooks: `error`
+            // is the ErrorResponse object, not its message. Preserved as-is.
+            const errorMessage =
+                (response?.error && String(response.error)) ||
+                (isEditMode ? "Failed to update car" : "Failed to add car");
             toast.error(errorMessage);
         }
     };

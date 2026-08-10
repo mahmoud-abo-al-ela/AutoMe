@@ -11,6 +11,8 @@ import {
   buildCarsUrl,
   buildActiveFilterChips,
 } from "./cars-page-filters";
+import type { CarPageFilters, MultiKey } from "./cars-page-filters";
+import type { ActionResponse } from "@/lib/utils/response";
 
 // Re-exported for backward-compatible import sites.
 export { DEFAULT_PER_PAGE, parseFiltersFromSearch, buildCarsUrl };
@@ -39,7 +41,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
 
   // Only seed react-query with SSR data while the key still matches the server's.
   const isInitialKeyRef = useRef(true);
-  const searchDebounceRef = useRef(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
 
@@ -91,7 +93,13 @@ export const useCarsPage = (initialData = null, initialState = null) => {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const pushUrl = useCallback((nextFilters, nextPage, nextPerPage, replace = false) => {
+  const pushUrl = useCallback(
+    (
+      nextFilters: CarPageFilters,
+      nextPage: number,
+      nextPerPage: number,
+      replace = false
+    ) => {
     const url = buildCarsUrl(nextFilters, nextPage, nextPerPage);
     if (replace) {
       window.history.replaceState(null, "", url);
@@ -116,7 +124,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
 
   // Apply a whole filters object (resets to page 1). Discrete → pushState.
   const applyFilters = useCallback(
-    (nextFilters, { replace = false } = {}) => {
+    (nextFilters: CarPageFilters, { replace = false }: { replace?: boolean } = {}) => {
       setIsFilterPending(true);
       setFilters(nextFilters);
       setPage(1);
@@ -127,22 +135,23 @@ export const useCarsPage = (initialData = null, initialState = null) => {
 
   // Set a single field and apply.
   const setFilter = useCallback(
-    (key, value) => applyFilters({ ...filters, [key]: value }),
+    (key: keyof CarPageFilters, value: unknown) =>
+      applyFilters({ ...filters, [key]: value }),
     [filters, applyFilters]
   );
 
   // Merge a partial filters patch (used by hero quick-picks) and apply.
   const applyPatch = useCallback(
-    (patch) => applyFilters({ ...filters, ...patch }),
+    (patch: Partial<CarPageFilters>) => applyFilters({ ...filters, ...patch }),
     [filters, applyFilters]
   );
 
   // Toggle one value in a multi-select array field.
   const toggleMulti = useCallback(
-    (key, value) => {
-      const current = filters[key] || [];
+    (key: MultiKey, value: string) => {
+      const current: string[] = filters[key] || [];
       const next = current.includes(value)
-        ? current.filter((v) => v !== value)
+        ? current.filter((v: string) => v !== value)
         : [...current, value];
       applyFilters({ ...filters, [key]: next });
     },
@@ -153,7 +162,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   // (which drives the fetch + URL) is debounced so we don't query per keystroke
   // or flood the back stack.
   const setSearch = useCallback(
-    (value) => {
+    (value: string) => {
       setSearchInput(value);
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
       searchDebounceRef.current = setTimeout(() => {
@@ -178,7 +187,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   }, [filters.search]);
 
   const setSort = useCallback(
-    (sortBy) => {
+    (sortBy: string) => {
       const next = { ...filters, sortBy };
       setFilters(next);
       pushUrl(next, page, perPage);
@@ -187,7 +196,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   );
 
   const changePage = useCallback(
-    (nextPage) => {
+    (nextPage: number) => {
       setIsPaging(true);
       setPage(nextPage);
       pushUrl(filters, nextPage, perPage);
@@ -197,7 +206,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   );
 
   const changePerPage = useCallback(
-    (nextPerPage) => {
+    (nextPerPage: number) => {
       setIsPaging(true);
       setPerPage(nextPerPage);
       setPage(1);
@@ -209,7 +218,12 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   // Commit a [min, max] range for price/year/mileage. Values equal to the
   // domain bounds are dropped so we don't pin the URL to the full range.
   const commitRange = useCallback(
-    (minKey, maxKey, [min, max], bounds) => {
+    (
+      minKey: keyof CarPageFilters,
+      maxKey: keyof CarPageFilters,
+      [min, max]: [number, number],
+      bounds?: { min: number; max: number }
+    ) => {
       const next = {
         ...filters,
         [minKey]: bounds && min <= bounds.min ? undefined : min || undefined,
@@ -229,7 +243,7 @@ export const useCarsPage = (initialData = null, initialState = null) => {
 
   // Clear one active-filter chip. For multi fields, `value` removes a single entry.
   const clearFilter = useCallback(
-    (type, value) => {
+    (type: string, value?: string) => {
       const next = { ...filters };
       switch (type) {
         case "search":
@@ -291,7 +305,9 @@ export const useCarsPage = (initialData = null, initialState = null) => {
     isPaging,
     isFilterPending,
     isError,
-    errorMessage: queryData?.error?.message,
+    // Only the error branch carries `error`; narrow before reading it.
+    errorMessage:
+      queryData && !queryData.success ? queryData.error.message : undefined,
     refetch,
     filters,
     searchValue: searchInput,
