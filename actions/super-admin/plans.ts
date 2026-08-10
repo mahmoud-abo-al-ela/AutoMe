@@ -5,11 +5,13 @@ import { revalidatePath } from "next/cache";
 import * as planService from "@/lib/services/super-admin/plan";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
+import type { PlanFormInput } from "@/lib/services/super-admin/plan";
 
 /**
  * Update a plan's pricing and limits
  */
-export const updatePlan = withSuperAdmin(async (admin, planId, data) => {
+export const updatePlan = withSuperAdmin(
+  async (admin, planId: string, data: PlanFormInput) => {
   const plan = await planService.updatePlan(planId, data);
 
   await db.auditLog.create({
@@ -19,7 +21,8 @@ export const updatePlan = withSuperAdmin(async (admin, planId, data) => {
       entityId: planId,
       userId: admin.id,
       userEmail: admin.email,
-      metadata: data,
+      // The audit column is Prisma JSON; an interface has no index signature.
+      metadata: { ...data },
     },
   });
 
@@ -30,7 +33,7 @@ export const updatePlan = withSuperAdmin(async (admin, planId, data) => {
 /**
  * Create a new plan
  */
-export const createPlan = withSuperAdmin(async (admin, data) => {
+export const createPlan = withSuperAdmin(async (admin, data: PlanFormInput) => {
   const plan = await planService.createPlan(data);
 
   await db.auditLog.create({
@@ -51,7 +54,7 @@ export const createPlan = withSuperAdmin(async (admin, data) => {
 /**
  * Delete a plan (only if no active subscriptions)
  */
-export const deletePlan = withSuperAdmin(async (admin, planId) => {
+export const deletePlan = withSuperAdmin(async (admin, planId: string) => {
   const plan = await planService.deletePlan(planId);
 
   await db.auditLog.create({

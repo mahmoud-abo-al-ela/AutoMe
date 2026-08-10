@@ -53,7 +53,7 @@ export const getStreamToken = withAuth(async (ctx) => {
 /**
  * Start a conversation about a car
  */
-export const startCarConversation = withAuth(async (ctx, carId) => {
+export const startCarConversation = withAuth(async (ctx, carId: string) => {
     const user = await prisma.user.findUnique({
         where: { clerkId: ctx.userId },
     });
@@ -87,7 +87,7 @@ export const startCarConversation = withAuth(async (ctx, carId) => {
     await ensureOrgMembersInStream(orgMembers);
 
     // Create channel in Stream Chat
-    const channel = await createCarInquiryChannel({
+    const { channelId } = await createCarInquiryChannel({
         organizationId: car.organizationId,
         userId: user.id,
         carId: car.id,
@@ -110,11 +110,11 @@ export const startCarConversation = withAuth(async (ctx, carId) => {
     // Add organization members to the channel
     const orgMemberIds = orgMembers.map(m => m.id);
     if (orgMemberIds.length > 0) {
-        await addMembersToChannel(channel.id, orgMemberIds);
+        await addMembersToChannel(channelId, orgMemberIds);
     }
 
     return createSuccessResponse({
-        channelId: channel.id,
+        channelId,
         channelType: "messaging",
     });
 });
@@ -122,7 +122,8 @@ export const startCarConversation = withAuth(async (ctx, carId) => {
 /**
  * Start a general conversation with an organization
  */
-export const startOrganizationConversation = withAuth(async (ctx, organizationId) => {
+export const startOrganizationConversation = withAuth(
+    async (ctx, organizationId: string) => {
     const user = await prisma.user.findUnique({
         where: { clerkId: ctx.userId },
     });
@@ -152,7 +153,7 @@ export const startOrganizationConversation = withAuth(async (ctx, organizationId
     await ensureOrgMembersInStream(orgMembers);
 
     // Create channel in Stream Chat
-    const channel = await createCarInquiryChannel({
+    const { channelId } = await createCarInquiryChannel({
         organizationId: organization.id,
         userId: user.id,
         organizationData: {
@@ -165,11 +166,11 @@ export const startOrganizationConversation = withAuth(async (ctx, organizationId
     // Add organization members to the channel
     const orgMemberIds = orgMembers.map(m => m.id);
     if (orgMemberIds.length > 0) {
-        await addMembersToChannel(channel.id, orgMemberIds);
+        await addMembersToChannel(channelId, orgMemberIds);
     }
 
     return createSuccessResponse({
-        channelId: channel.id,
+        channelId,
         channelType: "messaging",
     });
 });
@@ -177,7 +178,7 @@ export const startOrganizationConversation = withAuth(async (ctx, organizationId
 /**
  * Get organization member IDs for filtering channels
  */
-export const getOrganizationMemberIds = withAuth(async (ctx, slug) => {
+export const getOrganizationMemberIds = withAuth(async (ctx, slug: string) => {
     const { organization, membership } = await getOrganization(slug);
     if (!organization || !membership) {
         throw new NotFoundError("Organization not found or access denied");

@@ -24,13 +24,34 @@ import {
 import { createOrganizationInTransaction } from "@/lib/services/onboarding/creation";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { organizationSchema } from "@/lib/validations/schemas";
+import type { OrganizationInput } from "@/lib/validations/schemas";
+import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import { RateLimitError } from "@/lib/utils/errors";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key");
 
-export const checkSlugAvailability = withErrorHandling(async (slug) => {
+/**
+ * Stripe returns customer/subscription unexpanded here, so these arrive as ID
+ * strings; the object branch exists only to narrow the expandable union.
+ */
+function idOf(value: string | { id: string } | null | undefined): string | null {
+  if (!value) return null;
+  return typeof value === "string" ? value : value.id;
+}
+
+/**
+ * BUG (surfaced by this conversion, NOT fixed here): the Plan model has no
+ * trialDays column, so this is always undefined and the TRIALING branch in
+ * createOrganizationInTransaction never runs. Same defect as the one flagged
+ * in the checkout webhook handler; the fix belongs in its own PR.
+ */
+function planTrialDays(plan: object): number | undefined {
+  return (plan as { trialDays?: number }).trialDays;
+}
+
+export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
   if (!slug || slug.length < 3) {
     return createSuccessResponse({ available: false });
   }
@@ -58,7 +79,7 @@ export const createOrganization = withAuth(
       userId,
       subscriptionId,
       paymentIntentId,
-    }
+    }: OrganizationInput
   ) => {
     // Rate limit org creation
     const req = await request();
@@ -119,10 +140,10 @@ export const createOrganization = withAuth(
 
     const stripeData = {
       subscriptionId: stripeSubscription?.id || subscriptionId,
-      customerId: stripeSubscription?.customer,
+      customerId: idOf(stripeSubscription?.customer),
       paymentIntentId,
       stripeSubscription,
-      trialDays: plan.trialDays,
+      trialDays: planTrialDays(plan),
     };
 
     const organization = await createOrganizationInTransaction({
@@ -160,7 +181,8 @@ export const createOrganization = withAuth(
   }
 );
 
-export const saveOnboardingFormData = withAuth(async (ctx, formData) => {
+export const saveOnboardingFormData = withAuth(
+  async (ctx, formData: OnboardingSessionData) => {
   const result = await saveSession(ctx.user.id, formData);
   return createSuccessResponse({ sessionId: result.sessionId });
 });
@@ -179,7 +201,7 @@ export const resumeOnboardingFormData = withAuth(async (ctx) => {
 });
 
 export const createOrganizationAfterCheckout = withAuth(
-  async (ctx, stripeSessionId) => {
+  async (ctx, stripeSessionId: string) => {
     const session = await retrieveCheckoutSession(stripeSessionId);
 
     if (session.payment_status !== "paid") {
@@ -195,7 +217,7 @@ export const createOrganizationAfterCheckout = withAuth(
       });
     }
 
-    const { onboardingSessionId } = session.metadata;
+    const { onboardingSessionId } = session.metadata ?? {};
     const onboardingData = await getOnboardingSessionForUser(
       onboardingSessionId,
       ctx.user.id
@@ -227,20 +249,21 @@ export const createOrganizationAfterCheckout = withAuth(
     }
 
     let stripeSubscription = null;
-    if (session.subscription) {
+    const sessionSubscriptionId = idOf(session.subscription);
+    if (sessionSubscriptionId) {
       stripeSubscription = await stripe.subscriptions.retrieve(
-        session.subscription
+        sessionSubscriptionId
       );
     }
 
     const logoUrl = await resolveLogoUrl(logo, slug);
 
     const stripeData = {
-      subscriptionId: stripeSubscription?.id || session.subscription,
-      customerId: session.customer,
+      subscriptionId: stripeSubscription?.id ?? sessionSubscriptionId,
+      customerId: idOf(session.customer),
       checkoutSessionId: stripeSessionId,
       stripeSubscription,
-      trialDays: plan.trialDays,
+      trialDays: planTrialDays(plan),
     };
 
     const organization = await createOrganizationInTransaction({

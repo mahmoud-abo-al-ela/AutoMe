@@ -13,7 +13,7 @@ import { createSuccessResponse } from "@/lib/utils/response";
  * Start an impersonation session
  */
 export const startImpersonation = withSuperAdmin(
-  async (admin, organizationId, targetUserId) => {
+  async (admin, organizationId: string, targetUserId: string) => {
     await enforceRateLimit();
     const validated = validateAction(startImpersonationSchema, {
       organizationId,
@@ -43,7 +43,7 @@ export const startImpersonation = withSuperAdmin(
 /**
  * End an impersonation session
  */
-export const endImpersonation = withSuperAdmin(async (admin, sessionId) => {
+export const endImpersonation = withSuperAdmin(async (admin, sessionId: string) => {
   const session = await impersonationService.endImpersonation(sessionId);
 
   await auditHelpers.logImpersonationEnded(session, admin.email);

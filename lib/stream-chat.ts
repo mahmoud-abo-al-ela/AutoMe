@@ -1,6 +1,42 @@
-import { StreamChat } from "stream-chat";
+import { StreamChat, type ChannelData } from "stream-chat";
 
-let serverClient = null;
+/** The Stream user payload assembled from a local User row. */
+export interface StreamUserInput {
+    id: string;
+    name?: string | null;
+    image?: string | null;
+    email?: string | null;
+    custom?: Record<string, unknown>;
+}
+
+/** A local User row, as far as ensureOrgMembersInStream reads it. */
+export interface OrgMemberInput {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    imageUrl?: string | null;
+    clerkId?: string | null;
+    role?: string | null;
+}
+
+/** The car summary mirrored onto the channel. `price` may be a Decimal. */
+export interface ChannelCarData {
+    id: string;
+    title?: string | null;
+    make?: string;
+    model?: string;
+    year?: number;
+    price?: { toString(): string } | null;
+    images?: string[];
+}
+
+export interface ChannelOrganizationData {
+    id: string;
+    name: string;
+    slug: string;
+}
+
+let serverClient: StreamChat | null = null;
 
 /**
  * Get or create a singleton Stream Chat server client
@@ -23,7 +59,7 @@ export function getStreamServerClient() {
 /**
  * Generate a Stream Chat token for a user
  */
-export function generateStreamToken(userId) {
+export function generateStreamToken(userId: string): string {
     const client = getStreamServerClient();
     return client.createToken(userId);
 }
@@ -31,7 +67,7 @@ export function generateStreamToken(userId) {
 /**
  * Create or update a Stream Chat user
  */
-export async function upsertStreamUser(userData) {
+export async function upsertStreamUser(userData: StreamUserInput) {
     const client = getStreamServerClient();
 
     const streamUser = {
@@ -42,14 +78,16 @@ export async function upsertStreamUser(userData) {
         ...(userData.custom && userData.custom),
     };
 
-    await client.upsertUser(streamUser);
+    // The SDK's UserResponse rejects nullable name/image and the spread-in
+    // custom keys, both of which the API accepts. Cast at the boundary.
+    await client.upsertUser(streamUser as Parameters<typeof client.upsertUser>[0]);
     return streamUser;
 }
 
 /**
  * Delete a Stream Chat user
  */
-export async function deleteStreamUser(userId) {
+export async function deleteStreamUser(userId: string): Promise<void> {
     const client = getStreamServerClient();
     await client.deleteUser(userId, { mark_messages_deleted: true, hard_delete: true });
 }
@@ -57,7 +95,7 @@ export async function deleteStreamUser(userId) {
 /**
  * Create a short hash from a string (for channel IDs)
  */
-function createShortHash(str) {
+function createShortHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
@@ -67,7 +105,7 @@ function createShortHash(str) {
     return Math.abs(hash).toString(36);
 }
 
-export async function ensureOrgMembersInStream(orgMembers) {
+export async function ensureOrgMembersInStream(orgMembers: OrgMemberInput[]) {
     for (const member of orgMembers) {
         await upsertStreamUser({
             id: member.id,
@@ -91,6 +129,14 @@ export async function createCarInquiryChannel({
     carId,
     carData,
     organizationData,
+}: {
+    organizationId: string;
+    userId: string;
+    // Absent for a general organization inquiry, which falls back to an
+    // org-scoped channel ID below.
+    carId?: string;
+    carData?: ChannelCarData;
+    organizationData?: ChannelOrganizationData;
 }) {
     const client = getStreamServerClient();
 
@@ -104,6 +150,9 @@ export async function createCarInquiryChannel({
         ? `car-${carHash}-${userHash}`
         : `org-${orgHash}-${userHash}`;
 
+    // ChannelData in stream-chat@9 declares only the built-in fields; `name`
+    // and the car_*/organization_* metadata below are custom keys the API
+    // stores fine. Cast at the boundary rather than dropping them.
     const channel = client.channel("messaging", channelId, {
         name: carData?.title || organizationData?.name || "Inquiry",
         members: [userId],
@@ -125,16 +174,16 @@ export async function createCarInquiryChannel({
             name: organizationData.name,
             slug: organizationData.slug,
         } : undefined,
-    });
+    } as ChannelData);
 
     await channel.create();
-    return channel;
+    return { channel, channelId };
 }
 
 /**
  * Add organization members to a channel
  */
-export async function addMembersToChannel(channelId, memberIds) {
+export async function addMembersToChannel(channelId: string, memberIds: string[]) {
     const client = getStreamServerClient();
     const channel = client.channel("messaging", channelId);
     await channel.addMembers(memberIds);
@@ -143,7 +192,15 @@ export async function addMembersToChannel(channelId, memberIds) {
 /**
  * Get or create a channel
  */
-export async function getOrCreateChannel({ channelId, members, data = {} }) {
+export async function getOrCreateChannel({
+    channelId,
+    members,
+    data = {},
+}: {
+    channelId: string;
+    members: string[];
+    data?: Record<string, unknown>;
+}) {
     const client = getStreamServerClient();
     const channel = client.channel("messaging", channelId, {
         members,

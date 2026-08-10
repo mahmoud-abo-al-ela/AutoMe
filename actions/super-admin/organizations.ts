@@ -6,11 +6,13 @@ import * as orgService from "@/lib/services/super-admin/organization";
 import * as subscriptionService from "@/lib/services/super-admin/subscription";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
+import type { CreateOrganizationInput } from "@/lib/services/super-admin/organization";
 
 /**
  * Create a new organization
  */
-export const createOrganization = withSuperAdmin(async (admin, data) => {
+export const createOrganization = withSuperAdmin(
+  async (admin, data: CreateOrganizationInput) => {
   const { organization, plan } = await orgService.createOrganization(data);
 
   await db.auditLog.create({
@@ -39,7 +41,7 @@ export const createOrganization = withSuperAdmin(async (admin, data) => {
  * Update organization status
  */
 export const updateOrganizationStatus = withSuperAdmin(
-  async (admin, orgId, isActive) => {
+  async (admin, orgId: string, isActive: boolean) => {
     await orgService.updateOrganizationStatus(orgId, isActive);
 
     await db.auditLog.create({
@@ -62,7 +64,7 @@ export const updateOrganizationStatus = withSuperAdmin(
 /**
  * Delete an organization (hard delete with all related data)
  */
-export const deleteOrganization = withSuperAdmin(async (admin, orgId) => {
+export const deleteOrganization = withSuperAdmin(async (admin, orgId: string) => {
   const org = await orgService.deleteOrganization(orgId);
 
   await db.auditLog.create({
@@ -88,7 +90,7 @@ export const deleteOrganization = withSuperAdmin(async (admin, orgId) => {
  * Change organization's subscription plan
  */
 export const changeOrganizationPlan = withSuperAdmin(
-  async (admin, orgId, planId) => {
+  async (admin, orgId: string, planId: string) => {
     const { org, subscriptionId } = await orgService.changeOrganizationPlan(
       orgId,
       planId

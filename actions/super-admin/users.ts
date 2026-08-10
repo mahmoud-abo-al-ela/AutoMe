@@ -5,12 +5,13 @@ import { revalidatePath } from "next/cache";
 import * as userService from "@/lib/services/super-admin/user";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
+import type { UserRole } from "@/lib/generated/prisma";
 
 /**
  * Update a user's role
  */
 export const updateUserRole = withSuperAdmin(
-  async (admin, userId, newRole) => {
+  async (admin, userId: string, newRole: UserRole) => {
     await userService.updateUserRole(userId, newRole, admin.id);
 
     await db.auditLog.create({
