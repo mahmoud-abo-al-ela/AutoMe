@@ -12,7 +12,6 @@ export function useWorkingHours({ formData, updateFormData, onNext }) {
         control,
         handleSubmit,
         watch,
-        setValue,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(workingHoursSchema),
@@ -36,7 +35,5 @@ export function useWorkingHours({ formData, updateFormData, onNext }) {
         errors,
         loading,
         onSubmit,
-        // Exposed so the quick-fill presets can write whole days at once.
-        setValue,
     };
 }
