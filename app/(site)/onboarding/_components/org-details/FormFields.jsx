@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { XCircle } from "lucide-react";
 
-export default function FormFields({ fields, register, errors, slugStatus, SlugStatusComponent }) {
+export default function FormFields({ fields, register, errors, columns = 2, footerSlot }) {
     return (
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className={`grid gap-6 ${columns === 2 ? "sm:grid-cols-2" : ""}`}>
             {fields.map((field, index) => {
                 const Icon = field.icon;
                 return (
@@ -20,7 +20,14 @@ export default function FormFields({ fields, register, errors, slugStatus, SlugS
                     >
                         <Label htmlFor={field.id} className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                             {field.label}
-                            {field.required && <span className="text-red-500">*</span>}
+                            {/* Everything on this step is required, so asterisks
+                                on every row were pure noise. Optional fields are
+                                the ones worth marking. */}
+                            {field.optional && (
+                                <span className="text-xs font-normal text-gray-400">
+                                    Optional
+                                </span>
+                            )}
                         </Label>
                         <div className="relative">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
@@ -47,9 +54,7 @@ export default function FormFields({ fields, register, errors, slugStatus, SlugS
                                 {errors[field.id].message}
                             </motion.p>
                         )}
-                        {field.id === "name" && SlugStatusComponent && (
-                            <SlugStatusComponent status={slugStatus} fieldId="name" />
-                        )}
+                        {field.id === "name" && footerSlot}
                     </motion.div>
                 );
             })}

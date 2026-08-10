@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  OrgDetailsHeader,
   FormFields,
-  SlugStatus,
   SlugPreview,
   OrgDetailsFooter,
   LogoUpload,
@@ -36,29 +34,45 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     address: watchedAddress,
   });
 
+  const [nameField, ...otherFields] = inputFields;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <OrgDetailsHeader />
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        {/* Logo Upload - Left Column */}
-        <div>
-          <LogoUpload value={logo} onChange={setLogo} error={logoError} />
+      {/* Logo sits beside the name: they are the same decision (how the
+          dealership presents itself), and pairing them removes the dead
+          column the old 1fr/2fr split left under the dropzone. */}
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+        <div className="shrink-0">
+          <LogoUpload value={logo} onChange={setLogo} error={logoError} compact />
         </div>
 
-        {/* Form Fields - Right Column */}
-        <div>
+        <div className="flex-1 min-w-0">
           <FormFields
-            fields={inputFields}
+            fields={[nameField]}
             register={register}
             errors={errors}
-            slugStatus={slugStatus}
-            SlugStatusComponent={SlugStatus}
+            columns={1}
+            footerSlot={
+              <SlugPreview slug={generatedSlug} status={slugStatus} />
+            }
           />
         </div>
       </div>
 
-      <OrgDetailsFooter disabled={isDisabled} />
+      <FormFields fields={otherFields} register={register} errors={errors} />
+
+      <OrgDetailsFooter
+        disabled={isDisabled}
+        hint={
+          !logo
+            ? "Add a logo to continue"
+            : slugStatus === "checking"
+              ? "Checking name availability…"
+              : slugStatus === "taken"
+                ? "Choose an available dealership name"
+                : null
+        }
+      />
     </form>
   );
 }

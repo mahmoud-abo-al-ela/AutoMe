@@ -6,7 +6,13 @@ import { X, ImageIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
-export default function LogoUpload({ value, onChange, error }) {
+/**
+ * `compact` renders a square tile sized to sit beside the Dealership Name
+ * field. The old full-width dropzone lived in its own grid column and left a
+ * large dead area beneath it, since the box is much shorter than the field
+ * stack next to it.
+ */
+export default function LogoUpload({ value, onChange, error, compact = false }) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef(null);
@@ -78,7 +84,6 @@ export default function LogoUpload({ value, onChange, error }) {
     <div className="space-y-2">
       <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
         Dealership Logo
-        <span className="text-red-500">*</span>
       </Label>
 
       <AnimatePresence mode="wait">
@@ -110,7 +115,11 @@ export default function LogoUpload({ value, onChange, error }) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-colors cursor-pointer ${
+            className={`relative border-2 border-dashed rounded-xl text-center transition-colors cursor-pointer ${
+              compact
+                ? "w-28 h-28 flex items-center justify-center p-2"
+                : "p-4"
+            } ${
               error
                 ? "border-red-400 bg-red-50"
                 : dragActive
@@ -134,6 +143,18 @@ export default function LogoUpload({ value, onChange, error }) {
               <div className="flex items-center justify-center gap-3 py-2">
                 <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
                 <p className="text-sm text-gray-500">Uploading...</p>
+              </div>
+            ) : compact ? (
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="p-2 bg-gray-100 rounded-full">
+                  <ImageIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <p className="text-xs font-medium leading-tight text-gray-600">
+                  Add logo
+                </p>
+                <p className="text-[10px] leading-tight text-gray-400">
+                  PNG/JPG · 5MB
+                </p>
               </div>
             ) : (
               <div className="flex items-center gap-4">

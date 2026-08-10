@@ -4,14 +4,19 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-export default function OrgDetailsFooter({ disabled }) {
+export default function OrgDetailsFooter({ disabled, hint }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex justify-end pt-4"
+            className="flex items-center justify-end gap-4 pt-4"
         >
+            {/* A greyed-out button with no explanation makes the user guess
+                what is missing. */}
+            {disabled && hint && (
+                <span className="text-sm text-gray-500">{hint}</span>
+            )}
             <Button
                 type="submit"
                 disabled={disabled}
