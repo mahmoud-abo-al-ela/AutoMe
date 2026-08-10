@@ -1,36 +1,37 @@
+import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 /**
  * Organization repository for Super Admin operations
  */
 
-export async function findOrganizationById(orgId) {
+export async function findOrganizationById(orgId: string) {
   return db.organization.findUnique({
     where: { id: orgId },
   });
 }
 
-export async function findOrganizationBySlug(slug) {
+export async function findOrganizationBySlug(slug: string) {
   return db.organization.findUnique({
     where: { slug },
   });
 }
 
-export async function findOrganizationWithSubscription(orgId) {
+export async function findOrganizationWithSubscription(orgId: string) {
   return db.organization.findUnique({
     where: { id: orgId },
     include: { subscription: true },
   });
 }
 
-export async function findOrganizationForDeletion(orgId) {
+export async function findOrganizationForDeletion(orgId: string) {
   return db.organization.findUnique({
     where: { id: orgId },
     select: { name: true, slug: true },
   });
 }
 
-export async function createOrganization(data) {
+export async function createOrganization(data: Prisma.OrganizationCreateInput) {
   return db.organization.create({
     data,
     include: {
@@ -41,14 +42,14 @@ export async function createOrganization(data) {
   });
 }
 
-export async function updateOrganizationStatus(orgId, isActive) {
+export async function updateOrganizationStatus(orgId: string, isActive: boolean) {
   return db.organization.update({
     where: { id: orgId },
     data: { isActive },
   });
 }
 
-export async function deleteOrganization(orgId) {
+export async function deleteOrganization(orgId: string) {
   return db.organization.delete({
     where: { id: orgId },
   });
@@ -57,7 +58,7 @@ export async function deleteOrganization(orgId) {
 /**
  * Delete organization with all related data in a transaction
  */
-export async function deleteOrganizationWithRelations(orgId) {
+export async function deleteOrganizationWithRelations(orgId: string) {
   return db.$transaction(async (tx) => {
     // Delete impersonation sessions
     await tx.impersonationSession.deleteMany({
