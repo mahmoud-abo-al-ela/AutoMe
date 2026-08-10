@@ -3,14 +3,21 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+type PaginationProps = {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+    disabled?: boolean;
+};
+
 export const Pagination = ({
     currentPage,
     totalPages,
     onPageChange,
     disabled = false
-}) => {
+}: PaginationProps) => {
     const getPageNumbers = () => {
-        const pageNumbers = [];
+        const pageNumbers: number[] = [];
 
         if (totalPages <= 5) {
             for (let i = 1; i <= totalPages; i++) {
@@ -81,7 +88,19 @@ export const Pagination = ({
     );
 };
 
-export const PaginationInfo = ({ currentPage, limit, total, noun = "items" }) => {
+type PaginationInfoProps = {
+    currentPage: number;
+    limit: number;
+    total?: number | null;
+    noun?: string;
+};
+
+export const PaginationInfo = ({
+    currentPage,
+    limit,
+    total,
+    noun = "items",
+}: PaginationInfoProps) => {
     if (!total) return null;
 
     const start = Math.min((currentPage - 1) * limit + 1, total);

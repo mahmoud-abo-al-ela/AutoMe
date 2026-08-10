@@ -5,7 +5,24 @@ import Link from "next/link";
 import { AlertCircle, ArrowUpCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function UpgradeBanner({ resource, current, limit, planType, orgSlug }) {
+type UpgradeResource = "cars" | "members" | "aiProcessing";
+
+type UpgradeBannerProps = {
+  resource: UpgradeResource;
+  current: number;
+  /** -1 means unlimited, in which case the banner never renders. */
+  limit: number;
+  planType: string;
+  orgSlug: string;
+};
+
+export function UpgradeBanner({
+  resource,
+  current,
+  limit,
+  planType,
+  orgSlug,
+}: UpgradeBannerProps) {
   const [dismissed, setDismissed] = useState(() => {
     try {
       if (typeof window !== "undefined") {
@@ -29,7 +46,7 @@ export function UpgradeBanner({ resource, current, limit, planType, orgSlug }) {
     setDismissed(true);
   };
 
-  const resourceLabels = {
+  const resourceLabels: Record<UpgradeResource, string> = {
     cars: "cars",
     members: "team members",
     aiProcessing: "AI processing requests",

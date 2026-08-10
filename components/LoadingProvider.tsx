@@ -3,14 +3,23 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Loading from "./Loading";
 
-const LoadingContext = createContext({
+type LoadingContextValue = {
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const LoadingContext = createContext<LoadingContextValue>({
   isLoading: true,
   setIsLoading: () => {},
 });
 
 export const useLoading = () => useContext(LoadingContext);
 
-export default function LoadingProvider({ children }) {
+export default function LoadingProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isLoading, setIsLoading] = useState(true);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 

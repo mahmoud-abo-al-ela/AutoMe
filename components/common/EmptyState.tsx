@@ -2,6 +2,22 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SearchX, FilterX } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
+
+type EmptyStateProps = {
+    variant?: "standalone" | "inline" | "filtered";
+    icon?: LucideIcon;
+    title?: string;
+    description?: string;
+    actionLabel?: string;
+    actionHref?: string;
+    onAction?: () => void;
+    secondaryActionLabel?: string;
+    secondaryActionHref?: string;
+    onSecondaryAction?: () => void;
+    onClearFilters?: () => void;
+    className?: string;
+};
 
 export const EmptyState = ({
     variant = "standalone", // standalone, inline, filtered
@@ -16,7 +32,7 @@ export const EmptyState = ({
     onSecondaryAction,
     onClearFilters,
     className = "",
-}) => {
+}: EmptyStateProps) => {
     const isFiltered = variant === "filtered";
     const DisplayIcon = isFiltered ? (Icon || FilterX) : Icon;
 

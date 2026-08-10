@@ -8,9 +8,24 @@ import { cn } from "@/lib/utils";
  * Removable active-filter chips + a "Clear all" affordance. Each chip is a real
  * <button> with an aria-label, so removals are keyboard reachable and announced.
  *
- * filters: [{ type, label }] — onClear(type) removes one; onClear("all") resets.
+ * onClear(type) removes one; onClear("all") resets.
  */
-export const ActiveFilterChips = ({ filters, onClear, className }) => {
+export type ActiveFilter = {
+  type: string;
+  label: string;
+};
+
+type ActiveFilterChipsProps = {
+  filters?: ActiveFilter[] | null;
+  onClear: (type: string) => void;
+  className?: string;
+};
+
+export const ActiveFilterChips = ({
+  filters,
+  onClear,
+  className,
+}: ActiveFilterChipsProps) => {
   if (!filters || filters.length === 0) return null;
 
   return (

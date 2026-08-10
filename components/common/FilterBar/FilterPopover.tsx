@@ -11,6 +11,15 @@ import { cn } from "@/lib/utils";
  * when active, a count/label badge and a primary-tinted state. Radix supplies
  * aria-expanded/haspopup; we add an aria-label so the active count is announced.
  */
+type FilterPopoverProps = {
+  label: string;
+  activeCount?: number;
+  activeLabel?: string;
+  children: React.ReactNode;
+  align?: "start" | "center" | "end";
+  contentClassName?: string;
+};
+
 export const FilterPopover = ({
   label,
   activeCount = 0,
@@ -18,7 +27,7 @@ export const FilterPopover = ({
   children,
   align = "start",
   contentClassName,
-}) => {
+}: FilterPopoverProps) => {
   const active = activeCount > 0;
 
   return (

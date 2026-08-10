@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { LoadingGrid } from "@/components/common/LoadingStates";
 
-export const SkeletonPageHeader = ({ className }) => (
+export const SkeletonPageHeader = ({ className }: { className?: string }) => (
   <div className={`flex flex-col gap-2 ${className || ""}`}>
     <Skeleton className="h-8 sm:h-10 w-48 sm:w-64" />
     <Skeleton className="h-4 sm:h-5 w-72 sm:w-96" />

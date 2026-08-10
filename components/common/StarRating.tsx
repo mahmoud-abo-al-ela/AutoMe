@@ -6,7 +6,15 @@ import { cn } from "@/lib/utils";
  * clipped to (rating / 5), so half/quarter ratings show precisely. Decorative
  * only — callers should surface the numeric rating as text for screen readers.
  */
-export const StarRating = ({ rating = 0, size = 16, className }) => {
+export const StarRating = ({
+  rating = 0,
+  size = 16,
+  className,
+}: {
+  rating?: number;
+  size?: number;
+  className?: string;
+}) => {
   const pct = Math.max(0, Math.min(100, (rating / 5) * 100));
   const stars = [0, 1, 2, 3, 4];
   const dims = { width: size, height: size, minWidth: size };

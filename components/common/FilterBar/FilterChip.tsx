@@ -9,6 +9,15 @@ import { cn } from "@/lib/utils";
  * the --primary design token, so it follows per-tenant branding. Optionally
  * shows a facet count and disables itself when that count is zero.
  */
+export type FilterChipProps = {
+  label: string;
+  count?: number;
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
+};
+
 export const FilterChip = ({
   label,
   count,
@@ -16,7 +25,7 @@ export const FilterChip = ({
   disabled = false,
   onClick,
   className,
-}) => {
+}: FilterChipProps) => {
   const isDisabled = disabled || count === 0;
 
   return (

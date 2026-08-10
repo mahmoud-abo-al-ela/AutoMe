@@ -13,8 +13,24 @@ const COLLAPSED_COUNT = 12;
  * expansion. Works for both single-select (pass a one-element selectedValues)
  * and multi-select — selection semantics are decided by the caller's onToggle.
  *
- * options: [{ value, label?, count? }]
  */
+export type FilterOption = {
+  value: string;
+  label?: string;
+  count?: number;
+};
+
+type ChipGroupProps = {
+  options?: FilterOption[];
+  selectedValues?: string[];
+  onToggle: (value: string) => void;
+  searchPlaceholder?: string;
+  emptyLabel?: string;
+  disabled?: boolean;
+  collapseAt?: number;
+  searchable?: boolean;
+};
+
 export const ChipGroup = ({
   options = [],
   selectedValues = [],
@@ -24,7 +40,7 @@ export const ChipGroup = ({
   disabled = false,
   collapseAt = COLLAPSED_COUNT,
   searchable = true,
-}) => {
+}: ChipGroupProps) => {
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 

@@ -8,6 +8,20 @@ import { Slider } from "@/components/ui/slider";
  * (global, unfiltered) so it doesn't shift as other filters are applied. Drag
  * updates local state; release commits via onCommit([min, max], bounds).
  */
+export type RangeBounds = {
+  min?: number;
+  max?: number;
+};
+
+type RangeControlProps = {
+  value?: [number, number] | number[] | null;
+  bounds?: RangeBounds | null;
+  step?: number;
+  formatValue?: (value: number) => React.ReactNode;
+  onCommit: (range: number[], bounds: RangeBounds | null | undefined) => void;
+  disabled?: boolean;
+};
+
 export const RangeControl = ({
   value,
   bounds,
@@ -15,7 +29,7 @@ export const RangeControl = ({
   formatValue = (v) => v,
   onCommit,
   disabled = false,
-}) => {
+}: RangeControlProps) => {
   const min = bounds?.min ?? 0;
   const max = bounds?.max ?? 100;
   const selectedMin = value?.[0] ?? min;
