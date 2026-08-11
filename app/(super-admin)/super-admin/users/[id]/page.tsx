@@ -4,7 +4,7 @@ import UserDetailsHeader from "./_components/UserDetailsHeader";
 import UserActivity from "./_components/UserActivity";
 import UserOrganizations from "./_components/UserOrganizations";
 
-async function getUser(userId) {
+async function getUser(userId: string) {
   const user = await db.user.findUnique({
     where: { id: userId },
     include: {
@@ -53,7 +53,11 @@ async function getUser(userId) {
   return { user, recentActivity };
 }
 
-export default async function UserDetailsPage({ params }) {
+export default async function UserDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const data = await getUser(id);
 

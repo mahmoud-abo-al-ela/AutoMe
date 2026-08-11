@@ -4,8 +4,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { AuditLog } from "@/lib/generated/prisma";
+import type { SuperAdminUserDetail } from "./UserDetailsHeader";
 
-export default function UserActivity({ activity, testDrives }) {
+/**
+ * BUG (flagged, not fixed in this conversion): the test-drive list below reads
+ * td.bookingDate, and TestDrive has no such column — the scheduled date is
+ * `date`, with startTime/endTime beside it. The read is guarded by a ternary,
+ * so this is dead UI rather than a crash: every row prints "No date set".
+ *
+ * Typed as always-undefined so the dead read compiles unchanged and the defect
+ * stays legible. The truthy branch narrows to never, which is why the
+ * format(new Date(...)) call inside it still type-checks.
+ */
+type TestDriveWithMissingBookingDate =
+  SuperAdminUserDetail["testDrives"][number] & { bookingDate?: undefined };
+
+export default function UserActivity({
+  activity,
+  testDrives,
+}: {
+  activity: AuditLog[];
+  testDrives: TestDriveWithMissingBookingDate[];
+}) {
   return (
     <Card>
       <CardHeader>

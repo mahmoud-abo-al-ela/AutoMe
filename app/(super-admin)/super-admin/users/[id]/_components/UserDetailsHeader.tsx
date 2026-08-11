@@ -6,8 +6,51 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { Prisma, type UserRole } from "@/lib/generated/prisma";
+import type { LucideIcon } from "lucide-react";
 
-const roleConfig = {
+/**
+ * The full user record page.tsx loads for this detail view: memberships down
+ * to the plan, plus the recent test drives and saved cars.
+ */
+export type SuperAdminUserDetail = Prisma.UserGetPayload<{
+  include: {
+    memberships: {
+      include: {
+        organization: {
+          include: { subscription: { include: { plan: true } } };
+        };
+      };
+    };
+    testDrives: {
+      include: {
+        car: { select: { id: true; make: true; model: true; year: true } };
+      };
+    };
+    savedCars: {
+      include: {
+        car: {
+          select: {
+            id: true;
+            make: true;
+            model: true;
+            year: true;
+            images: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+
+const roleConfig: Record<
+  UserRole,
+  {
+    label: string;
+    icon: LucideIcon;
+    variant: React.ComponentProps<typeof Badge>["variant"];
+  }
+> = {
   ADMIN: {
     label: "Admin",
     icon: Shield,
@@ -20,7 +63,11 @@ const roleConfig = {
   },
 };
 
-export default function UserDetailsHeader({ user }) {
+export default function UserDetailsHeader({
+  user,
+}: {
+  user: SuperAdminUserDetail;
+}) {
   const router = useRouter();
   const role = roleConfig[user.role];
   const RoleIcon = role.icon;
@@ -40,7 +87,7 @@ export default function UserDetailsHeader({ user }) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={user.imageUrl} alt={user.name} />
+            <AvatarImage src={user.imageUrl ?? undefined} alt={user.name ?? ""} />
             <AvatarFallback className="text-xl">
               {user.name?.charAt(0)?.toUpperCase() || "U"}
             </AvatarFallback>

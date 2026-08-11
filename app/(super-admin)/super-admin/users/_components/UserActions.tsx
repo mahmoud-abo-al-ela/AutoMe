@@ -11,8 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { SuperAdminUserRow } from "./UsersTable";
 
-export default function UserActions({ user, onChangeRole }) {
+export default function UserActions({
+  user,
+  onChangeRole,
+}: {
+  user: SuperAdminUserRow;
+  onChangeRole: (user: SuperAdminUserRow) => void;
+}) {
   const router = useRouter();
 
   return (

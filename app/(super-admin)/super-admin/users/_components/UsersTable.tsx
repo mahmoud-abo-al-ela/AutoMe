@@ -17,8 +17,9 @@ import ChangeRoleDialog from "./ChangeRoleDialog";
 import UsersPagination from "./UsersPagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Users } from "lucide-react";
+import { Prisma, type UserRole } from "@/lib/generated/prisma";
 
-const roleConfig = {
+const roleConfig: Record<UserRole, { label: string }> = {
   ADMIN: {
     label: "Admin",
   },
@@ -27,20 +28,49 @@ const roleConfig = {
   },
 };
 
-export default function UsersTable({ users, pagination }) {
+/** A user row as page.tsx selects it, with memberships and activity counts. */
+export type SuperAdminUserRow = Prisma.UserGetPayload<{
+  include: {
+    memberships: {
+      include: {
+        organization: { select: { id: true; name: true; slug: true } };
+      };
+    };
+    _count: { select: { savedCars: true; testDrives: true } };
+  };
+}>;
+
+export type UsersPagination = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export default function UsersTable({
+  users,
+  pagination,
+}: {
+  users: SuperAdminUserRow[];
+  pagination: UsersPagination;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [roleDialog, setRoleDialog] = useState({ open: false, user: null });
-  const [newRole, setNewRole] = useState("");
+  const [roleDialog, setRoleDialog] = useState<{
+    open: boolean;
+    user: SuperAdminUserRow | null;
+  }>({ open: false, user: null });
+  // "" is the not-yet-chosen state; every guarded read narrows it away.
+  const [newRole, setNewRole] = useState<UserRole | "">("");
   const [loading, setLoading] = useState(false);
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(window.location.search);
     params.set("page", newPage.toString());
     router.push(`/super-admin/users?${params.toString()}`);
   };
 
-  const handleOpenRoleDialog = (user) => {
+  const handleOpenRoleDialog = (user: SuperAdminUserRow) => {
     setNewRole(user.role);
     setRoleDialog({ open: true, user });
   };
@@ -61,8 +91,10 @@ export default function UsersTable({ users, pagination }) {
         });
       } else {
         toast.error("Failed to update role", {
-          description:
-            result.error || "An error occurred while updating the role.",
+          // BUG (flagged, not fixed in this conversion): same defect as
+          // ActiveSessions.tsx — result.error is the error object, not a
+          // string, and should be result.error.message.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {

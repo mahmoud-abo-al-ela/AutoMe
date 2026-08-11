@@ -1,24 +1,35 @@
 import { Suspense } from "react";
 import { db } from "@/lib/prisma";
+import { Prisma, type UserRole } from "@/lib/generated/prisma";
 import UsersTable from "./_components/UsersTable";
 import UsersHeader from "./_components/UsersHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 
-async function getUsers(searchParams) {
-  const page = parseInt(searchParams?.page) || 1;
+/** The filter and pagination params this page reads. */
+type UsersSearchParams = {
+  page?: string;
+  search?: string;
+  role?: string;
+};
+
+async function getUsers(searchParams: UsersSearchParams) {
+  const page = parseInt(searchParams?.page ?? "") || 1;
   const limit = 15;
   const skip = (page - 1) * limit;
   const search = searchParams?.search || "";
   const role = searchParams?.role || "all";
 
-  const where = {
+  // Annotated so the "insensitive" literals narrow to Prisma's QueryMode. The
+  // role cast mirrors audit-logs: it arrives raw from the query string and is
+  // not validated against UserRole before Prisma sees it.
+  const where: Prisma.UserWhereInput = {
     ...(search && {
       OR: [
         { name: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
       ],
     }),
-    ...(role !== "all" && { role }),
+    ...(role !== "all" && { role: role as UserRole }),
   };
 
   const [users, total, roleStats] = await Promise.all([
@@ -58,14 +69,18 @@ async function getUsers(searchParams) {
       limit,
       totalPages: Math.ceil(total / limit),
     },
-    roleStats: roleStats.reduce((acc, r) => {
+    roleStats: roleStats.reduce<Record<string, number>>((acc, r) => {
       acc[r.role] = r._count.id;
       return acc;
     }, {}),
   };
 }
 
-export default async function UsersPage({ searchParams }) {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<UsersSearchParams>;
+}) {
   const resolvedParams = await searchParams;
   const { users, pagination, roleStats } = await getUsers(resolvedParams);
 

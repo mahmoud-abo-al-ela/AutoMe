@@ -3,7 +3,15 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function UsersPagination({ pagination, onPageChange }) {
+import type { UsersPagination as UsersPaginationState } from "./UsersTable";
+
+export default function UsersPagination({
+  pagination,
+  onPageChange,
+}: {
+  pagination: UsersPaginationState;
+  onPageChange: (page: number) => void;
+}) {
   if (pagination.totalPages <= 1) return null;
 
   return (

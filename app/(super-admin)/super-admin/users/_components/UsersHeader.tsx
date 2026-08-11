@@ -13,12 +13,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function UsersHeader({ roleStats }) {
+export default function UsersHeader({
+  roleStats,
+}: {
+  /** Count of users per UserRole, keyed by role name, as built in page.tsx. */
+  roleStats: Record<string, number>;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams(searchParams);
     if (search) {
@@ -30,7 +35,7 @@ export default function UsersHeader({ roleStats }) {
     router.push(`/super-admin/users?${params.toString()}`);
   };
 
-  const handleRoleFilter = (role) => {
+  const handleRoleFilter = (role: string) => {
     const params = new URLSearchParams(searchParams);
     if (role !== "all") {
       params.set("role", role);

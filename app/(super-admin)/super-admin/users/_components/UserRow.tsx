@@ -6,8 +6,13 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserActions from "./UserActions";
+import type { UserRole } from "@/lib/generated/prisma";
+import type { SuperAdminUserRow } from "./UsersTable";
 
-const roleConfig = {
+const roleConfig: Record<
+  UserRole,
+  { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }
+> = {
   ADMIN: {
     label: "Admin",
     variant: "destructive",
@@ -18,7 +23,13 @@ const roleConfig = {
   },
 };
 
-export default function UserRow({ user, onChangeRole }) {
+export default function UserRow({
+  user,
+  onChangeRole,
+}: {
+  user: SuperAdminUserRow;
+  onChangeRole: (user: SuperAdminUserRow) => void;
+}) {
   const role = roleConfig[user.role];
 
   return (
@@ -26,7 +37,7 @@ export default function UserRow({ user, onChangeRole }) {
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.imageUrl} alt={user.name} />
+            <AvatarImage src={user.imageUrl ?? undefined} alt={user.name ?? ""} />
             <AvatarFallback>
               {user.name?.charAt(0)?.toUpperCase() || "U"}
             </AvatarFallback>

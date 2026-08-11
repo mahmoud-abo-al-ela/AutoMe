@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { UserRole } from "@/lib/generated/prisma";
+import type { SuperAdminUserRow } from "./UsersTable";
 
 export default function ChangeRoleDialog({
   open,
@@ -27,6 +29,15 @@ export default function ChangeRoleDialog({
   onConfirm,
   loading,
   isPending,
+}: {
+  open: boolean;
+  user: SuperAdminUserRow | null;
+  currentRole: UserRole | "";
+  onClose: () => void;
+  onRoleChange: (role: UserRole) => void;
+  onConfirm: () => void;
+  loading: boolean;
+  isPending: boolean;
 }) {
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>

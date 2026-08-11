@@ -4,8 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { SuperAdminUserDetail } from "./UserDetailsHeader";
 
-export default function UserOrganizations({ memberships }) {
+export default function UserOrganizations({
+  memberships,
+}: {
+  memberships: SuperAdminUserDetail["memberships"];
+}) {
   return (
     <Card>
       <CardHeader>
