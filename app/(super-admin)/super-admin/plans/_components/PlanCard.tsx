@@ -15,6 +15,9 @@ import {
   Zap,
   Clock,
 } from "lucide-react";
+import type { PlanType } from "@/lib/generated/prisma";
+import type { PlanFeatures } from "./usePlanForm";
+import type { PlanWithUsage } from "./PlansGrid";
 import {
   Card,
   CardContent,
@@ -34,14 +37,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 
-const planColors = {
+const planColors: Record<PlanType, string> = {
   STARTER: "border-gray-200 dark:border-gray-700",
   PRO: "border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800",
   ENTERPRISE: "border-purple-500 ring-2 ring-purple-200 dark:ring-purple-800",
 };
 
-export default function PlanCard({ plan, onEdit, onDelete }) {
-  const features = plan.features || {};
+export default function PlanCard({
+  plan,
+  onEdit,
+  onDelete,
+}: {
+  plan: PlanWithUsage;
+  onEdit: (plan: PlanWithUsage) => void;
+  onDelete: (plan: PlanWithUsage) => void;
+}) {
+  // Plan.features is a Json column; the shape is only written by the plan form.
+  const features = (plan.features as Partial<PlanFeatures> | null) || {};
 
   const allFeatures = [
     { key: "aiProcessing", label: "AI Processing", icon: Sparkles, enabled: features.aiProcessing?.enabled || false },

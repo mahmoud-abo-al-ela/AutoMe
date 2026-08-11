@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { PlanWithUsage } from "./PlansGrid";
 
 export default function DeletePlanDialog({
   open,
@@ -17,6 +18,12 @@ export default function DeletePlanDialog({
   onClose,
   onConfirm,
   loading,
+}: {
+  open: boolean;
+  plan: PlanWithUsage | null;
+  onClose: () => void;
+  onConfirm: () => void;
+  loading: boolean;
 }) {
   return (
     <Dialog open={open} onOpenChange={(open) => !loading && !open && onClose()}>
@@ -33,10 +40,10 @@ export default function DeletePlanDialog({
                 <span className="font-semibold">{plan?.name}</span> plan and
                 remove it from the system.
               </p>
-              {plan?.activeSubscriptions > 0 && (
+              {(plan?.activeSubscriptions ?? 0) > 0 && (
                 <div className="mt-2 p-2 bg-destructive/10 rounded-md text-destructive">
                   <strong>Warning:</strong> This plan has{" "}
-                  {plan.activeSubscriptions} active subscription(s). You cannot
+                  {plan?.activeSubscriptions} active subscription(s). You cannot
                   delete it until all subscribers are migrated.
                 </div>
               )}
@@ -50,7 +57,7 @@ export default function DeletePlanDialog({
           <Button
             variant="destructive"
             onClick={onConfirm}
-            disabled={loading || plan?.activeSubscriptions > 0}
+            disabled={loading || (plan?.activeSubscriptions ?? 0) > 0}
           >
             {loading ? (
               <>

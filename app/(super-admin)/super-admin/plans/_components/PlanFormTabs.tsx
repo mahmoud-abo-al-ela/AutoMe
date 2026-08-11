@@ -1,10 +1,17 @@
-"use client";
+﻿"use client";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Dispatch, SetStateAction } from "react";
+import type { PlanType } from "@/lib/generated/prisma";
+import type {
+  PlanFeatures,
+  PlanFormInputValues,
+  PlanFormState,
+} from "./usePlanForm";
 
 // The three-tab body (Basic / Limits / Features) of the plan form dialog.
 export default function PlanFormTabs({
@@ -16,6 +23,18 @@ export default function PlanFormTabs({
   setInputValues,
   features,
   handleFeatureChange,
+}: {
+  mode: "create" | "edit";
+  availableTypes: PlanType[];
+  formData: PlanFormState;
+  setFormData: Dispatch<SetStateAction<PlanFormState>>;
+  inputValues: PlanFormInputValues;
+  setInputValues: Dispatch<SetStateAction<PlanFormInputValues>>;
+  features: PlanFeatures;
+  handleFeatureChange: <K extends keyof PlanFeatures>(
+    key: K,
+    value: PlanFeatures[K]
+  ) => void;
 }) {
   return (
     <Tabs defaultValue="basic" className="w-full">
@@ -39,7 +58,9 @@ export default function PlanFormTabs({
         {mode === "create" && (
           <div className="grid gap-2">
             <Label htmlFor="type">Plan Type</Label>
-            <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+            {/* Radix Select hands back a plain string; the only items rendered
+                below are availableTypes, so the value is always a PlanType. */}
+            <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value as PlanType })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -161,7 +182,10 @@ export default function PlanFormTabs({
             <Checkbox
               id="aiProcessing"
               checked={features.aiProcessing?.enabled || false}
-              onCheckedChange={(checked) => handleFeatureChange("aiProcessing", { enabled: checked })}
+              // Radix's CheckedState is boolean | "indeterminate". None of
+              // these checkboxes is ever indeterminate, so the stored value is
+              // a boolean; cast rather than coerce, to keep behaviour identical.
+              onCheckedChange={(checked) => handleFeatureChange("aiProcessing", { enabled: checked as boolean })}
             />
             <Label htmlFor="aiProcessing" className="cursor-pointer">AI-Powered Car Analysis</Label>
           </div>
@@ -169,7 +193,7 @@ export default function PlanFormTabs({
             <Checkbox
               id="chat"
               checked={features.chat || false}
-              onCheckedChange={(checked) => handleFeatureChange("chat", checked)}
+              onCheckedChange={(checked) => handleFeatureChange("chat", checked as boolean)}
             />
             <Label htmlFor="chat" className="cursor-pointer">Live Chat Support</Label>
           </div>
@@ -177,7 +201,7 @@ export default function PlanFormTabs({
             <Checkbox
               id="prioritySupport"
               checked={features.prioritySupport || false}
-              onCheckedChange={(checked) => handleFeatureChange("prioritySupport", checked)}
+              onCheckedChange={(checked) => handleFeatureChange("prioritySupport", checked as boolean)}
             />
             <Label htmlFor="prioritySupport" className="cursor-pointer">Priority Support</Label>
           </div>

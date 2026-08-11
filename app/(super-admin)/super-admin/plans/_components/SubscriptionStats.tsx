@@ -7,7 +7,15 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function SubscriptionStats({ stats, mrr }) {
+export default function SubscriptionStats({
+  stats,
+  mrr,
+}: {
+  /** Subscription counts keyed by SubscriptionStatus, built in page.tsx. */
+  stats: Record<string, number>;
+  /** Monthly recurring revenue, in minor units. */
+  mrr: number;
+}) {
   const totalSubscriptions = Object.values(stats).reduce((a, b) => a + b, 0);
 
   const statCards = [

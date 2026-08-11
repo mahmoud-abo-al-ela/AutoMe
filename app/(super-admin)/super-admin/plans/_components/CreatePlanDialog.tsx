@@ -1,6 +1,8 @@
-"use client";
+﻿"use client";
 
 import PlanFormDialog from "./PlanFormDialog";
+import type { PlanType } from "@/lib/generated/prisma";
+import type { PlanFormSubmitData } from "./usePlanForm";
 
 export default function CreatePlanDialog({
   open,
@@ -9,6 +11,13 @@ export default function CreatePlanDialog({
   loading,
   isPending,
   availableTypes,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: PlanFormSubmitData) => void;
+  loading: boolean;
+  isPending: boolean;
+  availableTypes: PlanType[];
 }) {
   return (
     <PlanFormDialog

@@ -1,10 +1,12 @@
-"use client";
+﻿"use client";
 
 import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePlanForm } from "./usePlanForm";
 import PlanFormTabs from "./PlanFormTabs";
+import type { Plan, PlanType } from "@/lib/generated/prisma";
+import type { PlanFormSubmitData } from "./usePlanForm";
 
 export default function PlanFormDialog({
     open,
@@ -15,6 +17,15 @@ export default function PlanFormDialog({
     mode = "create", // "create" or "edit"
     plan = null,
     availableTypes = [],
+}: {
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (data: PlanFormSubmitData) => void;
+    loading: boolean;
+    isPending: boolean;
+    mode?: "create" | "edit";
+    plan?: Plan | null;
+    availableTypes?: PlanType[];
 }) {
     const {
         formData,

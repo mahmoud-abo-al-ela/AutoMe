@@ -38,7 +38,7 @@ async function getPlansData() {
       ...p,
       activeSubscriptions: p.subscriptions.length,
     })),
-    subscriptionStats: subscriptionStats.reduce((acc, s) => {
+    subscriptionStats: subscriptionStats.reduce<Record<string, number>>((acc, s) => {
       acc[s.status] = s._count.id;
       return acc;
     }, {}),

@@ -2,8 +2,15 @@
 
 import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import type { PlanType } from "@/lib/generated/prisma";
 
-export default function AddPlanCard({ availableTypes, onClick }) {
+export default function AddPlanCard({
+  availableTypes,
+  onClick,
+}: {
+  availableTypes: PlanType[];
+  onClick: () => void;
+}) {
   return (
     <Card
       className="border-dashed border-2 hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center min-h-[400px]"

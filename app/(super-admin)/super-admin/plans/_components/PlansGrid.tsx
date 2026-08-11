@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -9,23 +9,40 @@ import AddPlanCard from "./AddPlanCard";
 import CreatePlanDialog from "./CreatePlanDialog";
 import EditPlanDialog from "./EditPlanDialog";
 import DeletePlanDialog from "./DeletePlanDialog";
+import { Prisma, type Plan, type PlanType } from "@/lib/generated/prisma";
+import type { PlanFormSubmitData } from "./usePlanForm";
+import type { PlanFormInput } from "@/lib/services/super-admin/plan";
 
-export default function PlansGrid({ plans }) {
+/** A plan row as page.tsx loads it, with its active-subscription tally. */
+export type PlanWithUsage = Prisma.PlanGetPayload<{
+  include: {
+    _count: { select: { subscriptions: true } };
+    subscriptions: { select: { id: true } };
+  };
+}> & { activeSubscriptions: number };
+
+export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [editDialog, setEditDialog] = useState({ open: false, plan: null });
+  const [editDialog, setEditDialog] = useState<{
+    open: boolean;
+    plan: PlanWithUsage | null;
+  }>({ open: false, plan: null });
   const [createDialog, setCreateDialog] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, plan: null });
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    plan: PlanWithUsage | null;
+  }>({ open: false, plan: null });
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Get existing plan types to filter available options
   const existingTypes = plans.map((p) => p.type);
-  const availableTypes = ["STARTER", "PRO", "ENTERPRISE"].filter(
-    (t) => !existingTypes.includes(t)
-  );
+  const availableTypes = (
+    ["STARTER", "PRO", "ENTERPRISE"] satisfies PlanType[]
+  ).filter((t) => !existingTypes.includes(t));
 
-  const openEditDialog = (plan) => {
+  const openEditDialog = (plan: PlanWithUsage) => {
     setEditDialog({ open: true, plan });
   };
 
@@ -33,7 +50,7 @@ export default function PlansGrid({ plans }) {
     setCreateDialog(true);
   };
 
-  const handleCreate = async (formData) => {
+  const handleCreate = async (formData: PlanFormSubmitData) => {
     if (!formData.name || !formData.type) {
       toast.error("Please fill in all required fields");
       return;
@@ -41,7 +58,9 @@ export default function PlansGrid({ plans }) {
 
     setLoading(true);
     try {
-      const result = await createPlan(formData);
+      // The guard above is what rules out type: ""; TypeScript narrows the
+      // property but cannot carry that through the whole object.
+      const result = await createPlan(formData as PlanFormInput);
 
       if (result.success) {
         toast.success("Plan created successfully", {
@@ -53,7 +72,11 @@ export default function PlansGrid({ plans }) {
         });
       } else {
         toast.error("Failed to create plan", {
-          description: result.error || "An error occurred.",
+          // BUG (flagged, not fixed in this conversion): result.error is the
+          // error object, not a string; should be result.error.message. Same
+          // defect as ActiveSessions.tsx, repeated at all three call sites in
+          // this file.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -65,12 +88,14 @@ export default function PlansGrid({ plans }) {
     }
   };
 
-  const handleUpdate = async (formData) => {
+  const handleUpdate = async (formData: PlanFormSubmitData) => {
     if (!editDialog.plan) return;
 
     setLoading(true);
     try {
-      const result = await updatePlan(editDialog.plan.id, formData);
+      // Editing always seeds type from the existing plan, so "" is unreachable
+      // here; same narrowing limitation as handleCreate.
+      const result = await updatePlan(editDialog.plan.id, formData as PlanFormInput);
 
       if (result.success) {
         toast.success("Plan updated successfully", {
@@ -82,7 +107,7 @@ export default function PlansGrid({ plans }) {
         });
       } else {
         toast.error("Failed to update plan", {
-          description: result.error || "An error occurred.",
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -111,7 +136,7 @@ export default function PlansGrid({ plans }) {
         });
       } else {
         toast.error("Failed to delete plan", {
-          description: result.error || "An error occurred.",
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {

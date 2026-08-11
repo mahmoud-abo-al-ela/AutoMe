@@ -1,6 +1,8 @@
-"use client";
+﻿"use client";
 
 import PlanFormDialog from "./PlanFormDialog";
+import type { Plan } from "@/lib/generated/prisma";
+import type { PlanFormSubmitData } from "./usePlanForm";
 
 export default function EditPlanDialog({
   open,
@@ -9,6 +11,13 @@ export default function EditPlanDialog({
   onSubmit,
   loading,
   isPending,
+}: {
+  open: boolean;
+  plan: Plan | null;
+  onClose: () => void;
+  onSubmit: (data: PlanFormSubmitData) => void;
+  loading: boolean;
+  isPending: boolean;
 }) {
   return (
     <PlanFormDialog
