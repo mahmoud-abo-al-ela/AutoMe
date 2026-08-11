@@ -1,6 +1,6 @@
 import arcjet, { createMiddleware, detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
@@ -29,7 +29,7 @@ const isPublicApiRoute = createRouteMatcher([
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost";
 
-function getSubdomain(request) {
+function getSubdomain(request: NextRequest): string | null {
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0]; // Remove port
 
@@ -55,7 +55,7 @@ function getSubdomain(request) {
   return null;
 }
 
-function getImpersonationContext(request) {
+function getImpersonationContext(request: NextRequest) {
   const impersonatedOrg = request.cookies.get("x-impersonated-org")?.value;
   const impersonatedUser = request.cookies.get("x-impersonated-user")?.value;
   const impersonationSessionId = request.cookies.get(
@@ -79,7 +79,13 @@ const arcjetMode =
   process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  // Asserted to keep the current runtime. Worth noting that this is the one
+  // guard in the request path with no fail-closed check: if ARCJET_KEY is unset
+  // in production, shield and bot detection are configured with undefined
+  // rather than rejecting, the same shape as the CRON_SECRET fail-open that
+  // Phase 0 closed. Left alone here because making middleware throw on a
+  // missing key would take the whole site down rather than one endpoint.
+  key: process.env.ARCJET_KEY!,
   rules: [
     shield({
       mode: arcjetMode,

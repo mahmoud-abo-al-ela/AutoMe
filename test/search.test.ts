@@ -11,11 +11,14 @@ const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 import { searchCarsRanked } from "@/lib/repositories/car/search";
 import { findManyCars } from "@/lib/repositories/car/queries";
 import { db } from "@/lib/prisma";
+import type { Prisma } from "@/lib/generated/prisma";
 
 const ORG_ID = "org_test_search";
 const ORG_SLUG = "test-search-dealer";
 
-function car(overrides) {
+function car(
+  overrides: Partial<Prisma.CarCreateManyInput> = {}
+): Prisma.CarCreateManyInput {
   return {
     organizationId: ORG_ID,
     make: "Toyota",
@@ -63,15 +66,17 @@ describe.skipIf(!hasTestDb)("searchCarsRanked (real Postgres)", () => {
     const { cars } = await searchCarsRanked({ search: "toyota corolla", organizationId: ORG_ID });
 
     expect(cars.length).toBeGreaterThan(0);
-    expect(cars[0].make).toBe("Toyota");
-    expect(cars[0].model).toBe("Corolla");
+    // Optional chaining rather than `!`: a null row then fails the assertion
+    // with a readable diff instead of a TypeError.
+    expect(cars[0]?.make).toBe("Toyota");
+    expect(cars[0]?.model).toBe("Corolla");
   });
 
   it("falls back to trigram similarity for a typo'd model", async () => {
     // "corola" has no FTS match; the pg_trgm fallback still finds Corolla.
     const { cars } = await searchCarsRanked({ search: "corola", organizationId: ORG_ID });
 
-    expect(cars.some((c) => c.model === "Corolla")).toBe(true);
+    expect(cars.some((c) => c?.model === "Corolla")).toBe(true);
   });
 
   it("returns no cars for a term that matches nothing", async () => {
