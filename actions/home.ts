@@ -30,6 +30,14 @@ export const getFeaturedCars = withErrorHandling(async (limit = 4) => {
   return createSuccessResponse(result.cars);
 });
 
+/** The fields the vision prompt below asks Gemini to return. */
+export interface ImageSearchResult {
+  make?: string;
+  bodyType?: string;
+  color?: string;
+  confidence?: number;
+}
+
 export const processImagesSearch = withErrorHandling(async (file: File) => {
   // Rate limiting check
   const req = await request();
@@ -122,5 +130,7 @@ Only respond with the JSON object, nothing else.
     throw new ValidationError("No valid JSON object found in response", "ai_response");
   }
 
-  return createSuccessResponse(parsedData);
+  // Unvalidated model output shaped by the prompt above, so every field is
+  // optional: the model can omit one or return an empty string for it.
+  return createSuccessResponse(parsedData as ImageSearchResult);
 });
