@@ -11,21 +11,15 @@ import {
 import type { AuditLogRow } from "./AuditLogsTable";
 
 /**
- * BUG (flagged, not fixed in this conversion): this dialog reads ipAddress,
- * userAgent and changes, and the AuditLog model has none of them. The schema
- * keeps IP and user agent inside the metadata Json blob, and the before/after
- * pair in oldValue/newValue. Every read is guarded (|| "N/A", &&), so the
- * result is dead UI rather than a crash: the IP Address and User Agent rows
- * always print "N/A" and the Changes block never renders.
- *
- * Typed as always-undefined so the dead reads compile unchanged and the defect
- * stays legible instead of being hidden behind a cast.
+ * What createAuditLog writes into the metadata Json column alongside whatever
+ * the caller passed. Prisma types the column as JsonValue, so the shape is
+ * asserted here rather than inferred.
  */
-type AuditLogRowWithMissingFields = AuditLogRow & {
-  ipAddress?: undefined;
-  userAgent?: undefined;
-  changes?: undefined;
-};
+type AuditLogMetadata = {
+  ipAddress?: string;
+  userAgent?: string;
+  impersonationSessionId?: string;
+} | null;
 
 // Read-only detail view for a single audit log entry.
 export default function AuditLogDetailsDialog({
@@ -33,10 +27,12 @@ export default function AuditLogDetailsDialog({
   open,
   onOpenChange,
 }: {
-  log: AuditLogRowWithMissingFields | null;
+  log: AuditLogRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const metadata = log?.metadata as AuditLogMetadata;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -76,13 +72,13 @@ export default function AuditLogDetailsDialog({
                 <label className="text-sm font-medium text-muted-foreground">
                   IP Address
                 </label>
-                <p className="font-mono text-sm">{log.ipAddress || "N/A"}</p>
+                <p className="font-mono text-sm">{metadata?.ipAddress || "N/A"}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
                   User Agent
                 </label>
-                <p className="text-sm truncate">{log.userAgent || "N/A"}</p>
+                <p className="text-sm truncate">{metadata?.userAgent || "N/A"}</p>
               </div>
             </div>
 
@@ -97,14 +93,28 @@ export default function AuditLogDetailsDialog({
               </div>
             )}
 
-            {log.changes && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  Changes
-                </label>
-                <pre className="mt-1 p-3 bg-muted rounded-lg overflow-auto text-xs">
-                  {JSON.stringify(log.changes, null, 2)}
-                </pre>
+            {(log.oldValue || log.newValue) && (
+              <div className="grid grid-cols-2 gap-4">
+                {log.oldValue && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Before
+                    </label>
+                    <pre className="mt-1 p-3 bg-muted rounded-lg overflow-auto text-xs">
+                      {JSON.stringify(log.oldValue, null, 2)}
+                    </pre>
+                  </div>
+                )}
+                {log.newValue && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      After
+                    </label>
+                    <pre className="mt-1 p-3 bg-muted rounded-lg overflow-auto text-xs">
+                      {JSON.stringify(log.newValue, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
             )}
           </div>

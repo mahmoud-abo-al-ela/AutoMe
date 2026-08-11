@@ -19,24 +19,13 @@ import {
 import type { Plan } from "@/lib/generated/prisma";
 import type { CreateOrganizationFormData } from "./CreateOrganizationForm";
 
-/**
- * BUG (flagged, not fixed in this conversion): the feature list below reads
- * selectedPlan.maxStorageMB, and Plan has no such column — the schema has no
- * storage limit at all. React renders undefined as nothing, so that bullet has
- * always read "• MB storage". Dead UI rather than a crash.
- *
- * Typed as always-undefined so the dead read compiles unchanged and the defect
- * stays legible.
- */
-type PlanWithMissingStorageLimit = Plan & { maxStorageMB?: undefined };
-
 export default function PlanSection({
   formData,
   plans,
   onPlanChange,
 }: {
   formData: CreateOrganizationFormData;
-  plans: PlanWithMissingStorageLimit[];
+  plans: Plan[];
   onPlanChange: (planId: string) => void;
 }) {
   const selectedPlan = plans.find((p) => p.id === formData.planId);
@@ -85,7 +74,6 @@ export default function PlanSection({
                   <li>• Up to {selectedPlan.maxCars} cars</li>
                   <li>• Up to {selectedPlan.maxMembers} team members</li>
                   <li>• {selectedPlan.maxImagesPerCar} images per car</li>
-                  <li>• {selectedPlan.maxStorageMB}MB storage</li>
                 </ul>
               </div>
             </div>

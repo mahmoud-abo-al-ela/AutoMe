@@ -18,10 +18,9 @@ const Why = () => {
           className="text-center mb-10 sm:mb-20"
         >
           <Badge
-            // BUG (surfaced by this conversion, NOT fixed here): badgeVariants
-            // has no "primary" variant, so cva falls back to "default" and this
-            // badge has never rendered the intended style.
-            variant={"primary" as React.ComponentProps<typeof Badge>["variant"]}
+            // Renders as "default"; badgeVariants has no "primary". Stating it
+            // explicitly rather than passing a value cva silently discards.
+            variant="default"
             className="mb-3 sm:mb-4 text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-1.5"
           >
             Why Choose Us

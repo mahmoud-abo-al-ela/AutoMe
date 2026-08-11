@@ -207,18 +207,11 @@ export default function MobileMenu({
                 <div className="space-y-1">
                   {filteredSignedInLinks
                     .filter(
-                      // BUG (surfaced by this conversion, NOT fixed here): same
-                      // dead filter as MainHeader — no signedInLinks entry
-                      // defines adminOnly or adminPath, so those two clauses
-                      // are constant-true.
+                      // Same dead adminOnly/adminPath clauses as MainHeader,
+                      // removed here too; only notAdmin filters anything.
                       (link: (typeof filteredSignedInLinks)[number] & {
-                        adminOnly?: boolean;
-                        adminPath?: string;
                         showUnreadBadge?: boolean;
-                      }) =>
-                        (!link.adminOnly || isOwner) &&
-                        (!link.notAdmin || !isOwner) &&
-                        (!link.adminPath || pathname === link.adminPath),
+                      }) => !link.notAdmin || !isOwner,
                     )
                     .map((link, index) => (
                       <NavLink

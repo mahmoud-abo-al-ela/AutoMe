@@ -258,20 +258,12 @@ export default function MainHeader({
                 <div className="flex items-center space-x-6">
                   {signedInLinks
                     .filter(
-                      // BUG (surfaced by this conversion, NOT fixed here): no
-                      // entry in signedInLinks defines adminOnly or adminPath,
-                      // so both of those clauses are constant-true and only the
-                      // notAdmin check does any filtering. Either the config
-                      // lost those fields or the filter was written against a
-                      // shape that never existed.
+                      // Only notAdmin does any filtering. This also tested
+                      // adminOnly and adminPath, which no entry in
+                      // signedInLinks defines, so both were constant-true.
                       (link: (typeof signedInLinks)[number] & {
-                        adminOnly?: boolean;
-                        adminPath?: string;
                         showUnreadBadge?: boolean;
-                      }) =>
-                        (!link.adminOnly || isOwner) &&
-                        (!link.notAdmin || !isOwner) &&
-                        (!link.adminPath || pathname === link.adminPath),
+                      }) => !link.notAdmin || !isOwner,
                     )
                     .map((link) => (
                       <NavLink

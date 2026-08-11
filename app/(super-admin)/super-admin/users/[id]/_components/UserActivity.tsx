@@ -7,25 +7,12 @@ import { EmptyState } from "@/components/common/EmptyState";
 import type { AuditLog } from "@/lib/generated/prisma";
 import type { SuperAdminUserDetail } from "./UserDetailsHeader";
 
-/**
- * BUG (flagged, not fixed in this conversion): the test-drive list below reads
- * td.bookingDate, and TestDrive has no such column — the scheduled date is
- * `date`, with startTime/endTime beside it. The read is guarded by a ternary,
- * so this is dead UI rather than a crash: every row prints "No date set".
- *
- * Typed as always-undefined so the dead read compiles unchanged and the defect
- * stays legible. The truthy branch narrows to never, which is why the
- * format(new Date(...)) call inside it still type-checks.
- */
-type TestDriveWithMissingBookingDate =
-  SuperAdminUserDetail["testDrives"][number] & { bookingDate?: undefined };
-
 export default function UserActivity({
   activity,
   testDrives,
 }: {
   activity: AuditLog[];
-  testDrives: TestDriveWithMissingBookingDate[];
+  testDrives: SuperAdminUserDetail["testDrives"];
 }) {
   return (
     <Card>
@@ -95,9 +82,8 @@ export default function UserActivity({
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {td.bookingDate
-                            ? format(new Date(td.bookingDate), "MMM d, yyyy")
-                            : "No date set"}
+                          {format(new Date(td.date), "MMM d, yyyy")}
+                          {td.startTime ? ` · ${td.startTime}` : ""}
                         </div>
                       </div>
                     </div>
