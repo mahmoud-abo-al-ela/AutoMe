@@ -8,9 +8,26 @@ import { cn } from "@/lib/utils"
 const THEMES = {
   light: "",
   dark: ".dark"
+} as const
+
+/**
+ * Per-series display config. A series carries either a flat `color` or a
+ * per-theme `theme` map, never both — ChartStyle emits one CSS variable per
+ * key from whichever is present.
+ */
+export type ChartConfig = {
+  [k in string]: {
+    label?: React.ReactNode
+    icon?: React.ComponentType
+  } & (
+    | { color?: string; theme?: never }
+    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+  )
 }
 
-const ChartContext = React.createContext(null)
+type ChartContextProps = { config: ChartConfig }
+
+const ChartContext = React.createContext<ChartContextProps | null>(null)
 
 function useChart() {
   const context = React.useContext(ChartContext)
@@ -28,6 +45,11 @@ function ChartContainer({
   children,
   config,
   ...props
+}: React.ComponentProps<"div"> & {
+  config: ChartConfig
+  children: React.ComponentProps<
+    typeof RechartsPrimitive.ResponsiveContainer
+  >["children"]
 }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
@@ -54,7 +76,7 @@ function ChartContainer({
 const ChartStyle = ({
   id,
   config
-}) => {
+}: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([, config]) => config.theme || config.color)
 
   if (!colorConfig.length) {
@@ -70,7 +92,7 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
 .map(([key, itemConfig]) => {
 const color =
-  itemConfig.theme?.[theme] ||
+  itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
   itemConfig.color
 return color ? `  --color-${key}: ${color};` : null
 })
@@ -98,7 +120,24 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey
-}) {
+}: // TooltipContentProps is what recharts passes to a custom `content` element,
+// unlike the Tooltip component's own props, which omit active/payload/label as
+// context-supplied. Partial because we are rendered as <ChartTooltipContent />
+// and recharts clones in the rest. The generics are recharts' own ValueType and
+// NameType, which the package does not re-export from its root.
+Partial<
+  RechartsPrimitive.TooltipContentProps<
+    number | string | Array<number | string>,
+    number | string
+  >
+> &
+  React.ComponentProps<"div"> & {
+    hideLabel?: boolean
+    hideIndicator?: boolean
+    indicator?: "line" | "dot" | "dashed"
+    nameKey?: string
+    labelKey?: string
+  }) {
   const { config } = useChart()
 
   const tooltipLabel = React.useMemo(() => {
@@ -183,7 +222,7 @@ function ChartTooltipContent({
                           {
                             "--color-bg": indicatorColor,
                             "--color-border": indicatorColor
-                          }
+                          } as React.CSSProperties
                         } />
                     )
                   )}
@@ -222,6 +261,13 @@ function ChartLegendContent({
   payload,
   verticalAlign = "bottom",
   nameKey
+}: React.ComponentProps<"div"> & {
+  hideIcon?: boolean
+  nameKey?: string
+  // Same story as the tooltip: Legend's own props omit payload/verticalAlign,
+  // but recharts injects both into a custom `content` element.
+  payload?: ReadonlyArray<RechartsPrimitive.LegendPayload>
+  verticalAlign?: "top" | "middle" | "bottom"
 }) {
   const { config } = useChart()
 
@@ -265,9 +311,9 @@ function ChartLegendContent({
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
-  config,
-  payload,
-  key
+  config: ChartConfig,
+  payload: unknown,
+  key: string
 ) {
   if (typeof payload !== "object" || payload === null) {
     return undefined
@@ -280,19 +326,22 @@ function getPayloadConfigFromPayload(
       ? payload.payload
       : undefined
 
-  let configLabelKey = key
+  let configLabelKey: string = key
 
+  // `payload` is unknown by design — it is whatever the chart's data rows hold.
+  // The `in` checks narrow presence but not the index type, so each read needs
+  // a cast; the typeof guard beside it is what makes the string cast sound.
   if (
     key in payload &&
-    typeof payload[key] === "string"
+    typeof payload[key as keyof typeof payload] === "string"
   ) {
-    configLabelKey = payload[key]
+    configLabelKey = payload[key as keyof typeof payload] as string
   } else if (
     payloadPayload &&
     key in payloadPayload &&
-    typeof payloadPayload[key] === "string"
+    typeof payloadPayload[key as keyof typeof payloadPayload] === "string"
   ) {
-    configLabelKey = payloadPayload[key]
+    configLabelKey = payloadPayload[key as keyof typeof payloadPayload] as string
   }
 
   return configLabelKey in config

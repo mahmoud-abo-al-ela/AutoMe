@@ -23,6 +23,15 @@ import {
   Bar,
 } from "recharts";
 
+/** One month of the 6-month series assembled in page.tsx. */
+export type AnalyticsMonth = {
+  month: string;
+  organizations: number;
+  users: number;
+  cars: number;
+  testDrives: number;
+};
+
 const chartConfig = {
   organizations: {
     label: "Organizations",
@@ -42,7 +51,11 @@ const chartConfig = {
   },
 };
 
-export default function AnalyticsCharts({ monthlyData }) {
+export default function AnalyticsCharts({
+  monthlyData,
+}: {
+  monthlyData: AnalyticsMonth[];
+}) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Growth Trend */}
