@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import type { OrganizationRowData } from "./OrganizationsTable";
 
 export default function DeleteOrganizationDialog({
   open,
@@ -17,6 +18,12 @@ export default function DeleteOrganizationDialog({
   onClose,
   onConfirm,
   isDeleting,
+}: {
+  open: boolean;
+  org: OrganizationRowData | null;
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
+  isDeleting: boolean;
 }) {
   const handleConfirm = async () => {
     await onConfirm();
@@ -40,7 +47,8 @@ export default function DeleteOrganizationDialog({
                 <span className="font-semibold">{org?.name}</span>? This action
                 cannot be undone.
               </p>
-              {(org?._count?.cars > 0 || org?._count?.memberships > 0) && (
+              {((org?._count?.cars ?? 0) > 0 ||
+                (org?._count?.memberships ?? 0) > 0) && (
                 <div className="mt-2 p-2 bg-destructive/10 rounded-md text-destructive">
                   <strong>Warning:</strong> This organization has{" "}
                   {org?._count?.cars || 0} cars and{" "}

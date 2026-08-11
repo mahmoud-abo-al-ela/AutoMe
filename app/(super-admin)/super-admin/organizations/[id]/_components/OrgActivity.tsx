@@ -12,9 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/common/EmptyState";
+import { Prisma } from "@/lib/generated/prisma";
 
 // Helper to get action category from detailed action name
-const getActionCategory = (action) => {
+const getActionCategory = (action: string) => {
   if (action.includes("CREATED") || action.includes("INVITED")) return "CREATE";
   if (
     action.includes("UPDATED") ||
@@ -62,7 +63,16 @@ const actionColors = {
     "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
 };
 
-export default function OrgActivity({ activity }) {
+/** An audit log row as page.tsx loads it for this organization. */
+export type OrgActivityLog = Prisma.AuditLogGetPayload<{
+  include: { user: { select: { id: true; name: true; imageUrl: true } } };
+}>;
+
+export default function OrgActivity({
+  activity,
+}: {
+  activity: OrgActivityLog[];
+}) {
   return (
     <Card>
       <CardHeader>
@@ -87,8 +97,8 @@ export default function OrgActivity({ activity }) {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={log.user?.imageUrl}
-                      alt={log.user?.name}
+                      src={log.user?.imageUrl ?? undefined}
+                      alt={log.user?.name ?? ""}
                     />
                     <AvatarFallback>
                       {log.user?.name?.charAt(0) || "?"}

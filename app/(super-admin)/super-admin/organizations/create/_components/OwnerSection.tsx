@@ -1,5 +1,6 @@
 "use client";
 
+import type { CreateOrganizationSectionProps } from "./CreateOrganizationForm";
 import { User, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function OwnerSection({ formData, onChange }) {
+export default function OwnerSection({
+  formData,
+  onChange,
+}: CreateOrganizationSectionProps) {
   return (
     <Card>
       <CardHeader>

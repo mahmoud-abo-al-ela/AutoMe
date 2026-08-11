@@ -18,6 +18,7 @@ import {
   Trash2,
   Loader2,
 } from "lucide-react";
+import type { OrganizationRowData } from "./OrganizationsTable";
 
 export default function OrganizationActions({
   org,
@@ -26,6 +27,14 @@ export default function OrganizationActions({
   onDelete,
   actionLoading,
   isPending,
+}: {
+  org: OrganizationRowData;
+  onToggleStatus: (org: OrganizationRowData) => void;
+  onImpersonate: (org: OrganizationRowData) => void;
+  onDelete: (org: OrganizationRowData) => void;
+  /** `status-<id>` / `delete-<id>` while that row's action is in flight. */
+  actionLoading: string | null;
+  isPending: boolean;
 }) {
   return (
     <DropdownMenu>

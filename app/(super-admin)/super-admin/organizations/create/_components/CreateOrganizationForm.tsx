@@ -10,11 +10,34 @@ import BasicInfoSection from "./BasicInfoSection";
 import ContactInfoSection from "./ContactInfoSection";
 import PlanSection from "./PlanSection";
 import OwnerSection from "./OwnerSection";
+import type { Plan } from "@/lib/generated/prisma";
 
-export default function CreateOrganizationForm({ plans }) {
+/** The fields the create-organization form collects. All are strings, since
+ * they come straight from text inputs and a plan Select. */
+export type CreateOrganizationFormData = {
+  name: string;
+  slug: string;
+  email: string;
+  phone: string;
+  address: string;
+  website: string;
+  description: string;
+  planId: string;
+  ownerEmail: string;
+};
+
+/** What the three plain-input sections of this form each receive. */
+export type CreateOrganizationSectionProps = {
+  formData: CreateOrganizationFormData;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+};
+
+export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateOrganizationFormData>({
     name: "",
     slug: "",
     email: "",
@@ -26,7 +49,9 @@ export default function CreateOrganizationForm({ plans }) {
     ownerEmail: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -40,7 +65,7 @@ export default function CreateOrganizationForm({ plans }) {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
@@ -65,7 +90,9 @@ export default function CreateOrganizationForm({ plans }) {
         router.push("/super-admin/organizations");
       } else {
         toast.error("Failed to create organization", {
-          description: result.error || "An error occurred",
+          // BUG (flagged, not fixed in this conversion): result.error is the
+          // error object, not a string. Same defect as ActiveSessions.tsx.
+          description: result.error as unknown as string,
         });
       }
     });

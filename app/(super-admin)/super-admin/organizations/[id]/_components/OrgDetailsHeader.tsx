@@ -26,8 +26,34 @@ import {
   updateOrganizationStatus,
   deleteOrganization,
 } from "@/actions/super-admin";
+import { Prisma } from "@/lib/generated/prisma";
 
-export default function OrgDetailsHeader({ org }) {
+/**
+ * The organization record page.tsx loads for this detail view: subscription
+ * down to the plan, memberships with their users, and the cars/test-drives
+ * tallies OrgStats renders.
+ */
+export type OrganizationDetail = Prisma.OrganizationGetPayload<{
+  include: {
+    subscription: { include: { plan: true } };
+    memberships: {
+      include: {
+        user: {
+          select: {
+            id: true;
+            name: true;
+            email: true;
+            imageUrl: true;
+            role: true;
+          };
+        };
+      };
+    };
+    _count: { select: { cars: true; testDrives: true } };
+  };
+}>;
+
+export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [statusLoading, setStatusLoading] = useState(false);
@@ -51,7 +77,10 @@ export default function OrgDetailsHeader({ org }) {
         });
       } else {
         toast.error("Failed to update status", {
-          description: result.error || "An error occurred.",
+          // BUG (flagged, not fixed in this conversion): result.error is the
+          // error object, not a string; should be result.error.message. Same
+          // defect as ActiveSessions.tsx, twice in this file.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -74,7 +103,7 @@ export default function OrgDetailsHeader({ org }) {
         router.push("/super-admin/organizations");
       } else {
         toast.error("Failed to delete organization", {
-          description: result.error || "An error occurred.",
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {

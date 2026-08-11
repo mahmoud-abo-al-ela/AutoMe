@@ -13,13 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import type { Plan } from "@/lib/generated/prisma";
 
-export default function OrganizationsHeader({ plans }) {
+export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams(searchParams);
     if (search) {
@@ -31,7 +32,7 @@ export default function OrganizationsHeader({ plans }) {
     router.push(`/super-admin/organizations?${params.toString()}`);
   };
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
     if (value && value !== "all") {
       params.set(key, value);

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -23,10 +23,30 @@ import {
 import { AlertCircle, UserCog, Loader2 } from "lucide-react";
 import { startImpersonationAction } from "@/actions/impersonation";
 import { toast } from "sonner";
+import { Prisma } from "@/lib/generated/prisma";
+import type { OrganizationRowData } from "./OrganizationsTable";
 
-export default function ImpersonateModal({ organization, onClose }) {
+/**
+ * A member as /api/super-admin/organizations/[id]/members returns it. That
+ * route is still JavaScript, so this is a hand-written mirror of its query
+ * rather than an inferred type; it will not track changes there
+ * automatically.
+ */
+type OrgMemberOption = Prisma.MembershipGetPayload<{
+  include: {
+    user: { select: { id: true; name: true; email: true; imageUrl: true } };
+  };
+}>;
+
+export default function ImpersonateModal({
+  organization,
+  onClose,
+}: {
+  organization: OrganizationRowData;
+  onClose: () => void;
+}) {
   const router = useRouter();
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState<OrgMemberOption[]>([]);
   const [selectedMember, setSelectedMember] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,7 +63,9 @@ export default function ImpersonateModal({ organization, onClose }) {
           const data = await response.json();
           setMembers(data.members || []);
           // Auto-select owner/admin if available
-          const owner = data.members?.find((m) => m.role === "OWNER");
+          const owner = data.members?.find(
+            (m: OrgMemberOption) => m.role === "OWNER"
+          );
           if (owner) {
             setSelectedMember(owner.userId);
           }
@@ -77,7 +99,9 @@ export default function ImpersonateModal({ organization, onClose }) {
         // Redirect to the organization's dashboard page
         window.location.href = `/org/${organization.slug}/dashboard`;
       } else {
-        toast.error(result.error || "Failed to start impersonation");
+        // BUG (flagged, not fixed in this conversion): result.error is the
+        // error object, not a string. Same defect as ActiveSessions.tsx.
+        toast.error(result.error as unknown as string);
       }
     } catch (error) {
       toast.error("An error occurred");

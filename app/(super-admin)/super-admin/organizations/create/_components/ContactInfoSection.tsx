@@ -1,5 +1,6 @@
 "use client";
 
+import type { CreateOrganizationSectionProps } from "./CreateOrganizationForm";
 import { Mail, Phone, Globe, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +13,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function ContactInfoSection({ formData, onChange }) {
+export default function ContactInfoSection({
+  formData,
+  onChange,
+}: CreateOrganizationSectionProps) {
   return (
     <Card>
       <CardHeader>

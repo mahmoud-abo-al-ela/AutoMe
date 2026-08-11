@@ -1,7 +1,8 @@
 import { Car, Users, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { OrganizationDetail } from "./OrgDetailsHeader";
 
-export default function OrgStats({ org }) {
+export default function OrgStats({ org }: { org: OrganizationDetail }) {
   const stats = [
     {
       title: "Total Cars",

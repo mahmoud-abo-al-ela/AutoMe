@@ -29,15 +29,42 @@ import {
 } from "@/actions/super-admin";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Building2 } from "lucide-react";
+import { Prisma } from "@/lib/generated/prisma";
 
-export default function OrganizationsTable({ organizations, pagination }) {
+/** An organization row as page.tsx selects it, with its plan and tallies. */
+export type OrganizationRowData = Prisma.OrganizationGetPayload<{
+  include: {
+    subscription: { include: { plan: true } };
+    _count: { select: { cars: true; memberships: true; testDrives: true } };
+  };
+}>;
+
+export type OrganizationsPagination = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export default function OrganizationsTable({
+  organizations,
+  pagination,
+}: {
+  organizations: OrganizationRowData[];
+  pagination: OrganizationsPagination;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [impersonateOrg, setImpersonateOrg] = useState(null);
-  const [actionLoading, setActionLoading] = useState(null);
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, org: null });
+  const [impersonateOrg, setImpersonateOrg] =
+    useState<OrganizationRowData | null>(null);
+  // Keyed as `status-<id>` / `delete-<id>` so one row can show a spinner.
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    org: OrganizationRowData | null;
+  }>({ open: false, org: null });
 
-  const handleToggleStatus = async (org) => {
+  const handleToggleStatus = async (org: OrganizationRowData) => {
     setActionLoading(`status-${org.id}`);
     try {
       const result = await updateOrganizationStatus(org.id, !org.isActive);
@@ -55,7 +82,10 @@ export default function OrganizationsTable({ organizations, pagination }) {
         });
       } else {
         toast.error("Failed to update status", {
-          description: result.error || "An error occurred.",
+          // BUG (flagged, not fixed in this conversion): result.error is the
+          // error object, not a string; should be result.error.message. Same
+          // defect as ActiveSessions.tsx, twice in this file.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -67,7 +97,7 @@ export default function OrganizationsTable({ organizations, pagination }) {
     }
   };
 
-  const handleDeleteClick = (org) => {
+  const handleDeleteClick = (org: OrganizationRowData) => {
     setDeleteDialog({ open: true, org });
   };
 
@@ -86,7 +116,7 @@ export default function OrganizationsTable({ organizations, pagination }) {
         });
       } else {
         toast.error("Failed to delete organization", {
-          description: result.error || "An error occurred.",
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -99,7 +129,7 @@ export default function OrganizationsTable({ organizations, pagination }) {
     }
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     const params = new URLSearchParams(window.location.search);
     params.set("page", page.toString());
     router.push(`/super-admin/organizations?${params.toString()}`);

@@ -5,6 +5,8 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Car, Users, Calendar, ExternalLink } from "lucide-react";
 import OrganizationActions from "./OrganizationActions";
+import type { PlanType } from "@/lib/generated/prisma";
+import type { OrganizationRowData } from "./OrganizationsTable";
 
 export default function OrganizationRow({
   org,
@@ -13,8 +15,15 @@ export default function OrganizationRow({
   onDelete,
   actionLoading,
   isPending,
+}: {
+  org: OrganizationRowData;
+  onToggleStatus: (org: OrganizationRowData) => void;
+  onImpersonate: (org: OrganizationRowData) => void;
+  onDelete: (org: OrganizationRowData) => void;
+  actionLoading: string | null;
+  isPending: boolean;
 }) {
-  const getPlanBadgeColor = (planType) => {
+  const getPlanBadgeColor = (planType: PlanType | undefined) => {
     switch (planType) {
       case "ENTERPRISE":
         return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";

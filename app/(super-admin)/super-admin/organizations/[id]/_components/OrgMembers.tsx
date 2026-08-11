@@ -4,15 +4,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { MemberRole } from "@/lib/generated/prisma";
+import type { OrganizationDetail } from "./OrgDetailsHeader";
 
-const roleColors = {
+// MemberRole is OWNER | MEMBER only; the ADMIN entry below is dead config that
+// no membership can ever match. Typed explicitly so that stays visible.
+const roleColors: Record<MemberRole, string> & { ADMIN: string } = {
   OWNER:
     "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
   ADMIN: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   MEMBER: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
 
-export default function OrgMembers({ memberships, orgId }) {
+export default function OrgMembers({
+  memberships,
+  orgId,
+}: {
+  memberships: OrganizationDetail["memberships"];
+  orgId: string;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -30,7 +40,10 @@ export default function OrgMembers({ memberships, orgId }) {
             >
               <div className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarImage src={m.user.imageUrl} alt={m.user.name} />
+                  <AvatarImage
+                    src={m.user.imageUrl ?? undefined}
+                    alt={m.user.name ?? ""}
+                  />
                   <AvatarFallback>
                     {m.user.name?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>

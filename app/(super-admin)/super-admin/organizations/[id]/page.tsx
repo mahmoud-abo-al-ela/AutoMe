@@ -6,7 +6,7 @@ import OrgMembers from "./_components/OrgMembers";
 import OrgActivity from "./_components/OrgActivity";
 import OrgSubscription from "./_components/OrgSubscription";
 
-async function getOrganization(orgId) {
+async function getOrganization(orgId: string) {
   const org = await db.organization.findUnique({
     where: { id: orgId },
     include: {
@@ -58,7 +58,11 @@ async function getOrganization(orgId) {
   return { org, recentActivity, plans };
 }
 
-export default async function OrganizationDetailsPage({ params }) {
+export default async function OrganizationDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const data = await getOrganization(id);
 

@@ -16,8 +16,18 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { changeOrganizationPlan } from "@/actions/super-admin";
+import type { Plan } from "@/lib/generated/prisma";
+import type { OrganizationDetail } from "./OrgDetailsHeader";
 
-export default function OrgSubscription({ subscription, plans, orgId }) {
+export default function OrgSubscription({
+  subscription,
+  plans,
+  orgId,
+}: {
+  subscription: OrganizationDetail["subscription"];
+  plans: Plan[];
+  orgId: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedPlan, setSelectedPlan] = useState(subscription?.planId || "");
@@ -41,7 +51,9 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
         });
       } else {
         toast.error("Failed to update plan", {
-          description: result.error || "An error occurred.",
+          // BUG (flagged, not fixed in this conversion): result.error is the
+          // error object, not a string. Same defect as ActiveSessions.tsx.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -82,7 +94,10 @@ export default function OrgSubscription({ subscription, plans, orgId }) {
                 </Badge>
               </div>
               <div className="text-2xl font-bold">
-                ${(currentPlan?.monthlyPrice / 100).toFixed(2)}
+                {/* currentPlan comes from a find() and can be undefined, in
+                    which case this has always rendered "$NaN". Cast rather
+                    than defaulted, so that pre-existing path is unchanged. */}
+                ${((currentPlan?.monthlyPrice as number) / 100).toFixed(2)}
                 <span className="text-sm font-normal text-muted-foreground">
                   /month
                 </span>
