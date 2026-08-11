@@ -12,13 +12,36 @@ import { toast } from "sonner";
 import { endImpersonation } from "@/actions/super-admin";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Shield } from "lucide-react";
+import { Prisma } from "@/lib/generated/prisma";
 
-export default function ActiveSessions({ sessions }) {
+/**
+ * An impersonation session row as page.tsx selects it. Shared with
+ * SessionHistory, which queries the same shape for ended sessions.
+ */
+export type ImpersonationSessionRow = Prisma.ImpersonationSessionGetPayload<{
+  include: {
+    superAdmin: { select: { id: true; name: true; email: true; imageUrl: true } };
+    targetUser: { select: { id: true; name: true; email: true; imageUrl: true } };
+    organization: { select: { id: true; name: true; slug: true } };
+  };
+}>;
+
+export default function ActiveSessions({
+  sessions,
+}: {
+  sessions: ImpersonationSessionRow[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [endingSession, setEndingSession] = useState(null);
+  const [endingSession, setEndingSession] = useState<string | null>(null);
 
-  const handleEndSession = async (sessionId, targetUserName) => {
+  // targetUserName is nullable because User.name is; it goes straight into the
+  // toast copy, so it is left as-is rather than defaulted to preserve the
+  // existing text exactly.
+  const handleEndSession = async (
+    sessionId: string,
+    targetUserName: string | null
+  ) => {
     setEndingSession(sessionId);
     try {
       const result = await endImpersonation(sessionId);
@@ -31,7 +54,11 @@ export default function ActiveSessions({ sessions }) {
         });
       } else {
         toast.error("Failed to end session", {
-          description: result.error || "An error occurred.",
+          // BUG (flagged, not fixed in this conversion): result.error is the
+          // error object { message, code, ... }, not a string, so this passes
+          // an object where sonner wants a ReactNode. Should be
+          // result.error.message. Same bug in QuickImpersonate.tsx.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {
@@ -67,8 +94,8 @@ export default function ActiveSessions({ sessions }) {
                   <div className="flex -space-x-2">
                     <Avatar className="border-2 border-background">
                       <AvatarImage
-                        src={session.superAdmin.imageUrl}
-                        alt={session.superAdmin.name}
+                        src={session.superAdmin.imageUrl ?? undefined}
+                        alt={session.superAdmin.name ?? ""}
                       />
                       <AvatarFallback>
                         {session.superAdmin.name?.charAt(0) || "S"}
@@ -76,8 +103,8 @@ export default function ActiveSessions({ sessions }) {
                     </Avatar>
                     <Avatar className="border-2 border-background">
                       <AvatarImage
-                        src={session.targetUser.imageUrl}
-                        alt={session.targetUser.name}
+                        src={session.targetUser.imageUrl ?? undefined}
+                        alt={session.targetUser.name ?? ""}
                       />
                       <AvatarFallback>
                         {session.targetUser.name?.charAt(0) || "U"}

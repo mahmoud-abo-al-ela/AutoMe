@@ -13,12 +13,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function AuditLogsHeader({ actions, entities }) {
+export default function AuditLogsHeader({
+  actions,
+  entities,
+}: {
+  actions: string[];
+  entities: string[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams(searchParams);
     if (search) {
@@ -30,7 +36,7 @@ export default function AuditLogsHeader({ actions, entities }) {
     router.push(`/super-admin/audit-logs?${params.toString()}`);
   };
 
-  const handleFilter = (key, value) => {
+  const handleFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
     if (value !== "all") {
       params.set(key, value);

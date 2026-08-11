@@ -34,15 +34,40 @@ import {
   actionColors,
 } from "./audit-log-actions";
 import AuditLogDetailsDialog from "./AuditLogDetailsDialog";
+import { Prisma } from "@/lib/generated/prisma";
 
-export default function AuditLogsTable({ logs, pagination }) {
+/** An audit log row as page.tsx selects it, with its user and organization. */
+export type AuditLogRow = Prisma.AuditLogGetPayload<{
+  include: {
+    user: { select: { id: true; name: true; email: true; imageUrl: true } };
+    organization: { select: { id: true; name: true; slug: true } };
+  };
+}>;
+
+export type AuditLogsPagination = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export default function AuditLogsTable({
+  logs,
+  pagination,
+}: {
+  logs: AuditLogRow[];
+  pagination: AuditLogsPagination;
+}) {
   const router = useRouter();
-  const [detailsDialog, setDetailsDialog] = useState({
+  const [detailsDialog, setDetailsDialog] = useState<{
+    open: boolean;
+    log: AuditLogRow | null;
+  }>({
     open: false,
     log: null,
   });
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(window.location.search);
     params.set("page", newPage.toString());
     router.push(`/super-admin/audit-logs?${params.toString()}`);
@@ -96,8 +121,8 @@ export default function AuditLogsTable({ logs, pagination }) {
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarImage
-                            src={log.user?.imageUrl}
-                            alt={log.user?.name || log.userEmail}
+                            src={log.user?.imageUrl ?? undefined}
+                            alt={log.user?.name || log.userEmail || ""}
                           />
                           <AvatarFallback>
                             {(log.user?.name || log.userEmail)

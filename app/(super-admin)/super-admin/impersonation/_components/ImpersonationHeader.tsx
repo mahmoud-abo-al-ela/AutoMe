@@ -1,7 +1,11 @@
 import { UserCog, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function ImpersonationHeader({ activeCount }) {
+export default function ImpersonationHeader({
+  activeCount,
+}: {
+  activeCount: number;
+}) {
   return (
     <div className="space-y-4">
       <div>
@@ -16,6 +20,12 @@ export default function ImpersonationHeader({ activeCount }) {
 
       {activeCount > 0 && (
         <Alert
+          // BUG (flagged, not fixed in this conversion): Alert has no
+          // "warning" variant — only default and destructive — so cva
+          // silently falls back to default. The yellow className below is
+          // what actually makes this look like a warning. Same class of bug
+          // as Badge variant="primary" in components/Why.tsx.
+          // @ts-expect-error unsupported variant, kept to preserve behaviour
           variant="warning"
           className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
         >

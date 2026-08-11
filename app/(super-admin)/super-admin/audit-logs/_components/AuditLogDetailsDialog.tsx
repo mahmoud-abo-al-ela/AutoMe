@@ -8,8 +8,35 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import type { AuditLogRow } from "./AuditLogsTable";
+
+/**
+ * BUG (flagged, not fixed in this conversion): this dialog reads ipAddress,
+ * userAgent and changes, and the AuditLog model has none of them. The schema
+ * keeps IP and user agent inside the metadata Json blob, and the before/after
+ * pair in oldValue/newValue. Every read is guarded (|| "N/A", &&), so the
+ * result is dead UI rather than a crash: the IP Address and User Agent rows
+ * always print "N/A" and the Changes block never renders.
+ *
+ * Typed as always-undefined so the dead reads compile unchanged and the defect
+ * stays legible instead of being hidden behind a cast.
+ */
+type AuditLogRowWithMissingFields = AuditLogRow & {
+  ipAddress?: undefined;
+  userAgent?: undefined;
+  changes?: undefined;
+};
+
 // Read-only detail view for a single audit log entry.
-export default function AuditLogDetailsDialog({ log, open, onOpenChange }) {
+export default function AuditLogDetailsDialog({
+  log,
+  open,
+  onOpenChange,
+}: {
+  log: AuditLogRowWithMissingFields | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">

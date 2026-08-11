@@ -10,11 +10,27 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { startImpersonation } from "@/actions/super-admin";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { User } from "@/lib/generated/prisma";
 
-export default function QuickImpersonate({ organizations }) {
+/**
+ * An impersonatable organization: the columns page.tsx selects, plus the
+ * OWNER membership's user flattened onto `owner` (null when there is none).
+ */
+export type ImpersonatableOrganization = {
+  id: string;
+  name: string;
+  slug: string;
+  owner: Pick<User, "id" | "name" | "email" | "imageUrl"> | null;
+};
+
+export default function QuickImpersonate({
+  organizations,
+}: {
+  organizations: ImpersonatableOrganization[];
+}) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState<string | null>(null);
 
   const filteredOrgs = organizations.filter(
     (org) =>
@@ -22,7 +38,7 @@ export default function QuickImpersonate({ organizations }) {
       org.slug.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleImpersonate = async (org) => {
+  const handleImpersonate = async (org: ImpersonatableOrganization) => {
     if (!org.owner) {
       toast.error("Cannot impersonate", {
         description: "This organization has no owner to impersonate.",
@@ -41,7 +57,10 @@ export default function QuickImpersonate({ organizations }) {
         window.location.href = `/org/${org.slug}/dashboard`;
       } else {
         toast.error("Failed to start impersonation", {
-          description: result.error || "An error occurred.",
+          // BUG (flagged, not fixed in this conversion): see the identical
+          // case in ActiveSessions.tsx — result.error is an object, not a
+          // string, and should be result.error.message.
+          description: result.error as unknown as string,
         });
       }
     } catch (error) {

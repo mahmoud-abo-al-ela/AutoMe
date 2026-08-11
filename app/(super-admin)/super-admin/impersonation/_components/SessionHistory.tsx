@@ -6,8 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { ImpersonationSessionRow } from "./ActiveSessions";
 
-export default function SessionHistory({ sessions }) {
+export default function SessionHistory({
+  sessions,
+}: {
+  sessions: ImpersonationSessionRow[];
+}) {
   return (
     <Card>
       <CardHeader>
@@ -20,7 +25,10 @@ export default function SessionHistory({ sessions }) {
           <div className="space-y-3">
             {sessions.map((session) => {
               const duration = differenceInMinutes(
-                new Date(session.endedAt),
+                // page.tsx queries this list with endedAt: { not: null }, a
+                // filter Prisma's generated row type cannot express, so the
+                // field still reads as Date | null here.
+                new Date(session.endedAt!),
                 new Date(session.startedAt)
               );
 
@@ -33,8 +41,8 @@ export default function SessionHistory({ sessions }) {
                     <div className="flex -space-x-2">
                       <Avatar className="h-8 w-8 border-2 border-background">
                         <AvatarImage
-                          src={session.superAdmin.imageUrl}
-                          alt={session.superAdmin.name}
+                          src={session.superAdmin.imageUrl ?? undefined}
+                          alt={session.superAdmin.name ?? ""}
                         />
                         <AvatarFallback>
                           {session.superAdmin.name?.charAt(0) || "S"}
@@ -42,8 +50,8 @@ export default function SessionHistory({ sessions }) {
                       </Avatar>
                       <Avatar className="h-8 w-8 border-2 border-background">
                         <AvatarImage
-                          src={session.targetUser.imageUrl}
-                          alt={session.targetUser.name}
+                          src={session.targetUser.imageUrl ?? undefined}
+                          alt={session.targetUser.name ?? ""}
                         />
                         <AvatarFallback>
                           {session.targetUser.name?.charAt(0) || "U"}
@@ -69,7 +77,7 @@ export default function SessionHistory({ sessions }) {
                       {duration} min
                     </Badge>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(session.endedAt), {
+                      {formatDistanceToNow(new Date(session.endedAt!), {
                         addSuffix: true,
                       })}
                     </div>

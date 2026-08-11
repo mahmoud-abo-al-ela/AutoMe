@@ -1,20 +1,39 @@
 import { Suspense } from "react";
 import { db } from "@/lib/prisma";
+import { Prisma, type AuditAction, type EntityType } from "@/lib/generated/prisma";
 import AuditLogsHeader from "./_components/AuditLogsHeader";
 import AuditLogsTable from "./_components/AuditLogsTable";
 import { Skeleton } from "@/components/ui/skeleton";
 
-async function getAuditLogs(searchParams) {
-  const page = parseInt(searchParams?.page) || 1;
+/**
+ * The filter and pagination params this page reads. Single strings rather than
+ * Next's string | string[]: every link that sets these sets one value, and the
+ * reads below have never handled the repeated-key case.
+ */
+type AuditLogsSearchParams = {
+  page?: string;
+  action?: string;
+  entity?: string;
+  search?: string;
+};
+
+async function getAuditLogs(searchParams: AuditLogsSearchParams) {
+  const page = parseInt(searchParams?.page ?? "") || 1;
   const limit = 20;
   const skip = (page - 1) * limit;
   const action = searchParams?.action || "all";
   const entity = searchParams?.entity || "all";
   const search = searchParams?.search || "";
 
-  const where = {
-    ...(action !== "all" && { action }),
-    ...(entity !== "all" && { entityType: entity }),
+  // Annotated so the `mode: "insensitive"` literals narrow to Prisma's
+  // QueryMode enum rather than widening to string.
+  const where: Prisma.AuditLogWhereInput = {
+    // action and entityType are Prisma enums, but these values arrive raw from
+    // the query string and are never validated against AuditAction/EntityType.
+    // Casting preserves the existing behaviour, in which an unknown value is
+    // simply passed to Prisma and rejected there.
+    ...(action !== "all" && { action: action as AuditAction }),
+    ...(entity !== "all" && { entityType: entity as EntityType }),
     ...(search && {
       OR: [
         { userEmail: { contains: search, mode: "insensitive" } },
@@ -66,7 +85,11 @@ async function getAuditLogs(searchParams) {
   };
 }
 
-export default async function AuditLogsPage({ searchParams }) {
+export default async function AuditLogsPage({
+  searchParams,
+}: {
+  searchParams: Promise<AuditLogsSearchParams>;
+}) {
   const resolvedParams = await searchParams;
   const { logs, pagination, actions, entities } = await getAuditLogs(
     resolvedParams
