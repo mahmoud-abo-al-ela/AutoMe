@@ -31,7 +31,6 @@ async function getOrganization(orgId) {
         select: {
           cars: true,
           testDrives: true,
-          conversations: true,
         },
       },
     },

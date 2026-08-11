@@ -1,4 +1,4 @@
-import { Car, Users, Calendar, MessageSquare } from "lucide-react";
+import { Car, Users, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function OrgStats({ org }) {
@@ -23,13 +23,6 @@ export default function OrgStats({ org }) {
       icon: Calendar,
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900/30",
-    },
-    {
-      title: "Conversations",
-      value: org._count.conversations,
-      icon: MessageSquare,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100 dark:bg-purple-900/30",
     },
   ];
 
