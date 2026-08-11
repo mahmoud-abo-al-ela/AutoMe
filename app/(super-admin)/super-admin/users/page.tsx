@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { db } from "@/lib/prisma";
-import { Prisma, type UserRole } from "@/lib/generated/prisma";
+import { Prisma, UserRole } from "@/lib/generated/prisma";
+import { asEnumParam } from "@/lib/utils/enum-params";
 import UsersTable from "./_components/UsersTable";
 import UsersHeader from "./_components/UsersHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,11 +18,9 @@ async function getUsers(searchParams: UsersSearchParams) {
   const limit = 15;
   const skip = (page - 1) * limit;
   const search = searchParams?.search || "";
-  const role = searchParams?.role || "all";
+  const role = asEnumParam(UserRole, searchParams?.role);
 
-  // Annotated so the "insensitive" literals narrow to Prisma's QueryMode. The
-  // role cast mirrors audit-logs: it arrives raw from the query string and is
-  // not validated against UserRole before Prisma sees it.
+  // Annotated so the "insensitive" literals narrow to Prisma's QueryMode.
   const where: Prisma.UserWhereInput = {
     ...(search && {
       OR: [
@@ -29,7 +28,7 @@ async function getUsers(searchParams: UsersSearchParams) {
         { email: { contains: search, mode: "insensitive" } },
       ],
     }),
-    ...(role !== "all" && { role: role as UserRole }),
+    ...(role && { role }),
   };
 
   const [users, total, roleStats] = await Promise.all([
