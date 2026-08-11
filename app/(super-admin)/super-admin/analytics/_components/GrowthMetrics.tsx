@@ -1,7 +1,19 @@
 import { TrendingUp, TrendingDown, Building2, Users, Car } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function GrowthMetrics({ growth }) {
+/** Month-over-month counts for one entity, as computed in page.tsx. */
+export type GrowthMetric = {
+  current: number;
+  previous: number;
+  /** Percentage change vs last month; 0 when last month was empty. */
+  change: number;
+};
+
+export default function GrowthMetrics({
+  growth,
+}: {
+  growth: { organizations: GrowthMetric; users: GrowthMetric; cars: GrowthMetric };
+}) {
   const metrics = [
     {
       title: "Organizations",

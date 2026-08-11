@@ -1,8 +1,25 @@
 import { Car, Calendar, Building2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Prisma } from "@/lib/generated/prisma";
 
-export default function TopOrganizations({ title, organizations, metric }) {
+/** The leaderboard rows page.tsx loads, with the counts this card ranks on. */
+export type TopOrganization = Prisma.OrganizationGetPayload<{
+  include: {
+    _count: { select: { cars: true; testDrives: true } };
+    subscription: { include: { plan: true } };
+  };
+}>;
+
+export default function TopOrganizations({
+  title,
+  organizations,
+  metric,
+}: {
+  title: string;
+  organizations: TopOrganization[];
+  metric: "cars" | "testDrives";
+}) {
   return (
     <Card>
       <CardHeader>
