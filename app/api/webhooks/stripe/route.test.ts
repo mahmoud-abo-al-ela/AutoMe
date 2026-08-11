@@ -30,21 +30,32 @@ vi.mock("next/headers", () => ({ headers: headersMock }));
 
 import { POST } from "@/app/api/webhooks/stripe/route";
 
-const signer = new Stripe(process.env.STRIPE_SECRET_KEY);
+// Non-null: the vi.hoisted block above sets this before this line evaluates.
+const signer = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-function event(overrides = {}) {
+type StripeTestEvent = {
+  id: string;
+  type: string;
+  data: { object: Record<string, unknown> };
+};
+
+function event(overrides: Partial<StripeTestEvent> = {}): StripeTestEvent {
   return { id: "evt_1", type: "customer.subscription.updated", data: { object: {} }, ...overrides };
 }
 
 /** Build a request + sign it with the real Stripe test-header helper. */
-function signedRequest(evt, { signature } = {}) {
+function signedRequest(
+  evt: StripeTestEvent,
+  { signature }: { signature?: string | null } = {}
+): Request {
   const payload = JSON.stringify(evt);
   const sig =
     signature === undefined
       ? signer.webhooks.generateTestHeaderString({ payload, secret: WEBHOOK_SECRET })
       : signature;
   headersMock.mockResolvedValue(new Headers(sig === null ? {} : { "stripe-signature": sig }));
-  return { text: async () => payload };
+  // The route only ever calls req.text(), so a full Request is unnecessary.
+  return { text: async () => payload } as unknown as Request;
 }
 
 beforeEach(() => {
@@ -105,7 +116,9 @@ describe("POST /api/webhooks/stripe", () => {
     delete process.env.STRIPE_WEBHOOK_SECRET;
     try {
       const mod = await import("@/app/api/webhooks/stripe/route");
-      const res = await mod.POST({ text: async () => "{}" });
+      const res = await mod.POST({
+        text: async () => "{}",
+      } as unknown as Request);
       expect(res.status).toBe(500);
     } finally {
       process.env.STRIPE_WEBHOOK_SECRET = saved;

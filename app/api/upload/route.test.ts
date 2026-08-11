@@ -19,7 +19,7 @@ vi.mock("@/lib/supabase", () => ({ createAdminClient }));
 import { POST } from "@/app/api/upload/route";
 import { createAdminClient as adminClientMock } from "@/lib/supabase";
 
-function uploadRequest(bucket) {
+function uploadRequest(bucket: string) {
   const form = new FormData();
   form.append("bucket", bucket);
   // A valid JPEG magic-byte file, so the rejection can only be the bucket.

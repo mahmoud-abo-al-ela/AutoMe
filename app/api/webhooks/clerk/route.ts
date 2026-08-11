@@ -9,7 +9,24 @@ export const runtime = "nodejs";
 
 const clerkWebhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
-export async function POST(req) {
+/**
+ * The subset of Clerk's user.* webhook payload this route reads. svix.verify
+ * proves the body is authentically from Clerk but returns unknown, since the
+ * shape is Clerk's contract rather than something we can derive.
+ */
+type ClerkUserEvent = {
+  type: string;
+  data: {
+    id: string;
+    email_addresses?: { email_address: string }[];
+    first_name?: string | null;
+    last_name?: string | null;
+    image_url?: string | null;
+    username?: string | null;
+  };
+};
+
+export async function POST(req: Request) {
     // Fail closed: without the signing secret we cannot verify authenticity.
     if (!clerkWebhookSecret) {
         logError("CLERK_WEBHOOK_SECRET is not configured; rejecting webhook.");
@@ -36,7 +53,7 @@ export async function POST(req) {
     // Create a new Svix instance with your webhook secret
     const wh = new Webhook(clerkWebhookSecret);
 
-    let evt;
+    let evt: ClerkUserEvent;
 
     // Verify the payload with the headers
     try {
@@ -44,7 +61,7 @@ export async function POST(req) {
             "svix-id": svix_id,
             "svix-timestamp": svix_timestamp,
             "svix-signature": svix_signature,
-        });
+        }) as ClerkUserEvent;
     } catch (err) {
         logError("Error verifying webhook:", err);
         return new Response("Error occurred", {
@@ -101,7 +118,16 @@ export async function GET() {
     return new Response("Webhook endpoint is active", { status: 200 });
 }
 
-async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, imageUrl, username) {
+type ClerkUserData = ClerkUserEvent["data"];
+
+async function handleUserCreated(
+    clerkId: string,
+    emailAddresses: ClerkUserData["email_addresses"],
+    firstName: ClerkUserData["first_name"],
+    lastName: ClerkUserData["last_name"],
+    imageUrl: ClerkUserData["image_url"],
+    username: ClerkUserData["username"]
+) {
     const email = emailAddresses?.[0]?.email_address;
 
     // Get name from firstName/lastName, or fallback to username if not available
@@ -127,14 +153,28 @@ async function handleUserCreated(clerkId, emailAddresses, firstName, lastName, i
         data: {
             clerkId,
             name,
-            email,
+            // BUG (surfaced by this conversion, NOT fixed here): User.email is
+            // required, but email_addresses can be absent — a phone-only or
+            // passwordless Clerk signup has none. Prisma then rejects the
+            // create, the POST handler releases the idempotency claim and
+            // returns 500, and Svix retries the event forever. Asserted to keep
+            // the current runtime; deciding what a user without an email should
+            // be is its own change.
+            email: email!,
             imageUrl,
         },
     });
 
 }
 
-async function handleUserUpdated(clerkId, emailAddresses, firstName, lastName, imageUrl, username) {
+async function handleUserUpdated(
+    clerkId: string,
+    emailAddresses: ClerkUserData["email_addresses"],
+    firstName: ClerkUserData["first_name"],
+    lastName: ClerkUserData["last_name"],
+    imageUrl: ClerkUserData["image_url"],
+    username: ClerkUserData["username"]
+) {
     const email = emailAddresses?.[0]?.email_address;
 
     // Get name from firstName/lastName, or fallback to username if not available
@@ -158,7 +198,7 @@ async function handleUserUpdated(clerkId, emailAddresses, firstName, lastName, i
 
 }
 
-async function handleUserDeleted(clerkId) {
+async function handleUserDeleted(clerkId: string) {
     // Delete user and all related data (cascading deletes should handle relationships)
     const user = await db.user.findUnique({
         where: { clerkId },

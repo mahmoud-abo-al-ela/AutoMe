@@ -19,7 +19,9 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
  * client-supplied `file.type` / filename extension. Returns null for anything
  * that isn't one of the formats we accept.
  */
-function detectImageType(buffer) {
+function detectImageType(
+  buffer: Buffer
+): { ext: string; contentType: string } | null {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return { ext: "jpg", contentType: "image/jpeg" };
   }
@@ -47,7 +49,7 @@ function detectImageType(buffer) {
   return null;
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     // Authenticated + tenant-scoped. resolveTenantContext throws typed errors
     // (401/403) mapped below, and gives us a server-sourced organization id.
@@ -60,11 +62,15 @@ export async function POST(request) {
     const file = formData.get("file");
     const bucket = formData.get("bucket") || "organization-logos";
 
-    if (!ALLOWED_BUCKETS.has(bucket)) {
+    // formData.get returns File | string | null. A non-string bucket already
+    // failed the allowlist check before (Set.has of a File is false); the
+    // typeof guard states that rather than relying on it.
+    if (typeof bucket !== "string" || !ALLOWED_BUCKETS.has(bucket)) {
       return NextResponse.json({ error: "Unknown bucket" }, { status: 400 });
     }
 
-    if (!file || typeof file.arrayBuffer !== "function") {
+    // Was a duck-type check on file.arrayBuffer, which a string also fails.
+    if (!file || typeof file === "string") {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 

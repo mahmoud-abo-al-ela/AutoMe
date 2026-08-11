@@ -14,7 +14,7 @@ import { logError } from "@/lib/utils/errors";
  *   }]
  * }
  */
-export async function GET(request) {
+export async function GET(request: Request) {
   try {
     // Fail closed: a missing secret must reject, never skip the check. With the
     // old `if (cronSecret && …)` guard, an unset CRON_SECRET let anyone trigger

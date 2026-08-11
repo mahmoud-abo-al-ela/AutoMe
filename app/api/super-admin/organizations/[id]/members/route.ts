@@ -3,7 +3,10 @@ import { checkUser } from "@/lib/checkUser";
 import { db } from "@/lib/prisma";
 import { logError } from "@/lib/utils/errors";
 
-export async function GET(request, { params }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await checkUser();
 

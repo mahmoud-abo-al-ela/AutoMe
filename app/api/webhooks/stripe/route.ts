@@ -22,7 +22,7 @@ const EVENT_HANDLERS = {
     "checkout.session.completed": webhookService.handleCheckoutSessionCompleted,
 };
 
-export async function POST(req) {
+export async function POST(req: Request) {
     // Fail closed: without the signing secret we cannot verify authenticity, so
     // never fall through to processing unverified input.
     if (!webhookSecret) {
@@ -60,7 +60,13 @@ export async function POST(req) {
         });
     }
 
-    const handler = EVENT_HANDLERS[event.type];
+    // Each handler declares the narrow Stripe event it expects, and the registry
+    // key is what guarantees the delivered event matches it. TypeScript cannot
+    // express that correlation without a mapped type over all ~250 event names,
+    // so the lookup is widened here rather than at every handler.
+    const handler = EVENT_HANDLERS[event.type as keyof typeof EVENT_HANDLERS] as
+        | ((event: Stripe.Event) => Promise<unknown>)
+        | undefined;
     if (!handler) {
         // Not an event we act on — ack so Stripe stops retrying.
         return new Response(JSON.stringify({ received: true }), { status: 200 });
