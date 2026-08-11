@@ -99,9 +99,7 @@ export default function ImpersonateModal({
         // Redirect to the organization's dashboard page
         window.location.href = `/org/${organization.slug}/dashboard`;
       } else {
-        // BUG (flagged, not fixed in this conversion): result.error is the
-        // error object, not a string. Same defect as ActiveSessions.tsx.
-        toast.error(result.error as unknown as string);
+        toast.error(result.error.message);
       }
     } catch (error) {
       toast.error("An error occurred");

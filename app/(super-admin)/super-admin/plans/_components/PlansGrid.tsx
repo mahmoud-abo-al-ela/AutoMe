@@ -72,11 +72,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
         });
       } else {
         toast.error("Failed to create plan", {
-          // BUG (flagged, not fixed in this conversion): result.error is the
-          // error object, not a string; should be result.error.message. Same
-          // defect as ActiveSessions.tsx, repeated at all three call sites in
-          // this file.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {
@@ -107,7 +103,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
         });
       } else {
         toast.error("Failed to update plan", {
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {
@@ -136,7 +132,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
         });
       } else {
         toast.error("Failed to delete plan", {
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {

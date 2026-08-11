@@ -91,10 +91,7 @@ export default function UsersTable({
         });
       } else {
         toast.error("Failed to update role", {
-          // BUG (flagged, not fixed in this conversion): same defect as
-          // ActiveSessions.tsx — result.error is the error object, not a
-          // string, and should be result.error.message.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {

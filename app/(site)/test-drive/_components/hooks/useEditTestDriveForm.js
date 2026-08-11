@@ -253,7 +253,7 @@ export const useEditTestDriveForm = ({ testDrive, workingHours, carId, onSuccess
                 toast.success("Test drive updated successfully!");
                 onSuccess();
             } else {
-                toast.error(result.error || "Failed to update test drive");
+                toast.error(result.error?.message || "Failed to update test drive");
             }
         } catch (error) {
             console.error("Error updating test drive:", error);

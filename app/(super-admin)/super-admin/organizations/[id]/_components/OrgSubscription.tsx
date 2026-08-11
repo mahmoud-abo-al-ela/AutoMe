@@ -51,9 +51,7 @@ export default function OrgSubscription({
         });
       } else {
         toast.error("Failed to update plan", {
-          // BUG (flagged, not fixed in this conversion): result.error is the
-          // error object, not a string. Same defect as ActiveSessions.tsx.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {

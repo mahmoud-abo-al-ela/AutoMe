@@ -90,9 +90,7 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
         router.push("/super-admin/organizations");
       } else {
         toast.error("Failed to create organization", {
-          // BUG (flagged, not fixed in this conversion): result.error is the
-          // error object, not a string. Same defect as ActiveSessions.tsx.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     });

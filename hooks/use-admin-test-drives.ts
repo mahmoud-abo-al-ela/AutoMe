@@ -81,9 +81,9 @@ export const useAdminTestDrives = () => {
             if (response.success) {
                 toast.success(`Test drive ${newStatus.toLowerCase()} successfully`);
             } else {
-                // BUG (flagged, not fixed): `error` is the ErrorResponse object, so
-                // this renders "[object Object]". Should read response.error.message.
-                toast.error(String(response.error) || "Failed to update test drive status");
+                toast.error(
+                    response.error.message || "Failed to update test drive status"
+                );
             }
         } catch (error) {
             logError("Error updating test drive status:", error);

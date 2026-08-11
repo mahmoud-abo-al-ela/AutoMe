@@ -57,10 +57,7 @@ export default function QuickImpersonate({
         window.location.href = `/org/${org.slug}/dashboard`;
       } else {
         toast.error("Failed to start impersonation", {
-          // BUG (flagged, not fixed in this conversion): see the identical
-          // case in ActiveSessions.tsx — result.error is an object, not a
-          // string, and should be result.error.message.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {

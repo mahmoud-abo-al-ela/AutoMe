@@ -54,11 +54,7 @@ export default function ActiveSessions({
         });
       } else {
         toast.error("Failed to end session", {
-          // BUG (flagged, not fixed in this conversion): result.error is the
-          // error object { message, code, ... }, not a string, so this passes
-          // an object where sonner wants a ReactNode. Should be
-          // result.error.message. Same bug in QuickImpersonate.tsx.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {

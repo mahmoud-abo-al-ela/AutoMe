@@ -77,10 +77,7 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
         });
       } else {
         toast.error("Failed to update status", {
-          // BUG (flagged, not fixed in this conversion): result.error is the
-          // error object, not a string; should be result.error.message. Same
-          // defect as ActiveSessions.tsx, twice in this file.
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {
@@ -103,7 +100,7 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
         router.push("/super-admin/organizations");
       } else {
         toast.error("Failed to delete organization", {
-          description: result.error as unknown as string,
+          description: result.error.message,
         });
       }
     } catch (error) {

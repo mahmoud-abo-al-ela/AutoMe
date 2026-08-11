@@ -21,7 +21,7 @@ export default function ImpersonationBanner({ session, organization }) {
         // Redirect back to super admin
         window.location.href = "/super-admin";
       } else {
-        toast.error(result.error || "Failed to end impersonation");
+        toast.error(result.error?.message || "Failed to end impersonation");
         setEnding(false);
       }
     } catch (error) {

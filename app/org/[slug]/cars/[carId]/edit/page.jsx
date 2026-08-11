@@ -21,7 +21,7 @@ export default function EditCarPage() {
     queryFn: async () => {
       const response = await getCarForEdit(carId);
       if (!response?.success) {
-        throw new Error(response?.error || "Failed to fetch car data");
+        throw new Error(response?.error?.message || "Failed to fetch car data");
       }
       return response.data;
     },
