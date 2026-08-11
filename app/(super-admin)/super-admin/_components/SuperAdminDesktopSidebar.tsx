@@ -6,12 +6,19 @@ import { Shield, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { Dispatch, SetStateAction } from "react";
+import type { CurrentUser } from "@/lib/checkUser";
 
 export default function SuperAdminDesktopSidebar({
   collapsed,
   setCollapsed,
   pathname,
   user,
+}: {
+  collapsed: boolean;
+  setCollapsed: Dispatch<SetStateAction<boolean>>;
+  pathname: string;
+  user: CurrentUser;
 }) {
   return (
     <aside
@@ -115,7 +122,7 @@ export default function SuperAdminDesktopSidebar({
         {!collapsed && user && (
           <div className="px-2 py-2 flex items-center space-x-3">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.imageUrl} alt={user.name} />
+              <AvatarImage src={user.imageUrl ?? undefined} alt={user.name ?? ""} />
               <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">
                 {user.name?.charAt(0) || "SA"}
               </AvatarFallback>

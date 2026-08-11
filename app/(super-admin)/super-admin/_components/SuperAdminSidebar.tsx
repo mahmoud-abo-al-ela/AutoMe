@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { Shield } from "lucide-react";
 import SuperAdminDesktopSidebar from "./SuperAdminDesktopSidebar";
 import SuperAdminMobileSidebar from "./SuperAdminMobileSidebar";
+import type { CurrentUser } from "@/lib/checkUser";
 
-export default function SuperAdminSidebar({ user }) {
+export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();

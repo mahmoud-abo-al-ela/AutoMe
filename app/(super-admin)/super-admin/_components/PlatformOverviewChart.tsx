@@ -12,7 +12,19 @@ import {
   Legend,
 } from "recharts";
 
-export default function PlatformOverviewChart({ data }) {
+/** One month of the 6-month growth series assembled in page.tsx. */
+export type MonthlyGrowthPoint = {
+  month: string;
+  organizations: number;
+  users: number;
+  cars: number;
+};
+
+export default function PlatformOverviewChart({
+  data,
+}: {
+  data: MonthlyGrowthPoint[];
+}) {
   return (
     <Card className="col-span-1">
       <CardHeader>

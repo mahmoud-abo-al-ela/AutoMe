@@ -12,9 +12,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Building2, ArrowRight, Car, Users } from "lucide-react";
+import { Prisma, PlanType } from "@/lib/generated/prisma";
 
-export default function RecentOrganizations({ organizations }) {
-  const getPlanBadgeColor = (planType) => {
+/** The organization rows page.tsx loads for this table, with their joins. */
+export type RecentOrganization = Prisma.OrganizationGetPayload<{
+  include: {
+    subscription: { include: { plan: true } };
+    _count: { select: { cars: true; memberships: true } };
+  };
+}>;
+
+export default function RecentOrganizations({
+  organizations,
+}: {
+  organizations: RecentOrganization[];
+}) {
+  const getPlanBadgeColor = (planType: PlanType | undefined) => {
     switch (planType) {
       case "ENTERPRISE":
         return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";

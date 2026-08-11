@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { checkUser, isSuperAdmin } from "@/lib/checkUser";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
@@ -9,12 +10,16 @@ import SuperAdminSidebar from "./_components/SuperAdminSidebar";
 // build time and the DB calls fail wherever no live database is reachable (CI).
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Super Admin | AutoMe Platform",
   description: "Platform administration dashboard",
 };
 
-export default async function SuperAdminLayout({ children }) {
+export default async function SuperAdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const user = await checkUser();
 
   // Must be authenticated

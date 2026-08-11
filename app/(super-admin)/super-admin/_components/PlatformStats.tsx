@@ -8,6 +8,9 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+/** One row of the "active subscriptions by plan" breakdown built in page.tsx. */
+export type SubscriptionBreakdownItem = { plan: string; count: number };
+
 export default function PlatformStats({
   totalOrganizations,
   activeOrganizations,
@@ -15,6 +18,13 @@ export default function PlatformStats({
   totalCars,
   totalTestDrives,
   subscriptionBreakdown,
+}: {
+  totalOrganizations: number;
+  activeOrganizations: number;
+  totalUsers: number;
+  totalCars: number;
+  totalTestDrives: number;
+  subscriptionBreakdown: SubscriptionBreakdownItem[];
 }) {
   const stats = [
     {
