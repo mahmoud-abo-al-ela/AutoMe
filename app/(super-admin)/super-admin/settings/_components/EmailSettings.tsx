@@ -15,7 +15,19 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
-export default function EmailSettings({ settings }) {
+/** Platform-wide transactional email settings; hardcoded defaults today. */
+export type EmailSettingsValues = {
+  fromName: string;
+  fromEmail: string;
+  welcomeEmailEnabled: boolean;
+  testDriveReminderEnabled: boolean;
+};
+
+export default function EmailSettings({
+  settings,
+}: {
+  settings: EmailSettingsValues;
+}) {
   const [formData, setFormData] = useState(settings);
   const [loading, setLoading] = useState(false);
   const [testLoading, setTestLoading] = useState(false);

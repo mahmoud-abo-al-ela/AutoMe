@@ -16,7 +16,23 @@ import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 
-export default function GeneralSettings({ settings }) {
+/**
+ * Platform-wide general settings. page.tsx currently returns these as
+ * hardcoded defaults — there is no settings table behind them yet.
+ */
+export type GeneralSettingsValues = {
+  platformName: string;
+  supportEmail: string;
+  /** Platform-level default, distinct from Plan.trialDays. */
+  defaultTrialDays: number;
+  maintenanceMode: boolean;
+};
+
+export default function GeneralSettings({
+  settings,
+}: {
+  settings: GeneralSettingsValues;
+}) {
   const [formData, setFormData] = useState(settings);
   const [loading, setLoading] = useState(false);
 
@@ -97,6 +113,11 @@ export default function GeneralSettings({ settings }) {
 
         {formData.maintenanceMode && (
           <Alert
+            // BUG (flagged, not fixed in this conversion): Alert has no
+            // "warning" variant, so cva falls back to default and the yellow
+            // className below is what styles this. Second instance, after
+            // ImpersonationHeader.tsx.
+            // @ts-expect-error unsupported variant, kept to preserve behaviour
             variant="warning"
             className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"
           >

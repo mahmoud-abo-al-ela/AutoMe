@@ -15,7 +15,21 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
-export default function SecuritySettings({ settings }) {
+/** Platform-wide security settings; hardcoded defaults today. */
+export type SecuritySettingsValues = {
+  maxLoginAttempts: number;
+  /** Hours. */
+  sessionTimeout: number;
+  requireMFA: boolean;
+  /** Days. */
+  auditLogRetention: number;
+};
+
+export default function SecuritySettings({
+  settings,
+}: {
+  settings: SecuritySettingsValues;
+}) {
   const [formData, setFormData] = useState(settings);
   const [loading, setLoading] = useState(false);
 
