@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const carSchema = z.object({
+  title: z.string().min(1, "Title is required").max(200),
   make: z.string().min(1, "Make is required").max(50),
   model: z.string().min(1, "Model is required").max(50),
   year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),

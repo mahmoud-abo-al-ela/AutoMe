@@ -63,12 +63,7 @@ export async function createCar(
   const car = await carRepository.createCar({
     id: carId,
     organizationId,
-    // BUG (surfaced by this conversion, NOT fixed here): carSchema has no
-    // `title` field, so validateAction strips it before this point and every
-    // car created through addCar lands with a null title — even though the
-    // form collects one and updateCarFullSchema does declare it. Behaviour
-    // preserved; adding title to carSchema belongs in its own PR.
-    title: (carData as { title?: string }).title,
+    title: carData.title,
     make: carData.make,
     model: carData.model,
     year: carData.year,
