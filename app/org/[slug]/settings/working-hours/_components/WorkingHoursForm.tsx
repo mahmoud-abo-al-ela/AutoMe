@@ -2,8 +2,20 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import type { DayOfWeek } from "@/lib/generated/prisma";
+import type { WorkingHoursByDay } from "./useWorkingHours";
 
-const DAYS = [
+interface WorkingHoursFormProps {
+    workingHours: WorkingHoursByDay;
+    onDayToggle: (day: DayOfWeek, isOpen: boolean) => void;
+    onTimeChange: (
+        day: DayOfWeek,
+        type: "openTime" | "closeTime",
+        value: string,
+    ) => void;
+}
+
+const DAYS: { label: string; value: DayOfWeek }[] = [
     { label: "Monday", value: "MONDAY" },
     { label: "Tuesday", value: "TUESDAY" },
     { label: "Wednesday", value: "WEDNESDAY" },
@@ -17,7 +29,7 @@ export default function WorkingHoursForm({
     workingHours,
     onDayToggle,
     onTimeChange,
-}) {
+}: WorkingHoursFormProps) {
     return (
         <div className="space-y-3 sm:space-y-6">
             {DAYS.map((day) => (
