@@ -5,8 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Heart, CarFront } from "lucide-react";
 import Image from "next/image";
+import type { CarStatus } from "@/lib/generated/prisma";
 
-const PopularCars = ({ cars }) => {
+/**
+ * A wishlisted car from getPopularCarsData(). `price` arrives as a number: the
+ * repository converts Car.price out of Prisma's Decimal before returning it.
+ * `image` is the first image, or null when the car has none.
+ */
+export type PopularCar = {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  status: CarStatus;
+  image: string | null;
+  savedCount: number;
+};
+
+const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
   if (!cars || cars.length === 0) {
     return (
       <Card className="h-full">
@@ -27,7 +44,7 @@ const PopularCars = ({ cars }) => {
     );
   }
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: CarStatus) => {
     switch (status) {
       case "AVAILABLE": return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200";
       case "SOLD": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200";

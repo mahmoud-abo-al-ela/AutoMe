@@ -31,7 +31,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const OverviewChart = ({ data }) => {
+/** One day of the overview series from getOverviewChartData(). */
+export type OverviewPoint = {
+  date: string;
+  cars: number;
+  users: number;
+  testDrives: number;
+};
+
+const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
   const [timeRange, setTimeRange] = useState("7d");
 
   // Filter data based on selected time range
@@ -51,14 +59,17 @@ const OverviewChart = ({ data }) => {
 
     const filtered = data
       .filter((item) => new Date(item.date) >= cutoffDate)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return filtered;
   }, [data, timeRange]);
 
+  // ChartConfig treats `color` and `theme` as mutually exclusive, which matches
+  // ChartStyle: it emits `theme?.[mode] || color`, so a theme always wins. Each
+  // entry here set both to the same hex, making `color` dead — dropped rather
+  // than kept as a value that could silently diverge from the theme.
   const chartConfig = {
     users: {
-      color: "#3b82f6",
       theme: {
         light: "#3b82f6",
         dark: "#3b82f6",
@@ -66,7 +77,6 @@ const OverviewChart = ({ data }) => {
       label: "Users",
     },
     cars: {
-      color: "#10b981",
       theme: {
         light: "#10b981",
         dark: "#10b981",
@@ -74,7 +84,6 @@ const OverviewChart = ({ data }) => {
       label: "Cars",
     },
     testDrives: {
-      color: "#9333ea",
       theme: {
         light: "#9333ea",
         dark: "#9333ea",

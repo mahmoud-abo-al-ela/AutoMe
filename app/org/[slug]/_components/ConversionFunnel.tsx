@@ -4,8 +4,29 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, ArrowRightCircle, Ban } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ConversionFunnelData } from "./AnalyticsCards";
 
-const FunnelStage = ({ title, count, percentage, colorClass, isLast, icon: Icon, subtitle }) => (
+/** Tailwind classes for one funnel stage, split by where they are applied. */
+type StageColors = { text: string; track: string; bg: string };
+
+const FunnelStage = ({
+  title,
+  count,
+  percentage,
+  colorClass,
+  isLast,
+  icon: Icon,
+  subtitle,
+}: {
+  title: string;
+  count: number;
+  percentage: number | null;
+  colorClass: StageColors;
+  isLast?: boolean;
+  icon: LucideIcon;
+  subtitle?: string;
+}) => (
   <div className="relative group">
     <div className="flex items-center justify-between mb-2">
       <div className="flex items-center gap-2">
@@ -34,7 +55,7 @@ const FunnelStage = ({ title, count, percentage, colorClass, isLast, icon: Icon,
   </div>
 );
 
-const ConversionFunnel = ({ funnel }) => {
+const ConversionFunnel = ({ funnel }: { funnel: ConversionFunnelData | null }) => {
   if (!funnel) return null;
 
   // Colors for each stage

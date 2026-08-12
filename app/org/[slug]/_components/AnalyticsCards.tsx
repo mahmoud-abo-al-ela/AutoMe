@@ -5,18 +5,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Car, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Revenue metrics from the dashboard repository, via getAnalytics(). */
+export type RevenueMetrics = {
+  totalValue: number;
+  averagePrice: number;
+  addedThisMonth: number;
+  addedLastMonth: number;
+};
+
+/** Conversion metrics from getConversionFunnel(), with its derived rates. */
+export type ConversionFunnelData = {
+  total: number;
+  confirmed: number;
+  completed: number;
+  cancelled: number;
+  confirmedRate: number;
+  completedRate: number;
+};
+
 // Helper for animated numbers
-const AnimatedNumber = ({ value, formatter = (v) => v.toString() }) => {
+const AnimatedNumber = ({
+  value,
+  formatter = (v: number) => v.toString(),
+}: {
+  value: number;
+  formatter?: (v: number) => string;
+}) => {
   const [displayValue, setDisplayValue] = useState(0);
   const currentValueRef = useRef(0);
 
   useEffect(() => {
-    let startTime;
-    let rafId;
+    let startTime: number | undefined;
+    let rafId: number | undefined;
     const duration = 1000; // 1 second animation
     const startValue = currentValueRef.current;
 
-    const animate = (timestamp) => {
+    const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       
@@ -47,7 +71,7 @@ const AnimatedNumber = ({ value, formatter = (v) => v.toString() }) => {
   return <span>{formatter(displayValue)}</span>;
 };
 
-const TrendBadge = ({ value, label = "" }) => {
+const TrendBadge = ({ value, label = "" }: { value: number; label?: string }) => {
   const isPositive = value >= 0;
   return (
     <div className={cn(
@@ -60,7 +84,13 @@ const TrendBadge = ({ value, label = "" }) => {
   );
 };
 
-const AnalyticsCards = ({ revenue, conversionFunnel }) => {
+const AnalyticsCards = ({
+  revenue,
+  conversionFunnel,
+}: {
+  revenue: RevenueMetrics | null | undefined;
+  conversionFunnel: ConversionFunnelData | null;
+}) => {
   // Calculate inventory growth trend
   const lastMonth = revenue?.addedLastMonth || 0;
   const thisMonth = revenue?.addedThisMonth || 0;
@@ -71,7 +101,12 @@ const AnalyticsCards = ({ revenue, conversionFunnel }) => {
     inventoryTrend = 100; // infinite growth if last month was 0 but this month is > 0
   }
 
-  const formatCurrency = (val) => {
+  // BUG (surfaced by this conversion, NOT fixed here): AutoMe prices are EGP,
+  // but these two cards format them as USD, so "Total Inventory Value" and
+  // "Average Car Price" render a dollar sign against Egyptian-pound figures.
+  // Changing the currency changes what every dealer sees, so it belongs in its
+  // own commit alongside the other price formatters.
+  const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -99,7 +134,7 @@ const AnalyticsCards = ({ revenue, conversionFunnel }) => {
     {
       title: "Conversion Rate",
       value: conversionFunnel?.confirmedRate || 0,
-      formatter: (v) => `${v.toFixed(1)}%`,
+      formatter: (v: number) => `${v.toFixed(1)}%`,
       icon: Percent,
       color: "from-purple-500 to-purple-600",
       iconBg: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
@@ -108,7 +143,7 @@ const AnalyticsCards = ({ revenue, conversionFunnel }) => {
     {
       title: "Cars Added (This Month)",
       value: revenue?.addedThisMonth || 0,
-      formatter: (v) => Math.round(v).toString(),
+      formatter: (v: number) => Math.round(v).toString(),
       icon: Car,
       color: "from-amber-500 to-amber-600",
       iconBg: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",

@@ -7,19 +7,28 @@ import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartToo
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Timer } from "lucide-react";
 
-const TestDriveTrends = ({ data }) => {
+/** One day of the test-drive trend series, split by status. */
+export type TestDriveTrendPoint = {
+  date: string;
+  pending: number;
+  confirmed: number;
+  completed: number;
+  cancelled: number;
+};
+
+const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
   const [timeRange, setTimeRange] = useState("30d");
 
   const filteredData = useMemo(() => {
     if (!data) return [];
     
-    const daysMap = { "7d": 7, "14d": 14, "30d": 30 };
+    const daysMap: Record<string, number> = { "7d": 7, "14d": 14, "30d": 30 };
     const days = daysMap[timeRange] || 30;
     const cutoffDate = new Date(Date.now() - days * 86400000);
 
     return data
       .filter((item) => new Date(item.date) >= cutoffDate)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [data, timeRange]);
 
   const chartConfig = {

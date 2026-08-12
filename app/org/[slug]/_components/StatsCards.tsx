@@ -2,7 +2,14 @@ import React from "react";
 import { Users, CarFront, Timer } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const StatsCards = ({ data }) => {
+/** Headline counts from getDashboardStats(). */
+export type DashboardStats = {
+  users: number;
+  cars: number;
+  testDrives: number;
+};
+
+const StatsCards = ({ data }: { data: DashboardStats | null }) => {
   const stats = [
     {
       title: "Total Users",

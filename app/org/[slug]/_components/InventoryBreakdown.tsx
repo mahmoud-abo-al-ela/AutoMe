@@ -6,7 +6,19 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { CarFront } from "lucide-react";
 
-const InventoryBreakdown = ({ breakdown }) => {
+/** Car counts by status from getAnalytics().inventory. */
+export type InventoryBreakdownData = {
+  total: number;
+  available: number;
+  sold: number;
+  unavailable: number;
+};
+
+const InventoryBreakdown = ({
+  breakdown,
+}: {
+  breakdown: InventoryBreakdownData | null | undefined;
+}) => {
   const STATUS_COLORS = {
     available: "#10b981", // emerald-500
     sold: "#3b82f6", // blue-500

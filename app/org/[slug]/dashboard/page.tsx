@@ -1,4 +1,11 @@
 import React from "react";
+import type { ActionResponse } from "@/lib/utils/response";
+import type { DashboardStats } from "../_components/StatsCards";
+import type { OverviewPoint } from "../_components/OverviewChart";
+import type { RevenueMetrics, ConversionFunnelData } from "../_components/AnalyticsCards";
+import type { InventoryBreakdownData } from "../_components/InventoryBreakdown";
+import type { PopularCar } from "../_components/PopularCars";
+import type { TestDriveTrendPoint } from "../_components/TestDriveTrends";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StatsCards from "../_components/StatsCards";
 import OverviewChart from "../_components/OverviewChart";
@@ -21,7 +28,29 @@ export const metadata = {
   description: "Dashboard for AutoMe",
 };
 
-const DashboardPage = async ({ params }) => {
+/**
+ * Pull `.data` out of a settled action result.
+ *
+ * Now checks `success` as well as `fulfilled`. Previously it only tested that
+ * the promise resolved, so an action returning an error envelope yielded
+ * `undefined` and skipped the fallback declared at the call site — the list
+ * components then received undefined instead of []. Checking the discriminant
+ * is what makes those fallbacks actually apply.
+ */
+function extract<T>(
+  result: PromiseSettledResult<ActionResponse<T>>,
+  fallback: T | null = null
+): T | null {
+  return result.status === "fulfilled" && result.value?.success
+    ? result.value.data
+    : fallback;
+}
+
+const DashboardPage = async ({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) => {
   const { slug } = await params;
   // Fetch data in parallel
   const results = await Promise.allSettled([
@@ -33,15 +62,22 @@ const DashboardPage = async ({ params }) => {
     getTestDriveTrendsData()
   ]);
 
-  const extract = (result, fallback = null) =>
-    result.status === "fulfilled" && result.value ? result.value.data : fallback;
-
-  const data = extract(results[0]);
-  const chartData = extract(results[1], []);
-  const analyticsData = extract(results[2]);
-  const funnelData = extract(results[3]);
-  const popularCarsData = extract(results[4], []);
-  const trendsData = extract(results[5], []);
+  // Explicit type arguments. These shapes originate in
+  // lib/repositories/dashboard, which is deliberately still JavaScript, so what
+  // infers through it varies: getPopularCarsData carries a real shape, while
+  // the stats and analytics calls arrive as {} / unknown. Naming the type at
+  // every call site keeps that inconsistency from being load-bearing — and the
+  // ones that do infer still cross-check these declarations, which is how the
+  // PopularCar price type got corrected from string to number.
+  const data = extract<DashboardStats>(results[0]);
+  const chartData = extract<OverviewPoint[]>(results[1], []) ?? [];
+  const analyticsData = extract<{
+    inventory: InventoryBreakdownData;
+    revenue: RevenueMetrics;
+  }>(results[2]);
+  const funnelData = extract<ConversionFunnelData>(results[3]);
+  const popularCarsData = extract<PopularCar[]>(results[4], []) ?? [];
+  const trendsData = extract<TestDriveTrendPoint[]>(results[5], []) ?? [];
 
   return (
     <div className="w-full">
@@ -54,7 +90,7 @@ const DashboardPage = async ({ params }) => {
                 Admin Dashboard
               </h1>
               <p className="text-gray-600 text-sm sm:text-base">
-                Welcome back, here's what's happening with your platform
+                Welcome back, here&apos;s what&apos;s happening with your platform
               </p>
             </div>
             <TabsList>
