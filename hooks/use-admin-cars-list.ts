@@ -130,12 +130,7 @@ export const useAdminCarsList = () => {
                     description: "The car has been removed from your inventory.",
                 });
             } else {
-                // BUG (surfaced by this conversion, NOT fixed here): `error` is
-                // the ErrorResponse object, not a string, so this Error's
-                // message stringifies to "[object Object]" and that is what the
-                // catch below shows the user. The read should be
-                // response.error.message; fixing it is its own PR.
-                throw new Error(String(response.error) || "Delete operation failed");
+                throw new Error(response.error.message || "Delete operation failed");
             }
         } catch (error) {
             toast.error("Delete operation failed", {
@@ -163,8 +158,7 @@ export const useAdminCarsList = () => {
                     description: "The car details have been updated.",
                 });
             } else {
-                // Same "[object Object]" defect as in handleDeleteCar above.
-                throw new Error(String(response.error) || "Update operation failed");
+                throw new Error(response.error.message || "Update operation failed");
             }
         } catch (error) {
             toast.error("Update operation failed", {

@@ -62,7 +62,7 @@ export default function TeamTable({
         toast.success("Member removed successfully");
         setConfirmRemove(null);
       } else {
-        toast.error(result.error || "Failed to remove member");
+        toast.error(result.error?.message || "Failed to remove member");
       }
     } catch (error) {
       toast.error("Failed to remove member");

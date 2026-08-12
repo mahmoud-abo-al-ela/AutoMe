@@ -70,9 +70,9 @@ export const useTestDrivePage = () => {
 
     useEffect(() => {
         if (testDriveData && !testDriveData.success) {
-            // BUG (flagged, not fixed): `error` is the ErrorResponse object, so
-            // this renders "[object Object]". Should read .error.message.
-            toast.error(String(testDriveData.error) || "Failed to load test drive details");
+            toast.error(
+                testDriveData.error.message || "Failed to load test drive details"
+            );
             router.push("/test-drive");
         }
     }, [testDriveData, router]);

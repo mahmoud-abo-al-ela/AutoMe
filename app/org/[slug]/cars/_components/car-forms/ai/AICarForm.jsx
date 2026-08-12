@@ -36,7 +36,7 @@ const AICarForm = () => {
         setShowForm(true);
         toast.success("Car details extracted successfully");
       } else {
-        throw new Error(result.error || "Failed to process image.");
+        throw new Error(result.error?.message || "Failed to process image.");
       }
     } catch (err) {
       setError(err.message || "An error occurred while processing the image.");
