@@ -11,13 +11,21 @@ import TeamMemberRow from "./TeamMemberRow";
 import EmptyTeamState from "./EmptyTeamState";
 import RemoveMemberDialog from "./RemoveMemberDialog";
 import { useTeamActions } from "./useTeamActions";
+import type { TeamMember } from "../_lib/team-types";
+
+interface TeamMembersTableProps {
+    members: TeamMember[];
+    currentUserId: string;
+    isOwner: boolean;
+    organizationId: string;
+}
 
 export default function TeamMembersTable({
     members,
     currentUserId,
     isOwner,
     organizationId,
-}) {
+}: TeamMembersTableProps) {
     const {
         memberToRemove,
         removeDialogOpen,

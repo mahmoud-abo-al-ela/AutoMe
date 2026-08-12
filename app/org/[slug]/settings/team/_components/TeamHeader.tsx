@@ -4,7 +4,16 @@ import Link from "next/link";
 import { ArrowLeft, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 
-export default function TeamHeader({ memberCount, memberLimit }) {
+interface TeamHeaderProps {
+  memberCount: number;
+  /** -1 means unlimited; undefined when the organization has no active plan. */
+  memberLimit: number | undefined;
+}
+
+export default function TeamHeader({
+  memberCount,
+  memberLimit,
+}: TeamHeaderProps) {
   const { slug } = useParams();
   return (
     <div className="flex sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6 items-center">

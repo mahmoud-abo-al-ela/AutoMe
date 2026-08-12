@@ -12,7 +12,11 @@ import TeamHeader from "./_components/TeamHeader";
 import TeamMembersTable from "./_components/TeamMembersTable";
 import InviteMemberButton from "./_components/InviteMemberButton";
 
-export default async function TeamPage({ params }) {
+export default async function TeamPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const user = await checkUser();
   const organization = await getOrganizationBySlug(slug);
@@ -21,16 +25,21 @@ export default async function TeamPage({ params }) {
     notFound();
   }
 
-  const membership = await getUserMembership(user.id, organization.id);
+  // The org layout redirects to /sign-in when there is no user, so this page
+  // is only reachable with one.
+  const membership = await getUserMembership(user!.id, organization.id);
   const isOwner = membership?.role === "OWNER";
 
   const members = await getTeamMembers(organization.id);
 
   const subscription = await getSubscriptionDetails(organization.id);
 
-  const currentPlan = subscription?.plan?.type;
   const memberLimit = subscription?.plan?.maxMembers;
-  const canAddMembers = memberLimit === -1 || members.length < memberLimit;
+  // No active plan means no seats, which is what the loose `<` comparison
+  // against undefined already worked out to.
+  const canAddMembers =
+    memberLimit === -1 ||
+    (memberLimit !== undefined && members.length < memberLimit);
 
   return (
     <div className="p-3 sm:p-6">
@@ -39,17 +48,18 @@ export default async function TeamPage({ params }) {
       <div className="space-y-6">
         {isOwner && (
           <div className="flex justify-end">
+            {/* `currentPlan` used to be passed here; InviteMemberButton has
+                never declared it. */}
             <InviteMemberButton
               organizationId={organization.id}
               canAdd={canAddMembers}
-              currentPlan={currentPlan}
             />
           </div>
         )}
 
         <TeamMembersTable
           members={members}
-          currentUserId={user.id}
+          currentUserId={user!.id}
           isOwner={isOwner}
           organizationId={organization.id}
         />

@@ -9,6 +9,15 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import type { TeamMember } from "../_lib/team-types";
+
+interface RemoveMemberDialogProps {
+    isOpen: boolean;
+    onClose: (open: boolean) => void;
+    member: TeamMember | null;
+    onConfirm: () => void;
+    isLoading: boolean;
+}
 
 export default function RemoveMemberDialog({
     isOpen,
@@ -16,7 +25,7 @@ export default function RemoveMemberDialog({
     member,
     onConfirm,
     isLoading,
-}) {
+}: RemoveMemberDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent>

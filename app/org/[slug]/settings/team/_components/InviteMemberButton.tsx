@@ -24,14 +24,20 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { inviteTeamMember } from "@/actions/team";
 import { queryKeys } from "@/lib/query-client";
+import type { TeamMemberRole } from "../_lib/team-types";
+
+interface InviteMemberButtonProps {
+  organizationId: string;
+  canAdd: boolean;
+}
 
 export default function InviteMemberButton({
   organizationId,
   canAdd,
-}) {
+}: InviteMemberButtonProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("MEMBER");
+  const [role, setRole] = useState<TeamMemberRole>("MEMBER");
   const queryClient = useQueryClient();
 
   const { isPending: loading, mutateAsync: inviteFn } = useMutation({
@@ -104,7 +110,12 @@ export default function InviteMemberButton({
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={setRole}>
+            {/* Radix hands back a plain string; the only two items rendered
+                below are the two roles, so the narrowing is sound. */}
+            <Select
+              value={role}
+              onValueChange={(value) => setRole(value as TeamMemberRole)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

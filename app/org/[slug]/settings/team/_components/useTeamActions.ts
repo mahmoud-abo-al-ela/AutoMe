@@ -3,9 +3,10 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMemberRole, removeMember } from "@/actions/team";
 import { queryKeys } from "@/lib/query-client";
+import type { TeamMember, TeamMemberRole } from "../_lib/team-types";
 
-export function useTeamActions(organizationId) {
-    const [memberToRemove, setMemberToRemove] = useState(null);
+export function useTeamActions(organizationId: string) {
+    const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
     const queryClient = useQueryClient();
 
@@ -16,7 +17,7 @@ export function useTeamActions(organizationId) {
         mutationFn: removeMember,
     });
 
-    const handleRemoveMember = (member) => {
+    const handleRemoveMember = (member: TeamMember) => {
         if (member.role === "OWNER") {
             toast.error("Cannot remove the organization owner");
             return;
@@ -52,7 +53,7 @@ export function useTeamActions(organizationId) {
         }
     };
 
-    const handleRoleChange = async (memberId, newRole) => {
+    const handleRoleChange = async (memberId: string, newRole: TeamMemberRole) => {
         try {
             const response = await updateRoleFn({
                 organizationId,
