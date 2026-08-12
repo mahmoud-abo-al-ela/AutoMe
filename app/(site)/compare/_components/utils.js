@@ -1,4 +1,5 @@
 import { compareUtils } from "@/lib/utils";
+import { formatCarPrice } from "@/lib/utils/currency";
 
 // ─── Formatting Utilities ────────────────────────────────────────────────────
 
@@ -7,13 +8,7 @@ import { compareUtils } from "@/lib/utils";
  * @param {number} price
  * @returns {string} e.g. "$25,000"
  */
-export const formatPrice = (price) => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-    }).format(price);
-};
+export const formatPrice = (price) => formatCarPrice(price);
 
 /**
  * Format a numeric mileage value with the "mile" unit.

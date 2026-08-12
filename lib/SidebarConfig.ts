@@ -1,3 +1,6 @@
+// `as const` so `icon` narrows to a literal union rather than string. The two
+// org sidebars index their icon maps with it, so a config entry naming an icon
+// they do not provide becomes a compile error instead of undefined at runtime.
 export const sidebarItems = [
   {
     name: "dashboard",
@@ -42,5 +45,5 @@ export const sidebarItems = [
     icon: "Settings",
     path: "/settings",
   },
-];
+] as const;
 

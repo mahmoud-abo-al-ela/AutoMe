@@ -1,4 +1,5 @@
 "use client";
+import { formatCarPrice } from "@/lib/utils/currency";
 import {
   Building2,
   Calendar,
@@ -40,12 +41,7 @@ const CarCard = ({
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
+  const formatPrice = (price: number) => formatCarPrice(price);
 
   const formatMileage = (mileage: number) =>
     new Intl.NumberFormat("en-US", {
