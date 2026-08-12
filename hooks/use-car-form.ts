@@ -234,10 +234,8 @@ export const useCarForm = (
             const slug = window.location.pathname.split('/')[2];
             router.push(`/org/${slug}/cars`);
         } else {
-            // Same "[object Object]" defect flagged in the admin hooks: `error`
-            // is the ErrorResponse object, not its message. Preserved as-is.
             const errorMessage =
-                (response?.error && String(response.error)) ||
+                response?.error?.message ||
                 (isEditMode ? "Failed to update car" : "Failed to add car");
             toast.error(errorMessage);
         }

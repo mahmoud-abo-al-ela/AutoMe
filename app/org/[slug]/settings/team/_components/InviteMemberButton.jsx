@@ -58,7 +58,7 @@ export default function InviteMemberButton({
         setRole("MEMBER");
         queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) }); // Refresh to show new member
       } else {
-        toast.error(response?.error || "Failed to invite member");
+        toast.error(response?.error?.message || "Failed to invite member");
       }
     } catch (error) {
       console.error("Invite error:", error);

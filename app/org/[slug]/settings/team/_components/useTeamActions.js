@@ -42,7 +42,7 @@ export function useTeamActions(organizationId) {
                 toast.success("Member removed successfully");
                 queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
-                toast.error(response?.error || "Failed to remove member");
+                toast.error(response?.error?.message || "Failed to remove member");
             }
         } catch (error) {
             console.error("Remove member error:", error);
@@ -64,7 +64,9 @@ export function useTeamActions(organizationId) {
                 toast.success("Member role updated successfully");
                 queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
-                toast.error(response?.error || "Failed to update member role");
+                toast.error(
+                    response?.error?.message || "Failed to update member role"
+                );
             }
         } catch (error) {
             console.error("Update role error:", error);
