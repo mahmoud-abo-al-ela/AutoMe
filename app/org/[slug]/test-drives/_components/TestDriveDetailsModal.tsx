@@ -11,8 +11,10 @@ import { format } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
+import type { AdminTestDrive, TestDriveCar } from "./TestDrivesPresenter";
+import { formatCarPrice } from "@/lib/utils/currency";
 
-const formatTime = (timeString) => {
+const formatTime = (timeString: string | null | undefined) => {
   if (!timeString) return "";
 
   if (/^\d{2}:\d{2}$/.test(timeString)) {
@@ -28,7 +30,7 @@ const formatTime = (timeString) => {
     }
 
     if (modifier === "PM") {
-      hours = parseInt(hours, 10) + 12;
+      hours = String(parseInt(hours, 10) + 12);
     }
 
     return `${hours.padStart(2, "0")}:${minutes}`;
@@ -37,15 +39,29 @@ const formatTime = (timeString) => {
   }
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | Date) => {
   return format(new Date(dateString), "PPP");
 };
 
-export const TestDriveDetailsModal = ({ testDrive, isOpen, onClose }) => {
+export const TestDriveDetailsModal = ({
+  testDrive,
+  isOpen,
+  onClose,
+}: {
+  testDrive: AdminTestDrive | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   if (!testDrive) return null;
 
+  // serializeTestDrive declares car nullable for callers that may pass nothing;
+  // a test drive always has one, since carId is a required FK. `images` comes
+  // back untyped from the JavaScript test-drive repository.
+  const car = testDrive.car as unknown as TestDriveCar;
+  const carImages = (car.images ?? []) as string[];
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="text-left space-y-1.5">
           <DialogTitle>Test Drive Details</DialogTitle>
@@ -58,10 +74,10 @@ export const TestDriveDetailsModal = ({ testDrive, isOpen, onClose }) => {
           {/* Car Information */}
           <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg bg-gray-50/50">
             <div className="relative h-20 w-24 sm:w-28 overflow-hidden rounded-md flex-shrink-0 border bg-white">
-              {testDrive.car.images && testDrive.car.images[0] ? (
+              {carImages[0] ? (
                 <Image
-                  src={testDrive.car.images[0]}
-                  alt={`${testDrive.car.make} ${testDrive.car.model}`}
+                  src={carImages[0]}
+                  alt={`${car.make} ${car.model}`}
                   fill
                   className="object-cover"
                 />
@@ -73,13 +89,16 @@ export const TestDriveDetailsModal = ({ testDrive, isOpen, onClose }) => {
             </div>
             <div className="flex-1 min-w-0 py-1">
               <Link
-                href={`/cars/${testDrive.car.id}`}
+                href={`/cars/${car.id}`}
                 className="text-base sm:text-lg font-semibold hover:underline block truncate text-gray-900"
               >
-                {testDrive.car.title}
+                {car.title}
               </Link>
               <p className="text-lg sm:text-xl font-bold text-green-600 mt-0.5">
-                ${Number(testDrive.car.price).toLocaleString()}
+                {/* Was a hardcoded "$" template literal, which the earlier
+                    currency sweep missed because it looked for
+                    Intl.NumberFormat rather than a "$" prefix. */}
+                {formatCarPrice(Number(car.price))}
               </p>
             </div>
           </div>
@@ -95,7 +114,7 @@ export const TestDriveDetailsModal = ({ testDrive, isOpen, onClose }) => {
                 {testDrive.user?.imageUrl ? (
                   <Image
                     src={testDrive.user.imageUrl}
-                    alt={testDrive.user.name}
+                    alt={testDrive.user.name ?? ""}
                     fill
                     className="object-cover"
                   />

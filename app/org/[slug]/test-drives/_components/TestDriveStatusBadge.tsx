@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 
-export const TestDriveStatusBadge = ({ status, compact = false }) => {
+export const TestDriveStatusBadge = ({
+    status,
+    compact = false,
+}: {
+    status: string;
+    compact?: boolean;
+}) => {
     const baseClasses = compact ? "text-xs px-2 py-1" : "";
 
     switch (status) {

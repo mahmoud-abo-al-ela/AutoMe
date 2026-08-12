@@ -19,10 +19,16 @@ export const TestDriveFilters = ({
   statusFilter,
   onFilterChange,
   disabled,
+}: {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  statusFilter: string;
+  onFilterChange: (value: string) => void;
+  disabled: boolean;
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 

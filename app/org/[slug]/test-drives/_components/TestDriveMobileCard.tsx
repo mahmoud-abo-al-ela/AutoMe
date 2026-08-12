@@ -16,6 +16,8 @@ import Link from "next/link";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import { TestDriveDetailsModal } from "./TestDriveDetailsModal";
 import { useState } from "react";
+import { formatCarPrice } from "@/lib/utils/currency";
+import type { TestDriveCar, TestDriveItemProps } from "./TestDrivesPresenter";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const formatTime = (timeString) => {
+const formatTime = (timeString: string | null | undefined) => {
   if (!timeString) return "";
 
   if (/^\d{2}:\d{2}$/.test(timeString)) {
@@ -39,7 +41,7 @@ const formatTime = (timeString) => {
     }
 
     if (modifier === "PM") {
-      hours = parseInt(hours, 10) + 12;
+      hours = String(parseInt(hours, 10) + 12);
     }
 
     return `${hours.padStart(2, "0")}:${minutes}`;
@@ -48,7 +50,7 @@ const formatTime = (timeString) => {
   }
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | Date) => {
   return format(new Date(dateString), "MMM dd, yyyy");
 };
 
@@ -57,8 +59,12 @@ export const TestDriveMobileCard = ({
   onStatusChange,
   isDisabled = false,
   isUpdating = false,
-}) => {
+}: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // Nullable by serializeTestDrive's signature only; carId is a required FK.
+  const car = testDrive.car as unknown as TestDriveCar;
+  const carImages = (car.images ?? []) as string[];
 
   return (
     <>
@@ -71,10 +77,10 @@ export const TestDriveMobileCard = ({
           {/* Car Information */}
           <div className="flex items-start gap-3">
             <div className="relative flex-shrink-0">
-              {testDrive.car.images && testDrive.car.images[0] ? (
+              {carImages[0] ? (
                 <Image
-                  src={testDrive.car.images[0]}
-                  alt={`${testDrive.car.make} ${testDrive.car.model}`}
+                  src={carImages[0]}
+                  alt={`${car.make} ${car.model}`}
                   width={112}
                   height={80}
                   className={` h-20 w-28 rounded-lg object-cover shadow-sm border border-gray-200 ${
@@ -95,13 +101,13 @@ export const TestDriveMobileCard = ({
 
             <div className="min-w-0 space-y-2">
               <Link
-                href={`/cars/${testDrive.car.id}`}
+                href={`/cars/${car.id}`}
                 className="font-semibold text-gray-900 text-sm truncate block"
               >
-                {testDrive.car.title}
+                {car.title}
               </Link>
               <p className="flex gap-4 font-bold text-lg text-green-700">
-                ${Number(testDrive.car.price).toLocaleString()}
+                {formatCarPrice(Number(car.price))}
                 <TestDriveStatusBadge status={testDrive.status} />
               </p>
               <div className="flex items-center gap-1 text-gray-600 text-xs">

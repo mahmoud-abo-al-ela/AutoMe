@@ -2,12 +2,18 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { CardTitle, CardDescription } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
+import type { TestDrivesPresenterProps } from "./TestDrivesPresenter";
 
 export const TestDriveStatsDisplay = ({
   stats,
   isRefreshing,
   isLoading,
   onRefresh,
+}: {
+  stats: TestDrivesPresenterProps["testDriveStats"];
+  isRefreshing: boolean;
+  isLoading: boolean;
+  onRefresh: () => void;
 }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div className="space-y-2">

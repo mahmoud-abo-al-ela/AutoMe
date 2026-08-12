@@ -8,12 +8,18 @@ import {
 import { TestDriveRow } from "./TestDriveRow";
 import { TestDriveTableSkeleton } from "./TestDriveTableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { AdminTestDrive, TestDriveItemProps } from "./TestDrivesPresenter";
 
 export const TestDriveTable = ({
     testDrives,
     onStatusChange,
     isLoading = false,
     isUpdating = false
+}: {
+    testDrives: AdminTestDrive[];
+    onStatusChange: TestDriveItemProps["onStatusChange"];
+    isLoading?: boolean;
+    isUpdating?: boolean;
 }) => {
     if (testDrives.length === 0 && !isLoading) {
         return (

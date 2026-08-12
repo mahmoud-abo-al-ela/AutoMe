@@ -7,8 +7,10 @@ import Link from "next/link";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import { TestDriveDetailsModal } from "./TestDriveDetailsModal";
 import { useState } from "react";
+import { formatCarPrice } from "@/lib/utils/currency";
+import type { TestDriveCar, TestDriveItemProps } from "./TestDrivesPresenter";
 
-const formatTime = (timeString) => {
+const formatTime = (timeString: string | null | undefined) => {
   if (!timeString) return "";
 
   if (/^\d{2}:\d{2}$/.test(timeString)) {
@@ -24,7 +26,7 @@ const formatTime = (timeString) => {
     }
 
     if (modifier === "PM") {
-      hours = parseInt(hours, 10) + 12;
+      hours = String(parseInt(hours, 10) + 12);
     }
 
     return `${hours.padStart(2, "0")}:${minutes}`;
@@ -33,7 +35,7 @@ const formatTime = (timeString) => {
   }
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | Date) => {
   return format(new Date(dateString), "MMM dd, yyyy");
 };
 
@@ -42,8 +44,12 @@ export const TestDriveRow = ({
   onStatusChange,
   isDisabled = false,
   isUpdating = false,
-}) => {
+}: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // Nullable by serializeTestDrive's signature only; carId is a required FK.
+  const car = testDrive.car as unknown as TestDriveCar;
+  const carImages = (car.images ?? []) as string[];
 
   return (
     <>
@@ -56,10 +62,10 @@ export const TestDriveRow = ({
           <div className="flex items-center gap-2 md:gap-4">
             <div className="relative">
               <div className="relative h-12 w-16 md:h-16 md:w-20 lg:h-20 lg:w-28 overflow-hidden rounded-xl flex-shrink-0">
-                {testDrive.car.images && testDrive.car.images[0] ? (
+                {carImages[0] ? (
                   <Image
-                    src={testDrive.car.images[0]}
-                    alt={`${testDrive.car.make} ${testDrive.car.model}`}
+                    src={carImages[0]}
+                    alt={`${car.make} ${car.model}`}
                     fill
                     className={`object-cover shadow-md border border-gray-200 transition-all ${
                       isDisabled ? "grayscale" : ""
@@ -79,13 +85,13 @@ export const TestDriveRow = ({
             </div>
             <div className="min-w-0 flex-1">
               <Link
-                href={`/cars/${testDrive.car.id}`}
+                href={`/cars/${car.id}`}
                 className="font-medium text-sm md:text-base hover:underline block truncate text-gray-900 hover:text-blue-600 transition-colors"
               >
-                {testDrive.car.title}
+                {car.title}
               </Link>
               <p className="text-sm md:text-base text-green-600 font-semibold mt-1">
-                ${Number(testDrive.car.price).toLocaleString()}
+                {formatCarPrice(Number(car.price))}
               </p>
             </div>
           </div>
@@ -96,7 +102,7 @@ export const TestDriveRow = ({
               {testDrive.user?.imageUrl ? (
                 <Image
                   src={testDrive.user.imageUrl}
-                  alt={testDrive.user.name}
+                  alt={testDrive.user.name ?? ""}
                   fill
                   className="object-cover"
                 />
