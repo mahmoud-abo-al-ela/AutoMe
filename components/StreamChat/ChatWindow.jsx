@@ -96,9 +96,6 @@ function DMChannelHeader({ channel }) {
                     </Link>
                 </div>
             </div>
-
-            {/* Car Info Card - only show for org members */}
-            {isOrgMember && <CarInfoCard carData={carData} />}
         </div>
     );
 }

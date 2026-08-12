@@ -12,10 +12,23 @@ import { Mail, Copy, Facebook, Twitter, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { socialShares } from "@/lib/SocialShare";
 
-const ShareDialog = ({ isOpen, onOpenChange, title = "Share This Vehicle" }) => {
+const ShareDialog = ({
+  isOpen,
+  onOpenChange,
+  title = "Share This Vehicle",
+  car,
+}) => {
   const [copying, setCopying] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  // CarInfoCard has always passed `car`; it was simply never read. Car.title is
+  // frequently null, so fall back to the year/make/model line, and to the
+  // document title if there is no car at all.
+  const shareTitle =
+    car?.title ||
+    [car?.year, car?.make, car?.model].filter(Boolean).join(" ") ||
+    (typeof document !== "undefined" ? document.title : "");
+  const shares = socialShares(shareUrl, shareTitle);
 
   const copyToClipboard = async () => {
     if (typeof window !== "undefined") {
@@ -62,7 +75,7 @@ const ShareDialog = ({ isOpen, onOpenChange, title = "Share This Vehicle" }) => 
               Share via
             </h3>
             <div className="grid grid-cols-4 md:grid-cols-2 gap-6 md:gap-2 w-fit md:w-full">
-              {socialShares.map((social) => (
+              {shares.map((social) => (
                 <Button
                   key={social.name}
                   variant="outline"

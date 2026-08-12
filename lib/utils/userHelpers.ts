@@ -59,25 +59,6 @@ export function getOrgRole(
 }
 
 /**
- * Check if user is owner or admin of an organization
- * @param {Object} user - User object with memberships
- * @param {string} organizationSlug - Organization slug
- * @returns {boolean}
- */
-export function canManageOrg(
-  user: UserWithMemberships | null | undefined,
-  organizationSlug: string | null | undefined
-): boolean {
-  const role = getOrgRole(user, organizationSlug);
-  // BUG (surfaced by this conversion, NOT fixed here): MemberRole is only
-  // OWNER | MEMBER — there is no org-level ADMIN — so the second branch is
-  // dead and canManageOrg is really isOrgOwner. This is the same defect class
-  // as the ctx.role one that motivated the migration. Behaviour preserved;
-  // deciding between adding the role and dropping the branch is its own PR.
-  return role === 'OWNER' || (role as string) === 'ADMIN';
-}
-
-/**
  * Check if user is owner of an organization
  * @param {Object} user - User object with memberships
  * @param {string} organizationSlug - Organization slug
