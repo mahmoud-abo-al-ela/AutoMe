@@ -8,7 +8,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
-import { formatPrice, getFeatures } from "./_lib/plan-display";
+import { formatPrice, getFeatures, PLAN_CONFIG } from "./_lib/plan-display";
+import type { PlanType } from "@/lib/generated/prisma";
+import type { BillingPlan } from "./_lib/billing-types";
 
 export default function PlanCard({
   plan,
@@ -20,6 +22,18 @@ export default function PlanCard({
   billingCycle,
   isOwner,
   onSelect,
+}: {
+  plan: BillingPlan;
+  config: (typeof PLAN_CONFIG)[PlanType];
+  isCurrent: boolean;
+  isPro: boolean;
+  /** Minor units, for the selected billing cycle. */
+  displayPrice: number;
+  /** Percent saved by paying yearly; 0 when there is nothing to save. */
+  savings: number;
+  billingCycle: "monthly" | "yearly";
+  isOwner: boolean;
+  onSelect: (plan: BillingPlan) => void;
 }) {
   const Icon = config.icon;
 

@@ -14,16 +14,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { createBillingPortalSession } from "@/actions/billing";
+import type { BillingSubscription } from "./_lib/billing-types";
 
-function getDaysRemaining(endDate) {
+function getDaysRemaining(endDate: Date | string | null | undefined) {
     if (!endDate) return null;
     const now = new Date();
     const end = new Date(endDate);
-    const diffMs = end - now;
+    const diffMs = end.getTime() - now.getTime();
     return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
 
-function formatDate(date) {
+function formatDate(date: Date | string) {
     return new Date(date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
@@ -40,6 +41,10 @@ export default function SubscriptionAlert({
     subscription,
     isOwner,
     organizationId,
+}: {
+    subscription: BillingSubscription;
+    isOwner: boolean;
+    organizationId: string;
 }) {
     const [isPortalLoading, setIsPortalLoading] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
@@ -53,15 +58,23 @@ export default function SubscriptionAlert({
     const handleManageSubscription = async () => {
         try {
             setIsPortalLoading(true);
-            const { url } = await createBillingPortalSession(
-                organizationId,
-                pathname
-            );
-            window.location.href = url;
+            // BUG FIX: third instance of the envelope defect — `url` is under
+            // .data. See CurrentPlan.tsx and PaymentMethod.tsx.
+            const result = await createBillingPortalSession(organizationId, pathname);
+            if (!result.success) {
+                toast.error(
+                    result.error.message ||
+                        "Failed to open billing portal. Please try again."
+                );
+                setIsPortalLoading(false);
+                return;
+            }
+            window.location.href = result.data.url;
         } catch (error) {
             console.error("Failed to open billing portal:", error);
             toast.error(
-                error.message || "Failed to open billing portal. Please try again."
+                (error instanceof Error && error.message) ||
+                    "Failed to open billing portal. Please try again."
             );
             setIsPortalLoading(false);
         }
@@ -109,7 +122,7 @@ export default function SubscriptionAlert({
     }
 
     // ---- TRIALING with < 3 days: Amber banner ----
-    if (status === "TRIALING") {
+    if (subscription && status === "TRIALING") {
         const trialEnd = subscription.trialEndsAt || subscription.currentPeriodEnd;
         const daysLeft = getDaysRemaining(trialEnd);
 
@@ -159,7 +172,7 @@ export default function SubscriptionAlert({
     }
 
     // ---- CANCELED: Gray banner ----
-    if (status === "CANCELED") {
+    if (subscription && status === "CANCELED") {
         const accessEnd = subscription.currentPeriodEnd;
 
         return (

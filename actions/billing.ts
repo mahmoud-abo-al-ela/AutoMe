@@ -197,7 +197,9 @@ export const createPlanChangeSession = withAuth(
         },
       });
 
-      return createSuccessResponse({ type: "updated" });
+      // `as const` on both branches so callers get a discriminated union and
+      // can narrow on `type` to reach `url`.
+      return createSuccessResponse({ type: "updated" as const });
     }
 
     // Case 2: No existing subscription and new plan is free — nothing to do
@@ -229,7 +231,7 @@ export const createPlanChangeSession = withAuth(
       },
     });
 
-    return createSuccessResponse({ type: "redirect", url });
+    return createSuccessResponse({ type: "redirect" as const, url });
   }
 );
 

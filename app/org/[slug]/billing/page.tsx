@@ -18,7 +18,7 @@ import NonOwnerBillingNotice from "./_components/NonOwnerBillingNotice";
 /**
  * Get the organization owner's name and email for non-owner contact info
  */
-async function getOrganizationOwner(organizationId) {
+async function getOrganizationOwner(organizationId: string) {
   const ownerMembership = await db.membership.findFirst({
     where: {
       organizationId,
@@ -37,7 +37,11 @@ async function getOrganizationOwner(organizationId) {
   return ownerMembership?.user || null;
 }
 
-export default async function BillingPage({ params }) {
+export default async function BillingPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const user = await checkUser();
   const organization = await getOrganizationBySlug(slug);
@@ -46,7 +50,9 @@ export default async function BillingPage({ params }) {
     notFound();
   }
 
-  const membership = await getUserMembership(user.id, organization.id);
+  // The org layout redirects to /sign-in when there is no user, so this page
+  // is only reachable with one.
+  const membership = await getUserMembership(user!.id, organization.id);
   const isOwner = membership?.role === "OWNER";
 
   const { subscription, plans, usage } = await getBillingData(organization.id);

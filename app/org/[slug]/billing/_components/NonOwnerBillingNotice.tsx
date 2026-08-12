@@ -9,7 +9,13 @@ import { ShieldAlert, Mail, User } from "lucide-react";
  * Shows a clear message that billing management requires owner access,
  * and provides the owner's contact information.
  */
-export default function NonOwnerBillingNotice({ ownerName, ownerEmail }) {
+export default function NonOwnerBillingNotice({
+  ownerName,
+  ownerEmail,
+}: {
+  ownerName: string | null | undefined;
+  ownerEmail: string | null | undefined;
+}) {
     return (
         <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800">
             <ShieldAlert className="h-4 w-4 text-blue-600" />

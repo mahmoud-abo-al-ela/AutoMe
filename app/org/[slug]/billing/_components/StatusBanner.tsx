@@ -10,8 +10,19 @@ import {
   Info,
 } from "lucide-react";
 import { getDaysRemaining, formatDate } from "./_lib/current-plan-utils";
+import type { BillingSubscription } from "./_lib/billing-types";
 
-export default function StatusBanner({ subscription, isOwner, onManageSubscription, isPortalLoading }) {
+export default function StatusBanner({
+  subscription,
+  isOwner,
+  onManageSubscription,
+  isPortalLoading,
+}: {
+  subscription: BillingSubscription;
+  isOwner: boolean;
+  onManageSubscription: () => void;
+  isPortalLoading: boolean;
+}) {
   const status = subscription?.status;
 
   // PAST_DUE — Red alert with "Update Payment Method" CTA
@@ -49,7 +60,7 @@ export default function StatusBanner({ subscription, isOwner, onManageSubscripti
   }
 
   // TRIALING — Amber banner with days remaining
-  if (status === "TRIALING") {
+  if (subscription && status === "TRIALING") {
     const trialEnd = subscription.trialEndsAt || subscription.currentPeriodEnd;
     const daysLeft = getDaysRemaining(trialEnd);
     const isUrgent = daysLeft !== null && daysLeft <= 3;
@@ -98,7 +109,7 @@ export default function StatusBanner({ subscription, isOwner, onManageSubscripti
   }
 
   // CANCELED — Gray banner with access end date
-  if (status === "CANCELED") {
+  if (subscription && status === "CANCELED") {
     const accessEnd = subscription.currentPeriodEnd;
 
     return (

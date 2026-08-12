@@ -15,6 +15,7 @@ import {
   getAllFeatureNames,
   getFeatureLookup,
 } from "./_lib/plan-display";
+import type { BillingPlan } from "./_lib/billing-types";
 
 export default function FeatureComparisonTable({
   plans,
@@ -22,9 +23,16 @@ export default function FeatureComparisonTable({
   billingCycle,
   isOwner,
   onSelectPlan,
+}: {
+  plans: BillingPlan[];
+  /** undefined/null when the org has no subscription — i.e. free Starter. */
+  currentPlanId: string | null | undefined;
+  billingCycle: "monthly" | "yearly";
+  isOwner: boolean;
+  onSelectPlan: (plan: BillingPlan) => void;
 }) {
   const allFeatures = getAllFeatureNames(plans);
-  const getDisplayPrice = (plan) =>
+  const getDisplayPrice = (plan: BillingPlan) =>
     billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
 
   return (

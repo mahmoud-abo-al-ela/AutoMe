@@ -22,7 +22,9 @@ import { toast } from "sonner";
 import { getPaymentMethod } from "@/actions/billing";
 import { createBillingPortalSession } from "@/actions/billing";
 
-const BRAND_COLORS = {
+// Keyed by Stripe's card brand string, which is open-ended; "Card" is the
+// fallback for anything unlisted.
+const BRAND_COLORS: Record<string, string> = {
     Visa: "text-blue-600 dark:text-blue-400",
     Mastercard: "text-orange-600 dark:text-orange-400",
     "American Express": "text-blue-700 dark:text-blue-300",
@@ -48,7 +50,13 @@ function PaymentMethodSkeleton() {
     );
 }
 
-function NoPaymentMethod({ isOwner, onManage, isLoading }) {
+type ManageProps = {
+    isOwner: boolean;
+    onManage: () => void;
+    isLoading: boolean;
+};
+
+function NoPaymentMethod({ isOwner, onManage, isLoading }: ManageProps) {
     return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -83,7 +91,12 @@ function NoPaymentMethod({ isOwner, onManage, isLoading }) {
     );
 }
 
-function CardDisplay({ paymentMethod, isOwner, onManage, isLoading }) {
+function CardDisplay({
+    paymentMethod,
+    isOwner,
+    onManage,
+    isLoading,
+}: ManageProps & { paymentMethod: NonNullable<PaymentMethodData> }) {
     const brandColor = BRAND_COLORS[paymentMethod.brand] || BRAND_COLORS.Card;
     const isExpiringSoon = isCardExpiringSoon(
         paymentMethod.expMonth,
@@ -145,7 +158,7 @@ function CardDisplay({ paymentMethod, isOwner, onManage, isLoading }) {
     );
 }
 
-function isCardExpiringSoon(expMonth, expYear) {
+function isCardExpiringSoon(expMonth: number, expYear: number) {
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
@@ -162,11 +175,23 @@ function isCardExpiringSoon(expMonth, expYear) {
  * Shows card brand, last 4 digits, and expiry date.
  * Provides an "Update" button that opens the Stripe billing portal.
  */
-export default function PaymentMethod({ organizationId, isOwner }) {
-    const [paymentMethod, setPaymentMethod] = useState(null);
+/** The saved card as the billing action returns it, or null when there is none. */
+type PaymentMethodData = Extract<
+    Awaited<ReturnType<typeof getPaymentMethod>>,
+    { success: true }
+>["data"];
+
+export default function PaymentMethod({
+    organizationId,
+    isOwner,
+}: {
+    organizationId: string;
+    isOwner: boolean;
+}) {
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethodData>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isPortalLoading, setIsPortalLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -175,10 +200,21 @@ export default function PaymentMethod({ organizationId, isOwner }) {
                 setIsLoading(true);
                 setError(null);
                 const result = await getPaymentMethod(organizationId);
-                setPaymentMethod(result);
+                // BUG FIX: this stored the whole ActionResponse envelope in
+                // state, so the card below read .brand/.last4 off { success,
+                // data } and always got undefined — the saved card has never
+                // rendered its details.
+                if (!result.success) {
+                    setError(result.error.message || "Failed to load payment method");
+                    return;
+                }
+                setPaymentMethod(result.data);
             } catch (err) {
                 console.error("Failed to fetch payment method:", err);
-                setError(err.message || "Failed to load payment method");
+                setError(
+                    (err instanceof Error && err.message) ||
+                        "Failed to load payment method"
+                );
             } finally {
                 setIsLoading(false);
             }
@@ -190,15 +226,24 @@ export default function PaymentMethod({ organizationId, isOwner }) {
     const handleManagePayment = async () => {
         try {
             setIsPortalLoading(true);
-            const { url } = await createBillingPortalSession(
-                organizationId,
-                pathname
-            );
-            window.location.href = url;
+            // BUG FIX: second instance of the envelope defect — `url` lives
+            // under .data, so this redirect was always to undefined. See the
+            // matching fix in CurrentPlan.tsx.
+            const result = await createBillingPortalSession(organizationId, pathname);
+            if (!result.success) {
+                toast.error(
+                    result.error.message ||
+                        "Failed to open billing portal. Please try again."
+                );
+                setIsPortalLoading(false);
+                return;
+            }
+            window.location.href = result.data.url;
         } catch (error) {
             console.error("Failed to open billing portal:", error);
             toast.error(
-                error.message || "Failed to open billing portal. Please try again."
+                (error instanceof Error && error.message) ||
+                    "Failed to open billing portal. Please try again."
             );
             setIsPortalLoading(false);
         }

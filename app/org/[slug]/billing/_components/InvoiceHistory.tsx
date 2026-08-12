@@ -40,7 +40,9 @@ const STATUS_STYLES = {
     UNKNOWN: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
 };
 
-function formatCurrency(amount, currency = "usd") {
+// Currency comes from the Stripe invoice rather than being assumed, which is
+// why this one is not routed through lib/utils/currency.
+function formatCurrency(amount: number, currency = "usd") {
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: currency.toUpperCase(),
@@ -48,7 +50,7 @@ function formatCurrency(amount, currency = "usd") {
     }).format(amount / 100);
 }
 
-function formatDate(dateString) {
+function formatDate(dateString: string | number | Date) {
     return new Date(dateString).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -87,7 +89,7 @@ function EmptyInvoices() {
     );
 }
 
-function InvoicesError({ onRetry }) {
+function InvoicesError({ onRetry }: { onRetry: () => void }) {
     return (
         <div className="flex flex-col items-center justify-center py-8 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground/40 mb-3" />
@@ -101,15 +103,25 @@ function InvoicesError({ onRetry }) {
     );
 }
 
-export default function InvoiceHistory({ organizationId }) {
-    const [invoices, setInvoices] = useState([]);
+/** One invoice as the billing action returns it. */
+type Invoice = Extract<
+    Awaited<ReturnType<typeof getInvoices>>,
+    { success: true }
+>["data"]["invoices"][number];
+
+export default function InvoiceHistory({
+    organizationId,
+}: {
+    organizationId: string;
+}) {
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
-    const [nextCursor, setNextCursor] = useState(null);
+    const [nextCursor, setNextCursor] = useState<string | null>(null);
 
-    const fetchInvoices = useCallback(async (cursor = null) => {
+    const fetchInvoices = useCallback(async (cursor: string | null = null) => {
         try {
             if (cursor) {
                 setIsLoadingMore(true);
@@ -138,7 +150,9 @@ export default function InvoiceHistory({ organizationId }) {
             setNextCursor(nextCursor);
         } catch (err) {
             console.error("Failed to fetch invoices:", err);
-            setError(err.message || "Failed to load invoices");
+            setError(
+                (err instanceof Error && err.message) || "Failed to load invoices"
+            );
         } finally {
             setIsLoading(false);
             setIsLoadingMore(false);

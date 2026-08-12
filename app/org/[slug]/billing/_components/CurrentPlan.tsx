@@ -31,12 +31,18 @@ import {
 } from "./_lib/current-plan-utils";
 import StatusBanner from "./StatusBanner";
 import UsageBar from "./UsageBar";
+import type { BillingSubscription, BillingUsage } from "./_lib/billing-types";
 
 export default function CurrentPlan({
   subscription,
   usage,
   isOwner,
   organizationId,
+}: {
+  subscription: BillingSubscription;
+  usage: BillingUsage;
+  isOwner: boolean;
+  organizationId: string;
 }) {
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const pathname = usePathname();
@@ -51,15 +57,25 @@ export default function CurrentPlan({
   const handleManageSubscription = async () => {
     try {
       setIsPortalLoading(true);
-      const { url } = await createBillingPortalSession(
-        organizationId,
-        pathname
-      );
-      window.location.href = url;
+      // BUG FIX: this destructured `url` straight off the ActionResponse
+      // envelope, where it lives under `.data`. It was therefore always
+      // undefined and the redirect never reached Stripe's billing portal —
+      // the same defect as the onboarding checkout one, missed in that sweep.
+      const result = await createBillingPortalSession(organizationId, pathname);
+      if (!result.success) {
+        toast.error(
+          result.error.message ||
+            "Failed to open billing portal. Please try again."
+        );
+        setIsPortalLoading(false);
+        return;
+      }
+      window.location.href = result.data.url;
     } catch (error) {
       console.error("Failed to open billing portal:", error);
       toast.error(
-        error.message || "Failed to open billing portal. Please try again."
+        (error instanceof Error && error.message) ||
+          "Failed to open billing portal. Please try again."
       );
       setIsPortalLoading(false);
     }
@@ -101,19 +117,21 @@ export default function CurrentPlan({
                 )}
               </CardTitle>
               <CardDescription className="mt-1">
-                {status === "ACTIVE" && subscription.currentPeriodEnd && (
+                {subscription && status === "ACTIVE" && subscription.currentPeriodEnd && (
                   <span className="flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
                     Renews on {formatDate(subscription.currentPeriodEnd)}
                   </span>
                 )}
-                {status === "TRIALING" && (
+                {subscription && status === "TRIALING" && (
                   <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                     <Clock className="h-3.5 w-3.5" />
                     Trial ends on{" "}
+                    {/* A TRIALING subscription with neither date set would be a
+                        data anomaly; previously it rendered the epoch. */}
                     {formatDate(
-                      subscription.trialEndsAt ||
-                      subscription.currentPeriodEnd
+                      (subscription.trialEndsAt ||
+                        subscription.currentPeriodEnd)!
                     )}
                   </span>
                 )}
@@ -123,7 +141,7 @@ export default function CurrentPlan({
                     Payment overdue — please update your payment method
                   </span>
                 )}
-                {status === "CANCELED" && subscription.currentPeriodEnd && (
+                {subscription && status === "CANCELED" && subscription.currentPeriodEnd && (
                   <span className="flex items-center gap-1 text-gray-500">
                     <XCircle className="h-3.5 w-3.5" />
                     Access ends on{" "}

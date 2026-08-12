@@ -1,7 +1,12 @@
 // Pure display helpers + config shared by the plan-comparison components.
 import { Sparkles, TrendingUp, Crown } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { Plan, PlanType } from "@/lib/generated/prisma";
 
-export const PLAN_CONFIG = {
+export const PLAN_CONFIG: Record<
+  PlanType,
+  { icon: LucideIcon; color: string; border: string; badge?: string }
+> = {
   STARTER: {
     icon: Sparkles,
     color: "text-gray-600",
@@ -20,7 +25,15 @@ export const PLAN_CONFIG = {
   },
 };
 
-export function formatPrice(price) {
+/**
+ * Plan prices, in minor units.
+ *
+ * Deliberately USD, unlike car prices: Stripe charges subscriptions in USD
+ * (lib/services/stripe/plan.ts), so this matches what the customer is actually
+ * billed. Whether plan pricing should move to EGP is a business decision that
+ * has to change Stripe and this together — see lib/utils/currency.ts.
+ */
+export function formatPrice(price: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -28,8 +41,8 @@ export function formatPrice(price) {
   }).format(price / 100);
 }
 
-export function formatFeatureName(key) {
-  const nameMap = {
+export function formatFeatureName(key: string) {
+  const nameMap: Record<string, string> = {
     aiProcessing: "AI Processing",
     chat: "Live Chat",
     prioritySupport: "Priority Support",
@@ -38,14 +51,19 @@ export function formatFeatureName(key) {
     nameMap[key] ||
     key
       .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase())
+      .replace(/^./, (str: string) => str.toUpperCase())
       .trim()
   );
 }
 
-export function getFeatures(plan) {
-  const f = plan.features || {};
-  const features = [];
+/** One row of a plan's feature list. */
+export type PlanFeature = { name: string; included: boolean };
+
+export function getFeatures(plan: Plan): PlanFeature[] {
+  // Plan.features is a Json column; the shape is written by the super-admin
+  // plan form, so it is read defensively rather than asserted here.
+  const f = (plan.features ?? {}) as Record<string, unknown>;
+  const features: PlanFeature[] = [];
 
   features.push({
     name:
@@ -79,7 +97,7 @@ export function getFeatures(plan) {
     if (typeof value === "object" && value !== null && "enabled" in value) {
       features.push({
         name: formatFeatureName(key),
-        included: !!value.enabled,
+        included: !!(value as { enabled?: unknown }).enabled,
       });
     } else if (typeof value === "boolean") {
       features.push({ name: formatFeatureName(key), included: value });
@@ -92,8 +110,8 @@ export function getFeatures(plan) {
 /**
  * Collect all unique feature names across all plans for the comparison table
  */
-export function getAllFeatureNames(plans) {
-  const featureSet = new Set();
+export function getAllFeatureNames(plans: Plan[]): string[] {
+  const featureSet = new Set<string>();
   plans.forEach((plan) => {
     getFeatures(plan).forEach((f) => featureSet.add(f.name));
   });
@@ -103,8 +121,8 @@ export function getAllFeatureNames(plans) {
 /**
  * Build a lookup: featureName -> boolean for a given plan
  */
-export function getFeatureLookup(plan) {
-  const lookup = {};
+export function getFeatureLookup(plan: Plan): Record<string, boolean> {
+  const lookup: Record<string, boolean> = {};
   getFeatures(plan).forEach((f) => {
     lookup[f.name] = f.included;
   });

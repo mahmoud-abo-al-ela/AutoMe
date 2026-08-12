@@ -19,24 +19,32 @@ import { createPlanChangeSession } from "@/actions/billing";
 import { PLAN_CONFIG, formatPrice, getFeatures } from "./_lib/plan-display";
 import PlanCard from "./PlanCard";
 import FeatureComparisonTable from "./FeatureComparisonTable";
+import type { BillingPlan } from "./_lib/billing-types";
 
 export default function PlanComparison({
   plans,
   currentPlanId,
   isOwner,
   organizationId,
+}: {
+  plans: BillingPlan[];
+  currentPlanId: string | null | undefined;
+  isOwner: boolean;
+  organizationId: string;
 }) {
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
-  const [billingCycle, setBillingCycle] = useState("monthly");
-  const [viewMode, setViewMode] = useState("cards"); // "cards" | "table"
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
+    "monthly"
+  );
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const pathname = usePathname();
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const getDisplayPrice = (plan) =>
+  const getDisplayPrice = (plan: BillingPlan) =>
     billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
-  const getSavingsPercent = (plan) =>
+  const getSavingsPercent = (plan: BillingPlan) =>
     plan.monthlyPrice === 0 || plan.yearlyPrice === 0
       ? 0
       : Math.round(
@@ -49,7 +57,7 @@ export default function PlanComparison({
       (plan) => plan.monthlyPrice > 0 && plan.monthlyPrice !== null
     );
     if (paidPlans.length === 0) return 0;
-    const totalSavings = paidPlans.reduce((sum, plan) => {
+    const totalSavings = paidPlans.reduce((sum: number, plan) => {
       const monthlyTotal = plan.monthlyPrice * 12;
       const yearlyPrice = plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8;
       const savings = ((monthlyTotal - yearlyPrice) / monthlyTotal) * 100;
@@ -58,7 +66,7 @@ export default function PlanComparison({
     return Math.round(totalSavings / paidPlans.length);
   })();
 
-  const handleSelectPlan = (plan) => {
+  const handleSelectPlan = (plan: BillingPlan) => {
     setSelectedPlan(plan);
     setIsDialogOpen(true);
   };
@@ -79,7 +87,8 @@ export default function PlanComparison({
       }
 
       if (result.data.type === "redirect") {
-        window.location.href = result.data.url;
+        // The action only returns this branch with a url present.
+        window.location.href = result.data.url!;
       } else if (result.data.type === "updated") {
         toast.success(`Successfully switched to ${selectedPlan.name} plan!`);
         setIsDialogOpen(false);
@@ -87,7 +96,10 @@ export default function PlanComparison({
       }
     } catch (error) {
       console.error("Failed to change plan:", error);
-      toast.error(error.message || "Failed to change plan. Please try again.");
+      toast.error(
+        (error instanceof Error && error.message) ||
+          "Failed to change plan. Please try again."
+      );
       setIsChanging(false);
     }
   };
@@ -108,7 +120,11 @@ export default function PlanComparison({
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Tabs
               value={billingCycle}
-              onValueChange={setBillingCycle}
+              // Tabs hands back a plain string; only the two triggers below
+              // can produce a value.
+              onValueChange={(value) =>
+                setBillingCycle(value as "monthly" | "yearly")
+              }
               className="w-auto"
             >
               <TabsList className="grid w-full grid-cols-2">

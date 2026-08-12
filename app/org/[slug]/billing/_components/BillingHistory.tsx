@@ -20,8 +20,11 @@ import {
 import { Receipt, ArrowUpCircle, ArrowDownCircle, XCircle, RefreshCw, PlusCircle, Loader2 } from "lucide-react";
 import { getBillingHistory } from "@/actions/billing";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { LucideIcon } from "lucide-react";
 
-const actionIcons = {
+// Keyed by AuditAction, but only the subscription actions are listed; the
+// lookups below fall back for anything else the history can contain.
+const actionIcons: Record<string, LucideIcon> = {
   SUBSCRIPTION_CREATED: PlusCircle,
   SUBSCRIPTION_UPGRADED: ArrowUpCircle,
   SUBSCRIPTION_DOWNGRADED: ArrowDownCircle,
@@ -29,7 +32,7 @@ const actionIcons = {
   SUBSCRIPTION_RENEWED: RefreshCw,
 };
 
-const actionColors = {
+const actionColors: Record<string, string> = {
   SUBSCRIPTION_CREATED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   SUBSCRIPTION_UPGRADED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   SUBSCRIPTION_DOWNGRADED: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
@@ -37,10 +40,20 @@ const actionColors = {
   SUBSCRIPTION_RENEWED: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
 };
 
-export default function BillingHistory({ organizationId }) {
-  const [billingHistory, setBillingHistory] = useState([]);
+/** One audit-log-derived row of the billing history, as the action returns it. */
+type BillingHistoryEntry = Extract<
+  Awaited<ReturnType<typeof getBillingHistory>>,
+  { success: true }
+>["data"]["history"][number];
+
+export default function BillingHistory({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
+  const [billingHistory, setBillingHistory] = useState<BillingHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBillingHistory() {
@@ -51,7 +64,9 @@ export default function BillingHistory({ organizationId }) {
         }
         setBillingHistory(result.data.history || []);
       } catch (err) {
-        setError(err.message);
+        setError(
+          err instanceof Error ? err.message : "Failed to load billing history"
+        );
       } finally {
         setLoading(false);
       }
@@ -60,7 +75,7 @@ export default function BillingHistory({ organizationId }) {
     fetchBillingHistory();
   }, [organizationId]);
 
-  const formatDate = (date) => {
+  const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -70,8 +85,8 @@ export default function BillingHistory({ organizationId }) {
     });
   };
 
-  const formatActionLabel = (action) => {
-    const labels = {
+  const formatActionLabel = (action: string) => {
+    const labels: Record<string, string> = {
       SUBSCRIPTION_CREATED: "Created",
       SUBSCRIPTION_UPGRADED: "Upgraded",
       SUBSCRIPTION_DOWNGRADED: "Downgraded",

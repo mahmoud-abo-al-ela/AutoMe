@@ -10,8 +10,20 @@ import {
   getUsageColor,
   getUsageTextColor,
 } from "./_lib/current-plan-utils";
+import type { LucideIcon } from "lucide-react";
 
-export default function UsageBar({ icon: Icon, label, current, limit }) {
+export default function UsageBar({
+  icon: Icon,
+  label,
+  current,
+  limit,
+}: {
+  icon: LucideIcon;
+  label: string;
+  current: number;
+  /** -1 means unlimited. */
+  limit: number;
+}) {
   const percent = getUsagePercent(current, limit);
   const isUnlimited = limit === -1;
   const colorClass = getUsageColor(percent);

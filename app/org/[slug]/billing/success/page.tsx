@@ -15,7 +15,13 @@ import { Button } from "@/components/ui/button";
  * Success page after a plan change via Stripe Checkout.
  * Verifies the checkout session and updates the local subscription record.
  */
-export default async function BillingSuccessPage({ params, searchParams }) {
+export default async function BillingSuccessPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ session_id?: string }>;
+}) {
     const { slug } = await params;
     const { session_id } = await searchParams;
 
@@ -59,6 +65,16 @@ export default async function BillingSuccessPage({ params, searchParams }) {
             where: { organizationId: organization.id },
         });
 
+        // retrieveCheckoutSession does not pass `expand`, so Stripe returns
+        // these as plain ids. The union type exists because expansion is
+        // possible in general; narrowing here means that if expansion is ever
+        // added, these degrade to null instead of writing an object into a
+        // string column.
+        const sessionSubscriptionId =
+            typeof session.subscription === "string" ? session.subscription : null;
+        const sessionCustomerId =
+            typeof session.customer === "string" ? session.customer : null;
+
         if (existingSubscription) {
             // Update existing subscription with new Stripe data
             await db.subscription.update({
@@ -66,8 +82,8 @@ export default async function BillingSuccessPage({ params, searchParams }) {
                 data: {
                     planId: metadata.planId,
                     status: "ACTIVE",
-                    stripeSubscriptionId: session.subscription || existingSubscription.stripeSubscriptionId,
-                    stripeCustomerId: session.customer || existingSubscription.stripeCustomerId,
+                    stripeSubscriptionId: sessionSubscriptionId || existingSubscription.stripeSubscriptionId,
+                    stripeCustomerId: sessionCustomerId || existingSubscription.stripeCustomerId,
                     stripeCheckoutSessionId: session.id,
                 },
             });
@@ -78,8 +94,8 @@ export default async function BillingSuccessPage({ params, searchParams }) {
                     organizationId: organization.id,
                     planId: metadata.planId,
                     status: "ACTIVE",
-                    stripeSubscriptionId: session.subscription || null,
-                    stripeCustomerId: session.customer || null,
+                    stripeSubscriptionId: sessionSubscriptionId,
+                    stripeCustomerId: sessionCustomerId,
                     stripeCheckoutSessionId: session.id,
                     currentPeriodStart: new Date(),
                     currentPeriodEnd: new Date(
