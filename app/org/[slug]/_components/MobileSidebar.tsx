@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import { OrgUnreadBadge } from "@/components/StreamChat";
+import type { OrgSidebarProps } from "./AdminSidebar";
 
 const iconMap = {
   LayoutDashboard,
@@ -34,7 +35,11 @@ const iconMap = {
   ScrollText,
 };
 
-export default function MobileSidebar({ pathname, organization, userRole }) {
+export default function MobileSidebar({
+  pathname,
+  organization,
+  userRole,
+}: OrgSidebarProps & { pathname: string }) {
   const [open, setOpen] = useState(false);
   const orgName = organization?.name || "AutoMe Admin";
 

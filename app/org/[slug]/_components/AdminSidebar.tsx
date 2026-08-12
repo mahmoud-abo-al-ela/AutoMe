@@ -8,8 +8,16 @@ import MobileSidebar from "./MobileSidebar";
 import DesktopSidebar from "./DesktopSidebar";
 import { OrgUnreadBadge } from "@/components/StreamChat";
 import Link from "next/link";
+import type { MemberRole, Organization } from "@/lib/generated/prisma";
 
-export default function AdminSidebar({ organization, userRole }) {
+/** Shared by the sidebar trio. userRole is undefined for a platform ADMIN or an
+ * impersonator, neither of whom has a membership in this organization. */
+export type OrgSidebarProps = {
+  organization: Organization;
+  userRole: MemberRole | undefined;
+};
+
+export default function AdminSidebar({ organization, userRole }: OrgSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();

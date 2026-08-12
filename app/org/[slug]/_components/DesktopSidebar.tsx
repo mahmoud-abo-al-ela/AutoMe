@@ -20,6 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import { OrgUnreadBadge } from "@/components/StreamChat";
+import type { Dispatch, SetStateAction } from "react";
+import type { OrgSidebarProps } from "./AdminSidebar";
 
 const iconMap = {
   LayoutDashboard,
@@ -39,6 +41,10 @@ export default function DesktopSidebar({
   pathname,
   organization,
   userRole,
+}: OrgSidebarProps & {
+  collapsed: boolean;
+  setCollapsed: Dispatch<SetStateAction<boolean>>;
+  pathname: string;
 }) {
   const orgName = organization?.name || "AutoMe Admin";
 

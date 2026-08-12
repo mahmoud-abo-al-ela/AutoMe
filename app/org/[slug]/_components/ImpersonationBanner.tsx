@@ -6,8 +6,25 @@ import { AlertCircle, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { endImpersonationAction } from "@/actions/impersonation";
 import { toast } from "sonner";
+import type { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
+import type { Organization } from "@/lib/generated/prisma";
 
-export default function ImpersonationBanner({ session, organization }) {
+/**
+ * Derived from the service rather than restated, so a change to what
+ * getCurrentImpersonationSession selects shows up here. `import type` is erased,
+ * so this does not pull the server module into the client bundle.
+ */
+type ImpersonationSession = NonNullable<
+  Awaited<ReturnType<typeof getCurrentImpersonationSession>>
+>;
+
+export default function ImpersonationBanner({
+  session,
+  organization,
+}: {
+  session: ImpersonationSession;
+  organization: Organization;
+}) {
   const router = useRouter();
   const [ending, setEnding] = useState(false);
 

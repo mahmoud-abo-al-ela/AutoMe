@@ -9,7 +9,9 @@ import { notFound, redirect } from "next/navigation";
 import AdminSidebar from "./_components/AdminSidebar";
 import ImpersonationBanner from "./_components/ImpersonationBanner";
 
-export async function generateMetadata({ params }) {
+type OrgParams = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: OrgParams) {
     const { slug } = await params;
     const organization = await getOrganizationBySlug(slug);
 
@@ -25,7 +27,10 @@ export async function generateMetadata({ params }) {
     };
 }
 
-export default async function OrganizationLayout({ children, params }) {
+export default async function OrganizationLayout({
+    children,
+    params,
+}: OrgParams & { children: React.ReactNode }) {
     const { slug } = await params;
     const user = await checkUser();
 
@@ -63,7 +68,7 @@ export default async function OrganizationLayout({ children, params }) {
             >
                 {isImpersonating && impersonationSession && (
                     <ImpersonationBanner
-                        targetUser={impersonationSession.targetUser}
+                        session={impersonationSession}
                         organization={organization}
                     />
                 )}
