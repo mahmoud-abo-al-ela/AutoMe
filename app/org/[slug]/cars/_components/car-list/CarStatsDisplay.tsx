@@ -2,12 +2,18 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { CardTitle, CardDescription } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
+import type { CarsListPresenterProps } from "./CarsListPresenter";
 
 const CarStatsDisplay = ({
   stats,
   isRefreshing,
   isLoading,
   onRefresh,
+}: {
+  stats: CarsListPresenterProps["carStats"];
+  isRefreshing: boolean;
+  isLoading: boolean;
+  onRefresh: () => void;
 }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div className="space-y-2">

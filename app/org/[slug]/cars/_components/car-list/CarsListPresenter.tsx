@@ -20,6 +20,31 @@ import ErrorState from "./ErrorState";
 import TableSkeleton from "./TableSkeleton";
 import Pagination from "./Pagination";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+import type { useAdminCarsList } from "@/hooks/use-admin-cars-list";
+
+/**
+ * CarsList spreads the whole useAdminCarsList result into this component, so
+ * the props are that return type rather than a restatement of it — adding a
+ * field to the hook cannot drift from what the presenter accepts.
+ */
+export type CarsListPresenterProps = ReturnType<typeof useAdminCarsList>;
+
+/** One row of the admin car table, with the nullable-by-signature case removed. */
+export type AdminCarRow = NonNullable<
+    CarsListPresenterProps["paginatedCars"][number]
+>;
+
+/** Shared by the desktop table row and the mobile card, which render the same
+ * car with the same two actions. Handler types come from the hook so they
+ * cannot drift from what is actually passed. */
+export type CarRowProps = {
+    car: AdminCarRow;
+    isCarDisabled: boolean;
+    isThisCarUpdating: boolean;
+    isThisCarDeleting: boolean;
+    onUpdateCar: CarsListPresenterProps["handlers"]["handleUpdateCar"];
+    onConfirmDelete: CarsListPresenterProps["handlers"]["confirmDelete"];
+};
 
 export const CarsListPresenter = ({
     searchTerm,
@@ -37,7 +62,7 @@ export const CarsListPresenter = ({
     updateCarLoading,
     updatedCar,
     handlers,
-}) => {
+}: CarsListPresenterProps) => {
     return (
         <>
             <Toaster
@@ -79,11 +104,17 @@ export const CarsListPresenter = ({
                                         {isFetchingCars || isRefreshing ? (
                                             <TableSkeleton />
                                         ) : paginatedCars?.length > 0 ? (
-                                            paginatedCars.map((car) => {
+                                            paginatedCars.map((row) => {
+                                                // serializeCar is declared nullable for callers that
+                                                // may hand it nothing; rows from the list query are
+                                                // always present.
+                                                const car = row!;
                                                 const isCarDisabled =
                                                     deleteCarLoading || updateCarLoading;
                                                 const isThisCarUpdating =
-                                                    updateCarLoading && updatedCar?.data?.id === car.id;
+                                                    updateCarLoading &&
+                                                    updatedCar?.success === true &&
+                                                    updatedCar.data?.id === car.id;
                                                 const isThisCarDeleting =
                                                     deleteCarLoading && carToDelete?.id === car.id;
 
@@ -120,11 +151,15 @@ export const CarsListPresenter = ({
                                     <CarMobileSkeleton />
                                 ) : paginatedCars?.length > 0 ? (
                                     <div className="space-y-4">
-                                        {paginatedCars.map((car) => {
+                                        {paginatedCars.map((row) => {
+                                            // See the table branch above: nullable by signature only.
+                                            const car = row!;
                                             const isCarDisabled =
                                                 deleteCarLoading || updateCarLoading;
                                             const isThisCarUpdating =
-                                                updateCarLoading && updatedCar?.data?.id === car.id;
+                                                updateCarLoading &&
+                                                updatedCar?.success === true &&
+                                                updatedCar.data?.id === car.id;
                                             const isThisCarDeleting =
                                                 deleteCarLoading && carToDelete?.id === car.id;
 

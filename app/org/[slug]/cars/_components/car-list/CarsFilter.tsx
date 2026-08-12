@@ -19,13 +19,21 @@ const CarsFilter = ({
   statusFilter,
   setStatusFilter,
   disabled,
+}: {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  disabled: boolean;
 }) => {
   const router = useRouter();
   const { slug } = useParams();
   const [isFocused, setIsFocused] = useState(false);
 
 
-  const handleSearch = (e) => {
+  // Wired to the form's onSubmit; it exists only to stop the default navigation
+  // since filtering happens as you type.
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 

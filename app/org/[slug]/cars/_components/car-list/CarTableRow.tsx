@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import StatusBadge from "./StatusBadge";
+import type { CarRowProps } from "./CarsListPresenter";
 
 const CarTableRow = ({
   car,
@@ -35,7 +36,7 @@ const CarTableRow = ({
   isThisCarDeleting,
   onUpdateCar,
   onConfirmDelete,
-}) => {
+}: CarRowProps) => {
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug;
@@ -54,7 +55,7 @@ const CarTableRow = ({
           <div className="relative">
             <Image
               src={car.images[0]}
-              alt={car.title}
+              alt={car.title ?? ""}
               className={`h-16 w-24 md:h-16 md:w-20 lg:h-20 lg:w-28 rounded-xl object-cover shadow-md border border-gray-200 transition-all relative ${isCarDisabled ? "grayscale" : ""
                 }`}
               width={112}

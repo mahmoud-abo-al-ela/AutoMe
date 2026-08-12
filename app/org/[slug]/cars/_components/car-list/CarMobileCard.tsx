@@ -27,6 +27,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import StatusBadge from "./StatusBadge";
+import type { CarRowProps } from "./CarsListPresenter";
 
 const CarMobileCard = ({
     car,
@@ -35,7 +36,7 @@ const CarMobileCard = ({
     isThisCarDeleting,
     onUpdateCar,
     onConfirmDelete,
-}) => {
+}: CarRowProps) => {
     const params = useParams();
     const router = useRouter();
     const slug = params?.slug;
@@ -49,7 +50,7 @@ const CarMobileCard = ({
                     <div className="relative flex-shrink-0">
                         <Image
                             src={car.images[0]}
-                            alt={car.title}
+                            alt={car.title ?? ""}
                             className={`h-20 w-28 rounded-lg object-cover shadow-sm border border-gray-200 ${isCarDisabled ? "grayscale" : ""
                                 }`}
                             width={112}

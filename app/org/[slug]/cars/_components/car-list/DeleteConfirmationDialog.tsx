@@ -1,4 +1,5 @@
 import React from "react";
+import type { AdminCarRow } from "./CarsListPresenter";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +17,15 @@ const DeleteConfirmationDialog = ({
   car,
   onDelete,
   isDeleting,
+}: {
+  isOpen: boolean;
+  /** Receives the Dialog's open state, so this is the setter itself. */
+  onClose: (open: boolean) => void;
+  /** null while no row is queued for deletion. */
+  car: AdminCarRow | null;
+  /** Takes the id of the car to delete. */
+  onDelete: (carId: string) => void | Promise<void>;
+  isDeleting: boolean;
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -26,7 +36,7 @@ const DeleteConfirmationDialog = ({
             Delete Car
           </DialogTitle>
           <DialogDescription className="text-gray-600 text-sm sm:text-base">
-            Are you sure you want to delete <strong>"{car?.title}"</strong>?
+            Are you sure you want to delete <strong>&quot;{car?.title}&quot;</strong>?
             This action cannot be undone and will permanently remove the car
             from your inventory.
           </DialogDescription>
@@ -40,9 +50,11 @@ const DeleteConfirmationDialog = ({
           >
             Cancel
           </Button>
+          {/* The dialog only opens with a car queued, so the guard below is
+              unreachable; before, a null car called onDelete(undefined). */}
           <Button
             variant="destructive"
-            onClick={() => onDelete(car?.id)}
+            onClick={() => car && onDelete(car.id)}
             className="bg-red-600 hover:bg-red-700 w-full sm:w-auto order-1 sm:order-2 cursor-pointer"
             disabled={isDeleting}
           >

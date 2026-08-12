@@ -2,7 +2,16 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 
-const StatusBadge = ({ status, compact = false, iconOnly = false }) => {
+const StatusBadge = ({
+  status,
+  compact = false,
+  iconOnly = false,
+}: {
+  /** Lower-cased CarStatus; the switch below matches "available" etc. */
+  status: string;
+  compact?: boolean;
+  iconOnly?: boolean;
+}) => {
   const getStatusConfig = () => {
     switch (status) {
       case "available":

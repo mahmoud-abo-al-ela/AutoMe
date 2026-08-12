@@ -2,7 +2,15 @@ import React from "react";
 import { EmptyState as SharedEmptyState } from "@/components/common/EmptyState";
 import { Car } from "lucide-react";
 
-const EmptyState = ({ searchTerm, statusFilter, onClearFilters }) => {
+const EmptyState = ({
+  searchTerm,
+  statusFilter,
+  onClearFilters,
+}: {
+  searchTerm: string;
+  statusFilter: string;
+  onClearFilters: () => void;
+}) => {
   const isFiltered = searchTerm || statusFilter !== "all";
 
   return (

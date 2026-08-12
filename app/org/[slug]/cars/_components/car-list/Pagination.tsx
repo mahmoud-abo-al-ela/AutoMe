@@ -23,6 +23,17 @@ const Pagination = ({
   onPageSizeChange,
   isDisabled,
   isMobileView,
+}: {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalCount: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (value: string) => void;
+  isDisabled: boolean;
+  /** Optional: the desktop call site does not pass it, so it is undefined
+   * there, which reads as false wherever it gates markup below. */
+  isMobileView?: boolean;
 }) => {
   return (
     <div className="w-full flex flex-col sm:flex-row justify-between items-center py-3 px-0 sm:px-4 border-t gap-4 sm:gap-0">
@@ -36,12 +47,13 @@ const Pagination = ({
         </span>
       </div>
       <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto">
+        {/* Radix's Select root renders no DOM node, so the className this was
+            given has never applied. Width is set on SelectTrigger. */}
         {!isMobileView && (
           <Select
             value={String(pageSize)}
             onValueChange={onPageSizeChange}
             disabled={isDisabled}
-            className="w-20 sm:w-28"
           >
             <SelectTrigger className="cursor-pointer h-8 text-xs">
               <SelectValue placeholder="Items per page" />
