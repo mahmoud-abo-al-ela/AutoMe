@@ -1,12 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
   getOrganizationProfile,
   updateOrganizationProfile,
 } from "@/actions/settings";
 import { getCities, getCountries, getStates } from "@/actions/locations";
+import type {
+  CityOption,
+  CountryOption,
+  StateOption,
+} from "@/lib/services/locations/country-state-city";
+import type { OrganizationProfileInput } from "@/lib/validations/schemas";
 
-const emptyProfile = {
+/**
+ * The form's own shape. `organizationProfileSchema` allows `null`/`undefined`
+ * on the optional fields, but controlled inputs need a string, so every field
+ * is normalized to `""` here. Still assignable to `OrganizationProfileInput`,
+ * which is what `updateOrganizationProfile` validates.
+ */
+export type OrganizationProfileFormState = {
+  [K in keyof OrganizationProfileInput]-?: string;
+};
+
+/** What `SearchableLocationSelect` consumes. */
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+const emptyProfile: OrganizationProfileFormState = {
   name: "",
   email: "",
   phone: "",
@@ -18,44 +40,54 @@ const emptyProfile = {
   country: "EG",
 };
 
-const normalizeProfile = (profile) => ({
+// `findOrganizationProfile` is a `findUnique`, so the profile can be null for a
+// deleted organization; fall back to the empty form rather than throwing.
+const normalizeProfile = (
+  // Loose on purpose: the stored organization columns are all nullable, and the
+  // record carries extra fields (id, slug, logo) the form does not use.
+  profile:
+    | Partial<Record<keyof OrganizationProfileFormState, string | null>>
+    | null
+    | undefined,
+): OrganizationProfileFormState => ({
   ...emptyProfile,
   ...profile,
-  email: profile.email || "",
-  phone: profile.phone || "",
-  website: profile.website || "",
-  address: profile.address || "",
-  description: profile.description || "",
-  city: profile.city || "",
-  region: profile.region || "",
-  country: profile.country || "EG",
+  name: profile?.name || "",
+  email: profile?.email || "",
+  phone: profile?.phone || "",
+  website: profile?.website || "",
+  address: profile?.address || "",
+  description: profile?.description || "",
+  city: profile?.city || "",
+  region: profile?.region || "",
+  country: profile?.country || "EG",
 });
 
 export function useOrganizationProfile() {
-  const [profile, setProfile] = useState(emptyProfile);
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
+  const [profile, setProfile] = useState<OrganizationProfileFormState>(emptyProfile);
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [states, setStates] = useState<StateOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [selectedStateCode, setSelectedStateCode] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const countryOptions = countries.map((country) => ({
+  const countryOptions: SelectOption[] = countries.map((country) => ({
     value: country.code,
     label: `${country.emoji ? `${country.emoji} ` : ""}${country.name}`,
   }));
-  const stateOptions = states.map((state) => ({
+  const stateOptions: SelectOption[] = states.map((state) => ({
     value: state.code,
     label: state.name,
   }));
-  const cityOptions = cities.map((city) => ({
+  const cityOptions: SelectOption[] = cities.map((city) => ({
     value: city.name,
     label: city.name,
   }));
 
-  const loadCities = async (countryCode, stateCode) => {
+  const loadCities = async (countryCode: string, stateCode: string) => {
     if (!countryCode || !stateCode) {
       setCities([]);
       return;
@@ -72,14 +104,16 @@ export function useOrganizationProfile() {
 
       setCities(response.data || []);
     } catch (error) {
-      toast.error(error.message || "Failed to load cities");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load cities",
+      );
       setCities([]);
     } finally {
       setLoadingCities(false);
     }
   };
 
-  const loadStates = async (countryCode, savedRegion = "") => {
+  const loadStates = async (countryCode: string, savedRegion = "") => {
     if (!countryCode) {
       setStates([]);
       setSelectedStateCode("");
@@ -110,7 +144,9 @@ export function useOrganizationProfile() {
         setCities([]);
       }
     } catch (error) {
-      toast.error(error.message || "Failed to load states");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load states",
+      );
       setStates([]);
       setSelectedStateCode("");
     } finally {
@@ -149,7 +185,11 @@ export function useOrganizationProfile() {
         setProfile(normalizedProfile);
         await loadStates(normalizedProfile.country, normalizedProfile.region);
       } catch (error) {
-        toast.error(error.message || "Failed to load organization profile");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to load organization profile",
+        );
       } finally {
         setLoading(false);
       }
@@ -159,11 +199,14 @@ export function useOrganizationProfile() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateField = (field, value) => {
+  const updateField = (
+    field: keyof OrganizationProfileFormState,
+    value: string,
+  ) => {
     setProfile((current) => ({ ...current, [field]: value }));
   };
 
-  const handleCountryChange = async (countryCode) => {
+  const handleCountryChange = async (countryCode: string) => {
     setProfile((current) => ({
       ...current,
       country: countryCode,
@@ -175,7 +218,7 @@ export function useOrganizationProfile() {
     await loadStates(countryCode);
   };
 
-  const handleStateChange = async (stateCode) => {
+  const handleStateChange = async (stateCode: string) => {
     const selectedState = states.find((state) => state.code === stateCode);
 
     setSelectedStateCode(stateCode);
@@ -188,7 +231,7 @@ export function useOrganizationProfile() {
     await loadCities(profile.country, stateCode);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
 
@@ -206,7 +249,11 @@ export function useOrganizationProfile() {
         response.message || "Organization profile updated successfully",
       );
     } catch (error) {
-      toast.error(error.message || "Failed to update organization profile");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to update organization profile",
+      );
     } finally {
       setSaving(false);
     }

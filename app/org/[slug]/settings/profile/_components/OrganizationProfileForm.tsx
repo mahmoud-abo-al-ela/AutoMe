@@ -6,6 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SearchableLocationSelect from "@/components/SearchableLocationSelect";
+import type { useOrganizationProfile } from "../useOrganizationProfile";
+
+// The page spreads the hook's result straight in, so deriving the props keeps
+// the two from drifting.
+type OrganizationProfileFormProps = Omit<
+  ReturnType<typeof useOrganizationProfile>,
+  "loading"
+>;
 
 export default function OrganizationProfileForm({
   profile,
@@ -20,7 +28,7 @@ export default function OrganizationProfileForm({
   handleStateChange,
   cityOptions,
   loadingCities,
-}) {
+}: OrganizationProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">

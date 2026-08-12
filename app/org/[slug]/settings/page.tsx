@@ -1,15 +1,22 @@
 import { Building2, Clock, Users } from "lucide-react";
 import React from "react";
-import SharedSettingCard from "./_components/SharedSettingCard";
+import type { Metadata } from "next";
+import SharedSettingCard, {
+  type SettingsPageLink,
+} from "./_components/SharedSettingCard";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Settings | AutoMe Admin",
   description: "Manage your settings",
 };
 
-const SettingsPage = async ({ params }) => {
+const SettingsPage = async ({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) => {
   const { slug } = await params;
-  const settingsPages = [
+  const settingsPages: SettingsPageLink[] = [
     {
       title: "Organization Profile",
       description: "Manage public dealership details and discovery location",

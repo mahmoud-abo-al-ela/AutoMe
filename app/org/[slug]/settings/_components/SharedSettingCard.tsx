@@ -8,8 +8,21 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 
-const SharedSettingCard = ({ settingsPages }) => {
+export interface SettingsPageLink {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  path: string;
+  color: string;
+}
+
+const SharedSettingCard = ({
+  settingsPages,
+}: {
+  settingsPages: SettingsPageLink[];
+}) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {settingsPages.map((page) => (

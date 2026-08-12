@@ -11,6 +11,23 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+export interface LocationOption {
+  value: string;
+  label: string;
+}
+
+export interface SearchableLocationSelectProps {
+  id?: string;
+  value?: string;
+  options: LocationOption[];
+  placeholder?: string;
+  searchPlaceholder?: string;
+  emptyMessage?: string;
+  disabled?: boolean;
+  onValueChange: (value: string) => void;
+  triggerClassName?: string;
+}
+
 export default function SearchableLocationSelect({
   id,
   value,
@@ -21,7 +38,7 @@ export default function SearchableLocationSelect({
   disabled,
   onValueChange,
   triggerClassName,
-}) {
+}: SearchableLocationSelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const selectedOption = options.find((option) => option.value === value);
@@ -30,7 +47,7 @@ export default function SearchableLocationSelect({
     ? options.filter((option) => option.label.toLowerCase().includes(normalizedQuery))
     : options;
 
-  const selectOption = (optionValue) => {
+  const selectOption = (optionValue: string) => {
     onValueChange(optionValue);
     setQuery("");
     setOpen(false);
