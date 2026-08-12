@@ -6,7 +6,13 @@ import { X, ImageIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
-export default function LogoUpload({ value, onChange, error }) {
+/**
+ * `compact` renders the control as a 48px row, the same height as an Input, so
+ * the logo occupies one cell of the form grid like every other field. The
+ * square tile it replaced was 112px tall and sat beside a 48px name field,
+ * leaving a block of dead space that no other row had.
+ */
+export default function LogoUpload({ value, onChange, error, compact = false }) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef(null);
@@ -88,21 +94,54 @@ export default function LogoUpload({ value, onChange, error }) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-green-200 bg-green-50"
+            className={
+              compact
+                ? "flex h-12 items-center gap-3 rounded-md border border-green-200 bg-green-50 px-3"
+                : "relative w-28 h-28 rounded-xl overflow-hidden border-2 border-green-200 bg-green-50"
+            }
           >
-            <Image
-              src={value}
-              alt="Organization logo"
-              fill
-              className="object-contain p-2"
-            />
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-            >
-              <X className="h-3 w-3" />
-            </button>
+            {compact ? (
+              <>
+                <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-white">
+                  <Image
+                    src={value}
+                    alt="Organization logo"
+                    fill
+                    className="object-contain p-0.5"
+                  />
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
+                  Logo added
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  aria-label="Remove logo"
+                  // A solid red fill on hover was heavier than the green row it
+                  // sits in; tinting the icon reads as destructive without
+                  // becoming the loudest thing on the form.
+                  className="shrink-0 cursor-pointer rounded-full p-1 text-green-700/70 transition-colors hover:bg-red-100 hover:text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <Image
+                  src={value}
+                  alt="Organization logo"
+                  fill
+                  className="object-contain p-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -110,7 +149,11 @@ export default function LogoUpload({ value, onChange, error }) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`relative border-2 border-dashed rounded-xl p-4 text-center transition-colors cursor-pointer ${
+            className={`relative border-2 border-dashed text-center transition-colors cursor-pointer ${
+              compact
+                ? "flex h-12 items-center rounded-md px-3"
+                : "rounded-xl p-4"
+            } ${
               error
                 ? "border-red-400 bg-red-50"
                 : dragActive
@@ -134,6 +177,16 @@ export default function LogoUpload({ value, onChange, error }) {
               <div className="flex items-center justify-center gap-3 py-2">
                 <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
                 <p className="text-sm text-gray-500">Uploading...</p>
+              </div>
+            ) : compact ? (
+              <div className="flex w-full items-center gap-2">
+                <ImageIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                <span className="text-sm font-medium text-gray-600">
+                  Add logo
+                </span>
+                <span className="ml-auto text-xs text-gray-400">
+                  PNG/JPG · 5MB
+                </span>
               </div>
             ) : (
               <div className="flex items-center gap-4">

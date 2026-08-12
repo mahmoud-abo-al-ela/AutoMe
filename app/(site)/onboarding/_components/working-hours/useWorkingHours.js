@@ -12,7 +12,6 @@ export function useWorkingHours({ formData, updateFormData, onNext }) {
         control,
         handleSubmit,
         watch,
-        setValue,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(workingHoursSchema),

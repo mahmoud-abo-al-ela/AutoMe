@@ -4,21 +4,24 @@ import * as webhookRepo from "@/lib/repositories/webhook";
 import type { StripeEventOf, WebhookHandlerResult } from "./subscription-events";
 
 /**
- * BUG (surfaced by this conversion, NOT fixed here): Invoice.subscription was
- * removed in the 2025 Basil API release — it now lives under
- * invoice.parent.subscription_details.subscription — so both handlers below
- * currently bail out with "no_subscription_id" on every invoice event.
- * Behaviour is preserved; the fix belongs in its own PR.
+ * The subscription an invoice belongs to moved from Invoice.subscription to
+ * Invoice.parent.subscription_details.subscription in the 2025 Basil API
+ * release. Verified against a live paid invoice: the old field is undefined and
+ * parent.type is "subscription_details".
+ *
+ * The subscription may itself be expanded, so narrow to an ID either way.
  */
-type InvoiceWithLegacySubscription = Stripe.Invoice & {
-    subscription?: string | null;
-};
+function subscriptionIdOf(invoice: Stripe.Invoice): string | null {
+    const subscription = invoice.parent?.subscription_details?.subscription;
+    if (!subscription) return null;
+    return typeof subscription === "string" ? subscription : subscription.id;
+}
 
 export async function handleInvoicePaid(
     event: StripeEventOf<Stripe.Invoice>
 ): Promise<WebhookHandlerResult> {
-    const invoice = event.data.object as InvoiceWithLegacySubscription;
-    const subscriptionId = invoice.subscription;
+    const invoice = event.data.object;
+    const subscriptionId = subscriptionIdOf(invoice);
 
     if (!subscriptionId) {
         return { success: false, reason: "no_subscription_id" };
@@ -49,8 +52,8 @@ export async function handleInvoicePaid(
 export async function handleInvoicePaymentFailed(
     event: StripeEventOf<Stripe.Invoice>
 ): Promise<WebhookHandlerResult> {
-    const invoice = event.data.object as InvoiceWithLegacySubscription;
-    const subscriptionId = invoice.subscription;
+    const invoice = event.data.object;
+    const subscriptionId = subscriptionIdOf(invoice);
 
     if (!subscriptionId) {
         return { success: false, reason: "no_subscription_id" };

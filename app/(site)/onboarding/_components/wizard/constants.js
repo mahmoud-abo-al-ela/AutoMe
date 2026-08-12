@@ -6,8 +6,11 @@ import {
 
 export const STEPS = [
     {
+        // Names stay short enough to hold one line at the indicator's width.
+        // "Organization Details" wrapped, which pushed its description a line
+        // below the other two and made the row look broken.
         id: 1,
-        name: "Organization Details",
+        name: "Organization",
         icon: Building2,
         description: "Basic info",
     },
@@ -21,6 +24,9 @@ export const DEFAULT_FORM_DATA = {
     email: "",
     phone: "",
     address: "",
+    country: "EG",
+    region: "",
+    city: "",
     logo: "",
     planId: null,
     workingHours: {

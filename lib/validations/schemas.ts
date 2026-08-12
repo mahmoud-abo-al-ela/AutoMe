@@ -50,6 +50,11 @@ export const organizationSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
+  // Structured location, captured in onboarding step 1 so an organization is
+  // filterable by city from the moment it is created.
+  country: z.string().optional().nullable(),
+  region: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
   logo: z.string().optional().nullable(),
   planId: z.string().min(1, "Plan ID is required"),
   workingHours: z.record(
@@ -138,14 +143,13 @@ export const dealershipReviewSchema = z.object({
 
 // ============ PAYMENT ============
 
-export const createSubscriptionSchema = z.object({
-  planId: z.string().min(1, "Plan is required"),
-  billingInterval: z.enum(["month", "year"]).default("month"),
-});
 
 export const createCheckoutSessionSchema = z.object({
   planId: z.string().min(1, "Plan is required"),
-  billingPeriod: z.enum(["month", "year"]),
+  // "monthly"/"yearly" is the onboarding UI's vocabulary — it is what the plan
+  // toggle holds, what is persisted in the onboarding session, and what
+  // createCheckoutSession compares against.
+  billingPeriod: z.enum(["monthly", "yearly"]),
   onboardingSessionId: z.string().min(1).optional().nullable(),
 });
 
@@ -172,7 +176,6 @@ export type RequestTestDriveInput = z.infer<typeof requestTestDriveSchema>;
 export type EditTestDriveInput = z.infer<typeof editTestDriveSchema>;
 export type UpdateTestDriveStatusInput = z.infer<typeof updateTestDriveStatusSchema>;
 export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
-export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
 export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 

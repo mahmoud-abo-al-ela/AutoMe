@@ -75,8 +75,12 @@ export const useCarInfoCard = (car) => {
       if (response.success) {
         setIsFavorite(!isFavorite);
         toast.success(response.message);
-      } else if (response.error === "Unauthorized") {
+        // `error` is an object, not a string — comparing it to "Unauthorized"
+        // was never true, so auth failures fell through silently.
+      } else if (response.error?.code === "AUTHENTICATION_ERROR") {
         toast.error("Please sign in to add cars to your wishlist");
+      } else {
+        toast.error(response.error?.message || "Failed to update wishlist");
       }
     } catch (error) {
       console.error("Failed to toggle wishlist", error);

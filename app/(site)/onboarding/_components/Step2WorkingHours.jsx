@@ -17,7 +17,7 @@ export default function Step2WorkingHours({
     useWorkingHours({ formData, updateFormData, onNext });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <WorkingHoursHeader />
 
       <WorkingHoursGrid workingHours={workingHours} control={control} />

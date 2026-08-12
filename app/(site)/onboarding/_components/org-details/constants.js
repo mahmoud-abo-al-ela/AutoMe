@@ -28,11 +28,14 @@ export const getInputFields = (values) => [
         value: values.phone,
     },
     {
+        // Optional: country/state/city below carry the structured location.
+        // This is just the street line, and not every dealership has one worth
+        // publishing at signup.
         id: "address",
-        label: "Address",
+        label: "Street Address",
         icon: MapPin,
-        placeholder: "123 Main Street, Cairo, Egypt",
-        required: true,
+        placeholder: "123 Main Street",
+        required: false,
         value: values.address,
     },
 ];

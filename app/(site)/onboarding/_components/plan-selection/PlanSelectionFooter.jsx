@@ -1,7 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import {
+    ArrowLeft,
+    ArrowRight,
+    Loader2,
+    ShieldCheck,
+    RefreshCw,
+    CreditCard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function PlanSelectionFooter({
@@ -21,6 +28,29 @@ export function PlanSelectionFooter({
                     Please select a plan to continue
                 </motion.p>
             )}
+
+            {/* Reassurance sits immediately above the CTA — this is the step
+                where people hesitate, and the objections are all about
+                commitment and payment safety. */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-600"
+            >
+                <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-green-600" />
+                    Secure checkout by Stripe
+                </span>
+                <span className="flex items-center gap-1.5">
+                    <RefreshCw className="h-4 w-4 text-green-600" />
+                    Cancel anytime
+                </span>
+                <span className="flex items-center gap-1.5">
+                    <CreditCard className="h-4 w-4 text-green-600" />
+                    No setup fees
+                </span>
+            </motion.div>
 
             {/* Help Text */}
             <motion.div

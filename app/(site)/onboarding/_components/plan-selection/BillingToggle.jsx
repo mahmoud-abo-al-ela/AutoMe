@@ -30,13 +30,18 @@ export function BillingToggle({ billingPeriod, onToggle, savingsPercentage }) {
             >
                 Yearly
             </span>
-            {billingPeriod === "yearly" && savingsPercentage > 0 && (
+            {/* Shown on both settings, not just once yearly is picked —
+                otherwise the incentive is invisible to anyone who never
+                flips the switch. */}
+            {savingsPercentage > 0 && (
                 <motion.span
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="ml-2 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"
                 >
-                    Save {savingsPercentage}%
+                    {billingPeriod === "yearly"
+                        ? `Saving ${savingsPercentage}%`
+                        : `Save ${savingsPercentage}%`}
                 </motion.span>
             )}
         </div>

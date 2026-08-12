@@ -74,9 +74,13 @@ export default function PlanComparison({
         pathname
       );
 
-      if (result.type === "redirect") {
-        window.location.href = result.url;
-      } else if (result.type === "updated") {
+      if (!result.success) {
+        throw new Error(result.error?.message || "Failed to change plan.");
+      }
+
+      if (result.data.type === "redirect") {
+        window.location.href = result.data.url;
+      } else if (result.data.type === "updated") {
         toast.success(`Successfully switched to ${selectedPlan.name} plan!`);
         setIsDialogOpen(false);
         window.location.reload();

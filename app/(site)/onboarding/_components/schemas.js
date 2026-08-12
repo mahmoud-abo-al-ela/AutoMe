@@ -10,8 +10,12 @@ export const orgDetailsSchema = z.object({
     email: z.string().min(1, "Email is required").email("Please enter a valid email"),
     phone: z.string().min(1, "Phone number is required").min
         (8, "Phone must be at least 8 digits"),
-    address: z.string().min
-        (1, "Address is required").min(5, "Address must be at least 5 characters"),
+    // Street line only — the structured location lives in country/region/city
+    // below, and not every dealership has a street address worth publishing.
+    address: z.string().max(240, "Address must be less than 240 characters").optional().or(z.literal("")),
+    country: z.string().min(1, "Country is required"),
+    region: z.string().min(1, "State / governorate is required"),
+    city: z.string().min(1, "City is required"),
     logo: z.string().min(1, "Please upload a logo for your dealership"),
 });
 

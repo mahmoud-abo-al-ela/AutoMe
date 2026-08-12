@@ -1,5 +1,10 @@
 import type Stripe from "stripe";
-import type { DayOfWeek, Organization, SubscriptionStatus } from "@/lib/generated/prisma";
+import type {
+  DayOfWeek,
+  Organization,
+  Prisma,
+  SubscriptionStatus,
+} from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { sendWelcomeEmail } from "@/lib/services/notification";
@@ -9,25 +14,18 @@ import type { OrganizationInput } from "@/lib/validations/schemas";
 
 export type WorkingHoursInput = NonNullable<OrganizationInput["workingHours"]>;
 
-/**
- * The Stripe-derived facts the subscription row is built from. `period_start`
- * and `period_end` moved off Subscription onto its items in the 2025 Basil API
- * release, so they are optional here and simply fall back to a 30-day window —
- * matching what this code already did. Reconciling that is a separate PR.
- */
+/** The Stripe-derived facts the subscription row is built from. */
 export interface OnboardingStripeData {
   subscriptionId?: string | null;
   customerId?: string | null;
   checkoutSessionId?: string | null;
+  /**
+   * Accepted because callers have it to hand, but NOT persisted: Subscription
+   * has no stripePaymentIntentId column. Storing it would need a migration.
+   */
   paymentIntentId?: string | null;
   trialDays?: number | null;
-  stripeSubscription?:
-    | (Pick<Stripe.Subscription, "status"> & {
-        trial_end?: number | null;
-        current_period_start?: number | null;
-        current_period_end?: number | null;
-      })
-    | null;
+  stripeSubscription?: Stripe.Subscription | null;
 }
 
 export interface CreateOrganizationInput {
@@ -36,6 +34,9 @@ export interface CreateOrganizationInput {
   email: string;
   phone?: string | null;
   address?: string | null;
+  country?: string | null;
+  region?: string | null;
+  city?: string | null;
   logoUrl?: string | null;
   workingHours?: WorkingHoursInput | null;
   userId: string;
@@ -54,6 +55,9 @@ export async function createOrganizationInTransaction({
   email,
   phone,
   address,
+  country,
+  region,
+  city,
   logoUrl,
   workingHours,
   userId,
@@ -70,12 +74,18 @@ export async function createOrganizationInTransaction({
         email,
         phone: phone || null,
         address: address || null,
+        // Prisma defaults country to "EG"; passing null would override that.
+        ...(country ? { country } : {}),
+        region: region || null,
+        city: city || null,
         logo: logoUrl || null,
       },
     });
 
     if (workingHours) {
-      const workingHoursData = Object.entries(workingHours).map(
+      const workingHoursData: Prisma.WorkingHoursCreateManyInput[] = Object.entries(
+        workingHours
+      ).map(
         ([day, hours]) => ({
           organizationId: org.id,
           // Form keys are lowercase day names, so the uppercased key is the
@@ -114,22 +124,25 @@ export async function createOrganizationInTransaction({
       if (stripeData.stripeSubscription.trial_end) {
         trialEndsAt = new Date(stripeData.stripeSubscription.trial_end * 1000);
       }
-      if (stripeData.stripeSubscription.current_period_start) {
-        currentPeriodStart = new Date(
-          stripeData.stripeSubscription.current_period_start * 1000
-        );
-      }
-      if (stripeData.stripeSubscription.current_period_end) {
-        currentPeriodEnd = new Date(
-          stripeData.stripeSubscription.current_period_end * 1000
-        );
+      // The billing period lives on the subscription's items since the 2025
+      // Basil API release; every item shares the same period. Falls back to the
+      // 30-day window above if the subscription somehow has no items.
+      const item = stripeData.stripeSubscription.items?.data?.[0];
+      if (item) {
+        currentPeriodStart = new Date(item.current_period_start * 1000);
+        currentPeriodEnd = new Date(item.current_period_end * 1000);
       }
     } else if (stripeData.trialDays && stripeData.trialDays > 0) {
       trialEndsAt = new Date(now.getTime() + stripeData.trialDays * 24 * 60 * 60 * 1000);
       status = "TRIALING";
     }
 
-    const subscriptionData = {
+    // Typed explicitly: this is passed to tx.subscription.create as a variable,
+    // and excess-property checking only fires on fresh object literals at the
+    // call site. Without the annotation a column that does not exist compiles
+    // fine and throws at runtime — which is exactly what stripePaymentIntentId
+    // did (Subscription has no such column; persisting it needs a migration).
+    const subscriptionData: Prisma.SubscriptionUncheckedCreateInput = {
       organizationId: org.id,
       planId,
       status,
@@ -137,7 +150,6 @@ export async function createOrganizationInTransaction({
       stripeSubscriptionId: stripeData.subscriptionId || null,
       stripeCustomerId: stripeData.customerId || null,
       stripeCheckoutSessionId: stripeData.checkoutSessionId || null,
-      stripePaymentIntentId: stripeData.paymentIntentId || null,
       currentPeriodStart,
       currentPeriodEnd,
     };

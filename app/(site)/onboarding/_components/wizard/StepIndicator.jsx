@@ -13,7 +13,7 @@ export default function StepIndicator({ step, index, currentStep }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
-            className={`flex flex-col items-center gap-2 flex-1 ${isCurrent
+            className={`flex w-24 shrink-0 flex-col items-center gap-2 sm:w-32 ${isCurrent
                     ? "text-blue-600"
                     : isCompleted
                         ? "text-green-600"
@@ -47,7 +47,7 @@ export default function StepIndicator({ step, index, currentStep }) {
                 )}
             </motion.div>
             <div className="text-center">
-                <span className="text-xs sm:text-sm font-semibold block">
+                <span className="text-xs sm:text-sm font-semibold block whitespace-nowrap">
                     {step.name}
                 </span>
                 <span className="text-[10px] sm:text-xs text-gray-500 block">

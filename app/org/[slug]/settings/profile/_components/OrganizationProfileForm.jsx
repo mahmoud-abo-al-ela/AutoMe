@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import SearchableLocationSelect from "./SearchableLocationSelect";
+import SearchableLocationSelect from "@/components/SearchableLocationSelect";
 
 export default function OrganizationProfileForm({
   profile,

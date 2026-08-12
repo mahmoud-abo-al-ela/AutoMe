@@ -20,6 +20,7 @@ export default function SearchableLocationSelect({
   emptyMessage,
   disabled,
   onValueChange,
+  triggerClassName,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -45,9 +46,11 @@ export default function SearchableLocationSelect({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-between font-normal"
+          className={cn("w-full justify-between font-normal", triggerClassName)}
         >
-          <span className="truncate">
+          {/* An unselected trigger read as filled-in because the placeholder
+              inherited the same colour as a real value. */}
+          <span className={cn("truncate", !selectedOption && "text-muted-foreground")}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

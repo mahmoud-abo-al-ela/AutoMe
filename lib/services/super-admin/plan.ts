@@ -19,6 +19,7 @@ export interface PlanFormInput {
   maxMembers?: string | number | null;
   maxImagesPerCar?: string | number | null;
   auditLogRetentionDays?: string | number | null;
+  trialDays?: string | number | null;
   features?: Prisma.InputJsonValue;
 }
 
@@ -43,6 +44,7 @@ export async function updatePlan(planId: string, data: PlanFormInput) {
     maxMembers: toInt(data.maxMembers),
     maxImagesPerCar: toInt(data.maxImagesPerCar),
     auditLogRetentionDays: data.auditLogRetentionDays ? toInt(data.auditLogRetentionDays) : null,
+    trialDays: toInt(data.trialDays),
     features: data.features || {},
   };
 
@@ -89,6 +91,7 @@ export async function createPlan(data: PlanFormInput) {
     maxMembers: toInt(data.maxMembers),
     maxImagesPerCar: toInt(data.maxImagesPerCar),
     auditLogRetentionDays: data.auditLogRetentionDays ? toInt(data.auditLogRetentionDays) : null,
+    trialDays: toInt(data.trialDays),
     features: data.features || {},
   };
 

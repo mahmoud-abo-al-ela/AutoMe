@@ -1,9 +1,8 @@
 "use client";
 
 import {
-  OrgDetailsHeader,
   FormFields,
-  SlugStatus,
+  LocationFields,
   SlugPreview,
   OrgDetailsFooter,
   LogoUpload,
@@ -24,6 +23,8 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     watchedEmail,
     watchedPhone,
     watchedAddress,
+    location,
+    updateLocation,
     logo,
     setLogo,
     logoError,
@@ -36,29 +37,49 @@ export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
     address: watchedAddress,
   });
 
+  const [nameField, emailField, phoneField, addressField] = inputFields;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <OrgDetailsHeader />
+      {/* One grid for the whole step. Every control is 48px tall and every
+          cell is half the width, so each row lines up with the one above it —
+          the logo used to be a 112px tile in a flex row of its own, which left
+          a block of empty space no other row had. */}
+      <div className="grid items-start gap-6 sm:grid-cols-2">
+        <FormFields
+          fields={[nameField]}
+          register={register}
+          errors={errors}
+          bare
+          footerSlot={<SlugPreview slug={generatedSlug} status={slugStatus} />}
+        />
+        <LogoUpload value={logo} onChange={setLogo} error={logoError} compact />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        {/* Logo Upload - Left Column */}
-        <div>
-          <LogoUpload value={logo} onChange={setLogo} error={logoError} />
-        </div>
-
-        {/* Form Fields - Right Column */}
-        <div>
-          <FormFields
-            fields={inputFields}
-            register={register}
-            errors={errors}
-            slugStatus={slugStatus}
-            SlugStatusComponent={SlugStatus}
-          />
-        </div>
+        <FormFields
+          fields={[emailField, phoneField]}
+          register={register}
+          errors={errors}
+          bare
+        />
+        <LocationFields value={location} onChange={updateLocation} />
+        <FormFields
+          fields={[addressField]}
+          register={register}
+          errors={errors}
+          bare
+        />
       </div>
 
-      <OrgDetailsFooter disabled={isDisabled} />
+      <OrgDetailsFooter
+        disabled={isDisabled}
+        hint={
+          slugStatus === "checking"
+            ? "Checking name availability…"
+            : slugStatus === "taken"
+              ? "Choose an available dealership name"
+              : null
+        }
+      />
     </form>
   );
 }

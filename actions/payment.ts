@@ -5,7 +5,6 @@ import { withAuth } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import {
-  createSubscriptionSchema,
   createCheckoutSessionSchema,
 } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -40,28 +39,6 @@ function handleStripeError(error: unknown): never {
 
   throw error;
 }
-
-export const createSubscription = withAuth(
-  async (ctx, planId: string, billingInterval: string = "month") => {
-    await enforceRateLimit();
-    const validated = validateAction(createSubscriptionSchema, {
-      planId,
-      billingInterval,
-    });
-
-    try {
-      const result = await paymentService.createSubscription(
-        ctx.user,
-        validated.planId,
-        validated.billingInterval
-      );
-
-      return createSuccessResponse(result);
-    } catch (error) {
-      handleStripeError(error);
-    }
-  }
-);
 
 export const createCheckoutSession = withAuth(
   async (
