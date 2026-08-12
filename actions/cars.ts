@@ -68,8 +68,10 @@ Rules:
 - No explanations
 - All fields must exist
 - If unsure, make a reasonable estimate
-- Price MUST be in USD ($), convert from any other currency
-- Price format: just the number without currency symbol (e.g., "45000" not "45000 USD")
+- Price MUST be the listing price in Egyptian pounds (EGP). Do NOT convert it to
+  any other currency. If the image shows a price in another currency, report the
+  number exactly as shown without converting it.
+- Price format: just the number without currency symbol (e.g., "850000" not "850000 EGP")
 
 Schema:
 {
@@ -77,7 +79,7 @@ Schema:
   "model": "string",
   "year": number,
   "color": "string",
-  "price": "string (USD amount without symbol)",
+  "price": "string (EGP amount without symbol, not converted)",
   "mileage": "string",
   "bodyType": "string",
   "fuelType": "string",

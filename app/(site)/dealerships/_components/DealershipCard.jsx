@@ -1,4 +1,5 @@
 "use client";
+import { formatCarPrice } from "@/lib/utils/currency";
 
 import { useState } from "react";
 import { MapPin, Car, Building2 } from "lucide-react";
@@ -8,12 +9,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { StarRating } from "@/components/common/StarRating";
 import { getOpenStatus } from "../[slug]/_components/OpenStatusBadge";
 
-const formatPrice = (value) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-    }).format(value);
+const formatPrice = (value) => formatCarPrice(value);
 
 const DealershipCard = ({ dealership, index = 0 }) => {
     const {

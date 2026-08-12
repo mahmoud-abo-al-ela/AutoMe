@@ -1,4 +1,5 @@
 "use client";
+import { formatCarPrice } from "@/lib/utils/currency";
 
 import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -101,18 +102,8 @@ const AnalyticsCards = ({
     inventoryTrend = 100; // infinite growth if last month was 0 but this month is > 0
   }
 
-  // BUG (surfaced by this conversion, NOT fixed here): AutoMe prices are EGP,
-  // but these two cards format them as USD, so "Total Inventory Value" and
-  // "Average Car Price" render a dollar sign against Egyptian-pound figures.
-  // Changing the currency changes what every dealer sees, so it belongs in its
-  // own commit alongside the other price formatters.
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(val);
-  };
+  // These aggregate Car.price, so they are EGP like every other car figure.
+  const formatCurrency = (val: number) => formatCarPrice(val);
 
   const cards = [
     {

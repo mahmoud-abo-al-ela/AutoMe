@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatCarPrice } from "@/lib/utils/currency";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
@@ -27,11 +28,7 @@ const MobileStickyBar = ({ car, formatPrice }) => {
 
     const priceFormatted = formatPrice
         ? formatPrice(car.price)
-        : new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-            maximumFractionDigits: 0,
-        }).format(car.price);
+        : formatCarPrice(car.price);
 
     return (
         <>

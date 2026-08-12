@@ -1,11 +1,7 @@
 // Pure helpers for the dealership inventory filter bar.
+import { formatCarPrice } from "@/lib/utils/currency";
 
-export const formatPrice = (price) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(price);
+export const formatPrice = (price) => formatCarPrice(price);
 
 /**
  * Build the active-filter chip descriptors from the current filters.

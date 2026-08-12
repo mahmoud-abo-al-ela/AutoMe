@@ -1,6 +1,7 @@
 "use client";
 
 import { Filter, RotateCcw, CircleDollarSign, Calendar, Gauge } from "lucide-react";
+import { formatCarPrice } from "@/lib/utils/currency";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Accordion } from "@/components/ui/accordion";
@@ -17,12 +18,7 @@ import {
   SeatsFilter,
 } from "./filter-components";
 
-const formatPrice = (v) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(v || 0);
+const formatPrice = (v) => formatCarPrice(v || 0);
 
 const formatMileage = (v) => `${new Intl.NumberFormat("en-US").format(v || 0)} mi`;
 

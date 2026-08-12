@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { formatCarPrice } from "@/lib/utils/currency";
 import { toggleWishlist } from "@/actions/cars-listing";
 import { checkExistingTestDrive } from "@/actions/test-drive";
 import { toast } from "sonner";
@@ -142,13 +143,7 @@ export const useCarInfoCard = (car) => {
     router.push(`/messages?carId=${car.id}`);
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  const formatPrice = (price) => formatCarPrice(price);
 
   return {
     isLoading,
