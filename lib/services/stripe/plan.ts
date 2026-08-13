@@ -1,6 +1,20 @@
 import Stripe from "stripe";
 import { logError } from "@/lib/utils/errors";
 
+/**
+ * The currency Stripe charges subscriptions in.
+ *
+ * AutoMe is Egypt-only, so this is EGP; it must stay in step with
+ * `formatPlanPrice` in lib/utils/currency.ts, or the product displays one
+ * currency while Stripe bills another.
+ *
+ * Stripe Price objects are immutable in currency: changing this does not
+ * convert existing prices, it only affects prices created from here on.
+ * `updateStripePrice` below archives a price whose currency no longer matches
+ * and creates a replacement, which is what `pnpm db:sync-plans` relies on.
+ */
+export const PLAN_CURRENCY = "egp";
+
 /** The plan fields these helpers read when creating/updating Stripe resources. */
 export interface StripePlanInput {
     /**
@@ -70,7 +84,7 @@ export async function createStripePrice(
         const price = await stripe.prices.create({
             product: productId,
             unit_amount: amount,
-            currency: "usd",
+            currency: PLAN_CURRENCY,
             recurring: {
                 interval: interval,
             },
@@ -122,12 +136,20 @@ export async function updateStripePrice(
         if (existingPriceId) {
             const existingPrice = await stripe.prices.retrieve(existingPriceId);
 
-            // If amount is the same, no need to create a new price
-            if (existingPrice.unit_amount === amount) {
+            // Currency is part of "has this price changed", not just the amount.
+            // Comparing unit_amount alone meant a currency switch that kept the
+            // same integer returned the old price and reported success, so the
+            // sync silently did nothing.
+            if (
+                existingPrice.unit_amount === amount &&
+                existingPrice.currency === PLAN_CURRENCY
+            ) {
                 return existingPriceId;
             }
 
-            // Archive the old price
+            // Archive the old price. This does NOT move existing subscriptions
+            // off it — they keep billing the archived price until migrated;
+            // archiving only stops new subscriptions using it.
             await stripe.prices.update(existingPriceId, { active: false });
         }
 
@@ -135,7 +157,7 @@ export async function updateStripePrice(
         const newPrice = await stripe.prices.create({
             product: productId,
             unit_amount: amount,
-            currency: "usd",
+            currency: PLAN_CURRENCY,
             recurring: {
                 interval: interval,
             },

@@ -6,10 +6,10 @@
  * Intl.NumberFormat with `currency: "USD"`, so every price in the product
  * rendered a dollar sign against a pound figure.
  *
- * NOTE: plan/subscription prices are deliberately NOT formatted through here.
- * Stripe charges those in USD (lib/services/stripe/plan.ts), so displaying them
- * as EGP would misstate what the customer is billed. Whether plan pricing
- * should move to EGP is a business decision, not a formatting one.
+ * Plan/subscription prices are EGP too, as of the move off the USD peg — see
+ * `formatPlanPrice` below and `PLAN_CURRENCY` in lib/services/stripe/plan.ts,
+ * which must agree with it or the product shows one currency and Stripe charges
+ * another.
  */
 
 /** Currency of record for car prices. Car.priceCurrency defaults to this. */
@@ -45,4 +45,20 @@ export function formatCarPrice(
       maximumFractionDigits: 0,
     }
   ).format(amount);
+}
+
+/**
+ * Format a plan price for display.
+ *
+ * Takes **minor units** (`Plan.monthlyPrice` / `Plan.yearlyPrice` are stored
+ * that way) and converts, so no call site does its own `/ 100`. Every plan
+ * price in the product — onboarding, org billing, super-admin — goes through
+ * here, and it must stay in step with `PLAN_CURRENCY` in
+ * lib/services/stripe/plan.ts, which is what Stripe actually charges.
+ */
+export function formatPlanPrice(
+  minorUnits: number,
+  locale: "en" | "ar" = "en"
+): string {
+  return formatCarPrice(minorToMajor(minorUnits), locale);
 }

@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { CreditCard, Calendar, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatPlanPrice } from "@/lib/utils/currency";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -93,9 +94,9 @@ export default function OrgSubscription({
               </div>
               <div className="text-2xl font-bold">
                 {/* currentPlan comes from a find() and can be undefined, in
-                    which case this has always rendered "$NaN". Cast rather
-                    than defaulted, so that pre-existing path is unchanged. */}
-                ${((currentPlan?.monthlyPrice as number) / 100).toFixed(2)}
+                    which case this has always rendered NaN. Cast rather than
+                    defaulted, so that pre-existing path is unchanged. */}
+                {formatPlanPrice(currentPlan?.monthlyPrice as number)}
                 <span className="text-sm font-normal text-muted-foreground">
                   /month
                 </span>
@@ -138,7 +139,7 @@ export default function OrgSubscription({
                 <SelectContent>
                   {plans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.id}>
-                      {plan.name} - ${(plan.monthlyPrice / 100).toFixed(0)}/mo
+                      {plan.name} - {formatPlanPrice(plan.monthlyPrice)}/mo
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -171,7 +172,7 @@ export default function OrgSubscription({
               <SelectContent>
                 {plans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
-                    {plan.name} - ${(plan.monthlyPrice / 100).toFixed(0)}/mo
+                    {plan.name} - {formatPlanPrice(plan.monthlyPrice)}/mo
                   </SelectItem>
                 ))}
               </SelectContent>

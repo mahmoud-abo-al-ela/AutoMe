@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPlanPrice } from "@/lib/utils/currency";
 import {
   Check,
   X,
@@ -100,12 +101,12 @@ export default function PlanCard({
         </div>
         <div className="mt-4">
           <span className="text-4xl font-bold">
-            ${plan.monthlyPrice === 0 ? "0" : (plan.monthlyPrice / 100).toFixed(2)}
+            {formatPlanPrice(plan.monthlyPrice)}
           </span>
           <span className="text-muted-foreground">/month</span>
           {plan.monthlyPrice > 0 && plan.yearlyPrice > 0 && (
             <div className="text-sm text-muted-foreground">
-              or ${(plan.yearlyPrice / 100).toFixed(2)}/year (save{" "}
+              or {formatPlanPrice(plan.yearlyPrice)}/year (save{" "}
               {Math.round(
                 (1 - plan.yearlyPrice / (plan.monthlyPrice * 12)) * 100
               )}

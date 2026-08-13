@@ -1,12 +1,10 @@
 import { Car, Shield, Star, Zap } from "lucide-react";
+import { formatPlanPrice } from "@/lib/utils/currency";
 
+/** @param {number} price Minor units (piastres). */
 export const formatPrice = (price) => {
     if (price === 0) return "Free";
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-    }).format(price / 100);
+    return formatPlanPrice(price);
 };
 
 export const getFeatures = (plan) => {

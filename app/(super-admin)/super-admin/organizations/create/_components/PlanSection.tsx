@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText } from "lucide-react";
+import { formatPlanPrice } from "@/lib/utils/currency";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -55,7 +56,7 @@ export default function PlanSection({
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{plan.name}</span>
                       <span className="text-muted-foreground">
-                        - ${(plan.monthlyPrice / 100).toFixed(0)}/mo
+                        - {formatPlanPrice(plan.monthlyPrice)}/mo
                       </span>
                     </div>
                   </SelectItem>
