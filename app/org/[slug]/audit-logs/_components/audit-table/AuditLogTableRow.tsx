@@ -5,12 +5,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, Settings } from "lucide-react";
 import { ACTION_COLORS, ENTITY_ICONS } from "./constants";
 import { formatActionLabel, formatDate } from "./utils";
+import type { AuditLogWithUser } from "../../_lib/audit-types";
 
-export default function AuditLogTableRow({ log, onView }) {
+interface AuditLogTableRowProps {
+  log: AuditLogWithUser;
+  onView: (log: AuditLogWithUser) => void;
+}
+
+export default function AuditLogTableRow({
+  log,
+  onView,
+}: AuditLogTableRowProps) {
   const EntityIcon = ENTITY_ICONS[log.entityType] || Settings;
 
   // Get initials for avatar fallback
-  const getInitials = (name) => {
+  const getInitials = (name: string) => {
     return name
       ?.split(" ")
       .map((n) => n[0])
@@ -44,7 +53,10 @@ export default function AuditLogTableRow({ log, onView }) {
       <TableCell>
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={log.user?.imageUrl} alt={log.user?.name} />
+            <AvatarImage
+              src={log.user?.imageUrl ?? undefined}
+              alt={log.user?.name ?? undefined}
+            />
             <AvatarFallback>
               {getInitials(log.user?.name || "U")}
             </AvatarFallback>

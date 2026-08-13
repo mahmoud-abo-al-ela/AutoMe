@@ -1,11 +1,11 @@
-export const formatActionLabel = (action) => {
+export const formatActionLabel = (action: string) => {
   return action
     .replace(/_/g, " ")
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-export const formatDate = (date) => {
+export const formatDate = (date: Date | string) => {
   return new Date(date).toLocaleString("en-US", {
     year: "numeric",
     month: "short",

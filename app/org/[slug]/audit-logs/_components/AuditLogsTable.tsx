@@ -14,14 +14,26 @@ import AuditLogDetailsDialog from "./audit-table/AuditLogDetailsDialog";
 import AuditLogsPagination from "./audit-table/AuditLogsPagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ScrollText } from "lucide-react";
+import type {
+  AuditLogWithUser,
+  AuditLogsPageInfo,
+} from "../_lib/audit-types";
 
-export default function AuditLogsTable({ logs, pagination }) {
+interface AuditLogsTableProps {
+  logs: AuditLogWithUser[];
+  pagination: AuditLogsPageInfo;
+}
+
+export default function AuditLogsTable({
+  logs,
+  pagination,
+}: AuditLogsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { slug } = useParams();
-  const [selectedLog, setSelectedLog] = useState(null);
+  const [selectedLog, setSelectedLog] = useState<AuditLogWithUser | null>(null);
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
     router.push(`/org/${slug}/audit-logs?${params.toString()}`);

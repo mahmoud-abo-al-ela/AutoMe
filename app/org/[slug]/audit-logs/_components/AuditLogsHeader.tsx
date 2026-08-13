@@ -8,8 +8,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { Plan } from "@/lib/generated/prisma";
 
-export default function AuditLogsHeader({ retentionInfo }) {
+interface AuditLogsHeaderProps {
+  /** The organization's plan, or null/undefined when it has no subscription. */
+  retentionInfo?: Pick<Plan, "auditLogRetentionDays"> | null;
+}
+
+export default function AuditLogsHeader({
+  retentionInfo,
+}: AuditLogsHeaderProps) {
   const getRetentionText = () => {
     if (!retentionInfo) return "90 days (Starter Plan)";
 

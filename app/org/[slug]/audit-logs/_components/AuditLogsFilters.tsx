@@ -20,8 +20,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useEffect, useTransition } from "react";
+import type { DateRange } from "react-day-picker";
+import type { AuditLogFilters } from "../_lib/audit-types";
+import type { AuditAction, EntityType } from "@/lib/generated/prisma";
 
-const actionOptions = [
+// Typed against the Prisma enums, so an option that no action can ever carry
+// fails to compile instead of quietly filtering to zero rows.
+const actionOptions: {
+  value: AuditAction | "all";
+  label: string;
+  type?: EntityType;
+}[] = [
   { value: "all", label: "All Actions" },
   { value: "CAR_CREATED", label: "Car Created", type: "CAR" },
   { value: "CAR_UPDATED", label: "Car Updated", type: "CAR" },
@@ -33,21 +42,27 @@ const actionOptions = [
   { value: "MEMBER_INVITED", label: "Member Invited", type: "MEMBERSHIP" },
   { value: "MEMBER_ROLE_CHANGED", label: "Member Role Changed", type: "MEMBERSHIP" },
   { value: "MEMBER_REMOVED", label: "Member Removed", type: "MEMBERSHIP" },
-  { value: "SETTINGS_UPDATED", label: "Settings Updated", type: "SETTINGS" },
+  {
+    value: "ORG_SETTINGS_UPDATED",
+    label: "Settings Updated",
+    type: "ORGANIZATION",
+  },
   { value: "ORG_UPDATED", label: "Org Updated", type: "ORGANIZATION" },
-  { value: "CONVERSATION_CREATED", label: "Conversation Created", type: "CONVERSATION" },
 ];
 
-const entityTypeOptions = [
+const entityTypeOptions: { value: EntityType | "all"; label: string }[] = [
   { value: "all", label: "All Types" },
   { value: "CAR", label: "Car" },
   { value: "TEST_DRIVE", label: "Test Drive" },
   { value: "MEMBERSHIP", label: "Membership" },
   { value: "ORGANIZATION", label: "Organization" },
-  { value: "CONVERSATION", label: "Conversation" },
 ];
 
-export default function AuditLogsFilters({ currentFilters }) {
+export default function AuditLogsFilters({
+  currentFilters,
+}: {
+  currentFilters: AuditLogFilters;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { slug } = useParams();
@@ -55,7 +70,7 @@ export default function AuditLogsFilters({ currentFilters }) {
 
   // Local state for debounced inputs
   const [userIdInput, setUserIdInput] = useState(currentFilters.userId || "");
-  const [date, setDate] = useState({
+  const [date, setDate] = useState<DateRange | undefined>({
     from: currentFilters.startDate ? new Date(currentFilters.startDate) : undefined,
     to: currentFilters.endDate ? new Date(currentFilters.endDate) : undefined,
   });
@@ -68,9 +83,13 @@ export default function AuditLogsFilters({ currentFilters }) {
       }
     }, 500);
     return () => clearTimeout(timer);
+    // Deliberately keyed on the typed value alone: `updateFilter` is recreated
+    // every render, and re-running on `currentFilters.userId` would fire the
+    // debounce again on the navigation it just caused.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userIdInput]);
 
-  const updateFilter = (key, value) => {
+  const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
     if (value && value !== "all") {
       params.set(key, value);
@@ -96,7 +115,7 @@ export default function AuditLogsFilters({ currentFilters }) {
     return option.type === currentFilters.entityType;
   });
 
-  const handleDateSelect = (newDate) => {
+  const handleDateSelect = (newDate: DateRange | undefined) => {
     setDate(newDate);
     if (newDate?.from) {
       const params = new URLSearchParams(searchParams);

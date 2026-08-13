@@ -16,7 +16,20 @@ import {
   Shield,
 } from "lucide-react";
 
-const DetailItem = ({ icon: Icon, label, value, mono = false }) => (
+import type { LucideIcon } from "lucide-react";
+import type { AuditLogWithUser } from "../../_lib/audit-types";
+
+const DetailItem = ({
+  icon: Icon,
+  label,
+  value,
+  mono = false,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: React.ReactNode;
+  mono?: boolean;
+}) => (
   <div className="flex flex-col gap-1">
     <div className="flex items-center gap-2 text-muted-foreground">
       <Icon className="h-3.5 w-3.5" />
@@ -34,7 +47,7 @@ const DetailItem = ({ icon: Icon, label, value, mono = false }) => (
   </div>
 );
 
-const JsonViewer = ({ data, title }) => {
+const JsonViewer = ({ data, title }: { data: unknown; title: string }) => {
   if (!data) return null;
   return (
     <div className="space-y-2">
@@ -53,8 +66,27 @@ const JsonViewer = ({ data, title }) => {
   );
 };
 
-export default function AuditLogDetailsDialog({ log, open, onOpenChange }) {
+interface AuditLogDetailsDialogProps {
+  log: AuditLogWithUser | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function AuditLogDetailsDialog({
+  log,
+  open,
+  onOpenChange,
+}: AuditLogDetailsDialogProps) {
   if (!log) return null;
+
+  // `metadata` is a Prisma Json column, so it can be any JSON value; only a
+  // plain object carries the fields this dialog reads.
+  const metadata =
+    log.metadata && typeof log.metadata === "object" && !Array.isArray(log.metadata)
+      ? (log.metadata as Record<string, unknown>)
+      : null;
+  const ipAddress =
+    typeof metadata?.ipAddress === "string" ? metadata.ipAddress : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,11 +120,11 @@ export default function AuditLogDetailsDialog({ log, open, onOpenChange }) {
               value={log.entityId}
               mono
             />
-            {log.metadata?.ipAddress && (
+            {ipAddress && (
               <DetailItem
                 icon={Globe}
                 label="IP Address"
-                value={log.metadata.ipAddress}
+                value={ipAddress}
                 mono
               />
             )}

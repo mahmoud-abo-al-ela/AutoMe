@@ -8,16 +8,24 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+interface AuditLogsPaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalEntries: number;
+  limit: number;
+  onPageChange: (page: number) => void;
+}
+
 export default function AuditLogsPagination({
   currentPage,
   totalPages,
   totalEntries,
   limit,
   onPageChange,
-}) {
+}: AuditLogsPaginationProps) {
   // Helper to generate page numbers
   const getPageNumbers = () => {
-    const pages = [];
+    const pages: (number | "...")[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
