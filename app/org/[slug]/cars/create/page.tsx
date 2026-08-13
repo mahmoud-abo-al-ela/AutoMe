@@ -1,7 +1,8 @@
 import React from "react";
+import type { Metadata } from "next";
 import CreateCarForm from "../_components/car-forms/CreateCarForm";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Create Car | AutoMe Admin",
   description: "Create a new car",
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import ManualCarForm from "../../_components/car-forms/manual/ManualCarForm";
 import AICarForm from "../../_components/car-forms/ai/AICarForm";
 import { ArrowLeft, Lock } from "lucide-react";
@@ -9,11 +9,20 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { getCarPlanLimits } from "@/actions/cars";
 
+const readParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
 const CreateCarByModePage = () => {
   const params = useParams();
   const router = useRouter();
-  const { mode, slug } = params;
-  const [aiEnabled, setAiEnabled] = useState(null);
+  const slug = readParam(params.slug);
+  // Anything that is not "manual" used to fall through to the AI form, which
+  // also skipped the plan check below - only `mode === "ai"` ran it. The server
+  // action stayed gated, so this was a UI-only bypass, but it offered the AI
+  // uploader to plans that cannot use it.
+  const rawMode = readParam(params.mode);
+  const mode = rawMode === "ai" || rawMode === "manual" ? rawMode : null;
+  const [aiEnabled, setAiEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (mode === "ai") {
@@ -36,6 +45,10 @@ const CreateCarByModePage = () => {
   const goBack = () => {
     router.back();
   };
+
+  if (!mode) {
+    notFound();
+  }
 
   // If AI mode is selected but not enabled by plan, show upgrade message
   if (mode === "ai" && aiEnabled === false) {

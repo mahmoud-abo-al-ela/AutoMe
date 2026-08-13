@@ -15,8 +15,25 @@ import {
     StatusSection,
 } from "../sections";
 import { BODY_TYPES, FUEL_TYPES, TRANSMISSIONS } from "@/lib/constants/car-options";
+import type { useCarForm } from "@/hooks/use-car-form";
 
-const getThemeColors = (isAIMode) => {
+/**
+ * `CarFormShared` spreads the hook's result straight in, so the form-shaped
+ * props are derived from it rather than restated.
+ */
+type CarFormPresenterProps = Pick<
+    ReturnType<typeof useCarForm>,
+    "form" | "currentSection" | "formSections" | "loading" | "handlers"
+> & {
+    isAIMode?: boolean;
+    onStartOver?: (() => void) | null;
+    aiConfidence?: number | null;
+    uploadedImage?: File | null;
+    maxImages?: number;
+    isEditMode?: boolean;
+};
+
+const getThemeColors = (isAIMode: boolean) => {
     return isAIMode
         ? {
             stepActive: "bg-purple-600 text-white",
@@ -52,7 +69,7 @@ export const CarFormPresenter = ({
     handlers,
     maxImages = 5,
     isEditMode = false,
-}) => {
+}: CarFormPresenterProps) => {
     const themeColors = getThemeColors(isAIMode);
     const { register, formState: { errors }, watch, setValue, trigger } = form;
 
@@ -158,6 +175,9 @@ export const CarFormPresenter = ({
                             <div className="flex items-center gap-3">
                                 {uploadedImage && (
                                     <div className="flex items-center gap-2">
+                                        {/* A blob: URL for the file the user just
+                                            dropped - next/image cannot optimize one. */}
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={URL.createObjectURL(uploadedImage)}
                                             alt="Uploaded car"

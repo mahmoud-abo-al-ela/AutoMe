@@ -3,7 +3,7 @@
 import { usePlanUsage } from "@/hooks/use-plan-usage";
 import { UpgradeBanner } from "@/components/common/UpgradeBanner";
 
-export function CarsPlanBanner({ orgSlug }) {
+export function CarsPlanBanner({ orgSlug }: { orgSlug: string }) {
   const { usage, isLoading } = usePlanUsage("cars");
 
   if (isLoading || !usage) return null;

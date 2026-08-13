@@ -1,14 +1,15 @@
 
 import React from "react";
+import type { Metadata } from "next";
 import CarsList from "./_components/car-list/CarsList";
 import { CarsPlanBanner } from "./_components/cars-plan-banner";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Cars | AutoMe Admin",
   description: "Manage your cars",
 };
 
-const CarsPage = async ({ params }) => {
+const CarsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
   return (
     <div>

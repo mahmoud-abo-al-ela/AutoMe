@@ -14,12 +14,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function EditCarPage() {
   const params = useParams();
   const router = useRouter();
-  const { slug, carId } = params;
+  const carId = Array.isArray(params.carId) ? params.carId[0] : params.carId;
 
   const { data: car, isLoading, error } = useQuery({
-    queryKey: queryKeys.cars.detail(carId),
+    queryKey: queryKeys.cars.detail(carId ?? ""),
     queryFn: async () => {
-      const response = await getCarForEdit(carId);
+      // `enabled` below keeps this from running without an id.
+      const response = await getCarForEdit(carId!);
       if (!response?.success) {
         throw new Error(response?.error?.message || "Failed to fetch car data");
       }

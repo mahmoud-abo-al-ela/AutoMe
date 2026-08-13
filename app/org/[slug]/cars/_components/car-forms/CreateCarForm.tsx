@@ -15,8 +15,10 @@ import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { getCarPlanLimits } from "@/actions/cars";
 
+type CarFormMode = "manual" | "ai";
+
 const CreateCarForm = () => {
-  const [selectedMode, setSelectedMode] = useState(null);
+  const [selectedMode, setSelectedMode] = useState<CarFormMode | null>(null);
   const [aiEnabled, setAiEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -38,7 +40,7 @@ const CreateCarForm = () => {
     fetchPlanLimits();
   }, []);
 
-  const handleModeSelect = (mode) => {
+  const handleModeSelect = (mode: CarFormMode) => {
     if (mode === "ai" && !aiEnabled) return;
     setSelectedMode(mode);
     router.push(`/org/${slug}/cars/create/${mode}`);
@@ -51,7 +53,7 @@ const CreateCarForm = () => {
         Add a New Vehicle
       </h2>
       <p className="text-gray-500 text-center text-sm sm:text-base mb-6 sm:mb-8">
-        Choose how you'd like to add your vehicle details
+        Choose how you&apos;d like to add your vehicle details
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">

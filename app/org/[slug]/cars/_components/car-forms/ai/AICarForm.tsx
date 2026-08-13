@@ -5,14 +5,36 @@ import { toast } from "sonner";
 import CarFormShared from "../shared/CarFormShared";
 import AIUploadSection from "../sections/AIUploadSection";
 
+/**
+ * What the vision model extracts. The action checks only that these keys are
+ * present, not their types — the model can still return a string where a number
+ * belongs, which is why the numeric fields are widened here and coerced by the
+ * form's Zod schema on submit.
+ */
+interface ExtractedCarData {
+  make?: string;
+  model?: string;
+  year?: string | number;
+  price?: string | number;
+  mileage?: string | number;
+  bodyType?: string;
+  fuelType?: string;
+  transmission?: string;
+  color?: string;
+  seats?: string | number;
+  features?: string | string[];
+  description?: string;
+  confidence?: number;
+}
+
 const AICarForm = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState(null);
-  const [carData, setCarData] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [carData, setCarData] = useState<ExtractedCarData | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 
-  const onDrop = useCallback(async (acceptedFiles) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
     setIsProcessing(true);
@@ -32,14 +54,18 @@ const AICarForm = () => {
       setUploadedImage(file);
       const result = await processCarImageGated(file);
       if (result.success) {
-        setCarData(result.data);
+        setCarData(result.data as ExtractedCarData);
         setShowForm(true);
         toast.success("Car details extracted successfully");
       } else {
         throw new Error(result.error?.message || "Failed to process image.");
       }
     } catch (err) {
-      setError(err.message || "An error occurred while processing the image.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred while processing the image.",
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -64,7 +90,7 @@ const AICarForm = () => {
   };
 
   // Normalize bodyType value
-  const normalizeBodyType = (bodyType) => {
+  const normalizeBodyType = (bodyType: string | undefined) => {
     if (bodyType === "Sport Utility Vehicle (SUV)") {
       return "SUV";
     }
