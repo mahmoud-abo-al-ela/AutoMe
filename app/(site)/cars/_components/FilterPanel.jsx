@@ -2,6 +2,7 @@
 
 import { Filter, RotateCcw, CircleDollarSign, Calendar, Gauge } from "lucide-react";
 import { formatCarPrice } from "@/lib/utils/currency";
+import { formatMileage as formatMileageKm } from "@/lib/utils/units";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Accordion } from "@/components/ui/accordion";
@@ -20,7 +21,7 @@ import {
 
 const formatPrice = (v) => formatCarPrice(v || 0);
 
-const formatMileage = (v) => `${new Intl.NumberFormat("en-US").format(v || 0)} mi`;
+const formatMileage = (v) => formatMileageKm(v);
 
 /**
  * Presentational filter sidebar. All state lives in useCarsPage; this component

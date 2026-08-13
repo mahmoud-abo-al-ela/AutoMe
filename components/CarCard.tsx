@@ -1,5 +1,6 @@
 "use client";
 import { formatCarPrice } from "@/lib/utils/currency";
+import { formatMileage as formatMileageKm } from "@/lib/utils/units";
 import {
   Building2,
   Calendar,
@@ -43,12 +44,7 @@ const CarCard = ({
 
   const formatPrice = (price: number) => formatCarPrice(price);
 
-  const formatMileage = (mileage: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "unit",
-      unit: "mile",
-      maximumFractionDigits: 0,
-    }).format(mileage);
+  const formatMileage = (mileage: number) => formatMileageKm(mileage);
 
   const carTitle = car.title || `${car.year} ${car.make} ${car.model}`;
   const subtitle = [car.bodyType, car.transmission].filter(Boolean).join(" • ");

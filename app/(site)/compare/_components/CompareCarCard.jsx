@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, ArrowRight, Fuel, Calendar, Gauge } from "lucide-react";
-import { formatPrice, getCarTitle } from "./utils";
+import { formatPrice, formatMileage, getCarTitle } from "./utils";
 
 /**
  * Card-based car display for the compare page sticky header row.
@@ -77,7 +77,7 @@ const CompareCarCard = ({ car, onRemove }) => {
                                 className="text-[10px] px-1.5 py-0 h-5 gap-1"
                             >
                                 <Gauge className="h-2.5 w-2.5" />
-                                {new Intl.NumberFormat("en-US").format(car.mileage)} mi
+                                {formatMileage(car.mileage)}
                             </Badge>
                         )}
                         {car.fuelType && (

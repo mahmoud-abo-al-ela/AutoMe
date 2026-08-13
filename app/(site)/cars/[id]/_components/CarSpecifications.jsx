@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMileage } from "@/lib/utils/units";
 import {
   Fuel,
   Gauge,
@@ -26,7 +27,7 @@ const CarSpecifications = ({ car, variant = "compact" }) => {
     },
     {
       label: "Mileage",
-      value: `${new Intl.NumberFormat().format(car.mileage)} mi`,
+      value: formatMileage(car.mileage),
       icon: Gauge,
       color: "text-green-500 bg-green-50 dark:bg-green-950/20",
     },

@@ -1,27 +1,22 @@
 import { compareUtils } from "@/lib/utils";
 import { formatCarPrice } from "@/lib/utils/currency";
+import { formatMileage as formatMileageKm } from "@/lib/utils/units";
 
 // ─── Formatting Utilities ────────────────────────────────────────────────────
 
 /**
- * Format a numeric price as a USD currency string (no decimals).
+ * Format a numeric price as an EGP currency string (no decimals).
  * @param {number} price
- * @returns {string} e.g. "$25,000"
+ * @returns {string} e.g. "EGP 25,000"
  */
 export const formatPrice = (price) => formatCarPrice(price);
 
 /**
- * Format a numeric mileage value with the "mile" unit.
+ * Format a numeric mileage value in kilometres.
  * @param {number} mileage
- * @returns {string} e.g. "45,000 mi"
+ * @returns {string} e.g. "45,000 km"
  */
-export const formatMileage = (mileage) => {
-    return new Intl.NumberFormat("en-US", {
-        style: "unit",
-        unit: "mile",
-        maximumFractionDigits: 0,
-    }).format(mileage);
-};
+export const formatMileage = (mileage) => formatMileageKm(mileage);
 
 // ─── Spec Category Definitions ───────────────────────────────────────────────
 
