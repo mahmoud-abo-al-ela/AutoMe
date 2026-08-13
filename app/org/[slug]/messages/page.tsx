@@ -1,14 +1,19 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getOrganization } from "@/lib/getOrganization";
 import { OrganizationChannelList, ChatWindow } from "@/components/StreamChat";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Messages | AutoMe",
   description: "Manage customer conversations",
 };
 
-export default async function OrganizationMessagesPage({ params }) {
+export default async function OrganizationMessagesPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { userId } = await auth();
   const { slug } = await params;
 
