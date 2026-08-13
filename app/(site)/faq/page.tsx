@@ -47,7 +47,7 @@ export default async function FAQ() {
       <div className="mt-16 bg-muted rounded-lg p-8 text-center">
         <h3 className="text-2xl font-semibold mb-3">Still have questions?</h3>
         <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-          If you couldn't find the answer you were looking for, our support team
+          If you couldn&apos;t find the answer you were looking for, our support team
           is here to help with any questions you might have.
         </p>
         <Button size="lg">

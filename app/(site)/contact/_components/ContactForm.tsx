@@ -17,7 +17,19 @@ import { toast } from "sonner";
 import { submitContactForm } from "@/actions/contact";
 import { topics } from "../contact-data";
 
-const EMPTY_FORM = { name: "", email: "", topic: "", message: "" };
+interface ContactFormState {
+  name: string;
+  email: string;
+  topic: string;
+  message: string;
+}
+
+const EMPTY_FORM: ContactFormState = {
+  name: "",
+  email: "",
+  topic: "",
+  message: "",
+};
 
 // The contact message form, including its submit + success states.
 export default function ContactForm() {
@@ -25,11 +37,11 @@ export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: keyof ContactFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!formState.name || !formState.email || !formState.message) {

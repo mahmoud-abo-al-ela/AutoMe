@@ -1,13 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
-export default function GlobalError({ error, reset }) {
+// The error boundary for the whole (site) route group — the customer-facing
+// half of the product. Named for that, rather than `GlobalError`, which is what
+// app/global-error.tsx is.
+export default function SiteRouteError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
-    console.error("Global Error:", error);
+    console.error("Site error:", error);
+    // This boundary is nearer than app/error.tsx, so it catches every customer
+    // -facing error first. Without this, none of them ever reached Sentry.
+    Sentry.captureException(error);
   }, [error]);
 
   return (
