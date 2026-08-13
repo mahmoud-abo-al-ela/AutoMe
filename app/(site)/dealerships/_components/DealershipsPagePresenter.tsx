@@ -9,11 +9,17 @@ import {
   DealershipFilterBar,
 } from "./index";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { useDealershipsPage } from "@/hooks/use-dealerships-page";
 
 /**
  * Presentational shell for the dealerships listing. All state lives in
  * useDealershipsPage (via ClientPage); this component only renders.
+ *
+ * ClientPage spreads the whole hook result in, so the props are derived from it
+ * rather than restated.
  */
+export type DealershipsPageData = ReturnType<typeof useDealershipsPage>;
+
 export const DealershipsPagePresenter = ({
   dealerships,
   pagination,
@@ -29,7 +35,7 @@ export const DealershipsPagePresenter = ({
   filterOptions,
   activeFilters,
   handlers,
-}) => {
+}: DealershipsPageData) => {
   const hasActiveFilters = activeFilters.length > 0;
   // Keep the previous grid mounted (dimmed) while re-fetching after the first
   // load, so filtering/paging doesn't flash the whole grid to skeletons.

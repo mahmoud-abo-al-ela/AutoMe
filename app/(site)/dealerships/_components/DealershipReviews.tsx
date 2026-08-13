@@ -10,11 +10,15 @@ import { getDealershipReviews, createDealershipReview } from "@/actions/dealersh
 import { Pagination } from "@/components/common/Pagination";
 import { useUser } from "@clerk/nextjs";
 import { EmptyState } from "@/components/common/EmptyState";
+import type {
+    DealershipReview,
+    ReviewsPagination,
+} from "../_lib/dealership-types";
 
-const DealershipReviews = ({ organizationId }) => {
+const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
     const { user, isLoaded } = useUser();
-    const [reviews, setReviews] = useState([]);
-    const [pagination, setPagination] = useState({
+    const [reviews, setReviews] = useState<DealershipReview[]>([]);
+    const [pagination, setPagination] = useState<ReviewsPagination>({
         page: 1,
         limit: 10,
         total: 0,
@@ -42,9 +46,13 @@ const DealershipReviews = ({ organizationId }) => {
             }
         };
         fetchReviews();
+        // `pagination.limit` is read but deliberately not a dependency: the
+        // effect replaces the whole pagination object from the response, so
+        // depending on it would refetch whenever the server echoed a limit.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [organizationId, pagination.page]);
 
-    const handlePageChange = (newPage) => {
+    const handlePageChange = (newPage: number) => {
         setPagination((prev) => ({ ...prev, page: newPage }));
         window.scrollTo({ top: 400, behavior: "smooth" });
     };
@@ -73,7 +81,13 @@ const DealershipReviews = ({ organizationId }) => {
     };
 
     const calculateRatingDistribution = () => {
-        const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        const distribution: Record<number, number> = {
+            5: 0,
+            4: 0,
+            3: 0,
+            2: 0,
+            1: 0,
+        };
         reviews.forEach((review) => {
             const rating = Math.round(review.rating);
             if (rating >= 1 && rating <= 5) {

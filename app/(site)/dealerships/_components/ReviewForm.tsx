@@ -9,14 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createDealershipReview } from "@/actions/dealerships";
 import { toast } from "sonner";
 
-const ReviewForm = ({ organizationId, onSuccess }) => {
+const ReviewForm = ({
+    organizationId,
+    onSuccess,
+}: {
+    organizationId: string;
+    onSuccess: () => void;
+}) => {
     const [rating, setRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
     const [title, setTitle] = useState("");
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const renderStar = (value) => {
+    const renderStar = (value: number) => {
         return (
             <button
                 type="button"
@@ -35,7 +41,7 @@ const ReviewForm = ({ organizationId, onSuccess }) => {
         );
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (rating === 0) {

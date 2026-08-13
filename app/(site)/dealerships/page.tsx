@@ -3,7 +3,11 @@ import { getDealerships } from "@/actions/dealerships";
 import { parseFiltersFromSearch } from "@/hooks/dealerships-url";
 import ClientPage from "./ClientPage";
 
-export default async function DealershipsPage({ searchParams }) {
+export default async function DealershipsPage({
+    searchParams,
+}: {
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
     const params = await searchParams;
 
     // Reuse the client parser by rebuilding a query string from the params

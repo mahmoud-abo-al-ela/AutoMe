@@ -1,6 +1,13 @@
 import { getDealerships } from "@/actions/dealerships";
+import type { MetadataRoute } from "next";
 
-export default async function sitemap() {
+/** The listing rows the sitemap needs; the repository is JS, so declare it here. */
+interface SitemapDealership {
+    slug: string;
+    updatedAt?: Date | string | null;
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://autome.com";
 
     try {
@@ -18,13 +25,13 @@ export default async function sitemap() {
             ];
         }
 
-        const dealerships = response.data.dealerships;
+        const dealerships = response.data.dealerships as SitemapDealership[];
 
         // Generate sitemap entries for each dealership
         const dealershipUrls = dealerships.map((dealership) => ({
             url: `${baseUrl}/dealerships/${dealership.slug}`,
             lastModified: dealership.updatedAt || new Date(),
-            changeFrequency: "weekly",
+            changeFrequency: "weekly" as const,
             priority: 0.7,
         }));
 

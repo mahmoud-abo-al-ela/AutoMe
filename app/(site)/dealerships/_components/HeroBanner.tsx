@@ -8,6 +8,11 @@ export const HeroBanner = ({
     onSearchChange,
     onClearSearch,
     stats,
+}: {
+    searchQuery: string;
+    onSearchChange: (value: string) => void;
+    onClearSearch: () => void;
+    stats?: { totalDealerships?: number; totalCities?: number } | null;
 }) => {
     const dealerships = stats?.totalDealerships;
     const cities = stats?.totalCities;

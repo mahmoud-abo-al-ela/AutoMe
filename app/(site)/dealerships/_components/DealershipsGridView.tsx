@@ -1,11 +1,20 @@
 import DealershipCard from "./DealershipCard";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
+import type {
+    DealershipListItem,
+    DealershipPagination,
+} from "../_lib/dealership-types";
 
 export const DealershipsGridView = ({
     dealerships,
     pagination,
     loading,
     onPageChange,
+}: {
+    dealerships: DealershipListItem[];
+    pagination: DealershipPagination;
+    loading: boolean;
+    onPageChange: (page: number) => void;
 }) => {
     return (
         <>

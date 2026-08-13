@@ -1,7 +1,13 @@
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const DealershipsErrorState = ({ error, onRetry }) => {
+export const DealershipsErrorState = ({
+    error,
+    onRetry,
+}: {
+    error?: string;
+    onRetry?: () => void;
+}) => {
     const handleRetry = () => {
         if (onRetry) {
             onRetry();

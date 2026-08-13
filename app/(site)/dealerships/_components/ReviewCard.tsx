@@ -4,11 +4,12 @@ import { Star, User } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import type { DealershipReview } from "../_lib/dealership-types";
 
-const ReviewCard = ({ review }) => {
+const ReviewCard = ({ review }: { review: DealershipReview }) => {
     const { rating, title, comment, user, createdAt } = review;
 
-    const formatDate = (date) => {
+    const formatDate = (date: Date | string) => {
         return new Date(date).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
@@ -16,7 +17,7 @@ const ReviewCard = ({ review }) => {
         });
     };
 
-    const renderStars = (rating) => {
+    const renderStars = (rating: number) => {
         return Array.from({ length: 5 }).map((_, i) => (
             <Star
                 key={i}

@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
+import type {
+    DealershipActiveFilter,
+    DealershipFilterOptions,
+    DealershipFilters,
+    DealershipHandlers,
+} from "../_lib/dealership-types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,11 +55,31 @@ export const DealershipFilterBar = ({
     onPerPageChange,
     onClearFilter,
     onResetAll,
+}: {
+    totalCount: number;
+    filters: DealershipFilters;
+    filterOptions: DealershipFilterOptions;
+    perPage: number;
+    activeFilters: DealershipActiveFilter[];
+    onToggleFilter: DealershipHandlers["toggleFilter"];
+    onSortChange: DealershipHandlers["setSort"];
+    onPerPageChange: DealershipHandlers["changePerPage"];
+    onClearFilter: DealershipHandlers["clearFilter"];
+    onResetAll: DealershipHandlers["resetAllFilters"];
 }) => {
     const [sheetOpen, setSheetOpen] = useState(false);
 
-    const cities = filterOptions?.cities || [];
-    const regions = filterOptions?.regions || [];
+    // The facet query groups by a nullable column, so organizations with no
+    // city/region come back as a `value: null` bucket. Rendering it produced a
+    // blank, unselectable chip.
+    const withoutNullValues = (
+        options: { value: string | null; count: number }[] | undefined
+    ) =>
+        (options ?? []).flatMap((option) =>
+            option.value === null ? [] : [{ value: option.value, count: option.count }]
+        );
+    const cities = withoutNullValues(filterOptions?.cities);
+    const regions = withoutNullValues(filterOptions?.regions);
     const sortValue = filters.sort || DEFAULT_DEALERSHIP_SORT;
 
     const activeCount = activeFilters.length;
@@ -201,7 +227,13 @@ export const DealershipFilterBar = ({
     );
 };
 
-const FilterSheetSection = ({ title, children }) => (
+const FilterSheetSection = ({
+    title,
+    children,
+}: {
+    title: React.ReactNode;
+    children: React.ReactNode;
+}) => (
     <div className="space-y-2">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {title}

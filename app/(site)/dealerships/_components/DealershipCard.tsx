@@ -8,10 +8,17 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { StarRating } from "@/components/common/StarRating";
 import { getOpenStatus } from "../[slug]/_components/OpenStatusBadge";
+import type { DealershipListItem } from "../_lib/dealership-types";
 
-const formatPrice = (value) => formatCarPrice(value);
+const formatPrice = (value: number) => formatCarPrice(value);
 
-const DealershipCard = ({ dealership, index = 0 }) => {
+const DealershipCard = ({
+    dealership,
+    index = 0,
+}: {
+    dealership: DealershipListItem;
+    index?: number;
+}) => {
     const {
         name,
         slug,
@@ -102,7 +109,7 @@ const DealershipCard = ({ dealership, index = 0 }) => {
                 {/* Brands carried */}
                 {brands.length > 0 && (
                     <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
-                        {brands.map((brand) => (
+                        {brands.map((brand: string) => (
                             <span
                                 key={brand}
                                 className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
