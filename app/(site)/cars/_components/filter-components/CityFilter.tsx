@@ -2,9 +2,15 @@
 
 import { MapPin } from "lucide-react";
 import { FilterSection } from "./FilterSection";
+import type { SingleFacetProps } from "../../_lib/cars-types";
 import { FilterChip } from "./FilterChip";
 
-const CityFilter = ({ selected, options = [], onSelect, isLoading }) => {
+const CityFilter = ({
+  selected,
+  options = [],
+  onSelect,
+  isLoading,
+}: SingleFacetProps) => {
   return (
     <FilterSection
       value="city"

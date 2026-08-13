@@ -3,12 +3,18 @@
 import { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { FilterSection } from "./FilterSection";
+import type { LucideIcon } from "lucide-react";
 
 /**
  * Generic min/max range section used for price, year and mileage. The slider
  * domain is pinned to `bounds` (global, unfiltered) so it doesn't shift as
  * other filters are applied. Drag updates local state; release commits.
  */
+export interface RangeBounds {
+  min: number;
+  max: number;
+}
+
 export const RangeFilter = ({
   value,
   bounds,
@@ -16,9 +22,20 @@ export const RangeFilter = ({
   icon,
   label,
   step = 1,
-  formatValue = (v) => v,
+  formatValue = (v) => String(v),
   onCommit,
   isLoading,
+}: {
+  /** The committed [min, max]; either end may be unset. */
+  value?: [number | undefined, number | undefined];
+  bounds?: RangeBounds | null;
+  sectionValue: string;
+  icon?: LucideIcon;
+  label: string;
+  step?: number;
+  formatValue?: (value: number) => string;
+  onCommit: (value: [number, number], bounds: RangeBounds) => void;
+  isLoading?: boolean;
 }) => {
   const min = bounds?.min ?? 0;
   const max = bounds?.max ?? 100;
@@ -59,7 +76,10 @@ export const RangeFilter = ({
           max={ready ? max : min + 1}
           step={step}
           onValueChange={(v) => !isLoading && setLocal(v)}
-          onValueCommit={(v) => !isLoading && ready && onCommit(v, bounds)}
+          // A two-thumb slider always emits both ends.
+          onValueCommit={(v) =>
+            !isLoading && ready && onCommit(v as [number, number], { min, max })
+          }
           disabled={isLoading || !ready}
           className="mb-2"
         />

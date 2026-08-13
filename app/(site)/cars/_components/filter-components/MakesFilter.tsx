@@ -5,10 +5,16 @@ import { Car, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
+import type { MultiFacetProps } from "../../_lib/cars-types";
 
 const COLLAPSED_COUNT = 12;
 
-const MakesFilter = ({ selected = [], options = [], onToggle, isLoading }) => {
+const MakesFilter = ({
+  selected = [],
+  options = [],
+  onToggle,
+  isLoading,
+}: MultiFacetProps) => {
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 

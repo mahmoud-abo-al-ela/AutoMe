@@ -2,13 +2,21 @@
 
 import { Flame, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { formatCarPrice } from "@/lib/utils/currency";
+import type { CarsFilters } from "../_lib/cars-types";
 
 // Structured quick-picks map to real filters, not free-text search — so
-// "Under $30k" and "Luxury" actually return matching cars.
-const QUICK_PICKS = [
+// "Under 30k" and "Luxury" actually return matching cars.
+//
+// ⚠️ THRESHOLDS ARE DOLLAR-SCALE. Car.price is EGP, where 30,000 is a very
+// cheap car and 60,000 is not remotely "luxury", so these two picks return
+// almost nothing and almost everything respectively. The label no longer says
+// "$", but the numbers still need real EGP values — a pricing decision, not a
+// formatting one.
+const QUICK_PICKS: { label: string; patch: Partial<CarsFilters> }[] = [
   { label: "SUV", patch: { bodyType: ["SUV"] } },
   { label: "Electric", patch: { fuelType: ["Electric"] } },
-  { label: "Under $30k", patch: { maxPrice: 30000 } },
+  { label: `Under ${formatCarPrice(30000)}`, patch: { maxPrice: 30000 } },
   { label: "Luxury", patch: { minPrice: 60000 } },
 ];
 
@@ -18,6 +26,12 @@ export const CarsHero = ({
   onClearSearch,
   totalCount,
   onQuickPick,
+}: {
+  searchQuery?: string;
+  onSearchChange: (value: string) => void;
+  onClearSearch: () => void;
+  totalCount?: number;
+  onQuickPick: (patch: Partial<CarsFilters>) => void;
 }) => {
   const query = searchQuery || "";
 
@@ -34,7 +48,7 @@ export const CarsHero = ({
           Find Your Perfect Car
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm font-medium text-white/80 sm:text-base">
-          Browse {totalCount > 0 ? totalCount.toLocaleString() : ""} {totalCount === 1 ? "vehicle" : "vehicles"} from trusted dealerships
+          Browse {totalCount && totalCount > 0 ? totalCount.toLocaleString() : ""} {totalCount === 1 ? "vehicle" : "vehicles"} from trusted dealerships
         </p>
 
         {/* Search — plain text, search-as-you-type */}

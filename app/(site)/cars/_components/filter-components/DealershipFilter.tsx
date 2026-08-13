@@ -2,9 +2,18 @@
 
 import { Building2 } from "lucide-react";
 import { FilterSection } from "./FilterSection";
+import type {
+  DealershipFacetOption,
+  SingleFacetProps,
+} from "../../_lib/cars-types";
 import { FilterChip } from "./FilterChip";
 
-const DealershipFilter = ({ selected, options = [], onSelect, isLoading }) => {
+const DealershipFilter = ({
+  selected,
+  options = [],
+  onSelect,
+  isLoading,
+}: SingleFacetProps<DealershipFacetOption>) => {
   return (
     <FilterSection
       value="dealership"

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
+import type { CarsPageData } from "../_lib/cars-types";
 
 export const CarsPagePresenter = ({
   cars,
@@ -38,7 +39,7 @@ export const CarsPagePresenter = ({
   optionsLoading,
   activeFilters,
   handlers,
-}) => {
+}: CarsPageData) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const reduceMotion = useReducedMotion();
   const hasActiveFilters = activeFilters.length > 0;

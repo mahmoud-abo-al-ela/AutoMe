@@ -16,6 +16,13 @@ export const FilterChip = ({
   disabled = false,
   onClick,
   className,
+}: {
+  label: string;
+  count?: number;
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+  className?: string;
 }) => {
   const isDisabled = disabled || count === 0;
 

@@ -21,6 +21,15 @@ export const ResultsSummary = ({
   perPage,
   onPerPageChange,
   isLoading,
+}: {
+  currentPage: number;
+  limit: number;
+  total: number;
+  sortBy?: string;
+  onSortChange: (value: string) => void;
+  perPage: number;
+  onPerPageChange: (value: number) => void;
+  isLoading?: boolean;
 }) => {
   const start = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const end = Math.min(currentPage * limit, total);

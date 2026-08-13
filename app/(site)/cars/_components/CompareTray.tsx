@@ -12,7 +12,7 @@ import { compareUtils } from "@/lib/utils";
  * via the same `compareListUpdated` event CarCard already dispatches.
  */
 export const CompareTray = () => {
-  const [ids, setIds] = useState([]);
+  const [ids, setIds] = useState<string[]>([]);
 
   useEffect(() => {
     const sync = () => setIds(compareUtils.getCompareList());

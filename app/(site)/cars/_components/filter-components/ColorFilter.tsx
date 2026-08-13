@@ -2,6 +2,7 @@
 
 import { Palette } from "lucide-react";
 import { FilterSection } from "./FilterSection";
+import type { FacetOption, SingleFacetProps } from "../../_lib/cars-types";
 import { getCarColorHex } from "@/lib/constants/car-options";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,12 @@ import { cn } from "@/lib/utils";
  * Single-select colour facet with swatches. Options are real DB colours with
  * counts ([{ value, count }]); the swatch hex comes from getCarColorHex.
  */
-const ColorFilter = ({ selected, options = [], onSelect, isLoading }) => {
+const ColorFilter = ({
+  selected,
+  options = [],
+  onSelect,
+  isLoading,
+}: SingleFacetProps<FacetOption>) => {
   return (
     <FilterSection
       value="color"

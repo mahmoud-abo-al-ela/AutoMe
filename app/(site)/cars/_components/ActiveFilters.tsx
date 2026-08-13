@@ -2,8 +2,9 @@
 
 import { X, FilterX } from "lucide-react";
 import { motion } from "framer-motion";
+import type { CarsActiveFilter, CarsHandlers } from "../_lib/cars-types";
 
-const TYPE_LABEL = {
+const TYPE_LABEL: Record<string, string> = {
   search: "Search",
   make: "Make",
   bodyType: "Body",
@@ -18,7 +19,13 @@ const TYPE_LABEL = {
   mileage: "Mileage",
 };
 
-export const ActiveFilters = ({ filters, onClearFilter }) => {
+export const ActiveFilters = ({
+  filters,
+  onClearFilter,
+}: {
+  filters: CarsActiveFilter[];
+  onClearFilter: CarsHandlers["clearFilter"];
+}) => {
   if (!filters || filters.length === 0) return null;
 
   return (

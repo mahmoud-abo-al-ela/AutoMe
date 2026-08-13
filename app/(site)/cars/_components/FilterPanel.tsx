@@ -3,6 +3,11 @@
 import { Filter, RotateCcw, CircleDollarSign, Calendar, Gauge } from "lucide-react";
 import { formatCarPrice } from "@/lib/utils/currency";
 import { formatMileage as formatMileageKm } from "@/lib/utils/units";
+import type {
+  CarsFilterOptions,
+  CarsFilters,
+  CarsHandlers,
+} from "../_lib/cars-types";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Accordion } from "@/components/ui/accordion";
@@ -19,9 +24,9 @@ import {
   SeatsFilter,
 } from "./filter-components";
 
-const formatPrice = (v) => formatCarPrice(v || 0);
+const formatPrice = (v: number) => formatCarPrice(v || 0);
 
-const formatMileage = (v) => formatMileageKm(v);
+const formatMileage = (v: number) => formatMileageKm(v);
 
 /**
  * Presentational filter sidebar. All state lives in useCarsPage; this component
@@ -34,8 +39,15 @@ const FilterPanel = ({
   isLoading = false,
   optionsLoading = false,
   onReset,
+}: {
+  filters: CarsFilters;
+  options: CarsFilterOptions;
+  handlers: CarsHandlers;
+  isLoading?: boolean;
+  optionsLoading?: boolean;
+  onReset: () => void;
 }) => {
-  const opts = options || {};
+  const opts = options || ({} as NonNullable<CarsFilterOptions>);
   const disabled = isLoading || optionsLoading;
 
   const activeCount =

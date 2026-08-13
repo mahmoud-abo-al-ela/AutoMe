@@ -3,8 +3,14 @@
 import { Cog } from "lucide-react";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
+import type { MultiFacetProps } from "../../_lib/cars-types";
 
-const TransmissionFilter = ({ selected = [], options = [], onToggle, isLoading }) => {
+const TransmissionFilter = ({
+  selected = [],
+  options = [],
+  onToggle,
+  isLoading,
+}: MultiFacetProps) => {
   return (
     <FilterSection
       value="transmission"

@@ -1,18 +1,24 @@
 "use client";
 
-import { Fuel } from "lucide-react";
+import { CarFront } from "lucide-react";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
+import type { MultiFacetProps } from "../../_lib/cars-types";
 
-const FuelTypeFilter = ({ selected = [], options = [], onToggle, isLoading }) => {
+const BodyTypeFilter = ({
+  selected = [],
+  options = [],
+  onToggle,
+  isLoading,
+}: MultiFacetProps) => {
   return (
     <FilterSection
-      value="fuel"
-      icon={Fuel}
-      label="Fuel Type"
+      value="body"
+      icon={CarFront}
+      label="Body Type"
       count={selected.length}
       isEmpty={options.length === 0}
-      emptyLabel="No fuel types available"
+      emptyLabel="No body types available"
     >
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
         {options.map(({ value, count }) => (
@@ -30,4 +36,4 @@ const FuelTypeFilter = ({ selected = [], options = [], onToggle, isLoading }) =>
   );
 };
 
-export default FuelTypeFilter;
+export default BodyTypeFilter;

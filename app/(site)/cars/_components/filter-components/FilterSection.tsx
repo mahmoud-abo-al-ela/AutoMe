@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import type { LucideIcon } from "lucide-react";
 import {
   AccordionContent,
   AccordionItem,
@@ -22,6 +23,14 @@ export const FilterSection = ({
   isEmpty = false,
   emptyLabel = "None available",
   children,
+}: {
+  value: string;
+  icon?: LucideIcon;
+  label: string;
+  count?: number;
+  isEmpty?: boolean;
+  emptyLabel?: string;
+  children: React.ReactNode;
 }) => {
   return (
     <AccordionItem value={value} className="border-none">
