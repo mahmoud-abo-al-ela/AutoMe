@@ -75,12 +75,12 @@ export default function PlanFormTabs({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="monthlyPrice">Monthly Price (EGP)</Label>
+            <Label htmlFor="monthlyPrice">Monthly Price ($)</Label>
             <Input
               id="monthlyPrice"
               type="number"
               step="0.01"
-              placeholder="e.g., 2500.00"
+              placeholder="e.g., 29.00"
               value={inputValues.monthlyPrice}
               onChange={(e) => setInputValues({ ...inputValues, monthlyPrice: e.target.value })}
               onBlur={(e) => {
@@ -91,12 +91,12 @@ export default function PlanFormTabs({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="yearlyPrice">Yearly Price (EGP)</Label>
+            <Label htmlFor="yearlyPrice">Yearly Price ($)</Label>
             <Input
               id="yearlyPrice"
               type="number"
               step="0.01"
-              placeholder="e.g., 25000.00"
+              placeholder="e.g., 290.00"
               value={inputValues.yearlyPrice}
               onChange={(e) => setInputValues({ ...inputValues, yearlyPrice: e.target.value })}
               onBlur={(e) => {

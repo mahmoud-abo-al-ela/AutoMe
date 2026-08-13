@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatPlanPrice } from "@/lib/utils/currency";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -33,7 +32,7 @@ export function PlanCard({
         const price = billingPeriod === "monthly"
             ? plan.monthlyPrice
             : (plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8);
-        return formatPlanPrice(price);
+        return `$${Math.floor(price / 100)}`;
     };
 
     const formatPeriod = () => {

@@ -999,11 +999,8 @@ async function main() {
     data: {
       name: "Pro",
       type: "PRO",
-      // EGP, minor units (piastres). PLACEHOLDER — confirm before running
-      // `pnpm db:sync-plans` against live Stripe. These are round local prices,
-      // not a conversion of the old $49/$470.
-      monthlyPrice: 250000, // 2,500.00 EGP
-      yearlyPrice: 2500000, // 25,000.00 EGP (save 2 months)
+      monthlyPrice: 4900, // $49.00
+      yearlyPrice: 47000, // $470.00 (save 2 months)
       maxCars: 100,
       maxMembers: 10,
       maxImagesPerCar: 15,
@@ -1024,9 +1021,8 @@ async function main() {
     data: {
       name: "Enterprise",
       type: "ENTERPRISE",
-      // EGP, minor units (piastres). PLACEHOLDER — see the Pro plan above.
-      monthlyPrice: 990000, // 9,900.00 EGP
-      yearlyPrice: 9900000, // 99,000.00 EGP (save 2+ months)
+      monthlyPrice: 19900, // $199.00
+      yearlyPrice: 190000, // $1,900.00 (save 2+ months)
       maxCars: -1, // Unlimited
       maxMembers: -1, // Unlimited
       maxImagesPerCar: 30,

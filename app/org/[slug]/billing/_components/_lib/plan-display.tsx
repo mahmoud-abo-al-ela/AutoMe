@@ -2,7 +2,6 @@
 import { Sparkles, TrendingUp, Crown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Plan, PlanType } from "@/lib/generated/prisma";
-import { formatPlanPrice } from "@/lib/utils/currency";
 
 export const PLAN_CONFIG: Record<
   PlanType,
@@ -26,9 +25,20 @@ export const PLAN_CONFIG: Record<
   },
 };
 
-/** Plan prices, in minor units. EGP — see lib/utils/currency.ts. */
+/**
+ * Plan prices, in minor units.
+ *
+ * Deliberately USD, unlike car prices: Stripe charges subscriptions in USD
+ * (lib/services/stripe/plan.ts), so this matches what the customer is actually
+ * billed. Whether plan pricing should move to EGP is a business decision that
+ * has to change Stripe and this together — see lib/utils/currency.ts.
+ */
 export function formatPrice(price: number) {
-  return formatPlanPrice(price);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+  }).format(price / 100);
 }
 
 export function formatFeatureName(key: string) {
