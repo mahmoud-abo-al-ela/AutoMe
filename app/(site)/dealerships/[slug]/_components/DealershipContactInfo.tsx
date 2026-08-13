@@ -1,6 +1,26 @@
 import { MapPin, Phone, Mail, Globe, ExternalLink } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { DealershipDetail } from "../_lib/detail-types";
 
-const ContactCard = ({ icon: Icon, iconBgClass, iconColorClass, label, value, href, external = false }) => {
+interface ContactCardProps {
+    icon: LucideIcon;
+    iconBgClass: string;
+    iconColorClass: string;
+    label: string;
+    value: string;
+    href: string;
+    external?: boolean;
+}
+
+const ContactCard = ({
+    icon: Icon,
+    iconBgClass,
+    iconColorClass,
+    label,
+    value,
+    href,
+    external = false,
+}: ContactCardProps) => {
     const linkProps = external
         ? { target: "_blank", rel: "noopener noreferrer" }
         : {};
@@ -27,8 +47,12 @@ const ContactCard = ({ icon: Icon, iconBgClass, iconColorClass, label, value, hr
     );
 };
 
-export const DealershipContactInfo = ({ dealership }) => {
-    const contacts = [];
+export const DealershipContactInfo = ({
+    dealership,
+}: {
+    dealership: DealershipDetail;
+}) => {
+    const contacts: ContactCardProps[] = [];
 
     if (dealership.phone) {
         contacts.push({

@@ -18,19 +18,29 @@ import {
     DealershipTabs,
     DealershipErrorState,
 } from "./index";
+import type {
+    DealershipCar,
+    DealershipCarFilterOptions,
+    DealershipCarsPagination,
+    DealershipDetail,
+    DealershipInventoryFilterState,
+} from "../_lib/detail-types";
 
 export const DealershipDetailPresenter = () => {
     const params = useParams();
-    const slug = params.slug;
+    const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
 
-    const [dealership, setDealership] = useState(null);
-    const [cars, setCars] = useState([]);
+    const [dealership, setDealership] = useState<DealershipDetail | null>(null);
+    const [cars, setCars] = useState<DealershipCar[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [carsLoading, setCarsLoading] = useState(false);
-    const [filters, setFilters] = useState({ sortBy: "newest" });
-    const [availableFilters, setAvailableFilters] = useState(null);
-    const [carsPagination, setCarsPagination] = useState({
+    const [filters, setFilters] = useState<DealershipInventoryFilterState>({
+        sortBy: "newest",
+    });
+    const [availableFilters, setAvailableFilters] =
+        useState<DealershipCarFilterOptions | null>(null);
+    const [carsPagination, setCarsPagination] = useState<DealershipCarsPagination>({
         page: 1,
         limit: 6,
         total: 0,
@@ -42,6 +52,7 @@ export const DealershipDetailPresenter = () => {
             setLoading(true);
             setError(null);
             try {
+                if (!slug) return;
                 const response = await getDealershipBySlug(slug);
                 if (response.success) {
                     setDealership(response.data);
@@ -63,9 +74,17 @@ export const DealershipDetailPresenter = () => {
             }
         };
         fetchDealership();
+        // `fetchCars` is recreated every render and is only called for the
+        // dealership this effect just loaded; depending on it would refetch on
+        // every render.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [slug]);
 
-    const fetchCars = async (organizationId, currentFilters = {}, page = 1) => {
+    const fetchCars = async (
+        organizationId: string,
+        currentFilters: DealershipInventoryFilterState = {},
+        page = 1
+    ) => {
         setCarsLoading(true);
         try {
             const response = await getDealershipCars(organizationId, currentFilters, {
@@ -73,7 +92,13 @@ export const DealershipDetailPresenter = () => {
                 limit: carsPagination.limit,
             });
             if (response.success) {
-                setCars(response.data.cars);
+                // The car serializer can return null entries; CarCard would
+                // crash on one.
+                setCars(
+                    response.data.cars.filter(
+                        (car): car is DealershipCar => car !== null
+                    )
+                );
                 setCarsPagination(response.data.pagination);
             }
         } catch (err) {
@@ -83,7 +108,7 @@ export const DealershipDetailPresenter = () => {
         }
     };
 
-    const handleFilterChange = (newFilters) => {
+    const handleFilterChange = (newFilters: DealershipInventoryFilterState) => {
         setFilters(newFilters);
         setCarsPagination((prev) => ({ ...prev, page: 1 }));
         if (dealership) {
@@ -91,7 +116,7 @@ export const DealershipDetailPresenter = () => {
         }
     };
 
-    const handlePageChange = (newPage) => {
+    const handlePageChange = (newPage: number) => {
         setCarsPagination((prev) => ({ ...prev, page: newPage }));
         if (dealership) {
             fetchCars(dealership.id, filters, newPage);

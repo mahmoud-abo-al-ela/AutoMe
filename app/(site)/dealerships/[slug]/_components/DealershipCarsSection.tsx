@@ -6,6 +6,7 @@ import CarCard from "@/components/CarCard";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { DealershipInventoryFilters } from "./DealershipInventoryFilters";
 import { LoadingGrid } from "@/components/common/LoadingStates";
+import type { DealershipInventoryProps } from "../_lib/detail-types";
 
 export const DealershipCarsSection = ({
     cars,
@@ -16,7 +17,8 @@ export const DealershipCarsSection = ({
     filters,
     onFilterChange,
     availableFilters,
-}) => {
+}: DealershipInventoryProps & { carCount?: number }) => {
+    const totalCarCount = carCount ?? 0;
     const hasActiveFilters = 
         filters.search || 
         filters.minPrice || 
@@ -28,7 +30,7 @@ export const DealershipCarsSection = ({
     return (
         <div className="space-y-6" id="dealership-cars-section">
             {/* Inline filters bar */}
-            {carCount > 0 && (
+            {totalCarCount > 0 && (
                 <DealershipInventoryFilters
                     filters={filters}
                     onFilterChange={onFilterChange}
@@ -42,7 +44,7 @@ export const DealershipCarsSection = ({
             {carsLoading && <LoadingGrid count={6} />}
 
             {/* Empty state - no cars at all in dealership */}
-            {!carsLoading && carCount === 0 && (
+            {!carsLoading && totalCarCount === 0 && (
                 <div className="bg-slate-50/50 rounded-2xl p-12 text-center border border-slate-100">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100/80 mb-4 text-slate-400">
                         <Car className="h-8 w-8" />
@@ -58,7 +60,7 @@ export const DealershipCarsSection = ({
             )}
 
             {/* Empty state - filters returned no results */}
-            {!carsLoading && carCount > 0 && cars.length === 0 && (
+            {!carsLoading && totalCarCount > 0 && cars.length === 0 && (
                 <div className="bg-slate-50/50 rounded-2xl p-12 text-center border border-slate-100">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100/80 mb-4 text-slate-400">
                         <Search className="h-8 w-8" />

@@ -9,12 +9,18 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ShareDialog from "@/app/(site)/cars/[id]/_components/ShareDialog";
+import type { DealershipDetail } from "../_lib/detail-types";
 
 export const ShareDealershipButton = ({
     dealership,
     variant = "outline",
     size = "icon",
     className = "",
+}: {
+    dealership: DealershipDetail;
+    variant?: React.ComponentProps<typeof Button>["variant"];
+    size?: React.ComponentProps<typeof Button>["size"];
+    className?: string;
 }) => {
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 

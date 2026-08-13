@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
 import { getDealershipBySlug } from "@/actions/dealerships";
 import { DealershipDetailPresenter } from "./_components";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
     try {
-        const dealership = await getDealershipBySlug(params.slug);
+        // `params` is a promise in Next 15. Reading `.slug` off it directly gave
+        // undefined, so every dealership page fell into the catch below and
+        // served the generic fallback title/description/OG tags.
+        const { slug } = await params;
+        const dealership = await getDealershipBySlug(slug);
 
         if (!dealership.success || !dealership.data) {
             return {
@@ -12,7 +21,11 @@ export async function generateMetadata({ params }) {
             };
         }
 
-        const { name, description, location, logo, carCount } = dealership.data;
+        // The payload carries `city`/`region` at the top level; there is no
+        // `location` object, so the two location keywords below were always
+        // undefined and filtered out.
+        const { name, description, city, region, logo, carCount } =
+            dealership.data;
 
         const title = `${name} - AutoMe Dealership`;
         const desc = description || `View ${name}'s inventory, reviews, and contact information. ${carCount || 0} cars available.`;
@@ -20,7 +33,7 @@ export async function generateMetadata({ params }) {
         return {
             title,
             description: desc,
-            keywords: [name, "dealership", "car dealership", "automotive", "cars for sale", location?.city, location?.state].filter(Boolean).join(", "),
+            keywords: [name, "dealership", "car dealership", "automotive", "cars for sale", city, region].filter(Boolean).join(", "),
             openGraph: {
                 title,
                 description: desc,

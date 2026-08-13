@@ -2,13 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Car, Star, Calendar } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, useInView } from "framer-motion";
+import type { DealershipDetail } from "../_lib/detail-types";
 
 /**
  * Animated counter hook that counts up from 0 to a target value.
  */
-function useCountUp(target, duration = 1.5, startCounting = false) {
+function useCountUp(
+    target: number,
+    duration = 1.5,
+    startCounting = false
+): number {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -20,10 +26,10 @@ function useCountUp(target, duration = 1.5, startCounting = false) {
             return;
         }
 
-        let startTime = null;
-        let animationFrame;
+        let startTime: number | null = null;
+        let animationFrame = 0;
 
-        const animate = (timestamp) => {
+        const animate = (timestamp: number) => {
             if (!startTime) startTime = timestamp;
             const progress = Math.min(
                 (timestamp - startTime) / (duration * 1000),
@@ -49,7 +55,7 @@ function useCountUp(target, duration = 1.5, startCounting = false) {
 /**
  * Format the createdAt date into "Member since Jan 2024" format.
  */
-function formatMemberSince(dateStr) {
+function formatMemberSince(dateStr: string | Date | null | undefined): string {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return "N/A";
@@ -71,11 +77,21 @@ const StatCard = ({
     decimals = 0,
     onClick,
     delay = 0,
+}: {
+    icon: LucideIcon;
+    iconBgClass: string;
+    iconColorClass: string;
+    value: number | string;
+    label: string;
+    isAnimatedNumber?: boolean;
+    decimals?: number;
+    onClick?: () => void;
+    delay?: number;
 }) => {
-    const ref = useRef(null);
+    const ref = useRef<HTMLDivElement>(null);
     const isInView = useInView(ref, { once: true, margin: "-50px" });
     const animatedValue = useCountUp(
-        isAnimatedNumber ? value : 0,
+        isAnimatedNumber ? Number(value) : 0,
         1.5,
         isAnimatedNumber && isInView
     );
@@ -124,12 +140,16 @@ const StatCard = ({
     );
 };
 
-export const DealershipStats = ({ dealership }) => {
-    const formatRating = (rating) => {
+export const DealershipStats = ({
+    dealership,
+}: {
+    dealership: DealershipDetail;
+}) => {
+    const formatRating = (rating: number | null | undefined) => {
         return rating ? rating.toFixed(1) : "0.0";
     };
 
-    const scrollToSection = (sectionId) => {
+    const scrollToSection = (sectionId: string) => {
         const element = document.getElementById(sectionId);
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" });

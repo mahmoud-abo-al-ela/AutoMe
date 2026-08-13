@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export const DealershipErrorState = ({ error }) => {
+export const DealershipErrorState = ({ error }: { error?: string | null }) => {
     return (
         <div className="container mx-auto py-8 px-4 mt-18">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">

@@ -16,7 +16,9 @@ const ShareDialog = ({
   isOpen,
   onOpenChange,
   title = "Share This Vehicle",
-  car,
+  // Optional: the dealership share button reuses this dialog and has no car,
+  // which the document.title fallback below already handles.
+  car = null,
 }) => {
   const [copying, setCopying] = useState(false);
 

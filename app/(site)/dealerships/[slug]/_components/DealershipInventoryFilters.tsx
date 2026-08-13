@@ -14,6 +14,23 @@ import { formatPrice, buildActiveChips } from "./inventory-filters/filter-utils"
 import FilterCheckboxPopover from "./inventory-filters/FilterCheckboxPopover";
 import FilterCheckboxGroup from "./inventory-filters/FilterCheckboxGroup";
 import ActiveFilterChips from "./inventory-filters/ActiveFilterChips";
+import type {
+    DealershipInventoryFilterState,
+    DealershipInventoryProps,
+} from "../_lib/detail-types";
+
+/**
+ * The multi-select facets are stored as comma-separated strings, and the chip
+ * and checkbox handlers address them by name at runtime. Reading them through
+ * this keeps that dynamic access in one narrow place.
+ */
+const readCsvFilter = (
+    filters: DealershipInventoryFilterState,
+    field: string
+): string[] => {
+    const value = filters[field as keyof DealershipInventoryFilterState];
+    return typeof value === "string" && value ? value.split(",") : [];
+};
 
 export const DealershipInventoryFilters = ({
     filters,
@@ -21,14 +38,20 @@ export const DealershipInventoryFilters = ({
     availableFilters,
     totalCars,
     isLoading
+}: Pick<
+    DealershipInventoryProps,
+    "filters" | "onFilterChange" | "availableFilters"
+> & {
+    totalCars?: number;
+    isLoading?: boolean;
 }) => {
     const [searchVal, setSearchVal] = useState(filters.search || "");
-    const [priceVal, setPriceVal] = useState([
-        filters.minPrice || 0,
-        filters.maxPrice || (availableFilters?.priceRange?.max || 100000)
+    const [priceVal, setPriceVal] = useState<number[]>([
+        Number(filters.minPrice) || 0,
+        Number(filters.maxPrice) || (availableFilters?.priceRange?.max || 100000)
     ]);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const searchDebounceRef = useRef(null);
+    const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Sync search val with filters prop
     useEffect(() => {
@@ -43,7 +66,7 @@ export const DealershipInventoryFilters = ({
         ]);
     }, [filters.minPrice, filters.maxPrice, availableFilters?.priceRange?.max]);
 
-    const handleSearchChange = (e) => {
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setSearchVal(val);
 
@@ -58,11 +81,11 @@ export const DealershipInventoryFilters = ({
         onFilterChange({ ...filters, search: undefined });
     };
 
-    const handleCheckboxToggle = (field, value) => {
-        const currentVals = filters[field] ? filters[field].split(",") : [];
-        let newVals;
+    const handleCheckboxToggle = (field: string, value: string) => {
+        const currentVals = readCsvFilter(filters, field);
+        let newVals: string[];
         if (currentVals.includes(value)) {
-            newVals = currentVals.filter((v) => v !== value);
+            newVals = currentVals.filter((v: string) => v !== value);
         } else {
             newVals = [...currentVals, value];
         }
@@ -72,11 +95,11 @@ export const DealershipInventoryFilters = ({
         });
     };
 
-    const handlePriceChange = (val) => {
+    const handlePriceChange = (val: number[]) => {
         setPriceVal(val);
     };
 
-    const handlePriceCommit = (val) => {
+    const handlePriceCommit = (val: number[]) => {
         const maxLimit = availableFilters?.priceRange?.max || 100000;
         const isMinSet = val[0] > 0;
         const isMaxSet = val[1] < maxLimit;
@@ -88,7 +111,7 @@ export const DealershipInventoryFilters = ({
         });
     };
 
-    const handleSortChange = (val) => {
+    const handleSortChange = (val: string) => {
         onFilterChange({ ...filters, sortBy: val });
     };
 
@@ -100,7 +123,7 @@ export const DealershipInventoryFilters = ({
         setPriceVal([0, availableFilters?.priceRange?.max || 100000]);
     };
 
-    const handleRemoveChip = (field, value) => {
+    const handleRemoveChip = (field: string, value?: string) => {
         if (field === "search") {
             handleClearSearch();
         } else if (field === "price") {
@@ -110,7 +133,7 @@ export const DealershipInventoryFilters = ({
                 maxPrice: undefined
             });
         } else {
-            const currentVals = filters[field] ? filters[field].split(",") : [];
+            const currentVals = readCsvFilter(filters, field);
             const newVals = currentVals.filter((v) => v !== value);
             onFilterChange({
                 ...filters,

@@ -4,9 +4,18 @@ import { X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import type { ActiveFilterChip } from "../../_lib/detail-types";
 
 // Animated row of active-filter chips with a "Clear All" action.
-export default function ActiveFilterChips({ chips, onRemove, onClearAll }) {
+export default function ActiveFilterChips({
+  chips,
+  onRemove,
+  onClearAll,
+}: {
+  chips: ActiveFilterChip[];
+  onRemove: (field: string, value?: string) => void;
+  onClearAll: () => void;
+}) {
   return (
     <AnimatePresence>
       {chips.length > 0 && (

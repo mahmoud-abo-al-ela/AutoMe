@@ -5,17 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { FilterCheckboxProps } from "./FilterCheckboxGroup";
 
 // contentWidthClass must be a static Tailwind class (e.g. "w-[200px]") so JIT
 // can see it — pass it in from the parent rather than composing it dynamically.
 export default function FilterCheckboxPopover({
   label,
   field,
-  options,
+  options = [],
   selectedCsv,
   onToggle,
   idPrefix,
   contentWidthClass = "w-[200px]",
+}: FilterCheckboxProps & {
+  idPrefix: string;
+  contentWidthClass?: string;
 }) {
   const selected = (selectedCsv || "").split(",").filter(Boolean);
   const active = selected.length > 0;

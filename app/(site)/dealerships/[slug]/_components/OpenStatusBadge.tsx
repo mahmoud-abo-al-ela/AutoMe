@@ -2,8 +2,14 @@
 
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
+import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
-const DAY_MAP = {
+export interface OpenStatus {
+    isOpen: boolean;
+    message: string;
+}
+
+const DAY_MAP: Record<number, string> = {
     0: "Sunday",
     1: "Monday",
     2: "Tuesday",
@@ -16,7 +22,7 @@ const DAY_MAP = {
 /**
  * Parse a time string like "09:00" or "9:00 AM" into minutes since midnight.
  */
-function parseTimeToMinutes(timeStr) {
+function parseTimeToMinutes(timeStr: string | null | undefined): number | null {
     if (!timeStr) return null;
 
     const cleaned = timeStr.trim().toUpperCase();
@@ -48,7 +54,7 @@ function parseTimeToMinutes(timeStr) {
 /**
  * Format minutes since midnight back to a readable time string.
  */
-function formatMinutesToTime(totalMinutes) {
+function formatMinutesToTime(totalMinutes: number): string {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     const period = hours >= 12 ? "PM" : "AM";
@@ -59,7 +65,9 @@ function formatMinutesToTime(totalMinutes) {
 /**
  * Calculate the open/closed status based on working hours.
  */
-function getOpenStatus(workingHours) {
+function getOpenStatus(
+    workingHours: WorkingHoursEntry[] | null | undefined
+): OpenStatus {
     if (!workingHours || workingHours.length === 0) {
         return { isOpen: false, message: "Hours not available" };
     }
@@ -121,7 +129,10 @@ function getOpenStatus(workingHours) {
 /**
  * Find the next day the dealership is open.
  */
-function findNextOpenDay(workingHours, currentDayIndex) {
+function findNextOpenDay(
+    workingHours: WorkingHoursEntry[],
+    currentDayIndex: number
+): { day: string; time: string } | null {
     for (let i = 1; i <= 7; i++) {
         const nextDayIndex = (currentDayIndex + i) % 7;
         const nextDayName = DAY_MAP[nextDayIndex];
@@ -140,7 +151,13 @@ function findNextOpenDay(workingHours, currentDayIndex) {
     return null;
 }
 
-export const OpenStatusBadge = ({ workingHours, className = "" }) => {
+export const OpenStatusBadge = ({
+    workingHours,
+    className = "",
+}: {
+    workingHours?: WorkingHoursEntry[] | null;
+    className?: string;
+}) => {
     const status = useMemo(() => getOpenStatus(workingHours), [workingHours]);
 
     return (

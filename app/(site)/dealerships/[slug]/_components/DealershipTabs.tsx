@@ -12,6 +12,10 @@ import { DealershipCarsSection } from "./DealershipCarsSection";
 import { DealershipWorkingHours } from "./DealershipWorkingHours";
 import { DealershipContactInfo } from "./DealershipContactInfo";
 import { DealershipReviews } from "../../_components";
+import type {
+    DealershipDetail,
+    DealershipInventoryProps,
+} from "../_lib/detail-types";
 
 export const DealershipTabs = ({
     dealership,
@@ -23,6 +27,9 @@ export const DealershipTabs = ({
     filters,
     onFilterChange,
     availableFilters,
+}: DealershipInventoryProps & {
+    dealership: DealershipDetail;
+    defaultTab?: string;
 }) => {
     return (
         <Tabs defaultValue={defaultTab} className="w-full">

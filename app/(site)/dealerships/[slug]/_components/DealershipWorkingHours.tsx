@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getOpenStatus } from "./OpenStatusBadge";
+import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
 const DAY_NAMES = [
     "Sunday",
@@ -15,7 +16,11 @@ const DAY_NAMES = [
     "Saturday",
 ];
 
-export const DealershipWorkingHours = ({ workingHours }) => {
+export const DealershipWorkingHours = ({
+    workingHours,
+}: {
+    workingHours?: WorkingHoursEntry[] | null;
+}) => {
     const currentDay = useMemo(() => {
         return DAY_NAMES[new Date().getDay()];
     }, []);

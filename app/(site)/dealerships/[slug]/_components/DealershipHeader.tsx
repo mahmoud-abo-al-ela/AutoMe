@@ -21,15 +21,20 @@ import {
 } from "@/components/ui/tooltip";
 import { OpenStatusBadge } from "./OpenStatusBadge";
 import { ShareDealershipButton } from "./ShareDealershipButton";
+import type { DealershipDetail } from "../_lib/detail-types";
 
 const MAX_DESCRIPTION_LINES = 2;
 const LINE_HEIGHT_PX = 24; // approximate line height for text-sm/base
 const MAX_HEIGHT_PX = MAX_DESCRIPTION_LINES * LINE_HEIGHT_PX;
 
-export const DealershipHeader = ({ dealership }) => {
+export const DealershipHeader = ({
+    dealership,
+}: {
+    dealership: DealershipDetail;
+}) => {
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [isDescriptionClamped, setIsDescriptionClamped] = useState(false);
-    const descriptionRef = useRef(null);
+    const descriptionRef = useRef<HTMLParagraphElement>(null);
 
     useEffect(() => {
         if (descriptionRef.current) {
@@ -39,12 +44,12 @@ export const DealershipHeader = ({ dealership }) => {
         }
     }, [dealership.description]);
 
-    const formatRating = (rating) => {
+    const formatRating = (rating: number | null | undefined) => {
         return rating ? rating.toFixed(1) : "0.0";
     };
 
-    const renderStars = (rating) => {
-        const stars = [];
+    const renderStars = (rating: number | null | undefined) => {
+        const stars: React.ReactNode[] = [];
         const fullStars = Math.floor(rating || 0);
         const hasHalfStar = (rating || 0) - fullStars >= 0.5;
 

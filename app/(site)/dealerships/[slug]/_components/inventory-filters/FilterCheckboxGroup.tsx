@@ -2,8 +2,23 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 
+export interface FilterCheckboxProps {
+  label: string;
+  field: string;
+  options?: string[];
+  /** The selected values, stored in state as a comma-separated string. */
+  selectedCsv?: string;
+  onToggle: (field: string, value: string) => void;
+}
+
 // Mobile-sheet checkbox grid for one filter field (body/fuel/transmission).
-export default function FilterCheckboxGroup({ label, field, options, selectedCsv, onToggle }) {
+export default function FilterCheckboxGroup({
+  label,
+  field,
+  options,
+  selectedCsv,
+  onToggle,
+}: FilterCheckboxProps) {
   if (!options || options.length === 0) return null;
   const selected = (selectedCsv || "").split(",").filter(Boolean);
 
