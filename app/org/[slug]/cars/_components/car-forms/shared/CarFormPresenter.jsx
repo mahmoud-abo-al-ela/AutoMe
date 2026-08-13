@@ -203,7 +203,6 @@ export const CarFormPresenter = ({
                                     register={register}
                                     errors={errors}
                                     watch={watch}
-                                    setValue={setValue}
                                 />
                             )}
 
@@ -232,7 +231,6 @@ export const CarFormPresenter = ({
 
                             {currentSection === "status" && (
                                 <StatusSection
-                                    register={register}
                                     errors={errors}
                                     watch={watch}
                                     setValue={setValue}

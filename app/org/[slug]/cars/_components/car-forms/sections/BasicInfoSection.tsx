@@ -4,8 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Check } from "lucide-react";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "../shared/FieldInfo";
+import type { CarFormSectionProps } from "../shared/section-props";
 
-const BasicInfoSection = ({ register, errors, watch, setValue }) => {
+const BasicInfoSection = ({
+  register,
+  errors,
+  watch,
+}: Pick<CarFormSectionProps, "register" | "errors" | "watch">) => {
   return (
     <FormSection title="Basic Information">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -91,7 +96,7 @@ const BasicInfoSection = ({ register, errors, watch, setValue }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="price" className="flex items-center">
-            Price ($) <FieldInfo text="The listing price in USD" />
+            Price (EGP) <FieldInfo text="The listing price in EGP" />
           </Label>
           <Input
             type="number"

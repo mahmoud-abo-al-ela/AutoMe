@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 
-const FieldInfo = ({ text }) => (
+const FieldInfo = ({ text }: { text: string }) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>

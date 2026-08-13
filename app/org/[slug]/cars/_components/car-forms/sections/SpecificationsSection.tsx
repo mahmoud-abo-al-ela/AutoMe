@@ -11,7 +11,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FormSection from "../shared/FormSection";
-import FieldInfo from "./FieldInfo";
+import FieldInfo from "../shared/FieldInfo";
+import type { CarFormSectionProps } from "../shared/section-props";
+
+type SpecificationsSectionProps = CarFormSectionProps & {
+  bodyTypes: string[];
+  fuelTypes: string[];
+  transmissions: string[];
+};
 
 const SpecificationsSection = ({
   register,
@@ -22,7 +29,19 @@ const SpecificationsSection = ({
   bodyTypes,
   fuelTypes,
   transmissions,
-}) => {
+}: SpecificationsSectionProps) => {
+  // The Zod schema's output type for `features` is string[], but the textarea
+  // is registered directly, so react-hook-form holds the raw comma-separated
+  // string until the transform runs at validation time. Both shapes are real
+  // at runtime, hence the widening.
+  const featuresValue = watch("features") as unknown as
+    | string
+    | string[]
+    | undefined;
+  const featureList = Array.isArray(featuresValue)
+    ? featuresValue
+    : (featuresValue?.split(",") ?? []);
+
   return (
     <FormSection title="Specifications">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4">
@@ -184,12 +203,9 @@ const SpecificationsSection = ({
         {errors.features && (
           <p className="text-red-500 text-sm mt-1">{errors.features.message}</p>
         )}
-        {watch("features") && (
+        {featureList.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {(Array.isArray(watch("features"))
-              ? watch("features")
-              : watch("features").split(",")
-            ).map((feature, idx) =>
+            {featureList.map((feature, idx) =>
               feature.trim() ? (
                 <Badge key={idx} variant="secondary" className="bg-blue-50">
                   {feature.trim()}

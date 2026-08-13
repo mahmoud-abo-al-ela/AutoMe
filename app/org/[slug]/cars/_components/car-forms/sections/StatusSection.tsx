@@ -10,9 +10,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FormSection from "../shared/FormSection";
-import FieldInfo from "./FieldInfo";
+import FieldInfo from "../shared/FieldInfo";
+import type { CarFormSectionProps } from "../shared/section-props";
+import type { CarFormValues } from "@/hooks/use-car-form";
 
-const StatusSection = ({ register, errors, watch, setValue, trigger }) => {
+const StatusSection = ({
+  errors,
+  watch,
+  setValue,
+  trigger,
+}: Pick<
+  CarFormSectionProps,
+  "errors" | "watch" | "setValue" | "trigger"
+>) => {
   const watchStatus = watch("status");
 
   return (
@@ -23,7 +33,9 @@ const StatusSection = ({ register, errors, watch, setValue, trigger }) => {
         </Label>
         <Select
           onValueChange={(value) => {
-            setValue("status", value);
+            // Radix hands back a plain string; the three items below are the
+            // schema's three statuses.
+            setValue("status", value as CarFormValues["status"]);
             if (errors.status) {
               trigger("status");
             }
@@ -52,7 +64,9 @@ const StatusSection = ({ register, errors, watch, setValue, trigger }) => {
           id="featured"
           checked={watch("featured")}
           onCheckedChange={(checked) => {
-            setValue("featured", checked || false);
+            // `checked` can be "indeterminate", which `|| false` let through as
+            // a truthy string.
+            setValue("featured", checked === true);
           }}
           className="mt-1 sm:mt-0"
         />

@@ -2,9 +2,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileImage, Upload, Brain } from "lucide-react";
 import React from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, type DropzoneOptions } from "react-dropzone";
 
-const AIUploadSection = ({ onDrop, isProcessing, error, isDragActive }) => {
+interface AIUploadSectionProps {
+  onDrop: NonNullable<DropzoneOptions["onDrop"]>;
+  isProcessing: boolean;
+  error?: string | null;
+  /** Drag state is owned by the parent's own dropzone, not this one. */
+  isDragActive?: boolean;
+}
+
+const AIUploadSection = ({
+  onDrop,
+  isProcessing,
+  error,
+  isDragActive,
+}: AIUploadSectionProps) => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {

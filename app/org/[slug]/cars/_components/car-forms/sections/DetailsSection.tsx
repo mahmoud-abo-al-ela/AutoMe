@@ -8,11 +8,33 @@ import { X, Upload } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import FormSection from "../shared/FormSection";
-import FieldInfo from "./FieldInfo";
+import FieldInfo from "../shared/FieldInfo";
+import type { CarFormSectionProps } from "../shared/section-props";
 
-const DetailsSection = ({ register, errors, watch, setValue, maxImages = 5 }) => {
+/** A blob URL kept alive for one File in the form's `images` array. */
+interface ImagePreview {
+  file: File;
+  url: string;
+}
+
+type DetailsSectionProps = Pick<
+  CarFormSectionProps,
+  "register" | "errors" | "watch" | "setValue"
+> & {
+  maxImages?: number;
+};
+
+const DetailsSection = ({
+  register,
+  errors,
+  watch,
+  setValue,
+  maxImages = 5,
+}: DetailsSectionProps) => {
   const watchImages = watch("images");
-  const [imagePreviews, setImagePreviews] = useState({});
+  const [imagePreviews, setImagePreviews] = useState<
+    Record<number, ImagePreview>
+  >({});
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -42,7 +64,7 @@ const DetailsSection = ({ register, errors, watch, setValue, maxImages = 5 }) =>
   useEffect(() => {
     if (!watchImages) return;
 
-    const newPreviews = {};
+    const newPreviews: Record<number, ImagePreview> = {};
     watchImages.forEach((image, index) => {
       if (image instanceof File) {
         // Reuse existing preview or create new one
@@ -61,16 +83,20 @@ const DetailsSection = ({ register, errors, watch, setValue, maxImages = 5 }) =>
 
     // Cleanup old previews that are no longer in use
     return () => {
-      Object.keys(imagePreviews).forEach(key => {
-        if (!newPreviews[key] && imagePreviews[key]?.url) {
-          URL.revokeObjectURL(imagePreviews[key].url);
+      Object.keys(imagePreviews).forEach((key) => {
+        const index = Number(key);
+        if (!newPreviews[index] && imagePreviews[index]?.url) {
+          URL.revokeObjectURL(imagePreviews[index].url);
         }
       });
     };
+    // `imagePreviews` is read to reuse blob URLs but is also what this effect
+    // sets, so listing it would re-run the effect on its own output.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchImages]);
 
-  const removeImage = (index) => {
-    const updatedImages = watchImages.filter((_, i) => i !== index);
+  const removeImage = (index: number) => {
+    const updatedImages = (watchImages ?? []).filter((_, i) => i !== index);
 
     // Revoke the preview URL for the removed image
     if (imagePreviews[index]?.url) {
