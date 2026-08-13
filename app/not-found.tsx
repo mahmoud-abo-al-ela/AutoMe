@@ -24,8 +24,7 @@ const NotFound = () => {
               Page Not Found
             </h2>
             <p className="text-gray-600 mb-6">
-              We couldn't find the page you were looking for doesn't exist on
-              our site.
+              We couldn&apos;t find the page you were looking for.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">

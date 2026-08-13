@@ -6,7 +6,16 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
-export default function GlobalError({ error, reset }) {
+// Named for what it is: the root route's error boundary. `global-error.tsx`
+// beside it is the one that replaces the whole document, and both were called
+// GlobalError.
+export default function RootRouteError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
     console.error("Global Error:", error);
     Sentry.captureException(error);

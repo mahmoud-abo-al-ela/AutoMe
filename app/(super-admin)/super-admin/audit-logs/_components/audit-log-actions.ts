@@ -1,8 +1,17 @@
 // Action categorization + display config for audit log rows.
 import { Plus, Pencil, Trash2, Eye, LogIn, LogOut } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+export type ActionCategory =
+  | "CREATE"
+  | "UPDATE"
+  | "DELETE"
+  | "VIEW"
+  | "LOGIN"
+  | "LOGOUT";
 
 // Map a detailed action name to a broad category.
-export const getActionCategory = (action) => {
+export const getActionCategory = (action: string): ActionCategory => {
   if (action.includes("CREATED") || action.includes("INVITED")) return "CREATE";
   if (
     action.includes("UPDATED") ||
@@ -29,7 +38,7 @@ export const getActionCategory = (action) => {
   return "VIEW";
 };
 
-export const actionIcons = {
+export const actionIcons: Record<ActionCategory, LucideIcon> = {
   CREATE: Plus,
   UPDATE: Pencil,
   DELETE: Trash2,
@@ -38,7 +47,7 @@ export const actionIcons = {
   LOGOUT: LogOut,
 };
 
-export const actionColors = {
+export const actionColors: Record<ActionCategory, string> = {
   CREATE:
     "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   UPDATE: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
