@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, Loader2, Globe } from "lucide-react";
+import type { SlugStatus } from "../../_lib/onboarding-types";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "autome.com";
 
@@ -13,7 +14,13 @@ const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "autome.com";
  * learned their address only at the end of onboarding. Naming the URL here is
  * what turns "Dealership Name" from a form field into "this is my site".
  */
-export default function SlugPreview({ slug, status }) {
+export default function SlugPreview({
+    slug,
+    status,
+}: {
+    slug: string;
+    status: SlugStatus;
+}) {
     if (!slug) return null;
 
     const tone =

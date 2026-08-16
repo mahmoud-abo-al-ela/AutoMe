@@ -47,6 +47,22 @@ export interface OnboardingFormData {
 /** Each step merges its own slice of the form; none of them replace it. */
 export type UpdateFormData = (updates: Partial<OnboardingFormData>) => void;
 
+/** The structured location the org-details step collects. */
+export interface OnboardingLocation {
+  country: string;
+  region: string;
+  city: string;
+}
+
+/**
+ * A partial location update. Picking a country clears the state and city
+ * beneath it, so LocationFields sends whichever keys actually changed.
+ */
+export type OnboardingLocationPatch = Partial<OnboardingLocation>;
+
+/** Availability of the generated slug; null before a name is long enough. */
+export type SlugStatus = "checking" | "available" | "taken" | null;
+
 /** One row of the working-hours editor. */
 export interface WorkingHoursDay {
   key: OnboardingDay;

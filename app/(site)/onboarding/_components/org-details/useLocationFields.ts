@@ -3,6 +3,18 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getCities, getCountries, getStates } from "@/actions/locations";
+import type { ActionResponse } from "@/lib/utils/response";
+import type {
+    OnboardingLocation,
+    OnboardingLocationPatch,
+} from "../../_lib/onboarding-types";
+
+/** Unwrap an action's success payload from the ActionResponse envelope. */
+type PayloadOf<T> = Awaited<T> extends ActionResponse<infer D> ? D : never;
+
+type Country = PayloadOf<ReturnType<typeof getCountries>>[number];
+type State = PayloadOf<ReturnType<typeof getStates>>[number];
+type City = PayloadOf<ReturnType<typeof getCities>>[number];
 
 /**
  * Country → state → city cascade, matching the org profile settings page.
@@ -11,10 +23,16 @@ import { getCities, getCountries, getStates } from "@/actions/locations";
  * organization landed with null city/region/country and could not be filtered
  * or sorted by location until the owner went and edited their profile.
  */
-export function useLocationFields({ value, onChange }) {
-    const [countries, setCountries] = useState([]);
-    const [states, setStates] = useState([]);
-    const [cities, setCities] = useState([]);
+export function useLocationFields({
+    value,
+    onChange,
+}: {
+    value: OnboardingLocation;
+    onChange: (patch: OnboardingLocationPatch) => void;
+}) {
+    const [countries, setCountries] = useState<Country[]>([]);
+    const [states, setStates] = useState<State[]>([]);
+    const [cities, setCities] = useState<City[]>([]);
     const [selectedStateCode, setSelectedStateCode] = useState("");
     const [loadingStates, setLoadingStates] = useState(false);
     const [loadingCities, setLoadingCities] = useState(false);
@@ -41,7 +59,7 @@ export function useLocationFields({ value, onChange }) {
             const response = await getCountries();
             if (cancelled) return;
             if (!response.success) {
-                toast.error(response.error?.message || "Failed to load countries");
+                toast.error(response.error.message || "Failed to load countries");
                 return;
             }
             setCountries(response.data || []);
@@ -66,7 +84,7 @@ export function useLocationFields({ value, onChange }) {
                 const response = await getStates(value.country);
                 if (cancelled) return;
                 if (!response.success) {
-                    toast.error(response.error?.message || "Failed to load states");
+                    toast.error(response.error.message || "Failed to load states");
                     setStates([]);
                     return;
                 }
@@ -92,7 +110,7 @@ export function useLocationFields({ value, onChange }) {
         loadCities(value.country, match.code);
     }, [states, value.region, value.country, selectedStateCode]);
 
-    const loadCities = async (countryCode, stateCode) => {
+    const loadCities = async (countryCode: string, stateCode: string) => {
         if (!countryCode || !stateCode) {
             setCities([]);
             return;
@@ -101,7 +119,7 @@ export function useLocationFields({ value, onChange }) {
         try {
             const response = await getCities(countryCode, stateCode);
             if (!response.success) {
-                toast.error(response.error?.message || "Failed to load cities");
+                toast.error(response.error.message || "Failed to load cities");
                 setCities([]);
                 return;
             }
@@ -111,20 +129,20 @@ export function useLocationFields({ value, onChange }) {
         }
     };
 
-    const handleCountryChange = (countryCode) => {
+    const handleCountryChange = (countryCode: string) => {
         setSelectedStateCode("");
         setCities([]);
         onChange({ country: countryCode, region: "", city: "" });
     };
 
-    const handleStateChange = async (stateCode) => {
+    const handleStateChange = async (stateCode: string) => {
         const state = states.find((item) => item.code === stateCode);
         setSelectedStateCode(stateCode);
         onChange({ region: state?.name || "", city: "" });
         await loadCities(value.country, stateCode);
     };
 
-    const handleCityChange = (cityName) => {
+    const handleCityChange = (cityName: string) => {
         onChange({ city: cityName });
     };
 

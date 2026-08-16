@@ -4,6 +4,10 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { XCircle } from "lucide-react";
+import type { ReactNode } from "react";
+import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { OrgDetailsFormValues } from "./useOrgDetails";
+import type { OrgInputField } from "./constants";
 
 /**
  * `bare` drops the grid wrapper so the fields become cells of a grid the caller
@@ -11,7 +15,21 @@ import { XCircle } from "lucide-react";
  * different components, and nesting a grid per component left their column edges
  * out of line with each other.
  */
-export default function FormFields({ fields, register, errors, columns = 2, footerSlot, bare = false }) {
+export default function FormFields({
+    fields,
+    register,
+    errors,
+    columns = 2,
+    footerSlot,
+    bare = false,
+}: {
+    fields: OrgInputField[];
+    register: UseFormRegister<OrgDetailsFormValues>;
+    errors: FieldErrors<OrgDetailsFormValues>;
+    columns?: number;
+    footerSlot?: ReactNode;
+    bare?: boolean;
+}) {
     const cells = (
         <>
             {fields.map((field, index) => {
@@ -56,7 +74,7 @@ export default function FormFields({ fields, register, errors, columns = 2, foot
                                 className="text-sm text-red-600 flex items-center gap-1"
                             >
                                 <XCircle className="h-4 w-4" />
-                                {errors[field.id].message}
+                                {errors[field.id]?.message}
                             </motion.p>
                         )}
                         {field.id === "name" && footerSlot}

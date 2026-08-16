@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ImageIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { toast } from "sonner";
 
 /**
  * `compact` renders the control as a 48px row, the same height as an Input, so
@@ -12,12 +13,22 @@ import Image from "next/image";
  * square tile it replaced was 112px tall and sat beside a 48px name field,
  * leaving a block of dead space that no other row had.
  */
-export default function LogoUpload({ value, onChange, error, compact = false }) {
+export default function LogoUpload({
+  value,
+  onChange,
+  error,
+  compact = false,
+}: {
+  value: string;
+  onChange: (dataUrl: string) => void;
+  error?: string;
+  compact?: boolean;
+}) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -27,7 +38,7 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -37,19 +48,22 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
     }
   };
 
-  const handleChange = (e) => {
-    e.preventDefault();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0]);
     }
   };
 
-  const handleFile = async (file) => {
+  const handleFile = async (file: File) => {
+    // Both rejections used to be a bare `return`, so dropping a PDF or an
+    // oversized photo did nothing at all — no message, no state change.
     if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
+      toast.error("Logo must be smaller than 5MB");
       return;
     }
 
@@ -59,7 +73,11 @@ export default function LogoUpload({ value, onChange, error, compact = false }) 
       // Convert to base64 for preview - actual upload happens on org creation
       const reader = new FileReader();
       reader.onloadend = () => {
-        onChange(reader.result);
+        // readAsDataURL always yields a string; the union is for the other read
+        // modes on the shared FileReader interface.
+        if (typeof reader.result === "string") {
+          onChange(reader.result);
+        }
         setIsUploading(false);
       };
       reader.onerror = () => {

@@ -4,13 +4,23 @@ import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import SearchableLocationSelect from "@/components/SearchableLocationSelect";
 import { useLocationFields } from "./useLocationFields";
+import type {
+    OnboardingLocation,
+    OnboardingLocationPatch,
+} from "../../_lib/onboarding-types";
 
 /**
  * Country / State / City, mirroring the org profile settings page so a
  * dealership's location is captured up front rather than left null until
  * someone edits their profile.
  */
-export default function LocationFields({ value, onChange }) {
+export default function LocationFields({
+    value,
+    onChange,
+}: {
+    value: OnboardingLocation;
+    onChange: (patch: OnboardingLocationPatch) => void;
+}) {
     const {
         countryOptions,
         stateOptions,

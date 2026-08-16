@@ -5,11 +5,30 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkSlugAvailability } from "@/actions/onboarding";
 import { orgDetailsSchema } from "../schemas";
+import type { z } from "zod";
+import type {
+    OnboardingFormData,
+    OnboardingLocationPatch,
+    SlugStatus,
+    UpdateFormData,
+} from "../../_lib/onboarding-types";
 
-export function useOrgDetails({ formData, updateFormData, onNext }) {
-    const [slugStatus, setSlugStatus] = useState(null);
+/** Step 1's own slice of the wizard's form data. */
+export type OrgDetailsFormValues = z.infer<typeof orgDetailsSchema>;
+
+export function useOrgDetails({
+    formData,
+    updateFormData,
+    onNext,
+}: {
+    formData: OnboardingFormData;
+    updateFormData: UpdateFormData;
+    onNext: () => void;
+}) {
+    const [slugStatus, setSlugStatus] = useState<SlugStatus>(null);
     const [generatedSlug, setGeneratedSlug] = useState("");
-    const [slugCheckTimeout, setSlugCheckTimeout] = useState(null);
+    const [slugCheckTimeout, setSlugCheckTimeout] =
+        useState<ReturnType<typeof setTimeout> | null>(null);
     const [logo, setLogo] = useState(formData.logo || "");
     const [logoError, setLogoError] = useState("");
 
@@ -19,7 +38,7 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
         watch,
         setValue,
         formState: { errors },
-    } = useForm({
+    } = useForm<OrgDetailsFormValues>({
         resolver: zodResolver(orgDetailsSchema),
         mode: "onChange",
         defaultValues: {
@@ -54,13 +73,13 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
 
     // LocationFields hands back a partial patch (picking a country clears the
     // state and city beneath it), so apply whatever keys it sends.
-    const updateLocation = (patch) => {
-        Object.entries(patch).forEach(([key, value]) => {
-            setValue(key, value, { shouldValidate: true });
+    const updateLocation = (patch: OnboardingLocationPatch) => {
+        (Object.keys(patch) as (keyof OnboardingLocationPatch)[]).forEach((key) => {
+            setValue(key, patch[key] ?? "", { shouldValidate: true });
         });
     };
 
-    const generateSlug = (name) => {
+    const generateSlug = (name: string) => {
         return name
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, "")
@@ -96,7 +115,7 @@ export function useOrgDetails({ formData, updateFormData, onNext }) {
         };
     }, [watchedName]);
 
-    const onSubmit = (data) => {
+    const onSubmit = (data: OrgDetailsFormValues) => {
         if (slugStatus === "taken" || !generatedSlug) {
             return;
         }

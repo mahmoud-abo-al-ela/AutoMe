@@ -1,6 +1,23 @@
-import { Building2, Mail, Phone, MapPin } from "lucide-react";
+import { Building2, Mail, Phone, MapPin, type LucideIcon } from "lucide-react";
+import type { OrgDetailsFormValues } from "./useOrgDetails";
 
-export const getInputFields = (values) => [
+/** One text field of the org-details form. */
+export interface OrgInputField {
+    id: keyof OrgDetailsFormValues;
+    label: string;
+    icon: LucideIcon;
+    placeholder: string;
+    type?: string;
+    required: boolean;
+    value: string | undefined;
+}
+
+export const getInputFields = (values: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string | undefined;
+}): OrgInputField[] => [
     {
         id: "name",
         label: "Dealership Name",

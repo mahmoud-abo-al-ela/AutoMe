@@ -4,7 +4,13 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-export default function OrgDetailsFooter({ disabled, hint }) {
+export default function OrgDetailsFooter({
+    disabled,
+    hint,
+}: {
+    disabled: boolean;
+    hint: string | null;
+}) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}

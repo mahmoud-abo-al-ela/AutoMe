@@ -9,8 +9,20 @@ import {
   useOrgDetails,
   getInputFields,
 } from "./org-details";
+import type {
+  OnboardingFormData,
+  UpdateFormData,
+} from "../_lib/onboarding-types";
 
-export default function Step1OrgDetails({ formData, updateFormData, onNext }) {
+export default function Step1OrgDetails({
+  formData,
+  updateFormData,
+  onNext,
+}: {
+  formData: OnboardingFormData;
+  updateFormData: UpdateFormData;
+  onNext: () => void;
+}) {
   const {
     register,
     handleSubmit,
