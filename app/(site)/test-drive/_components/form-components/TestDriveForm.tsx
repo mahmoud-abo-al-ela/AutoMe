@@ -6,12 +6,18 @@ import TimeSelector from "./TimeSelector";
 import NotesField from "./NotesField";
 import FormActions from "./FormActions";
 import { useTestDriveForm } from "../hooks";
+import type { WorkingHours } from "../../_lib/scheduling";
 
 const TestDriveForm = ({
     carId,
     workingHours,
     availableDates,
     onSuccess,
+}: {
+    carId: string;
+    workingHours: WorkingHours;
+    availableDates: Date[];
+    onSuccess: () => void;
 }) => {
     const {
         register,

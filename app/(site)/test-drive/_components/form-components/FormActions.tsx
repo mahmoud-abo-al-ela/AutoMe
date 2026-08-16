@@ -8,7 +8,15 @@ const FormActions = ({
     cancelText = "Cancel",
     submitText = "Submit",
     loadingText = "Processing...",
-    variant = "single", // "single" or "split"
+    variant = "single",
+}: {
+    /** Required by the "split" variant, which is the only one with a cancel button. */
+    onCancel?: () => void;
+    submitting: boolean;
+    cancelText?: string;
+    submitText?: string;
+    loadingText?: string;
+    variant?: "single" | "split";
 }) => {
     if (variant === "split") {
         return (

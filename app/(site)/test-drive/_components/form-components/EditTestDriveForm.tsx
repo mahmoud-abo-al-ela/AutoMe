@@ -6,6 +6,8 @@ import TimeSelector from "./TimeSelector";
 import NotesField from "./NotesField";
 import FormActions from "./FormActions";
 import { useEditTestDriveForm } from "../hooks";
+import type { WorkingHours } from "../../_lib/scheduling";
+import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 const EditTestDriveForm = ({
     testDrive,
@@ -13,6 +15,12 @@ const EditTestDriveForm = ({
     carId,
     onCancel,
     onSuccess,
+}: {
+    testDrive: TestDriveDetail;
+    workingHours: WorkingHours;
+    carId: string;
+    onCancel: () => void;
+    onSuccess: () => void;
 }) => {
     const {
         register,
@@ -38,7 +46,7 @@ const EditTestDriveForm = ({
         <div className="min-h-[400px] md:min-h-[500px]">
             <Card className="p-4 md:p-6 mx-2 md:mx-0 gap-3">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <h2 className="text-xl font-semibold">{testDrive?.car?.title}</h2>
+                    <h2 className="text-xl font-semibold">{testDrive.car?.title}</h2>
                     <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                         {testDrive.status}
                     </span>

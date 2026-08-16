@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { DayOfWeek, WorkingHours } from "../../_lib/scheduling";
 
 const DateSelector = ({
     selectedDate,
@@ -22,6 +23,16 @@ const DateSelector = ({
     setCalendarOpen,
     selectedDay,
     workingHours,
+}: {
+    selectedDate: string;
+    onDateChange: (date: Date | undefined) => void;
+    isDateDisabled: (date: Date) => boolean;
+    error?: string;
+    disabled: boolean;
+    calendarOpen: boolean;
+    setCalendarOpen: (open: boolean) => void;
+    selectedDay: DayOfWeek | null;
+    workingHours: WorkingHours;
 }) => {
     return (
         <div>

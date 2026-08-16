@@ -1,33 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CalendarDays, Clock, Info } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query-client";
 
-const InfoSidebar = ({ car, carId }) => {
-  const [carData, setCarData] = useState(car || null);
-
-  const { data } = useQuery({
-    queryKey: queryKeys.cars.detail(carId),
-    queryFn: async () => {
-      const response = await fetch(`/api/cars/${carId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch car data");
-      }
-      return await response.json();
-    },
-    enabled: Boolean(carId && !car),
-  });
-
-  useEffect(() => {
-    if (data?.success) {
-      setCarData(data.data);
-    }
-  }, [data]);
-
+/**
+ * Static booking guidance. This used to take `car`/`carId` props and fetch
+ * `/api/cars/${carId}` — a route that does not exist, so the request 404'd and
+ * react-query retried it on every render of the create form. The result was
+ * never rendered either: the panel below is entirely static.
+ */
+const InfoSidebar = () => {
   return (
     <Card className="p-4 md:p-6 mx-2 md:mx-0 gap-3">
       <h3 className="text-lg font-semibold mb-2 md:mb-4">
@@ -50,7 +33,7 @@ const InfoSidebar = ({ car, carId }) => {
           <span className="bg-primary/10 text-primary rounded-full p-1 mr-2 mt-0.5">
             <Info className="h-6 w-6" />
           </span>
-          <span>Bring your driver's license and proof of insurance</span>
+          <span>Bring your driver&apos;s license and proof of insurance</span>
         </li>
       </ul>
       <Separator className="my-4" />

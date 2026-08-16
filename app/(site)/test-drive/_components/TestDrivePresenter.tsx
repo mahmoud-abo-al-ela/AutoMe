@@ -9,6 +9,7 @@ import {
     UserTestDrivesList,
     TestDriveSkeleton,
 } from "./index";
+import type { useTestDrivePage } from "@/hooks/use-test-drive-page";
 
 const MODES = {
     LIST: "list",
@@ -26,13 +27,10 @@ export const TestDrivePresenter = ({
     loading,
     loadingTestDrive,
     handlers,
-}) => {
-    const {
-        workingHours,
-        availableDates,
-        loading: loadingHours,
-        isDateDisabled,
-    } = useWorkingHours();
+}: ReturnType<typeof useTestDrivePage>) => {
+    // Each form derives its own isDateDisabled from these hours, so the one
+    // this hook also returns was passed down and never read.
+    const { workingHours, availableDates } = useWorkingHours();
 
     const getTitle = () => {
         switch (mode) {
@@ -57,7 +55,6 @@ export const TestDrivePresenter = ({
                 <ExistingTestDrive
                     testDrive={selectedTestDrive}
                     onEditClick={handlers.handleEditClick}
-                    refreshData={handlers.fetchTestDrive}
                     loading={loadingTestDrive}
                 />
             )}
@@ -65,27 +62,25 @@ export const TestDrivePresenter = ({
             {mode === MODES.EDIT && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2">
-                        {loadingTestDrive ? (
+                        {loadingTestDrive || !selectedTestDrive ? (
                             <TestDriveSkeleton />
                         ) : (
                             <EditTestDriveForm
                                 testDrive={selectedTestDrive}
-                                carId={selectedTestDrive?.carId || carId}
+                                carId={selectedTestDrive.carId}
                                 onCancel={handlers.handleEditCancel}
                                 onSuccess={handlers.handleEditSuccess}
                                 workingHours={workingHours}
-                                availableDates={availableDates}
-                                isDateDisabled={isDateDisabled}
                             />
                         )}
                     </div>
                     <div className="md:col-span-1">
-                        <InfoSidebar car={selectedTestDrive?.car} />
+                        <InfoSidebar />
                     </div>
                 </div>
             )}
 
-            {mode === MODES.CREATE && (
+            {mode === MODES.CREATE && carId && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2">
                         <TestDriveForm
@@ -93,11 +88,10 @@ export const TestDrivePresenter = ({
                             onSuccess={handlers.handleTestDriveSuccess}
                             workingHours={workingHours}
                             availableDates={availableDates}
-                            isDateDisabled={isDateDisabled}
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <InfoSidebar carId={carId} />
+                        <InfoSidebar />
                     </div>
                 </div>
             )}

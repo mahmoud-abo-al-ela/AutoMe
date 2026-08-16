@@ -18,6 +18,14 @@ const TimeSelector = ({
     disabled,
     error,
     defaultValue,
+}: {
+    label: string;
+    placeholder?: string;
+    timeSlots: string[];
+    onTimeSelect: (time: string) => void;
+    disabled: boolean;
+    error?: string;
+    defaultValue?: string;
 }) => {
     return (
         <div>
