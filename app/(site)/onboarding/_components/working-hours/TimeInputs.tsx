@@ -5,8 +5,17 @@ import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sun, Moon } from "lucide-react";
+import type { Control } from "react-hook-form";
+import type { WorkingHoursFormValues } from "./useWorkingHours";
+import type { WorkingHoursDay } from "../../_lib/onboarding-types";
 
-export default function TimeInputs({ day, control }) {
+export default function TimeInputs({
+    day,
+    control,
+}: {
+    day: WorkingHoursDay;
+    control: Control<WorkingHoursFormValues>;
+}) {
     return (
         <motion.div
             initial={{ opacity: 0, height: 0 }}

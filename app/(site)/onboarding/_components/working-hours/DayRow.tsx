@@ -5,8 +5,24 @@ import { Controller } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "lucide-react";
 import TimeInputs from "./TimeInputs";
+import type { Control } from "react-hook-form";
+import type { WorkingHoursFormValues } from "./useWorkingHours";
+import type {
+    OnboardingDayHours,
+    WorkingHoursDay,
+} from "../../_lib/onboarding-types";
 
-export default function DayRow({ day, dayData, control, index }) {
+export default function DayRow({
+    day,
+    dayData,
+    control,
+    index,
+}: {
+    day: WorkingHoursDay;
+    dayData: OnboardingDayHours;
+    control: Control<WorkingHoursFormValues>;
+    index: number;
+}) {
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}

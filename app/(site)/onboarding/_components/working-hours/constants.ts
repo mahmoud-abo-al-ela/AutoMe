@@ -1,4 +1,6 @@
-export const DAYS = [
+import type { WorkingHoursDay } from "../../_lib/onboarding-types";
+
+export const DAYS: WorkingHoursDay[] = [
     { key: "monday", label: "Monday", short: "Mon" },
     { key: "tuesday", label: "Tuesday", short: "Tue" },
     { key: "wednesday", label: "Wednesday", short: "Wed" },

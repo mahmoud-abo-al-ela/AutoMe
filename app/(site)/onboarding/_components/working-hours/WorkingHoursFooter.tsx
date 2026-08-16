@@ -4,7 +4,13 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
-export default function WorkingHoursFooter({ onPrev, loading }) {
+export default function WorkingHoursFooter({
+    onPrev,
+    loading,
+}: {
+    onPrev: () => void;
+    loading: boolean;
+}) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}

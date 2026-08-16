@@ -19,7 +19,7 @@ export default function WorkingHoursHeader() {
                     Working Hours
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                    Set your dealership's opening hours
+                    Set your dealership&apos;s opening hours
                 </p>
             </div>
         </motion.div>

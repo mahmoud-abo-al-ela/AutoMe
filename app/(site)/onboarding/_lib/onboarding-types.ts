@@ -47,6 +47,13 @@ export interface OnboardingFormData {
 /** Each step merges its own slice of the form; none of them replace it. */
 export type UpdateFormData = (updates: Partial<OnboardingFormData>) => void;
 
+/** One row of the working-hours editor. */
+export interface WorkingHoursDay {
+  key: OnboardingDay;
+  label: string;
+  short: string;
+}
+
 /** One entry in the step indicator row. */
 export interface WizardStep {
   id: number;
