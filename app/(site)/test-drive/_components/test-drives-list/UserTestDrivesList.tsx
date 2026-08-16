@@ -8,12 +8,26 @@ import TestDriveCard from "./TestDriveCard";
 import TestDriveFilters from "./TestDriveFilters";
 import TestDrivePagination from "./TestDrivePagination";
 import TestDriveEmptyState from "./TestDriveEmptyState";
+import type {
+  TestDriveListItem,
+  TestDrivePagination as Pagination,
+} from "../../_lib/test-drive-types";
 
-const UserTestDrivesList = ({ testDrives, loading, pagination }) => {
+const UserTestDrivesList = ({
+  testDrives,
+  loading,
+  pagination,
+}: {
+  testDrives: TestDriveListItem[];
+  loading: boolean;
+  pagination: Pagination | null;
+}) => {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState(pagination?.status || "all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredDrives, setFilteredDrives] = useState(testDrives || []);
+  const [filteredDrives, setFilteredDrives] = useState<TestDriveListItem[]>(
+    testDrives || []
+  );
 
   const shouldShowPagination = () => {
     if (searchQuery) {
@@ -26,6 +40,9 @@ const UserTestDrivesList = ({ testDrives, loading, pagination }) => {
     if (pagination?.status && pagination.status !== statusFilter) {
       setStatusFilter(pagination.status);
     }
+    // `statusFilter` is read only as a guard. Adding it would re-run the effect
+    // on every local change and push the value straight back to the prop's.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination?.status]);
 
   useEffect(() => {
@@ -48,7 +65,7 @@ const UserTestDrivesList = ({ testDrives, loading, pagination }) => {
     setFilteredDrives(filtered);
   }, [testDrives, searchQuery]);
 
-  const formatDate = (date) => {
+  const formatDate = (date: string) => {
     try {
       return format(new Date(date), "MMMM d, yyyy");
     } catch (error) {
@@ -57,21 +74,21 @@ const UserTestDrivesList = ({ testDrives, loading, pagination }) => {
     }
   };
 
-  const handleViewDetails = (testDriveId) => {
+  const handleViewDetails = (testDriveId: string) => {
     router.push(`/test-drive?testDriveId=${testDriveId}`);
   };
 
-  const handleViewCar = (carId) => {
+  const handleViewCar = (carId: string) => {
     router.push(`/cars/${carId}`);
   };
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     if (pagination && pagination.onPageChange) {
       pagination.onPageChange(newPage);
     }
   };
 
-  const handleStatusChange = (status) => {
+  const handleStatusChange = (status: string) => {
     setStatusFilter(status);
     if (pagination && pagination.onStatusChange) {
       pagination.onStatusChange(status);

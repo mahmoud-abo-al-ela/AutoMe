@@ -3,7 +3,13 @@
 import { Calendar } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 
-const TestDriveEmptyState = ({ searchQuery, onClearSearch }) => {
+const TestDriveEmptyState = ({
+    searchQuery,
+    onClearSearch,
+}: {
+    searchQuery: string;
+    onClearSearch: () => void;
+}) => {
     if (searchQuery) {
         return (
             <EmptyState

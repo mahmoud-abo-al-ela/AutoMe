@@ -1,5 +1,9 @@
-const TestDriveStatusMessage = ({ status }) => {
-    const getStatusMessage = (status) => {
+import type { TestDriveDetail } from "../../_lib/test-drive-types";
+
+type Status = TestDriveDetail["status"];
+
+const TestDriveStatusMessage = ({ status }: { status: Status }) => {
+    const getStatusMessage = (status: Status) => {
         switch (status) {
             case "CONFIRMED":
                 return {

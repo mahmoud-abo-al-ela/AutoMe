@@ -7,6 +7,11 @@ import { toast } from "sonner";
 import { getTestDrives, getTestDriveById } from "@/actions/test-drive";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
+import type {
+    TestDriveDetail,
+    TestDriveListItem,
+    TestDrivePagination,
+} from "@/app/(site)/test-drive/_lib/test-drive-types";
 
 const MODES = {
     LIST: "list",
@@ -66,7 +71,13 @@ export const useTestDrivePage = () => {
         }
     }, [statusFilter, mode]);
 
-    const selectedTestDrive = testDriveData?.success ? testDriveData.data : null;
+    // The test-drive repository is JS by design, and serializePartialCar erases
+    // the joined car to Record<string, unknown>. These two casts re-attach the
+    // shapes findTestDriveById / findManyTestDrives actually select; they are
+    // the single boundary where the payload enters typed client code.
+    const selectedTestDrive = (
+        testDriveData?.success ? testDriveData.data : null
+    ) as TestDriveDetail | null;
 
     useEffect(() => {
         if (testDriveData && !testDriveData.success) {
@@ -108,8 +119,10 @@ export const useTestDrivePage = () => {
         setCurrentPage(newPage);
     }, []);
 
-    const testDrives = data?.success && data.data?.testDrives ? data.data.testDrives : [];
-    const pagination = data?.success && data.data?.pagination
+    const testDrives = (
+        data?.success && data.data?.testDrives ? data.data.testDrives : []
+    ) as TestDriveListItem[];
+    const pagination: TestDrivePagination | null = data?.success && data.data?.pagination
         ? {
             ...data.data.pagination,
             status: statusFilter,

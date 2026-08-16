@@ -1,5 +1,9 @@
-const TestDriveStatusBadge = ({ status }) => {
-    const getStatusStyles = (status) => {
+import type { TestDriveDetail } from "../../_lib/test-drive-types";
+
+type Status = TestDriveDetail["status"];
+
+const TestDriveStatusBadge = ({ status }: { status: Status }) => {
+    const getStatusStyles = (status: Status) => {
         switch (status) {
             case "PENDING":
                 return "bg-yellow-100 text-yellow-800";

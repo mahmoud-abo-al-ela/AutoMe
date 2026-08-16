@@ -9,8 +9,17 @@ import TestDriveDetails from "./TestDriveDetails";
 import TestDriveActions from "./TestDriveActions";
 import TestDriveStatusMessage from "./TestDriveStatusMessage";
 import CancelTestDriveDialog from "./CancelTestDriveDialog";
+import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
-const ExistingTestDrive = ({ testDrive, onEditClick, loading }) => {
+const ExistingTestDrive = ({
+    testDrive,
+    onEditClick,
+    loading,
+}: {
+    testDrive: TestDriveDetail | null;
+    onEditClick: () => void;
+    loading: boolean;
+}) => {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     if (loading) {

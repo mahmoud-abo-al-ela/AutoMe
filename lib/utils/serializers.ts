@@ -189,11 +189,16 @@ export function serializeUser(user: SerializableUser | null) {
   };
 }
 
-/** A test drive row with car/user relations optionally joined. */
-type TestDriveInput = TestDrive & {
+/**
+ * A test drive row with car/user relations optionally joined. `date` is widened
+ * to accept an already-serialized row (this helper is idempotent) but stays
+ * non-nullable, as the column is — widening it to null gave every consumer a
+ * phantom `date: string | null` to guard against.
+ */
+type TestDriveInput = Omit<TestDrive, "date"> & {
+  date: Date | string;
   car?: PartialCarInput | null;
   user?: SerializableUser | null;
-  date?: Date | string | null;
 };
 
 /**

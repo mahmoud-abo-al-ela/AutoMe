@@ -10,6 +10,12 @@ const TestDriveFilters = ({
     statusFilter,
     onStatusChange,
     onClearSearch,
+}: {
+    searchQuery: string;
+    onSearchChange: (value: string) => void;
+    statusFilter: string;
+    onStatusChange: (status: string) => void;
+    onClearSearch: () => void;
 }) => {
     return (
         <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border">

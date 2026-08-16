@@ -1,7 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
+import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
-const TestDriveActions = ({ testDrive, onEditClick, onCancelClick }) => {
+const TestDriveActions = ({
+    testDrive,
+    onEditClick,
+    onCancelClick,
+}: {
+    testDrive: TestDriveDetail;
+    onEditClick: () => void;
+    onCancelClick: () => void;
+}) => {
     const isEditable = testDrive.status === "PENDING"; // Only pending test drives can be edited
     const isCancellable = testDrive.status !== "CANCELLED" && testDrive.status !== "COMPLETED";
 

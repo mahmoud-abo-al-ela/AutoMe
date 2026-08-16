@@ -2,8 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import React from "react";
+import type { TestDrivePagination as Pagination } from "../../_lib/test-drive-types";
 
-const TestDrivePagination = ({ pagination, onPageChange }) => {
+const TestDrivePagination = ({
+    pagination,
+    onPageChange,
+}: {
+    pagination: Pagination | null;
+    onPageChange: (page: number) => void;
+}) => {
     if (!pagination || pagination.totalPages <= 1) {
         return null;
     }

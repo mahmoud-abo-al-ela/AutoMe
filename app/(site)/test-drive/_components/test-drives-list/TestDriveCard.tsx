@@ -7,9 +7,18 @@ import { Calendar, Clock, Car, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import type { TestDriveListItem } from "../../_lib/test-drive-types";
 
-const TestDriveCard = ({ testDrive, onViewDetails, onViewCar }) => {
-    const formatDate = (date) => {
+const TestDriveCard = ({
+    testDrive,
+    onViewDetails,
+    onViewCar,
+}: {
+    testDrive: TestDriveListItem;
+    onViewDetails: (testDriveId: string) => void;
+    onViewCar: (carId: string) => void;
+}) => {
+    const formatDate = (date: string) => {
         try {
             return format(new Date(date), "MMMM d, yyyy");
         } catch (error) {
@@ -18,7 +27,7 @@ const TestDriveCard = ({ testDrive, onViewDetails, onViewCar }) => {
         }
     };
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status: TestDriveListItem["status"]) => {
         switch (status) {
             case "PENDING":
                 return (
@@ -113,7 +122,7 @@ const TestDriveCard = ({ testDrive, onViewDetails, onViewCar }) => {
                             variant="outline"
                             size="sm"
                             className="cursor-pointer text-xs sm:text-sm"
-                            onClick={() => onViewCar(testDrive.car?.id)}
+                            onClick={() => testDrive.car && onViewCar(testDrive.car.id)}
                             disabled={!testDrive.car?.id}
                         >
                             View Car

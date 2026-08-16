@@ -15,12 +15,21 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { cancelTestDriveByUser } from "@/actions/test-drive";
+import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
-const CancelTestDriveDialog = ({ testDrive, isOpen, onClose }) => {
+const CancelTestDriveDialog = ({
+    testDrive,
+    isOpen,
+    onClose,
+}: {
+    testDrive: TestDriveDetail;
+    isOpen: boolean;
+    onClose: () => void;
+}) => {
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const formatDate = (date) => {
+    const formatDate = (date: string | null) => {
         if (!date) return "N/A";
         return format(new Date(date), "EEEE, MMMM d, yyyy");
     };
@@ -33,6 +42,11 @@ const CancelTestDriveDialog = ({ testDrive, isOpen, onClose }) => {
                 toast.success("Test drive cancelled successfully");
                 onClose();
                 router.push("/test-drive");
+            } else {
+                // The action returns an error envelope rather than throwing, so
+                // without this branch a failed cancel did nothing at all: no
+                // toast, no close, just a button that stopped spinning.
+                toast.error(result.error.message || "Failed to cancel test drive");
             }
         } catch (error) {
             console.error("Error cancelling test drive:", error);
