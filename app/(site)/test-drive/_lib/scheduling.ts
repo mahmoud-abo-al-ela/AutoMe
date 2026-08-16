@@ -1,6 +1,7 @@
 import type { getBookedTimeSlots } from "@/actions/test-drive";
 import type { ActionResponse } from "@/lib/utils/response";
 import type { DayOfWeek } from "@/lib/generated/prisma";
+import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
 export type { DayOfWeek };
 
@@ -109,6 +110,31 @@ export const generateAvailableDates = (
   }
 
   return dates;
+};
+
+/**
+ * Turn the dealership's stored WorkingHours rows into the calendar's lookup.
+ *
+ * The stored rows use the Prisma `DayOfWeek` enum and cover one day each after
+ * `formatWorkingHours` flattens them; days the dealership never configured are
+ * filled in as closed, so an unlisted day is never offered for booking.
+ */
+export const toWorkingHours = (entries: WorkingHoursEntry[]): WorkingHours => {
+  const hours = {} as WorkingHours;
+
+  for (const day of DAY_NAMES) {
+    hours[day] = { isOpen: false, openTime: "", closeTime: "" };
+  }
+
+  for (const entry of entries) {
+    hours[entry.dayKey] = {
+      isOpen: entry.isOpen,
+      openTime: entry.openTime,
+      closeTime: entry.closeTime,
+    };
+  }
+
+  return hours;
 };
 
 /** The form fields shared by the create and edit test-drive forms. */
