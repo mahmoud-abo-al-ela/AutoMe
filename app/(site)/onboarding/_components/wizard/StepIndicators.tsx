@@ -1,6 +1,7 @@
 "use client";
 
 import StepIndicator from "./StepIndicator";
+import type { WizardStep } from "../../_lib/onboarding-types";
 
 /**
  * The single source of progress in the wizard.
@@ -10,7 +11,13 @@ import StepIndicator from "./StepIndicator";
  * fold. The stepper is the one worth keeping: it also says what is coming next.
  * The step count is folded in here; the progress bar card is gone.
  */
-export default function StepIndicators({ steps, currentStep }) {
+export default function StepIndicators({
+    steps,
+    currentStep,
+}: {
+    steps: WizardStep[];
+    currentStep: number;
+}) {
     return (
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
             <p className="mb-4 text-sm font-semibold text-gray-500">

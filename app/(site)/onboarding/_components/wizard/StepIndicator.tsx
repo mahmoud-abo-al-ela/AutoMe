@@ -2,8 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import type { WizardStep } from "../../_lib/onboarding-types";
 
-export default function StepIndicator({ step, index, currentStep }) {
+export default function StepIndicator({
+    step,
+    index,
+    currentStep,
+}: {
+    step: WizardStep;
+    index: number;
+    currentStep: number;
+}) {
     const StepIcon = step.icon;
     const isCompleted = currentStep > step.id;
     const isCurrent = currentStep === step.id;

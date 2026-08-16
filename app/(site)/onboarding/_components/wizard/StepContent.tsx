@@ -5,6 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import Step1OrgDetails from "../Step1OrgDetails";
 import Step2WorkingHours from "../Step2WorkingHours";
 import Step3PlanSelection from "../Step3PlanSelection";
+import type {
+    OnboardingFormData,
+    OnboardingPlan,
+    UpdateFormData,
+} from "../../_lib/onboarding-types";
 
 export default function StepContent({
     currentStep,
@@ -14,6 +19,14 @@ export default function StepContent({
     prevStep,
     plans,
     userId,
+}: {
+    currentStep: number;
+    formData: OnboardingFormData;
+    updateFormData: UpdateFormData;
+    nextStep: () => void;
+    prevStep: () => void;
+    plans: OnboardingPlan[];
+    userId: string;
 }) {
     return (
         <motion.div

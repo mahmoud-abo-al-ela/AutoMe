@@ -6,8 +6,18 @@ import {
   StepContent,
   useWizard,
 } from "./wizard";
+import type {
+  OnboardingPlan,
+  OnboardingUser,
+} from "../_lib/onboarding-types";
 
-export default function OnboardingWizard({ user, plans }) {
+export default function OnboardingWizard({
+  user,
+  plans,
+}: {
+  user: OnboardingUser;
+  plans: OnboardingPlan[];
+}) {
   const {
     currentStep,
     formData,

@@ -3,8 +3,12 @@ import {
     CreditCard,
     Clock,
 } from "lucide-react";
+import type {
+    OnboardingFormData,
+    WizardStep,
+} from "../../_lib/onboarding-types";
 
-export const STEPS = [
+export const STEPS: WizardStep[] = [
     {
         // Names stay short enough to hold one line at the indicator's width.
         // "Organization Details" wrapped, which pushed its description a line
@@ -18,7 +22,7 @@ export const STEPS = [
     { id: 3, name: "Select Plan", icon: CreditCard, description: "Choose tier" },
 ];
 
-export const DEFAULT_FORM_DATA = {
+export const DEFAULT_FORM_DATA: OnboardingFormData = {
     name: "",
     slug: "",
     email: "",

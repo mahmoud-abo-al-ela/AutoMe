@@ -4,15 +4,20 @@ import { createOrganizationAfterCheckout } from "@/actions/onboarding";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "Setup Complete | AutoMe",
     description: "Your dealership has been set up successfully.",
 };
 
-export default async function OnboardingSuccessPage({ searchParams }) {
+export default async function OnboardingSuccessPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ session_id?: string }>;
+}) {
     const { session_id } = await searchParams;
 
     // Validate session_id is present
@@ -29,22 +34,18 @@ export default async function OnboardingSuccessPage({ searchParams }) {
     // Create the organization using the checkout session
     const result = await createOrganizationAfterCheckout(session_id);
 
-    // If org was already created (idempotency), show success with redirect link
-    if (result.success && result.data.redirect) {
+    if (result.success) {
+        // Two success shapes: the idempotent path carries a ready-made
+        // `redirect`, the freshly-created path only the organization.
+        const data = result.data;
         return (
             <SuccessPage
-                orgSlug={result.data.organization?.slug}
-                dashboardUrl={result.data.redirect}
-            />
-        );
-    }
-
-    // If org was just created, show success page
-    if (result.success && result.data.organization) {
-        return (
-            <SuccessPage
-                orgSlug={result.data.organization.slug}
-                dashboardUrl={`/org/${result.data.organization.slug}/dashboard`}
+                orgSlug={data.organization.slug}
+                dashboardUrl={
+                    "redirect" in data
+                        ? data.redirect
+                        : `/org/${data.organization.slug}/dashboard`
+                }
             />
         );
     }
@@ -59,7 +60,7 @@ export default async function OnboardingSuccessPage({ searchParams }) {
                     </div>
                     <h1 className="text-xl font-semibold">Setup Failed</h1>
                     <p className="text-muted-foreground text-sm">
-                        {result.error?.message ||
+                        {result.error.message ||
                             "Something went wrong while setting up your dealership."}
                     </p>
                     <p className="text-muted-foreground text-sm">
@@ -86,7 +87,13 @@ export default async function OnboardingSuccessPage({ searchParams }) {
     );
 }
 
-function SuccessPage({ orgSlug, dashboardUrl }) {
+function SuccessPage({
+    orgSlug,
+    dashboardUrl,
+}: {
+    orgSlug?: string;
+    dashboardUrl: string;
+}) {
     const siteUrl = orgSlug ? `/org/${orgSlug}` : "#";
 
     return (

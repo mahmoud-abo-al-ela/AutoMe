@@ -19,12 +19,12 @@ export const orgDetailsSchema = z.object({
     logo: z.string().min(1, "Please upload a logo for your dealership"),
 });
 
-// Step 2: Plan Selection Schema
+// Step 3: Plan Selection Schema
 export const planSelectionSchema = z.object({
     planId: z.string().min(1, "Please select a plan"),
 });
 
-// Step 3: Working Hours Schema
+// Step 2: Working Hours Schema
 export const workingHoursSchema = z.object({
     workingHours: z.object({
         monday: z.object({
