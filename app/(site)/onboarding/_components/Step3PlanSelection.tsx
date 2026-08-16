@@ -6,6 +6,11 @@ import {
   PlanSelectionFooter,
   usePlanSelection,
 } from "./plan-selection";
+import type {
+  OnboardingFormData,
+  OnboardingPlan,
+  UpdateFormData,
+} from "../_lib/onboarding-types";
 
 export default function Step3PlanSelection({
   plans,
@@ -13,6 +18,12 @@ export default function Step3PlanSelection({
   updateFormData,
   onPrev,
   userId,
+}: {
+  plans: OnboardingPlan[];
+  formData: OnboardingFormData;
+  updateFormData: UpdateFormData;
+  onPrev: () => void;
+  userId: string;
 }) {
   const {
     selectedPlanId,

@@ -10,12 +10,19 @@ import {
     CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { FieldErrors } from "react-hook-form";
+import type { PlanSelectionFormValues } from "./usePlanSelection";
 
 export function PlanSelectionFooter({
     onPrev,
     selectedPlanId,
     loading,
     errors,
+}: {
+    onPrev: () => void;
+    selectedPlanId: string;
+    loading: boolean;
+    errors: FieldErrors<PlanSelectionFormValues>;
 }) {
     return (
         <>

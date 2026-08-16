@@ -42,7 +42,11 @@ export interface OnboardingFormData {
   logo: string;
   planId: string | null;
   workingHours: OnboardingWorkingHours;
+  /** Chosen on the plan step, so absent until the user gets there. */
+  billingPeriod?: BillingPeriod;
 }
+
+export type BillingPeriod = "monthly" | "yearly";
 
 /** Each step merges its own slice of the form; none of them replace it. */
 export type UpdateFormData = (updates: Partial<OnboardingFormData>) => void;

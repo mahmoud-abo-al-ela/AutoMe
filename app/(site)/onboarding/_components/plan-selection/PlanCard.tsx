@@ -13,6 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PlanFeatureList } from "./PlanFeatureList";
+import type { PlanConfig } from "./constants";
+import type {
+    BillingPeriod,
+    OnboardingPlan,
+} from "../../_lib/onboarding-types";
 
 export function PlanCard({
     plan,
@@ -21,6 +26,13 @@ export function PlanCard({
     onSelect,
     index,
     billingPeriod,
+}: {
+    plan: OnboardingPlan;
+    config: PlanConfig;
+    isSelected: boolean;
+    onSelect: (planId: string) => void;
+    index: number;
+    billingPeriod: BillingPeriod;
 }) {
     const Icon = config.icon;
     const isPro = plan.type === "PRO";

@@ -1,6 +1,15 @@
-import { Sparkles, TrendingUp, Crown } from "lucide-react";
+import { Sparkles, TrendingUp, Crown, type LucideIcon } from "lucide-react";
 
-export const PLAN_CONFIG = {
+/** The per-tier styling a PlanCard reads. */
+export interface PlanConfig {
+    icon: LucideIcon;
+    color: string;
+    border: string;
+    bg: string;
+    badge: string | null;
+}
+
+export const PLAN_CONFIG: Record<string, PlanConfig> = {
     STARTER: {
         icon: Sparkles,
         color: "text-gray-600",

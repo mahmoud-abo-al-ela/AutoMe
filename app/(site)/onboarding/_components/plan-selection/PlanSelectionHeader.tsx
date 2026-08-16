@@ -3,8 +3,17 @@
 import { motion } from "framer-motion";
 import { CreditCard } from "lucide-react";
 import { BillingToggle } from "./BillingToggle";
+import type { BillingPeriod } from "../../_lib/onboarding-types";
 
-export function PlanSelectionHeader({ billingPeriod, onToggleBilling, savingsPercentage }) {
+export function PlanSelectionHeader({
+    billingPeriod,
+    onToggleBilling,
+    savingsPercentage,
+}: {
+    billingPeriod: BillingPeriod;
+    onToggleBilling: () => void;
+    savingsPercentage: number;
+}) {
     return (
         <motion.div
             initial={{ opacity: 0, y: -20 }}

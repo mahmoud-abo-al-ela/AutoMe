@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, X, Car, Shield, Star, Zap } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { getFeatures } from "./utils";
+import type { OnboardingPlan } from "../../_lib/onboarding-types";
 
-export function PlanFeatureList({ plan }) {
+export function PlanFeatureList({ plan }: { plan: OnboardingPlan }) {
     const features = getFeatures(plan);
 
     return (

@@ -2,8 +2,22 @@
 
 import { PlanCard } from "./PlanCard";
 import { PLAN_CONFIG } from "./constants";
+import type {
+    BillingPeriod,
+    OnboardingPlan,
+} from "../../_lib/onboarding-types";
 
-export function PlanGrid({ plans, selectedPlanId, onSelectPlan, billingPeriod }) {
+export function PlanGrid({
+    plans,
+    selectedPlanId,
+    onSelectPlan,
+    billingPeriod,
+}: {
+    plans: OnboardingPlan[];
+    selectedPlanId: string;
+    onSelectPlan: (planId: string) => void;
+    billingPeriod: BillingPeriod;
+}) {
     return (
         <div className="grid gap-6 md:grid-cols-3">
             {plans.map((plan, index) => {

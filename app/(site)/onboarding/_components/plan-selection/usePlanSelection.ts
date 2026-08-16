@@ -6,12 +6,27 @@ import { toast } from "sonner";
 import { planSelectionSchema } from "../schemas";
 import { createCheckoutSession } from "@/actions/payment";
 import { createOrganization, saveOnboardingFormData } from "@/actions/onboarding";
+import type { z } from "zod";
+import type {
+    BillingPeriod,
+    OnboardingFormData,
+    OnboardingPlan,
+    UpdateFormData,
+} from "../../_lib/onboarding-types";
+
+/** Step 3's own slice of the wizard's form data. */
+export type PlanSelectionFormValues = z.infer<typeof planSelectionSchema>;
 
 export function usePlanSelection({
     plans,
     formData,
     updateFormData,
     userId,
+}: {
+    plans: OnboardingPlan[];
+    formData: OnboardingFormData;
+    updateFormData: UpdateFormData;
+    userId: string;
 }) {
     const router = useRouter();
     const {
@@ -19,7 +34,7 @@ export function usePlanSelection({
         watch,
         handleSubmit,
         formState: { errors },
-    } = useForm({
+    } = useForm<PlanSelectionFormValues>({
         resolver: zodResolver(planSelectionSchema),
         mode: "onChange",
         defaultValues: {
@@ -29,7 +44,7 @@ export function usePlanSelection({
 
     const selectedPlanId = watch("planId");
     const [loading, setLoading] = useState(false);
-    const [billingPeriod, setBillingPeriod] = useState("monthly");
+    const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
 
     // Calculate average savings percentage from paid plans
     const calculateSavingsPercentage = () => {
@@ -51,18 +66,20 @@ export function usePlanSelection({
 
     const savingsPercentage = calculateSavingsPercentage();
 
-    const handleSelectPlan = (planId) => {
+    const handleSelectPlan = (planId: string) => {
         setValue("planId", planId, { shouldValidate: true });
     };
 
     const handleCreateOrg = async () => {
         setLoading(true);
         try {
+            // No billingPeriod: this is the free-plan path, there is no
+            // subscription to bill, and OrganizationInput has never carried the
+            // field — it was being silently dropped by the action's validation.
             const result = await createOrganization({
                 ...formData,
                 planId: selectedPlanId,
                 userId,
-                billingPeriod,
             });
 
             if (result.success) {
@@ -70,7 +87,7 @@ export function usePlanSelection({
                 // Redirect to dashboard with onboarding complete flag
                 router.push(`/org/${result.data.organization.slug}/dashboard?onboarding=complete`);
             } else {
-                toast.error(result.error?.message || "Failed to create organization");
+                toast.error(result.error.message || "Failed to create organization");
             }
         } catch (error) {
             console.error("Error creating organization:", error);
@@ -80,7 +97,7 @@ export function usePlanSelection({
         }
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit = async (data: PlanSelectionFormValues) => {
         const plan = plans.find((p) => p.id === data.planId);
         if (!plan) return;
 
@@ -99,7 +116,7 @@ export function usePlanSelection({
                 });
 
                 if (!sessionRes.success) {
-                    toast.error(sessionRes.error?.message || "Failed to save onboarding data");
+                    toast.error(sessionRes.error.message || "Failed to save onboarding data");
                     setLoading(false);
                     return;
                 }
@@ -111,11 +128,16 @@ export function usePlanSelection({
                     sessionRes.data.sessionId,
                 );
 
-                if (res.success) {
+                if (res.success && res.data.url) {
                     // 3. Redirect to Stripe Checkout
                     window.location.href = res.data.url;
+                } else if (res.success) {
+                    // Stripe can return a session without a url; assigning null
+                    // to location.href navigates to "/null" instead of failing.
+                    toast.error("Could not start checkout. Please try again.");
+                    setLoading(false);
                 } else {
-                    toast.error(res.error?.message || "Failed to initiate payment");
+                    toast.error(res.error.message || "Failed to initiate payment");
                     setLoading(false);
                 }
             } catch (error) {

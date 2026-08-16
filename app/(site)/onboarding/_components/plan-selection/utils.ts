@@ -1,6 +1,14 @@
-import { Car, Shield, Star, Zap } from "lucide-react";
+import { Car, Shield, Star, Zap, type LucideIcon } from "lucide-react";
+import type { OnboardingPlan } from "../../_lib/onboarding-types";
 
-export const formatPrice = (price) => {
+/** One line of a plan's feature list. */
+export interface PlanFeature {
+    name: string;
+    included: boolean;
+    icon?: LucideIcon;
+}
+
+export const formatPrice = (price: number) => {
     if (price === 0) return "Free";
     return new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -9,9 +17,15 @@ export const formatPrice = (price) => {
     }).format(price / 100);
 };
 
-export const getFeatures = (plan) => {
-    const f = plan.features || {};
-    const features = [];
+export const getFeatures = (plan: OnboardingPlan): PlanFeature[] => {
+    // `features` is a Prisma Json column, so it can legitimately hold a scalar
+    // or an array; only a plain object has flags worth listing.
+    const raw = plan.features;
+    const f: Record<string, unknown> =
+        raw && typeof raw === "object" && !Array.isArray(raw)
+            ? (raw as Record<string, unknown>)
+            : {};
+    const features: PlanFeature[] = [];
 
     features.push({
         name:
@@ -57,7 +71,7 @@ export const getFeatures = (plan) => {
         if (typeof value === "object" && value !== null && "enabled" in value) {
             features.push({
                 name: formatFeatureName(key),
-                included: !!value.enabled,
+                included: !!(value as { enabled?: unknown }).enabled,
             });
         } else if (typeof value === "boolean") {
             features.push({ name: formatFeatureName(key), included: value });
@@ -67,8 +81,8 @@ export const getFeatures = (plan) => {
     return features;
 };
 
-export const formatFeatureName = (key) => {
-    const nameMap = {
+export const formatFeatureName = (key: string) => {
+    const nameMap: Record<string, string> = {
         aiProcessing: "AI Processing",
         chat: "Live Chat",
         prioritySupport: "Priority Support",

@@ -1,8 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { BillingPeriod } from "../../_lib/onboarding-types";
 
-export function BillingToggle({ billingPeriod, onToggle, savingsPercentage }) {
+export function BillingToggle({
+    billingPeriod,
+    onToggle,
+    savingsPercentage,
+}: {
+    billingPeriod: BillingPeriod;
+    onToggle: () => void;
+    savingsPercentage: number;
+}) {
     return (
         <div className="flex items-center justify-center gap-4">
             <span
