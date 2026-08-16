@@ -10,23 +10,17 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
+import type { CarDetail, PriceFormatter } from "../../_lib/car-detail-types";
 
-export const useCarInfoCard = (car) => {
+export const useCarInfoCard = (car: CarDetail) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduleLoading, setIsScheduleLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
   const [isInCompare, setIsInCompare] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [testDriveId, setTestDriveId] = useState(null);
+  const [testDriveId, setTestDriveId] = useState<string | null>(null);
   const router = useRouter();
-  const { isSignedIn, user } = useUser();
-
-  // Get current user info for chat
-  const currentUserId = user?.id;
-  const currentUserName =
-    user?.fullName ||
-    user?.firstName ||
-    user?.emailAddresses?.[0]?.emailAddress;
+  const { isSignedIn } = useUser();
 
   // Check if car is in compare list on component mount
   useEffect(() => {
@@ -58,12 +52,14 @@ export const useCarInfoCard = (car) => {
   });
 
   useEffect(() => {
-    if (testDriveData?.exists) {
+    // The action returns the raw {exists, testDriveId} on success but an
+    // ErrorResponse on failure, so narrow before reading either field.
+    if (testDriveData && "exists" in testDriveData && testDriveData.exists) {
       setTestDriveId(testDriveData.testDriveId);
     }
   }, [testDriveData]);
 
-  const handleToggleFavorite = async (e) => {
+  const handleToggleFavorite = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -75,13 +71,13 @@ export const useCarInfoCard = (car) => {
 
       if (response.success) {
         setIsFavorite(!isFavorite);
-        toast.success(response.message);
+        toast.success(response.message || "Wishlist updated");
         // `error` is an object, not a string — comparing it to "Unauthorized"
         // was never true, so auth failures fell through silently.
-      } else if (response.error?.code === "AUTHENTICATION_ERROR") {
+      } else if (response.error.code === "AUTHENTICATION_ERROR") {
         toast.error("Please sign in to add cars to your wishlist");
       } else {
-        toast.error(response.error?.message || "Failed to update wishlist");
+        toast.error(response.error.message || "Failed to update wishlist");
       }
     } catch (error) {
       console.error("Failed to toggle wishlist", error);
@@ -119,14 +115,7 @@ export const useCarInfoCard = (car) => {
 
   const handleScheduleTestDrive = () => {
     setIsScheduleLoading(true);
-
-    if (!isSignedIn) {
-      // If user is not signed in, let middleware handle redirect
-      router.push(`/test-drive?carId=${car.id}`);
-      return;
-    }
-
-    // If user is signed in, navigate directly to reservation page
+    // Same destination either way — middleware handles the sign-in redirect.
     router.push(`/test-drive?carId=${car.id}`);
   };
 
@@ -143,7 +132,7 @@ export const useCarInfoCard = (car) => {
     router.push(`/messages?carId=${car.id}`);
   };
 
-  const formatPrice = (price) => formatCarPrice(price);
+  const formatPrice: PriceFormatter = (price) => formatCarPrice(price);
 
   return {
     isLoading,
@@ -162,9 +151,6 @@ export const useCarInfoCard = (car) => {
     handleViewTestDrive,
     handleChatClick,
     formatPrice,
-    // User info for chat
     isSignedIn,
-    currentUserId,
-    currentUserName,
   };
 };

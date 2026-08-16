@@ -15,6 +15,13 @@ const CarActionButtons = ({
     onToggleFavorite,
     onToggleCompare,
     onShare,
+}: {
+    isFavorite: boolean;
+    isInCompare: boolean;
+    isLoading: boolean;
+    onToggleFavorite: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    onToggleCompare: () => void;
+    onShare: () => void;
 }) => {
     return (
         <div className="flex gap-1.5 sm:gap-2">

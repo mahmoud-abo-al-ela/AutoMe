@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Home, ChevronRight } from "lucide-react";
+import type { CarDetail } from "../_lib/car-detail-types";
 
-const Breadcrumbs = ({ car }) => {
+const Breadcrumbs = ({ car }: { car: CarDetail }) => {
     const label = car.title || `${car.year} ${car.make} ${car.model}`;
 
     return (

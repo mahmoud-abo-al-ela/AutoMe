@@ -7,23 +7,22 @@ import {
   MobileStickyBar,
 } from "./";
 import { notFound } from "next/navigation";
+import type { CarDetail } from "../_lib/car-detail-types";
 
-const CarContent = async ({ id }) => {
-  let car;
+const CarContent = async ({ id }: { id: string }) => {
+  let car: CarDetail;
   try {
     const response = await getCarById(id);
     if (!response.success) {
-      const errorMsg = typeof response.error === 'string'
-        ? response.error
-        : response.error?.message || "Failed to fetch car details";
-      throw new Error(errorMsg);
+      throw new Error(response.error.message || "Failed to fetch car details");
     }
     car = response.data;
   } catch (error) {
     console.error("Error fetching car:", error);
-    const errorMessage = typeof error === 'string'
-      ? error
-      : error?.message || "An error occurred while fetching car details";
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "An error occurred while fetching car details";
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">
         Error: {errorMessage}

@@ -1,20 +1,21 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import type { CarDetailImage } from "../_lib/car-detail-types";
 
 /**
  * All interaction logic for the car image gallery: index state, next/prev,
  * keyboard + touch navigation, adjacent-image preloading, and keeping the
  * active thumbnail scrolled into view. Keeps CarImageGallery presentational.
  */
-export function useCarImageGallery(images) {
+export function useCarImageGallery(images: CarDetailImage[] | undefined) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const galleryRef = useRef(null);
-  const thumbnailContainerRef = useRef(null);
-  const modalThumbnailRef = useRef(null);
-  const touchStartRef = useRef(null);
-  const touchEndRef = useRef(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
+  const modalThumbnailRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<number | null>(null);
+  const touchEndRef = useRef<number | null>(null);
 
   const nextImage = useCallback(() => {
     if (!images?.length) return;
@@ -28,7 +29,7 @@ export function useCarImageGallery(images) {
 
   // Keyboard navigation for the gallery
   const handleGalleryKeyDown = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         prevImage();
@@ -47,7 +48,7 @@ export function useCarImageGallery(images) {
   useEffect(() => {
     if (!isImageModalOpen) return;
 
-    const handleModalKeyDown = (e) => {
+    const handleModalKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         prevImage();
@@ -62,12 +63,12 @@ export function useCarImageGallery(images) {
   }, [isImageModalOpen, prevImage, nextImage]);
 
   // Touch swipe gesture handling
-  const handleTouchStart = useCallback((e) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     touchStartRef.current = e.targetTouches[0].clientX;
     touchEndRef.current = null;
   }, []);
 
-  const handleTouchMove = useCallback((e) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     touchEndRef.current = e.targetTouches[0].clientX;
   }, []);
 
@@ -92,8 +93,8 @@ export function useCarImageGallery(images) {
   useEffect(() => {
     if (!images?.length || images.length <= 1) return;
 
-    const preloadImage = (index) => {
-      const src = images[index]?.url || images[index];
+    const preloadImage = (index: number) => {
+      const src = images[index]?.url;
       if (src) {
         const img = new window.Image();
         img.src = src;

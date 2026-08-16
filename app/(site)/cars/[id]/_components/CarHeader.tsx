@@ -3,9 +3,16 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock } from "lucide-react";
+import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
 
-const CarHeader = ({ car, formatPrice }) => {
-    const [listedText, setListedText] = useState(null);
+const CarHeader = ({
+    car,
+    formatPrice,
+}: {
+    car: CarDetail;
+    formatPrice: PriceFormatter;
+}) => {
+    const [listedText, setListedText] = useState<string | null>(null);
 
     useEffect(() => {
         if (!car.createdAt) return;
@@ -58,7 +65,7 @@ const CarHeader = ({ car, formatPrice }) => {
         }
     }, [car.createdAt]);
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status: CarDetail["status"]) => {
         switch (status) {
             case "AVAILABLE":
                 return (
@@ -72,10 +79,12 @@ const CarHeader = ({ car, formatPrice }) => {
                         Sold
                     </Badge>
                 );
-            case "PENDING":
+            // CarStatus has no PENDING member; this case used to read
+            // "PENDING", so UNAVAILABLE cars rendered no badge at all.
+            case "UNAVAILABLE":
                 return (
-                    <Badge className="bg-yellow-50 text-yellow-700 border border-yellow-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium">
-                        Pending
+                    <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium">
+                        Unavailable
                     </Badge>
                 );
             default:
@@ -94,11 +103,6 @@ const CarHeader = ({ car, formatPrice }) => {
                     </Badge>
                 )}
                 {getStatusBadge(car.status)}
-                {car.condition && (
-                    <Badge className="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium">
-                        {car.condition}
-                    </Badge>
-                )}
             </div>
 
             {/* Title */}
@@ -111,11 +115,6 @@ const CarHeader = ({ car, formatPrice }) => {
                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     {formatPrice(car.price)}
                 </div>
-                {car.oldPrice && (
-                    <div className="text-xs sm:text-sm text-gray-400 line-through">
-                        {formatPrice(car.oldPrice)}
-                    </div>
-                )}
             </div>
 
             {/* Listed date indicator - rendered client-side only to avoid hydration mismatch */}

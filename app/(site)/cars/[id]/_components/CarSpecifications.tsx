@@ -1,6 +1,7 @@
 "use client";
 
 import { formatMileage } from "@/lib/utils/units";
+import type { CarDetail } from "../_lib/car-detail-types";
 import {
   Fuel,
   Gauge,
@@ -13,7 +14,13 @@ import {
   Activity,
 } from "lucide-react";
 
-const CarSpecifications = ({ car, variant = "compact" }) => {
+const CarSpecifications = ({
+  car,
+  variant = "compact",
+}: {
+  car: CarDetail | null;
+  variant?: "compact" | "full";
+}) => {
   if (!car) return null;
 
   const isFull = variant === "full";
@@ -85,7 +92,8 @@ const CarSpecifications = ({ car, variant = "compact" }) => {
             Technical Specifications
           </h3>
           <p className="text-xs text-muted-foreground">
-            Detailed information about this vehicle's build and configuration.
+            Detailed information about this vehicle&apos;s build and
+            configuration.
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

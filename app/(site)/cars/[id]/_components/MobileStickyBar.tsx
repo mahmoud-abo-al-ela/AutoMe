@@ -7,12 +7,19 @@ import { MessageCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { StartConversationButton, ChatSidebar } from "@/components/StreamChat";
+import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
 
-const MobileStickyBar = ({ car, formatPrice }) => {
+const MobileStickyBar = ({
+    car,
+    formatPrice,
+}: {
+    car: CarDetail;
+    formatPrice?: PriceFormatter;
+}) => {
     const { isSignedIn } = useUser();
     const router = useRouter();
     const [chatOpen, setChatOpen] = useState(false);
-    const [selectedCarId, setSelectedCarId] = useState(null);
+    const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
 
     const handleChatClick = () => {
         if (!isSignedIn) {
@@ -21,7 +28,7 @@ const MobileStickyBar = ({ car, formatPrice }) => {
         }
     };
 
-    const handleChatOpen = (carId) => {
+    const handleChatOpen = (carId: string) => {
         setSelectedCarId(carId);
         setChatOpen(true);
     };

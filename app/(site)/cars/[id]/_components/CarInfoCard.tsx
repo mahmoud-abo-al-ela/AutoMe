@@ -10,8 +10,9 @@ import CarHeader from "./CarHeader";
 import CarActionButtons from "./CarActionButtons";
 import CarActions from "./CarActions";
 import { useCarInfoCard } from "./hooks/useCarInfoCard";
+import type { CarDetail } from "../_lib/car-detail-types";
 
-const CarInfoCard = ({ car }) => {
+const CarInfoCard = ({ car }: { car: CarDetail }) => {
   const {
     isLoading,
     isScheduleLoading,
@@ -30,8 +31,6 @@ const CarInfoCard = ({ car }) => {
     handleChatClick,
     formatPrice,
     isSignedIn,
-    currentUserId,
-    currentUserName,
   } = useCarInfoCard(car);
 
   const organization = car.organization;
@@ -112,8 +111,6 @@ const CarInfoCard = ({ car }) => {
             onScheduleTestDrive={handleScheduleTestDrive}
             onViewTestDrive={handleViewTestDrive}
             onGoToCompare={handleGoToCompare}
-            currentUserId={currentUserId}
-            currentUserName={currentUserName}
             isSignedIn={isSignedIn}
             onChatClick={handleChatClick}
           />

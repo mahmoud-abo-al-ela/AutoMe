@@ -1,7 +1,7 @@
 import { PageSkeleton, CarContent } from "./_components";
 import { Suspense } from "react";
 
-const CarPage = async ({ params }) => {
+const CarPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const id = (await params).id;
 
   return (

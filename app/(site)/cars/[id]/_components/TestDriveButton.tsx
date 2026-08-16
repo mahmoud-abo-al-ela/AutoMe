@@ -8,6 +8,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { CarDetail } from "../_lib/car-detail-types";
 
 const TestDriveButton = ({
     car,
@@ -16,6 +17,13 @@ const TestDriveButton = ({
     isScheduleLoading,
     onScheduleTestDrive,
     onViewTestDrive,
+}: {
+    car: CarDetail;
+    testDriveId: string | null;
+    isCheckingTestDrive: boolean;
+    isScheduleLoading: boolean;
+    onScheduleTestDrive: () => void;
+    onViewTestDrive: () => void;
 }) => {
     // If car is not available
     if (car.status !== "AVAILABLE") {

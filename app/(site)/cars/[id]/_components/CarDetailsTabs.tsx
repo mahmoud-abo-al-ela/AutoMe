@@ -11,8 +11,9 @@ import {
 import CarDescription from "./CarDescription";
 import CarFeatures from "./CarFeatures";
 import CarSpecifications from "./CarSpecifications";
+import type { CarDetail } from "../_lib/car-detail-types";
 
-const CarDetailsTabs = ({ car }) => {
+const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
     const hasFeatures = car.features && car.features.length > 0;
 
     return (

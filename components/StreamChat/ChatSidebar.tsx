@@ -19,7 +19,9 @@ export function ChatSidebar({
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    carId: string;
+    // Null until the caller picks a car — every effect below already no-ops
+    // without one, so the sidebar can mount before a selection exists.
+    carId: string | null;
 }) {
     const { client } = useChatContext();
     const [channel, setChannel] = useState<StreamChannel | null>(null);

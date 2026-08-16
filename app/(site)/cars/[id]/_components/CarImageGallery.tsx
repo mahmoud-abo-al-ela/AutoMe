@@ -10,8 +10,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCarImageGallery } from "./useCarImageGallery";
+import type { CarDetailImage } from "../_lib/car-detail-types";
 
-const CarImageGallery = ({ images, make, model, title }) => {
+const CarImageGallery = ({
+  images,
+  make,
+  model,
+  title,
+}: {
+  images: CarDetailImage[] | undefined;
+  make: string;
+  model: string;
+  title: string | null;
+}) => {
   const {
     currentImageIndex,
     setCurrentImageIndex,
@@ -57,7 +68,7 @@ const CarImageGallery = ({ images, make, model, title }) => {
             onTouchEnd={handleTouchEnd}
           >
             <Image
-              src={images[currentImageIndex]?.url || images[currentImageIndex]}
+              src={images[currentImageIndex].url}
               alt={`${make} ${model} - Image ${currentImageIndex + 1} of ${images.length}`}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               width={1000}
@@ -126,7 +137,7 @@ const CarImageGallery = ({ images, make, model, title }) => {
                     }`}
                 >
                   <Image
-                    src={image.url || image}
+                    src={image.url}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     width={100}
@@ -154,7 +165,7 @@ const CarImageGallery = ({ images, make, model, title }) => {
             onTouchEnd={handleTouchEnd}
           >
             <Image
-              src={images[currentImageIndex]?.url || images[currentImageIndex]}
+              src={images[currentImageIndex].url}
               alt={`${make} ${model} - Image ${currentImageIndex + 1}`}
               className="w-full h-full object-contain"
               width={1200}
@@ -200,7 +211,7 @@ const CarImageGallery = ({ images, make, model, title }) => {
                     }`}
                 >
                   <Image
-                    src={image.url || image}
+                    src={image.url}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     width={80}

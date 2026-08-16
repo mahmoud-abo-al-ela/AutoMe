@@ -8,8 +8,13 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { CarDetailOrganization } from "../_lib/car-detail-types";
 
-const DealershipInfoCard = ({ organization }) => {
+const DealershipInfoCard = ({
+    organization,
+}: {
+    organization: CarDetailOrganization | null | undefined;
+}) => {
     if (!organization) return null;
 
     const { name, logo, slug, phone, address } = organization;

@@ -11,6 +11,7 @@ import {
 import { Mail, Copy, Facebook, Twitter, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { socialShares } from "@/lib/SocialShare";
+import type { CarDetail } from "../_lib/car-detail-types";
 
 const ShareDialog = ({
   isOpen,
@@ -19,6 +20,11 @@ const ShareDialog = ({
   // Optional: the dealership share button reuses this dialog and has no car,
   // which the document.title fallback below already handles.
   car = null,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  car?: CarDetail | null;
 }) => {
   const [copying, setCopying] = useState(false);
 
@@ -38,7 +44,7 @@ const ShareDialog = ({
       try {
         await navigator.clipboard.writeText(shareUrl);
         toast.success("Link copied to clipboard");
-      } catch (error) {
+      } catch {
         toast.error("Failed to copy link");
       } finally {
         setCopying(false);

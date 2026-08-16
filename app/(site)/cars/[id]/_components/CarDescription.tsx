@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 
-const CarDescription = ({ description }) => {
+const CarDescription = ({ description }: { description: string | null }) => {
   return (
     <Card className="shadow-lg border-0 bg-white p-0">
       <CardContent className="p-4 sm:p-6 md:p-8">

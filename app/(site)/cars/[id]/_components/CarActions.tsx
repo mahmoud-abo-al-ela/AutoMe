@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Scale } from "lucide-react";
 import TestDriveButton from "./TestDriveButton";
 import { StartConversationButton, ChatSidebar } from "@/components/StreamChat";
+import type { CarDetail } from "../_lib/car-detail-types";
 
 const CarActions = ({
   car,
@@ -17,9 +18,20 @@ const CarActions = ({
   onGoToCompare,
   isSignedIn,
   onChatClick,
+}: {
+  car: CarDetail;
+  testDriveId: string | null;
+  isCheckingTestDrive: boolean;
+  isScheduleLoading: boolean;
+  isInCompare: boolean;
+  onScheduleTestDrive: () => void;
+  onViewTestDrive: () => void;
+  onGoToCompare: () => void;
+  isSignedIn: boolean | undefined;
+  onChatClick?: () => void;
 }) => {
   const [chatOpen, setChatOpen] = useState(false);
-  const [selectedCarId, setSelectedCarId] = useState(null);
+  const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
 
   const handleChatClick = () => {
     if (!isSignedIn) {
@@ -28,7 +40,7 @@ const CarActions = ({
     }
   };
 
-  const handleChatOpen = (carId) => {
+  const handleChatOpen = (carId: string) => {
     setSelectedCarId(carId);
     setChatOpen(true);
   };

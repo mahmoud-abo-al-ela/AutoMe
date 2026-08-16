@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, CheckCircle } from "lucide-react";
 
-const CarFeatures = ({ features }) => {
+const CarFeatures = ({ features }: { features: string[] }) => {
   if (!features || features.length === 0) {
     return null;
   }
