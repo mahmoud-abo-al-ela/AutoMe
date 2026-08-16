@@ -3,11 +3,26 @@
 import { Trophy, Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { specCategories } from "./utils";
+import type {
+  CompareCar,
+  CompareDifferences,
+  CompareWinners,
+} from "../_lib/compare-types";
 
 /**
  * Side-by-side specs for 2 cars.
  */
-const SideBySideSpecs = ({ cars, highlightDifferences, differences, winners }) => {
+const SideBySideSpecs = ({
+  cars,
+  highlightDifferences,
+  differences,
+  winners,
+}: {
+  cars: CompareCar[];
+  highlightDifferences: boolean;
+  differences: CompareDifferences;
+  winners: CompareWinners;
+}) => {
   return (
     <div>
       {specCategories.map((category) => (
@@ -77,7 +92,7 @@ const SideBySideSpecs = ({ cars, highlightDifferences, differences, winners }) =
         </div>
         <div className="divide-y">
           {(() => {
-            const allFeatures = new Set();
+            const allFeatures = new Set<string>();
             cars.forEach((car) =>
               (car.features || []).forEach((f) => allFeatures.add(f))
             );

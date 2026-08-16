@@ -14,11 +14,17 @@ import AddCarSlot from "./AddCarSlot";
 import CompareSpecRow from "./CompareSpecRow";
 import CompareFeatureMatrix from "./CompareFeatureMatrix";
 import CompareWinnerBadge from "./CompareWinnerBadge";
+import type {
+  CompareCar,
+  CompareDifferences,
+  CompareHandlers,
+  CompareWinners,
+} from "../_lib/compare-types";
 
 /**
  * Icon map for category tabs.
  */
-const CATEGORY_ICONS = {
+const CATEGORY_ICONS: Record<string, typeof Info> = {
   basic: Info,
   performance: Gauge,
   features: ListChecks,
@@ -32,14 +38,6 @@ const CATEGORY_ICONS = {
  *  - CompareFeatureMatrix for the features tab
  *  - CompareWinnerBadge per category
  *  - Framer-motion layout animations for adding/removing cars
- *
- * @param {Object}  props
- * @param {Array}   props.cars                 - Array of car objects
- * @param {boolean} props.highlightDifferences - Whether to highlight diffs
- * @param {string}  props.activeCategory       - Currently active tab ID
- * @param {Object}  props.differences          - Map of spec key → boolean
- * @param {Object}  props.winners              - Map of spec key → winning car ID
- * @param {Object}  props.handlers             - Handler functions from hook
  */
 const CompareTable = ({
   cars,
@@ -48,6 +46,13 @@ const CompareTable = ({
   differences,
   winners,
   handlers,
+}: {
+  cars: CompareCar[];
+  highlightDifferences: boolean;
+  activeCategory: string;
+  differences: CompareDifferences;
+  winners: CompareWinners;
+  handlers: CompareHandlers;
 }) => {
   const emptySlots = MAX_COMPARE_CARS - cars.length;
 

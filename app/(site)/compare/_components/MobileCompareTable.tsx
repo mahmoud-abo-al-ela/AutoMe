@@ -11,6 +11,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import { Columns2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,12 @@ import { getCarTitle, MAX_COMPARE_CARS } from "./utils";
 import MobileCarCard from "./MobileCarCard";
 import SingleCarSpecs from "./SingleCarSpecs";
 import SideBySideSpecs from "./SideBySideSpecs";
+import type {
+  CompareCar,
+  CompareDifferences,
+  CompareHandlers,
+  CompareWinners,
+} from "../_lib/compare-types";
 
 /**
  * Mobile comparison view with:
@@ -26,13 +33,6 @@ import SideBySideSpecs from "./SideBySideSpecs";
  *  - "Compare Side by Side" toggle for compact 2-car view
  *  - Sticky spec category headers
  *  - Swipe indicator dots synced with carousel
- *
- * @param {Object}  props
- * @param {Array}   props.cars                 - Array of car objects
- * @param {boolean} props.highlightDifferences - Whether to highlight diffs
- * @param {Object}  props.differences          - Map of spec key → boolean
- * @param {Object}  props.winners              - Map of spec key → winning car ID
- * @param {Object}  props.handlers             - Handler functions from hook
  */
 const MobileCompareTable = ({
   cars,
@@ -40,10 +40,16 @@ const MobileCompareTable = ({
   differences,
   winners,
   handlers,
+}: {
+  cars: CompareCar[];
+  highlightDifferences: boolean;
+  differences: CompareDifferences;
+  winners: CompareWinners;
+  handlers: CompareHandlers;
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [sideBySide, setSideBySide] = useState(false);
-  const [api, setApi] = useState(null);
+  const [api, setApi] = useState<CarouselApi>(undefined);
 
   // Sync carousel index
   const onSelect = useCallback(() => {
@@ -53,7 +59,7 @@ const MobileCompareTable = ({
 
   // Set up carousel event listener
   const handleApiChange = useCallback(
-    (emblaApi) => {
+    (emblaApi: CarouselApi) => {
       setApi(emblaApi);
       if (emblaApi) {
         emblaApi.on("select", onSelect);

@@ -3,6 +3,8 @@
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAX_COMPARE_CARS } from "./utils";
+import type { SpecDefinition } from "./utils";
+import type { CompareCar, SpecKey } from "../_lib/compare-types";
 
 const CompareSpecRow = ({
     label,
@@ -13,6 +15,15 @@ const CompareSpecRow = ({
     isDifferent,
     winnerCarId,
     isEven,
+}: {
+    label: string;
+    specKey: SpecKey;
+    cars: CompareCar[];
+    format?: SpecDefinition["format"];
+    highlighted: boolean;
+    isDifferent: boolean;
+    winnerCarId: string | null;
+    isEven: boolean;
 }) => {
     const showHighlight = highlighted && isDifferent;
     const emptySlots = MAX_COMPARE_CARS - cars.length;

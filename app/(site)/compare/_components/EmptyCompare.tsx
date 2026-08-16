@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import CompareCarCard from "./CompareCarCard";
 import { handleRemoveCar } from "./utils";
+import type { CompareCar } from "../_lib/compare-types";
 
 /**
  * Empty state for the compare page.
@@ -25,7 +26,7 @@ import { handleRemoveCar } from "./utils";
  *
  * Uses shared `handleRemoveCar` from utils instead of duplicated logic.
  */
-const EmptyCompare = ({ singleCar }) => {
+const EmptyCompare = ({ singleCar }: { singleCar: CompareCar | null }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -44,7 +45,7 @@ const EmptyCompare = ({ singleCar }) => {
 
 // ─── Single Car State ────────────────────────────────────────────────────────
 
-const SingleCarState = ({ car }) => {
+const SingleCarState = ({ car }: { car: CompareCar }) => {
   return (
     <div className="flex flex-col md:flex-row">
       {/* Car card */}

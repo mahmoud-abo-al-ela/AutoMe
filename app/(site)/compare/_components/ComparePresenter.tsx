@@ -8,6 +8,7 @@ import CompareTable from "./CompareTable";
 import MobileCompareTable from "./MobileCompareTable";
 import ComparePageHeader from "./ComparePageHeader";
 import ComparePageSkeleton from "./ComparePageSkeleton";
+import type { ComparePageData } from "../_lib/compare-types";
 
 export const ComparePresenter = ({
     cars,
@@ -20,7 +21,7 @@ export const ComparePresenter = ({
     differences,
     winners,
     handlers,
-}) => {
+}: ComparePageData) => {
     return (
         <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen py-20 print:bg-white print:py-4">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-10 sm:pb-16 md:pb-20 print:px-2 print:pb-4">

@@ -3,11 +3,28 @@
 import { Trophy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { specCategories } from "./utils";
+import type {
+  CompareCar,
+  CompareDifferences,
+  CompareWinners,
+} from "../_lib/compare-types";
 
 /**
  * Specs for a single active car (carousel mode).
  */
-const SingleCarSpecs = ({ car, cars, highlightDifferences, differences, winners }) => {
+const SingleCarSpecs = ({
+  car,
+  cars,
+  highlightDifferences,
+  differences,
+  winners,
+}: {
+  car: CompareCar;
+  cars: CompareCar[];
+  highlightDifferences: boolean;
+  differences: CompareDifferences;
+  winners: CompareWinners;
+}) => {
   return (
     <div>
       {specCategories.map((category) => (

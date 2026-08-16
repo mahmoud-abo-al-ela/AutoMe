@@ -4,11 +4,18 @@ import { useMemo } from "react";
 import { Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAX_COMPARE_CARS } from "./utils";
+import type { CompareCar } from "../_lib/compare-types";
 
-const CompareFeatureMatrix = ({ cars, highlighted }) => {
+const CompareFeatureMatrix = ({
+    cars,
+    highlighted,
+}: {
+    cars: CompareCar[];
+    highlighted: boolean;
+}) => {
     // Collect all unique features across all cars
     const allFeatures = useMemo(() => {
-        const featureSet = new Set();
+        const featureSet = new Set<string>();
         cars.forEach((car) => {
             (car.features || []).forEach((feature) => featureSet.add(feature));
         });
@@ -17,7 +24,7 @@ const CompareFeatureMatrix = ({ cars, highlighted }) => {
 
     // Build a lookup: car.id → Set of features
     const carFeatureSets = useMemo(() => {
-        const map = {};
+        const map: Record<string, Set<string>> = {};
         cars.forEach((car) => {
             map[car.id] = new Set(car.features || []);
         });

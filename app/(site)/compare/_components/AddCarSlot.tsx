@@ -13,7 +13,7 @@ import { Plus } from "lucide-react";
  *  - Plus icon with "Add Car" text
  *  - Links to /cars browse page
  */
-const AddCarSlot = () => {
+const AddCarSlot = (): React.ReactElement => {
     return (
         <motion.div
             initial={{ opacity: 0 }}

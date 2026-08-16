@@ -12,6 +12,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Printer, Share2, Trash2, Check } from "lucide-react";
+import type { CompareHandlers } from "../_lib/compare-types";
 
 /**
  * Header bar for the compare page.
@@ -27,6 +28,10 @@ const ComparePageHeader = ({
     carCount,
     highlightDifferences,
     handlers,
+}: {
+    carCount: number;
+    highlightDifferences: boolean;
+    handlers: CompareHandlers;
 }) => {
     const [showCopied, setShowCopied] = useState(false);
     const [showClearConfirm, setShowClearConfirm] = useState(false);

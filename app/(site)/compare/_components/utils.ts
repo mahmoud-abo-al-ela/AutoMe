@@ -1,31 +1,54 @@
 import { compareUtils } from "@/lib/utils";
 import { formatCarPrice } from "@/lib/utils/currency";
 import { formatMileage as formatMileageKm } from "@/lib/utils/units";
+import type {
+    CompareCar,
+    CompareDifferences,
+    CompareWinners,
+    SpecKey,
+    SpecValue,
+} from "../_lib/compare-types";
 
 // ─── Formatting Utilities ────────────────────────────────────────────────────
 
-/**
- * Format a numeric price as an EGP currency string (no decimals).
- * @param {number} price
- * @returns {string} e.g. "EGP 25,000"
- */
-export const formatPrice = (price) => formatCarPrice(price);
+/** Format a numeric price as an EGP currency string, e.g. "EGP 25,000". */
+export const formatPrice = (price: number): string => formatCarPrice(price);
+
+/** Format a numeric mileage value in kilometres, e.g. "45,000 km". */
+export const formatMileage = (mileage: number): string =>
+    formatMileageKm(mileage);
 
 /**
- * Format a numeric mileage value in kilometres.
- * @param {number} mileage
- * @returns {string} e.g. "45,000 km"
+ * Cell formatters for the spec table. A spec's `format` receives whatever
+ * `car[key]` holds, so these coerce; `price` and `mileage` are non-nullable
+ * numeric columns, so the coercion never actually sees a null in practice.
  */
-export const formatMileage = (mileage) => formatMileageKm(mileage);
+const formatPriceCell = (value: SpecValue): string => formatPrice(Number(value));
+const formatMileageCell = (value: SpecValue): string =>
+    formatMileage(Number(value));
 
 // ─── Spec Category Definitions ───────────────────────────────────────────────
+
+/** One row of the comparison table. */
+export interface SpecDefinition {
+    label: string;
+    key: SpecKey;
+    format?: (value: SpecValue) => string;
+}
+
+/** A tab of the comparison table. */
+export interface SpecCategory {
+    id: string;
+    title: string;
+    specs: SpecDefinition[];
+}
 
 /**
  * Shared specification categories used by both desktop and mobile compare views.
  * Each category contains an array of spec definitions with label, data key,
  * and an optional format function.
  */
-export const specCategories = [
+export const specCategories: SpecCategory[] = [
     {
         id: "basic",
         title: "Basic Information",
@@ -33,7 +56,7 @@ export const specCategories = [
             { label: "Make", key: "make" },
             { label: "Model", key: "model" },
             { label: "Year", key: "year" },
-            { label: "Price", key: "price", format: formatPrice },
+            { label: "Price", key: "price", format: formatPriceCell },
             { label: "Body Type", key: "bodyType" },
         ],
     },
@@ -41,7 +64,7 @@ export const specCategories = [
         id: "performance",
         title: "Performance & Specifications",
         specs: [
-            { label: "Mileage", key: "mileage", format: formatMileage },
+            { label: "Mileage", key: "mileage", format: formatMileageCell },
             { label: "Fuel Type", key: "fuelType" },
             { label: "Transmission", key: "transmission" },
             { label: "Color", key: "color" },
@@ -53,7 +76,7 @@ export const specCategories = [
 /**
  * Flat list of all spec keys across every category — useful for iteration.
  */
-export const allSpecKeys = specCategories.flatMap((cat) =>
+export const allSpecKeys: SpecKey[] = specCategories.flatMap((cat) =>
     cat.specs.map((s) => s.key)
 );
 
@@ -63,10 +86,8 @@ export const allSpecKeys = specCategories.flatMap((cat) =>
  * Remove a car from the compare list and broadcast the change.
  * Centralises the logic previously duplicated in CompareTable,
  * MobileCompareTable, and EmptyCompare.
- *
- * @param {string} carId - The ID of the car to remove
  */
-export const handleRemoveCar = (carId) => {
+export const handleRemoveCar = (carId: string): void => {
     compareUtils.removeFromCompare(carId);
     window.dispatchEvent(new Event("compareListUpdated"));
 };
@@ -75,19 +96,18 @@ export const handleRemoveCar = (carId) => {
 
 /**
  * Compare the spec values across all provided cars and return a map indicating
- * which specs have differing values.
- *
- * @param {Array<Object>} cars - Array of car objects
- * @returns {Record<string, boolean>} Map of spec key → true if values differ
+ * which specs have differing values. Keyed by spec key plus "features".
  *
  * @example
  *   computeDifferences([carA, carB])
  *   // => { make: false, model: true, year: true, price: true, ... }
  */
-export const computeDifferences = (cars) => {
+export const computeDifferences = (
+    cars: CompareCar[]
+): CompareDifferences => {
     if (!cars || cars.length < 2) return {};
 
-    const diffs = {};
+    const diffs: CompareDifferences = {};
 
     for (const key of allSpecKeys) {
         const values = cars.map((car) => car[key]);
@@ -106,6 +126,9 @@ export const computeDifferences = (cars) => {
 
 // ─── Winner Computation ──────────────────────────────────────────────────────
 
+/** The specs that have a "best" value; everything else is descriptive. */
+type NumericSpecKey = "price" | "mileage" | "year" | "seats";
+
 /**
  * Determines the "winner" car for specific numeric/comparable specs.
  *
@@ -116,43 +139,38 @@ export const computeDifferences = (cars) => {
  *  - seats    → highest is best
  *  - features → most features is best
  *
- * @param {Array<Object>} cars - Array of car objects
- * @returns {Record<string, string|null>} Map of spec key → winning car's ID,
- *          or null if there's a tie or not enough data.
+ * Returns a map of spec key → winning car's ID, or null on a tie or when there
+ * is not enough data.
  *
  * @example
  *   computeWinners([carA, carB])
  *   // => { price: "car-1", mileage: "car-2", year: "car-1", ... }
  */
-export const computeWinners = (cars) => {
+export const computeWinners = (
+    cars: CompareCar[]
+): CompareWinners => {
     if (!cars || cars.length < 2) return {};
 
-    const winners = {};
+    const winners: CompareWinners = {};
 
-    /**
-     * Find the winner for a given key using a comparator.
-     * @param {string} key - The car property to compare
-     * @param {"lowest"|"highest"} direction - Whether lower or higher is better
-     */
-    const findWinner = (key, direction) => {
-        const validCars = cars.filter(
-            (car) => car[key] != null && car[key] !== undefined
-        );
-        if (validCars.length < 2) {
+    const findWinner = (key: NumericSpecKey, direction: "lowest" | "highest") => {
+        const entries = cars
+            .map((car) => ({ id: car.id, value: car[key] }))
+            .filter((entry): entry is { id: string; value: number } =>
+                entry.value != null
+            );
+
+        if (entries.length < 2) {
             winners[key] = null;
             return;
         }
 
-        const sorted = [...validCars].sort((a, b) =>
-            direction === "lowest" ? a[key] - b[key] : b[key] - a[key]
+        const sorted = [...entries].sort((a, b) =>
+            direction === "lowest" ? a.value - b.value : b.value - a.value
         );
 
         // Check for tie between first and second
-        if (sorted[0][key] === sorted[1][key]) {
-            winners[key] = null;
-        } else {
-            winners[key] = sorted[0].id;
-        }
+        winners[key] = sorted[0].value === sorted[1].value ? null : sorted[0].id;
     };
 
     findWinner("price", "lowest");
@@ -182,14 +200,9 @@ export const computeWinners = (cars) => {
 
 // ─── Display Helpers ─────────────────────────────────────────────────────────
 
-/**
- * Build a display title for a car, falling back to year/make/model.
- * @param {Object} car
- * @returns {string}
- */
-export const getCarTitle = (car) => {
-    return car.title || `${car.year} ${car.make} ${car.model}`;
-};
+/** Build a display title for a car, falling back to year/make/model. */
+export const getCarTitle = (car: CompareCar): string =>
+    car.title || `${car.year} ${car.make} ${car.model}`;
 
 /**
  * Maximum number of cars allowed in a comparison.

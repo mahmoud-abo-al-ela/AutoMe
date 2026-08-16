@@ -5,8 +5,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, ArrowRight, Fuel, Calendar, Gauge } from "lucide-react";
+import { X, ArrowRight, Fuel, Calendar, Gauge, Car as CarIcon } from "lucide-react";
 import { formatPrice, formatMileage, getCarTitle } from "./utils";
+import type { CompareCar } from "../_lib/compare-types";
 
 /**
  * Card-based car display for the compare page sticky header row.
@@ -18,7 +19,13 @@ import { formatPrice, formatMileage, getCarTitle } from "./utils";
  *  - "View Details" link button
  *  - Subtle hover elevation via framer-motion
  */
-const CompareCarCard = ({ car, onRemove }) => {
+const CompareCarCard = ({
+    car,
+    onRemove,
+}: {
+    car: CompareCar;
+    onRemove: (carId: string) => void;
+}) => {
     return (
         <AnimatePresence mode="popLayout">
             <motion.div
@@ -43,13 +50,21 @@ const CompareCarCard = ({ car, onRemove }) => {
                 </Button>
 
                 {/* Image with gradient overlay */}
-                <div className="aspect-[4/3] relative">
-                    <Image
-                        src={car.images[0]?.url}
-                        alt={getCarTitle(car)}
-                        fill
-                        className="object-cover"
-                    />
+                <div className="aspect-[4/3] relative bg-muted">
+                    {/* A car with no images used to pass an undefined `src` to
+                        next/image, which throws and takes the page down. */}
+                    {car.images[0]?.url ? (
+                        <Image
+                            src={car.images[0].url}
+                            alt={getCarTitle(car)}
+                            fill
+                            className="object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                            <CarIcon className="h-10 w-10 text-muted-foreground/40" />
+                        </div>
+                    )}
                     <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
                     <Badge className="absolute bottom-2 left-2 bg-white/90 text-gray-900 hover:bg-white text-xs font-semibold shadow-sm">
                         {formatPrice(car.price)}

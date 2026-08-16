@@ -5,12 +5,16 @@ import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCarTitle } from "./utils";
+import type { CompareCar, CompareWinners } from "../_lib/compare-types";
 
 /**
  * Mapping of category IDs to the spec keys used for determining the winner,
  * and the logic for picking the best value.
  */
-const CATEGORY_WINNER_RULES = {
+const CATEGORY_WINNER_RULES: Record<
+    string,
+    { keys: string[]; label: string }
+> = {
     basic: {
         keys: ["price", "year"],
         label: "Best Value",
@@ -35,19 +39,22 @@ const CATEGORY_WINNER_RULES = {
  *  - features: Most features
  *
  * Shows trophy icon with car name. Returns null if there's no clear winner.
- *
- * @param {Object}  props
- * @param {string}  props.categoryId  - "basic" | "performance" | "features"
- * @param {Array}   props.cars        - Array of car objects
- * @param {Object}  props.winners     - Map of spec key → winning car ID
  */
-const CompareWinnerBadge = ({ categoryId, cars, winners }) => {
+const CompareWinnerBadge = ({
+    categoryId,
+    cars,
+    winners,
+}: {
+    categoryId: string;
+    cars: CompareCar[];
+    winners: CompareWinners;
+}) => {
     const categoryWinner = useMemo(() => {
         const rules = CATEGORY_WINNER_RULES[categoryId];
         if (!rules || !winners) return null;
 
         // Count how many spec wins each car has in this category
-        const winCounts = {};
+        const winCounts: Record<string, number> = {};
         cars.forEach((car) => {
             winCounts[car.id] = 0;
         });
@@ -60,7 +67,7 @@ const CompareWinnerBadge = ({ categoryId, cars, winners }) => {
         });
 
         // Find the car with the most wins
-        let bestId = null;
+        let bestId: string | null = null;
         let bestCount = 0;
         let hasTie = false;
 
