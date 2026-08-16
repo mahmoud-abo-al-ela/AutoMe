@@ -14,7 +14,11 @@ import { getCurrentOrganization } from "@/lib/getOrganization";
 export default async function Home() {
   const organization = await getCurrentOrganization();
   const isOnSubdomain = !!organization;
-  const plans = !isOnSubdomain ? await getActivePlans() : [];
+  // The whole ActionResponse envelope used to be handed to <Pricing>, whose
+  // `dbPlans.length > 0` check read undefined on it and quietly fell through to
+  // the hardcoded default plans — so the homepage never showed real pricing.
+  const plansResponse = isOnSubdomain ? null : await getActivePlans();
+  const plans = plansResponse?.success ? plansResponse.data : null;
   const brandName = organization?.name || "AutoMe";
 
   return (

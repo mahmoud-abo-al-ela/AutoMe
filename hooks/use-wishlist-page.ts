@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getWishlist } from "@/actions/cars-listing";
@@ -58,13 +58,18 @@ export const useWishlistPage = (limit = 6) => {
         }
     }, [data, currentPage, limit, queryClient]);
 
+    const emptyPagination = { total: 0, page: 1, limit, totalPages: 0 };
+
     return {
-        cars: data?.success ? data.data?.cars : [],
+        cars: data?.success ? data.data?.cars ?? [] : [],
         pagination: data?.success
-            ? data.data?.pagination
-            : { total: 0, page: 1, limit, totalPages: 0 },
+            ? data.data?.pagination ?? emptyPagination
+            : emptyPagination,
         loading,
-        error,
+        // The presenter renders this straight into a <p>. useQuery hands back an
+        // Error instance, which React refuses to render as a child — so a failed
+        // fetch blew up the error state itself. Surface the message instead.
+        error: error ? error.message : null,
         handlers: {
             handlePageChange,
             handleWishlistChange,

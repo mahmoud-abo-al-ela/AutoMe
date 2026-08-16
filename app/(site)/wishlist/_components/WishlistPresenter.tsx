@@ -1,13 +1,13 @@
 "use client";
 
 import CarCard from "@/components/CarCard";
-import { Heart, Car } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingGrid } from "@/components/common/LoadingStates";
-import Link from "next/link";
+import type { useWishlistPage } from "@/hooks/use-wishlist-page";
 
 export const WishlistPresenter = ({
     cars,
@@ -15,7 +15,7 @@ export const WishlistPresenter = ({
     loading,
     error,
     handlers,
-}) => {
+}: ReturnType<typeof useWishlistPage>) => {
     const isEmpty = !cars || cars.length === 0;
 
     return (
@@ -32,7 +32,7 @@ export const WishlistPresenter = ({
                         )}
                     </div>
                     <p className="text-muted-foreground text-sm">
-                        Save cars you're interested in and come back to them later.
+                        Save cars you&apos;re interested in and come back to them later.
                     </p>
                 </div>
             </div>

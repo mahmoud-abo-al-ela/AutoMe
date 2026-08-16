@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { UserChannelList, ChatWindow } from "@/components/StreamChat";
 import { getCurrentOrganization } from "@/lib/getOrganization";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Messages | AutoMe",
   description: "Chat with dealerships about cars you're interested in",
 };
