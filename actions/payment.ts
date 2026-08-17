@@ -9,6 +9,7 @@ import {
 } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { ValidationError } from "@/lib/utils/errors";
+import { requireBillingEmail } from "@/lib/utils/userHelpers";
 
 function handleStripeError(error: unknown): never {
   const err = error as { message?: string; type?: string; code?: string };
@@ -56,7 +57,9 @@ export const createCheckoutSession = withAuth(
 
     try {
       const result = await paymentService.createCheckoutSession(
-        ctx.user,
+        // Narrows ctx.user.email from string | null; a phone-only account
+        // cannot subscribe until it has an address to receive receipts at.
+        { ...ctx.user, email: requireBillingEmail(ctx.user) },
         validated.planId,
         validated.billingPeriod,
         validated.onboardingSessionId

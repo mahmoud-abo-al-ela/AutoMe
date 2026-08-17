@@ -152,16 +152,19 @@ export const createOrganization = withAuth(
       stripeData,
     });
 
-    // Send welcome email
-    sendWelcomeEmail({
-      to: ctx.user.email,
-      userName: ctx.user.name || "there",
-      dealershipName: organization.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
-    }).catch((error) => {
-      // Non-blocking: email failure should not fail the main operation
-      logError(error);
-    });
+    // Send welcome email. Skipped for accounts with no address (phone-only
+    // Clerk signups); the organization is created either way.
+    if (ctx.user.email) {
+      sendWelcomeEmail({
+        to: ctx.user.email,
+        userName: ctx.user.name || "there",
+        dealershipName: organization.name,
+        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
+    }
 
     return createSuccessResponse({
       organization: {
@@ -286,16 +289,19 @@ export const createOrganizationAfterCheckout = withAuth(
       stripeData,
     });
 
-    // Send welcome email
-    sendWelcomeEmail({
-      to: ctx.user.email,
-      userName: ctx.user.name || "there",
-      dealershipName: organization.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
-    }).catch((error) => {
-      // Non-blocking: email failure should not fail the main operation
-      logError(error);
-    });
+    // Send welcome email. Skipped for accounts with no address (phone-only
+    // Clerk signups); the organization is created either way.
+    if (ctx.user.email) {
+      sendWelcomeEmail({
+        to: ctx.user.email,
+        userName: ctx.user.name || "there",
+        dealershipName: organization.name,
+        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
+    }
 
     await markOnboardingSessionCompleted(onboardingSessionId);
 

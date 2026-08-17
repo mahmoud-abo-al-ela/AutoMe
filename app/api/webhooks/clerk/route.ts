@@ -148,35 +148,20 @@ async function handleUserCreated(
         return;
     }
 
-    // `User.email` is required and unique, but Clerk can legitimately deliver a
-    // user.created with no email address at all — phone-only and some
-    // passwordless signups. Creating the row anyway used to mean handing Prisma
-    // `undefined` for a required column: the insert threw, the caller released
-    // the idempotency claim and returned 500, and Svix retried the same event
-    // on its full backoff schedule, forever.
-    //
-    // Skipping is safe because this handler is not the only way a user row
-    // appears — `checkUser()` creates it on the first authenticated request,
-    // by which point Clerk may also have an email. Deliberately not
-    // synthesising a placeholder address: it would occupy the unique index,
-    // land in audit logs and pending-owner lookups, and could be delivered to.
-    if (!email) {
-        logError(
-            `Clerk user.created for ${clerkId} has no email address; skipping user creation.`
-        );
-        return;
-    }
-
-    // Create user
+    // Clerk can legitimately deliver a user.created with no email address at
+    // all — phone-only and some passwordless signups. `User.email` is nullable
+    // for exactly that reason, so the row is created either way and stays in
+    // step with Clerk. No placeholder address is synthesised: it would occupy
+    // the unique index, reach audit logs and pending-owner lookups, and could
+    // be delivered to.
     await db.user.create({
         data: {
             clerkId,
             name,
-            email,
+            email: email ?? null,
             imageUrl,
         },
     });
-
 }
 
 async function handleUserUpdated(
@@ -199,13 +184,16 @@ async function handleUserUpdated(
     }
 
     // `updateMany`, not `update`: `update` throws P2025 when no row matches,
-    // which would 500 and put Svix back into its retry loop. A miss is now
-    // routine — user.created skips users with no email address, so their
-    // user.updated arrives before any row exists. Zero rows updated is fine;
-    // `checkUser()` creates the row on the first authenticated request.
+    // which would 500 and put Svix back into its retry loop. A miss is not
+    // hypothetical — user.updated can arrive for a Clerk user we never saw
+    // created (webhook configured after signup, a replayed event, a purged
+    // row). Zero rows updated is fine; `checkUser()` creates the row on the
+    // user's first authenticated request.
     //
     // `email: undefined` when Clerk sends none means Prisma leaves the column
-    // alone rather than nulling it, which is what we want on a partial update.
+    // alone rather than nulling it, which is what we want on a partial update:
+    // it avoids wiping a known address just because this particular event did
+    // not carry one.
     const { count } = await db.user.updateMany({
         where: { clerkId },
         data: {
