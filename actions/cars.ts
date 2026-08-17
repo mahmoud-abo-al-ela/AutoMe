@@ -5,7 +5,7 @@ import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
-import { RateLimitError, ValidationError, NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
+import { ValidationError, NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";

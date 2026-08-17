@@ -11,7 +11,7 @@ import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
-import { ValidationError, RateLimitError } from "@/lib/utils/errors";
+import { ValidationError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
 // Vision model for image search. Overridable via env because the default can be

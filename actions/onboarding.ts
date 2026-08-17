@@ -32,7 +32,6 @@ import {
   assertArcjetConfigured,
 } from "@/lib/middleware/with-rate-limit";
 import { request } from "@arcjet/next";
-import { RateLimitError } from "@/lib/utils/errors";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key");
 

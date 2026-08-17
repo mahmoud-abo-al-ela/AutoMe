@@ -10,7 +10,7 @@ import { request } from "@arcjet/next";
 import { sendEmail } from "@/lib/resend";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
-import { ValidationError, RateLimitError, AppError } from "@/lib/utils/errors";
+import { ValidationError, AppError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
 const contactSchema = z.object({
