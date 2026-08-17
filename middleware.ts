@@ -1,6 +1,10 @@
-import arcjet, { createMiddleware, detectBot, shield } from "@arcjet/next";
+import arcjet, { detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse, type NextRequest } from "next/server";
+import {
+  NextResponse,
+  type NextFetchEvent,
+  type NextRequest,
+} from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
@@ -78,14 +82,14 @@ function getImpersonationContext(request: NextRequest) {
 const arcjetMode =
   process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN";
 
+const ARCJET_KEY = process.env.ARCJET_KEY;
+
+// Arcjet is only enforced in production. In development the rules run in
+// DRY_RUN anyway, so an absent key is not a security gap there.
+const arcjetRequired = process.env.NODE_ENV === "production";
+
 const aj = arcjet({
-  // Asserted to keep the current runtime. Worth noting that this is the one
-  // guard in the request path with no fail-closed check: if ARCJET_KEY is unset
-  // in production, shield and bot detection are configured with undefined
-  // rather than rejecting, the same shape as the CRON_SECRET fail-open that
-  // Phase 0 closed. Left alone here because making middleware throw on a
-  // missing key would take the whole site down rather than one endpoint.
-  key: process.env.ARCJET_KEY!,
+  key: ARCJET_KEY ?? "",
   rules: [
     shield({
       mode: arcjetMode,
@@ -96,6 +100,63 @@ const aj = arcjet({
     }),
   ],
 });
+
+function serviceUnavailable() {
+  return new NextResponse("Service Unavailable", {
+    status: 503,
+    headers: { "cache-control": "no-store" },
+  });
+}
+
+/**
+ * Shield + bot detection, failing **closed**.
+ *
+ * Previously this was `createMiddleware(aj, clerk)`, which allows the request
+ * through whenever Arcjet cannot reach a verdict — and `key` was a bare
+ * non-null assertion, so an unset ARCJET_KEY in production silently configured
+ * both rules with `undefined` and disabled them outright. Either way the site
+ * served traffic with no shield and nothing in the logs to say so.
+ *
+ * Now: a missing key in production, or an errored decision, rejects with 503.
+ * Denials reject with 429 for rate limits and 403 otherwise.
+ */
+async function arcjetGuard(req: NextRequest): Promise<NextResponse | null> {
+  if (!ARCJET_KEY) {
+    if (arcjetRequired) {
+      console.error("ARCJET_KEY is not configured; rejecting request");
+      return serviceUnavailable();
+    }
+    return null;
+  }
+
+  let decision;
+  try {
+    decision = await aj.protect(req);
+  } catch (error) {
+    console.error("Arcjet protect threw; rejecting request", error);
+    return arcjetRequired ? serviceUnavailable() : null;
+  }
+
+  if (decision.isErrored()) {
+    console.error("Arcjet returned an errored decision", decision.reason);
+    return arcjetRequired ? serviceUnavailable() : null;
+  }
+
+  if (decision.isDenied()) {
+    if (decision.reason.isRateLimit()) {
+      return new NextResponse("Too Many Requests", {
+        status: 429,
+        headers: { "cache-control": "no-store" },
+      });
+    }
+    return new NextResponse("Forbidden", {
+      status: 403,
+      headers: { "cache-control": "no-store" },
+    });
+  }
+
+  return null;
+}
 
 const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
@@ -194,8 +255,16 @@ const clerk = clerkMiddleware(async (auth, req) => {
   return response;
 });
 
-// Chain middlewares - ArcJet runs first, then Clerk
-export default createMiddleware(aj, clerk);
+// Chain middlewares - ArcJet runs first (fail-closed), then Clerk.
+export default async function middleware(
+  req: NextRequest,
+  event: NextFetchEvent
+) {
+  const blocked = await arcjetGuard(req);
+  if (blocked) return blocked;
+
+  return clerk(req, event);
+}
 
 export const config = {
   matcher: [

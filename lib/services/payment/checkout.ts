@@ -46,6 +46,11 @@ export async function createCheckoutSession(
     const session = await stripeService.createStripeCheckoutSession({
         customerEmail: user.email,
         stripePriceId,
+        // The selected plan's own trial, not a platform-wide default. Without
+        // this Stripe charges immediately, `trial_end` comes back null, and the
+        // subscription is created ACTIVE — so a plan configured with a trial in
+        // the super-admin UI silently did not have one.
+        trialDays: plan.trialDays,
         metadata: {
             userId: user.id,
             planId: plan.id,

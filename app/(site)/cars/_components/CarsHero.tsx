@@ -6,18 +6,25 @@ import { formatCarPrice } from "@/lib/utils/currency";
 import type { CarsFilters } from "../_lib/cars-types";
 
 // Structured quick-picks map to real filters, not free-text search — so
-// "Under 30k" and "Luxury" actually return matching cars.
+// "Under …" and "Luxury" actually return matching cars.
 //
-// ⚠️ THRESHOLDS ARE DOLLAR-SCALE. Car.price is EGP, where 30,000 is a very
-// cheap car and 60,000 is not remotely "luxury", so these two picks return
-// almost nothing and almost everything respectively. The label no longer says
-// "$", but the numbers still need real EGP values — a pricing decision, not a
-// formatting one.
+// Thresholds are EGP, matching Car.price. They were previously dollar-scale
+// (30,000 / 60,000), which against EGP prices meant "Under" returned almost
+// nothing and "Luxury" returned almost everything. Egyptian car prices sit far
+// higher than USD ones because of import duty and taxes, so these are pitched
+// against the real distribution: a little under the median for the budget pick,
+// and the top slice for luxury.
+const BUDGET_MAX_EGP = 1_500_000;
+const LUXURY_MIN_EGP = 3_000_000;
+
 const QUICK_PICKS: { label: string; patch: Partial<CarsFilters> }[] = [
   { label: "SUV", patch: { bodyType: ["SUV"] } },
   { label: "Electric", patch: { fuelType: ["Electric"] } },
-  { label: `Under ${formatCarPrice(30000)}`, patch: { maxPrice: 30000 } },
-  { label: "Luxury", patch: { minPrice: 60000 } },
+  {
+    label: `Under ${formatCarPrice(BUDGET_MAX_EGP)}`,
+    patch: { maxPrice: BUDGET_MAX_EGP },
+  },
+  { label: "Luxury", patch: { minPrice: LUXURY_MIN_EGP } },
 ];
 
 export const CarsHero = ({

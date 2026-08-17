@@ -1,5 +1,9 @@
 "use server";
 import aj from "@/lib/arcjet";
+import {
+  assertArcjetAllowed,
+  assertArcjetConfigured,
+} from "@/lib/middleware/with-rate-limit";
 import { request } from "@arcjet/next";
 import { GoogleGenAI } from "@google/genai";
 import { fileToBase64 } from "./cars";
@@ -41,19 +45,9 @@ export interface ImageSearchResult {
 export const processImagesSearch = withErrorHandling(async (file: File) => {
   // Rate limiting check
   const req = await request();
+  assertArcjetConfigured();
   const decision = await aj.protect(req, { requested: 1 });
-
-  if (decision.isDenied()) {
-    if (decision.reason.isRateLimit()) {
-      const { remaining, reset } = decision.reason;
-      throw new RateLimitError(
-        `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
-          reset
-        ).toLocaleString()}`
-      );
-    }
-    throw new ValidationError("Request denied", "request");
-  }
+  assertArcjetAllowed(decision);
 
   if (!process.env.GEMINI_API_KEY) {
     throw new ValidationError("GEMINI_API_KEY is not set", "config");

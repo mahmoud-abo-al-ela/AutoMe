@@ -4,7 +4,8 @@ import { logError } from "@/lib/utils/errors";
 import { useEffect, useState, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Channel, MessageInput, MessageList, Window, useChatContext } from "stream-chat-react";
-import { Loader2, Car, Send, MessageSquare, DollarSign, X } from "lucide-react";
+import { Loader2, Car, Send, MessageSquare, X } from "lucide-react";
+import { formatCarPrice } from "@/lib/utils/currency";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { startCarConversation } from "@/actions/stream-chat";
@@ -186,8 +187,7 @@ export function ChatSidebar({
                                 <SheetDescription className="text-sm space-y-1">
                                     {carInfo.price && (
                                         <div className="flex items-center text-primary font-semibold">
-                                            <DollarSign className="h-3 w-3" />
-                                            {Number(carInfo.price).toLocaleString()}
+                                            {formatCarPrice(Number(carInfo.price))}
                                         </div>
                                     )}
                                 </SheetDescription>
@@ -255,7 +255,7 @@ export function ChatSidebar({
                                             </p>
                                             {carInfo.price && (
                                                 <p className="text-xs text-primary font-medium mt-1">
-                                                    ${Number(carInfo.price).toLocaleString()}
+                                                    {formatCarPrice(Number(carInfo.price))}
                                                 </p>
                                             )}
                                         </div>

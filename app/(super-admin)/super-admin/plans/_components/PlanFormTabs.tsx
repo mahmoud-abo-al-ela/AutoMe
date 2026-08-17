@@ -173,6 +173,27 @@ export default function PlanFormTabs({
               }}
             />
           </div>
+          <div className="grid gap-2">
+            <Label htmlFor="trialDays">Free Trial (days)</Label>
+            <Input
+              id="trialDays"
+              type="number"
+              min={0}
+              placeholder="0 for no trial"
+              value={inputValues.trialDays}
+              onChange={(e) => setInputValues({ ...inputValues, trialDays: e.target.value })}
+              onBlur={(e) => {
+                const value = e.target.value === "" ? 0 : parseInt(e.target.value);
+                const safe = isNaN(value) || value < 0 ? 0 : value;
+                setFormData({ ...formData, trialDays: safe });
+                setInputValues({ ...inputValues, trialDays: safe === 0 ? "" : safe.toString() });
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Applies to subscribers on this plan. Sent to Stripe as the
+              checkout trial period, so it is not charged until the trial ends.
+            </p>
+          </div>
         </div>
       </TabsContent>
 

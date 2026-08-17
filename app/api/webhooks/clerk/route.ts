@@ -148,19 +148,31 @@ async function handleUserCreated(
         return;
     }
 
+    // `User.email` is required and unique, but Clerk can legitimately deliver a
+    // user.created with no email address at all — phone-only and some
+    // passwordless signups. Creating the row anyway used to mean handing Prisma
+    // `undefined` for a required column: the insert threw, the caller released
+    // the idempotency claim and returned 500, and Svix retried the same event
+    // on its full backoff schedule, forever.
+    //
+    // Skipping is safe because this handler is not the only way a user row
+    // appears — `checkUser()` creates it on the first authenticated request,
+    // by which point Clerk may also have an email. Deliberately not
+    // synthesising a placeholder address: it would occupy the unique index,
+    // land in audit logs and pending-owner lookups, and could be delivered to.
+    if (!email) {
+        logError(
+            `Clerk user.created for ${clerkId} has no email address; skipping user creation.`
+        );
+        return;
+    }
+
     // Create user
     await db.user.create({
         data: {
             clerkId,
             name,
-            // BUG (surfaced by this conversion, NOT fixed here): User.email is
-            // required, but email_addresses can be absent — a phone-only or
-            // passwordless Clerk signup has none. Prisma then rejects the
-            // create, the POST handler releases the idempotency claim and
-            // returns 500, and Svix retries the event forever. Asserted to keep
-            // the current runtime; deciding what a user without an email should
-            // be is its own change.
-            email: email!,
+            email,
             imageUrl,
         },
     });
@@ -186,8 +198,15 @@ async function handleUserUpdated(
         name = "User"; // Final fallback
     }
 
-    // Update user
-    await db.user.update({
+    // `updateMany`, not `update`: `update` throws P2025 when no row matches,
+    // which would 500 and put Svix back into its retry loop. A miss is now
+    // routine — user.created skips users with no email address, so their
+    // user.updated arrives before any row exists. Zero rows updated is fine;
+    // `checkUser()` creates the row on the first authenticated request.
+    //
+    // `email: undefined` when Clerk sends none means Prisma leaves the column
+    // alone rather than nulling it, which is what we want on a partial update.
+    const { count } = await db.user.updateMany({
         where: { clerkId },
         data: {
             name,
@@ -196,6 +215,11 @@ async function handleUserUpdated(
         },
     });
 
+    if (count === 0) {
+        logError(
+            `Clerk user.updated for ${clerkId} matched no local user; nothing to update.`
+        );
+    }
 }
 
 async function handleUserDeleted(clerkId: string) {

@@ -27,10 +27,13 @@ function getStripeClient() {
 export async function createStripeCheckoutSession({
     customerEmail,
     stripePriceId,
+    trialDays,
     metadata,
 }: {
     customerEmail: string;
     stripePriceId: string;
+    /** The plan's own trial length. 0 or absent means bill immediately. */
+    trialDays?: number | null;
     metadata: { userId: string; planId: string } & Record<string, string>;
 }): Promise<Stripe.Checkout.Session> {
     const stripe = getStripeClient();
@@ -54,6 +57,11 @@ export async function createStripeCheckoutSession({
         cancel_url: `${appUrl}/onboarding?step=3`,
         metadata,
         subscription_data: {
+            // Stripe rejects trial_period_days: 0, so the key is omitted
+            // entirely when the plan has no trial.
+            ...(trialDays && trialDays > 0
+                ? { trial_period_days: trialDays }
+                : {}),
             metadata: {
                 userId: metadata.userId,
                 planId: metadata.planId,

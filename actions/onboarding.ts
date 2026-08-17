@@ -27,6 +27,10 @@ import { organizationSchema } from "@/lib/validations/schemas";
 import type { OrganizationInput } from "@/lib/validations/schemas";
 import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
 import aj from "@/lib/arcjet";
+import {
+  assertArcjetAllowed,
+  assertArcjetConfigured,
+} from "@/lib/middleware/with-rate-limit";
 import { request } from "@arcjet/next";
 import { RateLimitError } from "@/lib/utils/errors";
 
@@ -76,19 +80,9 @@ export const createOrganization = withAuth(
   ) => {
     // Rate limit org creation
     const req = await request();
+    assertArcjetConfigured();
     const decision = await aj.protect(req, { requested: 1 });
-
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        const { remaining, reset } = decision.reason;
-        throw new RateLimitError(
-          `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
-            reset
-          ).toLocaleString()}`
-        );
-      }
-      throw new ValidationError("Request denied", "request");
-    }
+    assertArcjetAllowed(decision);
 
     // Validate payload
     const validatedData = validateAction(organizationSchema, {

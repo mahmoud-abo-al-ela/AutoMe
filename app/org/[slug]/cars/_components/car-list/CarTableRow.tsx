@@ -8,7 +8,6 @@ import {
   Calendar,
   MapPin,
   Star,
-  DollarSign,
   XCircle,
   Trash2,
   MoreHorizontal,
@@ -18,6 +17,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { formatCarPrice } from "@/lib/utils/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,9 +95,8 @@ const CarTableRow = ({
                 </span>
               </div>
               <div className="flex md:hidden items-center gap-1 bg-green-50 px-2 py-1 rounded">
-                <DollarSign className="h-3 w-3 text-green-600" />
                 <span className="font-semibold text-green-700 text-sm">
-                  ${car.price.toLocaleString()}
+                  {formatCarPrice(Number(car.price))}
                 </span>
               </div>
               <div className="flex md:hidden">
@@ -115,9 +114,8 @@ const CarTableRow = ({
       <TableCell className="py-4 md:py-6 hidden md:table-cell">
         <div className="space-y-2">
           <div className="flex items-center gap-1">
-            <DollarSign className="h-4 w-4 text-green-600" />
             <span className="font-bold text-base md:text-lg text-gray-900">
-              {car.price.toLocaleString()}
+              {formatCarPrice(Number(car.price))}
             </span>
           </div>
         </div>

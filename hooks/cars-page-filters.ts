@@ -1,5 +1,6 @@
 // Pure filter/URL helpers for the cars listing page — no React, fully testable.
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
+import { formatCarPrice } from "@/lib/utils/currency";
 
 /** The filter keys the cars page holds as comma-joined multi-selects. */
 export const MULTI_KEYS = ["make", "bodyType", "fuelType", "transmission"] as const;
@@ -131,8 +132,10 @@ export function buildActiveFilterChips(filters: CarPageFilters): ActiveFilterChi
   if (filters.color) chips.push({ type: "color", value: filters.color, label: filters.color });
   if (filters.minSeats) chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${filters.minSeats}+` });
   if (filters.minPrice || filters.maxPrice) {
-    const min = filters.minPrice ? `$${filters.minPrice.toLocaleString()}` : "$0";
-    const max = filters.maxPrice ? `$${filters.maxPrice.toLocaleString()}` : "Any";
+    // Car.price is EGP. These were `$${…}` and a bare "$0" — the same shape the
+    // dealership inventory chips already had corrected.
+    const min = filters.minPrice ? formatCarPrice(filters.minPrice) : formatCarPrice(0);
+    const max = filters.maxPrice ? formatCarPrice(filters.maxPrice) : "Any";
     chips.push({ type: "price", value: "price", label: `${min} – ${max}` });
   }
   if (filters.minYear || filters.maxYear) {

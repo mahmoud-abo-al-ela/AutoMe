@@ -2,6 +2,10 @@
 
 import { z } from "zod";
 import aj from "@/lib/arcjet";
+import {
+  assertArcjetAllowed,
+  assertArcjetConfigured,
+} from "@/lib/middleware/with-rate-limit";
 import { request } from "@arcjet/next";
 import { sendEmail } from "@/lib/resend";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -32,15 +36,9 @@ function escapeHtml(value: string = "") {
 export const submitContactForm = withErrorHandling(async (formData: unknown) => {
   // Rate limiting (per IP) to prevent contact-form abuse
   const req = await request();
+  assertArcjetConfigured();
   const decision = await aj.protect(req, { requested: 1 });
-  if (decision.isDenied()) {
-    if (decision.reason.isRateLimit()) {
-      throw new RateLimitError(
-        "Too many messages sent. Please try again later."
-      );
-    }
-    throw new ValidationError("Request denied", "request");
-  }
+  assertArcjetAllowed(decision, "Too many messages sent. Please try again later.");
 
   const parsed = contactSchema.safeParse(formData);
   if (!parsed.success) {

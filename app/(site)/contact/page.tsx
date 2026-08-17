@@ -106,11 +106,11 @@ export default function ContactPage() {
             {/* Map placeholder */}
             <div className="mt-8 bg-muted/50 border rounded-xl p-6 text-center">
               <MapPin className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm font-medium mb-1">San Francisco, CA</p>
+              <p className="text-sm font-medium mb-1">New Cairo, Cairo</p>
               <p className="text-xs text-muted-foreground">
-                123 Innovation Drive, Suite 400
+                12 El-Nasr Road, Fifth Settlement
                 <br />
-                San Francisco, CA 94102
+                New Cairo, Cairo Governorate 11835
               </p>
             </div>
           </div>

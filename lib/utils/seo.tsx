@@ -34,7 +34,7 @@ export function generateDealershipStructuredData(dealership: SeoDealership | nul
             addressLocality: dealership.location?.city || "",
             addressRegion: dealership.location?.state || "",
             postalCode: dealership.location?.postalCode || "",
-            addressCountry: dealership.location?.country || "US",
+            addressCountry: dealership.location?.country || "EG",
         };
     }
 
