@@ -46,9 +46,11 @@ type PartialCarInput = Record<string, unknown> & {
   updatedAt?: Date | string | null;
 };
 
-export function serializeCar(car: CarInput | null) {
-  if (!car) return null;
-
+/**
+ * The non-null body of `serializeCar`. Split out so the exported overloads can
+ * name the result type with `ReturnType` instead of restating the shape.
+ */
+function serializeCarInner(car: CarInput) {
   return {
     ...car,
     price: parseFloat(car.price.toString()),
@@ -71,6 +73,21 @@ export function serializeCar(car: CarInput | null) {
       },
     }),
   };
+}
+
+/**
+ * Serialize a car row for the client. Overloaded so callers that already know
+ * the row is present — the detail action throws NotFoundError before getting
+ * here — keep a non-nullable car instead of an all-optional spread of `null`.
+ */
+export function serializeCar(car: CarInput): ReturnType<typeof serializeCarInner>;
+export function serializeCar(car: null): null;
+export function serializeCar(
+  car: CarInput | null,
+): ReturnType<typeof serializeCarInner> | null;
+export function serializeCar(car: CarInput | null) {
+  if (!car) return null;
+  return serializeCarInner(car);
 }
 
 /**
@@ -119,20 +136,33 @@ export function serializePartialCar(car: PartialCarInput | null) {
   return serialized;
 }
 
-/**
- * Serialize car with images formatted for display
- */
-export function serializeCarWithImages(car: CarInput | null) {
-  const serialized = serializeCar(car);
-  if (!serialized) return null;
+/** The non-null body of `serializeCarWithImages`. See `serializeCarInner`. */
+function serializeCarWithImagesInner(car: CarInput) {
+  const serialized = serializeCarInner(car);
 
   return {
     ...serialized,
     images: serialized.images.map((url) => ({
       url,
-      alt: `${car?.make} ${car?.model}`,
+      alt: `${car.make} ${car.model}`,
     })),
   };
+}
+
+/**
+ * Serialize car with images formatted for display. Overloaded like
+ * `serializeCar` so a known-present row stays non-nullable.
+ */
+export function serializeCarWithImages(
+  car: CarInput,
+): ReturnType<typeof serializeCarWithImagesInner>;
+export function serializeCarWithImages(car: null): null;
+export function serializeCarWithImages(
+  car: CarInput | null,
+): ReturnType<typeof serializeCarWithImagesInner> | null;
+export function serializeCarWithImages(car: CarInput | null) {
+  if (!car) return null;
+  return serializeCarWithImagesInner(car);
 }
 
 /**
@@ -159,11 +189,16 @@ export function serializeUser(user: SerializableUser | null) {
   };
 }
 
-/** A test drive row with car/user relations optionally joined. */
-type TestDriveInput = TestDrive & {
+/**
+ * A test drive row with car/user relations optionally joined. `date` is widened
+ * to accept an already-serialized row (this helper is idempotent) but stays
+ * non-nullable, as the column is — widening it to null gave every consumer a
+ * phantom `date: string | null` to guard against.
+ */
+type TestDriveInput = Omit<TestDrive, "date"> & {
+  date: Date | string;
   car?: PartialCarInput | null;
   user?: SerializableUser | null;
-  date?: Date | string | null;
 };
 
 /**

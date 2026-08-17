@@ -234,3 +234,12 @@ export const getBookedTimeSlots = withErrorHandling(
   const bookedSlots = await testDriveService.getBookedTimeSlots(carId, date);
   return createSuccessResponse(bookedSlots);
 });
+
+/**
+ * The selling dealership's opening hours for a car. Public: the same hours are
+ * already published on the dealership's detail page.
+ */
+export const getCarWorkingHours = withErrorHandling(async (carId: string) => {
+  const workingHours = await testDriveService.getCarWorkingHours(carId);
+  return createSuccessResponse(workingHours);
+});

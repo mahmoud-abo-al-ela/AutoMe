@@ -17,7 +17,18 @@ import type { ActionResponse } from "@/lib/utils/response";
 // Re-exported for backward-compatible import sites.
 export { DEFAULT_PER_PAGE, parseFiltersFromSearch, buildCarsUrl };
 
-export const useCarsPage = (initialData = null, initialState = null) => {
+/** SSR seed: what the page already fetched, and the state it parsed the URL into. */
+export type CarsInitialData = Awaited<ReturnType<typeof getCars>>;
+export interface CarsInitialState {
+  filters: Partial<CarPageFilters>;
+  page: number;
+  perPage: number;
+}
+
+export const useCarsPage = (
+  initialData: CarsInitialData | null = null,
+  initialState: CarsInitialState | null = null
+) => {
   // Prefer the server-parsed state (identical on server and client → no
   // hydration mismatch); fall back to parsing the URL on the client only.
   const initial =
@@ -295,7 +306,11 @@ export const useCarsPage = (initialData = null, initialState = null) => {
   const isError = !!error || (queryData && queryData.success === false);
 
   return {
-    cars: queryData?.success ? queryData.data.cars : [],
+    // The car serializer can yield null entries; CarCard would crash on one,
+    // so they are dropped here rather than at each render site.
+    cars: queryData?.success
+      ? queryData.data.cars.filter((car) => car !== null)
+      : [],
     pagination: queryData?.success
       ? queryData.data.pagination
       : { total: 0, page, limit: perPage, totalPages: 0 },

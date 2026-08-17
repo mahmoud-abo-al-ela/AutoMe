@@ -2,6 +2,8 @@
 import * as testDriveRepository from "@/lib/repositories/test-drive";
 import * as userRepository from "@/lib/repositories/user";
 import * as carRepository from "@/lib/repositories/car";
+import * as workingHoursRepository from "@/lib/repositories/dealership/working-hours";
+import { formatWorkingHours } from "@/lib/utils/working-hours";
 import {
   AuthenticationError,
   NotFoundError,
@@ -156,4 +158,24 @@ export async function checkExistingTestDrive(carId: string, userId?: string | nu
  */
 export async function getBookedTimeSlots(carId: string, date: string | Date) {
   return await testDriveRepository.getBookedTimeSlots(carId, date);
+}
+
+/**
+ * The selling dealership's opening hours for a car, one entry per day.
+ *
+ * The booking calendar needs these to decide which days and half-hour slots it
+ * may offer. They are the same hours already published on the dealership's
+ * public detail page, so no authorization beyond the car existing is required.
+ *
+ * Returns `[]` when the dealership has never configured any — the caller
+ * decides what to do with that.
+ */
+export async function getCarWorkingHours(carId: string) {
+  const car = await carRepository.findCarById(carId);
+  if (!car) {
+    throw new NotFoundError("Car");
+  }
+
+  const rows = await workingHoursRepository.findWorkingHours(car.organizationId);
+  return formatWorkingHours(rows);
 }

@@ -108,7 +108,10 @@ export const useComparePage = () => {
     return {
         cars,
         loading,
-        error,
+        // The presenter renders this straight into a <p>. useQuery hands back an
+        // Error instance, which React refuses to render as a child — so a failed
+        // fetch blew up the error state itself. Surface the message instead.
+        error: error ? error.message : null,
         hasCars: cars.length >= 2,
         singleCar: cars.length === 1 ? cars[0] : null,
         highlightDifferences,

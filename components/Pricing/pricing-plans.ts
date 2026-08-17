@@ -1,5 +1,6 @@
 // Pricing plan data + pure mapping/format helpers.
 import { Zap, Shield, Headphones, type LucideIcon } from "lucide-react";
+import type { Prisma } from "@/lib/generated/prisma";
 
 export type PlanFeature = {
   name: string;
@@ -31,12 +32,27 @@ export type DbPlan = {
   maxMembers?: number | null;
   maxImagesPerCar?: number | null;
   auditLogRetentionDays?: number | null;
-  features?: {
-    chat?: boolean;
-    aiProcessing?: { enabled?: boolean };
-    prioritySupport?: boolean;
-  } | null;
+  /** `Plan.features` is a Prisma Json column, so it arrives unstructured. */
+  features?: Prisma.JsonValue;
 };
+
+/** The flags `mapDbPlanToUi` looks for inside the features JSON. */
+type PlanFeatureFlags = {
+  chat?: boolean;
+  aiProcessing?: { enabled?: boolean };
+  prioritySupport?: boolean;
+};
+
+/**
+ * Read the feature flags out of the Json column. Anything that is not a plain
+ * object (null, a string, an array) yields no flags rather than throwing.
+ */
+function featureFlags(features: DbPlan["features"]): PlanFeatureFlags {
+  if (!features || typeof features !== "object" || Array.isArray(features)) {
+    return {};
+  }
+  return features as PlanFeatureFlags;
+}
 
 export const defaultPlans: UiPlan[] = [
   {
@@ -116,8 +132,7 @@ function mapDbPlanToUi(plan: DbPlan): UiPlan {
   const cta = "Get Started";
   const ctaLink = "/onboarding";
 
-  // Handle features JSON
-  const f = plan.features || {};
+  const f = featureFlags(plan.features);
 
   const features = [
     {

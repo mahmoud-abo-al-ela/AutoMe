@@ -22,7 +22,18 @@ export {
 };
 export { parseFiltersFromSearch, buildDealershipsUrl } from "@/hooks/dealerships-url";
 
-export const useDealershipsPage = (initialData = null, initialState = null) => {
+/** SSR seed: what the page already fetched, and the state it parsed the URL into. */
+export type DealershipsInitialData = Awaited<ReturnType<typeof getDealerships>>;
+export interface DealershipsInitialState {
+  filters: Partial<DealershipPageFilters>;
+  page: number;
+  perPage: number;
+}
+
+export const useDealershipsPage = (
+  initialData: DealershipsInitialData | null = null,
+  initialState: DealershipsInitialState | null = null
+) => {
   // Prefer the server-parsed state (identical on server and client → no
   // hydration mismatch); fall back to parsing the URL on the client only.
   const initial =

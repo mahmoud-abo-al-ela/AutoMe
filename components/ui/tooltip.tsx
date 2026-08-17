@@ -12,9 +12,11 @@ function TooltipProvider({
   return (<TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />);
 }
 
+// Props go to TooltipPrimitive.Root, not to the Provider — typing them as the
+// Provider's hid `open`/`onOpenChange`, so a controlled Tooltip wouldn't compile.
 function Tooltip({
   ...props
-}: React.ComponentProps<typeof TooltipProvider>) {
+}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return (
     <TooltipProvider>
       <TooltipPrimitive.Root data-slot="tooltip" {...props} />

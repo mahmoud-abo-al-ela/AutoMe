@@ -44,6 +44,7 @@ export const queryKeys = {
     list: (filters: unknown) => ["testDrives", "list", filters],
     detail: (id: string) => ["testDrives", "detail", id],
     check: (carId: string) => ["testDrives", "check", carId],
+    workingHours: (carId: string) => ["testDrives", "workingHours", carId],
   },
   wishlist: {
     all: ["wishlist"],
