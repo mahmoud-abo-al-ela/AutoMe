@@ -1,0 +1,26 @@
+{
+  "actions": {
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "search": "بحث",
+    "viewDetails": "عرض التفاصيل"
+  },
+  "states": {
+    "empty": "لا يوجد شيء هنا بعد",
+    "error": "حدث خطأ ما",
+    "loading": "جارٍ التحميل…",
+    "notTranslated": "غير متوفر بالعربية — يتم عرض النص الإنجليزي الأصلي"
+  },
+  "language": {
+    "label": "اللغة",
+    "switchTo": "التبديل إلى {language}",
+    "suggestionBody": "هذا الموقع متاح أيضًا بـ{language}.",
+    "suggestionAccept": "التبديل إلى {language}",
+    "suggestionDismiss": "المتابعة بـ{language}"
+  }
+}

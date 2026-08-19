@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 const FAQ = ({ brandName = "AutoMe" }) => {
     const [openIndex, setOpenIndex] = useState(0);
@@ -62,9 +63,12 @@ const FAQ = ({ brandName = "AutoMe" }) => {
                     </h2>
                     <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
                         Everything you need to know about {brandName}. Can&apos;t find your answer?
-                        <a href="/contact" className="text-blue-600 hover:text-blue-700 font-semibold ml-1">
+                        {/* Locale-aware Link, not a raw <a>: a bare href drops the
+                            locale prefix, so an Arabic reader clicking this was
+                            redirected into the English tree. */}
+                        <Link href="/contact" className="text-blue-600 hover:text-blue-700 font-semibold ms-1">
                             Contact us
-                        </a>
+                        </Link>
                     </p>
                 </motion.div>
 

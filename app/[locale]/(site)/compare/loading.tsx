@@ -1,4 +1,4 @@
-import ComparePageSkeleton from "@/app/(site)/compare/_components/ComparePageSkeleton";
+import ComparePageSkeleton from "@/app/[locale]/(site)/compare/_components/ComparePageSkeleton";
 
 export default function CompareLoading() {
   return (

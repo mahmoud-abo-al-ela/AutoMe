@@ -8,7 +8,7 @@ import {
     computeDifferences,
     computeWinners,
     handleRemoveCar,
-} from "@/app/(site)/compare/_components/utils";
+} from "@/app/[locale]/(site)/compare/_components/utils";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import type { SerializedCarWithImages } from "@/lib/utils/serializers";

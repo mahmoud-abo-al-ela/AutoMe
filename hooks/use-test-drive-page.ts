@@ -11,7 +11,7 @@ import type {
     TestDriveDetail,
     TestDriveListItem,
     TestDrivePagination,
-} from "@/app/(site)/test-drive/_lib/test-drive-types";
+} from "@/app/[locale]/(site)/test-drive/_lib/test-drive-types";
 
 const MODES = {
     LIST: "list",

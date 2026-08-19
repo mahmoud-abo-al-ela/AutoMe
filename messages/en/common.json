@@ -1,0 +1,26 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "retry": "Try again",
+    "save": "Save",
+    "search": "Search",
+    "viewDetails": "View details"
+  },
+  "states": {
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "loading": "Loading…",
+    "notTranslated": "Not available in Arabic — showing the English original"
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": "Switch to {language}",
+    "suggestionBody": "This site is also available in {language}.",
+    "suggestionAccept": "Switch to {language}",
+    "suggestionDismiss": "Keep {language}"
+  }
+}

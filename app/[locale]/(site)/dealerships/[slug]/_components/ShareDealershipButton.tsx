@@ -8,7 +8,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import ShareDialog from "@/app/(site)/cars/[id]/_components/ShareDialog";
+import ShareDialog from "@/app/[locale]/(site)/cars/[id]/_components/ShareDialog";
 import type { DealershipDetail } from "../_lib/detail-types";
 
 export const ShareDealershipButton = ({

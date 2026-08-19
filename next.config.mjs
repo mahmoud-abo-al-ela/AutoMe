@@ -1,4 +1,7 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 // Derive the Supabase storage hostname from the configured URL rather than
 // hardcoding one project's subdomain — that breaks any non-prod/self-hosted
@@ -39,7 +42,7 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withNextIntl(nextConfig), {
   org: "mahmoud-ali-re",
   project: "autome",
   authToken: process.env.SENTRY_AUTH_TOKEN,

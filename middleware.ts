@@ -1,35 +1,48 @@
 import arcjet, { detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import createIntlMiddleware from "next-intl/middleware";
 import {
   NextResponse,
   type NextFetchEvent,
   type NextRequest,
 } from "next/server";
+import { routing } from "@/i18n/routing";
+import {
+  localized,
+  localeOf,
+  pathnameWithoutLocale,
+} from "@/lib/utils/locale-path";
 
-const isProtectedRoute = createRouteMatcher([
-  "/admin(.*)",
-  "/saved-cars(.*)",
-  "/reservations(.*)",
-]);
+const isProtectedRoute = createRouteMatcher(
+  localized(["/admin(.*)", "/saved-cars(.*)", "/reservations(.*)"])
+);
 
-const isSuperAdminRoute = createRouteMatcher(["/super-admin(.*)"]);
+const isSuperAdminRoute = createRouteMatcher(localized(["/super-admin(.*)"]));
 
-const isMainDomainOnlyRoute = createRouteMatcher([
-  "/pricing(.*)",
-  "/signup-org(.*)",
-  "/super-admin(.*)",
-  "/onboarding(.*)",
-]);
+const isMainDomainOnlyRoute = createRouteMatcher(
+  localized([
+    "/pricing(.*)",
+    "/signup-org(.*)",
+    "/super-admin(.*)",
+    "/onboarding(.*)",
+  ])
+);
 
 // Routes that should redirect to the dealership home on subdomains
-const isSubdomainRedirectToHomeRoute = createRouteMatcher([
-  "/dealerships",
-]);
+const isSubdomainRedirectToHomeRoute = createRouteMatcher(
+  localized(["/dealerships"])
+);
+
+// API routes are not localized — they carry no locale prefix and must bypass
+// the intl middleware entirely, or every fetch gains a redirect hop.
+const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"]);
 
 const isPublicApiRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
 ]);
+
+const intlMiddleware = createIntlMiddleware(routing);
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost";
 
@@ -212,22 +225,27 @@ const clerk = clerkMiddleware(async (auth, req) => {
     return response;
   }
 
+  // Redirects below must keep the locale the visitor is already reading, or
+  // every subdomain bounce silently drops an Arabic user into English.
+  const locale = localeOf(url.pathname);
+  const localeHome = `/${locale}`;
+
   // Block main-domain-only routes on subdomains
   if (subdomain && isMainDomainOnlyRoute(req)) {
     // For onboarding, redirect to the main domain's onboarding page
-    if (url.pathname.startsWith("/onboarding")) {
+    if (pathnameWithoutLocale(url.pathname).startsWith("/onboarding")) {
       const mainDomainUrl = ROOT_DOMAIN === "localhost"
         ? `http://localhost:${url.port || "3000"}${url.pathname}${url.search}`
         : `https://${ROOT_DOMAIN}${url.pathname}${url.search}`;
       return NextResponse.redirect(mainDomainUrl);
     }
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL(localeHome, req.url));
   }
 
   // Redirect dealership-listing routes to home on subdomains
   // (on a subdomain, the user is already on a specific dealership)
   if (subdomain && isSubdomainRedirectToHomeRoute(req)) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL(localeHome, req.url));
   }
 
   // Admin routes (platform admin): require auth and ADMIN role (checked in layout)
@@ -255,7 +273,22 @@ const clerk = clerkMiddleware(async (auth, req) => {
   return response;
 });
 
-// Chain middlewares - ArcJet runs first (fail-closed), then Clerk.
+/**
+ * Chain: Arcjet (fail-closed) → next-intl → Clerk.
+ *
+ * The order matters and each step is doing something the next one cannot undo:
+ *
+ * - Arcjet first, so a blocked request never reaches auth or locale resolution.
+ * - next-intl second, but **only to catch its redirect**. On a path with no
+ *   locale prefix it issues a 308 to the prefixed URL; returning that
+ *   immediately is correct, and Clerk re-runs against the redirected request.
+ * - Clerk last, because it owns the response: it is the step that forwards the
+ *   sanitized tenant headers on the *request*, and rebuilding that response
+ *   from intl's would drop them.
+ *
+ * API routes skip intl entirely — they carry no locale prefix, and running them
+ * through it would add a redirect hop to every fetch and webhook.
+ */
 export default async function middleware(
   req: NextRequest,
   event: NextFetchEvent
@@ -263,7 +296,28 @@ export default async function middleware(
   const blocked = await arcjetGuard(req);
   if (blocked) return blocked;
 
-  return clerk(req, event);
+  if (isApiRoute(req)) {
+    return clerk(req, event);
+  }
+
+  const intlResponse = intlMiddleware(req);
+
+  // A redirect (or anything else non-pass-through) is final.
+  if (intlResponse.status !== 200) {
+    return intlResponse;
+  }
+
+  const response = await clerk(req, event);
+
+  // Carry over anything intl set on a pass-through response — the NEXT_LOCALE
+  // cookie in particular, which is what makes the choice stick across visits.
+  if (response instanceof NextResponse) {
+    for (const cookie of intlResponse.cookies.getAll()) {
+      response.cookies.set(cookie);
+    }
+  }
+
+  return response;
 }
 
 export const config = {
