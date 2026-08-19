@@ -134,7 +134,7 @@ export default function PlanComparison({
                 <TabsTrigger value="yearly" className="cursor-pointer">
                   Yearly
                   {averageSavings > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs bg-green-100">
+                    <Badge variant="secondary" className="ms-2 text-xs bg-green-100">
                       Save {averageSavings}%
                     </Badge>
                   )}
@@ -150,7 +150,7 @@ export default function PlanComparison({
                 className="h-8 px-3 cursor-pointer"
                 onClick={() => setViewMode("cards")}
               >
-                <LayoutGrid className="h-4 w-4 mr-1.5" />
+                <LayoutGrid className="h-4 w-4 me-1.5" />
                 <span className="hidden sm:inline">Cards</span>
               </Button>
               <Button
@@ -159,7 +159,7 @@ export default function PlanComparison({
                 className="h-8 px-3 cursor-pointer"
                 onClick={() => setViewMode("table")}
               >
-                <TableProperties className="h-4 w-4 mr-1.5" />
+                <TableProperties className="h-4 w-4 me-1.5" />
                 <span className="hidden sm:inline">Compare</span>
               </Button>
             </div>
@@ -296,7 +296,7 @@ export default function PlanComparison({
             >
               {isChanging ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   Processing...
                 </>
               ) : (

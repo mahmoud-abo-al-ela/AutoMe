@@ -157,7 +157,7 @@ const Footer = ({
       </div>
 
       <div className="border-t mt-6 md:mt-8 pt-4 md:pt-6 flex flex-col sm:flex-row items-center justify-between">
-        <p className="text-xs text-muted-foreground text-center sm:text-left">
+        <p className="text-xs text-muted-foreground text-center sm:text-start">
           © {new Date().getFullYear()} {brandName}. All rights reserved.
         </p>
         <div className="flex items-center space-x-4 mt-4 sm:mt-0">

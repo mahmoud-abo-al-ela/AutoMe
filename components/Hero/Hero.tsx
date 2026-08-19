@@ -35,8 +35,8 @@ const Hero = () => {
         <div className="absolute inset-0 bg-slate-950/70" />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/60 to-slate-950/95" />
         {/* Brand glows inherit tenant --primary / --brand-accent */}
-        <div className="absolute -top-1/4 right-1/4 w-[32rem] h-[32rem] bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-[28rem] h-[28rem] bg-brand-accent/15 rounded-full blur-3xl" />
+        <div className="absolute -top-1/4 end-1/4 w-[32rem] h-[32rem] bg-primary/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 start-1/4 w-[28rem] h-[28rem] bg-brand-accent/15 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto relative z-10 px-4 md:px-6 -mt-20 md:mt-0">
@@ -104,17 +104,17 @@ const Hero = () => {
             className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-xs md:text-sm"
           >
             <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
-              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 mr-2" />
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
               <span className="text-blue-100">AI-Powered Recommendations</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-white/20"></div>
             <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
-              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 mr-2" />
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
               <span className="text-blue-100">Market Price Analysis</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-white/20"></div>
             <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
-              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 mr-2" />
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
               <span className="text-blue-100">Virtual Car Tours</span>
             </div>
           </motion.div>

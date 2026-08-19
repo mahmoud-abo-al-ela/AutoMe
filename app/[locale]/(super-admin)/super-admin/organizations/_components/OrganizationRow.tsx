@@ -87,7 +87,7 @@ export default function OrganizationRow({
           addSuffix: true,
         })}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-end">
         <OrganizationActions
           org={org}
           onToggleStatus={onToggleStatus}

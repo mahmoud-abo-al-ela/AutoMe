@@ -102,7 +102,7 @@ export const SkeletonFilterBar = () => (
 
 export const SkeletonChatLayout = () => (
   <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] h-[calc(100vh-220px)] md:h-[calc(100vh-200px)] border rounded-lg shadow-sm bg-background overflow-hidden">
-    <div className="border-r border-border hidden md:flex flex-col">
+    <div className="border-e border-border hidden md:flex flex-col">
       <div className="p-4 border-b border-border">
         <Skeleton className="h-10 w-full" />
       </div>
@@ -125,13 +125,13 @@ export const SkeletonChatLayout = () => (
       </div>
       <div className="flex-1 p-4 space-y-6 overflow-hidden">
         <div className="flex justify-end">
-          <Skeleton className="h-16 w-[70%] rounded-2xl rounded-tr-sm" />
+          <Skeleton className="h-16 w-[70%] rounded-2xl rounded-se-sm" />
         </div>
         <div className="flex justify-start">
-          <Skeleton className="h-12 w-[60%] rounded-2xl rounded-tl-sm" />
+          <Skeleton className="h-12 w-[60%] rounded-2xl rounded-ss-sm" />
         </div>
         <div className="flex justify-start">
-          <Skeleton className="h-20 w-[80%] rounded-2xl rounded-tl-sm" />
+          <Skeleton className="h-20 w-[80%] rounded-2xl rounded-ss-sm" />
         </div>
       </div>
       <div className="p-4 border-t border-border mt-auto">

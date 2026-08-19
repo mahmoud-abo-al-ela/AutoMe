@@ -30,7 +30,7 @@ export default function ContactInfoSection({
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="email"
               name="email"
@@ -38,7 +38,7 @@ export default function ContactInfoSection({
               placeholder="contact@acme-auto.com"
               value={formData.email}
               onChange={onChange}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function ContactInfoSection({
         <div className="space-y-2">
           <Label htmlFor="phone">Phone</Label>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="phone"
               name="phone"
@@ -54,7 +54,7 @@ export default function ContactInfoSection({
               placeholder="+20 10 1234 5678"
               value={formData.phone}
               onChange={onChange}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function ContactInfoSection({
         <div className="space-y-2">
           <Label htmlFor="website">Website</Label>
           <div className="relative">
-            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Globe className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="website"
               name="website"
@@ -70,7 +70,7 @@ export default function ContactInfoSection({
               placeholder="https://www.acme-auto.com"
               value={formData.website}
               onChange={onChange}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
         </div>
@@ -78,14 +78,14 @@ export default function ContactInfoSection({
         <div className="space-y-2">
           <Label htmlFor="address">Address</Label>
           <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <MapPin className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
             <Textarea
               id="address"
               name="address"
               placeholder="123 Main Street, City, State, ZIP"
               value={formData.address}
               onChange={onChange}
-              className="pl-10"
+              className="ps-10"
               rows={2}
             />
           </div>

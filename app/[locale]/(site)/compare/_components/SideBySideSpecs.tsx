@@ -48,7 +48,7 @@ const SideBySideSpecs = ({
                   <div
                     className={cn(
                       "px-3 pt-2 pb-0.5 text-[10px] text-muted-foreground",
-                      showHighlight && "border-l-2 border-l-amber-400"
+                      showHighlight && "border-s-2 border-s-amber-400"
                     )}
                   >
                     {spec.label}
@@ -124,7 +124,7 @@ const SideBySideSpecs = ({
                   <div
                     className={cn(
                       "px-3 pt-2 pb-0.5 text-[10px] text-muted-foreground line-clamp-1",
-                      showHighlight && "border-l-2 border-l-amber-400"
+                      showHighlight && "border-s-2 border-s-amber-400"
                     )}
                   >
                     {feature}

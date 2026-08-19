@@ -207,7 +207,7 @@ const DetailsSection = ({
                       e.stopPropagation();
                       removeImage(index);
                     }}
-                    className="absolute cursor-pointer top-1 right-0 p-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                    className="absolute cursor-pointer top-1 end-0 p-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
                   >
                     <X className="w-4 h-4" />
                   </Button>

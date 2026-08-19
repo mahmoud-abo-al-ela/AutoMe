@@ -157,17 +157,17 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
           >
             {statusLoading || isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 {org.isActive ? "Suspending..." : "Activating..."}
               </>
             ) : org.isActive ? (
               <>
-                <Pause className="h-4 w-4 mr-2" />
+                <Pause className="h-4 w-4 me-2" />
                 Suspend
               </>
             ) : (
               <>
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="h-4 w-4 me-2" />
                 Activate
               </>
             )}
@@ -179,12 +179,12 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
           >
             {deleteLoading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 Deleting...
               </>
             ) : (
               <>
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 me-2" />
                 Delete
               </>
             )}
@@ -233,7 +233,7 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
             >
               {deleteLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   Deleting...
                 </>
               ) : (

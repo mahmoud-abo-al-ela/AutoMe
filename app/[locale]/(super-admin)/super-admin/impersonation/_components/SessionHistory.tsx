@@ -68,7 +68,7 @@ export default function SessionHistory({
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-end">
                     <Badge
                       variant="outline"
                       className="flex items-center gap-1"

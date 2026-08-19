@@ -75,7 +75,7 @@ export default function SuperAdminMobileSidebar({
                 {ItemIcon && (
                   <ItemIcon
                     className={cn(
-                      "h-5 w-5 mr-3",
+                      "h-5 w-5 me-3",
                       isActive
                         ? "text-purple-600 dark:text-purple-400"
                         : "text-sidebar-foreground/70"
@@ -112,7 +112,7 @@ export default function SuperAdminMobileSidebar({
             onClick={() => setOpen(false)}
             className="flex items-center px-4 py-3 text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 rounded-lg transition-all duration-200"
           >
-            <LogOut className="h-5 w-5 mr-3 rotate-180" />
+            <LogOut className="h-5 w-5 me-3 rotate-180" />
             <span>Back to Site</span>
           </Link>
         </div>

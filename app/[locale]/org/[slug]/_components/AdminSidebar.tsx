@@ -73,10 +73,10 @@ export default function AdminSidebar({ organization, userRole }: OrgSidebarProps
   return (
     <>
       {/* Mobile Header with Hamburger */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 start-0 end-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
           <MobileSidebar pathname={pathname} organization={organization} userRole={userRole} />
-          <div className="flex items-center space-x-2 ml-4">
+          <div className="flex items-center space-x-2 ms-4">
             {organization?.logo ? (
               <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0 relative">
                 <Image
@@ -106,7 +106,7 @@ export default function AdminSidebar({ organization, userRole }: OrgSidebarProps
           <MessageSquare className="h-5 w-5 text-sidebar-foreground" />
           <OrgUnreadBadge
             organizationId={organization.id}
-            className="absolute -top-0.5 -right-0.5"
+            className="absolute -top-0.5 -end-0.5"
           />
         </Link>
       </div>

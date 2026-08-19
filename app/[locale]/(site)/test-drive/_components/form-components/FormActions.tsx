@@ -37,7 +37,7 @@ const FormActions = ({
                 >
                     {submitting ? (
                         <>
-                            <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2"></span>
+                            <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full me-2"></span>
                             {loadingText}
                         </>
                     ) : (
@@ -56,7 +56,7 @@ const FormActions = ({
         >
             {submitting ? (
                 <>
-                    <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2"></span>
+                    <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full me-2"></span>
                     {loadingText}
                 </>
             ) : (

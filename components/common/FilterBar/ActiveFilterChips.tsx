@@ -50,7 +50,7 @@ export const ActiveFilterChips = ({
         <button
           type="button"
           onClick={() => onClear("all")}
-          className="ml-1 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          className="ms-1 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <FilterX className="h-3.5 w-3.5" />
           Clear all

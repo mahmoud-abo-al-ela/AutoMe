@@ -33,12 +33,12 @@ const NotFound = () => {
                 onClick={() => router.back()}
                 className="flex-1 cursor-pointer"
               >
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="me-2 h-4 w-4" />
                 Go Back
               </Button>
               <Button className="flex-1 cursor-pointer" asChild>
                 <Link href="/">
-                  <HomeIcon className="mr-2 h-4 w-4" />
+                  <HomeIcon className="me-2 h-4 w-4" />
                   Home
                 </Link>
               </Button>

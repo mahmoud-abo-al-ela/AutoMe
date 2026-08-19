@@ -31,7 +31,7 @@ export default function OwnerSection({
         <div className="space-y-2">
           <Label htmlFor="ownerEmail">Owner Email (Optional)</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="ownerEmail"
               name="ownerEmail"
@@ -39,7 +39,7 @@ export default function OwnerSection({
               placeholder="owner@example.com"
               value={formData.ownerEmail}
               onChange={onChange}
-              className="pl-10"
+              className="ps-10"
             />
           </div>
           <p className="text-xs text-muted-foreground">

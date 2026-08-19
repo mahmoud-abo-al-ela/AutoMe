@@ -181,18 +181,18 @@ export const DealershipInventoryFilters = ({
             <div className="flex items-center gap-3">
                 {/* Search Bar */}
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                         type="text"
                         placeholder="Search make, model..."
                         value={searchVal}
                         onChange={handleSearchChange}
-                        className="pl-9 pr-9 h-9.5 w-full bg-white border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
+                        className="ps-9 pe-9 h-9.5 w-full bg-white border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
                     />
                     {searchVal && (
                         <button
                             onClick={handleClearSearch}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -207,7 +207,7 @@ export const DealershipInventoryFilters = ({
                                 <SlidersHorizontal className="h-4 w-4 text-slate-500" />
                                 <span className="text-sm">Filters</span>
                                 {activeChips.length > 0 && (
-                                    <Badge className="ml-1 h-5 min-w-5 px-1.5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center">
+                                    <Badge className="ms-1 h-5 min-w-5 px-1.5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center">
                                         {activeChips.length}
                                     </Badge>
                                 )}
@@ -283,7 +283,7 @@ export const DealershipInventoryFilters = ({
                                         Set
                                     </Badge>
                                 )}
-                                <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
+                                <ChevronDown className="h-3 w-3 opacity-60 ms-0.5" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent align="start" className="w-[280px] p-4 rounded-xl border border-slate-100 shadow-xl bg-white space-y-4">

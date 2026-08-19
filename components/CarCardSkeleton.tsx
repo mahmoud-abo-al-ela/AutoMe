@@ -7,10 +7,10 @@ const CarCardSkeleton = () => {
         <div className="aspect-[16/9] relative overflow-hidden">
           <div className="w-full h-full skeleton-shimmer" />
         </div>
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 end-2">
           <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full skeleton-shimmer" />
         </div>
-        <div className="absolute bottom-2.5 left-2.5">
+        <div className="absolute bottom-2.5 start-2.5">
           <div className="h-6 sm:h-7 w-20 sm:w-24 rounded-lg skeleton-shimmer" />
         </div>
       </div>
@@ -23,19 +23,19 @@ const CarCardSkeleton = () => {
 
         <div className="grid grid-cols-2 gap-x-2 gap-y-2 sm:gap-y-2.5 mb-3 sm:mb-4">
           <div className="flex items-center">
-            <div className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 rounded-full skeleton-shimmer" />
+            <div className="h-5 w-5 sm:h-6 sm:w-6 me-1.5 rounded-full skeleton-shimmer" />
             <div className="h-3 sm:h-3.5 w-10 sm:w-12 rounded skeleton-shimmer" />
           </div>
           <div className="flex items-center">
-            <div className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 rounded-full skeleton-shimmer" />
+            <div className="h-5 w-5 sm:h-6 sm:w-6 me-1.5 rounded-full skeleton-shimmer" />
             <div className="h-3 sm:h-3.5 w-12 sm:w-14 rounded skeleton-shimmer" />
           </div>
           <div className="flex items-center">
-            <div className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 rounded-full skeleton-shimmer" />
+            <div className="h-5 w-5 sm:h-6 sm:w-6 me-1.5 rounded-full skeleton-shimmer" />
             <div className="h-3 sm:h-3.5 w-10 sm:w-12 rounded skeleton-shimmer" />
           </div>
           <div className="flex items-center">
-            <div className="h-5 w-5 sm:h-6 sm:w-6 mr-1.5 rounded-full skeleton-shimmer" />
+            <div className="h-5 w-5 sm:h-6 sm:w-6 me-1.5 rounded-full skeleton-shimmer" />
             <div className="h-3 sm:h-3.5 w-14 sm:w-16 rounded skeleton-shimmer" />
           </div>
         </div>

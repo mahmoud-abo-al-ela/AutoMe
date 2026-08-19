@@ -122,11 +122,11 @@ export default function EmailSettings({
             onClick={handleTestEmail}
             disabled={testLoading}
           >
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 me-2" />
             {testLoading ? "Sending..." : "Send Test Email"}
           </Button>
           <Button onClick={handleSave} disabled={loading}>
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 me-2" />
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </div>

@@ -102,9 +102,9 @@ export default function SubscriptionAlert({
                             disabled={isPortalLoading}
                         >
                             {isPortalLoading ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                             ) : (
-                                <CreditCard className="h-4 w-4 mr-2" />
+                                <CreditCard className="h-4 w-4 me-2" />
                             )}
                             Update Payment Method
                         </Button>
@@ -112,7 +112,7 @@ export default function SubscriptionAlert({
                 </AlertDescription>
                 <button
                     onClick={() => setIsDismissed(true)}
-                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300 transition-colors"
+                    className="absolute top-3 end-3 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300 transition-colors"
                     aria-label="Dismiss alert"
                 >
                     <X className="h-4 w-4" />
@@ -152,9 +152,9 @@ export default function SubscriptionAlert({
                             disabled={isPortalLoading}
                         >
                             {isPortalLoading ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                             ) : (
-                                <CreditCard className="h-4 w-4 mr-2" />
+                                <CreditCard className="h-4 w-4 me-2" />
                             )}
                             Add Payment Method
                         </Button>
@@ -162,7 +162,7 @@ export default function SubscriptionAlert({
                 </AlertDescription>
                 <button
                     onClick={() => setIsDismissed(true)}
-                    className="absolute top-3 right-3 text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300 transition-colors"
+                    className="absolute top-3 end-3 text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300 transition-colors"
                     aria-label="Dismiss alert"
                 >
                     <X className="h-4 w-4" />
@@ -190,7 +190,7 @@ export default function SubscriptionAlert({
                 </AlertDescription>
                 <button
                     onClick={() => setIsDismissed(true)}
-                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                    className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                     aria-label="Dismiss alert"
                 >
                     <X className="h-4 w-4" />

@@ -84,7 +84,7 @@ export default function PlanCard({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(plan)}>
-                <Pencil className="h-4 w-4 mr-2" />
+                <Pencil className="h-4 w-4 me-2" />
                 Edit Plan
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -92,7 +92,7 @@ export default function PlanCard({
                 className="text-destructive focus:text-destructive"
                 onClick={() => onDelete(plan)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 me-2" />
                 Delete Plan
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -168,7 +168,7 @@ export default function PlanCard({
       <CardFooter>
         <div className="w-full text-center">
           <Badge variant="outline" className="text-sm">
-            <Building2 className="h-3 w-3 mr-1" />
+            <Building2 className="h-3 w-3 me-1" />
             {plan.activeSubscriptions} active subscription
             {plan.activeSubscriptions !== 1 ? "s" : ""}
           </Badge>

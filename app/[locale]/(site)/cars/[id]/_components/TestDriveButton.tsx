@@ -37,7 +37,7 @@ const TestDriveButton = ({
                                 disabled
                                 className="w-full py-3 sm:py-4 rounded-xl cursor-not-allowed opacity-60"
                             >
-                                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
                                 Schedule Test Drive
                             </Button>
                         </div>
@@ -58,7 +58,7 @@ const TestDriveButton = ({
                 disabled
                 className="w-full py-3 sm:py-4 rounded-xl"
             >
-                <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin me-2"></div>
                 Checking...
             </Button>
         );
@@ -72,7 +72,7 @@ const TestDriveButton = ({
                 onClick={onViewTestDrive}
                 className="w-full py-3 sm:py-4 rounded-xl hover:scale-105 transition-transform cursor-pointer bg-blue-50 border-blue-200 text-blue-700"
             >
-                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
                 View Your Test Drive
             </Button>
         );
@@ -88,12 +88,12 @@ const TestDriveButton = ({
         >
             {isScheduleLoading ? (
                 <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin me-2"></div>
                     Processing...
                 </div>
             ) : (
                 <>
-                    <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
                     Schedule Test Drive
                 </>
             )}

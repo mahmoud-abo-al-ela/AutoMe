@@ -68,7 +68,7 @@ const CancelTestDriveDialog = ({
                 </DialogHeader>
                 <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mt-2">
                     <div className="flex items-start">
-                        <Info className="h-4 w-4 mr-2 text-amber-500 mt-0.5" />
+                        <Info className="h-4 w-4 me-2 text-amber-500 mt-0.5" />
                         <div>
                             <p className="text-sm text-amber-800">
                                 {testDrive?.car?.title}
@@ -96,7 +96,7 @@ const CancelTestDriveDialog = ({
                     >
                         {isDeleting ? (
                             <>
-                                <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2"></span>
+                                <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full me-2"></span>
                                 Cancelling...
                             </>
                         ) : (

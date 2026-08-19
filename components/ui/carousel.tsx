@@ -4,6 +4,7 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
 import { ArrowLeft, ArrowRight } from "lucide-react"
+import { useDirection } from "@radix-ui/react-direction";
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -50,9 +51,14 @@ function Carousel({
   children,
   ...props
 }: React.ComponentProps<"div"> & CarouselProps) {
+  // embla does not read `dir` off the document — without passing direction
+  // explicitly, an RTL carousel scrolls the wrong way and starts on the wrong
+  // slide, while still *looking* correct until you interact with it.
+  const direction = useDirection();
   const [carouselRef, api] = useEmblaCarousel({
     ...opts,
     axis: orientation === "horizontal" ? "x" : "y",
+    direction,
   }, plugins)
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
@@ -71,15 +77,19 @@ function Carousel({
     api?.scrollNext()
   }, [api])
 
+  // Arrow keys are physical; scrollPrev/scrollNext are logical once embla is in
+  // RTL. Without the swap, pressing the left arrow in Arabic walks the carousel
+  // backwards relative to the direction the slides visibly move.
   const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    const isRtl = direction === "rtl"
     if (event.key === "ArrowLeft") {
       event.preventDefault()
-      scrollPrev()
+      if (isRtl) scrollNext(); else scrollPrev()
     } else if (event.key === "ArrowRight") {
       event.preventDefault()
-      scrollNext()
+      if (isRtl) scrollPrev(); else scrollNext()
     }
-  }, [scrollPrev, scrollNext])
+  }, [scrollPrev, scrollNext, direction])
 
   React.useEffect(() => {
     if (!api || !setApi) return
@@ -137,7 +147,9 @@ function CarouselContent({
       <div
         className={cn(
           "flex",
-          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+          // Must stay paired with CarouselItem's ps-4: a physical -ml-4 against
+          // a logical ps-4 misaligns every carousel by the gutter width in RTL.
+          orientation === "horizontal" ? "-ms-4" : "-mt-4 flex-col",
           className
         )}
         {...props} />
@@ -158,7 +170,7 @@ function CarouselItem({
       data-slot="carousel-item"
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
+        orientation === "horizontal" ? "ps-4" : "pt-4",
         className
       )}
       {...props} />
@@ -179,12 +191,12 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn("absolute size-8 rounded-full", orientation === "horizontal"
-        ? "top-1/2 -left-12 -translate-y-1/2"
+        ? "top-1/2 -start-12 -translate-y-1/2"
         : "-top-12 left-1/2 -translate-x-1/2 rotate-90", className)}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}>
-      <ArrowLeft />
+      <ArrowLeft className="rtl:rotate-180" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -204,12 +216,12 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn("absolute size-8 rounded-full", orientation === "horizontal"
-        ? "top-1/2 -right-12 -translate-y-1/2"
+        ? "top-1/2 -end-12 -translate-y-1/2"
         : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90", className)}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}>
-      <ArrowRight />
+      <ArrowRight className="rtl:rotate-180" />
       <span className="sr-only">Next slide</span>
     </Button>
   );

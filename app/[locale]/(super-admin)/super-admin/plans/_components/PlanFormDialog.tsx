@@ -71,12 +71,12 @@ export default function PlanFormDialog({
                     <Button onClick={handleSubmit} disabled={loading || isPending} className="cursor-pointer">
                         {loading || isPending ? (
                             <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                                 {mode === "create" ? "Creating..." : "Saving..."}
                             </>
                         ) : (
                             <>
-                                {mode === "create" && <Plus className="h-4 w-4 mr-2" />}
+                                {mode === "create" && <Plus className="h-4 w-4 me-2" />}
                                 {mode === "create" ? "Create Plan" : "Save Changes"}
                             </>
                         )}

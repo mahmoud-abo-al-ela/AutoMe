@@ -50,7 +50,7 @@ export default function SlugPreview({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="ml-auto flex items-center gap-1 text-xs font-medium text-gray-500"
+                        className="ms-auto flex items-center gap-1 text-xs font-medium text-gray-500"
                     >
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         Checking
@@ -62,7 +62,7 @@ export default function SlugPreview({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="ml-auto flex items-center gap-1 text-xs font-semibold text-green-700"
+                        className="ms-auto flex items-center gap-1 text-xs font-semibold text-green-700"
                     >
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         Available
@@ -74,7 +74,7 @@ export default function SlugPreview({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="ml-auto flex items-center gap-1 text-xs font-semibold text-red-700"
+                        className="ms-auto flex items-center gap-1 text-xs font-semibold text-red-700"
                     >
                         <XCircle className="h-3.5 w-3.5" />
                         Taken — try another name

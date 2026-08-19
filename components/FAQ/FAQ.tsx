@@ -84,9 +84,9 @@ const FAQ = ({ brandName = "AutoMe" }) => {
                         >
                             <button
                                 onClick={() => setOpenIndex(openIndex === index ? -1 : index)}
-                                className="w-full px-6 py-5 sm:px-8 sm:py-6 flex items-center justify-between text-left"
+                                className="w-full px-6 py-5 sm:px-8 sm:py-6 flex items-center justify-between text-start"
                             >
-                                <span className="text-base sm:text-lg font-semibold text-gray-900 pr-4">
+                                <span className="text-base sm:text-lg font-semibold text-gray-900 pe-4">
                                     {faq.question}
                                 </span>
                                 <ChevronDown

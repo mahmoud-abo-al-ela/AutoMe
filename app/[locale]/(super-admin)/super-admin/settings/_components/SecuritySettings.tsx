@@ -128,7 +128,7 @@ export default function SecuritySettings({
 
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={loading}>
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 me-2" />
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </div>

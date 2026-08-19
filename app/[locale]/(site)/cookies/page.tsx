@@ -20,7 +20,7 @@ export default function CookiePolicyPage() {
         <p>
           We use cookies to:
         </p>
-        <ul className="list-disc pl-6 space-y-2">
+        <ul className="list-disc ps-6 space-y-2">
           <li>Remember your preferences and settings</li>
           <li>Understand how you use our platform</li>
           <li>Improve your user experience</li>

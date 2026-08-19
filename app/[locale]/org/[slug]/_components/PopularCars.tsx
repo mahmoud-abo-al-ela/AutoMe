@@ -76,7 +76,7 @@ const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
                   <CarFront className="h-6 w-6 text-muted-foreground" />
                 )}
                 {/* Rank Badge */}
-                <div className="absolute -top-1 -left-1 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm border text-[10px] font-bold z-10">
+                <div className="absolute -top-1 -start-1 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm border text-[10px] font-bold z-10">
                   {idx + 1}
                 </div>
               </div>
@@ -95,7 +95,7 @@ const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
                 </div>
               </div>
               
-              <div className="flex-shrink-0 text-right">
+              <div className="flex-shrink-0 text-end">
                 <div className="flex items-center gap-1.5 justify-end text-rose-500 bg-rose-50 dark:bg-rose-950/30 px-2 py-1 rounded-md">
                   <Heart className="h-3.5 w-3.5 fill-current" />
                   <span className="text-xs font-bold">{car.savedCount}</span>

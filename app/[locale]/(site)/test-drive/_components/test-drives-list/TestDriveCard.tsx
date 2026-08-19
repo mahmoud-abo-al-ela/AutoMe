@@ -80,7 +80,7 @@ const TestDriveCard = ({
                                 style={{ objectFit: "cover" }}
                                 className="bg-gray-100 group-hover:scale-105 transition-transform duration-300"
                             />
-                            <div className="absolute top-1 right-1 block md:hidden">
+                            <div className="absolute top-1 end-1 block md:hidden">
                                 {getStatusBadge(testDrive.status)}
                             </div>
                         </>
@@ -135,7 +135,7 @@ const TestDriveCard = ({
                         >
                             {testDrive.status === "CANCELLED" ? "Cancelled" : "Manage"}
                             {testDrive.status === "CANCELLED" ? null : (
-                                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+                                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ms-1" />
                             )}
                         </Button>
                     </div>

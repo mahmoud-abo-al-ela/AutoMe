@@ -26,7 +26,7 @@ export const WishlistPresenter = ({
                         <Heart className="h-7 w-7 text-primary" />
                         <h1 className="text-xl sm:text-3xl font-bold">Your Wishlist</h1>
                         {!loading && !isEmpty && pagination && (
-                            <Badge variant="outline" className="ml-2 bg-primary/5">
+                            <Badge variant="outline" className="ms-2 bg-primary/5">
                                 {pagination.total} {pagination.total === 1 ? "car" : "cars"}
                             </Badge>
                         )}

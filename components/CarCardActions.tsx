@@ -103,7 +103,7 @@ export default function CarCardActions({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="absolute right-2 top-2 z-20 flex gap-2">
+      <div className="absolute end-2 top-2 z-20 flex gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

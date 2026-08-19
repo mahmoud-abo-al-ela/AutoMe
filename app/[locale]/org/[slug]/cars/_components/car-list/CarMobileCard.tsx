@@ -68,7 +68,7 @@ const CarMobileCard = ({
                             </div>
                         )}
                         {car.featured && (
-                            <div className="absolute -top-1 -right-1 bg-yellow-400 rounded-full p-1">
+                            <div className="absolute -top-1 -end-1 bg-yellow-400 rounded-full p-1">
                                 <Star className="h-3 w-3 text-white" fill="currentColor" />
                             </div>
                         )}
@@ -125,7 +125,7 @@ const CarMobileCard = ({
                                 className="cursor-pointer"
                                 disabled={isCarDisabled}
                             >
-                                <Eye className="mr-2 h-4 w-4" />
+                                <Eye className="me-2 h-4 w-4" />
                                 View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem
@@ -133,7 +133,7 @@ const CarMobileCard = ({
                                 className="cursor-pointer"
                                 disabled={isCarDisabled}
                             >
-                                <Pencil className="mr-2 h-4 w-4" />
+                                <Pencil className="me-2 h-4 w-4" />
                                 Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
@@ -146,7 +146,7 @@ const CarMobileCard = ({
                                 className="cursor-pointer"
                                 disabled={isCarDisabled}
                             >
-                                <Star className="mr-2 h-4 w-4" />
+                                <Star className="me-2 h-4 w-4" />
                                 {car.featured ? "Remove Featured" : "Make Featured"}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -162,7 +162,7 @@ const CarMobileCard = ({
                                     className="cursor-pointer"
                                     disabled={isCarDisabled}
                                 >
-                                    <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                                    <CheckCircle className="me-2 h-4 w-4 text-green-600" />
                                     Mark Available
                                 </DropdownMenuItem>
                             )}
@@ -177,7 +177,7 @@ const CarMobileCard = ({
                                     className="cursor-pointer"
                                     disabled={isCarDisabled}
                                 >
-                                    <XCircle className="mr-2 h-4 w-4 text-gray-600" />
+                                    <XCircle className="me-2 h-4 w-4 text-gray-600" />
                                     Mark as Sold
                                 </DropdownMenuItem>
                             )}
@@ -192,7 +192,7 @@ const CarMobileCard = ({
                                     className="cursor-pointer"
                                     disabled={isCarDisabled}
                                 >
-                                    <Clock className="mr-2 h-4 w-4 text-gray-600" />
+                                    <Clock className="me-2 h-4 w-4 text-gray-600" />
                                     Mark Unavailable
                                 </DropdownMenuItem>
                             )}
@@ -202,7 +202,7 @@ const CarMobileCard = ({
                                 className="cursor-pointer text-red-600 focus:text-red-600"
                                 disabled={isCarDisabled}
                             >
-                                <Trash2 className="mr-2 h-4 w-4" />
+                                <Trash2 className="me-2 h-4 w-4" />
                                 Delete Car
                             </DropdownMenuItem>
                         </DropdownMenuContent>

@@ -27,7 +27,7 @@ const MobileCarCard = ({
         onClick={() => onRemove(car.id)}
         size="icon"
         variant="ghost"
-        className="absolute top-1 right-1 z-10 h-6 w-6 bg-white/80 backdrop-blur-sm rounded-full hover:bg-red-50 hover:text-red-600 cursor-pointer shadow-sm"
+        className="absolute top-1 end-1 z-10 h-6 w-6 bg-white/80 backdrop-blur-sm rounded-full hover:bg-red-50 hover:text-red-600 cursor-pointer shadow-sm"
         aria-label={`Remove ${getCarTitle(car)}`}
       >
         <X className="h-3 w-3" />
@@ -65,7 +65,7 @@ const MobileCarCard = ({
             <Button asChild size="sm" className="w-full text-xs h-7">
               <Link href={`/cars/${car.id}`}>
                 View Details
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ms-1 h-3 w-3" />
               </Link>
             </Button>
           )}

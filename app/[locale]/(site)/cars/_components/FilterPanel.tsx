@@ -65,10 +65,10 @@ const FilterPanel = ({
     (filters.minMileage || filters.maxMileage ? 1 : 0);
 
   return (
-    <div className="w-full rounded-2xl border border-border border-l-4 border-l-primary bg-card p-4 sm:p-5 md:shadow-sm">
+    <div className="w-full rounded-2xl border border-border border-s-4 border-s-primary bg-card p-4 sm:p-5 md:shadow-sm">
       <div className="mb-4 flex items-center justify-between border-b border-border pb-3 sm:mb-5">
         <h2 className="flex items-center text-base font-bold sm:text-lg">
-          <Filter className="mr-1.5 h-4 w-4 text-primary sm:mr-2 sm:h-5 sm:w-5" />
+          <Filter className="me-1.5 h-4 w-4 text-primary sm:me-2 sm:h-5 sm:w-5" />
           Filters
         </h2>
         {activeCount > 0 && (

@@ -74,7 +74,7 @@ const CarTableRow = ({
             )}
             {car.featured && (
               <Star
-                className="ml-1 text-yellow-400 absolute -top-2 -left-2 sm:hidden"
+                className="ms-1 text-yellow-400 absolute -top-2 -start-2 sm:hidden"
                 size={20}
                 fill="currentColor"
               />
@@ -171,7 +171,7 @@ const CarTableRow = ({
                 className="cursor-pointer"
                 disabled={isCarDisabled}
               >
-                <Eye className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <Eye className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">View</span>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -179,7 +179,7 @@ const CarTableRow = ({
                 className="cursor-pointer"
                 disabled={isCarDisabled}
               >
-                <Pencil className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <Pencil className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">Edit</span>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -192,7 +192,7 @@ const CarTableRow = ({
                 className="cursor-pointer"
                 disabled={isCarDisabled}
               >
-                <Star className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <Star className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">
                   {car.featured ? "Unfeature" : "Feature"}
                 </span>
@@ -212,7 +212,7 @@ const CarTableRow = ({
                   className="cursor-pointer"
                   disabled={isCarDisabled}
                 >
-                  <CheckCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                  <CheckCircle className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                   <span className="text-xs sm:text-sm">Available</span>
                 </DropdownMenuItem>
               )}{" "}
@@ -227,7 +227,7 @@ const CarTableRow = ({
                   className="cursor-pointer"
                   disabled={isCarDisabled}
                 >
-                  <XCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+                  <XCircle className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
                   <span className="text-xs sm:text-sm">Sold</span>
                 </DropdownMenuItem>
               )}{" "}
@@ -242,7 +242,7 @@ const CarTableRow = ({
                   className="cursor-pointer"
                   disabled={isCarDisabled}
                 >
-                  <Clock className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+                  <Clock className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
                   <span className="text-xs sm:text-sm">Unavailable</span>
                 </DropdownMenuItem>
               )}{" "}
@@ -252,7 +252,7 @@ const CarTableRow = ({
                 className="cursor-pointer text-red-600 focus:text-red-600"
                 disabled={isCarDisabled}
               >
-                <Trash2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <Trash2 className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

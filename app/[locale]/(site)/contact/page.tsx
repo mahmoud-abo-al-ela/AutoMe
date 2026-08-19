@@ -9,8 +9,8 @@ export default function ContactPage() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
         <div className="absolute inset-0">
-          <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 end-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/3 start-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
         </div>
         <div className="container mx-auto px-4 py-16 md:py-24 relative z-10 text-center">
           <span className="inline-block text-xs font-semibold uppercase tracking-widest text-blue-300 mb-4">

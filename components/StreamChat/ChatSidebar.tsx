@@ -245,7 +245,7 @@ export function ChatSidebar({
                                     </div>
 
                                     {carInfo && (
-                                        <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 text-left border border-border/50 shadow-sm">
+                                        <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 text-start border border-border/50 shadow-sm">
                                             <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                                                 <Car className="h-3 w-3" />
                                                 Asking about:
@@ -276,14 +276,14 @@ export function ChatSidebar({
                                                 onChange={(e) => setMessageText(e.target.value)}
                                                 placeholder="Type your message..."
                                                 disabled={loading}
-                                                className="w-full px-4 py-3 pr-10 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-background transition-all duration-200 placeholder:text-muted-foreground/60"
+                                                className="w-full px-4 py-3 pe-10 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-background transition-all duration-200 placeholder:text-muted-foreground/60"
                                                 aria-label="Message input"
                                             />
                                             {messageText && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setMessageText("")}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                                    className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                                     aria-label="Clear message"
                                                 >
                                                     <X className="h-4 w-4" />

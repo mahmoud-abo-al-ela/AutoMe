@@ -63,7 +63,7 @@ export const TestDriveDetailsModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader className="text-left space-y-1.5">
+        <DialogHeader className="text-start space-y-1.5">
           <DialogTitle>Test Drive Details</DialogTitle>
           <DialogDescription>
             Complete information for this test drive request
@@ -141,7 +141,7 @@ export const TestDriveDetailsModal = ({
               <Calendar className="h-4 w-4" />
               Schedule
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm pl-6 sm:pl-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ps-6 sm:ps-2">
               <div className="flex items-center gap-2">
                 <span className="font-medium">Date:</span>
                 <span>{formatDate(testDrive.date)}</span>

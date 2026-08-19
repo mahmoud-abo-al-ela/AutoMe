@@ -57,10 +57,10 @@ export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 start-0 end-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
           <SuperAdminMobileSidebar pathname={pathname} user={user} />
-          <div className="flex items-center space-x-2 ml-4">
+          <div className="flex items-center space-x-2 ms-4">
             <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>

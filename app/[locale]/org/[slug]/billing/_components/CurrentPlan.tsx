@@ -110,7 +110,7 @@ export default function CurrentPlan({
                 {statusConfig && (
                   <Badge className={statusConfig.badge}>
                     {StatusIcon && (
-                      <StatusIcon className="h-3 w-3 mr-1" />
+                      <StatusIcon className="h-3 w-3 me-1" />
                     )}
                     {statusConfig.badgeLabel}
                   </Badge>
@@ -161,9 +161,9 @@ export default function CurrentPlan({
                   disabled={isPortalLoading}
                 >
                   {isPortalLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   ) : (
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className="h-4 w-4 me-2" />
                   )}
                   Manage Subscription
                 </Button>

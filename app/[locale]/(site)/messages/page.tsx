@@ -33,7 +33,7 @@ export default async function MessagesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-0 h-[calc(100vh-220px)] md:h-[calc(100vh-200px)] border rounded-lg overflow-hidden bg-card shadow-sm">
         {/* Channel List - scoped to current organization on subdomains */}
-        <div className="border-r flex flex-col overflow-hidden bg-background">
+        <div className="border-e flex flex-col overflow-hidden bg-background">
           <UserChannelList organizationId={organization?.id} />
         </div>
 

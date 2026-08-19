@@ -63,7 +63,7 @@ export default function UserRow({
               <div key={m.id} className="text-sm flex items-center gap-1">
                 <Building2 className="h-3 w-3 text-muted-foreground" />
                 <span>{m.organization.name}</span>
-                <Badge variant="outline" className="text-xs ml-1">
+                <Badge variant="outline" className="text-xs ms-1">
                   {m.role}
                 </Badge>
               </div>

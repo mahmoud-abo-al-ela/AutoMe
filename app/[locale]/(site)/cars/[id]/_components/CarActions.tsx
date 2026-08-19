@@ -85,7 +85,7 @@ const CarActions = ({
             onClick={onGoToCompare}
             className="w-full py-2 sm:py-3 rounded-xl hover:scale-105 transition-transform cursor-pointer text-xs sm:text-sm"
           >
-            <Scale className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <Scale className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
             Go to Compare
           </Button>
         )}

@@ -80,9 +80,9 @@ function NoPaymentMethod({ isOwner, onManage, isLoading }: ManageProps) {
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     ) : (
-                        <CreditCard className="h-4 w-4 mr-2" />
+                        <CreditCard className="h-4 w-4 me-2" />
                     )}
                     Add Payment Method
                 </Button>
@@ -147,9 +147,9 @@ function CardDisplay({
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     ) : (
-                        <Settings className="h-4 w-4 mr-2" />
+                        <Settings className="h-4 w-4 me-2" />
                     )}
                     Update
                 </Button>

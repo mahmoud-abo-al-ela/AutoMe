@@ -48,7 +48,7 @@ export default function ImpersonationBanner({
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-yellow-900">
+    <div className="fixed top-0 start-0 end-0 z-50 bg-yellow-500 text-yellow-900">
       <div className="container mx-auto px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
@@ -74,12 +74,12 @@ export default function ImpersonationBanner({
         >
           {ending ? (
             <>
-              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              <Loader2 className="h-3 w-3 me-1 animate-spin" />
               Ending...
             </>
           ) : (
             <>
-              <LogOut className="h-3 w-3 mr-1" />
+              <LogOut className="h-3 w-3 me-1" />
               Exit Impersonation
             </>
           )}

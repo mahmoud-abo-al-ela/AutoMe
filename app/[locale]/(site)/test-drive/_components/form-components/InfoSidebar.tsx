@@ -18,19 +18,19 @@ const InfoSidebar = () => {
       </h3>
       <ul className="space-y-2 text-sm">
         <li className="flex items-center">
-          <span className="bg-primary/10 text-primary rounded-full p-1 mr-2 mt-0.5">
+          <span className="bg-primary/10 text-primary rounded-full p-1 me-2 mt-0.5">
             <CalendarDays className="h-6 w-6" />
           </span>
           <span>Test drives are subject to availability</span>
         </li>
         <li className="flex items-center">
-          <span className="bg-primary/10 text-primary rounded-full p-1 mr-2 mt-0.5">
+          <span className="bg-primary/10 text-primary rounded-full p-1 me-2 mt-0.5">
             <Clock className="h-6 w-6" />
           </span>
           <span>Please arrive 10 minutes before your scheduled time</span>
         </li>
         <li className="flex items-center">
-          <span className="bg-primary/10 text-primary rounded-full p-1 mr-2 mt-0.5">
+          <span className="bg-primary/10 text-primary rounded-full p-1 me-2 mt-0.5">
             <Info className="h-6 w-6" />
           </span>
           <span>Bring your driver&apos;s license and proof of insurance</span>

@@ -53,7 +53,7 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="w-full md:w-[320px] lg:w-[360px] p-4 sm:p-5 md:border-r border-b md:border-b-0"
+        className="w-full md:w-[320px] lg:w-[360px] p-4 sm:p-5 md:border-e border-b md:border-b-0"
       >
         <CompareCarCard car={car} onRemove={handleRemoveCar} />
       </motion.div>
@@ -65,7 +65,13 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
         transition={{ duration: 0.4, delay: 0.25 }}
         className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 md:p-10 text-center"
       >
-        {/* Animated bouncing arrow */}
+        {/* Animated bouncing arrow.
+            A directional icon cluster, so it is mirrored as a unit rather than
+            rewritten to logical properties: the chevrons point "onward" and the
+            animation nudges them the same way. Flipping the container reverses
+            the glyphs, their overlap and the motion together — converting the
+            -ml-4 overlap to -ms-4 would have reversed only the spacing and left
+            three chevrons pointing back the way the reader came. */}
         <motion.div
           animate={{ x: [0, 8, 0] }}
           transition={{
@@ -73,7 +79,7 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="hidden md:flex items-center text-primary/40 mb-6"
+          className="hidden md:flex items-center text-primary/40 mb-6 rtl:-scale-x-100"
         >
           <ChevronRight className="h-8 w-8" />
           <ChevronRight className="h-8 w-8 -ml-4" />
@@ -110,9 +116,9 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
           className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-md hover:shadow-lg transition-shadow"
         >
           <Link href="/cars">
-            <Search className="mr-2 h-4 w-4" />
+            <Search className="me-2 h-4 w-4" />
             Browse Cars
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ms-2 h-4 w-4" />
           </Link>
         </Button>
       </motion.div>
@@ -141,21 +147,21 @@ const NoCarsState = () => {
         <motion.div
           animate={{ y: [-2, 2, -2] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-2 -left-3 bg-white rounded-full p-1.5 shadow-md border"
+          className="absolute -top-2 -start-3 bg-white rounded-full p-1.5 shadow-md border"
         >
           <Car className="h-4 w-4 text-primary/70" />
         </motion.div>
         <motion.div
           animate={{ y: [2, -2, 2] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-          className="absolute -top-1 -right-3 bg-white rounded-full p-1.5 shadow-md border"
+          className="absolute -top-1 -end-3 bg-white rounded-full p-1.5 shadow-md border"
         >
           <Car className="h-4 w-4 text-blue-500/70" />
         </motion.div>
         <motion.div
           animate={{ y: [-1, 3, -1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -bottom-2 right-0 bg-white rounded-full p-1.5 shadow-md border"
+          className="absolute -bottom-2 end-0 bg-white rounded-full p-1.5 shadow-md border"
         >
           <Plus className="h-3.5 w-3.5 text-emerald-500" />
         </motion.div>
@@ -188,9 +194,9 @@ const NoCarsState = () => {
           className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-md hover:shadow-lg transition-shadow"
         >
           <Link href="/cars">
-            <Search className="mr-2 h-4 w-4" />
+            <Search className="me-2 h-4 w-4" />
             Browse Cars
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ms-2 h-4 w-4" />
           </Link>
         </Button>
       </motion.div>

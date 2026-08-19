@@ -20,7 +20,7 @@ export default function PrivacyPage() {
         <p>
           We may use the information we collect about you to:
         </p>
-        <ul className="list-disc pl-6 space-y-2">
+        <ul className="list-disc ps-6 space-y-2">
           <li>Provide, maintain, and improve our Services</li>
           <li>Process transactions and send related information</li>
           <li>Send administrative messages, customer service responses, and technical notices</li>

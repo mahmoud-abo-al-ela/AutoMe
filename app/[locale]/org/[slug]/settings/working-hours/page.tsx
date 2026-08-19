@@ -33,7 +33,7 @@ export default function AdminWorkingHours() {
         <WorkingHoursSkeleton />
       ) : (
         <Card className="overflow-hidden pb-3">
-          <CardHeader className="text-center sm:text-left py-0">
+          <CardHeader className="text-center sm:text-start py-0">
             <CardTitle className="text-lg sm:text-xl">Business Hours</CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               Set your operating hours for each day of the week. Customers will
@@ -55,7 +55,7 @@ export default function AdminWorkingHours() {
               >
                 {loadingUpdateWorkingHours ? (
                   <span className="flex items-center justify-center">
-                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin mr-1 sm:mr-2" />
+                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin me-1 sm:me-2" />
                     <span className="text-xs sm:text-base">Saving...</span>
                   </span>
                 ) : (

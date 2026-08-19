@@ -7,7 +7,7 @@ const TestDriveSkeleton = () => {
             <Card className="p-6">
                 <div className="space-y-6">
                     <div className="flex items-start">
-                        <Skeleton className="h-5 w-5 mr-2 rounded-full" />
+                        <Skeleton className="h-5 w-5 me-2 rounded-full" />
                         <div className="space-y-2 w-full">
                             <Skeleton className="h-5 w-36" />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

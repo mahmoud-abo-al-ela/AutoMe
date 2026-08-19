@@ -34,7 +34,7 @@ export default function ActiveFilterChips({
               exit={{ scale: 0.85, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <Badge variant="outline" className="flex items-center gap-1 py-1 pl-2.5 pr-1.5 bg-slate-50 border-slate-200 text-slate-600 rounded-full font-medium text-[11px] select-none hover:bg-slate-100 transition-colors">
+              <Badge variant="outline" className="flex items-center gap-1 py-1 ps-2.5 pe-1.5 bg-slate-50 border-slate-200 text-slate-600 rounded-full font-medium text-[11px] select-none hover:bg-slate-100 transition-colors">
                 <span>{chip.label}</span>
                 <button
                   onClick={() => onRemove(chip.field, chip.value)}

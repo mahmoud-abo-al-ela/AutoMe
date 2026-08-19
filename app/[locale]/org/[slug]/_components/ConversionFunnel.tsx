@@ -33,10 +33,10 @@ const FunnelStage = ({
         <Icon className={`h-5 w-5 ${colorClass.text}`} />
         <span className="font-medium">{title}</span>
       </div>
-      <div className="text-right">
+      <div className="text-end">
         <span className="text-xl font-bold">{count}</span>
         {percentage !== null && (
-          <span className="text-sm text-muted-foreground ml-2 hidden sm:inline-block">
+          <span className="text-sm text-muted-foreground ms-2 hidden sm:inline-block">
             ({percentage.toFixed(1)}%{subtitle ? ` ${subtitle}` : ''})
           </span>
         )}
@@ -50,7 +50,7 @@ const FunnelStage = ({
     />
     
     {!isLast && (
-      <div className="absolute -bottom-6 left-6 h-6 border-l-2 border-dashed border-border" />
+      <div className="absolute -bottom-6 start-6 h-6 border-s-2 border-dashed border-border" />
     )}
   </div>
 );

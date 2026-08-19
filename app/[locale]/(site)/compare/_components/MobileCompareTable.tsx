@@ -137,9 +137,9 @@ const MobileCompareTable = ({
               opts={{ align: "start", loop: false }}
               className="w-full"
             >
-              <CarouselContent className="-ml-2">
+              <CarouselContent className="-ms-2">
                 {cars.map((car) => (
-                  <CarouselItem key={car.id} className="pl-2 basis-[85%]">
+                  <CarouselItem key={car.id} className="ps-2 basis-[85%]">
                     <MobileCarCard
                       car={car}
                       onRemove={handlers.removeCar}
@@ -149,8 +149,8 @@ const MobileCompareTable = ({
               </CarouselContent>
               {cars.length > 1 && (
                 <>
-                  <CarouselPrevious className="left-1 h-7 w-7" />
-                  <CarouselNext className="right-1 h-7 w-7" />
+                  <CarouselPrevious className="start-1 h-7 w-7" />
+                  <CarouselNext className="end-1 h-7 w-7" />
                 </>
               )}
             </Carousel>

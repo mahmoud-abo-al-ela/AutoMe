@@ -47,9 +47,9 @@ export default function StatusBanner({
               disabled={isPortalLoading}
             >
               {isPortalLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
               ) : (
-                <CreditCard className="h-4 w-4 mr-2" />
+                <CreditCard className="h-4 w-4 me-2" />
               )}
               Update Payment Method
             </Button>
@@ -96,9 +96,9 @@ export default function StatusBanner({
               disabled={isPortalLoading}
             >
               {isPortalLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
               ) : (
-                <CreditCard className="h-4 w-4 mr-2" />
+                <CreditCard className="h-4 w-4 me-2" />
               )}
               Add Payment Method
             </Button>
@@ -126,7 +126,7 @@ export default function StatusBanner({
           </p>
           {isOwner && (
             <Button size="sm" className="mt-2">
-              <ArrowUpRight className="h-4 w-4 mr-2" />
+              <ArrowUpRight className="h-4 w-4 me-2" />
               Re-subscribe
             </Button>
           )}
@@ -150,7 +150,7 @@ export default function StatusBanner({
           </p>
           {isOwner && (
             <Button size="sm" className="mt-2">
-              <ArrowUpRight className="h-4 w-4 mr-2" />
+              <ArrowUpRight className="h-4 w-4 me-2" />
               Upgrade Now
             </Button>
           )}

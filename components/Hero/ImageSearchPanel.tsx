@@ -35,7 +35,7 @@ const ImageSearchPanel = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="absolute top-0 left-0 w-full bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-3 sm:p-4 z-20 mt-2 border border-gray-100"
+      className="absolute top-0 start-0 w-full bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-3 sm:p-4 z-20 mt-2 border border-gray-100"
     >
       <div className="flex items-center justify-between mb-2">
         <p className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-700">
@@ -103,7 +103,7 @@ const ImageSearchPanel = ({
             Change
           </Button>
           <Button
-            className="text-xs sm:ml-auto bg-primary text-white hover:bg-primary/90 hover:text-white cursor-pointer h-8 sm:h-9 min-w-[9.5rem] justify-center"
+            className="text-xs sm:ms-auto bg-primary text-white hover:bg-primary/90 hover:text-white cursor-pointer h-8 sm:h-9 min-w-[9.5rem] justify-center"
             size="sm"
             onClick={onSearch}
             type="button"

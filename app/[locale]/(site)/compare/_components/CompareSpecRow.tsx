@@ -38,9 +38,9 @@ const CompareSpecRow = ({
             {/* Spec label */}
             <div
                 className={cn(
-                    "p-3 text-sm text-muted-foreground border-r flex items-center",
+                    "p-3 text-sm text-muted-foreground border-e flex items-center",
                     showHighlight
-                        ? "bg-amber-50 border-l-2 border-l-amber-400"
+                        ? "bg-amber-50 border-s-2 border-s-amber-400"
                         : isEven
                             ? "bg-gray-50/80"
                             : "bg-gray-50"
@@ -62,7 +62,7 @@ const CompareSpecRow = ({
                         <div
                             key={`${car.id}-${specKey}`}
                             className={cn(
-                                "p-3 text-sm border-r last:border-r-0 flex items-center gap-1.5 transition-colors duration-200",
+                                "p-3 text-sm border-e last:border-e-0 flex items-center gap-1.5 transition-colors duration-200",
                                 showHighlight && "bg-amber-50/40",
                                 isWinner && highlighted && "bg-emerald-50/60",
                                 !showHighlight && !isWinner && isEven && "bg-white",
@@ -83,7 +83,7 @@ const CompareSpecRow = ({
                 {Array.from({ length: emptySlots }).map((_, index) => (
                     <div
                         key={`empty-${specKey}-${index}`}
-                        className="p-3 text-sm border-r last:border-r-0 text-muted-foreground bg-gray-50/50"
+                        className="p-3 text-sm border-e last:border-e-0 text-muted-foreground bg-gray-50/50"
                     >
                         —
                     </div>

@@ -25,7 +25,7 @@ export function PlanSelectionHeader({
                 <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg">
                     <CreditCard className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-left">
+                <div className="text-start">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
                         Choose Your Plan
                     </h2>

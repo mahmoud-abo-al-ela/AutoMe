@@ -18,7 +18,7 @@ const ReservationCTA = () => {
         <div className="flex flex-col md:flex-row gap-12 items-center">
           <div className="flex-1 space-y-4">
             <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium bg-card">
-              <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 inline-flex items-center justify-center text-xs mr-2">
+              <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 inline-flex items-center justify-center text-xs me-2">
                 <CalendarDays size={12} />
               </span>
               <span>Easy Scheduling</span>
@@ -38,7 +38,7 @@ const ReservationCTA = () => {
                 className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8"
               >
                 Find a Car
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
             </div>
           </div>

@@ -28,14 +28,14 @@ const ComparePageSkeleton = () => {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                     {/* Car cards row */}
                     <div className="grid grid-cols-[250px_1fr]">
-                        <div className="p-4 bg-gray-50 border-b border-r">
+                        <div className="p-4 bg-gray-50 border-b border-e">
                             <Skeleton className="h-6 w-28" />
                         </div>
                         <div className="grid grid-cols-3 border-b">
                             {Array.from({ length: 3 }).map((_, i) => (
                                 <div
                                     key={`card-${i}`}
-                                    className="p-4 border-r last:border-r-0"
+                                    className="p-4 border-e last:border-e-0"
                                 >
                                     {/* Image placeholder */}
                                     <Skeleton className="aspect-[4/3] w-full rounded-md mb-3" />
@@ -58,14 +58,14 @@ const ComparePageSkeleton = () => {
                         <div key={category.id}>
                             {/* Category header */}
                             <div className="grid grid-cols-[250px_1fr] bg-gray-100">
-                                <div className="p-3 border-b border-r">
+                                <div className="p-3 border-b border-e">
                                     <Skeleton className="h-5 w-40" />
                                 </div>
                                 <div className="grid grid-cols-3 border-b">
                                     {Array.from({ length: 3 }).map((_, i) => (
                                         <div
                                             key={`cat-header-${i}`}
-                                            className="p-3 border-r last:border-r-0"
+                                            className="p-3 border-e last:border-e-0"
                                         />
                                     ))}
                                 </div>
@@ -77,14 +77,14 @@ const ComparePageSkeleton = () => {
                                     key={spec.key}
                                     className="grid grid-cols-[250px_1fr] border-b last:border-b-0"
                                 >
-                                    <div className="p-3 border-r bg-gray-50">
+                                    <div className="p-3 border-e bg-gray-50">
                                         <Skeleton className="h-4 w-20" />
                                     </div>
                                     <div className="grid grid-cols-3">
                                         {Array.from({ length: 3 }).map((_, i) => (
                                             <div
                                                 key={`${spec.key}-${i}`}
-                                                className="p-3 border-r last:border-r-0"
+                                                className="p-3 border-e last:border-e-0"
                                             >
                                                 <Skeleton className="h-4 w-24" />
                                             </div>

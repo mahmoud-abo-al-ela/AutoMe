@@ -79,7 +79,7 @@ const CarImageGallery = ({
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
             {/* Zoom hint icon */}
-            <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-3 end-3 bg-black/50 backdrop-blur-sm text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <ZoomIn className="w-4 h-4" />
             </div>
           </div>
@@ -93,7 +93,7 @@ const CarImageGallery = ({
                   prevImage();
                 }}
                 aria-label="Previous image"
-                className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
+                className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
                 size="icon"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -104,7 +104,7 @@ const CarImageGallery = ({
                   nextImage();
                 }}
                 aria-label="Next image"
-                className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
+                className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
                 size="icon"
               >
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -113,7 +113,7 @@ const CarImageGallery = ({
           )}
 
           {/* Image Counter */}
-          <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 bg-black/70 backdrop-blur-sm text-white px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium">
+          <div className="absolute bottom-2 sm:bottom-4 end-2 sm:end-4 bg-black/70 backdrop-blur-sm text-white px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium">
             {currentImageIndex + 1} / {images.length}
           </div>
         </div>
@@ -176,7 +176,7 @@ const CarImageGallery = ({
                 <Button
                   onClick={prevImage}
                   aria-label="Previous image"
-                  className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
+                  className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
                   size="icon"
                 >
                   <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
@@ -184,7 +184,7 @@ const CarImageGallery = ({
                 <Button
                   onClick={nextImage}
                   aria-label="Next image"
-                  className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
+                  className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
                   size="icon"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />

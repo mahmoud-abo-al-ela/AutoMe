@@ -25,7 +25,7 @@ export default function WorkingHoursFooter({
                 disabled={loading}
                 className="cursor-pointer px-6 py-6 text-base font-semibold"
             >
-                <ArrowLeft className="h-5 w-5 mr-2" />
+                <ArrowLeft className="h-5 w-5 me-2" />
                 Back
             </Button>
             <Button
@@ -35,13 +35,13 @@ export default function WorkingHoursFooter({
             >
                 {loading ? (
                     <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        <Loader2 className="h-5 w-5 me-2 animate-spin" />
                         Loading...
                     </>
                 ) : (
                     <>
                         Continue
-                        <ArrowRight className="h-5 w-5 ml-2" />
+                        <ArrowRight className="h-5 w-5 ms-2" />
                     </>
                 )}
             </Button>

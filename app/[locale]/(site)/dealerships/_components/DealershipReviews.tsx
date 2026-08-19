@@ -150,7 +150,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                                 <div className="space-y-2">
                                     {[5, 4, 3, 2, 1].map((rating) => (
                                         <div key={rating} className="flex items-center gap-3">
-                                            <span className="text-sm w-8 text-right">
+                                            <span className="text-sm w-8 text-end">
                                                 {rating}★
                                             </span>
                                             <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -161,7 +161,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                                                     }}
                                                 />
                                             </div>
-                                            <span className="text-sm w-12 text-left">
+                                            <span className="text-sm w-12 text-start">
                                                 {ratingDistribution[rating]} ({Math.round(
                                                     (ratingDistribution[rating] / totalReviews) * 100
                                                 )}%)

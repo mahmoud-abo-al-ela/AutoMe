@@ -21,7 +21,7 @@ const ErrorState = ({
         "An error occurred while loading the car inventory."}
     </p>
     <Button onClick={onRetry} className="mb-2 text-sm">
-      <RefreshCw className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+      <RefreshCw className="me-2 h-3 w-3 sm:h-4 sm:w-4" />
       Try again
     </Button>
   </div>

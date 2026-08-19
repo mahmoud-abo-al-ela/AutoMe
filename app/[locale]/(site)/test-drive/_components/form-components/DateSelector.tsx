@@ -44,13 +44,13 @@ const DateSelector = ({
                     <Button
                         variant="outline"
                         className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-start font-normal",
                             !selectedDate && "text-muted-foreground",
                             error && "border-red-500"
                         )}
                         disabled={disabled}
                     >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <CalendarIcon className="me-2 h-4 w-4" />
                         {selectedDate ? (
                             format(new Date(selectedDate), "EEEE, MMMM d, yyyy")
                         ) : (
@@ -73,7 +73,7 @@ const DateSelector = ({
             )}
             {selectedDay && workingHours[selectedDay] && (
                 <div className="flex items-center text-xs mt-2 text-blue-600">
-                    <Clock className="w-3 h-3 mr-1" />
+                    <Clock className="w-3 h-3 me-1" />
                     Business hours: {workingHours[selectedDay].openTime} -{" "}
                     {workingHours[selectedDay].closeTime}
                 </div>

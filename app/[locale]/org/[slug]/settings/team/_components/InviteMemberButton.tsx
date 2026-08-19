@@ -75,7 +75,7 @@ export default function InviteMemberButton({
   if (!canAdd) {
     return (
       <Button disabled variant="outline" size="sm">
-        <UserPlus className="h-4 w-4 mr-2" />
+        <UserPlus className="h-4 w-4 me-2" />
         Member Limit Reached
       </Button>
     );
@@ -85,7 +85,7 @@ export default function InviteMemberButton({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" className="cursor-pointer">
-          <UserPlus className="h-4 w-4 mr-2" />
+          <UserPlus className="h-4 w-4 me-2" />
           Invite Member
         </Button>
       </DialogTrigger>
@@ -133,7 +133,7 @@ export default function InviteMemberButton({
           <Button onClick={handleInvite} disabled={loading} className="cursor-pointer">
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
                 Inviting...
               </>
             ) : (

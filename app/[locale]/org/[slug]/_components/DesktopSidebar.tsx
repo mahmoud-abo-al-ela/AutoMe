@@ -51,7 +51,7 @@ export default function DesktopSidebar({
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out fixed top-0 left-0 h-screen z-30",
+        "hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-e border-sidebar-border transition-all duration-300 ease-in-out fixed top-0 start-0 h-screen z-30",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -137,7 +137,7 @@ export default function DesktopSidebar({
                     <ItemIcon
                       className={cn(
                         "h-5 w-5 transition-all duration-200",
-                        collapsed ? "mx-0" : "mr-3",
+                        collapsed ? "mx-0" : "me-3",
                         isActive
                           ? "text-sidebar-accent-foreground scale-110"
                           : "text-sidebar-foreground/70 group-hover:text-sidebar-accent-foreground group-hover:scale-105"
@@ -155,21 +155,21 @@ export default function DesktopSidebar({
                     <OrgUnreadBadge
                       organizationId={organization.id}
                       className={cn(
-                        "ml-auto",
-                        collapsed && "absolute -top-1 -right-1"
+                        "ms-auto",
+                        collapsed && "absolute -top-1 -end-1"
                       )}
                     />
                   )}
 
                   {/* Active indicator */}
                   {isActive && (
-                    <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600 rounded-r-full" />
+                    <div className="absolute start-0 top-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600 rounded-e-full" />
                   )}
                 </Link>
 
                 {/* Tooltip for collapsed state */}
                 {collapsed && (
-                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute start-full ms-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     {item.label}
                   </div>
                 )}
@@ -191,7 +191,7 @@ export default function DesktopSidebar({
           <LogOut
             className={cn(
               "h-5 w-5 rotate-180 transition-all duration-200",
-              collapsed ? "mx-0" : "mr-3",
+              collapsed ? "mx-0" : "me-3",
               "group-hover:scale-105"
             )}
           />

@@ -52,14 +52,14 @@ const CarsFilter = ({
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
             <form onSubmit={handleSearch} className="relative flex-1 w-full">
               <Search
-                className={`absolute left-2 sm:left-3 top-2.5 sm:top-3 h-3 w-3 sm:h-4 sm:w-4 ${isFocused ? "text-blue-500" : "text-gray-400"
+                className={`absolute start-2 sm:start-3 top-2.5 sm:top-3 h-3 w-3 sm:h-4 sm:w-4 ${isFocused ? "text-blue-500" : "text-gray-400"
                   } transition-colors`}
               />
               <Input
                 placeholder="Search by model or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-8 sm:pl-10 text-sm h-9 sm:h-10 bg-gray-50 border-gray-200 ${isFocused
+                className={`ps-8 sm:ps-10 text-sm h-9 sm:h-10 bg-gray-50 border-gray-200 ${isFocused
                   ? "ring-1 sm:ring-2 ring-blue-100 border-blue-300"
                   : "focus:bg-white"
                   } transition-all`}
@@ -72,7 +72,7 @@ const CarsFilter = ({
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-2 sm:right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute end-2 sm:end-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600 transition-colors"
                   disabled={disabled}
                   aria-label="Clear search"
                 >
@@ -80,7 +80,7 @@ const CarsFilter = ({
                 </button>
               )}
               {disabled && (
-                <div className="absolute right-2 sm:right-3 top-2.5 sm:top-3">
+                <div className="absolute end-2 sm:end-3 top-2.5 sm:top-3">
                   <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-blue-500" />
                 </div>
               )}
@@ -100,7 +100,7 @@ const CarsFilter = ({
                 >
                   <div className="flex items-center">
                     <Filter
-                      className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${statusFilter !== "all"
+                      className={`h-3 w-3 sm:h-4 sm:w-4 me-1 sm:me-2 ${statusFilter !== "all"
                         ? "text-blue-500"
                         : "text-gray-400"
                         }`}
@@ -126,7 +126,7 @@ const CarsFilter = ({
                   disabled={disabled}
                   className="text-gray-500 hover:text-gray-700 text-sm h-9 sm:h-10 px-3"
                 >
-                  <X className="h-3 w-3 mr-1" />
+                  <X className="h-3 w-3 me-1" />
                   Clear
                 </Button>
               )}
@@ -137,7 +137,7 @@ const CarsFilter = ({
               className="bg-blue-500 text-white hover:bg-blue-600 hover:text-white cursor-pointer text-sm h-9 sm:h-10 px-3 sm:px-4 w-auto"
               onClick={() => router.push(`/org/${slug}/cars/create`)}
             >
-              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4 me-1 sm:me-2" />
               Add Car
             </Button>
 

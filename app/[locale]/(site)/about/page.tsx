@@ -86,8 +86,8 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 start-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 end-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
         <div className="container mx-auto px-4 py-20 md:py-28 relative z-10 text-center">
           <span className="inline-block text-xs font-semibold uppercase tracking-widest text-blue-300 mb-4">

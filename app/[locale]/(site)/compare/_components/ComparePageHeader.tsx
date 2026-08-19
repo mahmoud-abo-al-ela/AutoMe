@@ -160,7 +160,7 @@ const ComparePageHeader = ({
                                 onClick={handleClearAll}
                                 className="cursor-pointer text-xs sm:text-sm"
                             >
-                                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                <Trash2 className="h-3.5 w-3.5 me-1" />
                                 {showClearConfirm ? "Confirm?" : "Clear All"}
                             </Button>
                         </TooltipTrigger>

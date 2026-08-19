@@ -74,7 +74,7 @@ export default function HeaderNavLink({
             )}
           />
           {showUnreadBadge && (
-            <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+            <UnreadBadge className="absolute -top-0.5 -end-0.5" />
           )}
         </span>
       )}
@@ -82,10 +82,10 @@ export default function HeaderNavLink({
         <>
           <span className={isActive ? "font-medium" : ""}>{label}</span>
           {!isMobile && isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
           )}
           {!isMobile && !isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           )}
         </>
       )}

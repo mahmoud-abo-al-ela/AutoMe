@@ -165,7 +165,7 @@ export default function BillingHistory({
                     </TableCell>
                     <TableCell>
                       <Badge className={actionColors[event.action] || "bg-gray-100 text-gray-800"}>
-                        <Icon className="h-3 w-3 mr-1" />
+                        <Icon className="h-3 w-3 me-1" />
                         {formatActionLabel(event.action)}
                       </Badge>
                     </TableCell>

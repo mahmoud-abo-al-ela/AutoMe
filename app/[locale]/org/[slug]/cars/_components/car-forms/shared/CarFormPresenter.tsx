@@ -157,7 +157,7 @@ export const CarFormPresenter = ({
                                     <span className="text-xs text-gray-600">
                                         AI Confidence:
                                         <span
-                                            className={`ml-1 font-medium ${aiConfidence > 0.8
+                                            className={`ms-1 font-medium ${aiConfidence > 0.8
                                                     ? "text-green-600"
                                                     : aiConfidence > 0.6
                                                         ? "text-yellow-600"

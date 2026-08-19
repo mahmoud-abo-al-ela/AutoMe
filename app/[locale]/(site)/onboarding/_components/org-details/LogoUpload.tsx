@@ -154,7 +154,7 @@ export default function LogoUpload({
                 <button
                   type="button"
                   onClick={handleRemove}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  className="absolute top-1 end-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -202,7 +202,7 @@ export default function LogoUpload({
                 <span className="text-sm font-medium text-gray-600">
                   Add logo
                 </span>
-                <span className="ml-auto text-xs text-gray-400">
+                <span className="ms-auto text-xs text-gray-400">
                   PNG/JPG · 5MB
                 </span>
               </div>
@@ -211,7 +211,7 @@ export default function LogoUpload({
                 <div className="p-2.5 bg-gray-100 rounded-full shrink-0">
                   <ImageIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <div className="text-left">
+                <div className="text-start">
                   <p className="text-sm font-medium text-gray-700">
                     Drop your logo here or{" "}
                     <span className="text-blue-600">browse</span>

@@ -114,7 +114,7 @@ export default function MobileSidebar({
                     {ItemIcon && (
                       <ItemIcon
                         className={cn(
-                          "h-5 w-5 mr-3 transition-colors",
+                          "h-5 w-5 me-3 transition-colors",
                           isActive
                             ? "text-sidebar-accent-foreground"
                             : "text-sidebar-foreground/70 group-hover:text-sidebar-accent-foreground"
@@ -125,7 +125,7 @@ export default function MobileSidebar({
                     {item.name === "messages" && item.showUnreadBadge && (
                       <OrgUnreadBadge
                         organizationId={organization.id}
-                        className="ml-auto"
+                        className="ms-auto"
                       />
                     )}
                   </Link>
@@ -141,7 +141,7 @@ export default function MobileSidebar({
               className="flex items-center px-4 py-3 text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg transition-all duration-200 group"
               title="Back to Site"
             >
-              <LogOut className="h-5 w-5 mr-3 rotate-180 transition-colors group-hover:text-sidebar-accent-foreground" />
+              <LogOut className="h-5 w-5 me-3 rotate-180 transition-colors group-hover:text-sidebar-accent-foreground" />
               <span className="font-medium">Back to Site</span>
             </Link>
           </div>

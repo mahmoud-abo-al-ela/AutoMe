@@ -197,7 +197,7 @@ export default function InvoiceHistory({
                                         <TableHead>Description</TableHead>
                                         <TableHead>Amount</TableHead>
                                         <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead className="text-end">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -227,7 +227,7 @@ export default function InvoiceHistory({
                                                     {invoice.status}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="text-end">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {invoice.pdfUrl && (
                                                         <Button
@@ -280,7 +280,7 @@ export default function InvoiceHistory({
                                 >
                                     {isLoadingMore ? (
                                         <>
-                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            <Loader2 className="h-4 w-4 me-2 animate-spin" />
                                             Loading...
                                         </>
                                     ) : (

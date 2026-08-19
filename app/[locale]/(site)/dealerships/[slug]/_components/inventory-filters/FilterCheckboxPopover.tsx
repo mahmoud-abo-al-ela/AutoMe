@@ -37,7 +37,7 @@ export default function FilterCheckboxPopover({
               {selected.length}
             </Badge>
           )}
-          <ChevronDown className="h-3 w-3 opacity-60 ml-0.5" />
+          <ChevronDown className="h-3 w-3 opacity-60 ms-0.5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

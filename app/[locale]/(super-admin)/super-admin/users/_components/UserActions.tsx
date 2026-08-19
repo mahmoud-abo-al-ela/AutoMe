@@ -33,13 +33,13 @@ export default function UserActions({
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => onChangeRole(user)}>
-          <UserCog className="h-4 w-4 mr-2" />
+          <UserCog className="h-4 w-4 me-2" />
           Change Role
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => router.push(`/super-admin/users/${user.id}`)}
         >
-          <User className="h-4 w-4 mr-2" />
+          <User className="h-4 w-4 me-2" />
           View Details
         </DropdownMenuItem>
       </DropdownMenuContent>

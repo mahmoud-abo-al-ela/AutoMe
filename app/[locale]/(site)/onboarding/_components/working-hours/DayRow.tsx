@@ -74,7 +74,7 @@ export default function DayRow({
             </div>
 
             {/* Desktop Toggle */}
-            <div className="hidden sm:flex items-center gap-3 ml-4">
+            <div className="hidden sm:flex items-center gap-3 ms-4">
                 <Controller
                     name={`workingHours.${day.key}.closed`}
                     control={control}

@@ -39,7 +39,7 @@ const MobileStickyBar = ({
 
     return (
         <>
-            <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+            <div className="fixed bottom-0 start-0 end-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center gap-3 px-4 py-3 max-w-7xl mx-auto">
                     {/* Price */}
                     <div className="flex-1 min-w-0">
@@ -63,7 +63,7 @@ const MobileStickyBar = ({
                             onClick={handleChatClick}
                             className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md"
                         >
-                            <MessageCircle className="w-4 h-4 mr-1.5" />
+                            <MessageCircle className="w-4 h-4 me-1.5" />
                             Chat Now
                         </Button>
                     )}

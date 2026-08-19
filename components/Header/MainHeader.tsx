@@ -90,7 +90,7 @@ function NavLink({
             )}
           />
           {showUnreadBadge && (
-            <UnreadBadge className="absolute -top-0.5 -right-0.5" organizationId={organizationId} />
+            <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organizationId} />
           )}
         </span>
       )}
@@ -98,10 +98,10 @@ function NavLink({
         <>
           <span className={isActive ? "font-medium" : ""}>{label}</span>
           {!isMobile && isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
           )}
           {!isMobile && !isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           )}
         </>
       )}
@@ -181,7 +181,7 @@ export default function MainHeader({
         <div className="container flex h-14 md:h-16 items-center mx-auto">
           <Link
             href="/"
-            className="mr-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
+            className="me-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
             title={isOnSubdomain && organization?.name ? organization.name : "Home"}
             aria-label={isOnSubdomain && organization?.name ? organization.name : "Home"}
           >
@@ -189,10 +189,10 @@ export default function MainHeader({
               <img
                 src={organization.logo}
                 alt={organization.name ?? ""}
-                className="h-8 w-8 rounded-full object-cover ml-4 md:ml-0"
+                className="h-8 w-8 rounded-full object-cover ms-4 md:ms-0"
               />
             ) : null}
-            <span className="text-2xl font-bold text-primary ml-4 md:ml-0">
+            <span className="text-2xl font-bold text-primary ms-4 md:ms-0">
               {isOnSubdomain && organization?.name ? (
                 <span className="text-black dark:text-white">{organization.name}</span>
               ) : (
@@ -225,7 +225,7 @@ export default function MainHeader({
 
             {/* Context switcher for org members */}
             {(hasOrgMembership || isSuperAdmin) && !isOnOrgPath && (
-              <div className="mr-4">
+              <div className="me-4">
                 {isOnAdminPath ? (
                   <Button variant="outline" size="sm" asChild>
                     <Link href="/">View Storefront</Link>
@@ -293,7 +293,7 @@ export default function MainHeader({
           </div>
 
           {/* Mobile icons - Messages and Menu */}
-          <div className="md:hidden ml-auto flex items-center gap-1">
+          <div className="md:hidden ms-auto flex items-center gap-1">
             {/* Messages icon with unread badge - only show when signed in and not org owner */}
             <SignedIn>
               {!isOwner && (
@@ -303,7 +303,7 @@ export default function MainHeader({
                   title="Messages"
                 >
                   <MessageSquare className="h-5 w-5" />
-                  <UnreadBadge className="absolute -top-0.5 -right-0.5" organizationId={organization?.id} />
+                  <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organization?.id} />
                 </Link>
               )}
             </SignedIn>

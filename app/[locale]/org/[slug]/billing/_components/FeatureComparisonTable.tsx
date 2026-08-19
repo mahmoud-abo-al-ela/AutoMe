@@ -41,7 +41,7 @@ export default function FeatureComparisonTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px] sticky left-0 bg-background z-10">
+              <TableHead className="w-[200px] sticky start-0 bg-background z-10">
                 Feature
               </TableHead>
               {plans.map((plan) => {
@@ -81,7 +81,7 @@ export default function FeatureComparisonTable({
           <TableBody>
             {allFeatures.map((featureName) => (
               <TableRow key={featureName}>
-                <TableCell className="font-medium text-sm sticky left-0 bg-background z-10">
+                <TableCell className="font-medium text-sm sticky start-0 bg-background z-10">
                   {featureName}
                 </TableCell>
                 {plans.map((plan) => {
@@ -102,7 +102,7 @@ export default function FeatureComparisonTable({
             ))}
             {/* Action row */}
             <TableRow>
-              <TableCell className="sticky left-0 bg-background z-10" />
+              <TableCell className="sticky start-0 bg-background z-10" />
               {plans.map((plan) => {
                 const isCurrent =
                   plan.id === currentPlanId ||
@@ -114,7 +114,7 @@ export default function FeatureComparisonTable({
                     {isOwner ? (
                       isCurrent ? (
                         <Button size="sm" variant="outline" disabled>
-                          <Check className="h-3 w-3 mr-1" />
+                          <Check className="h-3 w-3 me-1" />
                           Current
                         </Button>
                       ) : (

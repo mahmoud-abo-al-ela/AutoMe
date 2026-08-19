@@ -136,12 +136,12 @@ export default function ActiveSessions({
                   {endingSession === session.id ||
                   (isPending && endingSession === session.id) ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                       Ending...
                     </>
                   ) : (
                     <>
-                      <LogOut className="h-4 w-4 mr-2" />
+                      <LogOut className="h-4 w-4 me-2" />
                       End Session
                     </>
                   )}

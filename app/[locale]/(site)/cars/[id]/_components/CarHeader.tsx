@@ -98,7 +98,7 @@ const CarHeader = ({
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                 {car.featured && (
                     <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium shadow-sm">
-                        <Star className="w-3 h-3 mr-1 fill-current" />
+                        <Star className="w-3 h-3 me-1 fill-current" />
                         Featured
                     </Badge>
                 )}

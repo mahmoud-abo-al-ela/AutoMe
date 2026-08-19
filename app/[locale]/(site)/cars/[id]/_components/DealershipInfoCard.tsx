@@ -30,7 +30,7 @@ const DealershipInfoCard = ({
     return (
         <Card className="relative overflow-hidden border border-slate-200 shadow-sm bg-gradient-to-br from-white via-white to-blue-50/30 p-0">
             {/* Decorative background element */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-100/30 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+            <div className="absolute top-0 end-0 w-32 h-32 bg-gradient-to-bl from-blue-100/30 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
             <CardContent className="relative p-4 sm:p-5">
                 {/* Header row: Logo + Info + CTA */}
@@ -117,7 +117,7 @@ const DealershipInfoCard = ({
                         <Link href={`/dealerships/${slug}`}>
                             <Car className="h-3.5 w-3.5" />
                             View All Cars
-                            <ChevronRight className="h-3.5 w-3.5 ml-auto" />
+                            <ChevronRight className="h-3.5 w-3.5 ms-auto" />
                         </Link>
                     </Button>
                     {phone && (

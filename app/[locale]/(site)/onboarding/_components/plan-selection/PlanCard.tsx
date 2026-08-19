@@ -154,13 +154,13 @@ export function PlanCard({
                     >
                         {isSelected ? (
                             <>
-                                <Check className="h-5 w-5 mr-2" />
+                                <Check className="h-5 w-5 me-2" />
                                 Selected
                             </>
                         ) : (
                             <>
                                 {`Select ${plan.name}`}
-                                <ArrowRight className="h-5 w-5 ml-2" />
+                                <ArrowRight className="h-5 w-5 ms-2" />
                             </>
                         )}
                     </Button>

@@ -69,7 +69,7 @@ export default function TeamMemberRow({
             <div className="flex items-center gap-2">
                 {isOwnerRole ? (
                     <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                        <Crown className="h-3 w-3 mr-1" />
+                        <Crown className="h-3 w-3 me-1" />
                         Owner
                     </Badge>
                 ) : isOwner ? (
@@ -102,7 +102,7 @@ export default function TeamMemberRow({
                     </Select>
                 ) : (
                     <Badge variant="secondary">
-                        <User className="h-3 w-3 mr-1" />
+                        <User className="h-3 w-3 me-1" />
                         Member
                     </Badge>
                 )}

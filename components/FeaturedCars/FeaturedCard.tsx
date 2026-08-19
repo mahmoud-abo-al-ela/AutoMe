@@ -44,7 +44,7 @@ const FeaturedCard = ({
               size="lg"
               className="bg-primary hover:bg-primary/90 cursor-pointer text-primary-foreground rounded-full px-6 sm:px-8 shadow-lg hover:shadow-xl transition-all duration-300 w-full md:w-auto"
             >
-              <GalleryHorizontal className="mr-2 h-4 w-4" /> View All Vehicles
+              <GalleryHorizontal className="me-2 h-4 w-4" /> View All Vehicles
             </Button>
           </Link>
         </div>

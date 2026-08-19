@@ -47,12 +47,12 @@ export default function OrganizationActions({
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
           <Link href={`/super-admin/organizations/${org.id}`}>
-            <Eye className="h-4 w-4 mr-2" />
+            <Eye className="h-4 w-4 me-2" />
             View Details
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onImpersonate(org)}>
-          <UserCog className="h-4 w-4 mr-2" />
+          <UserCog className="h-4 w-4 me-2" />
           Impersonate
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -62,17 +62,17 @@ export default function OrganizationActions({
         >
           {actionLoading === `status-${org.id}` ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
               {org.isActive ? "Suspending..." : "Activating..."}
             </>
           ) : org.isActive ? (
             <>
-              <Pause className="h-4 w-4 mr-2" />
+              <Pause className="h-4 w-4 me-2" />
               Suspend
             </>
           ) : (
             <>
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4 me-2" />
               Activate
             </>
           )}
@@ -82,7 +82,7 @@ export default function OrganizationActions({
           className="text-destructive focus:text-destructive"
           onClick={() => onDelete(org)}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <Trash2 className="h-4 w-4 me-2" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

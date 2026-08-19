@@ -161,12 +161,12 @@ export default function AuditLogsFilters({
       <div className="grid grid-cols-2 gap-4 w-full">
         <div className="flex gap-5">
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by User ID..."
               value={userIdInput}
               onChange={(e) => setUserIdInput(e.target.value)}
-              className="pl-9 bg-background"
+              className="ps-9 bg-background"
             />
           </div>
 
@@ -176,11 +176,11 @@ export default function AuditLogsFilters({
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full justify-start text-left font-normal bg-background",
+                    "w-full justify-start text-start font-normal bg-background",
                     !date && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="me-2 h-4 w-4" />
                   {date?.from ? (
                     date.to ? (
                       <>
@@ -208,7 +208,7 @@ export default function AuditLogsFilters({
             </Popover>
           </div>
         </div>
-        <div className="flex justify-end items-center gap-2 text-muted-foreground mr-2 text-sm font-medium">
+        <div className="flex justify-end items-center gap-2 text-muted-foreground me-2 text-sm font-medium">
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -256,7 +256,7 @@ export default function AuditLogsFilters({
               disabled={isPending}
               className="hover:bg-destructive/10 hover:text-destructive h-10 px-4 cursor-pointer"
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4 me-2" />
               Reset
             </Button>
           )}

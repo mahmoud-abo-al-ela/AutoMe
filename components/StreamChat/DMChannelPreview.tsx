@@ -84,7 +84,7 @@ export function DMChannelPreview({
                     </AvatarFallback>
                 </Avatar>
                 {unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                    <div className="absolute -top-1 -end-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
                         <span className="text-[10px] font-bold text-primary-foreground">
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
@@ -93,7 +93,7 @@ export function DMChannelPreview({
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 text-left">
+            <div className="flex-1 min-w-0 text-start">
                 {/* Top row: Name and Time */}
                 <div className="flex items-start justify-between gap-2 mb-1">
                     <h4 className={cn(

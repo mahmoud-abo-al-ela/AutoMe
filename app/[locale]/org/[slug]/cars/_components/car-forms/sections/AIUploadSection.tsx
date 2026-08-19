@@ -82,7 +82,7 @@ const AIUploadSection = ({
                   className="bg-purple-600 hover:bg-purple-700 mb-4"
                   disabled={isProcessing}
                 >
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="h-4 w-4 me-2" />
                   Choose Image
                 </Button>
                 <p className="text-sm text-gray-500">

@@ -99,9 +99,9 @@ const CreateCarForm = () => {
                   handleModeSelect("manual");
                 }}
               >
-                <Edit3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <Edit3 className="h-3 w-3 sm:h-4 sm:w-4 me-1 sm:me-2" />
                 Start Manual Entry
-                <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="ms-1 sm:ms-2 h-3 w-3 sm:h-4 sm:w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </Button>
             </CardContent>
           </Card>
@@ -122,9 +122,9 @@ const CreateCarForm = () => {
               {!aiEnabled && (
                 <Badge
                   variant="secondary"
-                  className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-amber-100 text-amber-800 border-amber-200 text-xs"
+                  className="absolute top-3 end-3 sm:top-4 sm:end-4 bg-amber-100 text-amber-800 border-amber-200 text-xs"
                 >
-                  <Lock className="h-3 w-3 mr-1" />
+                  <Lock className="h-3 w-3 me-1" />
                   Pro Plan
                 </Badge>
               )}
@@ -163,9 +163,9 @@ const CreateCarForm = () => {
                     handleModeSelect("ai");
                   }}
                 >
-                  <Upload className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <Upload className="h-3 w-3 sm:h-4 sm:w-4 me-1 sm:me-2" />
                   Upload with AI
-                  <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="ms-1 sm:ms-2 h-3 w-3 sm:h-4 sm:w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </Button>
               ) : (
                 <Button
@@ -174,7 +174,7 @@ const CreateCarForm = () => {
                   disabled
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Lock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <Lock className="h-3 w-3 sm:h-4 sm:w-4 me-1 sm:me-2" />
                   Upgrade to Pro to Unlock
                 </Button>
               )}

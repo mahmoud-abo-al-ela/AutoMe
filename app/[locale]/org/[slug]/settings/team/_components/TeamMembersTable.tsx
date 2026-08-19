@@ -41,7 +41,7 @@ export default function TeamMembersTable({
         <>
             <Toaster richColors position="top-right" expand={true} />
             <Card className="overflow-hidden gap-3">
-                <CardHeader className="text-center sm:text-left">
+                <CardHeader className="text-center sm:text-start">
                     <CardTitle className="text-lg sm:text-xl">Team Members</CardTitle>
                     <CardDescription className="text-xs sm:text-sm">
                         Manage your team members and their roles within the organization.

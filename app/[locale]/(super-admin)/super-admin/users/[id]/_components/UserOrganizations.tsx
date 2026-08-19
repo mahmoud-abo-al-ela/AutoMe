@@ -46,7 +46,7 @@ export default function UserOrganizations({
                     <Link
                       href={`/super-admin/organizations/${m.organization.id}`}
                     >
-                      <ExternalLink className="h-3 w-3 mr-1" />
+                      <ExternalLink className="h-3 w-3 me-1" />
                       View
                     </Link>
                   </Button>

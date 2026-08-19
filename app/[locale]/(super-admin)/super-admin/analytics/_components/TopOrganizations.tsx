@@ -51,7 +51,7 @@ export default function TopOrganizations({
                   </div>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <div className="text-lg font-bold">
                   {metric === "cars" ? org._count.cars : org._count.testDrives}
                 </div>

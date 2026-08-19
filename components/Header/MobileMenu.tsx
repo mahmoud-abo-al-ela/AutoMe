@@ -114,7 +114,7 @@ export default function MobileMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-14 left-3 right-3 bg-background border rounded-3xl shadow-2xl md:hidden overflow-hidden"
+            className="fixed top-14 start-3 end-3 bg-background border rounded-3xl shadow-2xl md:hidden overflow-hidden"
             style={{ zIndex: 40, maxHeight: "calc(100vh - 5rem)" }}
           >
             {/* User section */}

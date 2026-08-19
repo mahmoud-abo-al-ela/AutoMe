@@ -46,7 +46,7 @@ const SingleCarSpecs = ({
                   key={spec.key}
                   className={cn(
                     "flex justify-between items-center px-3 py-2 text-xs transition-colors duration-200",
-                    showHighlight && "bg-amber-50/60 border-l-2 border-l-amber-400",
+                    showHighlight && "bg-amber-50/60 border-s-2 border-s-amber-400",
                     isWinner && highlightDifferences && "bg-emerald-50/60"
                   )}
                 >
@@ -84,7 +84,7 @@ const SingleCarSpecs = ({
                   key={idx}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-xs transition-colors duration-200",
-                    showHighlight && "bg-amber-50/60 border-l-2 border-l-amber-400"
+                    showHighlight && "bg-amber-50/60 border-s-2 border-s-amber-400"
                   )}
                 >
                   <div className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">

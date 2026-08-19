@@ -54,7 +54,7 @@ export default function RecentOrganizations({
         <Button variant="outline" size="sm" asChild>
           <Link href="/super-admin/organizations">
             View All
-            <ArrowRight className="h-4 w-4 ml-1" />
+            <ArrowRight className="h-4 w-4 ms-1" />
           </Link>
         </Button>
       </CardHeader>

@@ -37,7 +37,7 @@ const Pagination = ({
 }) => {
   return (
     <div className="w-full flex flex-col sm:flex-row justify-between items-center py-3 px-0 sm:px-4 border-t gap-4 sm:gap-0">
-      <div className="text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-left">
+      <div className="text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-start">
         <span className="hidden sm:inline">
           Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)} to{" "}
           {Math.min(currentPage * pageSize, totalCount)} of {totalCount} cars

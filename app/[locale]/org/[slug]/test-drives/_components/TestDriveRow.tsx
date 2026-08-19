@@ -151,7 +151,7 @@ export const TestDriveRow = ({
               onClick={() => setShowDetailsModal(true)}
               disabled={isDisabled}
             >
-              <Eye className="h-3 w-3 sm:h-4 sm:w-4 lg:mr-1" />
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
               <span className="hidden lg:inline text-xs sm:text-sm">
                 Details
               </span>
@@ -166,7 +166,7 @@ export const TestDriveRow = ({
                   onClick={() => onStatusChange(testDrive.id, "CONFIRMED")}
                   disabled={isDisabled}
                 >
-                  <Check className="h-3 w-3 sm:h-4 sm:w-4 lg:mr-1" />
+                  <Check className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
                   <span className="hidden lg:inline text-xs sm:text-sm">
                     Confirm
                   </span>
@@ -178,7 +178,7 @@ export const TestDriveRow = ({
                   onClick={() => onStatusChange(testDrive.id, "CANCELLED")}
                   disabled={isDisabled}
                 >
-                  <X className="h-3 w-3 sm:h-4 sm:w-4 lg:mr-1" />
+                  <X className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
                   <span className="hidden lg:inline text-xs sm:text-sm">
                     Cancel
                   </span>
@@ -193,7 +193,7 @@ export const TestDriveRow = ({
                 onClick={() => onStatusChange(testDrive.id, "CANCELLED")}
                 disabled={isDisabled}
               >
-                <X className="h-3 w-3 sm:h-4 sm:w-4 lg:mr-1" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
                 <span className="hidden lg:inline text-xs sm:text-sm">
                   Cancel
                 </span>

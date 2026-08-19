@@ -130,7 +130,7 @@ const ReviewForm = ({
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
                             maxLength={500}
                         />
-                        <p className="text-xs text-muted-foreground text-right">
+                        <p className="text-xs text-muted-foreground text-end">
                             {comment.length}/500
                         </p>
                     </div>

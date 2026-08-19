@@ -114,7 +114,7 @@ export default function PlanCard({
         {isOwner ? (
           isCurrent ? (
             <Button className="w-full" variant="outline" disabled>
-              <Check className="h-4 w-4 mr-2" />
+              <Check className="h-4 w-4 me-2" />
               Current Plan
             </Button>
           ) : (

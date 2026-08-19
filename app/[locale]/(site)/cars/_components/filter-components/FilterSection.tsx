@@ -42,7 +42,7 @@ export const FilterSection = ({
         {count > 0 && (
           <Badge
             variant="secondary"
-            className="ml-2 bg-primary/10 text-primary text-xs"
+            className="ms-2 bg-primary/10 text-primary text-xs"
           >
             {count}
           </Badge>

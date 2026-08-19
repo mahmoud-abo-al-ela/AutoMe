@@ -53,7 +53,7 @@ export default function FormFields({
                             )}
                         </Label>
                         <div className="relative">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <Icon className="h-5 w-5" />
                             </div>
                             <Input
@@ -61,7 +61,7 @@ export default function FormFields({
                                 type={field.type || "text"}
                                 placeholder={field.placeholder}
                                 {...register(field.id)}
-                                className={`pl-10 h-12 text-base transition-all duration-300 ${errors[field.id]
+                                className={`ps-10 h-12 text-base transition-all duration-300 ${errors[field.id]
                                     ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
                                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
                                     }`}

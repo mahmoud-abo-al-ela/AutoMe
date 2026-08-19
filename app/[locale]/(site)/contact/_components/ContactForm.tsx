@@ -165,12 +165,12 @@ export default function ContactForm() {
       >
         {isSubmitting ? (
           <>
-            <span className="animate-spin mr-2">⏳</span>
+            <span className="animate-spin me-2">⏳</span>
             Sending...
           </>
         ) : (
           <>
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 me-2" />
             Send Message
           </>
         )}

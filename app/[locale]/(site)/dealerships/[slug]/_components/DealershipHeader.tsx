@@ -83,8 +83,8 @@ export const DealershipHeader = ({
     return (
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 via-white to-blue-50/30 shadow-md border border-slate-100 mb-6">
             {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-100/30 to-transparent rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+            <div className="absolute top-0 end-0 w-72 h-72 bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+            <div className="absolute bottom-0 start-0 w-48 h-48 bg-gradient-to-tr from-purple-100/30 to-transparent rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
             <div className="relative p-6 sm:p-8 lg:p-10">
                 <div className="flex flex-col sm:flex-row gap-6 lg:gap-8">

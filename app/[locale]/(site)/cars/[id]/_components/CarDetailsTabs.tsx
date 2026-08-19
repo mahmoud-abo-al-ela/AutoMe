@@ -36,7 +36,7 @@ const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
                         <span>Features</span>
                         <Badge
                             variant="secondary"
-                            className="ml-1 h-5 min-w-5 px-1.5 text-[10px] font-semibold rounded-full"
+                            className="ms-1 h-5 min-w-5 px-1.5 text-[10px] font-semibold rounded-full"
                         >
                             {car.features.length}
                         </Badge>

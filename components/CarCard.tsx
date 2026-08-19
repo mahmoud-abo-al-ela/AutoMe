@@ -78,7 +78,7 @@ const CarCard = ({
               </div>
             )}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
-            <div className="absolute bottom-3 left-3 z-10">
+            <div className="absolute bottom-3 start-3 z-10">
               <span className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/90 px-3 py-1.5 text-sm font-extrabold text-slate-900 shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 sm:text-base">
                 {formatPrice(car.price)}
               </span>
@@ -109,14 +109,14 @@ const CarCard = ({
 
           <div className="mb-3 grid grid-cols-2 gap-x-2 gap-y-2 text-xs text-muted-foreground sm:mb-4 sm:gap-y-2.5">
             <div className="flex items-center">
-              <div className="mr-1.5 rounded-full bg-muted p-1">
+              <div className="me-1.5 rounded-full bg-muted p-1">
                 <Calendar className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
               </div>
               <span className="font-medium text-foreground">{car.year}</span>
             </div>
             {car.mileage != null && (
               <div className="flex items-center">
-                <div className="mr-1.5 rounded-full bg-muted p-1">
+                <div className="me-1.5 rounded-full bg-muted p-1">
                   <Gauge className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
                 <span className="truncate font-medium text-foreground">{formatMileage(car.mileage)}</span>
@@ -124,7 +124,7 @@ const CarCard = ({
             )}
             {car.fuelType && (
               <div className="flex items-center">
-                <div className="mr-1.5 rounded-full bg-muted p-1">
+                <div className="me-1.5 rounded-full bg-muted p-1">
                   <Fuel className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
                 <span className="truncate font-medium text-foreground">{car.fuelType}</span>
@@ -132,7 +132,7 @@ const CarCard = ({
             )}
             {car.location && (
               <div className="flex items-center">
-                <div className="mr-1.5 rounded-full bg-muted p-1">
+                <div className="me-1.5 rounded-full bg-muted p-1">
                   <MapPin className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
                 <span className="truncate font-medium text-foreground">{car.location}</span>
@@ -189,7 +189,7 @@ const CarCard = ({
               <span className="truncate text-xs font-medium text-muted-foreground transition-colors group-hover/dealer:text-primary">
                 {car.organization.name}
               </span>
-              <span className="ml-auto flex items-center text-[10px] text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
+              <span className="ms-auto flex items-center text-[10px] text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
                 View dealer <ChevronRight className="h-3 w-3" />
               </span>
             </Link>

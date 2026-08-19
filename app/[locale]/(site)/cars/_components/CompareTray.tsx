@@ -42,7 +42,7 @@ export const CompareTray = () => {
           </span>
           <span className="text-xs text-muted-foreground">({3 - ids.length} left)</span>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           {ids.length < 2 ? (
             <Button size="sm" disabled title="Add at least 2 cars to compare">
               Compare

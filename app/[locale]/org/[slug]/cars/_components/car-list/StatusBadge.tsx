@@ -49,7 +49,7 @@ const StatusBadge = ({
       className={`text-xs whitespace-nowrap ${className} ${iconOnly ? "h-6 w-6 p-0 flex items-center justify-center" : "px-2 py-1"
         }`}
     >
-      <span className={compact || iconOnly ? "" : "mr-1"}>{icon}</span>
+      <span className={compact || iconOnly ? "" : "me-1"}>{icon}</span>
       {!compact && !iconOnly && text}
     </Badge>
   );

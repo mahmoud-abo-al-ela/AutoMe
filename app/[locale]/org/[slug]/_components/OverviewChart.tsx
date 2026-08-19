@@ -119,7 +119,7 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
 
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
-              className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
+              className="hidden w-[160px] rounded-lg sm:ms-auto sm:flex"
               aria-label="Select a value"
             >
               <SelectValue placeholder="Last 7 days" />

@@ -22,7 +22,7 @@ const TestDriveActions = ({
                 onClick={onEditClick}
                 disabled={!isEditable}
             >
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 me-2" />
                 Edit
             </Button>
             <Button
@@ -31,7 +31,7 @@ const TestDriveActions = ({
                 onClick={onCancelClick}
                 disabled={!isCancellable}
             >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 me-2" />
                 Cancel
             </Button>
         </div>

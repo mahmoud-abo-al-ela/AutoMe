@@ -76,12 +76,12 @@ export default function QuickImpersonate({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search organizations..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="ps-10"
           />
         </div>
 
@@ -110,12 +110,12 @@ export default function QuickImpersonate({
               >
                 {loading === org.id ? (
                   <>
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    <Loader2 className="h-3 w-3 me-1 animate-spin" />
                     Loading...
                   </>
                 ) : (
                   <>
-                    <ExternalLink className="h-3 w-3 mr-1" />
+                    <ExternalLink className="h-3 w-3 me-1" />
                     View
                   </>
                 )}

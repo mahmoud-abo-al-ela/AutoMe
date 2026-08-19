@@ -140,7 +140,7 @@ export const TestDriveMobileCard = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setShowDetailsModal(true)}>
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="h-4 w-4 me-2" />
                     View Details
                   </DropdownMenuItem>
                   {testDrive.status === "PENDING" && (
@@ -151,7 +151,7 @@ export const TestDriveMobileCard = ({
                         }
                         className="text-green-600 focus:text-green-600"
                       >
-                        <Check className="h-4 w-4 mr-2" />
+                        <Check className="h-4 w-4 me-2" />
                         Confirm
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -160,7 +160,7 @@ export const TestDriveMobileCard = ({
                         }
                         className="text-red-600 focus:text-red-600"
                       >
-                        <X className="h-4 w-4 mr-2" />
+                        <X className="h-4 w-4 me-2" />
                         Cancel
                       </DropdownMenuItem>
                     </>
@@ -170,7 +170,7 @@ export const TestDriveMobileCard = ({
                       onClick={() => onStatusChange(testDrive.id, "CANCELLED")}
                       className="text-red-600 focus:text-red-600"
                     >
-                      <X className="h-4 w-4 mr-2" />
+                      <X className="h-4 w-4 me-2" />
                       Cancel
                     </DropdownMenuItem>
                   )}

@@ -30,7 +30,7 @@ export default function OrgDetailsFooter({
                 className="cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
                 Continue
-                <ArrowRight className="h-5 w-5 ml-2" />
+                <ArrowRight className="h-5 w-5 ms-2" />
             </Button>
         </motion.div>
     );

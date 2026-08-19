@@ -42,12 +42,12 @@ const HeroSearch = () => {
           >
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 sm:size-[18px]"
+              className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 sm:size-[18px]"
             />
             <Input
               type="search"
               placeholder="Search by model, keyword, or drop a photo..."
-              className="pl-9 h-10 sm:h-11 md:h-12 text-sm md:text-base text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg border-0 focus-visible:ring-primary shadow-lg"
+              className="ps-9 h-10 sm:h-11 md:h-12 text-sm md:text-base text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg border-0 focus-visible:ring-primary shadow-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -56,7 +56,7 @@ const HeroSearch = () => {
               onClick={image.openPicker}
               title="Search by photo"
               aria-label="Search by photo"
-              className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-colors ${
+              className={`absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-colors ${
                 searchQuery.trim() ? "hidden" : "block"
               }`}
             >

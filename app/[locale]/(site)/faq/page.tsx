@@ -30,7 +30,7 @@ export default async function FAQ() {
             <Accordion type="single" collapsible className="w-full">
               {category.questions.map((item) => (
                 <AccordionItem key={item.id} value={item.id}>
-                  <AccordionTrigger className="text-left cursor-pointer">
+                  <AccordionTrigger className="text-start cursor-pointer">
                     {item.question}
                   </AccordionTrigger>
                   <AccordionContent>

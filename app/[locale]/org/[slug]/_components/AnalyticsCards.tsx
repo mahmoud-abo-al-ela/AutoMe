@@ -79,7 +79,7 @@ const TrendBadge = ({ value, label = "" }: { value: number; label?: string }) =>
       "flex items-center text-xs font-medium px-2 py-0.5 rounded-full",
       isPositive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
     )}>
-      {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingUp className="h-3 w-3 mr-1 rotate-180" />}
+      {isPositive ? <TrendingUp className="h-3 w-3 me-1" /> : <TrendingUp className="h-3 w-3 me-1 rotate-180" />}
       {Math.abs(value)}% {label}
     </div>
   );
@@ -172,7 +172,7 @@ const AnalyticsCards = ({
             </div>
             
             {/* Decorative background gradient line */}
-            <div className={cn("absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r", card.color)} />
+            <div className={cn("absolute bottom-0 start-0 end-0 h-1 bg-gradient-to-r", card.color)} />
           </CardContent>
         </Card>
       ))}

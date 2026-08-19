@@ -43,7 +43,7 @@ const CompareCarCard = ({
                     onClick={() => onRemove(car.id)}
                     size="icon"
                     variant="ghost"
-                    className="absolute top-2 right-2 z-10 h-7 w-7 bg-white/80 backdrop-blur-sm rounded-full hover:bg-red-50 hover:text-red-600 cursor-pointer shadow-sm print:hidden"
+                    className="absolute top-2 end-2 z-10 h-7 w-7 bg-white/80 backdrop-blur-sm rounded-full hover:bg-red-50 hover:text-red-600 cursor-pointer shadow-sm print:hidden"
                     aria-label={`Remove ${getCarTitle(car)} from comparison`}
                 >
                     <X className="h-3.5 w-3.5" />
@@ -66,7 +66,7 @@ const CompareCarCard = ({
                         </div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
-                    <Badge className="absolute bottom-2 left-2 bg-white/90 text-gray-900 hover:bg-white text-xs font-semibold shadow-sm">
+                    <Badge className="absolute bottom-2 start-2 bg-white/90 text-gray-900 hover:bg-white text-xs font-semibold shadow-sm">
                         {formatPrice(car.price)}
                     </Badge>
                 </div>
@@ -110,7 +110,7 @@ const CompareCarCard = ({
                     <Button asChild size="sm" className="w-full text-xs h-8 print:hidden">
                         <Link href={`/cars/${car.id}`}>
                             View Details
-                            <ArrowRight className="ml-1 h-3 w-3" />
+                            <ArrowRight className="ms-1 h-3 w-3" />
                         </Link>
                     </Button>
                 </div>
