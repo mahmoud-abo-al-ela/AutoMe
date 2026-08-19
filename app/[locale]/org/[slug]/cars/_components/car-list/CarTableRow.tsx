@@ -16,7 +16,8 @@ import {
   Clock,
   Pencil,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { formatCarPrice } from "@/lib/utils/currency";
 import {
   DropdownMenu,

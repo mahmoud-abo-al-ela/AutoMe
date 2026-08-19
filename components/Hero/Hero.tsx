@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { CheckCircle, ChevronDown } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import HeroSearch from "./HeroSearch";
 

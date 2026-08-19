@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 // The error boundary for the whole (site) route group — the customer-facing
 // half of the product. Named for that, rather than `GlobalError`, which is what

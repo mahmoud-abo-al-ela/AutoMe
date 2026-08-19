@@ -6,7 +6,7 @@ import ManualCarForm from "../../_components/car-forms/manual/ManualCarForm";
 import AICarForm from "../../_components/car-forms/ai/AICarForm";
 import { ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { getCarPlanLimits } from "@/actions/cars";
 
 const readParam = (value: string | string[] | undefined) =>

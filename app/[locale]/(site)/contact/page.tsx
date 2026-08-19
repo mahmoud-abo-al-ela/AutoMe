@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { MapPin } from "lucide-react";
 import { contactMethods, faqQuickLinks } from "./contact-data";
 import ContactForm from "./_components/ContactForm";

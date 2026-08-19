@@ -1,9 +1,10 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { checkUser } from "@/lib/checkUser";
 import { createOrganizationAfterCheckout } from "@/actions/onboarding";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
@@ -19,16 +20,17 @@ export default async function OnboardingSuccessPage({
     searchParams: Promise<{ session_id?: string }>;
 }) {
     const { session_id } = await searchParams;
+    const locale = await getLocale();
 
     // Validate session_id is present
     if (!session_id) {
-        redirect("/onboarding?error=missing_session");
+        redirect({ href: "/onboarding?error=missing_session", locale });
     }
 
     // Ensure user is authenticated
     const user = await checkUser();
     if (!user) {
-        redirect("/sign-in");
+        redirect({ href: "/sign-in", locale });
     }
 
     // Create the organization using the checkout session

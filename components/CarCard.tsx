@@ -11,13 +11,13 @@ import {
   Fuel,
   Gauge,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { getCarColorHex } from "@/lib/constants/car-options";
 import CarCardActions from "./CarCardActions";
 import type { SerializedCar } from "@/lib/utils/serializers";

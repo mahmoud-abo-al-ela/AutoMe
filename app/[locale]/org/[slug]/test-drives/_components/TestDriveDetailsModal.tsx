@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Car, User, FileText } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import type { AdminTestDrive, TestDriveCar } from "./TestDrivesPresenter";
 import { formatCarPrice } from "@/lib/utils/currency";

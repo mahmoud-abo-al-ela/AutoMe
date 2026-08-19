@@ -2,7 +2,7 @@ import { db } from "@/lib/prisma";
 import CreateOrganizationForm from "./_components/CreateOrganizationForm";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 async function getPlans() {
   return db.plan.findMany({

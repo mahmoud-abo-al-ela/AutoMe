@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { auth } from "@clerk/nextjs/server";
 import { UserChannelList, ChatWindow } from "@/components/StreamChat";
 import { getCurrentOrganization } from "@/lib/getOrganization";
@@ -13,7 +14,7 @@ export default async function MessagesPage() {
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirect({ href: "/sign-in", locale: await getLocale() });
   }
 
   // Get current organization context (null on main domain, set on subdomain)

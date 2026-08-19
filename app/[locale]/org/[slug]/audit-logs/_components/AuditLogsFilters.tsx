@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams, useParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Filter, X, Search, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";

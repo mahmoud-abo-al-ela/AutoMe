@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import {
   formatPlanPrice,

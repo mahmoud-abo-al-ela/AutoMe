@@ -5,7 +5,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { faqConfig } from "@/lib/FaqConfig";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 
 import { getCurrentOrganization } from "@/lib/getOrganization";

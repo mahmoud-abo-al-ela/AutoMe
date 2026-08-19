@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { updatePlan, createPlan, deletePlan } from "@/actions/super-admin";
 import PlanCard from "./PlanCard";

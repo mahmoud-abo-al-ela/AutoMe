@@ -6,7 +6,7 @@ import { toggleWishlist } from "@/actions/cars-listing";
 import { checkExistingTestDrive } from "@/actions/test-drive";
 import { toast } from "sonner";
 import { compareUtils } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";

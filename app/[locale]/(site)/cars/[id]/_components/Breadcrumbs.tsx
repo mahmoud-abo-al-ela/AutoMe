@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Home, ChevronRight } from "lucide-react";
 import type { CarDetail } from "../_lib/car-detail-types";
 

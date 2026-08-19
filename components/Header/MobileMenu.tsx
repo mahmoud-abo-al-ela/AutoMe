@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";

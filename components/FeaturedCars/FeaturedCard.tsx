@@ -4,7 +4,7 @@ import { GalleryHorizontal } from "lucide-react";
 import { getFeaturedCars } from "@/actions/home";
 import CarCard from "../CarCard";
 import CarCardSkeleton from "../CarCardSkeleton";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   Carousel,
   CarouselContent,

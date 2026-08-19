@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import {

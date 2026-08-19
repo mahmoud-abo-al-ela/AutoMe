@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import { CarFront, MessageSquare } from "lucide-react";
 import MobileSidebar from "./MobileSidebar";
 import DesktopSidebar from "./DesktopSidebar";
 import { OrgUnreadBadge } from "@/components/StreamChat";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { MemberRole, Organization } from "@/lib/generated/prisma";
 
 /** Shared by the sidebar trio. userRole is undefined for a platform ADMIN or an

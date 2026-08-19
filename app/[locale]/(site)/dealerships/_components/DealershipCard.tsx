@@ -3,7 +3,7 @@ import { formatCarPrice } from "@/lib/utils/currency";
 
 import { useState } from "react";
 import { MapPin, Car, Building2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { StarRating } from "@/components/common/StarRating";

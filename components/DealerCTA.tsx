@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "./ui/button";
 import { Building2, CheckCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";

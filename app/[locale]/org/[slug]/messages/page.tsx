@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getOrganization } from "@/lib/getOrganization";
@@ -16,15 +17,16 @@ export default async function OrganizationMessagesPage({
 }) {
   const { userId } = await auth();
   const { slug } = await params;
+  const locale = await getLocale();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirect({ href: "/sign-in", locale });
   }
 
   const { organization, membership } = await getOrganization(slug);
 
   if (!organization || !membership) {
-    redirect("/");
+    redirect({ href: "/", locale });
   }
 
   return (

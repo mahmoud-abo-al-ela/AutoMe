@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/select";
 import { Search, Plus, Filter, X, Loader2 } from "lucide-react";
 import React, { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 
 const CarsFilter = ({

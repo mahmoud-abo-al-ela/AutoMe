@@ -2,7 +2,8 @@
 import { logError } from "@/lib/utils/errors";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { getTestDrives, getTestDriveById } from "@/actions/test-drive";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

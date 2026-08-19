@@ -6,7 +6,7 @@ import { Search, Camera, Upload } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 

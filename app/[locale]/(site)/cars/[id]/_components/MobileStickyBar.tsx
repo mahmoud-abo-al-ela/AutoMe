@@ -5,7 +5,7 @@ import { formatCarPrice } from "@/lib/utils/currency";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { StartConversationButton, ChatSidebar } from "@/components/StreamChat";
 import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
 

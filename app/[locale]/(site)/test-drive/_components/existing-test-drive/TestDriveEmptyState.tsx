@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Info } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 

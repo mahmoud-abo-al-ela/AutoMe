@@ -5,7 +5,9 @@ import BackToTop from "@/components/BackToTop";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import Loading from "@/components/Loading";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import AdminSidebar from "./_components/AdminSidebar";
 import ImpersonationBanner from "./_components/ImpersonationBanner";
 
@@ -33,9 +35,10 @@ export default async function OrganizationLayout({
 }: OrgParams & { children: React.ReactNode }) {
     const { slug } = await params;
     const user = await checkUser();
+    const locale = await getLocale();
 
     if (!user) {
-        redirect("/sign-in");
+        redirect({ href: "/sign-in", locale });
     }
 
     // Get organization from path parameter

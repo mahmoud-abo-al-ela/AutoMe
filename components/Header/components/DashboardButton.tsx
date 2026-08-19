@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 /** Only the slug is read here; the rest of the Clerk/Prisma user is irrelevant. */
 type UserWithMemberships = {

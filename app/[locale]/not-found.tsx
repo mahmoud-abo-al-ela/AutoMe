@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { HomeIcon } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 const NotFound = () => {
   const router = useRouter();

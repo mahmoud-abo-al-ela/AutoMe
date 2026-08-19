@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 // Named for what it is: the root route's error boundary. `global-error.tsx`
 // beside it is the one that replaces the whole document, and both were called

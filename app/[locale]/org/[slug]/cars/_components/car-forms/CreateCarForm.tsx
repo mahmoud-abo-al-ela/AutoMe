@@ -11,7 +11,8 @@ import {
   ArrowRight,
   Lock,
 } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useState, useEffect } from "react";
 import { getCarPlanLimits } from "@/actions/cars";
 

@@ -1,5 +1,6 @@
 import { checkUser } from "@/lib/checkUser";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { getOnboardingData } from "@/lib/services/onboarding";
 import OnboardingWizard from "./_components/OnboardingWizard";
 import { Suspense } from "react";
@@ -44,7 +45,7 @@ export default async function OnboardingPage() {
   // Redirect if user already owns an organization
   if (existingOwnership) {
     const orgSlug = existingOwnership.organization.slug;
-    redirect(`/org/${orgSlug}/dashboard`);
+    redirect({ href: `/org/${orgSlug}/dashboard`, locale: await getLocale() });
   }
 
   return (

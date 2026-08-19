@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { checkUser } from "@/lib/checkUser";
 import {
     getOrganizationBySlug,
@@ -8,7 +9,7 @@ import { retrieveCheckoutSession } from "@/lib/services/stripe/subscription";
 import { db } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -24,24 +25,25 @@ export default async function BillingSuccessPage({
 }) {
     const { slug } = await params;
     const { session_id } = await searchParams;
+    const locale = await getLocale();
 
     if (!session_id) {
-        redirect(`/org/${slug}/billing`);
+        redirect({ href: `/org/${slug}/billing`, locale });
     }
 
     const user = await checkUser();
     if (!user) {
-        redirect("/sign-in");
+        redirect({ href: "/sign-in", locale });
     }
 
     const organization = await getOrganizationBySlug(slug);
     if (!organization) {
-        redirect("/");
+        redirect({ href: "/", locale });
     }
 
     const membership = await getUserMembership(user.id, organization.id);
     if (!membership || membership.role !== "OWNER") {
-        redirect(`/org/${slug}/billing`);
+        redirect({ href: `/org/${slug}/billing`, locale });
     }
 
     // Retrieve the Stripe Checkout session
@@ -50,13 +52,13 @@ export default async function BillingSuccessPage({
         session = await retrieveCheckoutSession(session_id);
     } catch (error) {
         console.error("Failed to retrieve checkout session:", error);
-        redirect(`/org/${slug}/billing`);
+        redirect({ href: `/org/${slug}/billing`, locale });
     }
 
     // Verify the session is for this organization
     const metadata = session.metadata || {};
     if (metadata.organizationId !== organization.id) {
-        redirect(`/org/${slug}/billing`);
+        redirect({ href: `/org/${slug}/billing`, locale });
     }
 
     // Update the local subscription record if this is a plan change checkout

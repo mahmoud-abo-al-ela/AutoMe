@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { Shield } from "lucide-react";
 import SuperAdminDesktopSidebar from "./SuperAdminDesktopSidebar";
 import SuperAdminMobileSidebar from "./SuperAdminMobileSidebar";

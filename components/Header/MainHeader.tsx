@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   Menu,
   X,
@@ -14,7 +14,7 @@ import {
 import MobileMenu from "./MobileMenu";
 import { Button } from "@/components/ui/button";
 import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { UnreadBadge } from "@/components/StreamChat";
 import { cn } from "@/lib/utils";
