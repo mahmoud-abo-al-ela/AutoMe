@@ -27,7 +27,11 @@ export function minorToMajor(minor: number): number {
 }
 
 /**
- * Format a major-unit EGP amount for display.
+ * Format a major-unit car price for display.
+ *
+ * `currency` comes from the listing's own `Car.priceCurrency`, not from a global
+ * assumption. It defaults to EGP for the many call sites that format a bare
+ * number (filter chips, price-range labels) where there is no row to read.
  *
  * The `-u-nu-latn` on the Arabic locale is deliberate: Intl.NumberFormat("ar-EG")
  * renders Eastern Arabic numerals (٠١٢٣) by default, and Egyptian commerce
@@ -35,13 +39,14 @@ export function minorToMajor(minor: number): number {
  */
 export function formatCarPrice(
   amount: number,
-  locale: "en" | "ar" = "en"
+  locale: "en" | "ar" = "en",
+  currency: string = CAR_CURRENCY
 ): string {
   return new Intl.NumberFormat(
     locale === "ar" ? "ar-EG-u-nu-latn" : "en-EG",
     {
       style: "currency",
-      currency: CAR_CURRENCY,
+      currency,
       maximumFractionDigits: 0,
     }
   ).format(amount);

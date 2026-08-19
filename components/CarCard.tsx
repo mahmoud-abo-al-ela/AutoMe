@@ -42,7 +42,9 @@ const CarCard = ({
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
-  const formatPrice = (price: number) => formatCarPrice(price);
+  // Reads the listing's own currency rather than assuming the market default.
+  const formatPrice = (price: number) =>
+    formatCarPrice(price, "en", car.priceCurrency);
 
   const formatMileage = (mileage: number) => formatMileageKm(mileage);
 

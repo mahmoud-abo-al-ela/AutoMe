@@ -132,7 +132,9 @@ export const useCarInfoCard = (car: CarDetail) => {
     router.push(`/messages?carId=${car.id}`);
   };
 
-  const formatPrice: PriceFormatter = (price) => formatCarPrice(price);
+  // Bound to this listing's own currency, so presenters stay currency-agnostic.
+  const formatPrice: PriceFormatter = (price) =>
+    formatCarPrice(price, "en", car.priceCurrency);
 
   return {
     isLoading,

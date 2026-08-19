@@ -363,6 +363,12 @@ model Car {
   model         String
   year          Int
   price         Decimal
+  // Currency of record for `price`. AutoMe is Egypt-only, so this is always
+  // "EGP" today and nothing converts it — the column exists so that a listing
+  // carries its own currency rather than inheriting one from a global
+  // assumption. Backfilling it after the fact is the expensive part; the column
+  // itself is near-free now. See lib/utils/currency.ts.
+  priceCurrency String         @default("EGP")
   mileage       Int
   fuelType      String
   transmission  String

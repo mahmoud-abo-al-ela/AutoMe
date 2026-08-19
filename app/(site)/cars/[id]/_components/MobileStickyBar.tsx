@@ -35,7 +35,7 @@ const MobileStickyBar = ({
 
     const priceFormatted = formatPrice
         ? formatPrice(car.price)
-        : formatCarPrice(car.price);
+        : formatCarPrice(car.price, "en", car.priceCurrency);
 
     return (
         <>
