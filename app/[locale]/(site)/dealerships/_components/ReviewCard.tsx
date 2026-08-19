@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatters } from "@/hooks/use-formatters";
+
 import { Star, User } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,13 +11,9 @@ import type { DealershipReview } from "../_lib/dealership-types";
 const ReviewCard = ({ review }: { review: DealershipReview }) => {
     const { rating, title, comment, user, createdAt } = review;
 
-    const formatDate = (date: Date | string) => {
-        return new Date(date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
+    const { date: formatDateFor } = useFormatters();
+    const formatDate = (date: Date | string) =>
+        formatDateFor(date, { month: "long" });
 
     const renderStars = (rating: number) => {
         return Array.from({ length: 5 }).map((_, i) => (

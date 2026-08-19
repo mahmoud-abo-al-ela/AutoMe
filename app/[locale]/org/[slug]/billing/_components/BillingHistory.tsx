@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatters } from "@/hooks/use-formatters";
+
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -75,14 +77,9 @@ export default function BillingHistory({
     fetchBillingHistory();
   }, [organizationId]);
 
+  const { dateTime } = useFormatters();
   const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return dateTime(date);
   };
 
   const formatActionLabel = (action: string) => {

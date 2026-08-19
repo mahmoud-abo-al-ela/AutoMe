@@ -1,10 +1,16 @@
 import { db } from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { formatDate } from "@/lib/utils/datetime";
 import AnalyticsHeader from "./_components/AnalyticsHeader";
 import AnalyticsCharts from "./_components/AnalyticsCharts";
 import TopOrganizations from "./_components/TopOrganizations";
 import GrowthMetrics from "./_components/GrowthMetrics";
 
 async function getAnalyticsData() {
+  // Resolved once rather than inside the per-month map, which would re-enter
+  // next-intl's request context six times to get the same answer.
+  const locale = (await getLocale()) as Locale;
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
@@ -38,7 +44,7 @@ async function getAnalyticsData() {
       ]);
 
       return {
-        month: monthStart.toLocaleDateString("en-US", { month: "short" }),
+        month: formatDate(monthStart, locale, { month: "short", day: undefined, year: undefined }),
         organizations: orgs,
         users,
         cars,

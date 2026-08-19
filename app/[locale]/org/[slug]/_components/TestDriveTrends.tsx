@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -30,6 +31,12 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
       .filter((item) => new Date(item.date) >= cutoffDate)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [data, timeRange]);
+
+  // Chart axis and tooltip labels follow the reader's locale; the axis
+  // *orientation* stays physical (see the i18n skill).
+  const { date: formatDateFor } = useFormatters();
+  const chartDate = (value: string | number | Date) =>
+    formatDateFor(value, { day: "numeric", month: "short", year: undefined });
 
   const chartConfig = {
     completed: {
@@ -133,10 +140,7 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
                 minTickGap={32}
                 tickFormatter={(value) => {
                   const date = new Date(value);
-                  return date.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  });
+                  return chartDate(date);
                 }}
               />
               <YAxis
@@ -151,10 +155,7 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
                 content={
                   <ChartTooltipContent
                     labelFormatter={(value) => {
-                      return new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      });
+                      return chartDate(value);
                     }}
                     indicator="dot"
                   />

@@ -12,6 +12,9 @@
  * should move to EGP is a business decision, not a formatting one.
  */
 
+import type { Locale } from "@/i18n/routing";
+import { intlLocale } from "./intl-locale";
+
 /** Currency of record for car prices. Car.priceCurrency defaults to this. */
 export const CAR_CURRENCY = "EGP";
 
@@ -33,21 +36,16 @@ export function minorToMajor(minor: number): number {
  * assumption. It defaults to EGP for the many call sites that format a bare
  * number (filter chips, price-range labels) where there is no row to read.
  *
- * The `-u-nu-latn` on the Arabic locale is deliberate: Intl.NumberFormat("ar-EG")
- * renders Eastern Arabic numerals (٠١٢٣) by default, and Egyptian commerce
- * writes prices in Western digits.
+ * The Arabic numbering system is decided in `intlLocale`, not here.
  */
 export function formatCarPrice(
   amount: number,
-  locale: "en" | "ar" = "en",
+  locale: Locale = "en",
   currency: string = CAR_CURRENCY
 ): string {
-  return new Intl.NumberFormat(
-    locale === "ar" ? "ar-EG-u-nu-latn" : "en-EG",
-    {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }
-  ).format(amount);
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
 }

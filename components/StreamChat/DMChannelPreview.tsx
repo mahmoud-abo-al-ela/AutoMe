@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Car, Building2 } from "lucide-react";
 import { useChatContext } from "stream-chat-react";
 import { cn } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 import type { Channel as StreamChannel } from "stream-chat";
 
 export function DMChannelPreview({
@@ -30,29 +31,7 @@ export function DMChannelPreview({
     const lastMessage = channel.state.messages[channel.state.messages.length - 1];
     const lastMessageTime = lastMessage?.created_at;
 
-    // Format time
-    const formatTime = (date?: string | Date | null) => {
-        if (!date) return "";
-        const now = new Date();
-        const messageDate = new Date(date);
-        const diffInHours =
-            (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-
-        if (diffInHours < 24) {
-            return messageDate.toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true,
-            });
-        } else if (diffInHours < 168) {
-            return messageDate.toLocaleDateString("en-US", { weekday: "short" });
-        } else {
-            return messageDate.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-            });
-        }
-    };
+    const { messageTimestamp: formatTime } = useFormatters();
 
     // Get last message preview
     const getMessagePreview = () => {

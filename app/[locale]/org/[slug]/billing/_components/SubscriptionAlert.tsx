@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatters } from "@/hooks/use-formatters";
+
 import { useState } from "react";
 import { usePathname } from "@/i18n/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -24,13 +26,6 @@ function getDaysRemaining(endDate: Date | string | null | undefined) {
     return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
 
-function formatDate(date: Date | string) {
-    return new Date(date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-}
 
 /**
  * Top-level subscription status alert banner.
@@ -49,6 +44,9 @@ export default function SubscriptionAlert({
     const [isPortalLoading, setIsPortalLoading] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
     const pathname = usePathname();
+    const { date: formatDateFor } = useFormatters();
+    const formatDate = (date: Date | string) =>
+        formatDateFor(date, { month: "long" });
 
     const status = subscription?.status;
 

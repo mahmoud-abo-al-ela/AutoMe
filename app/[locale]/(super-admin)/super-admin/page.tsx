@@ -1,4 +1,7 @@
 import { db } from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { formatDate } from "@/lib/utils/datetime";
 import PlatformStats from "./_components/PlatformStats";
 import RecentOrganizations from "./_components/RecentOrganizations";
 import PlatformOverviewChart from "./_components/PlatformOverviewChart";
@@ -70,6 +73,7 @@ async function getPlatformStats() {
 }
 
 async function getMonthlyGrowth() {
+  const locale = (await getLocale()) as Locale;
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -96,7 +100,7 @@ async function getMonthlyGrowth() {
     const monthKey = `${date.getFullYear()}-${String(
       date.getMonth() + 1
     ).padStart(2, "0")}`;
-    const monthName = date.toLocaleDateString("en-US", { month: "short" });
+    const monthName = formatDate(date, locale, { month: "short", day: undefined, year: undefined });
 
     months.push({
       month: monthName,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
     Card,
     CardContent,
@@ -48,14 +49,6 @@ function formatCurrency(amount: number, currency = "usd") {
         currency: currency.toUpperCase(),
         minimumFractionDigits: 2,
     }).format(amount / 100);
-}
-
-function formatDate(dateString: string | number | Date) {
-    return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
 }
 
 function InvoicesSkeleton() {
@@ -120,6 +113,7 @@ export default function InvoiceHistory({
     const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
     const [nextCursor, setNextCursor] = useState<string | null>(null);
+    const { date: formatDate } = useFormatters();
 
     const fetchInvoices = useCallback(async (cursor: string | null = null) => {
         try {

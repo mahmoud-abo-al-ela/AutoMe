@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Card,
   CardContent,
@@ -68,6 +69,12 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
   // ChartStyle: it emits `theme?.[mode] || color`, so a theme always wins. Each
   // entry here set both to the same hex, making `color` dead — dropped rather
   // than kept as a value that could silently diverge from the theme.
+  // Chart axis and tooltip labels follow the reader's locale; the axis
+  // *orientation* stays physical (see the i18n skill).
+  const { date: formatDateFor } = useFormatters();
+  const chartDate = (value: string | number | Date) =>
+    formatDateFor(value, { day: "numeric", month: "short", year: undefined });
+
   const chartConfig = {
     users: {
       theme: {
@@ -189,10 +196,7 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
                 minTickGap={32}
                 tickFormatter={(value) => {
                   const date = new Date(value);
-                  return date.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  });
+                  return chartDate(date);
                 }}
               />
               <YAxis
@@ -207,10 +211,7 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
                 content={
                   <ChartTooltipContent
                     labelFormatter={(value) => {
-                      return new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      });
+                      return chartDate(value);
                     }}
                     indicator="dot"
                   />

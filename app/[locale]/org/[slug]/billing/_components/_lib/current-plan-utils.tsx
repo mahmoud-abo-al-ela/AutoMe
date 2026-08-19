@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/routing";
+import { formatDate as formatDateIn } from "@/lib/utils/datetime";
 // Status/plan display config + pure helpers for the CurrentPlan components.
 import {
   AlertTriangle,
@@ -67,12 +69,8 @@ export function getDaysRemaining(endDate: Date | string | null | undefined) {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
 
-export function formatDate(date: Date | string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+export function formatDate(date: Date | string, locale: Locale = "en") {
+  return formatDateIn(date, locale, { month: "long" });
 }
 
 /** limit === -1 means unlimited, which reads as 0% used. */

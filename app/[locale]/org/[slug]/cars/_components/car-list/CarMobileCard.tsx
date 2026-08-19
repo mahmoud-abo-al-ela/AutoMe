@@ -28,6 +28,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import StatusBadge from "./StatusBadge";
+import { useFormatters } from "@/hooks/use-formatters";
 import type { CarRowProps } from "./CarsListPresenter";
 
 const CarMobileCard = ({
@@ -41,6 +42,7 @@ const CarMobileCard = ({
     const params = useParams();
     const router = useRouter();
     const slug = params?.slug;
+    const { date: shortDate } = useFormatters();
     const carStatus = car.status.toLowerCase();
     return (
         <Card className={`overflow-hidden transition-all duration-200 p-0 ${isCarDisabled ? "opacity-60" : ""
@@ -91,12 +93,7 @@ const CarMobileCard = ({
                             <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
                                 <span>
-                                    {new Date(car.createdAt
-                                    ).toLocaleDateString("en-US", {
-                                        year: "numeric",
-                                        month: "numeric",
-                                        day: "numeric",
-                                    })}
+                                    {shortDate(car.createdAt)}
                                 </span>
                             </div>
                         </div>

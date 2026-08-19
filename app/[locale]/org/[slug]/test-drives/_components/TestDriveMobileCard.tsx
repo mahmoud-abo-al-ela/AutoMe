@@ -16,6 +16,7 @@ import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import { TestDriveDetailsModal } from "./TestDriveDetailsModal";
 import { useState } from "react";
+import { useFormatters } from "@/hooks/use-formatters";
 import { formatCarPrice } from "@/lib/utils/currency";
 import type { TestDriveCar, TestDriveItemProps } from "./TestDrivesPresenter";
 import {
@@ -61,6 +62,7 @@ export const TestDriveMobileCard = ({
   isUpdating = false,
 }: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const { date: shortDate } = useFormatters();
 
   // Nullable by serializeTestDrive's signature only; carId is a required FK.
   const car = testDrive.car as unknown as TestDriveCar;
@@ -113,11 +115,7 @@ export const TestDriveMobileCard = ({
               <div className="flex items-center gap-1 text-gray-600 text-xs">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  {new Date(testDrive.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "numeric",
-                    day: "numeric",
-                  })}
+                  {shortDate(testDrive.date)}
                 </span>
                 <span>
                   {formatTime(testDrive.startTime)} -{" "}
