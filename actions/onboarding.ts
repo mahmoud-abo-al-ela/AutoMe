@@ -27,8 +27,11 @@ import { organizationSchema } from "@/lib/validations/schemas";
 import type { OrganizationInput } from "@/lib/validations/schemas";
 import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
 import aj from "@/lib/arcjet";
+import {
+  assertArcjetAllowed,
+  assertArcjetConfigured,
+} from "@/lib/middleware/with-rate-limit";
 import { request } from "@arcjet/next";
-import { RateLimitError } from "@/lib/utils/errors";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key");
 
@@ -76,19 +79,9 @@ export const createOrganization = withAuth(
   ) => {
     // Rate limit org creation
     const req = await request();
+    assertArcjetConfigured();
     const decision = await aj.protect(req, { requested: 1 });
-
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        const { remaining, reset } = decision.reason;
-        throw new RateLimitError(
-          `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
-            reset
-          ).toLocaleString()}`
-        );
-      }
-      throw new ValidationError("Request denied", "request");
-    }
+    assertArcjetAllowed(decision);
 
     // Validate payload
     const validatedData = validateAction(organizationSchema, {
@@ -159,16 +152,19 @@ export const createOrganization = withAuth(
       stripeData,
     });
 
-    // Send welcome email
-    sendWelcomeEmail({
-      to: ctx.user.email,
-      userName: ctx.user.name || "there",
-      dealershipName: organization.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
-    }).catch((error) => {
-      // Non-blocking: email failure should not fail the main operation
-      logError(error);
-    });
+    // Send welcome email. Skipped for accounts with no address (phone-only
+    // Clerk signups); the organization is created either way.
+    if (ctx.user.email) {
+      sendWelcomeEmail({
+        to: ctx.user.email,
+        userName: ctx.user.name || "there",
+        dealershipName: organization.name,
+        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
+    }
 
     return createSuccessResponse({
       organization: {
@@ -293,16 +289,19 @@ export const createOrganizationAfterCheckout = withAuth(
       stripeData,
     });
 
-    // Send welcome email
-    sendWelcomeEmail({
-      to: ctx.user.email,
-      userName: ctx.user.name || "there",
-      dealershipName: organization.name,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
-    }).catch((error) => {
-      // Non-blocking: email failure should not fail the main operation
-      logError(error);
-    });
+    // Send welcome email. Skipped for accounts with no address (phone-only
+    // Clerk signups); the organization is created either way.
+    if (ctx.user.email) {
+      sendWelcomeEmail({
+        to: ctx.user.email,
+        userName: ctx.user.name || "there",
+        dealershipName: organization.name,
+        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
+    }
 
     await markOnboardingSessionCompleted(onboardingSessionId);
 

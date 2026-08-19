@@ -57,6 +57,18 @@ export class RateLimitError extends AppError {
     }
 }
 
+/**
+ * A protection layer could not reach a verdict, so the request is refused
+ * rather than allowed through unchecked. Used by the Arcjet guards, which fail
+ * closed: an unreachable Arcjet or an unconfigured key must not silently
+ * disable shield, bot detection and rate limiting.
+ */
+export class ServiceUnavailableError extends AppError {
+    constructor(message = "Service temporarily unavailable. Please try again.") {
+        super(message, 503, "SERVICE_UNAVAILABLE");
+    }
+}
+
 export interface PlanLimitErrorInput {
     resource?: string;
     planType?: string;

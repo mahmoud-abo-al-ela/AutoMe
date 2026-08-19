@@ -28,5 +28,10 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "lib/generated"]
+  // `.next` is NOT excluded: `exclude` filters `include`, so listing it here
+  // cancelled the `.next/types/**/*.ts` entry above and `pnpm typecheck` never
+  // checked page/layout props against Next's generated route validators —
+  // only `next build` did. Everything else under .next is .js, which `**/*.ts`
+  // does not match, so nothing else is pulled in.
+  "exclude": ["node_modules", "lib/generated"]
 }

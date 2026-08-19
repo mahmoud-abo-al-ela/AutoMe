@@ -2,6 +2,7 @@
  * Helper functions for user role and membership checks
  */
 import type { MemberRole } from "@/lib/generated/prisma";
+import { ValidationError } from "@/lib/utils/errors";
 
 /** A membership joined with just enough of its organization to match by slug. */
 export interface MembershipWithOrgSlug {
@@ -12,6 +13,41 @@ export interface MembershipWithOrgSlug {
 /** Any user-shaped object carrying memberships. */
 export interface UserWithMemberships {
   memberships?: MembershipWithOrgSlug[] | null;
+}
+
+/**
+ * A human-readable name for a user, for emails and dealer-facing lists.
+ *
+ * `name` is optional and `email` is nullable — Clerk supports phone-only
+ * signups — so the long-standing `user.name || user.email.split("@")[0]`
+ * would throw for exactly the users this fallback was meant to cover.
+ */
+export function displayNameFor(user: {
+  name?: string | null;
+  email?: string | null;
+}): string {
+  if (user.name?.trim()) return user.name.trim();
+  const local = user.email?.split("@")[0];
+  if (local) return local;
+  return "Customer";
+}
+
+/**
+ * The email address to bill to, or a clear refusal.
+ *
+ * Subscribing genuinely requires one: Stripe sends receipts, invoices and
+ * dunning notices there, and Checkout wants it up front. Rather than let a
+ * phone-only account reach Stripe with a null, this stops early and tells the
+ * user what to do about it.
+ */
+export function requireBillingEmail(user: { email?: string | null }): string {
+  if (!user.email) {
+    throw new ValidationError(
+      "Add an email address to your account before subscribing — we need somewhere to send receipts.",
+      "email"
+    );
+  }
+  return user.email;
 }
 
 /**

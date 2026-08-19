@@ -148,23 +148,20 @@ async function handleUserCreated(
         return;
     }
 
-    // Create user
+    // Clerk can legitimately deliver a user.created with no email address at
+    // all — phone-only and some passwordless signups. `User.email` is nullable
+    // for exactly that reason, so the row is created either way and stays in
+    // step with Clerk. No placeholder address is synthesised: it would occupy
+    // the unique index, reach audit logs and pending-owner lookups, and could
+    // be delivered to.
     await db.user.create({
         data: {
             clerkId,
             name,
-            // BUG (surfaced by this conversion, NOT fixed here): User.email is
-            // required, but email_addresses can be absent — a phone-only or
-            // passwordless Clerk signup has none. Prisma then rejects the
-            // create, the POST handler releases the idempotency claim and
-            // returns 500, and Svix retries the event forever. Asserted to keep
-            // the current runtime; deciding what a user without an email should
-            // be is its own change.
-            email: email!,
+            email: email ?? null,
             imageUrl,
         },
     });
-
 }
 
 async function handleUserUpdated(
@@ -186,8 +183,18 @@ async function handleUserUpdated(
         name = "User"; // Final fallback
     }
 
-    // Update user
-    await db.user.update({
+    // `updateMany`, not `update`: `update` throws P2025 when no row matches,
+    // which would 500 and put Svix back into its retry loop. A miss is not
+    // hypothetical — user.updated can arrive for a Clerk user we never saw
+    // created (webhook configured after signup, a replayed event, a purged
+    // row). Zero rows updated is fine; `checkUser()` creates the row on the
+    // user's first authenticated request.
+    //
+    // `email: undefined` when Clerk sends none means Prisma leaves the column
+    // alone rather than nulling it, which is what we want on a partial update:
+    // it avoids wiping a known address just because this particular event did
+    // not carry one.
+    const { count } = await db.user.updateMany({
         where: { clerkId },
         data: {
             name,
@@ -196,6 +203,11 @@ async function handleUserUpdated(
         },
     });
 
+    if (count === 0) {
+        logError(
+            `Clerk user.updated for ${clerkId} matched no local user; nothing to update.`
+        );
+    }
 }
 
 async function handleUserDeleted(clerkId: string) {

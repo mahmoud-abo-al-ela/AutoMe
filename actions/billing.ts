@@ -12,6 +12,7 @@ import { getCustomerInvoices } from "@/lib/services/stripe/invoices";
 import { getDefaultPaymentMethod } from "@/lib/services/stripe/payment-method";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { requireBillingEmail } from "@/lib/utils/userHelpers";
 import {
   AuthenticationError,
   AuthorizationError,
@@ -218,7 +219,7 @@ export const createPlanChangeSession = withAuth(
     const cancelUrl = `${appUrl}${billingPagePath}`;
 
     const { url } = await createNewSubscriptionCheckout({
-      customerEmail: ctx.user.email,
+      customerEmail: requireBillingEmail(ctx.user),
       stripePriceId,
       successUrl,
       cancelUrl,

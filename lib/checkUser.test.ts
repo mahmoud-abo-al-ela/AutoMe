@@ -15,7 +15,7 @@ vi.mock("@/lib/prisma", () => ({ db }));
 vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn(), currentUser: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { checkUser } from "@/lib/checkUser";
 
@@ -23,6 +23,9 @@ import { checkUser } from "@/lib/checkUser";
 // the real implementations, so re-view them as mocks to configure per test.
 const mockAuth = vi.mocked(auth as unknown as () => Promise<unknown>);
 const mockHeaders = vi.mocked(headers as unknown as () => Promise<Headers>);
+const mockCurrentUser = vi.mocked(
+  currentUser as unknown as () => Promise<unknown>,
+);
 
 const nonAdmin = {
   id: "nonadmin-1",
@@ -59,5 +62,65 @@ describe("checkUser impersonation backstop", () => {
     expect(result.isImpersonated).toBeFalsy();
     // Only the initial self-lookup ran; the impersonated user was never fetched.
     expect(db.user.findUnique).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("checkUser with a phone-only Clerk account", () => {
+  // Clerk supports phone-only and some passwordless signups, which carry no
+  // email address. User.email used to be NOT NULL, so creating these users
+  // threw on their first authenticated page load.
+  const phoneOnlyClerkUser = {
+    id: "clerk_phoneonly",
+    firstName: "Mona",
+    lastName: "Saleh",
+    imageUrl: "https://example.test/avatar.png",
+    emailAddresses: [] as { emailAddress: string }[],
+  };
+
+  beforeEach(() => {
+    mockAuth.mockResolvedValue({ userId: "clerk_phoneonly" });
+    mockHeaders.mockResolvedValue(new Headers());
+    // No local row yet: this is the user's first authenticated request.
+    db.user.findUnique.mockResolvedValue(null);
+    mockCurrentUser.mockResolvedValue(phoneOnlyClerkUser);
+  });
+
+  it("creates the user with a null email rather than throwing", async () => {
+    db.user.create.mockResolvedValue({
+      id: "u-phoneonly",
+      clerkId: "clerk_phoneonly",
+      email: null,
+      name: "Mona Saleh",
+      role: "USER",
+      memberships: [],
+    });
+
+    const result = await checkUser();
+
+    expect(result?.email).toBeNull();
+    // Explicitly null, not undefined — the column has no default, so relying on
+    // Prisma's omit-means-skip would be leaning on a behaviour we don't want.
+    expect(db.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ clerkId: "clerk_phoneonly", email: null }),
+      }),
+    );
+  });
+
+  it("skips the pending-organization lookup when there is no email", async () => {
+    db.user.create.mockResolvedValue({
+      id: "u-phoneonly",
+      clerkId: "clerk_phoneonly",
+      email: null,
+      name: "Mona Saleh",
+      role: "USER",
+      memberships: [],
+    });
+
+    await checkUser();
+
+    // Matching organizations on a null pendingOwnerEmail would claim every
+    // organization still awaiting an owner.
+    expect(db.organization.findMany).not.toHaveBeenCalled();
   });
 });

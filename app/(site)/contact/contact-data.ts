@@ -2,6 +2,7 @@
 import {
   Mail,
   MapPin,
+  Phone,
   Clock,
   MessageSquare,
   HelpCircle,
@@ -16,16 +17,23 @@ export const contactMethods = [
     detail: "support@autome.com",
   },
   {
+    icon: Phone,
+    title: "Call Us",
+    description: "Sunday to Thursday, during business hours.",
+    detail: "+20 2 2480 1500",
+  },
+  {
     icon: MapPin,
     title: "Visit Us",
     description: "Come say hello at our headquarters.",
-    detail: "123 Innovation Drive, San Francisco, CA 94102",
+    detail: "12 El-Nasr Road, New Cairo, Cairo Governorate 11835",
   },
   {
     icon: Clock,
     title: "Business Hours",
     description: "We're available during these times.",
-    detail: "Mon – Fri: 9AM – 6PM (PST)",
+    // Egypt runs a Sunday–Thursday working week; EET is UTC+2 (UTC+3 in summer).
+    detail: "Sun – Thu: 9AM – 6PM (EET)",
   },
 ];
 

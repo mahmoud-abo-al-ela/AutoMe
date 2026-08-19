@@ -1,0 +1,15 @@
+-- Allow users with no email address.
+--
+-- Clerk supports phone-only and some passwordless signups, which deliver a
+-- user.created webhook carrying no email_addresses at all. `User.email` being
+-- NOT NULL meant those users could not be inserted: the webhook returned 500
+-- and Svix retried forever, and checkUser() threw on the affected user's first
+-- authenticated page load.
+--
+-- Only the NOT NULL constraint is dropped. The unique index is kept as-is:
+-- Postgres treats NULLs as distinct under a UNIQUE index, so any number of
+-- emailless users coexist while everyone with an address stays unique.
+--
+-- Non-destructive and instant: DROP NOT NULL takes only a brief ACCESS
+-- EXCLUSIVE lock and does not rewrite the table.
+ALTER TABLE "User" ALTER COLUMN "email" DROP NOT NULL;

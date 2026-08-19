@@ -8,7 +8,6 @@ import {
     Calendar,
     MapPin,
     Star,
-    DollarSign,
     MoreVertical,
     Eye,
     Trash2,
@@ -18,6 +17,7 @@ import {
     Pencil,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { formatCarPrice } from "@/lib/utils/currency";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -80,7 +80,7 @@ const CarMobileCard = ({
 
                         {/* Price */}
                         <div className="font-bold text-lg text-green-700">
-                            ${car.price.toLocaleString()}
+                            {formatCarPrice(Number(car.price))}
                         </div>
 
                         {/* Status Badge */}

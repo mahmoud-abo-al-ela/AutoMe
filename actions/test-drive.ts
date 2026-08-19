@@ -13,6 +13,7 @@ import {
   updateTestDriveStatusSchema,
 } from "@/lib/validations/schemas";
 import { NotFoundError, logError } from "@/lib/utils/errors";
+import { displayNameFor } from "@/lib/utils/userHelpers";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
 import { db } from "@/lib/prisma";
@@ -64,22 +65,26 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
       org.memberships.find((m) => m.role === "OWNER")?.user?.email;
 
     const carName = car.title || `${car.make} ${car.model} ${car.year}`;
-    const userName = user.name || user.email.split("@")[0];
+    const userName = displayNameFor(user);
 
-    // Send confirmation to customer
-    sendTestDriveConfirmationEmail({
-      to: user.email,
-      customerName: userName,
-      carTitle: carName,
-      date: fullTestDrive.date,
-      startTime: fullTestDrive.startTime,
-      endTime: fullTestDrive.endTime,
-      dealershipName: org.name,
-      dealershipAddress: org.address,
-    }).catch((error) => {
-      // Non-blocking: email failure should not fail the main operation
-      logError(error);
-    });
+    // Send confirmation to customer. Phone-only signups have no address, so
+    // there is nowhere to send it — the booking itself already succeeded and
+    // is visible in the app.
+    if (user.email) {
+      sendTestDriveConfirmationEmail({
+        to: user.email,
+        customerName: userName,
+        carTitle: carName,
+        date: fullTestDrive.date,
+        startTime: fullTestDrive.startTime,
+        endTime: fullTestDrive.endTime,
+        dealershipName: org.name,
+        dealershipAddress: org.address,
+      }).catch((error) => {
+        // Non-blocking: email failure should not fail the main operation
+        logError(error);
+      });
+    }
 
     // Send notification to dealership
     if (ownerEmail) {
@@ -203,12 +208,13 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
       include: { car: true, user: true, organization: true },
     });
 
-    if (fullTestDrive && fullTestDrive.user && fullTestDrive.user.email) {
+    const recipient = fullTestDrive?.user?.email;
+    if (fullTestDrive && fullTestDrive.user && recipient) {
       const car = fullTestDrive.car;
       const user = fullTestDrive.user;
       sendTestDriveStatusUpdateEmail({
-        to: user.email,
-        customerName: user.name || user.email.split("@")[0],
+        to: recipient,
+        customerName: displayNameFor(user),
         carTitle: car.title || `${car.make} ${car.model} ${car.year}`,
         status,
         dealershipName: fullTestDrive.organization.name,

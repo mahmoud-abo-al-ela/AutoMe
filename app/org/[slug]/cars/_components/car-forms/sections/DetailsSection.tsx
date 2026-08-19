@@ -115,7 +115,7 @@ const DetailsSection = ({
         <Input
           type="text"
           id="location"
-          placeholder="San Francisco, CA"
+          placeholder="New Cairo, Cairo"
           {...register("location")}
           className={`${errors.location ? "border-red-500" : ""}`}
         />

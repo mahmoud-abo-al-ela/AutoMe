@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, CarFront } from "lucide-react";
 import Image from "next/image";
 import type { CarStatus } from "@/lib/generated/prisma";
+import { formatCarPrice } from "@/lib/utils/currency";
 
 /**
  * A wishlisted car from getPopularCarsData(). `price` arrives as a number: the
@@ -86,7 +87,7 @@ const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-xs text-muted-foreground font-mono">
-                    ${car.price.toLocaleString()}
+                    {formatCarPrice(Number(car.price))}
                   </p>
                   <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 ${getStatusColor(car.status)}`}>
                     {car.status.toLowerCase()}

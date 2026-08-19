@@ -29,6 +29,8 @@ export type PlanFormState = {
   maxMembers: number;
   maxImagesPerCar: number;
   auditLogRetentionDays: number | null;
+  /** Free trial length for subscribers on this plan; 0 means no trial. */
+  trialDays: number;
   features: PlanFeatures;
 };
 
@@ -50,6 +52,7 @@ export type PlanFormInputValues = {
   maxMembers: string;
   maxImagesPerCar: string;
   auditLogRetentionDays: string;
+  trialDays: string;
 };
 
 export const DEFAULT_FEATURES: PlanFeatures = {
@@ -68,6 +71,7 @@ const EMPTY_INPUTS: PlanFormInputValues = {
   maxMembers: "",
   maxImagesPerCar: "",
   auditLogRetentionDays: "",
+  trialDays: "",
 };
 
 const EMPTY_FORM: PlanFormState = {
@@ -79,6 +83,7 @@ const EMPTY_FORM: PlanFormState = {
   maxMembers: 0,
   maxImagesPerCar: 0,
   auditLogRetentionDays: null,
+  trialDays: 0,
   features: DEFAULT_FEATURES,
 };
 
@@ -111,6 +116,7 @@ export function usePlanForm({
         maxMembers: plan.maxMembers || 0,
         maxImagesPerCar: plan.maxImagesPerCar || 0,
         auditLogRetentionDays: plan.auditLogRetentionDays,
+        trialDays: plan.trialDays ?? 0,
         // Plan.features is a Json column, so Prisma types it as JsonValue.
         // The shape is only ever written by this form.
         features: (plan.features as PlanFeatures | null) || DEFAULT_FEATURES,
@@ -123,6 +129,7 @@ export function usePlanForm({
         maxMembers: plan.maxMembers === 0 ? "" : plan.maxMembers.toString(),
         maxImagesPerCar: plan.maxImagesPerCar === 0 ? "" : plan.maxImagesPerCar.toString(),
         auditLogRetentionDays: plan.auditLogRetentionDays === null ? "" : plan.auditLogRetentionDays.toString(),
+        trialDays: !plan.trialDays ? "" : plan.trialDays.toString(),
       });
     } else if (mode === "create") {
       setFormData(EMPTY_FORM);
@@ -150,6 +157,7 @@ export function usePlanForm({
     maxMembers: inputValues.maxMembers === "" ? 0 : parseInt(inputValues.maxMembers),
     maxImagesPerCar: inputValues.maxImagesPerCar === "" ? 0 : parseInt(inputValues.maxImagesPerCar),
     auditLogRetentionDays: inputValues.auditLogRetentionDays === "" ? null : parseInt(inputValues.auditLogRetentionDays),
+    trialDays: inputValues.trialDays === "" ? 0 : parseInt(inputValues.trialDays),
   });
 
   return {

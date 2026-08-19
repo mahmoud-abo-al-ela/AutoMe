@@ -44,6 +44,11 @@ export async function checkUser(): Promise<CurrentUser | null> {
 
   let userData = await findOrCreateUser(userId);
 
+  // The email check is load-bearing, not defensive. `assignPendingOrganizations`
+  // matches on `pendingOwnerEmail: userData.email`, and Prisma turns a null into
+  // `IS NULL` — which matches every organization still awaiting an owner and
+  // would grant this user OWNER membership on all of them. Now that
+  // `User.email` is nullable, that is reachable rather than theoretical.
   if (userData.email) {
     userData = await assignPendingOrganizations(userData);
   }
@@ -88,7 +93,11 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
     }
 
     const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
-    const email = clerkUser.emailAddresses[0]?.emailAddress;
+    // Explicitly null rather than undefined: phone-only and some passwordless
+    // Clerk signups carry no address, and `User.email` is nullable for them.
+    // Leaving it undefined would rely on Prisma's omit-means-default behaviour
+    // for a column that has no default.
+    const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
 
     try {
       userData = await db.user.create({

@@ -10,6 +10,16 @@
 import "stream-chat";
 
 declare module "stream-chat" {
+  /**
+   * Custom user fields. `upsertStreamUser` spreads these flat onto the user
+   * object, so they are read flat too — not under a `custom` key. Reading
+   * `user.custom.user_role` (as the chat header did) always yielded undefined.
+   */
+  interface CustomUserData {
+    clerk_id?: string;
+    user_role?: string | null;
+  }
+
   interface CustomChannelData {
     organization_id?: string;
     car_id?: string;

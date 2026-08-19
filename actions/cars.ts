@@ -5,11 +5,15 @@ import { GoogleGenAI } from '@google/genai';
 import * as carService from "@/lib/services/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
-import { RateLimitError, ValidationError, NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
+import { ValidationError, NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
 import aj from "@/lib/arcjet";
+import {
+  assertArcjetAllowed,
+  assertArcjetConfigured,
+} from "@/lib/middleware/with-rate-limit";
 import { request } from "@arcjet/next";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
@@ -36,19 +40,9 @@ export async function processCarImageWithAI(
   ctx?: TenantContext | null
 ) {
     const req = await request();
+    assertArcjetConfigured();
     const decision = await aj.protect(req, { requested: 1 });
-
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        const { remaining, reset } = decision.reason;
-        throw new RateLimitError(
-          `Rate limit exceeded. ${remaining} requests remaining until ${new Date(
-            reset
-          ).toLocaleString()}`
-        );
-      }
-      throw new ValidationError("Request denied", "request");
-    }
+    assertArcjetAllowed(decision);
 
     if (!process.env.GEMINI_API_KEY) {
       throw new ValidationError("GEMINI_API_KEY is not defined");
