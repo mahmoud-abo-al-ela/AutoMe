@@ -10,33 +10,53 @@ import {
     Window,
     useChatContext,
 } from "stream-chat-react";
-import { MessageSquare, Car, Building2, DollarSign } from "lucide-react";
+import type { Channel as StreamChannel } from "stream-chat";
+import { MessageSquare, Car, Building2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "../ui/button";
+import { formatCarPrice } from "@/lib/utils/currency";
 
-function DMChannelHeader({ channel }) {
+function DMChannelHeader({ channel }: { channel: StreamChannel }) {
     const { client } = useChatContext();
 
     // Get the other user in the conversation
-    const members = Object.values(channel.state.members);
-    const otherMember = members.find((member) => member.user.id !== client.userID);
+    const members = Object.values(channel.state.members ?? {});
+    const otherMember = members.find((member) => member.user?.id !== client.userID);
     const otherUser = otherMember?.user;
 
     // Get car and organization data from channel data
     const carData = channel.data?.car_data;
     const organizationData = channel.data?.organization_data;
 
-    // Determine if current user is organization member
-    const isOrgMember = channel.data?.organization_id &&
-        members.some(m => m.user.id === client.userID && m.user.custom?.user_role);
+    // Determine if current user is organization member.
+    // `user_role` is stored flat on the Stream user (see upsertStreamUser), not
+    // under a `custom` key — reading it nested made this permanently false, so
+    // the dealer-side inbox rendered the buyer-facing branch.
+    const isOrgMember =
+        Boolean(channel.data?.organization_id) &&
+        members.some(
+            (m) => m.user?.id === client.userID && Boolean(m.user?.user_role)
+        );
 
     // For regular users, show car info in header
     // For org members, show customer info
     const showCarInHeader = !isOrgMember && carData;
     const showOrgInHeader = !isOrgMember && !carData && organizationData;
+
+    // The title block used to read carData.title unconditionally, so every
+    // channel without car_data — the entire dealer-side inbox, and any
+    // organization-level conversation — crashed the panel on render.
+    const title = showCarInHeader
+        ? carData.title
+        : showOrgInHeader
+          ? organizationData.name
+          : otherUser?.name;
+
+    const price =
+        showCarInHeader && carData.price != null
+            ? Number(carData.price)
+            : null;
 
     return (
         <div className="border-b bg-background">
@@ -47,7 +67,7 @@ function DMChannelHeader({ channel }) {
                         {carData.images?.[0] ? (
                             <AvatarImage
                                 src={carData.images[0]}
-                                alt={carData.title}
+                                alt={carData.title ?? ""}
                                 className="object-cover"
                             />
                         ) : null}
@@ -57,6 +77,12 @@ function DMChannelHeader({ channel }) {
                     </Avatar>
                 ) : showOrgInHeader ? (
                     <Avatar className="h-11 w-11 ring-2 ring-primary/20 shadow-sm">
+                        {organizationData.logo ? (
+                            <AvatarImage
+                                src={organizationData.logo}
+                                alt={organizationData.name ?? ""}
+                            />
+                        ) : null}
                         <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
                             <Building2 className="h-5 w-5 text-primary" />
                         </AvatarFallback>
@@ -73,27 +99,29 @@ function DMChannelHeader({ channel }) {
                 )}
 
                 {/* Info */}
-                <div className="flex justify-between items-center w-full">
-                    <div>
+                <div className="flex justify-between items-center w-full gap-3">
+                    <div className="min-w-0">
                         <h3 className="font-semibold text-base truncate">
-                            {carData.title}
+                            {title || "Conversation"}
                         </h3>
-                        {carData.price && (
+                        {price !== null && Number.isFinite(price) && (
                             <div className="flex items-center text-sm text-muted-foreground">
                                 <span className="font-medium text-primary">
-                                    ${Number(carData.price).toLocaleString()}
+                                    {formatCarPrice(price)}
                                 </span>
                             </div>
                         )}
                     </div>
-                    <Link
-                        href={`/cars/${carData.id}`}
-                    >
-                        <Button size="sm" className="h-7 px-2 text-xs bg-primary hover:bg-primary/80 cursor-pointer"
-                        >
-                            View Details
-                        </Button>
-                    </Link>
+                    {showCarInHeader && carData.id && (
+                        <Link href={`/cars/${carData.id}`} className="shrink-0">
+                            <Button
+                                size="sm"
+                                className="h-7 px-2 text-xs bg-primary hover:bg-primary/80 cursor-pointer"
+                            >
+                                View Details
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
