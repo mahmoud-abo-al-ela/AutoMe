@@ -1,18 +1,24 @@
 {
   "home": "الرئيسية",
+  "browseCars": "تصفح السيارات",
   "cars": "السيارات",
   "dealerships": "المعارض",
   "compare": "المقارنة",
+  "faq": "الأسئلة الشائعة",
   "testDrive": "قيادة تجريبية",
+  "testDrives": "القيادات التجريبية",
   "wishlist": "المفضلة",
   "messages": "الرسائل",
   "pricing": "الأسعار",
   "about": "من نحن",
   "contact": "اتصل بنا",
+  "dashboard": "لوحة التحكم",
   "signIn": "تسجيل الدخول",
   "signUp": "إنشاء حساب",
-  "dashboard": "لوحة التحكم",
+  "signOut": "تسجيل الخروج",
   "skipToContent": "تخطٍ إلى المحتوى الرئيسي",
   "openMenu": "فتح القائمة",
-  "closeMenu": "إغلاق القائمة"
+  "closeMenu": "إغلاق القائمة",
+  "viewStorefront": "عرض المتجر",
+  "welcomeBack": "مرحبًا بعودتك"
 }

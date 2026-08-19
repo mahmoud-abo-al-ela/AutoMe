@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { signedInLinks } from "@/lib/HeaderConfig";
 import HeaderNavLink from "./HeaderNavLink";
 
@@ -14,6 +15,8 @@ export default function AuthSection({
   hasOrgMembership?: boolean;
   isAdmin?: boolean;
 }) {
+  const t = useTranslations("nav");
+
   return (
     <div className="space-x-6">
       <SignedOut>
@@ -22,7 +25,7 @@ export default function AuthSection({
             variant="default"
             className="cursor-pointer transition-all duration-300 hover:shadow-md"
           >
-            Sign In
+            {t("signIn")}
           </Button>
         </SignInButton>
       </SignedOut>
@@ -34,7 +37,7 @@ export default function AuthSection({
               <HeaderNavLink
                 key={link.href}
                 href={link.href}
-                label={link.label}
+                label={t(link.labelKey)}
                 icon={link.icon}
                 iconClass={link.iconClass}
                 size={link.size}

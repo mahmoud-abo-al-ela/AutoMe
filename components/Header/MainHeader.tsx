@@ -17,6 +17,8 @@ import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { UnreadBadge } from "@/components/StreamChat";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 const NAV_ICONS = { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare };
@@ -152,6 +154,7 @@ export default function MainHeader({
     isSuperAdmin ||
     (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
+  const t = useTranslations("nav");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
@@ -182,8 +185,8 @@ export default function MainHeader({
           <Link
             href="/"
             className="me-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
-            title={isOnSubdomain && organization?.name ? organization.name : "Home"}
-            aria-label={isOnSubdomain && organization?.name ? organization.name : "Home"}
+            title={isOnSubdomain && organization?.name ? organization.name : t("home")}
+            aria-label={isOnSubdomain && organization?.name ? organization.name : t("home")}
           >
             {isOnSubdomain && organization?.logo ? (
               <img
@@ -208,7 +211,7 @@ export default function MainHeader({
                   <NavLink
                     key={item.href}
                     href={item.href}
-                    label={item.label}
+                    label={t(item.labelKey)}
                     isActive={pathname === item.href}
                   />
                 ))
@@ -217,7 +220,7 @@ export default function MainHeader({
                   <NavLink
                     key={item.href}
                     href={item.href}
-                    label={item.label}
+                    label={t(item.labelKey)}
                     isActive={pathname === item.href}
                   />
                 ))}
@@ -269,7 +272,7 @@ export default function MainHeader({
                       <NavLink
                         key={link.href}
                         href={link.href}
-                        label={link.label}
+                        label={t(link.labelKey)}
                         icon={link.icon}
                         iconClass={link.iconClass}
                         size={link.size}
@@ -289,18 +292,20 @@ export default function MainHeader({
                   />
                 </div>
               </SignedIn>
+              <LanguageSwitcher />
             </div>
           </div>
 
           {/* Mobile icons - Messages and Menu */}
           <div className="md:hidden ms-auto flex items-center gap-1">
+            <LanguageSwitcher />
             {/* Messages icon with unread badge - only show when signed in and not org owner */}
             <SignedIn>
               {!isOwner && (
                 <Link
                   href="/messages"
                   className="relative flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
-                  title="Messages"
+                  title={t("messages")}
                 >
                   <MessageSquare className="h-5 w-5" />
                   <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organization?.id} />
@@ -312,7 +317,7 @@ export default function MainHeader({
             <button
               className="flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={isMenuOpen ? t("closeMenu") : t("openMenu")}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
             >

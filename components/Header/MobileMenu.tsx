@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
@@ -25,6 +27,7 @@ export default function MobileMenu({
   organizationSlug?: string | null;
   organization?: HeaderOrganization;
 }) {
+  const t = useTranslations("nav");
   const pathname = usePathname();
 
   // Check if user has any organization membership
@@ -131,7 +134,7 @@ export default function MobileMenu({
                   />
                   <div className="flex-1">
                     <p className="font-semibold text-sm">
-                      {user?.name || "Welcome back"}
+                      {user?.name || t("welcomeBack")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {user?.email}
@@ -143,7 +146,7 @@ export default function MobileMenu({
                       signOut({ redirectUrl: "/" });
                     }}
                     className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                    aria-label="Sign out"
+                    aria-label={t("signOut")}
                   >
                     <LogOut className="w-5 h-5" />
                   </button>
@@ -170,13 +173,13 @@ export default function MobileMenu({
                         variant="outline"
                         className="w-full py-6 rounded-2xl font-semibold"
                       >
-                        View Storefront
+                        {t("viewStorefront")}
                       </Button>
                     </Link>
                   ) : (
                     <Link href={orgDashboardHref} onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        Dashboard
+                        {t("dashboard")}
                       </Button>
                     </Link>
                   )}
@@ -186,12 +189,12 @@ export default function MobileMenu({
               {/* Main nav */}
               <div className="space-y-1">
                 {navToShow.map((item, index) => {
-                  const NavIcon = getNavIcon(item.label);
+                  const NavIcon = getNavIcon(item.labelKey);
                   return (
                     <NavLink
                       key={item.href}
                       href={item.href}
-                      label={item.label}
+                      label={t(item.labelKey)}
                       IconComponent={NavIcon}
                       onClick={() => setIsMenuOpen(false)}
                       isActive={pathname === item.href}
@@ -217,7 +220,7 @@ export default function MobileMenu({
                       <NavLink
                         key={link.href}
                         href={link.href}
-                        label={link.label}
+                        label={t(link.labelKey)}
                         icon={link.icon}
                         iconClass={link.iconClass}
                         size={18}

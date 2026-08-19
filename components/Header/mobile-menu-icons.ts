@@ -13,6 +13,7 @@ import {
   Building2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { NavLabelKey } from "@/lib/HeaderConfig";
 
 // Icon map for nav items (keyed by the icon name in HeaderConfig). Left to
 // infer its literal keys so `keyof typeof iconMap` stays meaningful at the
@@ -30,17 +31,26 @@ export const iconMap = {
   Calendar,
 };
 
-// Get icon for a nav item based on its label.
-export function getNavIcon(label: string): LucideIcon {
-  const icons: Record<string, LucideIcon> = {
-    "Browse Cars": Search,
-    Dealerships: Building2,
-    Compare: Scale,
-    FAQ: HelpCircle,
-    Dashboard: LayoutDashboard,
-    Cars: CarFront,
-    "Test Drives": Calendar,
-    Messages: MessageSquare,
+/**
+ * Icon for a nav item, keyed by its message key.
+ *
+ * This used to be keyed by the English label, which worked only for as long as
+ * the label *was* English. Translating the nav would have made every lookup
+ * miss and silently rendered the Home icon for every item — no error, just a
+ * column of identical icons in Arabic.
+ */
+export function getNavIcon(labelKey: NavLabelKey): LucideIcon {
+  const icons: Record<NavLabelKey, LucideIcon> = {
+    browseCars: Search,
+    dealerships: Building2,
+    compare: Scale,
+    faq: HelpCircle,
+    dashboard: LayoutDashboard,
+    cars: CarFront,
+    testDrives: Calendar,
+    testDrive: Calendar,
+    messages: MessageSquare,
+    wishlist: Heart,
   };
-  return icons[label] || Home;
+  return icons[labelKey] ?? Home;
 }

@@ -1,18 +1,24 @@
 {
   "home": "Home",
+  "browseCars": "Browse Cars",
   "cars": "Cars",
   "dealerships": "Dealerships",
   "compare": "Compare",
-  "testDrive": "Test drive",
+  "faq": "FAQ",
+  "testDrive": "Test Drive",
+  "testDrives": "Test Drives",
   "wishlist": "Wishlist",
   "messages": "Messages",
   "pricing": "Pricing",
   "about": "About",
   "contact": "Contact",
+  "dashboard": "Dashboard",
   "signIn": "Sign in",
   "signUp": "Sign up",
-  "dashboard": "Dashboard",
+  "signOut": "Sign out",
   "skipToContent": "Skip to main content",
   "openMenu": "Open menu",
-  "closeMenu": "Close menu"
+  "closeMenu": "Close menu",
+  "viewStorefront": "View storefront",
+  "welcomeBack": "Welcome back"
 }
