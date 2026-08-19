@@ -1,6 +1,6 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -34,6 +34,7 @@ const DateSelector = ({
     selectedDay: DayOfWeek | null;
     workingHours: WorkingHours;
 }) => {
+  const { date: fmtDate } = useFormatters();
     return (
         <div>
             <Label htmlFor="date" className="block mb-2 font-medium">
@@ -52,7 +53,7 @@ const DateSelector = ({
                     >
                         <CalendarIcon className="me-2 h-4 w-4" />
                         {selectedDate ? (
-                            format(new Date(selectedDate), "EEEE, MMMM d, yyyy")
+                            fmtDate(new Date(selectedDate), { weekday: "long", month: "long" })
                         ) : (
                             <span>Select a date</span>
                         )}

@@ -1,8 +1,8 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { format } from "date-fns";
 import { CreditCard, Calendar, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ export default function OrgSubscription({
   plans: Plan[];
   orgId: string;
 }) {
+  const { date: fmtDate } = useFormatters();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedPlan, setSelectedPlan] = useState(subscription?.planId || "");
@@ -107,10 +108,7 @@ export default function OrgSubscription({
                 <span className="text-muted-foreground">Period Start</span>
                 <span>
                   {subscription.currentPeriodStart
-                    ? format(
-                        new Date(subscription.currentPeriodStart),
-                        "MMM d, yyyy"
-                      )
+                    ? fmtDate(new Date(subscription.currentPeriodStart))
                     : "N/A"}
                 </span>
               </div>
@@ -118,10 +116,7 @@ export default function OrgSubscription({
                 <span className="text-muted-foreground">Period End</span>
                 <span>
                   {subscription.currentPeriodEnd
-                    ? format(
-                        new Date(subscription.currentPeriodEnd),
-                        "MMM d, yyyy"
-                      )
+                    ? fmtDate(new Date(subscription.currentPeriodEnd))
                     : "N/A"}
                 </span>
               </div>

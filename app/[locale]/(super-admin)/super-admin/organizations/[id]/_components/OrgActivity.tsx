@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from "date-fns";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   FileText,
   Plus,
@@ -73,6 +73,7 @@ export default function OrgActivity({
 }: {
   activity: OrgActivityLog[];
 }) {
+  const { relativeToNow } = useFormatters();
   return (
     <Card>
       <CardHeader>
@@ -122,9 +123,7 @@ export default function OrgActivity({
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(log.createdAt), {
-                        addSuffix: true,
-                      })}
+                      {relativeToNow(new Date(log.createdAt))}
                     </p>
                   </div>
                 </div>

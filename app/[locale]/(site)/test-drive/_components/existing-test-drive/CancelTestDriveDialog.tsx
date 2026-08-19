@@ -1,7 +1,7 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState } from "react";
-import { format } from "date-fns";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,13 @@ const CancelTestDriveDialog = ({
     isOpen: boolean;
     onClose: () => void;
 }) => {
+  const { date: fmtDate } = useFormatters();
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
 
     const formatDate = (date: string | null) => {
         if (!date) return "N/A";
-        return format(new Date(date), "EEEE, MMMM d, yyyy");
+        return fmtDate(new Date(date), { weekday: "long", month: "long" });
     };
 
     const handleCancelTestDrive = async () => {

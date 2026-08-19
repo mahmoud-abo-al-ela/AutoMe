@@ -1,8 +1,8 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
 import { useSearchParams, useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
-import { format } from "date-fns";
 import { Calendar as CalendarIcon, Filter, X, Search, User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,7 @@ export default function AuditLogsFilters({
 }: {
   currentFilters: AuditLogFilters;
 }) {
+  const { date: fmtDate } = useFormatters();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { slug } = useParams();
@@ -184,11 +185,11 @@ export default function AuditLogsFilters({
                   {date?.from ? (
                     date.to ? (
                       <>
-                        {format(date.from, "LLL dd, y")} -{" "}
-                        {format(date.to, "LLL dd, y")}
+                        {fmtDate(date.from)} -{" "}
+                        {fmtDate(date.to)}
                       </>
                     ) : (
-                      format(date.from, "LLL dd, y")
+                      fmtDate(date.from)
                     )
                   ) : (
                     <span>Pick a date range</span>

@@ -1,11 +1,11 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
 import { useRouter } from "@/i18n/navigation";
 import { ArrowLeft, Mail, Shield, UserCog, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
 import { Prisma, type UserRole } from "@/lib/generated/prisma";
 import type { LucideIcon } from "lucide-react";
 
@@ -68,6 +68,7 @@ export default function UserDetailsHeader({
 }: {
   user: SuperAdminUserDetail;
 }) {
+  const { date: fmtDate } = useFormatters();
   const router = useRouter();
   const role = roleConfig[user.role];
   const RoleIcon = role.icon;
@@ -105,7 +106,7 @@ export default function UserDetailsHeader({
               </Badge>
               <span className="text-sm text-muted-foreground flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                Joined {format(new Date(user.createdAt), "MMM d, yyyy")}
+                Joined {fmtDate(new Date(user.createdAt))}
               </span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock, Car, ChevronRight } from "lucide-react";
@@ -18,9 +18,10 @@ const TestDriveCard = ({
     onViewDetails: (testDriveId: string) => void;
     onViewCar: (carId: string) => void;
 }) => {
+  const { date: fmtDate } = useFormatters();
     const formatDate = (date: string) => {
         try {
-            return format(new Date(date), "MMMM d, yyyy");
+            return fmtDate(new Date(date), { month: "long" });
         } catch (error) {
             console.error("Date formatting error:", error);
             return "Invalid date";

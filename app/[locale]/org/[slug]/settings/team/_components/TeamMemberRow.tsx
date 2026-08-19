@@ -1,4 +1,5 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Trash2, Crown, User } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import type { TeamMember, TeamMemberRole } from "../_lib/team-types";
 
 interface TeamMemberRowProps {
@@ -31,6 +31,7 @@ export default function TeamMemberRow({
     onRoleChange,
     loadingRoleUpdate,
 }: TeamMemberRowProps) {
+  const { relativeToNow } = useFormatters();
     const isCurrentUser = member.userId === currentUserId;
     const isOwnerRole = member.role === "OWNER";
 
@@ -61,7 +62,7 @@ export default function TeamMemberRow({
                         {member.user.email}
                     </p>
                     <p className="text-xs text-gray-400">
-                        Joined {formatDistanceToNow(new Date(member.user.createdAt), { addSuffix: true })}
+                        Joined {relativeToNow(new Date(member.user.createdAt))}
                     </p>
                 </div>
             </div>

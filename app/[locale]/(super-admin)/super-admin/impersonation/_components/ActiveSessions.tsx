@@ -1,8 +1,8 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { formatDistanceToNow } from "date-fns";
 import { LogOut, Clock, Building2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ export default function ActiveSessions({
 }: {
   sessions: ImpersonationSessionRow[];
 }) {
+  const { relativeToNow } = useFormatters();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [endingSession, setEndingSession] = useState<string | null>(null);
@@ -119,9 +120,7 @@ export default function ActiveSessions({
                       <span className="text-muted-foreground">•</span>
                       <Clock className="h-3 w-3" />
                       Started{" "}
-                      {formatDistanceToNow(new Date(session.startedAt), {
-                        addSuffix: true,
-                      })}
+                      {relativeToNow(new Date(session.startedAt))}
                     </div>
                   </div>
                 </div>

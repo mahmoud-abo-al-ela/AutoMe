@@ -1,6 +1,7 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { formatDistanceToNow, differenceInMinutes } from "date-fns";
+import { differenceInMinutes } from "date-fns";
 import { Clock, Building2, CheckCircle, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ export default function SessionHistory({
 }: {
   sessions: ImpersonationSessionRow[];
 }) {
+  const { relativeToNow } = useFormatters();
   return (
     <Card>
       <CardHeader>
@@ -77,9 +79,7 @@ export default function SessionHistory({
                       {duration} min
                     </Badge>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(session.endedAt!), {
-                        addSuffix: true,
-                      })}
+                      {relativeToNow(new Date(session.endedAt!))}
                     </div>
                   </div>
                 </div>

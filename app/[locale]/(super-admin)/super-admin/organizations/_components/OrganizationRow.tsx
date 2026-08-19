@@ -1,6 +1,6 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { formatDistanceToNow } from "date-fns";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Car, Users, Calendar, ExternalLink } from "lucide-react";
@@ -23,6 +23,8 @@ export default function OrganizationRow({
   actionLoading: string | null;
   isPending: boolean;
 }) {
+  const { relativeToNow } = useFormatters();
+
   const getPlanBadgeColor = (planType: PlanType | undefined) => {
     switch (planType) {
       case "ENTERPRISE":
@@ -83,9 +85,7 @@ export default function OrganizationRow({
         </Badge>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
-        {formatDistanceToNow(new Date(org.createdAt), {
-          addSuffix: true,
-        })}
+        {relativeToNow(new Date(org.createdAt))}
       </TableCell>
       <TableCell className="text-end">
         <OrganizationActions

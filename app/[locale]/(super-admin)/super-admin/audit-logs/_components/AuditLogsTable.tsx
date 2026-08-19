@@ -1,8 +1,8 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { formatDistanceToNow, format } from "date-fns";
 import {
   ChevronLeft,
   ChevronRight,
@@ -58,6 +58,7 @@ export default function AuditLogsTable({
   logs: AuditLogRow[];
   pagination: AuditLogsPagination;
 }) {
+  const { dateTime: fmtDateTime, relativeToNow } = useFormatters();
   const router = useRouter();
   const [detailsDialog, setDetailsDialog] = useState<{
     open: boolean;
@@ -106,13 +107,11 @@ export default function AuditLogsTable({
                         <Tooltip>
                           <TooltipTrigger>
                             <span className="text-sm">
-                              {formatDistanceToNow(new Date(log.createdAt), {
-                                addSuffix: true,
-                              })}
+                              {relativeToNow(new Date(log.createdAt))}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {format(new Date(log.createdAt), "PPpp")}
+                            {fmtDateTime(new Date(log.createdAt))}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

@@ -51,10 +51,6 @@ const formatTime = (timeString: string | null | undefined) => {
   }
 };
 
-const formatDate = (dateString: string | Date) => {
-  return format(new Date(dateString), "MMM dd, yyyy");
-};
-
 export const TestDriveMobileCard = ({
   testDrive,
   onStatusChange,
@@ -63,6 +59,7 @@ export const TestDriveMobileCard = ({
 }: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const { date: shortDate } = useFormatters();
+  const formatDate = (dateString: string | Date) => shortDate(new Date(dateString));
 
   // Nullable by serializeTestDrive's signature only; carId is a required FK.
   const car = testDrive.car as unknown as TestDriveCar;

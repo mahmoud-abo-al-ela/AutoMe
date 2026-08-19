@@ -1,3 +1,4 @@
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar, Car, User, FileText } from "lucide-react";
-import { format } from "date-fns";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
@@ -39,10 +39,6 @@ const formatTime = (timeString: string | null | undefined) => {
   }
 };
 
-const formatDate = (dateString: string | Date) => {
-  return format(new Date(dateString), "PPP");
-};
-
 export const TestDriveDetailsModal = ({
   testDrive,
   isOpen,
@@ -52,6 +48,10 @@ export const TestDriveDetailsModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
+  const { date: fmtDate, dateTime: fmtDateTime } = useFormatters();
+  const formatDate = (dateString: string | Date) =>
+    fmtDate(new Date(dateString), { month: "long" });
+
   if (!testDrive) return null;
 
   // serializeTestDrive declares car nullable for callers that may pass nothing;
@@ -185,7 +185,7 @@ export const TestDriveDetailsModal = ({
                 <span className="text-gray-500">Created:</span>
                 <p className="truncate">
                   {testDrive.createdAt
-                    ? format(new Date(testDrive.createdAt), "PPp")
+                    ? fmtDateTime(new Date(testDrive.createdAt))
                     : "N/A"}
                 </p>
               </div>

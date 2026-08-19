@@ -1,7 +1,7 @@
+import { useFormatters } from "@/hooks/use-formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Calendar, Car, Clock, User, Check, X, Eye } from "lucide-react";
-import { format } from "date-fns";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
@@ -35,10 +35,6 @@ const formatTime = (timeString: string | null | undefined) => {
   }
 };
 
-const formatDate = (dateString: string | Date) => {
-  return format(new Date(dateString), "MMM dd, yyyy");
-};
-
 export const TestDriveRow = ({
   testDrive,
   onStatusChange,
@@ -46,6 +42,8 @@ export const TestDriveRow = ({
   isUpdating = false,
 }: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const { date: fmtDate } = useFormatters();
+  const formatDate = (dateString: string | Date) => fmtDate(new Date(dateString));
 
   // Nullable by serializeTestDrive's signature only; carId is a required FK.
   const car = testDrive.car as unknown as TestDriveCar;

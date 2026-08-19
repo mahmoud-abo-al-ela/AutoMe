@@ -1,5 +1,7 @@
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { formatRelativeToNow } from "@/lib/utils/datetime";
 import { Link } from "@/i18n/navigation";
-import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,11 @@ import {
 } from "@/lib/services/impersonation";
 
 export default async function ActiveImpersonations() {
+  // A server component, so the locale comes from getLocale rather than the
+  // useFormatters hook.
+  const locale = (await getLocale()) as Locale;
+  const relativeToNow = (value: Date | string | number) =>
+    formatRelativeToNow(value, locale);
   const activeCount = await getActiveImpersonationCount();
   const { sessions } = await getImpersonationSessions({
     filters: { activeOnly: true },
@@ -71,9 +78,7 @@ export default async function ActiveImpersonations() {
                       <span>·</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(session.startedAt), {
-                          addSuffix: true,
-                        })}
+                        {relativeToNow(new Date(session.startedAt))}
                       </span>
                     </div>
                   </div>

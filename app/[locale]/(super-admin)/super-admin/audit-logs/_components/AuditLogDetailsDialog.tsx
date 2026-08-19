@@ -1,6 +1,6 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,7 @@ export default function AuditLogDetailsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { dateTime: fmtDateTime } = useFormatters();
   const metadata = log?.metadata as AuditLogMetadata;
 
   return (
@@ -65,7 +66,7 @@ export default function AuditLogDetailsDialog({
                   Timestamp
                 </label>
                 <p className="text-sm">
-                  {format(new Date(log.createdAt), "PPpp")}
+                  {fmtDateTime(new Date(log.createdAt))}
                 </p>
               </div>
               <div>

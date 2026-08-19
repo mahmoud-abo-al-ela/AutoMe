@@ -1,4 +1,4 @@
-import { formatDistanceToNow, format } from "date-fns";
+import { useFormatters } from "@/hooks/use-formatters";
 import { FileText, Calendar, Car } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ export default function UserActivity({
   activity: AuditLog[];
   testDrives: SuperAdminUserDetail["testDrives"];
 }) {
+  const { date: fmtDate, relativeToNow } = useFormatters();
   return (
     <Card>
       <CardHeader>
@@ -50,9 +51,7 @@ export default function UserActivity({
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {log.createdAt
-                          ? formatDistanceToNow(new Date(log.createdAt), {
-                              addSuffix: true,
-                            })
+                          ? relativeToNow(new Date(log.createdAt))
                           : "Unknown time"}
                       </p>
                     </div>
@@ -82,7 +81,7 @@ export default function UserActivity({
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(td.date), "MMM d, yyyy")}
+                          {fmtDate(new Date(td.date))}
                           {td.startTime ? ` · ${td.startTime}` : ""}
                         </div>
                       </div>

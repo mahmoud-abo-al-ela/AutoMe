@@ -1,5 +1,5 @@
+import { useFormatters } from "@/hooks/use-formatters";
 import { Link } from "@/i18n/navigation";
-import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ export default function RecentOrganizations({
 }: {
   organizations: RecentOrganization[];
 }) {
+  const { relativeToNow } = useFormatters();
+
   const getPlanBadgeColor = (planType: PlanType | undefined) => {
     switch (planType) {
       case "ENTERPRISE":
@@ -115,9 +117,7 @@ export default function RecentOrganizations({
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {formatDistanceToNow(new Date(org.createdAt), {
-                      addSuffix: true,
-                    })}
+                    {relativeToNow(new Date(org.createdAt))}
                   </TableCell>
                 </TableRow>
               ))

@@ -1,11 +1,12 @@
-import { format } from "date-fns";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Calendar, Clock, Info } from "lucide-react";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 const TestDriveDetails = ({ testDrive }: { testDrive: TestDriveDetail }) => {
+  const { date: fmtDate } = useFormatters();
     const formatDate = (date: string | null) => {
         if (!date) return "N/A";
-        return format(new Date(date), "EEEE, MMMM d, yyyy");
+        return fmtDate(new Date(date), { weekday: "long", month: "long" });
     };
 
     return (

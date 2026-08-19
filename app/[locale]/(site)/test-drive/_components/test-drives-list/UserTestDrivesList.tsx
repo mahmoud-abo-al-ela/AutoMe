@@ -1,8 +1,8 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { format } from "date-fns";
 import TestDriveSkeleton from "./TestDriveSkeleton";
 import TestDriveCard from "./TestDriveCard";
 import TestDriveFilters from "./TestDriveFilters";
@@ -22,11 +22,27 @@ const UserTestDrivesList = ({
   loading: boolean;
   pagination: Pagination | null;
 }) => {
+  const { date: fmtDate } = useFormatters();
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState(pagination?.status || "all");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredDrives, setFilteredDrives] = useState<TestDriveListItem[]>(
     testDrives || []
+  );
+
+  // Memoised because the search effect below filters on the *formatted* date,
+  // so it is a real dependency: switching locale has to re-filter against the
+  // Arabic rendering of the same dates, not the English one it matched before.
+  const formatDate = useCallback(
+    (date: string) => {
+      try {
+        return fmtDate(new Date(date), { month: "long" });
+      } catch (error) {
+        console.error("Date formatting error:", error);
+        return "Invalid date";
+      }
+    },
+    [fmtDate]
   );
 
   const shouldShowPagination = () => {
@@ -63,16 +79,7 @@ const UserTestDrivesList = ({
         formatDate(drive.date).toLowerCase().includes(query)
     );
     setFilteredDrives(filtered);
-  }, [testDrives, searchQuery]);
-
-  const formatDate = (date: string) => {
-    try {
-      return format(new Date(date), "MMMM d, yyyy");
-    } catch (error) {
-      console.error("Date formatting error:", error);
-      return "Invalid date";
-    }
-  };
+  }, [testDrives, searchQuery, formatDate]);
 
   const handleViewDetails = (testDriveId: string) => {
     router.push(`/test-drive?testDriveId=${testDriveId}`);

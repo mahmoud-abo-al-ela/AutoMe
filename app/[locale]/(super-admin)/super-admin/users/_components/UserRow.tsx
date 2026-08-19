@@ -1,6 +1,6 @@
 "use client";
+import { useFormatters } from "@/hooks/use-formatters";
 
-import { formatDistanceToNow } from "date-fns";
 import { Mail, Building2 } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ export default function UserRow({
   user: SuperAdminUserRow;
   onChangeRole: (user: SuperAdminUserRow) => void;
 }) {
+  const { relativeToNow } = useFormatters();
   const role = roleConfig[user.role];
 
   return (
@@ -90,9 +91,7 @@ export default function UserRow({
       </TableCell>
       <TableCell>
         <span className="text-sm text-muted-foreground">
-          {formatDistanceToNow(new Date(user.createdAt), {
-            addSuffix: true,
-          })}
+          {relativeToNow(new Date(user.createdAt))}
         </span>
       </TableCell>
       <TableCell>
