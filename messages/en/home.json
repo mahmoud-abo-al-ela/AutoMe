@@ -128,7 +128,8 @@
       "liveChat": "Live Chat",
       "aiProcessing": "AI Processing",
       "prioritySupport": "Priority Support"
-    }
+    },
+    "billingPeriodLabel": "Toggle yearly billing"
   },
   "testimonials": {
     "badge": "Customer Reviews",

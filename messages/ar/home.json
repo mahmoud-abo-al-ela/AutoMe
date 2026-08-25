@@ -128,7 +128,8 @@
       "liveChat": "محادثة مباشرة",
       "aiProcessing": "معالجة بالذكاء الاصطناعي",
       "prioritySupport": "دعم ذو أولوية"
-    }
+    },
+    "billingPeriodLabel": "تبديل الاشتراك السنوي"
   },
   "testimonials": {
     "badge": "آراء العملاء",
