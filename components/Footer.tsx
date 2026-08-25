@@ -1,8 +1,9 @@
 import { Twitter, Instagram, Facebook } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import React from "react";
 
-const Footer = ({
+const Footer = async ({
   user,
   organization,
 }: {
@@ -15,10 +16,14 @@ const Footer = ({
     address?: string | null;
   } | null;
 }) => {
+  const t = await getTranslations("footer");
+
   const isOnSubdomain = !!organization;
   const brandName = organization?.name || "AutoMe";
-  const brandDescription = organization?.description || 
-    "AutoMe is a platform that helps you find your perfect vehicle match with smart recommendations and market insights.";
+  // A dealership's own description is user content and is shown as written —
+  // there is no translation of it to fall back to. Only the platform's own
+  // tagline is a message key.
+  const brandDescription = organization?.description || t("tagline");
 
   return (
     <footer className="container mx-auto px-4 py-6 md:py-12">
@@ -31,14 +36,14 @@ const Footer = ({
         </div>
 
         <div className="flex flex-col">
-          <h3 className="text-sm font-semibold mb-3">Quick Links</h3>
+          <h3 className="text-sm font-semibold mb-3">{t("quickLinks")}</h3>
           <ul className="space-y-1.5 text-sm">
             <li>
               <Link
                 href="/cars"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Browse Cars
+                {t("browseCars")}
               </Link>
             </li>
             <li>
@@ -46,7 +51,7 @@ const Footer = ({
                 href="/compare"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Compare Models
+                {t("compareModels")}
               </Link>
             </li>
             <li>
@@ -54,7 +59,7 @@ const Footer = ({
                 href="/wishlist"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Saved Vehicles
+                {t("savedVehicles")}
               </Link>
             </li>
             <li>
@@ -62,7 +67,7 @@ const Footer = ({
                 href="/faq"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                FAQ
+                {t("faq")}
               </Link>
             </li>
           </ul>
@@ -70,27 +75,40 @@ const Footer = ({
 
         <div className="flex flex-col">
           <h3 className="text-sm font-semibold mb-3">
-            {isOnSubdomain ? "Contact Info" : "Company"}
+            {isOnSubdomain ? t("contactInfo") : t("company")}
           </h3>
           {isOnSubdomain ? (
             <ul className="space-y-2 text-sm text-muted-foreground">
               {organization.phone && (
                 <li>
-                  <span className="font-medium text-foreground block">Phone</span>
-                  {organization.phone}
+                  <span className="font-medium text-foreground block">
+                    {t("phone")}
+                  </span>
+                  {/* Phone numbers are always read left-to-right, even in an
+                      RTL paragraph, so the direction is pinned rather than
+                      inherited. */}
+                  <span dir="ltr">{organization.phone}</span>
                 </li>
               )}
               {organization.email && (
                 <li>
-                  <span className="font-medium text-foreground block">Email</span>
-                  <a href={`mailto:${organization.email}`} className="hover:text-primary transition-colors break-all">
+                  <span className="font-medium text-foreground block">
+                    {t("email")}
+                  </span>
+                  <a
+                    href={`mailto:${organization.email}`}
+                    className="hover:text-primary transition-colors break-all"
+                    dir="ltr"
+                  >
                     {organization.email}
                   </a>
                 </li>
               )}
               {organization.address && (
                 <li>
-                  <span className="font-medium text-foreground block">Address</span>
+                  <span className="font-medium text-foreground block">
+                    {t("address")}
+                  </span>
                   {organization.address}
                 </li>
               )}
@@ -102,7 +120,7 @@ const Footer = ({
                   href="/about"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  About Us
+                  {t("aboutUs")}
                 </Link>
               </li>
               <li>
@@ -110,7 +128,7 @@ const Footer = ({
                   href="/contact"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Contact Us
+                  {t("contactUs")}
                 </Link>
               </li>
               <li>
@@ -118,7 +136,7 @@ const Footer = ({
                   href="/dealerships"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Dealerships
+                  {t("dealerships")}
                 </Link>
               </li>
             </ul>
@@ -126,14 +144,14 @@ const Footer = ({
         </div>
 
         <div className="flex flex-col">
-          <h3 className="text-sm font-semibold mb-3">Legal</h3>
+          <h3 className="text-sm font-semibold mb-3">{t("legal")}</h3>
           <ul className="space-y-1.5 text-sm">
             <li>
               <Link
                 href="/terms"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Terms of Service
+                {t("terms")}
               </Link>
             </li>
             <li>
@@ -141,7 +159,7 @@ const Footer = ({
                 href="/privacy"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Privacy Policy
+                {t("privacy")}
               </Link>
             </li>
             <li>
@@ -149,7 +167,7 @@ const Footer = ({
                 href="/cookies"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Cookie Policy
+                {t("cookies")}
               </Link>
             </li>
           </ul>
@@ -158,7 +176,13 @@ const Footer = ({
 
       <div className="border-t mt-6 md:mt-8 pt-4 md:pt-6 flex flex-col sm:flex-row items-center justify-between">
         <p className="text-xs text-muted-foreground text-center sm:text-start">
-          © {new Date().getFullYear()} {brandName}. All rights reserved.
+          {/* `year` is passed through next-intl's raw number formatting
+              deliberately disabled: a year must not carry a thousands
+              separator ("2,026"). */}
+          {t("copyright", {
+            year: String(new Date().getFullYear()),
+            brand: brandName,
+          })}
         </p>
         <div className="flex items-center space-x-4 mt-4 sm:mt-0">
           <a
