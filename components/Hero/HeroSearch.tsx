@@ -13,6 +13,7 @@ import ImageSearchPanel from "./ImageSearchPanel";
 
 const HeroSearch = () => {
   const t = useTranslations("home.hero");
+  const tActions = useTranslations("common.actions");
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
@@ -95,7 +96,7 @@ const HeroSearch = () => {
             className="bg-primary hover:bg-primary/90 text-white h-10 sm:h-11 md:h-12 text-sm md:text-base cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg px-4 sm:px-6"
             disabled={image.loading}
           >
-            Search
+            {tActions("search")}
           </Button>
         </motion.form>
       )}

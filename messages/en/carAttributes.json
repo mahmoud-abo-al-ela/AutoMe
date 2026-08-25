@@ -1,0 +1,46 @@
+{
+  "fuel": {
+    "Gasoline": "Gasoline",
+    "Diesel": "Diesel",
+    "Electric": "Electric",
+    "Hybrid": "Hybrid",
+    "Plug-in Hybrid": "Plug-in Hybrid"
+  },
+  "body": {
+    "SUV": "SUV",
+    "Sedan": "Sedan",
+    "Hatchback": "Hatchback",
+    "Convertible": "Convertible",
+    "Coupe": "Coupe",
+    "Wagon": "Wagon",
+    "Pickup": "Pickup",
+    "Pickup Truck": "Pickup Truck"
+  },
+  "transmission": {
+    "Automatic": "Automatic",
+    "Manual": "Manual",
+    "Semi-Automatic": "Semi-Automatic"
+  },
+  "color": {
+    "black": "Black",
+    "white": "White",
+    "silver": "Silver",
+    "grey": "Grey",
+    "gray": "Grey",
+    "metallic grey": "Metallic Grey",
+    "metallic gray": "Metallic Grey",
+    "red": "Red",
+    "blue": "Blue",
+    "navy blue": "Navy Blue",
+    "navy": "Navy",
+    "green": "Green",
+    "yellow": "Yellow",
+    "orange": "Orange",
+    "brown": "Brown",
+    "beige": "Beige",
+    "gold": "Gold",
+    "bronze": "Bronze",
+    "purple": "Purple",
+    "maroon": "Maroon"
+  }
+}

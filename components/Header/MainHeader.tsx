@@ -231,11 +231,11 @@ export default function MainHeader({
               <div className="me-4">
                 {isOnAdminPath ? (
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="/">View Storefront</Link>
+                    <Link href="/">{t("viewStorefront")}</Link>
                   </Button>
                 ) : (
                   <Button variant="default" size="sm" asChild>
-                    <Link href={orgDashboardHref}>Dashboard</Link>
+                    <Link href={orgDashboardHref}>{t("dashboard")}</Link>
                   </Button>
                 )}
               </div>
@@ -252,7 +252,7 @@ export default function MainHeader({
                       href="/sign-in"
                       className="w-full flex items-center justify-center"
                     >
-                      Sign In
+                      {t("signIn")}
                     </Link>
                   </Button>
                 )}

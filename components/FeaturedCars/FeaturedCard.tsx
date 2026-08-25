@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { Button } from "../ui/button";
 import { GalleryHorizontal } from "lucide-react";
 import { getFeaturedCars } from "@/actions/home";
@@ -23,6 +24,7 @@ const FeaturedCard = ({
   title: string;
   subtitle: string;
 }) => {
+  const t = useTranslations("home.featured");
   const {
     data: featuredCars,
     isLoading: loading,
@@ -49,7 +51,7 @@ const FeaturedCard = ({
               size="lg"
               className="bg-primary hover:bg-primary/90 cursor-pointer text-primary-foreground rounded-full px-6 sm:px-8 shadow-lg hover:shadow-xl transition-all duration-300 w-full md:w-auto"
             >
-              <GalleryHorizontal className="me-2 h-4 w-4" /> View All Vehicles
+              <GalleryHorizontal className="me-2 h-4 w-4" /> {t("viewAll")}
             </Button>
           </Link>
         </div>

@@ -245,7 +245,7 @@ export default function MobileMenu({
                   >
                     <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        Sign In
+                        {t("signIn")}
                       </Button>
                     </Link>
                   </motion.div>

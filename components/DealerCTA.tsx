@@ -132,15 +132,15 @@ function DealerCTA() {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="bg-white/5 rounded-lg p-3 text-center">
                         <div className="text-2xl font-bold">24</div>
-                        <div className="text-xs text-gray-400">Cars</div>
+                        <div className="text-xs text-gray-400">{t("statCars")}</div>
                       </div>
                       <div className="bg-white/5 rounded-lg p-3 text-center">
                         <div className="text-2xl font-bold">12</div>
-                        <div className="text-xs text-gray-400">Test Drives</div>
+                        <div className="text-xs text-gray-400">{t("statTestDrives")}</div>
                       </div>
                       <div className="bg-white/5 rounded-lg p-3 text-center">
                         <div className="text-2xl font-bold">5</div>
-                        <div className="text-xs text-gray-400">Messages</div>
+                        <div className="text-xs text-gray-400">{t("statMessages")}</div>
                       </div>
                     </div>
 
@@ -154,7 +154,7 @@ function DealerCTA() {
 
                 {/* Floating elements */}
                 <div className="absolute -top-4 -end-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                  +3 New Leads Today
+                  {t("newLeads", { count: 3 })}
                 </div>
               </div>
             </motion.div>

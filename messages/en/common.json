@@ -8,7 +8,8 @@
     "retry": "Try again",
     "save": "Save",
     "search": "Search",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "viewDealer": "View dealer"
   },
   "states": {
     "empty": "Nothing here yet",

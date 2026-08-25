@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { UserButton, SignedIn, useClerk } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
@@ -10,6 +11,7 @@ export default function MobileUserSection({
   user?: { name?: string | null; email?: string | null } | null;
   setIsMenuOpen: (open: boolean) => void;
 }) {
+  const t = useTranslations("nav");
   const { signOut } = useClerk();
 
   return (
@@ -26,7 +28,7 @@ export default function MobileUserSection({
           />
           <div className="flex-1">
             <p className="font-semibold text-sm">
-              {user?.name || "Welcome back"}
+              {user?.name || t("welcomeBack")}
             </p>
             <p className="text-xs text-muted-foreground">
               {user?.email}
@@ -38,7 +40,7 @@ export default function MobileUserSection({
               signOut({ redirectUrl: "/" });
             }}
             className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-            aria-label="Sign out"
+            aria-label={t("signOut")}
           >
             <LogOut className="w-5 h-5" />
           </button>

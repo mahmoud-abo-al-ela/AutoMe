@@ -106,17 +106,17 @@ const Hero = () => {
           >
             <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
               <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
-              <span className="text-blue-100">AI-Powered Recommendations</span>
+              <span className="text-blue-100">{t("trustRecommendations")}</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-white/20"></div>
             <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
               <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
-              <span className="text-blue-100">Market Price Analysis</span>
+              <span className="text-blue-100">{t("trustPriceAnalysis")}</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-white/20"></div>
             <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
               <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
-              <span className="text-blue-100">Virtual Car Tours</span>
+              <span className="text-blue-100">{t("trustVirtualTours")}</span>
             </div>
           </motion.div>
 

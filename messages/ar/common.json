@@ -8,7 +8,8 @@
     "retry": "إعادة المحاولة",
     "save": "حفظ",
     "search": "بحث",
-    "viewDetails": "عرض التفاصيل"
+    "viewDetails": "عرض التفاصيل",
+    "viewDealer": "عرض المعرض"
   },
   "states": {
     "empty": "لا يوجد شيء هنا بعد",

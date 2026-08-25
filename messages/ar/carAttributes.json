@@ -1,0 +1,46 @@
+{
+  "fuel": {
+    "Gasoline": "بنزين",
+    "Diesel": "ديزل",
+    "Electric": "كهرباء",
+    "Hybrid": "هجين",
+    "Plug-in Hybrid": "هجين قابل للشحن"
+  },
+  "body": {
+    "SUV": "دفع رباعي",
+    "Sedan": "سيدان",
+    "Hatchback": "هاتشباك",
+    "Convertible": "مكشوفة",
+    "Coupe": "كوبيه",
+    "Wagon": "ستيشن",
+    "Pickup": "بيك أب",
+    "Pickup Truck": "بيك أب"
+  },
+  "transmission": {
+    "Automatic": "أوتوماتيك",
+    "Manual": "مانوال",
+    "Semi-Automatic": "نصف أوتوماتيك"
+  },
+  "color": {
+    "black": "أسود",
+    "white": "أبيض",
+    "silver": "فضي",
+    "grey": "رمادي",
+    "gray": "رمادي",
+    "metallic grey": "رمادي ميتاليك",
+    "metallic gray": "رمادي ميتاليك",
+    "red": "أحمر",
+    "blue": "أزرق",
+    "navy blue": "كحلي",
+    "navy": "كحلي",
+    "green": "أخضر",
+    "yellow": "أصفر",
+    "orange": "برتقالي",
+    "brown": "بني",
+    "beige": "بيج",
+    "gold": "ذهبي",
+    "bronze": "برونزي",
+    "purple": "بنفسجي",
+    "maroon": "عنابي"
+  }
+}

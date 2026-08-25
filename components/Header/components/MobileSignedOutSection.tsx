@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -9,6 +10,7 @@ export default function MobileSignedOutSection({
 }: {
   setIsMenuOpen: (open: boolean) => void;
 }) {
+  const t = useTranslations("nav");
   return (
     <SignedOut>
       <motion.div
@@ -22,7 +24,7 @@ export default function MobileSignedOutSection({
             className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25"
             onClick={() => setIsMenuOpen(false)}
           >
-            Sign In
+            {t("signIn")}
           </Button>
         </SignInButton>
       </motion.div>

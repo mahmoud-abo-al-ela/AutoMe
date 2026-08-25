@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
@@ -23,6 +24,7 @@ export default function DashboardButton({
   onClick?: () => void;
   variant?: React.ComponentProps<typeof Button>["variant"];
 }) {
+  const t = useTranslations("nav");
   if (!hasOrgMembership && !isAdmin) return null;
 
   // Prioritize organizationSlug if it was passed 
@@ -36,7 +38,7 @@ export default function DashboardButton({
     <div className={className}>
       <Button variant={variant} size="sm" asChild className={buttonClassName}>
         <Link href={href} onClick={onClick}>
-          Dashboard
+          {t("dashboard")}
         </Link>
       </Button>
     </div>

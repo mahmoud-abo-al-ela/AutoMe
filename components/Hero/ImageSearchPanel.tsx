@@ -31,6 +31,7 @@ const ImageSearchPanel = ({
   onSearch: () => void;
 }) => {
   const t = useTranslations("home.hero");
+  const tActions = useTranslations("common.actions");
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -75,7 +76,7 @@ const ImageSearchPanel = ({
               className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-900/60 backdrop-blur-[2px] text-white"
             >
               <Loader2 size={26} className="animate-spin" />
-              <span className="text-xs sm:text-sm font-medium">Analyzing image…</span>
+              <span className="text-xs sm:text-sm font-medium">{t("analyzingImage")}</span>
             </motion.div>
           )}
         </div>
@@ -91,7 +92,7 @@ const ImageSearchPanel = ({
             type="button"
             disabled={loading}
           >
-            Cancel
+            {tActions("cancel")}
           </Button>
           <Button
             onClick={onChangeImage}
@@ -102,7 +103,7 @@ const ImageSearchPanel = ({
             disabled={loading}
           >
             <Upload size={12} className="sm:size-[14px]" />
-            Change
+            {t("changeImage")}
           </Button>
           <Button
             className="text-xs sm:ms-auto bg-primary text-white hover:bg-primary/90 hover:text-white cursor-pointer h-8 sm:h-9 min-w-[9.5rem] justify-center"
@@ -114,7 +115,7 @@ const ImageSearchPanel = ({
             {loading ? (
               <span className="flex items-center gap-1.5">
                 <Loader2 size={14} className="animate-spin" />
-                Analyzing…
+                {t("analyzing")}
               </span>
             ) : (
               t("searchWithImage")

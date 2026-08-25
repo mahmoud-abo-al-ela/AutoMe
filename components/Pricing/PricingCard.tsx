@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import {
   formatPlanPrice,
-  formatPlanPeriod,
+  planPeriodKey,
   type UiPlan,
 } from "./pricing-plans";
 
@@ -24,6 +24,12 @@ export default function PricingCard({
 }) {
   const t = useTranslations("home.pricing");
   const Icon = plan.icon;
+  const price = formatPlanPrice(plan, billingPeriod);
+  const periodKey = planPeriodKey(plan, billingPeriod);
+  // A DB plan with an unrecognised `type` has no message key, so it falls back
+  // to the untranslated DB name rather than rendering blank.
+  const name = plan.planKey ? t(`plans.${plan.planKey}.name`) : plan.name;
+  const description = plan.planKey ? t(`plans.${plan.planKey}.description`) : null;
 
   return (
     <motion.div
@@ -61,13 +67,13 @@ export default function PricingCard({
             className={`text-xl font-bold ${plan.popular ? "text-white" : "text-foreground"
               }`}
           >
-            {plan.name}
+            {name}
           </h3>
           <p
             className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
               }`}
           >
-            {plan.description}
+            {description}
           </p>
         </div>
       </div>
@@ -78,13 +84,13 @@ export default function PricingCard({
             className={`text-4xl sm:text-5xl font-bold ${plan.popular ? "text-white" : "text-foreground"
               }`}
           >
-            {formatPlanPrice(plan, billingPeriod)}
+            {price ?? t("custom")}
           </span>
           <span
             className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
               }`}
           >
-            /{formatPlanPeriod(plan, billingPeriod)}
+            {periodKey ? `/${t(periodKey)}` : null}
           </span>
         </div>
       </div>
@@ -114,7 +120,7 @@ export default function PricingCard({
                   : ""
                 }`}
             >
-              {feature.name}
+              {t(`features.${feature.key}`, feature.params)}
             </span>
           </li>
         ))}
@@ -133,7 +139,7 @@ export default function PricingCard({
             href={plan.ctaLink}
             className="flex items-center justify-center gap-2"
           >
-            {plan.cta}
+            {t("cta")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
@@ -151,7 +157,7 @@ export default function PricingCard({
             href={`/sign-up?redirect_url=${encodeURIComponent(plan.ctaLink)}`}
             className="flex items-center justify-center gap-2"
           >
-            {plan.cta}
+            {t("cta")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>

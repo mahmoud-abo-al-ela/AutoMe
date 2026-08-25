@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { processImagesSearch } from "@/actions/home";
 
 const MAX_IMAGE_MB = 10;
@@ -14,6 +15,7 @@ const MAX_IMAGE_MB = 10;
  * redirect. HeroSearch stays a thin composition over what this returns.
  */
 export function useImageSearch() {
+  const t = useTranslations("home.hero");
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -38,23 +40,23 @@ export function useImageSearch() {
     if (!result?.success) return;
     const { make, bodyType, color } = result.data;
     const detected = [color, make, bodyType].filter(Boolean).join(" ");
-    if (detected) toast.success(`Detected ${detected}`);
+    if (detected) toast.success(t("detected", { attributes: detected }));
 
     const params = new URLSearchParams();
     if (make) params.append("make", make);
     if (bodyType) params.append("bodyType", bodyType);
     if (color) params.append("color", color);
     router.push(`/cars?${params.toString()}`);
-  }, [result, router]);
+  }, [result, router, t]);
 
   const selectFile = (file: File | undefined) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file");
+      toast.error(t("invalidImageType"));
       return;
     }
     if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
-      toast.error(`Image must be under ${MAX_IMAGE_MB}MB`);
+      toast.error(t("imageTooLarge", { max: MAX_IMAGE_MB }));
       return;
     }
 
@@ -78,7 +80,7 @@ export function useImageSearch() {
 
   const search = async () => {
     if (!selectedImage) {
-      toast.error("Please select an image");
+      toast.error(t("noImageSelected"));
       return;
     }
     await mutateAsync(selectedImage);

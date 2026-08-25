@@ -14,7 +14,17 @@
     "quickSuv": "SUVs",
     "quickSedan": "Sedans",
     "quickAutomatic": "Automatic",
-    "dropImage": "Drop image to search"
+    "dropImage": "Drop image to search",
+    "trustRecommendations": "AI-Powered Recommendations",
+    "trustPriceAnalysis": "Market Price Analysis",
+    "trustVirtualTours": "Virtual Car Tours",
+    "analyzingImage": "Analyzing image…",
+    "analyzing": "Analyzing…",
+    "changeImage": "Change",
+    "invalidImageType": "Please choose an image file",
+    "imageTooLarge": "Image must be under {max}MB",
+    "noImageSelected": "Please select an image",
+    "detected": "Detected {attributes}"
   },
   "stats": {
     "customersLabel": "Happy Customers",
@@ -28,7 +38,8 @@
   },
   "featured": {
     "title": "Featured Cars",
-    "subtitle": "Explore our curated selection of premium vehicles"
+    "subtitle": "Explore our curated selection of premium vehicles",
+    "viewAll": "View All Vehicles"
   },
   "why": {
     "badge": "Why Choose Us",
@@ -72,7 +83,11 @@
     "startTrial": "Start Free Trial",
     "learnMore": "Learn More",
     "dashboardPreview": "Your Dealership Dashboard",
-    "proPlan": "Pro Plan"
+    "proPlan": "Pro Plan",
+    "statCars": "Cars",
+    "statTestDrives": "Test Drives",
+    "statMessages": "Messages",
+    "newLeads": "+{count} New Leads Today"
   },
   "pricing": {
     "badge": "Pricing Plans",
@@ -82,14 +97,85 @@
     "monthly": "Monthly",
     "yearly": "Yearly",
     "save": "Save {percentage}%",
-    "mostPopular": "Most Popular"
+    "mostPopular": "Most Popular",
+    "cta": "Get Started",
+    "custom": "Custom",
+    "forever": "forever",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Perfect for small dealerships"
+      },
+      "pro": {
+        "name": "Professional",
+        "description": "For growing dealerships"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "For large dealership groups"
+      }
+    },
+    "features": {
+      "carListings": "{count} car listings",
+      "carListingsUnlimited": "Unlimited car listings",
+      "teamMembers": "{count} team members",
+      "teamMembersUnlimited": "Unlimited team members",
+      "imagesPerCar": "{count} images per car",
+      "auditLogs": "{count} days audit logs",
+      "auditLogsUnlimited": "Unlimited audit logs",
+      "liveChat": "Live Chat",
+      "aiProcessing": "AI Processing",
+      "prioritySupport": "Priority Support"
+    }
   },
   "testimonials": {
-    "badge": "Customer Reviews"
+    "badge": "Customer Reviews",
+    "title": "Loved by Thousands of",
+    "titleAccent": "Happy Customers",
+    "subtitle": "See what our customers have to say about their experience with {brand}",
+    "reviews": {
+      "r1": {
+        "role": "First-time Buyer",
+        "content": "AutoMe made finding my first car incredibly easy. The AI recommendations were spot-on, and I found the perfect SUV within my budget. The test drive scheduling was seamless!"
+      },
+      "r2": {
+        "role": "Business Owner",
+        "content": "As a busy professional, I needed a quick and reliable way to find a company car. AutoMe's platform saved me hours of research. The virtual tours were incredibly helpful."
+      },
+      "r3": {
+        "role": "Car Enthusiast",
+        "content": "I've bought many cars over the years, but AutoMe offers the best experience I've ever had. The detailed specs, market analysis, and dealer reviews gave me complete confidence in my purchase."
+      },
+      "r4": {
+        "role": "Family Man",
+        "content": "Found the perfect family minivan through AutoMe. The safety features comparison and child seat compatibility info were exactly what I needed. Highly recommend!"
+      }
+    }
   },
   "cta": {
     "title": "Ready to find your perfect car?",
     "description": "Let's discover your dream car and make your driving experience unforgettable.",
     "browseAll": "Browse All Vehicles"
+  },
+  "faq": {
+    "badge": "FAQ",
+    "title": "Frequently Asked",
+    "titleAccent": "Questions",
+    "subtitle": "Everything you need to know about {brand}. Can’t find your answer?",
+    "contactUs": "Contact us",
+    "q1": "How does {brand}’s AI recommendation system work?",
+    "a1": "Our AI analyzes thousands of data points including your budget, preferences, driving habits, and market trends to recommend the perfect car for you. The system learns from millions of successful car purchases to provide increasingly accurate suggestions.",
+    "q2": "Is it free to use {brand} as a buyer?",
+    "a2": "Yes! {brand} is completely free for car buyers. You can browse listings, get AI recommendations, schedule test drives, and communicate with dealers at no cost. We only charge dealerships for premium features.",
+    "q3": "How do I schedule a test drive?",
+    "a3": "Simply find a car you’re interested in, click the “Schedule Test Drive” button, and choose your preferred date and time. The dealership will confirm your appointment, and the car will be ready when you arrive. No waiting, no hassle.",
+    "q4": "Are the cars on {brand} verified?",
+    "a4": "Yes, all vehicles listed on {brand} go through a rigorous verification process. Our team checks vehicle history, condition reports, and dealer credentials. We also provide market price analysis to ensure you’re getting a fair deal.",
+    "q5": "Can I sell my car on {brand}?",
+    "a5": "Currently, {brand} focuses on connecting buyers with verified dealerships. However, we’re working on a peer-to-peer marketplace feature that will allow individual sellers to list their vehicles. Stay tuned for updates!",
+    "q6": "What payment methods are accepted?",
+    "a6": "{brand} supports various payment methods including bank transfers, financing through our partner lenders, and dealership payment plans. All transactions are secured with advanced encryption and buyer protection."
   }
 }

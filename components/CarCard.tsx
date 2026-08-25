@@ -1,4 +1,6 @@
 "use client";
+import { useTranslations } from "next-intl";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { formatCarPrice } from "@/lib/utils/currency";
 import { formatMileage as formatMileageKm } from "@/lib/utils/units";
 import {
@@ -38,6 +40,8 @@ const CarCard = ({
   onWishlistChange?: (removedCarId: string) => void;
   index?: number;
 }) => {
+  const t = useTranslations("common.actions");
+  const attr = useCarAttributes();
   const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
@@ -49,7 +53,9 @@ const CarCard = ({
   const formatMileage = (mileage: number) => formatMileageKm(mileage);
 
   const carTitle = car.title || `${car.year} ${car.make} ${car.model}`;
-  const subtitle = [car.bodyType, car.transmission].filter(Boolean).join(" • ");
+  const subtitle = [attr.body(car.bodyType), attr.transmission(car.transmission)]
+    .filter(Boolean)
+    .join(" • ");
   const detailHref = `/cars/${car.id}`;
 
   return (
@@ -127,7 +133,7 @@ const CarCard = ({
                 <div className="me-1.5 rounded-full bg-muted p-1">
                   <Fuel className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
-                <span className="truncate font-medium text-foreground">{car.fuelType}</span>
+                <span className="truncate font-medium text-foreground">{attr.fuel(car.fuelType)}</span>
               </div>
             )}
             {car.location && (
@@ -143,12 +149,12 @@ const CarCard = ({
           <div className="mb-4 flex flex-wrap gap-1.5 sm:mb-5 sm:gap-2">
             {car.bodyType && (
               <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px] font-medium">
-                {car.bodyType}
+                {attr.body(car.bodyType)}
               </Badge>
             )}
             {car.transmission && (
               <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px] font-medium">
-                {car.transmission}
+                {attr.transmission(car.transmission)}
               </Badge>
             )}
             {car.color && (
@@ -160,7 +166,7 @@ const CarCard = ({
                   className="inline-block h-2.5 w-2.5 rounded-full border border-border shadow-inner"
                   style={{ backgroundColor: getCarColorHex(car.color) }}
                 />
-                {car.color}
+                {attr.color(car.color)}
               </Badge>
             )}
           </div>
@@ -190,7 +196,7 @@ const CarCard = ({
                 {car.organization.name}
               </span>
               <span className="ms-auto flex items-center text-[10px] text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
-                View dealer <ChevronRight className="h-3 w-3" />
+                {t("viewDealer")} <ChevronRight className="h-3 w-3" />
               </span>
             </Link>
           </>
@@ -202,7 +208,7 @@ const CarCard = ({
               size="sm"
               className="group/cta h-8 w-full gap-1.5 rounded-lg text-xs shadow-md transition-all duration-300 hover:shadow-lg sm:h-9"
             >
-              View Details
+              {t("viewDetails")}
               <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-1 sm:h-3.5 sm:w-3.5" />
             </Button>
           </Link>
