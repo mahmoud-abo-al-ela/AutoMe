@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { motion } from "framer-motion";
 import { Camera, X, Upload, Loader2 } from "lucide-react";
@@ -29,6 +30,7 @@ const ImageSearchPanel = ({
   onChangeImage: () => void;
   onSearch: () => void;
 }) => {
+  const t = useTranslations("home.hero");
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -40,11 +42,11 @@ const ImageSearchPanel = ({
       <div className="flex items-center justify-between mb-2">
         <p className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-700">
           <Camera size={15} className="text-primary" />
-          Search by photo
+          {t("searchByPhoto")}
         </p>
         <button
           type="button"
-          aria-label="Close photo search"
+          aria-label={t("closePhotoSearch")}
           onClick={onCancel}
           disabled={loading}
           className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
@@ -58,7 +60,7 @@ const ImageSearchPanel = ({
           {imagePreview && (
             <Image
               src={imagePreview}
-              alt="Selected car"
+              alt={t("selectedCarAlt")}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-contain"
@@ -115,7 +117,7 @@ const ImageSearchPanel = ({
                 Analyzing…
               </span>
             ) : (
-              "Search With Image"
+              t("searchWithImage")
             )}
           </Button>
         </div>

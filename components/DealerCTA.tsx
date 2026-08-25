@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 import { Button } from "./ui/button";
@@ -7,11 +8,12 @@ import { motion } from "framer-motion";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 function DealerCTA() {
+  const t = useTranslations("home.dealer");
   const benefits = [
-    "Free to get started",
-    "AI-powered car listings",
-    "Manage test drives online",
-    "Built-in customer messaging",
+    t("benefitFree"),
+    t("benefitListings"),
+    t("benefitTestDrives"),
+    t("benefitMessaging"),
   ];
 
   return (
@@ -34,21 +36,19 @@ function DealerCTA() {
               <div className="flex items-center gap-2 mb-4">
                 <Building2 className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium text-blue-300 uppercase tracking-wide">
-                  For Dealerships
+                  {t("badge")}
                 </span>
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                Start Your Own{" "}
+                {t("title")}{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-brand-accent">
-                  Digital Dealership
+                  {t("titleAccent")}
                 </span>
               </h2>
 
               <p className="text-lg text-gray-300 mb-6">
-                Join AutoMe and get your dealership online in minutes. Manage
-                inventory, handle customer inquiries, and schedule test drives -
-                all in one powerful platform.
+                {t("description")}
               </p>
 
               <ul className="space-y-3 mb-8">
@@ -75,7 +75,7 @@ function DealerCTA() {
                     className="bg-primary hover:bg-primary/90"
                   >
                     <Link href="/onboarding" className="flex items-center gap-2">
-                      Start Free Trial
+                      {t("startTrial")}
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
@@ -87,7 +87,7 @@ function DealerCTA() {
                     className="bg-primary hover:bg-primary/90"
                   >
                     <Link href="/sign-up?redirect_url=/onboarding" className="flex items-center gap-2">
-                      Start Free Trial
+                      {t("startTrial")}
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
@@ -98,7 +98,7 @@ function DealerCTA() {
                   size="lg"
                   className="border-white/20 bg-white/5 hover:bg-white/10"
                 >
-                  <Link href="/faq">Learn More</Link>
+                  <Link href="/faq">{t("learnMore")}</Link>
                 </Button>
               </div>
             </motion.div>
@@ -122,10 +122,10 @@ function DealerCTA() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="bg-white/5 rounded px-3 py-2 text-sm">
-                        Your Dealership Dashboard
+                        {t("dashboardPreview")}
                       </div>
                       <div className="bg-primary/20 text-primary px-3 py-1 rounded text-xs">
-                        Pro Plan
+                        {t("proPlan")}
                       </div>
                     </div>
 

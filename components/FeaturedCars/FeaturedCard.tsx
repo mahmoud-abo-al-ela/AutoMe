@@ -14,9 +14,14 @@ import AutoPlay from "embla-carousel-autoplay";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 
+// Required rather than defaulted: an English default here would silently
+// reappear in the Arabic tree if anything ever rendered this directly.
 const FeaturedCard = ({
-  title = "Featured Cars",
-  subtitle = "Explore our curated selection of premium vehicles",
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle: string;
 }) => {
   const {
     data: featuredCars,

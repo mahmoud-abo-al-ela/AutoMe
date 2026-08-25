@@ -3,33 +3,16 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Users, Car, Building2, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const Stats = () => {
+    const t = useTranslations("home.stats");
+
     const stats = [
-        {
-            icon: Users,
-            value: "50K+",
-            label: "Happy Customers",
-            description: "Trusted by thousands of car buyers",
-        },
-        {
-            icon: Car,
-            value: "10K+",
-            label: "Vehicles Listed",
-            description: "Wide selection of quality cars",
-        },
-        {
-            icon: Building2,
-            value: "500+",
-            label: "Partner Dealerships",
-            description: "Verified and trusted sellers",
-        },
-        {
-            icon: Star,
-            value: "4.9",
-            label: "Average Rating",
-            description: "Based on customer reviews",
-        },
+      { icon: Users, value: "50K+", label: t("customersLabel"), description: t("customersDescription") },
+      { icon: Car, value: "10K+", label: t("vehiclesLabel"), description: t("vehiclesDescription") },
+      { icon: Building2, value: "500+", label: t("dealershipsLabel"), description: t("dealershipsDescription") },
+      { icon: Star, value: "4.9", label: t("ratingLabel"), description: t("ratingDescription") },
     ];
 
     return (

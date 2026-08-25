@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CalendarDays, Clock, ArrowRight } from "lucide-react";
 
 const ReservationCTA = () => {
   const router = useRouter();
+
+  const t = useTranslations("home.reservation");
 
   const navigateToReservation = () => {
     router.push("/cars");
@@ -21,15 +24,13 @@ const ReservationCTA = () => {
               <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 inline-flex items-center justify-center text-xs me-2">
                 <CalendarDays size={12} />
               </span>
-              <span>Easy Scheduling</span>
+              <span>{t("badge")}</span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-              Schedule Your Test Drive Online
+              {t("title")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-[600px]">
-              Skip the wait and book your test drive appointment in minutes.
-              Choose your preferred date and time, and we&apos;ll have the car
-              ready for you.
+              {t("description")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <Button
@@ -37,7 +38,7 @@ const ReservationCTA = () => {
                 size="lg"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8"
               >
-                Find a Car
+                {t("cta")}
                 <ArrowRight className="ms-2 h-4 w-4" />
               </Button>
             </div>
@@ -47,19 +48,18 @@ const ReservationCTA = () => {
               <div className="bg-primary/10 rounded-full h-12 w-12 flex items-center justify-center mb-4">
                 <CalendarDays className="text-primary h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Easy Scheduling</h3>
+              <h3 className="text-xl font-bold mb-2">{t("schedulingTitle")}</h3>
               <p className="text-muted-foreground">
-                Choose from available dates and times that work best for your
-                schedule.
+                {t("schedulingDescription")}
               </p>
             </Card>
             <Card className="bg-card p-6 shadow-md border-0 rounded-xl hover:shadow-lg transition-shadow duration-300">
               <div className="bg-brand-accent/10 rounded-full h-12 w-12 flex items-center justify-center mb-4">
                 <Clock className="text-brand-accent h-6 w-6" />
               </div>
-              <h3 className="text-xl font-bold mb-2">No Wait Times</h3>
+              <h3 className="text-xl font-bold mb-2">{t("noWaitTitle")}</h3>
               <p className="text-muted-foreground">
-                Your car will be ready when you arrive. No unnecessary waiting.
+                {t("noWaitDescription")}
               </p>
             </Card>
           </div>

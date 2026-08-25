@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { motion } from "framer-motion";
 
@@ -11,13 +12,14 @@ export function BillingToggle({
     onToggle: () => void;
     savingsPercentage?: number;
 }) {
+  const t = useTranslations("home.pricing");
     return (
         <div className="flex items-center justify-center gap-4 mb-8">
             <span
                 className={`text-sm font-semibold transition-colors ${billingPeriod === "monthly" ? "text-foreground" : "text-muted-foreground"
                     }`}
             >
-                Monthly
+                {t("monthly")}
             </span>
             <button
                 type="button"
@@ -36,7 +38,7 @@ export function BillingToggle({
                 className={`text-sm font-semibold transition-colors ${billingPeriod === "yearly" ? "text-foreground" : "text-muted-foreground"
                     }`}
             >
-                Yearly
+                {t("yearly")}
             </span>
             {billingPeriod === "yearly" && (savingsPercentage ?? 0) > 0 && (
                 <motion.span
@@ -44,7 +46,7 @@ export function BillingToggle({
                     animate={{ opacity: 1, scale: 1 }}
                     className="ms-2 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"
                 >
-                    Save {savingsPercentage}%
+                    {t("save", { percentage: savingsPercentage ?? 0 })}
                 </motion.span>
             )}
         </div>

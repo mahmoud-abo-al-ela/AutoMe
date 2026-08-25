@@ -5,8 +5,11 @@ import { Badge } from "../ui/badge";
 import { motion } from "framer-motion";
 import WhyCard from "./WhyCard";
 import { whyConfig } from "@/lib/WhyConfig";
+import { useTranslations } from "next-intl";
 
 const Why = () => {
+  const t = useTranslations("home.why");
+
   return (
     <section className="bg-gradient-to-b from-gray-50 to-white py-10 sm:py-16">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6">
@@ -23,14 +26,13 @@ const Why = () => {
             variant="default"
             className="mb-3 sm:mb-4 text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-1.5"
           >
-            Why Choose Us
+            {t("badge")}
           </Badge>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight px-2 sm:px-0">
-            The Smarter Way to <span className="text-blue-600">Buy Cars</span>
+            {t("title")} <span className="text-blue-600">{t("titleAccent")}</span>
           </h2>
           <p className="text-base sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2 sm:px-0">
-            Experience a revolutionary car buying journey powered by advanced AI
-            technology that puts you in control
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -39,8 +41,8 @@ const Why = () => {
             <WhyCard
               key={index}
               icon={card.icon}
-              title={card.title}
-              description={card.description}
+              title={t(`cards.${card.key}Title`)}
+              description={t(`cards.${card.key}Description`)}
               delay={index * 0.1}
             />
           ))}

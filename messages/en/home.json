@@ -1,0 +1,95 @@
+{
+  "hero": {
+    "headline": "Find Your Perfect Car",
+    "headlineAccent": "Powered by AI",
+    "subheadline": "Our AI technology analyzes thousands of vehicles to match you with the perfect car based on your preferences, budget, and needs.",
+    "searchPlaceholder": "Search by model, keyword, or drop a photo…",
+    "searchByPhoto": "Search by photo",
+    "closePhotoSearch": "Close photo search",
+    "selectedCarAlt": "Selected car",
+    "searchWithImage": "Search With Image",
+    "emptySearch": "Please enter a search term",
+    "scrollToFeatured": "Scroll to featured section",
+    "quickElectric": "Electric Vehicles",
+    "quickSuv": "SUVs",
+    "quickSedan": "Sedans",
+    "quickAutomatic": "Automatic",
+    "dropImage": "Drop image to search"
+  },
+  "stats": {
+    "customersLabel": "Happy Customers",
+    "customersDescription": "Trusted by thousands of car buyers",
+    "vehiclesLabel": "Vehicles Listed",
+    "vehiclesDescription": "Wide selection of quality cars",
+    "dealershipsLabel": "Partner Dealerships",
+    "dealershipsDescription": "Verified and trusted sellers",
+    "ratingLabel": "Average Rating",
+    "ratingDescription": "Based on customer reviews"
+  },
+  "featured": {
+    "title": "Featured Cars",
+    "subtitle": "Explore our curated selection of premium vehicles"
+  },
+  "why": {
+    "badge": "Why Choose Us",
+    "title": "The Smarter Way to",
+    "titleAccent": "Buy Cars",
+    "subtitle": "Experience a revolutionary car buying journey powered by advanced AI technology that puts you in control",
+    "cards": {
+      "insightsTitle": "AI-Powered Insights",
+      "insightsDescription": "Get real-time market analysis and personalized recommendations based on your preferences and budget.",
+      "secureTitle": "Secure Transactions",
+      "secureDescription": "Every purchase is protected with advanced security measures and comprehensive buyer protection.",
+      "supportTitle": "24/7 Support",
+      "supportDescription": "Access round-the-clock customer support and AI assistance whenever you need help with your purchase.",
+      "toursTitle": "Virtual Car Tours",
+      "toursDescription": "Experience 360° virtual tours and detailed walkthroughs from the comfort of your home.",
+      "compareTitle": "Price Comparison",
+      "compareDescription": "Compare prices across multiple dealerships and get the best deal with our market analysis tools.",
+      "financingTitle": "Instant Financing",
+      "financingDescription": "Get pre-approved for financing in minutes with our integrated lending partners."
+    }
+  },
+  "reservation": {
+    "badge": "Easy Scheduling",
+    "title": "Schedule Your Test Drive Online",
+    "description": "Skip the wait and book your test drive appointment in minutes. Choose your preferred date and time, and we'll have the car ready for you.",
+    "cta": "Find a Car",
+    "schedulingTitle": "Easy Scheduling",
+    "schedulingDescription": "Choose from available dates and times that work best for your schedule.",
+    "noWaitTitle": "No Wait Times",
+    "noWaitDescription": "Your car will be ready when you arrive. No unnecessary waiting."
+  },
+  "dealer": {
+    "badge": "For Dealerships",
+    "title": "Start Your Own",
+    "titleAccent": "Digital Dealership",
+    "description": "Join AutoMe and get your dealership online in minutes. Manage inventory, handle customer inquiries, and schedule test drives — all in one powerful platform.",
+    "benefitFree": "Free to get started",
+    "benefitListings": "AI-powered car listings",
+    "benefitTestDrives": "Manage test drives online",
+    "benefitMessaging": "Built-in customer messaging",
+    "startTrial": "Start Free Trial",
+    "learnMore": "Learn More",
+    "dashboardPreview": "Your Dealership Dashboard",
+    "proPlan": "Pro Plan"
+  },
+  "pricing": {
+    "badge": "Pricing Plans",
+    "title": "Simple, Transparent",
+    "titleAccent": "Pricing",
+    "subtitle": "Choose the perfect plan for your dealership. No hidden fees, cancel anytime.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save {percentage}%",
+    "mostPopular": "Most Popular"
+  },
+  "testimonials": {
+    "badge": "Customer Reviews"
+  },
+  "cta": {
+    "title": "Ready to find your perfect car?",
+    "description": "Let's discover your dream car and make your driving experience unforgettable.",
+    "browseAll": "Browse All Vehicles"
+  }
+}

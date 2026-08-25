@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { motion } from "framer-motion";
 import { Check, ArrowRight, X } from "lucide-react";
@@ -21,6 +22,7 @@ export default function PricingCard({
   billingPeriod: string;
   index: number;
 }) {
+  const t = useTranslations("home.pricing");
   const Icon = plan.icon;
 
   return (
@@ -37,7 +39,7 @@ export default function PricingCard({
       {plan.popular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
           <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
-            Most Popular
+            {t("mostPopular")}
           </div>
         </div>
       )}

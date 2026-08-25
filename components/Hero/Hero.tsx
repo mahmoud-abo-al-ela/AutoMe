@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import React from "react";
 import Image from "next/image";
@@ -8,6 +9,7 @@ import { motion } from "framer-motion";
 import HeroSearch from "./HeroSearch";
 
 const Hero = () => {
+  const t = useTranslations("home.hero");
   const scrollToFeatures = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const featuresSection = document.getElementById("featured");
@@ -47,9 +49,9 @@ const Hero = () => {
             transition={{ duration: 0.8 }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 sm:mb-6 md:mb-8 leading-tight"
           >
-            Find Your Perfect Car{" "}
+            {t("headline")}{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-brand-accent">
-              Powered by AI
+              {t("headlineAccent")}
             </span>
           </motion.h1>
 
@@ -59,8 +61,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-100/90 mb-6 sm:mb-8 md:mb-10 max-w-3xl mx-auto px-2 sm:px-0 leading-relaxed"
           >
-            Our AI technology analyzes thousands of vehicles to match you with
-            the perfect car based on your preferences, budget, and needs.
+            {t("subheadline")}
           </motion.p>
 
           <HeroSearch />
@@ -75,25 +76,25 @@ const Hero = () => {
               href="/cars?fuelType=Electric"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105"
             >
-              ⚡ Electric Vehicles
+              ⚡ {t("quickElectric")}
             </Link>
             <Link
               href="/cars?bodyType=SUV"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105"
             >
-              🚙 SUVs
+              🚙 {t("quickSuv")}
             </Link>
             <Link
               href="/cars?bodyType=Sedan"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105 hidden sm:block"
             >
-              🚗 Sedans
+              🚗 {t("quickSedan")}
             </Link>
             <Link
               href="/cars?transmission=Automatic"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105"
             >
-              ⚙️ Automatic
+              ⚙️ {t("quickAutomatic")}
             </Link>
           </motion.div>
 
@@ -129,7 +130,7 @@ const Hero = () => {
               href="#features"
               onClick={scrollToFeatures}
               className="flex items-center justify-center w-12 h-12 text-white rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 animate-bounce transition-all duration-300 hover:scale-110"
-              aria-label="Scroll to featured section"
+              aria-label={t("scrollToFeatured")}
             >
               <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
             </a>

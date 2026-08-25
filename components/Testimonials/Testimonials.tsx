@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -11,6 +12,17 @@ import {
 import AutoPlay from "embla-carousel-autoplay";
 
 const Testimonials = () => {
+  const t = useTranslations("home.testimonials");
+    // PLACEHOLDER CONTENT, not translated on purpose. These are invented
+
+    // reviews with US names on an Egypt-only product. Translating them into
+
+    // Arabic would make fabricated social proof look more legitimate, not
+
+    // less, so they stay as-is until real customer reviews replace them.
+
+    // Only the section heading above is a message key.
+
     const testimonials = [
         {
             name: "Sarah Johnson",
@@ -54,7 +66,7 @@ const Testimonials = () => {
                 >
                     <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
                         <Star className="h-4 w-4 fill-current" />
-                        <span>Customer Reviews</span>
+                        <span>{t("badge")}</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
                         Loved by Thousands of{" "}
