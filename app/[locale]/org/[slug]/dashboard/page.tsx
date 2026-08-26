@@ -24,7 +24,7 @@ import {
   getTestDriveTrendsData
 } from "@/actions/dashboard";
 export const metadata = {
-  title: "Dashboard | AutoMe Admin",
+  title: "Dashboard",
   description: "Dashboard for AutoMe",
 };
 

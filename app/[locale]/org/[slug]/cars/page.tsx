@@ -5,7 +5,7 @@ import CarsList from "./_components/car-list/CarsList";
 import { CarsPlanBanner } from "./_components/cars-plan-banner";
 
 export const metadata: Metadata = {
-  title: "Cars | AutoMe Admin",
+  title: "Cars",
   description: "Manage your cars",
 };
 

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import CreateCarForm from "../_components/car-forms/CreateCarForm";
 
 export const metadata: Metadata = {
-  title: "Create Car | AutoMe Admin",
+  title: "Create Car",
   description: "Create a new car",
 };
 

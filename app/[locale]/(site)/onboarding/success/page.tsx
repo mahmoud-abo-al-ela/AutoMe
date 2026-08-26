@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: "Setup Complete | AutoMe",
+    title: "Setup Complete",
     description: "Your dealership has been set up successfully.",
 };
 

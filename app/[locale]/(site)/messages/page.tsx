@@ -6,7 +6,7 @@ import { getCurrentOrganization } from "@/lib/getOrganization";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Messages | AutoMe",
+  title: "Messages",
   description: "Chat with dealerships about cars you're interested in",
 };
 

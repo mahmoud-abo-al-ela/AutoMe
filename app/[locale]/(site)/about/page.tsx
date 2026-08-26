@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "About Us | AutoMe",
+  title: "About Us",
   description:
     "Learn about AutoMe — the modern platform helping dealerships digitize operations and buyers find their perfect vehicle.",
 };

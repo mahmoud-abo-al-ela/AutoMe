@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: OrgParams) {
     }
 
     return {
-        title: `${organization.name} | AutoMe`,
+        title: `${organization.name}`,
         description: `Browse cars from ${organization.name}`,
     };
 }

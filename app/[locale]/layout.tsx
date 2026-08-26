@@ -30,7 +30,22 @@ const arabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "AutoMe",
+  /**
+   * The brand suffix is applied here, once, and nowhere else.
+   *
+   * Every page used to append its own — with three different separators
+   * ("|", "-") and three different brand strings ("AutoMe", "AutoMe Admin",
+   * "AutoMe Platform"). Once the Arabic pages started supplying a translated
+   * title that also carried the brand, tabs read
+   * "تصفح السيارات | أوتومي | AutoMe". Pages now set only their own name.
+   *
+   * The brand stays Latin in both locales: it is a proper noun, and per the
+   * i18n rule we do not transliterate names.
+   */
+  title: {
+    default: "AutoMe",
+    template: "%s | AutoMe",
+  },
   description: "Find your dream car",
 };
 

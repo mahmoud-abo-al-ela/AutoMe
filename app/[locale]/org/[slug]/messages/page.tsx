@@ -6,7 +6,7 @@ import { getOrganization } from "@/lib/getOrganization";
 import { OrganizationChannelList, ChatWindow } from "@/components/StreamChat";
 
 export const metadata: Metadata = {
-  title: "Messages | AutoMe",
+  title: "Messages",
   description: "Manage customer conversations",
 };
 

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Terms of Service | AutoMe",
+  title: "Terms of Service",
   description: "Terms of Service for AutoMe platform",
 };
 

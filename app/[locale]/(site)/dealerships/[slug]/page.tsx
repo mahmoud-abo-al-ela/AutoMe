@@ -16,7 +16,7 @@ export async function generateMetadata({
 
         if (!dealership.success || !dealership.data) {
             return {
-                title: "Dealership Not Found - AutoMe",
+                title: "Dealership Not Found",
                 description: "The requested dealership could not be found.",
             };
         }
@@ -27,7 +27,10 @@ export async function generateMetadata({
         const { name, description, city, region, logo, carCount } =
             dealership.data;
 
-        const title = `${name} - AutoMe Dealership`;
+        // The tab title gets the brand from the root title.template; og/twitter
+        // titles do not inherit it, so they spell the brand out themselves.
+        const title = name;
+        const socialTitle = name + " | AutoMe";
         const desc = description || `View ${name}'s inventory, reviews, and contact information. ${carCount || 0} cars available.`;
 
         return {
@@ -35,7 +38,7 @@ export async function generateMetadata({
             description: desc,
             keywords: [name, "dealership", "car dealership", "automotive", "cars for sale", city, region].filter(Boolean).join(", "),
             openGraph: {
-                title,
+                title: socialTitle,
                 description: desc,
                 type: "website",
                 images: [
@@ -50,7 +53,7 @@ export async function generateMetadata({
             },
             twitter: {
                 card: "summary_large_image",
-                title,
+                title: socialTitle,
                 description: desc,
                 images: [logo || "/og-image.jpg"],
             },
@@ -58,7 +61,7 @@ export async function generateMetadata({
     } catch (error) {
         console.error("Error generating metadata:", error);
         return {
-            title: "Dealership - AutoMe",
+            title: "Dealership",
             description: "View dealership information on AutoMe",
         };
     }

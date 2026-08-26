@@ -11,7 +11,7 @@ import SuperAdminSidebar from "./_components/SuperAdminSidebar";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Super Admin | AutoMe Platform",
+  title: "Super Admin",
   description: "Platform administration dashboard",
 };
 

@@ -6,7 +6,7 @@ import SharedSettingCard, {
 } from "./_components/SharedSettingCard";
 
 export const metadata: Metadata = {
-  title: "Settings | AutoMe Admin",
+  title: "Settings",
   description: "Manage your settings",
 };
 

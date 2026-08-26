@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Cookie Policy | AutoMe",
+  title: "Cookie Policy",
   description: "Cookie Policy for AutoMe platform",
 };
 
