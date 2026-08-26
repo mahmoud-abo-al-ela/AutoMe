@@ -109,7 +109,8 @@
   "pnpm": {
     "overrides": {
       "@types/react": "$@types/react",
-      "@types/react-dom": "$@types/react-dom"
+      "@types/react-dom": "$@types/react-dom",
+      "@radix-ui/react-direction": "1.1.4"
     }
   }
 }
