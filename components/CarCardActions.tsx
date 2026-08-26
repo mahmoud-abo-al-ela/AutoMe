@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +18,10 @@ import { toggleWishlist } from "@/actions/cars-listing";
 import { queryKeys } from "@/lib/query-client";
 import { compareUtils } from "@/lib/utils";
 import { logError } from "@/lib/utils/errors";
+import { useFormatters } from "@/hooks/use-formatters";
+
+/** Mirrors the cap enforced by compareUtils.addToCompare. */
+const COMPARE_LIMIT = 3;
 
 /**
  * The favorite + compare action overlay for a CarCard. Owns its own wishlist /
@@ -34,6 +39,8 @@ export default function CarCardActions({
   onWishlistChange?: (removedCarId: string) => void;
   isWishlistPage?: boolean;
 }) {
+  const t = useTranslations("common.carActions");
+  const fmt = useFormatters();
   const [isFavorite, setIsFavorite] = useState(isWishlisted);
   const [isInCompare, setIsInCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +62,8 @@ export default function CarCardActions({
     if (isLoading) return;
 
     if (!isSignedIn) {
-      toast.info("Sign in to save cars to your wishlist", {
-        action: { label: "Sign in", onClick: () => router.push("/sign-in") },
+      toast.info(t("signInToSave"), {
+        action: { label: t("signIn"), onClick: () => router.push("/sign-in") },
       });
       return;
     }
@@ -71,11 +78,11 @@ export default function CarCardActions({
           onWishlistChange(carId);
         }
       } else {
-        toast.error(response.error?.message || "Couldn't update wishlist");
+        toast.error(response.error?.message || t("wishlistError"));
       }
     } catch (error) {
       logError("Failed to toggle wishlist", error);
-      toast.error("Couldn't update wishlist");
+      toast.error(t("wishlistError"));
     } finally {
       setIsLoading(false);
     }
@@ -88,14 +95,16 @@ export default function CarCardActions({
     if (isInCompare) {
       compareUtils.removeFromCompare(carId);
       setIsInCompare(false);
-      toast.info("Removed from comparison");
+      toast.info(t("compareRemoved"));
     } else {
       const added = compareUtils.addToCompare(carId);
       if (added) {
         setIsInCompare(true);
-        toast.success("Added to comparison");
+        toast.success(t("compareAdded"));
       } else {
-        toast.warning("You can compare up to 3 cars at a time");
+        toast.warning(
+          t("compareLimit", { max: fmt.number(COMPARE_LIMIT) })
+        );
       }
     }
     window.dispatchEvent(new Event("compareListUpdated"));
@@ -112,7 +121,7 @@ export default function CarCardActions({
               disabled={isLoading}
               size="icon"
               variant="ghost"
-              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              aria-label={t(isFavorite ? "removeFromFavorites" : "addToFavorites")}
             >
               <Heart
                 className={`h-3.5 w-3.5 transition-colors duration-300 sm:h-4 sm:w-4 ${
@@ -122,7 +131,7 @@ export default function CarCardActions({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {isFavorite ? "Remove from favorites" : "Add to favorites"}
+            {t(isFavorite ? "removeFromFavorites" : "addToFavorites")}
           </TooltipContent>
         </Tooltip>
 
@@ -133,7 +142,7 @@ export default function CarCardActions({
               onClick={handleToggleCompare}
               size="icon"
               variant="ghost"
-              aria-label={isInCompare ? "Remove from compare" : "Add to compare"}
+              aria-label={t(isInCompare ? "removeFromCompare" : "addToCompare")}
             >
               <Scale
                 className={`h-3.5 w-3.5 transition-colors duration-300 sm:h-4 sm:w-4 ${
@@ -143,7 +152,7 @@ export default function CarCardActions({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {isInCompare ? "Remove from compare" : "Add to compare"}
+            {t(isInCompare ? "removeFromCompare" : "addToCompare")}
           </TooltipContent>
         </Tooltip>
       </div>

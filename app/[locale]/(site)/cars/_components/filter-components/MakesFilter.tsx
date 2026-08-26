@@ -7,6 +7,7 @@ import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { MultiFacetProps } from "../../_lib/cars-types";
 import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const COLLAPSED_COUNT = 12;
 
@@ -17,6 +18,7 @@ const MakesFilter = ({
   isLoading,
 }: MultiFacetProps) => {
   const t = useTranslations("cars.filters");
+  const fmt = useFormatters();
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -64,7 +66,7 @@ const MakesFilter = ({
             onClick={() => setExpanded(true)}
             className="rounded-full px-2 text-xs font-medium text-primary hover:underline"
           >
-            {t("showMore", { count: hiddenCount })}
+            {t("showMore", { value: fmt.number(hiddenCount) })}
           </button>
         )}
         {expanded && filtered.length > COLLAPSED_COUNT && (

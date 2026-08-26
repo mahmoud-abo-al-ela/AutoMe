@@ -1,6 +1,5 @@
 // Pure filter/URL helpers for the cars listing page — no React, fully testable.
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
-import { formatCarPrice } from "@/lib/utils/currency";
 
 /** The filter keys the cars page holds as comma-joined multi-selects. */
 export const MULTI_KEYS = ["make", "bodyType", "fuelType", "transmission"] as const;
@@ -120,29 +119,59 @@ export function buildCarsUrl(
   return qs ? `/cars?${qs}` : "/cars";
 }
 
+/**
+ * Everything `buildActiveFilterChips` needs to render a label in the active
+ * locale. Injected rather than imported so this module stays React-free and
+ * directly testable — the formatters come from `useFormatters` at the call
+ * site, and the attribute labels from `useCarAttributes`.
+ */
+export interface ChipFormatters {
+  /** Translated stand-in for an open-ended range bound. */
+  any: string;
+  price: (value: number) => string;
+  mileage: (value: number) => string;
+  /** Plain integer, no grouping — used for years and seat counts. */
+  number: (value: number) => string;
+  /** Translates a stored attribute value (body/fuel/transmission/colour). */
+  attribute: (type: string, value: string) => string;
+}
+
 /** Build the active-filter chip list shown above the results grid. */
-export function buildActiveFilterChips(filters: CarPageFilters): ActiveFilterChip[] {
+export function buildActiveFilterChips(
+  filters: CarPageFilters,
+  fmt: ChipFormatters
+): ActiveFilterChip[] {
   const chips: ActiveFilterChip[] = [];
   if (filters.search) chips.push({ type: "search", value: filters.search, label: `“${filters.search}”` });
   MULTI_KEYS.forEach((key) => {
-    (filters[key] || []).forEach((v: string) => chips.push({ type: key, value: v, label: v }));
+    // `value` stays the stored English so clearing the filter still matches;
+    // only the label is translated.
+    (filters[key] || []).forEach((v: string) =>
+      chips.push({ type: key, value: v, label: fmt.attribute(key, v) })
+    );
   });
   if (filters.dealership) chips.push({ type: "dealership", value: filters.dealership, label: filters.dealership });
   if (filters.city) chips.push({ type: "city", value: filters.city, label: filters.city });
-  if (filters.color) chips.push({ type: "color", value: filters.color, label: filters.color });
-  if (filters.minSeats) chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${filters.minSeats}+` });
+  if (filters.color) chips.push({ type: "color", value: filters.color, label: fmt.attribute("color", filters.color) });
+  if (filters.minSeats) {
+    chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${fmt.number(filters.minSeats)}+` });
+  }
   if (filters.minPrice || filters.maxPrice) {
     // Car.price is EGP. These were `$${…}` and a bare "$0" — the same shape the
     // dealership inventory chips already had corrected.
-    const min = filters.minPrice ? formatCarPrice(filters.minPrice) : formatCarPrice(0);
-    const max = filters.maxPrice ? formatCarPrice(filters.maxPrice) : "Any";
+    const min = fmt.price(filters.minPrice || 0);
+    const max = filters.maxPrice ? fmt.price(filters.maxPrice) : fmt.any;
     chips.push({ type: "price", value: "price", label: `${min} – ${max}` });
   }
   if (filters.minYear || filters.maxYear) {
-    chips.push({ type: "year", value: "year", label: `${filters.minYear || "Any"} – ${filters.maxYear || "Any"}` });
+    const min = filters.minYear ? fmt.number(filters.minYear) : fmt.any;
+    const max = filters.maxYear ? fmt.number(filters.maxYear) : fmt.any;
+    chips.push({ type: "year", value: "year", label: `${min} – ${max}` });
   }
   if (filters.minMileage || filters.maxMileage) {
-    const max = filters.maxMileage ? `${filters.maxMileage.toLocaleString()} mi` : "Any";
+    // This read `${…} mi` — miles, on a product whose every other mileage is
+    // kilometres. `fmt.mileage` carries the unit, so the suffix is gone.
+    const max = filters.maxMileage ? fmt.mileage(filters.maxMileage) : fmt.any;
     chips.push({ type: "mileage", value: "mileage", label: `≤ ${max}` });
   }
   return chips;

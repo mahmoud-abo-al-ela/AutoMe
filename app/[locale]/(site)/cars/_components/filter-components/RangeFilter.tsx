@@ -23,7 +23,7 @@ export const RangeFilter = ({
   icon,
   label,
   step = 1,
-  formatValue = (v) => String(v),
+  formatValue,
   onCommit,
   isLoading,
 }: {
@@ -34,7 +34,12 @@ export const RangeFilter = ({
   icon?: LucideIcon;
   label: string;
   step?: number;
-  formatValue?: (value: number) => string;
+  /**
+   * Required on purpose. This used to default to `String(v)`, which renders
+   * Latin digits regardless of locale — the Year range silently used it and
+   * stayed English while every other number on the page was translated.
+   */
+  formatValue: (value: number) => string;
   onCommit: (value: [number, number], bounds: RangeBounds) => void;
   isLoading?: boolean;
 }) => {

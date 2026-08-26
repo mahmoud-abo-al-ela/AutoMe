@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCars, getCarsFilters } from "@/actions/cars-listing";
@@ -11,8 +11,11 @@ import {
   buildCarsUrl,
   buildActiveFilterChips,
 } from "./cars-page-filters";
-import type { CarPageFilters, MultiKey } from "./cars-page-filters";
+import type { CarPageFilters, MultiKey, ChipFormatters } from "./cars-page-filters";
 import type { ActionResponse } from "@/lib/utils/response";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "./use-formatters";
+import { useCarAttributes } from "./use-car-attributes";
 
 // Re-exported for backward-compatible import sites.
 export { DEFAULT_PER_PAGE, parseFiltersFromSearch, buildCarsUrl };
@@ -33,6 +36,10 @@ export const useCarsPage = (
   // hydration mismatch); fall back to parsing the URL on the client only.
   const initial =
     initialState || parseFiltersFromSearch(typeof window !== "undefined" ? window.location.search : "");
+
+  const t = useTranslations("cars.filters");
+  const fmt = useFormatters();
+  const attr = useCarAttributes();
 
   const [filters, setFilters] = useState({ ...DEFAULT_FILTERS, ...initial.filters });
   const [page, setPage] = useState(initial.page || 1);
@@ -301,7 +308,30 @@ export const useCarsPage = (
     [filters, applyFilters, resetAllFilters]
   );
 
-  const getActiveFilters = useCallback(() => buildActiveFilterChips(filters), [filters]);
+  // Chip labels are locale-dependent, so the formatters are rebuilt when the
+  // locale changes and the memo is keyed on them.
+  const chipFormatters = useMemo<ChipFormatters>(
+    () => ({
+      any: t("any"),
+      price: (v: number) => fmt.price(v),
+      mileage: (v: number) => fmt.mileage(v),
+      number: (v: number) => fmt.number(v, { useGrouping: false }),
+      attribute: (type: string, value: string) => {
+        if (type === "bodyType") return attr.body(value);
+        if (type === "fuelType") return attr.fuel(value);
+        if (type === "transmission") return attr.transmission(value);
+        if (type === "color") return attr.color(value);
+        // "make" is a brand name — never translated.
+        return value;
+      },
+    }),
+    [t, fmt, attr]
+  );
+
+  const getActiveFilters = useCallback(
+    () => buildActiveFilterChips(filters, chipFormatters),
+    [filters, chipFormatters]
+  );
 
   const isError = !!error || (queryData && queryData.success === false);
 

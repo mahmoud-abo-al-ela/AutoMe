@@ -6,6 +6,8 @@ import type { FacetOption, SingleFacetProps } from "../../_lib/cars-types";
 import { getCarColorHex } from "@/lib/constants/car-options";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /**
  * Single-select colour facet with swatches. Options are real DB colours with
@@ -18,6 +20,8 @@ const ColorFilter = ({
   isLoading,
 }: SingleFacetProps<FacetOption>) => {
   const t = useTranslations("cars.filters");
+  const attr = useCarAttributes();
+  const fmt = useFormatters();
   return (
     <FilterSection
       value="color"
@@ -36,7 +40,7 @@ const ColorFilter = ({
               type="button"
               role="checkbox"
               aria-checked={isSelected}
-              aria-label={value}
+              aria-label={attr.color(value)}
               disabled={isLoading || count === 0}
               onClick={() => onSelect(isSelected ? undefined : value)}
               className={cn(
@@ -52,10 +56,10 @@ const ColorFilter = ({
                 className="h-3 w-3 rounded-full border border-black/10"
                 style={{ backgroundColor: getCarColorHex(value) }}
               />
-              <span>{value}</span>
+              <span>{attr.color(value)}</span>
               {typeof count === "number" && (
                 <span className={cn("tabular-nums", isSelected ? "text-primary/70" : "text-muted-foreground")}>
-                  ({count})
+                  ({fmt.number(count)})
                 </span>
               )}
             </button>

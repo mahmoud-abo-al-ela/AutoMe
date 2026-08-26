@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useFormatters } from "@/hooks/use-formatters";
 
 type PaginationProps = {
     currentPage: number;
@@ -18,6 +19,9 @@ export const Pagination = ({
     disabled = false
 }: PaginationProps) => {
     const t = useTranslations("common.pagination");
+    const fmt = useFormatters();
+    // A page number is an ordinal, not a quantity: no grouping separator.
+    const pageLabel = (n: number) => fmt.number(n, { useGrouping: false });
 
     const getPageNumbers = () => {
         const pageNumbers: number[] = [];
@@ -68,10 +72,10 @@ export const Pagination = ({
                             onClick={() => onPageChange(pageNum)}
                             disabled={disabled}
                             className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer"
-                            aria-label={t("page", { number: pageNum })}
+                            aria-label={t("page", { number: pageLabel(pageNum) })}
                             aria-current={currentPage === pageNum ? "page" : undefined}
                         >
-                            {pageNum}
+                            {pageLabel(pageNum)}
                         </Button>
                     ))}
                 </div>
@@ -106,6 +110,7 @@ export const PaginationInfo = ({
     noun = "items",
 }: PaginationInfoProps) => {
     const t = useTranslations("common.pagination");
+    const fmt = useFormatters();
 
     if (!total) return null;
 
@@ -115,9 +120,9 @@ export const PaginationInfo = ({
     return (
         <div className="text-center text-sm text-muted-foreground mt-4">
             {t("showing", {
-                start,
-                end,
-                total,
+                start: fmt.number(start),
+                end: fmt.number(end),
+                total: fmt.number(total),
                 // The noun is pluralised inside its own message rather than by
                 // the caller. A caller doing `total === 1 ? "dealership" :
                 // "dealerships"` encodes English's two-form plural; Arabic has

@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { processImagesSearch } from "@/actions/home";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const MAX_IMAGE_MB = 10;
 
@@ -16,6 +17,7 @@ const MAX_IMAGE_MB = 10;
  */
 export function useImageSearch() {
   const t = useTranslations("home.hero");
+  const fmt = useFormatters();
   const router = useRouter();
   const [isActive, setIsActive] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -56,7 +58,7 @@ export function useImageSearch() {
       return;
     }
     if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
-      toast.error(t("imageTooLarge", { max: MAX_IMAGE_MB }));
+      toast.error(t("imageTooLarge", { max: fmt.number(MAX_IMAGE_MB) }));
       return;
     }
 

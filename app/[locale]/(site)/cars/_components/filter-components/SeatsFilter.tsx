@@ -5,6 +5,7 @@ import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { SingleFacetProps } from "../../_lib/cars-types";
 import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const SEAT_OPTIONS = [2, 4, 5, 7];
 
@@ -18,6 +19,7 @@ const SeatsFilter = ({
   isLoading,
 }: Omit<SingleFacetProps, "options">) => {
   const t = useTranslations("cars.filters");
+  const fmt = useFormatters();
   return (
     <FilterSection value="seats" icon={Users} label={t("seats")} count={selected ? 1 : 0}>
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
@@ -26,7 +28,7 @@ const SeatsFilter = ({
           return (
             <FilterChip
               key={n}
-              label={t("seatsOption", { count: n })}
+              label={t("seatsOption", { value: fmt.number(n) })}
               selected={isSelected}
               disabled={isLoading}
               onClick={() => onSelect(isSelected ? undefined : String(n))}

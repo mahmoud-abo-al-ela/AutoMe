@@ -17,7 +17,7 @@ import { APP_TIME_ZONE, intlLocale } from "./intl-locale";
  *   2023, so the offset changes twice a year and a hardcoded +02:00 is wrong
  *   for part of the year. Leaving the zone unset is also wrong: it would render
  *   in the *server's* zone, which is typically UTC.
- * - **Western digits in Arabic**, via `intlLocale`. See that file.
+ * - **Eastern Arabic numerals in Arabic**, via `intlLocale`. See that file.
  */
 
 type DateInput = Date | string | number;

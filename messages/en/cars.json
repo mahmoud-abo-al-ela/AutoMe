@@ -1,11 +1,11 @@
 {
   "meta": {
-    "title": "Browse Cars | AutoMe",
+    "title": "Browse Cars",
     "description": "Search and filter our extensive inventory of vehicles. Find the perfect car that matches your needs and budget."
   },
   "hero": {
     "title": "Find Your Perfect Car",
-    "subtitle": "Browse {count, plural, =0 {vehicles} one {# vehicle} other {# vehicles}} from trusted dealerships",
+    "subtitle": "Browse {count, plural, =0 {vehicles} one {{value} vehicle} other {{value} vehicles}} from trusted dealerships",
     "searchPlaceholder": "Search by make, model, or keyword…",
     "searchLabel": "Search cars",
     "clearSearch": "Clear search",
@@ -17,7 +17,7 @@
   },
   "results": {
     "summary": "Showing <range>{start}-{end}</range> of <strong>{total}</strong> {count, plural, one {vehicle} other {vehicles}}",
-    "perPage": "{count} / page",
+    "perPage": "{value} / page",
     "perPageLabel": "Results per page",
     "sortLabel": "Sort results",
     "sortPlaceholder": "Sort by"
@@ -34,13 +34,13 @@
     "title": "Filters",
     "resetAll": "Reset all filters",
     "clearAll": "Clear all",
-    "showResults": "Show {count, plural, one {# result} other {# results}}",
+    "showResults": "Show {count, plural, =0 {results} one {{value} result} other {{value} results}}",
     "removeFilter": "Remove filter {type} {value}",
     "makes": "Makes",
     "makesEmpty": "No makes available",
     "searchMakes": "Search makes…",
     "searchMakesLabel": "Search makes",
-    "showMore": "+{count} more",
+    "showMore": "+{value} more",
     "showLess": "Show less",
     "bodyType": "Body Type",
     "bodyTypeEmpty": "No body types available",
@@ -55,11 +55,13 @@
     "dealership": "Dealership",
     "dealershipEmpty": "No dealerships available",
     "seats": "Seats",
-    "seatsOption": "{count}+ seats",
+    "seatsOption": "{value}+ seats",
     "priceRange": "Price Range",
     "year": "Year",
     "mileage": "Mileage",
-    "loadingRange": "Loading range…"
+    "loadingRange": "Loading range…",
+    "any": "Any",
+    "activeCount": "{value} active"
   },
   "activeFilters": {
     "search": "Search",
@@ -85,8 +87,8 @@
     "emptyBody": "There are no vehicles available right now. Please check back soon."
   },
   "compare": {
-    "selected": "{count, plural, one {# car} other {# cars}} to compare",
-    "remaining": "({count} left)",
+    "selected": "{count, plural, one {{value} car} other {{value} cars}} to compare",
+    "remaining": "({value} left)",
     "action": "Compare",
     "needTwo": "Add at least 2 cars to compare",
     "clear": "Clear comparison"

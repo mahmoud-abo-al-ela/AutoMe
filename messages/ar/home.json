@@ -87,7 +87,7 @@
     "statCars": "سيارة",
     "statTestDrives": "قيادة تجريبية",
     "statMessages": "رسالة",
-    "newLeads": "+{count} عملاء محتملون اليوم"
+    "newLeads": "+{value} عملاء محتملون اليوم"
   },
   "pricing": {
     "badge": "باقات الأسعار",
@@ -118,12 +118,12 @@
       }
     },
     "features": {
-      "carListings": "{count} إعلان سيارة",
+      "carListings": "{value} إعلان سيارة",
       "carListingsUnlimited": "إعلانات سيارات بلا حدود",
-      "teamMembers": "{count} عضو في الفريق",
+      "teamMembers": "{value} عضو في الفريق",
       "teamMembersUnlimited": "أعضاء فريق بلا حدود",
-      "imagesPerCar": "{count} صور لكل سيارة",
-      "auditLogs": "سجلات تدقيق لمدة {count} يومًا",
+      "imagesPerCar": "{value} صور لكل سيارة",
+      "auditLogs": "سجلات تدقيق لمدة {value} يومًا",
       "auditLogsUnlimited": "سجلات تدقيق بلا حدود",
       "liveChat": "محادثة مباشرة",
       "aiProcessing": "معالجة بالذكاء الاصطناعي",

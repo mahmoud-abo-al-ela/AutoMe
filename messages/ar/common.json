@@ -35,5 +35,17 @@
     "previous": "الصفحة السابقة",
     "next": "الصفحة التالية",
     "page": "صفحة {number}"
+  },
+  "carActions": {
+    "addToFavorites": "أضف إلى المفضلة",
+    "removeFromFavorites": "إزالة من المفضلة",
+    "addToCompare": "أضف إلى المقارنة",
+    "removeFromCompare": "إزالة من المقارنة",
+    "signInToSave": "سجّل الدخول لحفظ السيارات في قائمة رغباتك",
+    "signIn": "تسجيل الدخول",
+    "wishlistError": "تعذّر تحديث قائمة الرغبات",
+    "compareAdded": "تمت الإضافة إلى المقارنة",
+    "compareRemoved": "تمت الإزالة من المقارنة",
+    "compareLimit": "يمكنك مقارنة {max} سيارات كحد أقصى في المرة الواحدة"
   }
 }

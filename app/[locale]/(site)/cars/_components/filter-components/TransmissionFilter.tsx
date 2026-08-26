@@ -5,6 +5,7 @@ import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { MultiFacetProps } from "../../_lib/cars-types";
 import { useTranslations } from "next-intl";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 
 const TransmissionFilter = ({
   selected = [],
@@ -13,6 +14,7 @@ const TransmissionFilter = ({
   isLoading,
 }: MultiFacetProps) => {
   const t = useTranslations("cars.filters");
+  const attr = useCarAttributes();
   return (
     <FilterSection
       value="transmission"
@@ -26,7 +28,7 @@ const TransmissionFilter = ({
         {options.map(({ value, count }) => (
           <FilterChip
             key={value}
-            label={value}
+            label={attr.transmission(value)}
             count={count}
             selected={selected.includes(value)}
             disabled={isLoading}

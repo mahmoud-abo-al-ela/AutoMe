@@ -9,8 +9,9 @@
  * locale the page is being rendered in, so an Arabic page could group digits
  * one way and an English page another, on the same machine, for the same number.
  *
- * It also bypassed the `-u-nu-latn` decision in `intlLocale`, which is the one
- * thing that keeps Egyptian prices and counts in Western digits.
+ * It also bypassed `intlLocale`, which is the one place the numbering system
+ * is decided — so counts rendered in a different numeral system to the prices
+ * beside them.
  *
  * The Arabic numbering system is decided in `intlLocale`, not here.
  */

@@ -2,28 +2,37 @@ import { describe, expect, it } from "vitest";
 import { formatDate, formatDateTime, formatTime } from "./datetime";
 import { formatCarPrice } from "./currency";
 import { formatMileage } from "./units";
+import { formatNumber } from "./number";
 
 /**
- * These pin the two rules that are invisible until they are wrong: Arabic must
- * render Western digits, and times must be expressed in Africa/Cairo rather
- * than in whatever zone the server happens to run in.
+ * These pin the two rules that are invisible until they are wrong: Arabic
+ * renders Eastern Arabic numerals across every formatter, and times must be
+ * expressed in Africa/Cairo rather than in whatever zone the server happens to
+ * run in.
+ *
+ * The numeral direction was reversed on 2026-08-26 — these previously asserted
+ * Western digits. What matters either way is that all five formatters agree;
+ * a product where the price is ١٥٠٠٠٠٠ and the mileage is 85,000 is worse than
+ * either choice made consistently.
  */
 
 const EASTERN_ARABIC = /[٠-٩]/;
+const WESTERN = /[0-9]/;
 
-describe("Western digits in Arabic", () => {
+describe("Eastern Arabic numerals in Arabic", () => {
   const cases: Array<[string, string]> = [
     ["formatDate", formatDate("2026-08-15T10:00:00Z", "ar")],
     ["formatTime", formatTime("2026-08-15T10:00:00Z", "ar")],
     ["formatDateTime", formatDateTime("2026-08-15T10:00:00Z", "ar")],
     ["formatCarPrice", formatCarPrice(1500000, "ar")],
     ["formatMileage", formatMileage(85000, "ar")],
+    ["formatNumber", formatNumber(1234, "ar")],
   ];
 
   for (const [name, output] of cases) {
-    it(`${name} does not emit Eastern Arabic numerals`, () => {
-      expect(output).not.toMatch(EASTERN_ARABIC);
-      expect(output).toMatch(/[0-9]/);
+    it(`${name} emits Eastern Arabic numerals`, () => {
+      expect(output).toMatch(EASTERN_ARABIC);
+      expect(output).not.toMatch(WESTERN);
     });
   }
 
@@ -32,6 +41,22 @@ describe("Western digits in Arabic", () => {
     // assertions above would not catch on their own.
     expect(formatDate("2026-08-15T10:00:00Z", "ar")).toMatch(/[؀-ۿ]/);
   });
+});
+
+describe("Western digits in English", () => {
+  const cases: Array<[string, string]> = [
+    ["formatDate", formatDate("2026-08-15T10:00:00Z", "en")],
+    ["formatCarPrice", formatCarPrice(1500000, "en")],
+    ["formatMileage", formatMileage(85000, "en")],
+    ["formatNumber", formatNumber(1234, "en")],
+  ];
+
+  for (const [name, output] of cases) {
+    it(`${name} is unaffected by the Arabic numbering system`, () => {
+      expect(output).toMatch(WESTERN);
+      expect(output).not.toMatch(EASTERN_ARABIC);
+    });
+  }
 });
 
 describe("Africa/Cairo", () => {

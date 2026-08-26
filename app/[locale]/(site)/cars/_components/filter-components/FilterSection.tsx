@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /**
  * Unified shell for every sidebar filter section. Owns the accordion item,
@@ -32,6 +33,7 @@ export const FilterSection = ({
   emptyLabel?: string;
   children: React.ReactNode;
 }) => {
+  const fmt = useFormatters();
   return (
     <AccordionItem value={value} className="border-none">
       <AccordionTrigger className="py-2 hover:no-underline cursor-pointer">
@@ -44,7 +46,7 @@ export const FilterSection = ({
             variant="secondary"
             className="ms-2 bg-primary/10 text-primary text-xs"
           >
-            {count}
+            {fmt.number(count)}
           </Badge>
         )}
       </AccordionTrigger>

@@ -1,8 +1,7 @@
 "use client";
 import { useTranslations } from "next-intl";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
-import { formatCarPrice } from "@/lib/utils/currency";
-import { formatMileage as formatMileageKm } from "@/lib/utils/units";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Building2,
   Calendar,
@@ -42,17 +41,23 @@ const CarCard = ({
 }) => {
   const t = useTranslations("common.actions");
   const attr = useCarAttributes();
+  const fmt = useFormatters();
   const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
   // Reads the listing's own currency rather than assuming the market default.
   const formatPrice = (price: number) =>
-    formatCarPrice(price, "en", car.priceCurrency);
+    fmt.price(price, car.priceCurrency);
 
-  const formatMileage = (mileage: number) => formatMileageKm(mileage);
+  const formatMileage = (mileage: number) => fmt.mileage(mileage);
 
-  const carTitle = car.title || `${car.year} ${car.make} ${car.model}`;
+  // A year is a number but never a quantity: grouping would render 2020 as
+  // "2,020" in English and "٢٬٠٢٠" in Arabic.
+  const formatYear = (year: number) => fmt.number(year, { useGrouping: false });
+
+  const carTitle =
+    car.title || `${formatYear(car.year)} ${car.make} ${car.model}`;
   const subtitle = [attr.body(car.bodyType), attr.transmission(car.transmission)]
     .filter(Boolean)
     .join(" • ");
@@ -118,7 +123,7 @@ const CarCard = ({
               <div className="me-1.5 rounded-full bg-muted p-1">
                 <Calendar className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
               </div>
-              <span className="font-medium text-foreground">{car.year}</span>
+              <span className="font-medium text-foreground">{formatYear(car.year)}</span>
             </div>
             {car.mileage != null && (
               <div className="flex items-center">

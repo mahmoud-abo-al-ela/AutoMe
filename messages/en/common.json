@@ -35,5 +35,17 @@
     "previous": "Previous page",
     "next": "Next page",
     "page": "Page {number}"
+  },
+  "carActions": {
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "addToCompare": "Add to compare",
+    "removeFromCompare": "Remove from compare",
+    "signInToSave": "Sign in to save cars to your wishlist",
+    "signIn": "Sign in",
+    "wishlistError": "Couldn’t update wishlist",
+    "compareAdded": "Added to comparison",
+    "compareRemoved": "Removed from comparison",
+    "compareLimit": "You can compare up to {max} cars at a time"
   }
 }

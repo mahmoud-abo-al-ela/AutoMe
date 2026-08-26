@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const SORT_ORDER = ["newest", "priceAsc", "priceDesc", "yearDesc", "yearAsc", "mileageAsc"];
 const PER_PAGE_OPTIONS = [12, 24, 48];
@@ -32,6 +33,7 @@ export const ResultsSummary = ({
   isLoading?: boolean;
 }) => {
   const t = useTranslations("cars");
+  const fmt = useFormatters();
   const start = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const end = Math.min(currentPage * limit, total);
 
@@ -46,9 +48,9 @@ export const ResultsSummary = ({
       */}
       <p className="flex items-center text-sm text-muted-foreground" role="status" aria-live="polite">
         {t.rich("results.summary", {
-          start,
-          end,
-          total,
+          start: fmt.number(start),
+          end: fmt.number(end),
+          total: fmt.number(total),
           count: total,
           range: (chunks) => (
             <span className="mx-1.5 rounded border border-border bg-background px-1.5 py-0.5 font-bold text-foreground shadow-sm">
@@ -70,7 +72,7 @@ export const ResultsSummary = ({
             <SelectContent>
               {PER_PAGE_OPTIONS.map((n) => (
                 <SelectItem key={n} value={String(n)} className="cursor-pointer">
-                  {t("results.perPage", { count: n })}
+                  {t("results.perPage", { value: fmt.number(n) })}
                 </SelectItem>
               ))}
             </SelectContent>

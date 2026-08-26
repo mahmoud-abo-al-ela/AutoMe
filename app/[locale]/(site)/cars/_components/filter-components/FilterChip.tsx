@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /**
  * Accessible, tenant-themable filter chip. Renders a real <button> with
@@ -24,6 +25,7 @@ export const FilterChip = ({
   onClick?: () => void;
   className?: string;
 }) => {
+  const fmt = useFormatters();
   const isDisabled = disabled || count === 0;
 
   return (
@@ -48,7 +50,7 @@ export const FilterChip = ({
       <span>{label}</span>
       {typeof count === "number" && (
         <span className={cn("tabular-nums", selected ? "text-primary/70" : "text-muted-foreground")}>
-          ({count})
+          ({fmt.number(count)})
         </span>
       )}
       {selected && <X className="h-3 w-3" />}

@@ -22,6 +22,7 @@ import {
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import type { CarsPageData } from "../_lib/cars-types";
+import { useFormatters } from "@/hooks/use-formatters";
 
 export const CarsPagePresenter = ({
   cars,
@@ -42,6 +43,7 @@ export const CarsPagePresenter = ({
   handlers,
 }: CarsPageData) => {
   const t = useTranslations("cars");
+  const fmt = useFormatters();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const reduceMotion = useReducedMotion();
   const hasActiveFilters = activeFilters.length > 0;
@@ -184,7 +186,7 @@ export const CarsPagePresenter = ({
               <span>{t("filters.title")}</span>
               {hasActiveFilters && (
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-white">
-                  {activeFilters.length}
+                  {fmt.number(activeFilters.length)}
                 </span>
               )}
             </Button>
@@ -198,7 +200,10 @@ export const CarsPagePresenter = ({
             </div>
             <div className="sticky bottom-0 z-10 border-t border-border bg-background px-4 py-3">
               <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-                {t("filters.showResults", { count: pagination.total })}
+                {t("filters.showResults", {
+                  count: pagination.total,
+                  value: fmt.number(pagination.total),
+                })}
               </Button>
             </div>
           </SheetContent>

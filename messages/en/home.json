@@ -87,7 +87,7 @@
     "statCars": "Cars",
     "statTestDrives": "Test Drives",
     "statMessages": "Messages",
-    "newLeads": "+{count} New Leads Today"
+    "newLeads": "+{value} New Leads Today"
   },
   "pricing": {
     "badge": "Pricing Plans",
@@ -118,12 +118,12 @@
       }
     },
     "features": {
-      "carListings": "{count} car listings",
+      "carListings": "{value} car listings",
       "carListingsUnlimited": "Unlimited car listings",
-      "teamMembers": "{count} team members",
+      "teamMembers": "{value} team members",
       "teamMembersUnlimited": "Unlimited team members",
-      "imagesPerCar": "{count} images per car",
-      "auditLogs": "{count} days audit logs",
+      "imagesPerCar": "{value} images per car",
+      "auditLogs": "{value} days audit logs",
       "auditLogsUnlimited": "Unlimited audit logs",
       "liveChat": "Live Chat",
       "aiProcessing": "AI Processing",

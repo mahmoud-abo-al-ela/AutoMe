@@ -11,6 +11,7 @@ import {
   planPeriodKey,
   type UiPlan,
 } from "./pricing-plans";
+import { useFormatters } from "@/hooks/use-formatters";
 
 // A single pricing plan card.
 export default function PricingCard({
@@ -23,6 +24,12 @@ export default function PricingCard({
   index: number;
 }) {
   const t = useTranslations("home.pricing");
+  const fmt = useFormatters();
+  // Feature bullets interpolate a plan limit. The number is formatted here
+  // rather than left to ICU, which would use the bare `ar` tag and render
+  // Western digits against the Eastern ones everywhere else on the card.
+  const featureParams = (feature: UiPlan["features"][number]) =>
+    feature.params ? { value: fmt.number(feature.params.count) } : undefined;
   const Icon = plan.icon;
   const price = formatPlanPrice(plan, billingPeriod);
   const periodKey = planPeriodKey(plan, billingPeriod);
@@ -120,7 +127,7 @@ export default function PricingCard({
                   : ""
                 }`}
             >
-              {t(`features.${feature.key}`, feature.params)}
+              {t(`features.${feature.key}`, featureParams(feature))}
             </span>
           </li>
         ))}

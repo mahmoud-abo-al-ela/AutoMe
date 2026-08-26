@@ -61,7 +61,10 @@ export const CarsHero = ({
           {t("title")}
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm font-medium text-white/80 sm:text-base">
-          {t("subtitle", { count: totalCount ?? 0 })}
+          {t("subtitle", {
+            count: totalCount ?? 0,
+            value: fmt.number(totalCount ?? 0),
+          })}
         </p>
 
         {/* Search — plain text, search-as-you-type */}

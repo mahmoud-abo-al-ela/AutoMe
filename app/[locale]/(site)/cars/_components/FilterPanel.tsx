@@ -1,8 +1,7 @@
 "use client";
 
 import { Filter, RotateCcw, CircleDollarSign, Calendar, Gauge } from "lucide-react";
-import { formatCarPrice } from "@/lib/utils/currency";
-import { formatMileage as formatMileageKm } from "@/lib/utils/units";
+import { useFormatters } from "@/hooks/use-formatters";
 import type {
   CarsFilterOptions,
   CarsFilters,
@@ -25,9 +24,7 @@ import {
 } from "./filter-components";
 import { useTranslations } from "next-intl";
 
-const formatPrice = (v: number) => formatCarPrice(v || 0);
 
-const formatMileage = (v: number) => formatMileageKm(v);
 
 /**
  * Presentational filter sidebar. All state lives in useCarsPage; this component
@@ -49,6 +46,13 @@ const FilterPanel = ({
   onReset: () => void;
 }) => {
   const t = useTranslations("cars.filters");
+  const fmt = useFormatters();
+  // These were module-scope helpers with no locale argument, so the range
+  // labels stayed English while the cards beside them were translated.
+  const formatPrice = (v: number) => fmt.price(v || 0);
+  const formatMileage = (v: number) => fmt.mileage(v);
+  // A year is a number but never a quantity, so no grouping separator.
+  const formatYear = (v: number) => fmt.number(v, { useGrouping: false });
   const opts = options || ({} as NonNullable<CarsFilterOptions>);
   const disabled = isLoading || optionsLoading;
 
@@ -75,7 +79,7 @@ const FilterPanel = ({
         </h2>
         {activeCount > 0 && (
           <Badge variant="secondary" className="bg-primary/10 px-2 text-xs font-semibold text-primary">
-            {activeCount} active
+            {t("activeCount", { value: fmt.number(activeCount) })}
           </Badge>
         )}
       </div>
@@ -121,7 +125,7 @@ const FilterPanel = ({
           value={[filters.minYear, filters.maxYear]}
           bounds={opts.yearBounds}
           step={1}
-          formatValue={(v) => String(v)}
+          formatValue={formatYear}
           onCommit={(v, bounds) => handlers.commitRange("minYear", "maxYear", v, bounds)}
           isLoading={disabled}
         />

@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Scale, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { compareUtils } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /**
  * Fixed tray that surfaces the compare selection (max 3, stored in
@@ -14,6 +15,7 @@ import { compareUtils } from "@/lib/utils";
  */
 export const CompareTray = () => {
   const t = useTranslations("cars.compare");
+  const fmt = useFormatters();
   const [ids, setIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -40,10 +42,10 @@ export const CompareTray = () => {
         <div className="flex items-center gap-2 text-sm font-medium">
           <Scale className="h-4 w-4 text-primary" />
           <span>
-            {t("selected", { count: ids.length })}
+            {t("selected", { count: ids.length, value: fmt.number(ids.length) })}
           </span>
           <span className="text-xs text-muted-foreground">
-            {t("remaining", { count: 3 - ids.length })}
+            {t("remaining", { value: fmt.number(3 - ids.length) })}
           </span>
         </div>
         <div className="ms-auto flex items-center gap-2">

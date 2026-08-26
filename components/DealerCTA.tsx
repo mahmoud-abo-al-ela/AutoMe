@@ -6,9 +6,11 @@ import { Button } from "./ui/button";
 import { Building2, CheckCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { useFormatters } from "@/hooks/use-formatters";
 
 function DealerCTA() {
   const t = useTranslations("home.dealer");
+  const fmt = useFormatters();
   const benefits = [
     t("benefitFree"),
     t("benefitListings"),
@@ -154,7 +156,7 @@ function DealerCTA() {
 
                 {/* Floating elements */}
                 <div className="absolute -top-4 -end-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                  {t("newLeads", { count: 3 })}
+                  {t("newLeads", { value: fmt.number(3) })}
                 </div>
               </div>
             </motion.div>
