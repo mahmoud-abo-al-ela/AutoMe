@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Flame, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { formatCarPrice } from "@/lib/utils/currency";
+import { useFormatters } from "@/hooks/use-formatters";
 import type { CarsFilters } from "../_lib/cars-types";
 
 // Structured quick-picks map to real filters, not free-text search — so
@@ -17,14 +18,17 @@ import type { CarsFilters } from "../_lib/cars-types";
 const BUDGET_MAX_EGP = 1_500_000;
 const LUXURY_MIN_EGP = 3_000_000;
 
-const QUICK_PICKS: { label: string; patch: Partial<CarsFilters> }[] = [
-  { label: "SUV", patch: { bodyType: ["SUV"] } },
-  { label: "Electric", patch: { fuelType: ["Electric"] } },
-  {
-    label: `Under ${formatCarPrice(BUDGET_MAX_EGP)}`,
-    patch: { maxPrice: BUDGET_MAX_EGP },
-  },
-  { label: "Luxury", patch: { minPrice: LUXURY_MIN_EGP } },
+/**
+ * The filter patches are static data; their labels are not. The label used to
+ * be built here at module scope, which meant `Under …` was formatted once when
+ * the module first loaded and then reused for every request regardless of
+ * locale. Labels are now resolved inside the component instead.
+ */
+const QUICK_PICKS: { key: string; patch: Partial<CarsFilters> }[] = [
+  { key: "quickSuv", patch: { bodyType: ["SUV"] } },
+  { key: "quickElectric", patch: { fuelType: ["Electric"] } },
+  { key: "quickUnder", patch: { maxPrice: BUDGET_MAX_EGP } },
+  { key: "quickLuxury", patch: { minPrice: LUXURY_MIN_EGP } },
 ];
 
 export const CarsHero = ({
@@ -40,6 +44,8 @@ export const CarsHero = ({
   totalCount?: number;
   onQuickPick: (patch: Partial<CarsFilters>) => void;
 }) => {
+  const t = useTranslations("cars.hero");
+  const fmt = useFormatters();
   const query = searchQuery || "";
 
   return (
@@ -52,10 +58,10 @@ export const CarsHero = ({
 
       <div className="relative z-10 mx-auto max-w-2xl text-center">
         <h1 className="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-4xl">
-          Find Your Perfect Car
+          {t("title")}
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm font-medium text-white/80 sm:text-base">
-          Browse {totalCount && totalCount > 0 ? totalCount.toLocaleString() : ""} {totalCount === 1 ? "vehicle" : "vehicles"} from trusted dealerships
+          {t("subtitle", { count: totalCount ?? 0 })}
         </p>
 
         {/* Search — plain text, search-as-you-type */}
@@ -64,10 +70,10 @@ export const CarsHero = ({
             <Search className="absolute start-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-gray-500" />
             <Input
               type="text"
-              placeholder="Search by make, model, or keyword…"
+              placeholder={t("searchPlaceholder")}
               value={query}
               onChange={(e) => onSearchChange(e.target.value)}
-              aria-label="Search cars"
+              aria-label={t("searchLabel")}
               className="h-14 w-full rounded-xl border border-white/40 bg-white/95 ps-12 pe-12 text-base text-gray-900 shadow-lg placeholder:text-gray-500 focus-visible:border-white focus-visible:ring-4 focus-visible:ring-white/20"
             />
             {query && (
@@ -75,7 +81,7 @@ export const CarsHero = ({
                 type="button"
                 onClick={onClearSearch}
                 className="absolute end-4 top-1/2 z-10 -translate-y-1/2 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700"
-                aria-label="Clear search"
+                aria-label={t("clearSearch")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -87,16 +93,16 @@ export const CarsHero = ({
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           <span className="me-1 flex items-center text-sm font-medium text-white/70">
             <Flame className="me-1 h-4 w-4 text-orange-300" />
-            Popular:
+            {t("popular")}
           </span>
-          {QUICK_PICKS.map(({ label, patch }) => (
+          {QUICK_PICKS.map(({ key, patch }) => (
             <button
-              key={label}
+              key={key}
               type="button"
               onClick={() => onQuickPick(patch)}
               className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-normal text-white backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white/20 active:scale-95"
             >
-              {label}
+              {t(key, { price: fmt.price(BUDGET_MAX_EGP) })}
             </button>
           ))}
         </div>

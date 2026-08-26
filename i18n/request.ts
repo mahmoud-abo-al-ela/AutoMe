@@ -12,7 +12,14 @@ import { routing } from "./routing";
  * *both* locales; a missing file is a build error, not a silent English
  * fallback, which is the behaviour we want.
  */
-const NAMESPACES = ["common", "nav", "footer", "home", "carAttributes"] as const;
+const NAMESPACES = [
+  "common",
+  "nav",
+  "footer",
+  "home",
+  "carAttributes",
+  "cars",
+] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;

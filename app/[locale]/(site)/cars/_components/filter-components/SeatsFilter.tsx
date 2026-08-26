@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { SingleFacetProps } from "../../_lib/cars-types";
+import { useTranslations } from "next-intl";
 
 const SEAT_OPTIONS = [2, 4, 5, 7];
 
@@ -16,15 +17,16 @@ const SeatsFilter = ({
   onSelect,
   isLoading,
 }: Omit<SingleFacetProps, "options">) => {
+  const t = useTranslations("cars.filters");
   return (
-    <FilterSection value="seats" icon={Users} label="Seats" count={selected ? 1 : 0}>
+    <FilterSection value="seats" icon={Users} label={t("seats")} count={selected ? 1 : 0}>
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
         {SEAT_OPTIONS.map((n) => {
           const isSelected = selected === n;
           return (
             <FilterChip
               key={n}
-              label={`${n}+ seats`}
+              label={t("seatsOption", { count: n })}
               selected={isSelected}
               disabled={isLoading}
               onClick={() => onSelect(isSelected ? undefined : String(n))}

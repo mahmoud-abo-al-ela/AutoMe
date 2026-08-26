@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Scale, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { compareUtils } from "@/lib/utils";
  * via the same `compareListUpdated` event CarCard already dispatches.
  */
 export const CompareTray = () => {
+  const t = useTranslations("cars.compare");
   const [ids, setIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -38,24 +40,26 @@ export const CompareTray = () => {
         <div className="flex items-center gap-2 text-sm font-medium">
           <Scale className="h-4 w-4 text-primary" />
           <span>
-            {ids.length} {ids.length === 1 ? "car" : "cars"} to compare
+            {t("selected", { count: ids.length })}
           </span>
-          <span className="text-xs text-muted-foreground">({3 - ids.length} left)</span>
+          <span className="text-xs text-muted-foreground">
+            {t("remaining", { count: 3 - ids.length })}
+          </span>
         </div>
         <div className="ms-auto flex items-center gap-2">
           {ids.length < 2 ? (
-            <Button size="sm" disabled title="Add at least 2 cars to compare">
-              Compare
+            <Button size="sm" disabled title={t("needTwo")}>
+              {t("action")}
             </Button>
           ) : (
             <Button asChild size="sm">
-              <Link href="/compare">Compare</Link>
+              <Link href="/compare">{t("action")}</Link>
             </Button>
           )}
           <button
             type="button"
             onClick={clear}
-            aria-label="Clear comparison"
+            aria-label={t("clear")}
             className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="h-4 w-4" />

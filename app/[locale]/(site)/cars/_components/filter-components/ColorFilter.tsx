@@ -5,6 +5,7 @@ import { FilterSection } from "./FilterSection";
 import type { FacetOption, SingleFacetProps } from "../../_lib/cars-types";
 import { getCarColorHex } from "@/lib/constants/car-options";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 /**
  * Single-select colour facet with swatches. Options are real DB colours with
@@ -16,14 +17,15 @@ const ColorFilter = ({
   onSelect,
   isLoading,
 }: SingleFacetProps<FacetOption>) => {
+  const t = useTranslations("cars.filters");
   return (
     <FilterSection
       value="color"
       icon={Palette}
-      label="Color"
+      label={t("color")}
       count={selected ? 1 : 0}
       isEmpty={options.length === 0}
-      emptyLabel="No colors available"
+      emptyLabel={t("colorEmpty")}
     >
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
         {options.map(({ value, count }) => {

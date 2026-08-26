@@ -4,6 +4,7 @@ import { Fuel } from "lucide-react";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { MultiFacetProps } from "../../_lib/cars-types";
+import { useTranslations } from "next-intl";
 
 const FuelTypeFilter = ({
   selected = [],
@@ -11,14 +12,15 @@ const FuelTypeFilter = ({
   onToggle,
   isLoading,
 }: MultiFacetProps) => {
+  const t = useTranslations("cars.filters");
   return (
     <FilterSection
       value="fuel"
       icon={Fuel}
-      label="Fuel Type"
+      label={t("fuelType")}
       count={selected.length}
       isEmpty={options.length === 0}
-      emptyLabel="No fuel types available"
+      emptyLabel={t("fuelTypeEmpty")}
     >
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
         {options.map(({ value, count }) => (

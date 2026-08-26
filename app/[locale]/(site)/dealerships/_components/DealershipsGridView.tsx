@@ -41,7 +41,7 @@ export const DealershipsGridView = ({
                         currentPage={pagination.page}
                         limit={pagination.limit}
                         total={pagination.total}
-                        noun={pagination.total === 1 ? "dealership" : "dealerships"}
+                        noun="dealerships"
                     />
                 </div>
             )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -16,6 +17,8 @@ export const Pagination = ({
     onPageChange,
     disabled = false
 }: PaginationProps) => {
+    const t = useTranslations("common.pagination");
+
     const getPageNumbers = () => {
         const pageNumbers: number[] = [];
 
@@ -43,7 +46,7 @@ export const Pagination = ({
     if (totalPages <= 1) return null;
 
     return (
-        <nav className="flex justify-center mt-6 sm:mt-8" aria-label="Pagination">
+        <nav className="flex justify-center mt-6 sm:mt-8" aria-label={t("label")}>
             <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                     variant="outline"
@@ -51,9 +54,9 @@ export const Pagination = ({
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1 || disabled}
                     className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
-                    aria-label="Previous page"
+                    aria-label={t("previous")}
                 >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
                 </Button>
 
                 <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto px-1">
@@ -65,7 +68,7 @@ export const Pagination = ({
                             onClick={() => onPageChange(pageNum)}
                             disabled={disabled}
                             className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer"
-                            aria-label={`Page ${pageNum}`}
+                            aria-label={t("page", { number: pageNum })}
                             aria-current={currentPage === pageNum ? "page" : undefined}
                         >
                             {pageNum}
@@ -79,9 +82,9 @@ export const Pagination = ({
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages || disabled}
                     className="cursor-pointer w-8 h-8 sm:w-10 sm:h-10"
-                    aria-label="Next page"
+                    aria-label={t("next")}
                 >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                 </Button>
             </div>
         </nav>
@@ -92,7 +95,8 @@ type PaginationInfoProps = {
     currentPage: number;
     limit: number;
     total?: number | null;
-    noun?: string;
+    /** Key under `common.pagination.nouns`, not a display word. */
+    noun?: "items" | "cars" | "dealerships";
 };
 
 export const PaginationInfo = ({
@@ -101,6 +105,8 @@ export const PaginationInfo = ({
     total,
     noun = "items",
 }: PaginationInfoProps) => {
+    const t = useTranslations("common.pagination");
+
     if (!total) return null;
 
     const start = Math.min((currentPage - 1) * limit + 1, total);
@@ -108,7 +114,16 @@ export const PaginationInfo = ({
 
     return (
         <div className="text-center text-sm text-muted-foreground mt-4">
-            Showing {start} to {end} of {total.toLocaleString()} {noun}
+            {t("showing", {
+                start,
+                end,
+                total,
+                // The noun is pluralised inside its own message rather than by
+                // the caller. A caller doing `total === 1 ? "dealership" :
+                // "dealerships"` encodes English's two-form plural; Arabic has
+                // six, so that choice cannot be made outside the message.
+                noun: t(`nouns.${noun}`, { count: total }),
+            })}
         </div>
     );
 };

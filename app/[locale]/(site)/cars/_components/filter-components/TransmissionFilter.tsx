@@ -4,6 +4,7 @@ import { Cog } from "lucide-react";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { MultiFacetProps } from "../../_lib/cars-types";
+import { useTranslations } from "next-intl";
 
 const TransmissionFilter = ({
   selected = [],
@@ -11,14 +12,15 @@ const TransmissionFilter = ({
   onToggle,
   isLoading,
 }: MultiFacetProps) => {
+  const t = useTranslations("cars.filters");
   return (
     <FilterSection
       value="transmission"
       icon={Cog}
-      label="Transmission"
+      label={t("transmission")}
       count={selected.length}
       isEmpty={options.length === 0}
-      emptyLabel="No transmissions available"
+      emptyLabel={t("transmissionEmpty")}
     >
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
         {options.map(({ value, count }) => (

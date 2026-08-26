@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import FilterPanel from "./FilterPanel";
 import CarsHero from "./CarsHero";
@@ -40,6 +41,7 @@ export const CarsPagePresenter = ({
   activeFilters,
   handlers,
 }: CarsPageData) => {
+  const t = useTranslations("cars");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const reduceMotion = useReducedMotion();
   const hasActiveFilters = activeFilters.length > 0;
@@ -97,29 +99,29 @@ export const CarsPagePresenter = ({
             ) : isError ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-16 text-center">
                 <h3 className="mb-2 text-lg font-semibold text-destructive">
-                  Something went wrong
+                  {t("states.errorTitle")}
                 </h3>
                 <p className="mb-6 max-w-md text-sm text-muted-foreground">
-                  {errorMessage || "We couldn't load cars right now. Please try again."}
+                  {errorMessage || t("states.errorBody")}
                 </p>
                 <Button onClick={() => refetch()} variant="outline" className="gap-2">
                   <RefreshCw className="h-4 w-4" />
-                  Retry
+                  {t("states.retry")}
                 </Button>
               </div>
             ) : cars.length === 0 ? (
               hasActiveFilters ? (
                 <EmptyState
                   variant="filtered"
-                  title="No cars match your filters"
-                  description="Try widening your price range or removing a filter to see more results."
+                  title={t("states.filteredEmptyTitle")}
+                  description={t("states.filteredEmptyBody")}
                   onClearFilters={handlers.resetAllFilters}
                 />
               ) : (
                 <EmptyState
                   icon={Car}
-                  title="No cars listed yet"
-                  description="There are no vehicles available right now. Please check back soon."
+                  title={t("states.emptyTitle")}
+                  description={t("states.emptyBody")}
                 />
               )
             ) : (
@@ -163,6 +165,7 @@ export const CarsPagePresenter = ({
                       currentPage={pagination.page}
                       limit={pagination.limit}
                       total={pagination.total}
+                      noun="cars"
                     />
                   </div>
                 )}
@@ -178,7 +181,7 @@ export const CarsPagePresenter = ({
           <SheetTrigger asChild>
             <Button variant="outline" className="w-full gap-2">
               <SlidersHorizontal className="h-4 w-4" />
-              <span>Filters</span>
+              <span>{t("filters.title")}</span>
               {hasActiveFilters && (
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-white">
                   {activeFilters.length}
@@ -188,14 +191,14 @@ export const CarsPagePresenter = ({
           </SheetTrigger>
           <SheetContent side="left" className="flex w-[88%] flex-col p-0 sm:w-[360px]">
             <SheetHeader className="sticky top-0 z-10 border-b border-border bg-background px-4 py-3">
-              <SheetTitle className="text-base font-semibold">Filters</SheetTitle>
+              <SheetTitle className="text-base font-semibold">{t("filters.title")}</SheetTitle>
             </SheetHeader>
             <div className="flex-1 overflow-y-auto p-4">
               <FilterPanel {...panelProps} />
             </div>
             <div className="sticky bottom-0 z-10 border-t border-border bg-background px-4 py-3">
               <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-                Show {pagination.total.toLocaleString()} results
+                {t("filters.showResults", { count: pagination.total })}
               </Button>
             </div>
           </SheetContent>

@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "title": "Browse Cars | AutoMe",
+    "description": "Search and filter our extensive inventory of vehicles. Find the perfect car that matches your needs and budget."
+  },
+  "hero": {
+    "title": "Find Your Perfect Car",
+    "subtitle": "Browse {count, plural, =0 {vehicles} one {# vehicle} other {# vehicles}} from trusted dealerships",
+    "searchPlaceholder": "Search by make, model, or keyword…",
+    "searchLabel": "Search cars",
+    "clearSearch": "Clear search",
+    "popular": "Popular:",
+    "quickSuv": "SUV",
+    "quickElectric": "Electric",
+    "quickUnder": "Under {price}",
+    "quickLuxury": "Luxury"
+  },
+  "results": {
+    "summary": "Showing <range>{start}-{end}</range> of <strong>{total}</strong> {count, plural, one {vehicle} other {vehicles}}",
+    "perPage": "{count} / page",
+    "perPageLabel": "Results per page",
+    "sortLabel": "Sort results",
+    "sortPlaceholder": "Sort by"
+  },
+  "sort": {
+    "newest": "Newest First",
+    "priceAsc": "Price: Low to High",
+    "priceDesc": "Price: High to Low",
+    "yearDesc": "Year: Newest",
+    "yearAsc": "Year: Oldest",
+    "mileageAsc": "Mileage: Lowest"
+  },
+  "filters": {
+    "title": "Filters",
+    "resetAll": "Reset all filters",
+    "clearAll": "Clear all",
+    "showResults": "Show {count, plural, one {# result} other {# results}}",
+    "removeFilter": "Remove filter {type} {value}",
+    "makes": "Makes",
+    "makesEmpty": "No makes available",
+    "searchMakes": "Search makes…",
+    "searchMakesLabel": "Search makes",
+    "showMore": "+{count} more",
+    "showLess": "Show less",
+    "bodyType": "Body Type",
+    "bodyTypeEmpty": "No body types available",
+    "fuelType": "Fuel Type",
+    "fuelTypeEmpty": "No fuel types available",
+    "transmission": "Transmission",
+    "transmissionEmpty": "No transmissions available",
+    "city": "Location",
+    "cityEmpty": "No locations available",
+    "color": "Color",
+    "colorEmpty": "No colors available",
+    "dealership": "Dealership",
+    "dealershipEmpty": "No dealerships available",
+    "seats": "Seats",
+    "seatsOption": "{count}+ seats",
+    "priceRange": "Price Range",
+    "year": "Year",
+    "mileage": "Mileage",
+    "loadingRange": "Loading range…"
+  },
+  "activeFilters": {
+    "search": "Search",
+    "make": "Make",
+    "bodyType": "Body",
+    "fuelType": "Fuel",
+    "transmission": "Transmission",
+    "dealership": "Dealer",
+    "city": "Location",
+    "color": "Color",
+    "minSeats": "Seats",
+    "price": "Price",
+    "year": "Year",
+    "mileage": "Mileage"
+  },
+  "states": {
+    "errorTitle": "Something went wrong",
+    "errorBody": "We couldn't load cars right now. Please try again.",
+    "retry": "Retry",
+    "filteredEmptyTitle": "No cars match your filters",
+    "filteredEmptyBody": "Try widening your price range or removing a filter to see more results.",
+    "emptyTitle": "No cars listed yet",
+    "emptyBody": "There are no vehicles available right now. Please check back soon."
+  },
+  "compare": {
+    "selected": "{count, plural, one {# car} other {# cars}} to compare",
+    "remaining": "({count} left)",
+    "action": "Compare",
+    "needTwo": "Add at least 2 cars to compare",
+    "clear": "Clear comparison"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "title": "تصفح السيارات | أوتومي",
+    "description": "ابحث في مخزوننا الواسع من السيارات وصفِّه حسب احتياجك. اعثر على السيارة التي تناسب متطلباتك وميزانيتك."
+  },
+  "hero": {
+    "title": "اعثر على سيارتك المثالية",
+    "subtitle": "تصفح {count, plural, =0 {السيارات} one {سيارة واحدة} two {سيارتين} few {# سيارات} many {# سيارة} other {# سيارة}} من معارض موثوقة",
+    "searchPlaceholder": "ابحث بالماركة أو الموديل أو بكلمة مفتاحية…",
+    "searchLabel": "البحث عن سيارات",
+    "clearSearch": "مسح البحث",
+    "popular": "الأكثر بحثًا:",
+    "quickSuv": "دفع رباعي",
+    "quickElectric": "كهربائية",
+    "quickUnder": "أقل من {price}",
+    "quickLuxury": "فاخرة"
+  },
+  "results": {
+    "summary": "عرض <range>{start}-{end}</range> من إجمالي <strong>{total}</strong> {count, plural, one {سيارة} two {سيارتين} few {سيارات} many {سيارة} other {سيارة}}",
+    "perPage": "{count} / صفحة",
+    "perPageLabel": "عدد النتائج في الصفحة",
+    "sortLabel": "ترتيب النتائج",
+    "sortPlaceholder": "الترتيب حسب"
+  },
+  "sort": {
+    "newest": "الأحدث أولًا",
+    "priceAsc": "السعر: من الأقل للأعلى",
+    "priceDesc": "السعر: من الأعلى للأقل",
+    "yearDesc": "سنة الصنع: الأحدث",
+    "yearAsc": "سنة الصنع: الأقدم",
+    "mileageAsc": "المسافة المقطوعة: الأقل"
+  },
+  "filters": {
+    "title": "التصفية",
+    "resetAll": "إعادة ضبط كل عوامل التصفية",
+    "clearAll": "مسح الكل",
+    "showResults": "عرض {count, plural, =0 {النتائج} one {نتيجة واحدة} two {نتيجتين} few {# نتائج} many {# نتيجة} other {# نتيجة}}",
+    "removeFilter": "إزالة عامل التصفية {type} {value}",
+    "makes": "الماركات",
+    "makesEmpty": "لا توجد ماركات متاحة",
+    "searchMakes": "ابحث في الماركات…",
+    "searchMakesLabel": "البحث في الماركات",
+    "showMore": "+{count} أخرى",
+    "showLess": "عرض أقل",
+    "bodyType": "نوع الهيكل",
+    "bodyTypeEmpty": "لا توجد أنواع هياكل متاحة",
+    "fuelType": "نوع الوقود",
+    "fuelTypeEmpty": "لا توجد أنواع وقود متاحة",
+    "transmission": "ناقل الحركة",
+    "transmissionEmpty": "لا توجد أنواع ناقل حركة متاحة",
+    "city": "الموقع",
+    "cityEmpty": "لا توجد مواقع متاحة",
+    "color": "اللون",
+    "colorEmpty": "لا توجد ألوان متاحة",
+    "dealership": "المعرض",
+    "dealershipEmpty": "لا توجد معارض متاحة",
+    "seats": "المقاعد",
+    "seatsOption": "{count}+ مقاعد",
+    "priceRange": "نطاق السعر",
+    "year": "سنة الصنع",
+    "mileage": "المسافة المقطوعة",
+    "loadingRange": "جارٍ تحميل النطاق…"
+  },
+  "activeFilters": {
+    "search": "بحث",
+    "make": "الماركة",
+    "bodyType": "الهيكل",
+    "fuelType": "الوقود",
+    "transmission": "ناقل الحركة",
+    "dealership": "المعرض",
+    "city": "الموقع",
+    "color": "اللون",
+    "minSeats": "المقاعد",
+    "price": "السعر",
+    "year": "سنة الصنع",
+    "mileage": "المسافة المقطوعة"
+  },
+  "states": {
+    "errorTitle": "حدث خطأ ما",
+    "errorBody": "تعذّر تحميل السيارات في الوقت الحالي. من فضلك حاول مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "filteredEmptyTitle": "لا توجد سيارات مطابقة لعوامل التصفية",
+    "filteredEmptyBody": "جرّب توسيع نطاق السعر أو إزالة أحد عوامل التصفية لعرض نتائج أكثر.",
+    "emptyTitle": "لا توجد سيارات معروضة بعد",
+    "emptyBody": "لا توجد سيارات متاحة في الوقت الحالي. من فضلك عاود الزيارة قريبًا."
+  },
+  "compare": {
+    "selected": "{count, plural, one {سيارة واحدة} two {سيارتان} few {# سيارات} many {# سيارة} other {# سيارة}} للمقارنة",
+    "remaining": "(متبقٍ {count})",
+    "action": "قارن",
+    "needTwo": "أضف سيارتين على الأقل للمقارنة",
+    "clear": "مسح المقارنة"
+  }
+}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { FilterSection } from "./FilterSection";
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /**
  * Generic min/max range section used for price, year and mileage. The slider
@@ -37,6 +38,7 @@ export const RangeFilter = ({
   onCommit: (value: [number, number], bounds: RangeBounds) => void;
   isLoading?: boolean;
 }) => {
+  const t = useTranslations("cars.filters");
   const min = bounds?.min ?? 0;
   const max = bounds?.max ?? 100;
   const selectedMin = value?.[0] ?? min;
@@ -84,7 +86,7 @@ export const RangeFilter = ({
           className="mb-2"
         />
         {!ready && (
-          <p className="text-center text-xs text-muted-foreground">Loading range…</p>
+          <p className="text-center text-xs text-muted-foreground">{t("loadingRange")}</p>
         )}
       </div>
     </FilterSection>

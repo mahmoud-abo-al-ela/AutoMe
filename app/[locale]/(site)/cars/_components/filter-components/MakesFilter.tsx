@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { MultiFacetProps } from "../../_lib/cars-types";
+import { useTranslations } from "next-intl";
 
 const COLLAPSED_COUNT = 12;
 
@@ -15,6 +16,7 @@ const MakesFilter = ({
   onToggle,
   isLoading,
 }: MultiFacetProps) => {
+  const t = useTranslations("cars.filters");
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -28,10 +30,10 @@ const MakesFilter = ({
     <FilterSection
       value="makes"
       icon={Car}
-      label="Makes"
+      label={t("makes")}
       count={selected.length}
       isEmpty={options.length === 0}
-      emptyLabel="No makes available"
+      emptyLabel={t("makesEmpty")}
     >
       {options.length > COLLAPSED_COUNT && (
         <div className="relative mb-2">
@@ -39,9 +41,9 @@ const MakesFilter = ({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search makes..."
+            placeholder={t("searchMakes")}
             className="h-8 ps-8 text-xs"
-            aria-label="Search makes"
+            aria-label={t("searchMakesLabel")}
           />
         </div>
       )}
@@ -62,7 +64,7 @@ const MakesFilter = ({
             onClick={() => setExpanded(true)}
             className="rounded-full px-2 text-xs font-medium text-primary hover:underline"
           >
-            +{hiddenCount} more
+            {t("showMore", { count: hiddenCount })}
           </button>
         )}
         {expanded && filtered.length > COLLAPSED_COUNT && (
@@ -71,7 +73,7 @@ const MakesFilter = ({
             onClick={() => setExpanded(false)}
             className="rounded-full px-2 text-xs font-medium text-muted-foreground hover:underline"
           >
-            Show less
+            {t("showLess")}
           </button>
         )}
       </div>

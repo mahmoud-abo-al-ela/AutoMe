@@ -23,5 +23,17 @@
     "suggestionBody": "This site is also available in {language}.",
     "suggestionAccept": "Switch to {language}",
     "suggestionDismiss": "Keep {language}"
+  },
+  "pagination": {
+    "showing": "Showing {start} to {end} of {total} {noun}",
+    "nouns": {
+      "items": "{count, plural, one {item} other {items}}",
+      "cars": "{count, plural, one {car} other {cars}}",
+      "dealerships": "{count, plural, one {dealership} other {dealerships}}"
+    },
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {number}"
   }
 }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/utils/datetime";
 import { formatCarPrice } from "@/lib/utils/currency";
 import { formatMileage } from "@/lib/utils/units";
+import { formatNumber } from "@/lib/utils/number";
 
 /**
  * Locale-bound formatters for client components.
@@ -45,6 +46,8 @@ export function useFormatters() {
       price: (amount: number, currency?: string) =>
         formatCarPrice(amount, locale, currency),
       mileage: (value: number) => formatMileage(value, locale),
+      number: (value: number, options?: Intl.NumberFormatOptions) =>
+        formatNumber(value, locale, options),
     }),
     [locale]
   );

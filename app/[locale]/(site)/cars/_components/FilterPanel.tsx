@@ -23,6 +23,7 @@ import {
   ColorFilter,
   SeatsFilter,
 } from "./filter-components";
+import { useTranslations } from "next-intl";
 
 const formatPrice = (v: number) => formatCarPrice(v || 0);
 
@@ -47,6 +48,7 @@ const FilterPanel = ({
   optionsLoading?: boolean;
   onReset: () => void;
 }) => {
+  const t = useTranslations("cars.filters");
   const opts = options || ({} as NonNullable<CarsFilterOptions>);
   const disabled = isLoading || optionsLoading;
 
@@ -69,7 +71,7 @@ const FilterPanel = ({
       <div className="mb-4 flex items-center justify-between border-b border-border pb-3 sm:mb-5">
         <h2 className="flex items-center text-base font-bold sm:text-lg">
           <Filter className="me-1.5 h-4 w-4 text-primary sm:me-2 sm:h-5 sm:w-5" />
-          Filters
+          {t("title")}
         </h2>
         {activeCount > 0 && (
           <Badge variant="secondary" className="bg-primary/10 px-2 text-xs font-semibold text-primary">
@@ -103,7 +105,7 @@ const FilterPanel = ({
         <RangeFilter
           sectionValue="price"
           icon={CircleDollarSign}
-          label="Price Range"
+          label={t("priceRange")}
           value={[filters.minPrice, filters.maxPrice]}
           bounds={opts.priceBounds}
           step={1000}
@@ -115,7 +117,7 @@ const FilterPanel = ({
         <RangeFilter
           sectionValue="year"
           icon={Calendar}
-          label="Year"
+          label={t("year")}
           value={[filters.minYear, filters.maxYear]}
           bounds={opts.yearBounds}
           step={1}
@@ -127,7 +129,7 @@ const FilterPanel = ({
         <RangeFilter
           sectionValue="mileage"
           icon={Gauge}
-          label="Mileage"
+          label={t("mileage")}
           value={[filters.minMileage, filters.maxMileage]}
           bounds={opts.mileageBounds}
           step={1000}
@@ -181,7 +183,7 @@ const FilterPanel = ({
             className="mx-auto flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            Reset all filters
+            {t("resetAll")}
           </button>
         </>
       )}

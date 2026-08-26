@@ -7,6 +7,7 @@ import type {
   SingleFacetProps,
 } from "../../_lib/cars-types";
 import { FilterChip } from "./FilterChip";
+import { useTranslations } from "next-intl";
 
 const DealershipFilter = ({
   selected,
@@ -14,14 +15,15 @@ const DealershipFilter = ({
   onSelect,
   isLoading,
 }: SingleFacetProps<DealershipFacetOption>) => {
+  const t = useTranslations("cars.filters");
   return (
     <FilterSection
       value="dealership"
       icon={Building2}
-      label="Dealership"
+      label={t("dealership")}
       count={selected ? 1 : 0}
       isEmpty={options.length === 0}
-      emptyLabel="No dealerships available"
+      emptyLabel={t("dealershipEmpty")}
     >
       <div className="flex flex-wrap gap-1.5 pt-1 pb-2">
         {options.map((dealer) => {
