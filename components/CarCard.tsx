@@ -153,19 +153,19 @@ const CarCard = ({
 
           <div className="mb-4 flex flex-wrap gap-1.5 sm:mb-5 sm:gap-2">
             {car.bodyType && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px] font-medium">
+              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-micro font-medium">
                 {attr.body(car.bodyType)}
               </Badge>
             )}
             {car.transmission && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px] font-medium">
+              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-micro font-medium">
                 {attr.transmission(car.transmission)}
               </Badge>
             )}
             {car.color && (
               <Badge
                 variant="outline"
-                className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-micro font-medium"
               >
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full border border-border shadow-inner"
@@ -200,7 +200,7 @@ const CarCard = ({
               <span className="truncate text-xs font-medium text-muted-foreground transition-colors group-hover/dealer:text-primary">
                 {car.organization.name}
               </span>
-              <span className="ms-auto flex items-center text-[10px] text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
+              <span className="ms-auto flex items-center text-micro text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
                 {t("viewDealer")} <ChevronRight className="h-3 w-3" />
               </span>
             </Link>

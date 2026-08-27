@@ -64,7 +64,7 @@ export function DMChannelPreview({
                 </Avatar>
                 {unreadCount > 0 && (
                     <div className="absolute -top-1 -end-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-primary-foreground">
+                        <span className="text-micro font-bold text-primary-foreground">
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                     </div>

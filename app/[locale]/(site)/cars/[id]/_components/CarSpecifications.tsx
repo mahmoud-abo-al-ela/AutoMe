@@ -163,7 +163,7 @@ const CarSpecifications = ({
                   <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
                 <div>
-                  <div className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide">
+                  <div className="text-micro sm:text-xs text-gray-500 uppercase tracking-wide">
                     {spec.label}
                   </div>
                   <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm md:text-base truncate">

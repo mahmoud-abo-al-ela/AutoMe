@@ -134,7 +134,7 @@ const InventoryBreakdown = ({
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-medium">{entry.name}</span>
-                  <span className="text-[10px] text-muted-foreground">{entry.value} ({percentage}%)</span>
+                  <span className="text-micro text-muted-foreground">{entry.value} ({percentage}%)</span>
                 </div>
               </div>
             );

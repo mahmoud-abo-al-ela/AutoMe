@@ -39,8 +39,8 @@ const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
                         <Award className="h-4 w-4" />
                         <span>{t("features")}</span>
                         <Badge
-                            variant="secondary"
-                            className="ms-1 h-5 min-w-5 px-1.5 text-[10px] font-semibold rounded-full"
+                            variant="default"
+                            className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full bg-primary text-primary-foreground tabular-nums"
                         >
                             {fmt.number(car.features.length)}
                         </Badge>

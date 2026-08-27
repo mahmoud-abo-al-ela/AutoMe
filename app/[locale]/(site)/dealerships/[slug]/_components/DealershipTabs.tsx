@@ -43,7 +43,7 @@ export const DealershipTabs = ({
                     {dealership.carCount > 0 && (
                         <Badge
                             variant="secondary"
-                            className="ms-1 h-5 min-w-5 px-1.5 text-[10px] font-semibold rounded-full"
+                            className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full"
                         >
                             {dealership.carCount}
                         </Badge>
@@ -59,7 +59,7 @@ export const DealershipTabs = ({
                     {dealership.totalReviews > 0 && (
                         <Badge
                             variant="secondary"
-                            className="ms-1 h-5 min-w-5 px-1.5 text-[10px] font-semibold rounded-full"
+                            className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full"
                         >
                             {dealership.totalReviews}
                         </Badge>

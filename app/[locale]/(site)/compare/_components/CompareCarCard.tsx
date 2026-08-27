@@ -81,7 +81,7 @@ const CompareCarCard = ({
                     <div className="flex flex-wrap items-center gap-1.5 mb-3">
                         <Badge
                             variant="outline"
-                            className="text-[10px] px-1.5 py-0 h-5 gap-1"
+                            className="text-micro px-1.5 py-0 h-5 gap-1"
                         >
                             <Calendar className="h-2.5 w-2.5" />
                             {car.year}
@@ -89,7 +89,7 @@ const CompareCarCard = ({
                         {car.mileage && (
                             <Badge
                                 variant="outline"
-                                className="text-[10px] px-1.5 py-0 h-5 gap-1"
+                                className="text-micro px-1.5 py-0 h-5 gap-1"
                             >
                                 <Gauge className="h-2.5 w-2.5" />
                                 {formatMileage(car.mileage)}
@@ -98,7 +98,7 @@ const CompareCarCard = ({
                         {car.fuelType && (
                             <Badge
                                 variant="outline"
-                                className="text-[10px] px-1.5 py-0 h-5 gap-1"
+                                className="text-micro px-1.5 py-0 h-5 gap-1"
                             >
                                 <Fuel className="h-2.5 w-2.5" />
                                 {car.fuelType}

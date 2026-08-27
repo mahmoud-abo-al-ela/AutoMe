@@ -71,7 +71,7 @@ export default function AuditLogTableRow({
             {log.impersonatedBy && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1 py-0 h-4 mt-1 w-fit border-amber-500/50 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20"
+                className="text-micro px-1 py-0 h-4 mt-1 w-fit border-amber-500/50 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20"
               >
                 Impersonated
               </Badge>

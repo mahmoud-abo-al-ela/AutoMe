@@ -207,7 +207,7 @@ export const DealershipInventoryFilters = ({
                                 <SlidersHorizontal className="h-4 w-4 text-slate-500" />
                                 <span className="text-sm">Filters</span>
                                 {activeChips.length > 0 && (
-                                    <Badge className="ms-1 h-5 min-w-5 px-1.5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center">
+                                    <Badge className="ms-1 h-5 min-w-5 px-1.5 bg-primary text-white text-micro rounded-full flex items-center justify-center">
                                         {activeChips.length}
                                     </Badge>
                                 )}
@@ -230,7 +230,7 @@ export const DealershipInventoryFilters = ({
                                     <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Price Range</h4>
                                     <div className="flex justify-between items-center gap-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                                         <span className="text-xs font-semibold text-slate-700">{formatPrice(priceVal[0])}</span>
-                                        <span className="text-[10px] font-bold text-slate-400">to</span>
+                                        <span className="text-micro font-bold text-slate-400">to</span>
                                         <span className="text-xs font-semibold text-slate-700">{formatPrice(priceVal[1])}</span>
                                     </div>
                                     <div className="px-2 pt-2">
@@ -279,7 +279,7 @@ export const DealershipInventoryFilters = ({
                             <Button variant="outline" className={`h-9.5 gap-1.5 px-3 rounded-lg bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-all ${(filters.minPrice || filters.maxPrice) ? 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10' : ''}`}>
                                 <span className="text-xs">Price Range</span>
                                 {(filters.minPrice || filters.maxPrice) && (
-                                    <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-[10px] rounded-full">
+                                    <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-micro rounded-full">
                                         Set
                                     </Badge>
                                 )}
@@ -289,12 +289,12 @@ export const DealershipInventoryFilters = ({
                         <PopoverContent align="start" className="w-[280px] p-4 rounded-xl border border-slate-100 shadow-xl bg-white space-y-4">
                             <div className="flex justify-between items-center gap-2">
                                 <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 flex-1 text-center">
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Min Price</p>
+                                    <p className="text-micro font-bold text-slate-400 uppercase tracking-wide">Min Price</p>
                                     <span className="text-xs font-bold text-slate-700">{formatPrice(priceVal[0])}</span>
                                 </div>
                                 <span className="text-slate-300">-</span>
                                 <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 flex-1 text-center">
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Max Price</p>
+                                    <p className="text-micro font-bold text-slate-400 uppercase tracking-wide">Max Price</p>
                                     <span className="text-xs font-bold text-slate-700">{formatPrice(priceVal[1])}</span>
                                 </div>
                             </div>

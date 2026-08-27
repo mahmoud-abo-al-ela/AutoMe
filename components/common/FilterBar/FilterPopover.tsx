@@ -45,7 +45,7 @@ export const FilterPopover = ({
           {active && (
             <Badge
               variant="secondary"
-              className="h-5 min-w-5 justify-center rounded-full bg-primary/10 px-1.5 text-[10px] font-bold text-primary"
+              className="h-5 min-w-5 justify-center rounded-full bg-primary/10 px-1.5 text-micro font-bold text-primary"
             >
               {activeLabel || activeCount}
             </Badge>

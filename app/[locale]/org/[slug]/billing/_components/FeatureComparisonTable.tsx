@@ -67,7 +67,7 @@ export default function FeatureComparisonTable({
                       {isCurrent && (
                         <Badge
                           variant="outline"
-                          className="text-[10px] border-green-500 text-green-600"
+                          className="text-micro border-green-500 text-green-600"
                         >
                           Current
                         </Badge>

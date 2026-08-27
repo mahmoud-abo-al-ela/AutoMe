@@ -372,31 +372,17 @@
     --text-xs: 0.8125rem;
     --text-sm: 0.9375rem;
     --text-caption: 0.9375rem;
+    --text-micro: 0.8125rem;
 
     /* Arabic needs more leading than Latin: taller ascenders, deeper
        descenders, and diacritics that sit outside the x-height band. */
     line-height: 1.75;
   }
 
-  /* The arbitrary sizes (text-[9px] / [10px] / [11px], ~38 uses) cannot be
-     reached through a variable — Tailwind emits the literal. They are
-     clamped here until they are converted to text-micro. */
-  :lang(ar) [class*="text-[9px]"],
-  :lang(ar) [class*="text-[10px]"],
-  :lang(ar) [class*="text-[11px]"] {
-    font-size: 0.8125rem;
-  }
-
   :lang(ar) * {
     letter-spacing: 0 !important;
   }
 
-  /* Arabic has no letter case, so text-transform is a no-op on the script
-     itself — but the uppercase utility is usually paired with tracking-wider,
-     which is what actually does the damage. Dropped for the same reason. */
-  :lang(ar) .uppercase {
-    text-transform: none;
-  }
 }
 
 /* Custom UI/UX Animations */

@@ -76,7 +76,7 @@ const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
                   <CarFront className="h-6 w-6 text-muted-foreground" />
                 )}
                 {/* Rank Badge */}
-                <div className="absolute -top-1 -start-1 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm border text-[10px] font-bold z-10">
+                <div className="absolute -top-1 -start-1 w-5 h-5 bg-background rounded-full flex items-center justify-center shadow-sm border text-micro font-bold z-10">
                   {idx + 1}
                 </div>
               </div>
@@ -89,7 +89,7 @@ const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
                   <p className="text-xs text-muted-foreground font-mono">
                     {formatCarPrice(Number(car.price))}
                   </p>
-                  <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 ${getStatusColor(car.status)}`}>
+                  <Badge variant="outline" className={`text-micro px-1.5 py-0 h-4 ${getStatusColor(car.status)}`}>
                     {car.status.toLowerCase()}
                   </Badge>
                 </div>

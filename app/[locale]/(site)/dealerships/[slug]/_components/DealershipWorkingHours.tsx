@@ -87,7 +87,7 @@ export const DealershipWorkingHours = ({
                                     )}
                                     {wh.day}
                                     {isToday && (
-                                        <span className="text-[10px] uppercase tracking-wider text-primary/70 font-semibold">
+                                        <span className="text-micro uppercase tracking-wider text-primary/70 font-semibold">
                                             Today
                                         </span>
                                     )}

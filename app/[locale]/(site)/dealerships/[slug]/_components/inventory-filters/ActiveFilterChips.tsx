@@ -34,7 +34,7 @@ export default function ActiveFilterChips({
               exit={{ scale: 0.85, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <Badge variant="outline" className="flex items-center gap-1 py-1 ps-2.5 pe-1.5 bg-slate-50 border-slate-200 text-slate-600 rounded-full font-medium text-[11px] select-none hover:bg-slate-100 transition-colors">
+              <Badge variant="outline" className="flex items-center gap-1 py-1 ps-2.5 pe-1.5 bg-slate-50 border-slate-200 text-slate-600 rounded-full font-medium text-micro select-none hover:bg-slate-100 transition-colors">
                 <span>{chip.label}</span>
                 <button
                   onClick={() => onRemove(chip.field, chip.value)}
@@ -49,7 +49,7 @@ export default function ActiveFilterChips({
           <Button
             variant="ghost"
             onClick={onClearAll}
-            className="h-7 gap-1.5 px-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all font-semibold text-[11px] cursor-pointer"
+            className="h-7 gap-1.5 px-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all font-semibold text-micro cursor-pointer"
           >
             <RotateCcw className="h-3 w-3" />
             Clear All

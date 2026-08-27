@@ -54,10 +54,10 @@ const MobileCarCard = ({
             {getCarTitle(car)}
           </h3>
           <div className="flex items-center gap-1.5 mb-2">
-            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 text-[10px] px-1.5 py-0">
+            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 text-micro px-1.5 py-0">
               {formatPrice(car.price)}
             </Badge>
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+            <Badge variant="outline" className="text-micro px-1.5 py-0">
               {car.year}
             </Badge>
           </div>

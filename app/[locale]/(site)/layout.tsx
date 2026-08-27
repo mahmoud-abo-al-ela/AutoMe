@@ -1,4 +1,3 @@
-import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import MainHeader from "@/components/Header/MainHeader";
 import Footer from "@/components/Footer";
@@ -9,7 +8,6 @@ import { Toaster } from "sonner";
 import { Suspense } from "react";
 import Loading from "@/components/Loading";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
   const organization = await getCurrentOrganization();
@@ -69,7 +67,13 @@ export default async function SiteLayout({
       )}
       <MainHeader user={user} organizationSlug={organization?.slug} organization={organization} />
       <main
-        className={`flex-1 animate-in fade-in duration-500 ${inter.className}`}
+        // No font class here. This used to carry a SECOND Inter instance,
+        // which set font-family: Inter, Inter Fallback on every page body —
+        // and Inter Fallback is local(Arial), which covers Arabic. So all
+        // page content rendered Arabic in Arial while the header and footer,
+        // which sit outside <main>, correctly inherited the Cairo stack from
+        // <body>. Inheriting is the whole point; see globals.css.
+        className="flex-1 animate-in fade-in duration-500"
       >
         <Suspense
           fallback={

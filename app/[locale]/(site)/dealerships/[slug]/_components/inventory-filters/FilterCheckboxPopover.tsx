@@ -33,7 +33,7 @@ export default function FilterCheckboxPopover({
         >
           <span className="text-xs">{label}</span>
           {active && (
-            <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-[10px] rounded-full">
+            <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-micro rounded-full">
               {selected.length}
             </Badge>
           )}

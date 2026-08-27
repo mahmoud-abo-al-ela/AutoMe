@@ -59,7 +59,7 @@ export default function StepIndicator({
                 <span className="text-xs sm:text-sm font-semibold block whitespace-nowrap">
                     {step.name}
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 block">
+                <span className="text-micro sm:text-xs text-gray-500 block">
                     {step.description}
                 </span>
             </div>

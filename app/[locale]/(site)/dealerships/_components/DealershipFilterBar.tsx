@@ -147,7 +147,7 @@ export const DealershipFilterBar = ({
                             <SlidersHorizontal className="h-4 w-4" />
                             Filters
                             {activeCount > 0 && (
-                                <Badge className="h-5 min-w-5 justify-center rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">
+                                <Badge className="h-5 min-w-5 justify-center rounded-full bg-primary px-1.5 text-micro text-primary-foreground">
                                     {activeCount}
                                 </Badge>
                             )}

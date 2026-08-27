@@ -255,7 +255,7 @@ export default function MobileMenu({
 
             {/* Footer */}
             <div className="px-5 py-3 border-t bg-muted/30 text-center">
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-micro text-muted-foreground">
                 {isOnSubdomain && organization?.name
                   ? `© 2026 ${organization.name} • Powered by AutoMe`
                   : "© 2026 AutoMe • All rights reserved"}

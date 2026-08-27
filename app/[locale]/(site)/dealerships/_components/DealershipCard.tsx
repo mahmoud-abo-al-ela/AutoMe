@@ -112,7 +112,7 @@ const DealershipCard = ({
                         {brands.map((brand: string) => (
                             <span
                                 key={brand}
-                                className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+                                className="rounded-full border border-border bg-muted px-2 py-0.5 text-micro text-muted-foreground"
                             >
                                 {brand}
                             </span>

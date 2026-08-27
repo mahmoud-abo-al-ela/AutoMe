@@ -175,7 +175,7 @@ export const OpenStatusBadge = ({
                     }`}
             />
             <span>{status.isOpen ? "Open Now" : "Closed"}</span>
-            <span className="text-[10px] opacity-70">· {status.message}</span>
+            <span className="text-micro opacity-70">· {status.message}</span>
         </Badge>
     );
 };

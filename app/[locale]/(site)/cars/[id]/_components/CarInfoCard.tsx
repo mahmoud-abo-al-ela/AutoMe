@@ -49,11 +49,6 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
     <>
       <Card className="shadow-xl border-0 bg-white p-0 rounded-2xl">
         <CardContent className="p-4 sm:p-6 md:p-8">
-          {/* Save / compare / share stay in the top-RIGHT corner in both
-              directions. `justify-end` is logical, so in RTL it packed them to
-              the left; `rtl:justify-start` is the right-hand edge there. This is
-              a deliberate non-mirror — the actions are anchored to the card, not
-              to the reading direction. */}
           <div className="flex justify-end rtl:justify-start mb-4 sm:mb-6">
             <CarActionButtons
               isFavorite={isFavorite}
@@ -90,8 +85,8 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <Building2 className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground font-medium uppercase tracking-wider">
                       {t("soldBy")}
                     </span>
                   </div>
@@ -106,7 +101,7 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
             </>
           )}
 
-          <Separator className="my-6 sm:my-8" />
+          <Separator className="my-4 sm:my-5" />
 
           <CarActions
             car={car}

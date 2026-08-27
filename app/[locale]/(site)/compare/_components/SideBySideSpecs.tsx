@@ -47,7 +47,7 @@ const SideBySideSpecs = ({
                   {/* Label row */}
                   <div
                     className={cn(
-                      "px-3 pt-2 pb-0.5 text-[10px] text-muted-foreground",
+                      "px-3 pt-2 pb-0.5 text-micro text-muted-foreground",
                       showHighlight && "border-s-2 border-s-amber-400"
                     )}
                   >
@@ -123,7 +123,7 @@ const SideBySideSpecs = ({
                 >
                   <div
                     className={cn(
-                      "px-3 pt-2 pb-0.5 text-[10px] text-muted-foreground line-clamp-1",
+                      "px-3 pt-2 pb-0.5 text-micro text-muted-foreground line-clamp-1",
                       showHighlight && "border-s-2 border-s-amber-400"
                     )}
                   >
