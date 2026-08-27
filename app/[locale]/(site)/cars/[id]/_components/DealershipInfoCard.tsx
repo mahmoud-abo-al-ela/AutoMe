@@ -9,12 +9,14 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { CarDetailOrganization } from "../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
 
 const DealershipInfoCard = ({
     organization,
 }: {
     organization: CarDetailOrganization | null | undefined;
 }) => {
+  const t = useTranslations("carDetail.dealership");
     if (!organization) return null;
 
     const { name, logo, slug, phone, address } = organization;
@@ -52,7 +54,7 @@ const DealershipInfoCard = ({
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                                Listed by
+                                {t("listedBy")}
                             </span>
                         </div>
                         <Link
@@ -81,7 +83,7 @@ const DealershipInfoCard = ({
                                             </a>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>Get directions</p>
+                                            <p>{t("getDirections")}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 )}
@@ -97,7 +99,7 @@ const DealershipInfoCard = ({
                                             </a>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>Call dealership</p>
+                                            <p>{t("callDealership")}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 )}
@@ -116,7 +118,7 @@ const DealershipInfoCard = ({
                     >
                         <Link href={`/dealerships/${slug}`}>
                             <Car className="h-3.5 w-3.5" />
-                            View All Cars
+                            {t("viewAllCars")}
                             <ChevronRight className="h-3.5 w-3.5 ms-auto" />
                         </Link>
                     </Button>
@@ -129,7 +131,7 @@ const DealershipInfoCard = ({
                         >
                             <a href={`tel:${phone}`}>
                                 <Phone className="h-3.5 w-3.5 text-green-600" />
-                                <span className="hidden sm:inline">Call</span>
+                                <span className="hidden sm:inline">{t("call")}</span>
                             </a>
                         </Button>
                     )}
@@ -146,7 +148,7 @@ const DealershipInfoCard = ({
                                 rel="noopener noreferrer"
                             >
                                 <MapPin className="h-3.5 w-3.5 text-red-500" />
-                                <span className="hidden sm:inline">Directions</span>
+                                <span className="hidden sm:inline">{t("directions")}</span>
                             </a>
                         </Button>
                     )}

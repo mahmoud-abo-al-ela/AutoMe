@@ -11,8 +11,10 @@ import CarActionButtons from "./CarActionButtons";
 import CarActions from "./CarActions";
 import { useCarInfoCard } from "./hooks/useCarInfoCard";
 import type { CarDetail } from "../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
 
 const CarInfoCard = ({ car }: { car: CarDetail }) => {
+  const t = useTranslations("carDetail.dealership");
   const {
     isLoading,
     isScheduleLoading,
@@ -47,8 +49,12 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
     <>
       <Card className="shadow-xl border-0 bg-white p-0 rounded-2xl">
         <CardContent className="p-4 sm:p-6 md:p-8">
-          {/* Action buttons in top right */}
-          <div className="flex justify-end mb-4 sm:mb-6">
+          {/* Save / compare / share stay in the top-RIGHT corner in both
+              directions. `justify-end` is logical, so in RTL it packed them to
+              the left; `rtl:justify-start` is the right-hand edge there. This is
+              a deliberate non-mirror — the actions are anchored to the card, not
+              to the reading direction. */}
+          <div className="flex justify-end rtl:justify-start mb-4 sm:mb-6">
             <CarActionButtons
               isFavorite={isFavorite}
               isInCompare={isInCompare}
@@ -86,7 +92,7 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <Building2 className="h-3 w-3 text-muted-foreground" />
                     <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                      Sold by
+                      {t("soldBy")}
                     </span>
                   </div>
                   <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
@@ -94,7 +100,7 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
                   </span>
                 </div>
                 <span className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  View →
+                  {t("view")}
                 </span>
               </Link>
             </>

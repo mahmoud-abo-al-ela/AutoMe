@@ -9,6 +9,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { CarDetail } from "../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
 
 const TestDriveButton = ({
     car,
@@ -25,6 +26,7 @@ const TestDriveButton = ({
     onScheduleTestDrive: () => void;
     onViewTestDrive: () => void;
 }) => {
+  const t = useTranslations("carDetail.testDrive");
     // If car is not available
     if (car.status !== "AVAILABLE") {
         return (
@@ -38,12 +40,12 @@ const TestDriveButton = ({
                                 className="w-full py-3 sm:py-4 rounded-xl cursor-not-allowed opacity-60"
                             >
                                 <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-                                Schedule Test Drive
+                                {t("schedule")}
                             </Button>
                         </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>This car is not available for test drives</p>
+                        <p>{t("unavailable")}</p>
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
@@ -73,7 +75,7 @@ const TestDriveButton = ({
                 className="w-full py-3 sm:py-4 rounded-xl hover:scale-105 transition-transform cursor-pointer bg-blue-50 border-blue-200 text-blue-700"
             >
                 <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-                View Your Test Drive
+                {t("viewYours")}
             </Button>
         );
     }
@@ -94,7 +96,7 @@ const TestDriveButton = ({
             ) : (
                 <>
                     <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-                    Schedule Test Drive
+                    {t("schedule")}
                 </>
             )}
         </Button>

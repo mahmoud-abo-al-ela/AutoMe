@@ -1,0 +1,87 @@
+{
+  "breadcrumb": {
+    "label": "مسار التنقل",
+    "home": "الرئيسية",
+    "cars": "السيارات"
+  },
+  "header": {
+    "listed": "أُضيفت {when}",
+    "featured": "مميزة",
+    "statusAvailable": "متاحة",
+    "statusSold": "مباعة",
+    "statusUnavailable": "غير متاحة"
+  },
+  "gallery": {
+    "label": "معرض الصور",
+    "imageAlt": "{make} {model} — صورة {index} من {total}",
+    "imageAltShort": "{make} {model} — صورة {index}",
+    "previous": "الصورة السابقة",
+    "next": "الصورة التالية",
+    "viewImage": "عرض الصورة {index}",
+    "thumbnail": "صورة مصغّرة {index}",
+    "galleryTitle": "{title} — معرض الصور"
+  },
+  "tabs": {
+    "description": "الوصف",
+    "features": "المزايا",
+    "specifications": "المواصفات"
+  },
+  "description": {
+    "title": "وصف السيارة",
+    "empty": "لا يوجد وصف متاح لهذه السيارة."
+  },
+  "features": {
+    "title": "المزايا والتجهيزات"
+  },
+  "specs": {
+    "title": "المواصفات الفنية",
+    "subtitle": "معلومات تفصيلية عن تصنيع هذه السيارة وتجهيزاتها.",
+    "keyTitle": "أبرز المواصفات",
+    "year": "سنة الصنع",
+    "mileage": "المسافة المقطوعة",
+    "fuelType": "نوع الوقود",
+    "transmission": "ناقل الحركة",
+    "bodyType": "نوع الهيكل",
+    "location": "الموقع",
+    "color": "اللون",
+    "seats": "المقاعد",
+    "seatsValue": "{count} مقاعد",
+    "status": "الحالة",
+    "notSpecified": "غير محدّد"
+  },
+  "actions": {
+    "save": "حفظ",
+    "saved": "محفوظة",
+    "compare": "قارن",
+    "share": "مشاركة",
+    "shareThisCar": "شارك هذه السيارة",
+    "chatNow": "ابدأ محادثة",
+    "goToCompare": "اذهب إلى المقارنة"
+  },
+  "share": {
+    "title": "شارك هذه السيارة",
+    "copyLink": "نسخ الرابط",
+    "copied": "تم نسخ الرابط",
+    "copyFailed": "تعذّر نسخ الرابط",
+    "shareVia": "المشاركة عبر"
+  },
+  "testDrive": {
+    "schedule": "احجز قيادة تجريبية",
+    "unavailable": "هذه السيارة غير متاحة للقيادة التجريبية",
+    "viewYours": "عرض قيادتك التجريبية"
+  },
+  "dealership": {
+    "listedBy": "معروضة من",
+    "soldBy": "البائع",
+    "view": "عرض ←",
+    "getDirections": "الحصول على الاتجاهات",
+    "callDealership": "الاتصال بالمعرض",
+    "viewAllCars": "عرض كل السيارات",
+    "call": "اتصال",
+    "directions": "الاتجاهات"
+  },
+  "errors": {
+    "fetchFailed": "تعذّر جلب تفاصيل السيارة",
+    "fetchError": "حدث خطأ أثناء جلب تفاصيل السيارة"
+  }
+}

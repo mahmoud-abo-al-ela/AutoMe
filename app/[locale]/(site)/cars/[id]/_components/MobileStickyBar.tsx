@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { formatCarPrice } from "@/lib/utils/currency";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "@/i18n/navigation";
 import { StartConversationButton, ChatSidebar } from "@/components/StreamChat";
 import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const MobileStickyBar = ({
     car,
@@ -16,6 +17,8 @@ const MobileStickyBar = ({
     car: CarDetail;
     formatPrice?: PriceFormatter;
 }) => {
+  const fmt = useFormatters();
+  const t = useTranslations("carDetail.actions");
     const { isSignedIn } = useUser();
     const router = useRouter();
     const [chatOpen, setChatOpen] = useState(false);
@@ -35,7 +38,7 @@ const MobileStickyBar = ({
 
     const priceFormatted = formatPrice
         ? formatPrice(car.price)
-        : formatCarPrice(car.price, "en", car.priceCurrency);
+        : fmt.price(car.price, car.priceCurrency);
 
     return (
         <>
@@ -47,7 +50,8 @@ const MobileStickyBar = ({
                             {priceFormatted}
                         </div>
                         <div className="text-xs text-muted-foreground truncate">
-                            {car.title || `${car.year} ${car.make} ${car.model}`}
+                            {car.title ||
+                                `${fmt.number(car.year, { useGrouping: false })} ${car.make} ${car.model}`}
                         </div>
                     </div>
 
@@ -64,7 +68,7 @@ const MobileStickyBar = ({
                             className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md"
                         >
                             <MessageCircle className="w-4 h-4 me-1.5" />
-                            Chat Now
+                            {t("chatNow")}
                         </Button>
                     )}
                 </div>

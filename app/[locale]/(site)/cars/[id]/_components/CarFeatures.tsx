@@ -2,8 +2,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, CheckCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const CarFeatures = ({ features }: { features: string[] }) => {
+  const t = useTranslations("carDetail.features");
   if (!features || features.length === 0) {
     return null;
   }
@@ -16,7 +18,7 @@ const CarFeatures = ({ features }: { features: string[] }) => {
             <Award className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
           </div>
           <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-            Features & Equipment
+            {t("title")}
           </h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">

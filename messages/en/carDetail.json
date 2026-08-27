@@ -1,0 +1,87 @@
+{
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "cars": "Cars"
+  },
+  "header": {
+    "listed": "Listed {when}",
+    "featured": "Featured",
+    "statusAvailable": "Available",
+    "statusSold": "Sold",
+    "statusUnavailable": "Unavailable"
+  },
+  "gallery": {
+    "label": "Image gallery",
+    "imageAlt": "{make} {model} — image {index} of {total}",
+    "imageAltShort": "{make} {model} — image {index}",
+    "previous": "Previous image",
+    "next": "Next image",
+    "viewImage": "View image {index}",
+    "thumbnail": "Thumbnail {index}",
+    "galleryTitle": "{title} — Gallery"
+  },
+  "tabs": {
+    "description": "Description",
+    "features": "Features",
+    "specifications": "Specifications"
+  },
+  "description": {
+    "title": "Vehicle Description",
+    "empty": "No description available for this vehicle."
+  },
+  "features": {
+    "title": "Features & Equipment"
+  },
+  "specs": {
+    "title": "Technical Specifications",
+    "subtitle": "Detailed information about this vehicle’s build and configuration.",
+    "keyTitle": "Key Specifications",
+    "year": "Year",
+    "mileage": "Mileage",
+    "fuelType": "Fuel Type",
+    "transmission": "Transmission",
+    "bodyType": "Body Type",
+    "location": "Location",
+    "color": "Color",
+    "seats": "Seats",
+    "seatsValue": "{count} seats",
+    "status": "Status",
+    "notSpecified": "Not specified"
+  },
+  "actions": {
+    "save": "Save",
+    "saved": "Saved",
+    "compare": "Compare",
+    "share": "Share",
+    "shareThisCar": "Share this car",
+    "chatNow": "Chat Now",
+    "goToCompare": "Go to Compare"
+  },
+  "share": {
+    "title": "Share This Vehicle",
+    "copyLink": "Copy Link",
+    "copied": "Link copied to clipboard",
+    "copyFailed": "Failed to copy link",
+    "shareVia": "Share via"
+  },
+  "testDrive": {
+    "schedule": "Schedule Test Drive",
+    "unavailable": "This car is not available for test drives",
+    "viewYours": "View Your Test Drive"
+  },
+  "dealership": {
+    "listedBy": "Listed by",
+    "soldBy": "Sold by",
+    "view": "View →",
+    "getDirections": "Get directions",
+    "callDealership": "Call dealership",
+    "viewAllCars": "View All Cars",
+    "call": "Call",
+    "directions": "Directions"
+  },
+  "errors": {
+    "fetchFailed": "Failed to fetch car details",
+    "fetchError": "An error occurred while fetching car details"
+  }
+}

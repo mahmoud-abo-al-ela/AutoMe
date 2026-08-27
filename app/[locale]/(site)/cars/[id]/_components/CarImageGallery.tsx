@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { useCarImageGallery } from "./useCarImageGallery";
 import type { CarDetailImage } from "../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const CarImageGallery = ({
   images,
@@ -23,6 +25,8 @@ const CarImageGallery = ({
   model: string;
   title: string | null;
 }) => {
+  const t = useTranslations("carDetail.gallery");
+  const fmt = useFormatters();
   const {
     currentImageIndex,
     setCurrentImageIndex,
@@ -55,7 +59,7 @@ const CarImageGallery = ({
         tabIndex={0}
         onKeyDown={handleGalleryKeyDown}
         role="region"
-        aria-label="Image gallery"
+        aria-label={t("label")}
         aria-roledescription="carousel"
       >
         {/* Main Image Display */}
@@ -69,7 +73,12 @@ const CarImageGallery = ({
           >
             <Image
               src={images[currentImageIndex].url}
-              alt={`${make} ${model} - Image ${currentImageIndex + 1} of ${images.length}`}
+              alt={t("imageAlt", {
+                make,
+                model,
+                index: fmt.number(currentImageIndex + 1),
+                total: fmt.number(images.length),
+              })}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               width={1000}
               height={625}
@@ -92,7 +101,7 @@ const CarImageGallery = ({
                   e.stopPropagation();
                   prevImage();
                 }}
-                aria-label="Previous image"
+                aria-label={t("previous")}
                 className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
                 size="icon"
               >
@@ -103,7 +112,7 @@ const CarImageGallery = ({
                   e.stopPropagation();
                   nextImage();
                 }}
-                aria-label="Next image"
+                aria-label={t("next")}
                 className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
                 size="icon"
               >
@@ -114,7 +123,7 @@ const CarImageGallery = ({
 
           {/* Image Counter */}
           <div className="absolute bottom-2 sm:bottom-4 end-2 sm:end-4 bg-black/70 backdrop-blur-sm text-white px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium">
-            {currentImageIndex + 1} / {images.length}
+            {fmt.number(currentImageIndex + 1)} / {fmt.number(images.length)}
           </div>
         </div>
 
@@ -129,7 +138,7 @@ const CarImageGallery = ({
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  aria-label={`View image ${index + 1}`}
+                  aria-label={t("viewImage", { index: fmt.number(index + 1) })}
                   aria-current={index === currentImageIndex ? "true" : undefined}
                   className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-18 rounded-lg overflow-hidden transition-all duration-200 hover:scale-105 snap-start cursor-pointer ${index === currentImageIndex
                       ? "ring-2 ring-blue-500 shadow-lg shadow-blue-200/50"
@@ -138,7 +147,7 @@ const CarImageGallery = ({
                 >
                   <Image
                     src={image.url}
-                    alt={`Thumbnail ${index + 1}`}
+                    alt={t("thumbnail", { index: fmt.number(index + 1) })}
                     className="w-full h-full object-cover"
                     width={100}
                     height={80}
@@ -155,7 +164,7 @@ const CarImageGallery = ({
         <DialogContent className="max-w-[95vw] sm:max-w-5xl w-full bg-black/95 border-0">
           <DialogHeader>
             <DialogTitle className="text-white text-sm sm:text-base md:text-lg">
-              {title || `${make} ${model}`} - Gallery
+              {t("galleryTitle", { title: title || `${make} ${model}` })}
             </DialogTitle>
           </DialogHeader>
           <div
@@ -166,7 +175,11 @@ const CarImageGallery = ({
           >
             <Image
               src={images[currentImageIndex].url}
-              alt={`${make} ${model} - Image ${currentImageIndex + 1}`}
+              alt={t("imageAltShort", {
+                make,
+                model,
+                index: fmt.number(currentImageIndex + 1),
+              })}
               className="w-full h-full object-contain"
               width={1200}
               height={750}
@@ -175,7 +188,7 @@ const CarImageGallery = ({
               <>
                 <Button
                   onClick={prevImage}
-                  aria-label="Previous image"
+                  aria-label={t("previous")}
                   className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
                   size="icon"
                 >
@@ -183,7 +196,7 @@ const CarImageGallery = ({
                 </Button>
                 <Button
                   onClick={nextImage}
-                  aria-label="Next image"
+                  aria-label={t("next")}
                   className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
                   size="icon"
                 >
@@ -193,7 +206,7 @@ const CarImageGallery = ({
             )}
           </div>
           <div className="flex justify-center items-center gap-2 text-white text-sm sm:text-base">
-            {currentImageIndex + 1} / {images.length}
+            {fmt.number(currentImageIndex + 1)} / {fmt.number(images.length)}
           </div>
           {images.length > 1 && (
             <div
@@ -204,7 +217,7 @@ const CarImageGallery = ({
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  aria-label={`View image ${index + 1}`}
+                  aria-label={t("viewImage", { index: fmt.number(index + 1) })}
                   className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-md overflow-hidden snap-start cursor-pointer transition-all duration-200 ${index === currentImageIndex
                       ? "ring-2 ring-blue-500 opacity-100"
                       : "ring-2 ring-transparent hover:ring-gray-400 opacity-60 hover:opacity-100"
@@ -212,7 +225,7 @@ const CarImageGallery = ({
                 >
                   <Image
                     src={image.url}
-                    alt={`Thumbnail ${index + 1}`}
+                    alt={t("thumbnail", { index: fmt.number(index + 1) })}
                     className="w-full h-full object-cover"
                     width={80}
                     height={60}

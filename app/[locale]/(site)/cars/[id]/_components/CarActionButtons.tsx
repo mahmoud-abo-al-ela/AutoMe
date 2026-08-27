@@ -7,6 +7,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Heart, Share2, Scale } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const CarActionButtons = ({
     isFavorite,
@@ -23,6 +24,8 @@ const CarActionButtons = ({
     onToggleCompare: () => void;
     onShare: () => void;
 }) => {
+  const t = useTranslations("carDetail.actions");
+  const tCar = useTranslations("common.carActions");
     return (
         <div className="flex gap-1.5 sm:gap-2">
             <Tooltip>
@@ -41,12 +44,12 @@ const CarActionButtons = ({
                             className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`}
                         />
                         <span className="hidden xl:inline text-xs">
-                            {isFavorite ? "Saved" : "Save"}
+                            {t(isFavorite ? "saved" : "save")}
                         </span>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>{isFavorite ? "Remove from wishlist" : "Add to wishlist"}</p>
+                    <p>{tCar(isFavorite ? "removeFromFavorites" : "addToFavorites")}</p>
                 </TooltipContent>
             </Tooltip>
 
@@ -64,11 +67,11 @@ const CarActionButtons = ({
                         <Scale
                             className={`w-4 h-4 ${isInCompare ? "fill-current" : ""}`}
                         />
-                        <span className="hidden xl:inline text-xs">Compare</span>
+                        <span className="hidden xl:inline text-xs">{t("compare")}</span>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>{isInCompare ? "Remove from comparison" : "Add to comparison"}</p>
+                    <p>{tCar(isInCompare ? "removeFromCompare" : "addToCompare")}</p>
                 </TooltipContent>
             </Tooltip>
 
@@ -81,11 +84,11 @@ const CarActionButtons = ({
                         className="min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] gap-1.5 transition-all duration-200 hover:text-purple-500 hover:border-purple-200 hover:bg-purple-50 cursor-pointer"
                     >
                         <Share2 className="w-4 h-4" />
-                        <span className="hidden xl:inline text-xs">Share</span>
+                        <span className="hidden xl:inline text-xs">{t("share")}</span>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>Share this car</p>
+                    <p>{t("shareThisCar")}</p>
                 </TooltipContent>
             </Tooltip>
         </div>

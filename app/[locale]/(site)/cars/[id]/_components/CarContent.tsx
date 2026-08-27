@@ -8,13 +8,16 @@ import {
 } from "./";
 import { notFound } from "next/navigation";
 import type { CarDetail } from "../_lib/car-detail-types";
+import { getTranslations } from "next-intl/server";
 
 const CarContent = async ({ id }: { id: string }) => {
+  // Server component: getTranslations, not the useTranslations hook.
+  const t = await getTranslations("carDetail.errors");
   let car: CarDetail;
   try {
     const response = await getCarById(id);
     if (!response.success) {
-      throw new Error(response.error.message || "Failed to fetch car details");
+      throw new Error(response.error.message || t("fetchFailed"));
     }
     car = response.data;
   } catch (error) {
@@ -22,7 +25,7 @@ const CarContent = async ({ id }: { id: string }) => {
     const errorMessage =
       error instanceof Error
         ? error.message
-        : "An error occurred while fetching car details";
+        : t("fetchError");
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500">
         Error: {errorMessage}

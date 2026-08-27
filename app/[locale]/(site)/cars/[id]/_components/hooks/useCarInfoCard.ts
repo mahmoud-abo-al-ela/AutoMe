@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatCarPrice } from "@/lib/utils/currency";
 import { toggleWishlist } from "@/actions/cars-listing";
 import { checkExistingTestDrive } from "@/actions/test-drive";
 import { toast } from "sonner";
@@ -11,8 +10,12 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import type { CarDetail, PriceFormatter } from "../../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 export const useCarInfoCard = (car: CarDetail) => {
+  const t = useTranslations("common.carActions");
+  const fmt = useFormatters();
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduleLoading, setIsScheduleLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(car?.isWishlisted || false);
@@ -75,13 +78,13 @@ export const useCarInfoCard = (car: CarDetail) => {
         // `error` is an object, not a string — comparing it to "Unauthorized"
         // was never true, so auth failures fell through silently.
       } else if (response.error.code === "AUTHENTICATION_ERROR") {
-        toast.error("Please sign in to add cars to your wishlist");
+        toast.error(t("signInToSave"));
       } else {
-        toast.error(response.error.message || "Failed to update wishlist");
+        toast.error(response.error.message || t("wishlistError"));
       }
     } catch (error) {
       console.error("Failed to toggle wishlist", error);
-      toast.error("Failed to update wishlist");
+      toast.error(t("wishlistError"));
     } finally {
       setIsLoading(false);
     }
@@ -91,16 +94,16 @@ export const useCarInfoCard = (car: CarDetail) => {
     if (isInCompare) {
       compareUtils.removeFromCompare(car.id);
       setIsInCompare(false);
-      toast.info("Removed from comparison");
+      toast.info(t("compareRemoved"));
       window.dispatchEvent(new Event("compareListUpdated"));
     } else {
       const added = compareUtils.addToCompare(car.id);
       if (added) {
         setIsInCompare(true);
-        toast.success("Added to comparison");
+        toast.success(t("compareAdded"));
         window.dispatchEvent(new Event("compareListUpdated"));
       } else {
-        toast.warning("You can compare up to 3 cars at a time");
+        toast.warning(t("compareLimit", { max: fmt.number(3) }));
       }
     }
   };
@@ -134,7 +137,7 @@ export const useCarInfoCard = (car: CarDetail) => {
 
   // Bound to this listing's own currency, so presenters stay currency-agnostic.
   const formatPrice: PriceFormatter = (price) =>
-    formatCarPrice(price, "en", car.priceCurrency);
+    fmt.price(price, car.priceCurrency);
 
   return {
     isLoading,

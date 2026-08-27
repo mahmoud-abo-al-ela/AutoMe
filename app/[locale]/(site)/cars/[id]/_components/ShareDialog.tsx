@@ -12,11 +12,12 @@ import { Mail, Copy, Facebook, Twitter, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { socialShares } from "@/lib/SocialShare";
 import type { CarDetail } from "../_lib/car-detail-types";
+import { useTranslations } from "next-intl";
 
 const ShareDialog = ({
   isOpen,
   onOpenChange,
-  title = "Share This Vehicle",
+  title,
   // Optional: the dealership share button reuses this dialog and has no car,
   // which the document.title fallback below already handles.
   car = null,
@@ -26,7 +27,11 @@ const ShareDialog = ({
   title?: string;
   car?: CarDetail | null;
 }) => {
+  const t = useTranslations("carDetail.share");
   const [copying, setCopying] = useState(false);
+
+  // A default parameter cannot call a hook, so the fallback is resolved here.
+  const dialogTitle = title ?? t("title");
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   // CarInfoCard has always passed `car`; it was simply never read. Car.title is
@@ -43,9 +48,9 @@ const ShareDialog = ({
       setCopying(true);
       try {
         await navigator.clipboard.writeText(shareUrl);
-        toast.success("Link copied to clipboard");
+        toast.success(t("copied"));
       } catch {
-        toast.error("Failed to copy link");
+        toast.error(t("copyFailed"));
       } finally {
         setCopying(false);
       }
@@ -57,7 +62,7 @@ const ShareDialog = ({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-start sm:text-center text-base sm:text-xl">
-            {title}
+            {dialogTitle}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-2">
@@ -74,13 +79,13 @@ const ShareDialog = ({
               className="gap-1.5 whitespace-nowrap w-full sm:w-auto cursor-pointer"
             >
               <Copy className="h-4 w-4" />
-              {copying ? "Copying..." : "Copy Link"}
+              {copying ? "Copying..." : t("copyLink")}
             </Button>
           </div>
 
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-3">
-              Share via
+              {t("shareVia")}
             </h3>
             <div className="grid grid-cols-4 md:grid-cols-2 gap-6 md:gap-2 w-fit md:w-full">
               {shares.map((social) => (

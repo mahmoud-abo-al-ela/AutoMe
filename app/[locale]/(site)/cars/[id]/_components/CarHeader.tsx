@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock } from "lucide-react";
 import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
@@ -12,71 +14,29 @@ const CarHeader = ({
     car: CarDetail;
     formatPrice: PriceFormatter;
 }) => {
-    const [listedText, setListedText] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!car.createdAt) return;
-
-        const created = new Date(car.createdAt);
-        if (isNaN(created.getTime())) return;
-
-        const now = new Date();
-
-        // If the date is in the future (shouldn't happen, but handle gracefully)
-        if (created > now) {
-            setListedText("Listed recently");
-            return;
-        }
-
-        // Use calendar day comparison to avoid timezone/hour issues
-        const createdDate = new Date(
-            created.getFullYear(),
-            created.getMonth(),
-            created.getDate()
-        );
-        const todayDate = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-        );
-        const diffDays = Math.round(
-            (todayDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        if (diffDays === 0) {
-            setListedText("Listed today");
-        } else if (diffDays === 1) {
-            setListedText("Listed yesterday");
-        } else if (diffDays < 7) {
-            setListedText(`Listed ${diffDays} days ago`);
-        } else if (diffDays < 30) {
-            const weeks = Math.floor(diffDays / 7);
-            setListedText(`Listed ${weeks} ${weeks === 1 ? "week" : "weeks"} ago`);
-        } else if (diffDays < 365) {
-            const months = Math.floor(diffDays / 30);
-            setListedText(
-                `Listed ${months} ${months === 1 ? "month" : "months"} ago`
-            );
-        } else {
-            const years = Math.floor(diffDays / 365);
-            setListedText(
-                `Listed ${years} ${years === 1 ? "year" : "years"} ago`
-            );
-        }
-    }, [car.createdAt]);
+    const t = useTranslations("carDetail.header");
+    const fmt = useFormatters();
+    const attr = useCarAttributes();
+    // This was ~50 lines of hand-rolled date arithmetic that hardcoded
+    // English words and English pluralisation ("1 week" / "2 weeks"), which
+    // cannot be expressed for Arabic. `formatRelativeToNow` already does this
+    // through date-fns with the active locale loaded.
+    const listedText = car.createdAt
+        ? t("listed", { when: fmt.relativeToNow(car.createdAt) })
+        : null;
 
     const getStatusBadge = (status: CarDetail["status"]) => {
         switch (status) {
             case "AVAILABLE":
                 return (
                     <Badge className="bg-green-50 text-green-700 border border-green-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium">
-                        Available
+                        {t("statusAvailable")}
                     </Badge>
                 );
             case "SOLD":
                 return (
                     <Badge className="bg-red-50 text-red-700 border border-red-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium">
-                        Sold
+                        {t("statusSold")}
                     </Badge>
                 );
             // CarStatus has no PENDING member; this case used to read
@@ -84,7 +44,7 @@ const CarHeader = ({
             case "UNAVAILABLE":
                 return (
                     <Badge className="bg-gray-100 text-gray-700 border border-gray-200 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium">
-                        Unavailable
+                        {t("statusUnavailable")}
                     </Badge>
                 );
             default:
@@ -99,7 +59,7 @@ const CarHeader = ({
                 {car.featured && (
                     <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 px-2.5 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full font-medium shadow-sm">
                         <Star className="w-3 h-3 me-1 fill-current" />
-                        Featured
+                        {t("featured")}
                     </Badge>
                 )}
                 {getStatusBadge(car.status)}
@@ -107,7 +67,8 @@ const CarHeader = ({
 
             {/* Title */}
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
-                {car.title || `${car.year} ${car.make} ${car.model}`}
+                {car.title ||
+                    `${fmt.number(car.year, { useGrouping: false })} ${car.make} ${car.model}`}
             </h1>
 
             {/* Price + Listed date */}
