@@ -6,7 +6,21 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+  /* Per-glyph fallback: Latin resolves to Inter, Arabic to Cairo, so a car
+     listing title that mixes scripts in one string ("تويوتا Corolla") gets
+     the right face for each half.
+
+     The families are named directly instead of going through next/font's
+     --font-inter / --font-arabic variables, and that is load-bearing. Those
+     variables expand to `"Inter", "Inter Fallback"`, where Inter Fallback is
+     `local(Arial)` with no unicode-range. Arial covers Arabic, so it caught
+     every Arabic glyph before the stack ever reached Cairo — the Arabic text
+     silently rendered in Arial. `adjustFontFallback: false` on the Inter
+     import does not remove that face either.
+
+     The @font-face rules still come from next/font (both `.variable` classes
+     are applied on <html>); this only controls resolution order. */
+  --font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
   --color-brand-accent: var(--brand-accent);
@@ -44,6 +58,50 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Deliberately NOT `@theme inline`: inline substitutes the literal value
+   into every utility, which would put these sizes beyond the reach of the
+   per-language overrides in the base layer below. */
+@theme {
+  /* ---------------------------------------------------------------------
+     Type scale.
+
+     Seven roles, not fifteen ad-hoc sizes. Headings are fluid: clamp()
+     interpolates between the min and max across the viewport, which replaces
+     the hand-written "text-3xl sm:text-4xl md:text-5xl" chains — those had
+     drifted into 18 different variants for about 6 jobs.
+
+     Body and below do NOT scale. Body text is 16px everywhere: under 16px iOS
+     Safari zooms the page when an input takes focus, and scaling body copy per
+     breakpoint is a common way to make small screens harder to read, not easier.
+
+     --text-micro is the floor at 12px. It exists so nobody reaches for
+     text-[9px] again.
+     --------------------------------------------------------------------- */
+  --text-display: clamp(2rem, 1.2rem + 4vw, 3.75rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-h1: clamp(1.75rem, 1.2rem + 2.5vw, 3rem);
+  --text-h1--line-height: 1.12;
+  --text-h1--letter-spacing: -0.02em;
+
+  --text-h2: clamp(1.5rem, 1.1rem + 1.8vw, 2.25rem);
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.01em;
+
+  --text-h3: clamp(1.25rem, 1.05rem + 1vw, 1.5rem);
+  --text-h3--line-height: 1.3;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.5;
+
+  --text-micro: 0.75rem;
+  --text-micro--line-height: 1.45;
 }
 
 :root {
@@ -282,7 +340,62 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* ---------------------------------------------------------------------
+     Arabic typography.
+
+     Arabic is not Latin at a different size. At the same nominal px it reads
+     smaller and denser, its ascenders and descenders are taller, and the
+     diacritics sit above and below the line — so it needs more leading than
+     Latin, and a slightly larger body size to match optically.
+
+     Letter-spacing is forced to zero because Arabic is cursive: the letters
+     join, and tracking pulls those joins apart so words look shattered. The
+     app had 39 tracking-* utilities, several on headings that also render in
+     Arabic. This neutralises them in the Arabic tree without touching Latin.
+     --------------------------------------------------------------------- */
+  :lang(ar) {
+    /* Only the small end is raised.
+
+       Cairo has a large x-height, so it already reads bigger than a Latin
+       face at the same nominal px — raising every step the way a smaller
+       Arabic face would need makes the page look oversized next to the
+       English one. What does not survive is the bottom of the scale: 12px
+       Arabic is hard to read whatever the face, because the letterforms
+       carry more detail per glyph than Latin and the dots merge. 13px is
+       the floor. text-base and above are left alone.
+
+       These four values are the tuning knobs if the Arabic pages still
+       read small or start to read heavy. */
+    --text-xs: 0.8125rem;
+    --text-sm: 0.9375rem;
+    --text-caption: 0.9375rem;
+
+    /* Arabic needs more leading than Latin: taller ascenders, deeper
+       descenders, and diacritics that sit outside the x-height band. */
+    line-height: 1.75;
+  }
+
+  /* The arbitrary sizes (text-[9px] / [10px] / [11px], ~38 uses) cannot be
+     reached through a variable — Tailwind emits the literal. They are
+     clamped here until they are converted to text-micro. */
+  :lang(ar) [class*="text-[9px]"],
+  :lang(ar) [class*="text-[10px]"],
+  :lang(ar) [class*="text-[11px]"] {
+    font-size: 0.8125rem;
+  }
+
+  :lang(ar) * {
+    letter-spacing: 0 !important;
+  }
+
+  /* Arabic has no letter case, so text-transform is a no-op on the script
+     itself — but the uppercase utility is usually paired with tracking-wider,
+     which is what actually does the damage. Dropped for the same reason. */
+  :lang(ar) .uppercase {
+    text-transform: none;
   }
 }
 

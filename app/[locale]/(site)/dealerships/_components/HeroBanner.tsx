@@ -32,7 +32,7 @@ export const HeroBanner = ({
             </div>
 
             <div className="relative z-10 mx-auto max-w-2xl text-center">
-                <h1 className="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-4xl">
+                <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm sm:text-4xl">
                     Browse Dealerships
                 </h1>
                 <p className="mx-auto mt-3 max-w-xl text-sm font-medium text-white/80 sm:text-base">

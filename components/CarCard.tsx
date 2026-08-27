@@ -90,7 +90,7 @@ const CarCard = ({
             )}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
             <div className="absolute bottom-3 start-3 z-10">
-              <span className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/90 px-3 py-1.5 text-sm font-extrabold text-slate-900 shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 sm:text-base">
+              <span className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/90 px-3 py-1.5 text-sm font-bold text-slate-900 shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 sm:text-base">
                 {formatPrice(car.price)}
               </span>
             </div>
