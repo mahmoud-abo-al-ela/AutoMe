@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useDirection } from "@radix-ui/react-direction";
 import type { CarDetailImage } from "../_lib/car-detail-types";
 
 /**
@@ -9,6 +10,8 @@ import type { CarDetailImage } from "../_lib/car-detail-types";
  * active thumbnail scrolled into view. Keeps CarImageGallery presentational.
  */
 export function useCarImageGallery(images: CarDetailImage[] | undefined) {
+  const direction = useDirection();
+  const isRtl = direction === "rtl";
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -30,18 +33,21 @@ export function useCarImageGallery(images: CarDetailImage[] | undefined) {
   // Keyboard navigation for the gallery
   const handleGalleryKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      // Arrow keys are physical; nextImage/prevImage are logical. In Arabic
+      // the gallery advances right-to-left, so the left arrow has to mean
+      // "next" or the keys walk against the way the images visibly move.
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        prevImage();
+        if (isRtl) nextImage(); else prevImage();
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        nextImage();
+        if (isRtl) prevImage(); else nextImage();
       } else if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         setIsImageModalOpen(true);
       }
     },
-    [prevImage, nextImage]
+    [prevImage, nextImage, isRtl]
   );
 
   // Keyboard navigation for the modal
@@ -78,7 +84,12 @@ export function useCarImageGallery(images: CarDetailImage[] | undefined) {
     const minSwipeDistance = 50;
 
     if (Math.abs(distance) >= minSwipeDistance) {
-      if (distance > 0) {
+      // A positive distance is a swipe towards the start of the screen. That
+      // means "forward" in LTR and "backward" in RTL, so the branch flips
+      // with direction — otherwise an Arabic reader swipes one way and the
+      // gallery moves the other.
+      const forward = isRtl ? distance < 0 : distance > 0;
+      if (forward) {
         nextImage();
       } else {
         prevImage();
@@ -87,7 +98,7 @@ export function useCarImageGallery(images: CarDetailImage[] | undefined) {
 
     touchStartRef.current = null;
     touchEndRef.current = null;
-  }, [nextImage, prevImage]);
+  }, [nextImage, prevImage, isRtl]);
 
   // Preload adjacent images
   useEffect(() => {

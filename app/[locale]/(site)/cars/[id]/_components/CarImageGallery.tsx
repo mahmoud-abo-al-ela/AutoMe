@@ -105,7 +105,7 @@ const CarImageGallery = ({
                 className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
                 size="icon"
               >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 rtl:rotate-180" />
               </Button>
               <Button
                 onClick={(e) => {
@@ -116,7 +116,7 @@ const CarImageGallery = ({
                 className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
                 size="icon"
               >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 rtl:rotate-180" />
               </Button>
             </>
           )}
@@ -192,7 +192,7 @@ const CarImageGallery = ({
                   className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
                   size="icon"
                 >
-                  <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
+                  <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6 rtl:rotate-180" />
                 </Button>
                 <Button
                   onClick={nextImage}
@@ -200,7 +200,7 @@ const CarImageGallery = ({
                   className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-3 rounded-full cursor-pointer transition-colors"
                   size="icon"
                 >
-                  <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
+                  <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 rtl:rotate-180" />
                 </Button>
               </>
             )}
