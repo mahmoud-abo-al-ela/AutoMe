@@ -31,6 +31,7 @@ export default defineConfig({
             "lib/**/*.test.{js,jsx,ts,tsx}",
             "actions/**/*.test.{js,jsx,ts,tsx}",
             "app/**/*.test.{js,jsx,ts,tsx}",
+            "i18n/**/*.test.{js,jsx,ts,tsx}",
             "test/**/*.test.{js,jsx,ts,tsx}",
           ],
           exclude: [...sharedExclude, "**/*.jsdom.test.{js,jsx,ts,tsx}"],
