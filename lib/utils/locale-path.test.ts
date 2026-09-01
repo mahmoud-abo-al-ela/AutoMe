@@ -1,7 +1,10 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { localized, localeOf, pathnameWithoutLocale } from "./locale-path";
+import { PROTECTED_ROUTES } from "../route-policy";
 
 describe("pathnameWithoutLocale", () => {
   it("strips a leading locale segment", () => {
@@ -73,14 +76,42 @@ describe("localized route matchers", () => {
   });
 
   it("covers every protected route family in both locales", () => {
-    const isProtected = createRouteMatcher(
-      localized(["/admin(.*)", "/saved-cars(.*)", "/reservations(.*)"])
-    );
+    // Driven off the real list, not a copy of it. The copy is what let the
+    // middleware guard three routes that did not exist while /test-drive and
+    // /wishlist stayed open.
+    const isProtected = createRouteMatcher(localized(PROTECTED_ROUTES));
 
-    for (const path of ["/admin", "/saved-cars", "/reservations"]) {
+    for (const pattern of PROTECTED_ROUTES) {
+      const path = pattern.replace("(.*)", "");
       expect(isProtected(req(path))).toBe(true);
       expect(isProtected(req(`/en${path}`))).toBe(true);
       expect(isProtected(req(`/ar${path}`))).toBe(true);
+    }
+  });
+
+  it("guards a route for every signed-in page that exists", () => {
+    // Guards against the reverse drift: a pattern that matches nothing real.
+    // Every entry must name a directory under app/[locale].
+    const appDir = path.join(process.cwd(), "app", "[locale]");
+    const dirs = new Set<string>();
+    for (const group of fs.readdirSync(appDir, { withFileTypes: true })) {
+      if (!group.isDirectory()) continue;
+      dirs.add(group.name);
+      // Route groups like (site) are not URL segments; look inside them too.
+      if (group.name.startsWith("(")) {
+        for (const child of fs.readdirSync(path.join(appDir, group.name), {
+          withFileTypes: true,
+        })) {
+          if (child.isDirectory()) dirs.add(child.name);
+        }
+      }
+    }
+
+    for (const pattern of PROTECTED_ROUTES) {
+      const segment = pattern.replace("(.*)", "").slice(1);
+      expect(dirs, `${pattern} names no directory under app/[locale]`).toContain(
+        segment
+      );
     }
   });
 });

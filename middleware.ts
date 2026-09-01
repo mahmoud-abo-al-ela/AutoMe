@@ -12,25 +12,24 @@ import {
   localeOf,
   pathnameWithoutLocale,
 } from "@/lib/utils/locale-path";
+import {
+  MAIN_DOMAIN_ONLY_ROUTES,
+  PROTECTED_ROUTES,
+  SUBDOMAIN_REDIRECT_TO_HOME_ROUTES,
+  SUPER_ADMIN_ROUTES,
+} from "@/lib/route-policy";
 
-const isProtectedRoute = createRouteMatcher(
-  localized(["/admin(.*)", "/saved-cars(.*)", "/reservations(.*)"])
-);
+const isProtectedRoute = createRouteMatcher(localized(PROTECTED_ROUTES));
 
-const isSuperAdminRoute = createRouteMatcher(localized(["/super-admin(.*)"]));
+const isSuperAdminRoute = createRouteMatcher(localized(SUPER_ADMIN_ROUTES));
 
 const isMainDomainOnlyRoute = createRouteMatcher(
-  localized([
-    "/pricing(.*)",
-    "/signup-org(.*)",
-    "/super-admin(.*)",
-    "/onboarding(.*)",
-  ])
+  localized(MAIN_DOMAIN_ONLY_ROUTES)
 );
 
 // Routes that should redirect to the dealership home on subdomains
 const isSubdomainRedirectToHomeRoute = createRouteMatcher(
-  localized(["/dealerships"])
+  localized(SUBDOMAIN_REDIRECT_TO_HOME_ROUTES)
 );
 
 // API routes are not localized — they carry no locale prefix and must bypass
