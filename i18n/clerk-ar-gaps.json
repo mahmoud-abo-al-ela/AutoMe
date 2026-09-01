@@ -1,0 +1,31 @@
+{
+  "formFieldInputPlaceholder__emailAddress": "أدخل بريدك الإلكتروني",
+  "formFieldInputPlaceholder__emailAddress_username": "أدخل البريد الإلكتروني أو اسم المستخدم",
+  "formFieldInputPlaceholder__username": "أدخل اسم المستخدم",
+  "formFieldInputPlaceholder__password": "أدخل كلمة المرور",
+  "formFieldInputPlaceholder__signUpPassword": "أنشئ كلمة مرور",
+  "formFieldInputPlaceholder__firstName": "الاسم الأول",
+  "formFieldInputPlaceholder__lastName": "الاسم الأخير",
+  "formFieldInputPlaceholder__phoneNumber": "أدخل رقم هاتفك",
+  "formFieldInputPlaceholder__backupCode": "أدخل الرمز الاحتياطي",
+  "signIn": {
+    "start": {
+      "titleCombined": "للمتابعة إلى {{applicationName}}"
+    }
+  },
+  "signUp": {
+    "start": {
+      "subtitleCombined": "أهلًا بك! من فضلك أكمل البيانات للبدء.",
+      "actionLink__use_email": "استخدم البريد الإلكتروني بدلًا من ذلك",
+      "actionLink__use_phone": "استخدم رقم الهاتف بدلًا من ذلك"
+    }
+  },
+  "unstable__errors": {
+    "action_blocked": "تم حظر هذا الإجراء. من فضلك حاول مرة أخرى لاحقًا.",
+    "form_password_length_too_short": "كلمة المرور قصيرة جدًا. يجب ألا تقل عن 8 أحرف.",
+    "form_password_matches_identifier": "لا يمكن أن تطابق كلمة المرور بريدك الإلكتروني أو اسم المستخدم.",
+    "form_new_password_matches_current": "كلمة المرور الجديدة مطابقة للحالية.",
+    "form_username_invalid_length": "يجب أن يتراوح طول اسم المستخدم بين {{min_length}} و{{max_length}} حرفًا.",
+    "oauth_access_denied": "تم رفض الوصول. لم تكتمل عملية تسجيل الدخول."
+  }
+}
