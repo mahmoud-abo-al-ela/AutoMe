@@ -2,6 +2,7 @@ import type { getBookedTimeSlots } from "@/actions/test-drive";
 import type { ActionResponse } from "@/lib/utils/response";
 import type { DayOfWeek } from "@/lib/generated/prisma";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
+import { APP_TIME_ZONE } from "@/lib/utils/intl-locale";
 
 export type { DayOfWeek };
 
@@ -80,6 +81,40 @@ export const filterAvailableTimeSlots = (
   bookedSlots: BookedSlot[]
 ): string[] => allSlots.filter((slot) => !isTimeSlotBooked(slot, bookedSlots));
 
+const cairoNow = (now: Date): { date: string; time: string } => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    // h23 rather than hour12:false — the latter renders midnight as "24" on
+    // some ICU builds, which would compare above every slot and empty the day.
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+
+  return {
+    date: `${part("year")}-${part("month")}-${part("day")}`,
+    time: `${part("hour")}:${part("minute")}`,
+  };
+};
+
+export const filterPastTimeSlots = (
+  slots: string[],
+  dateString: string,
+  now: Date = new Date()
+): string[] => {
+  const { date: today, time } = cairoNow(now);
+
+  if (dateString !== today) return slots;
+
+  return slots.filter((slot) => slot > time);
+};
+
 /** Past dates and days the dealership is closed cannot be booked. */
 export const makeIsDateDisabled =
   (workingHours: WorkingHours) =>
@@ -112,13 +147,6 @@ export const generateAvailableDates = (
   return dates;
 };
 
-/**
- * Turn the dealership's stored WorkingHours rows into the calendar's lookup.
- *
- * The stored rows use the Prisma `DayOfWeek` enum and cover one day each after
- * `formatWorkingHours` flattens them; days the dealership never configured are
- * filled in as closed, so an unlisted day is never offered for booking.
- */
 export const toWorkingHours = (entries: WorkingHoursEntry[]): WorkingHours => {
   const hours = {} as WorkingHours;
 

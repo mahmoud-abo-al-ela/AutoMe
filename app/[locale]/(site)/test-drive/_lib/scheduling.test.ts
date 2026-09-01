@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   dayOfWeekFor,
+  filterPastTimeSlots,
   generateAvailableDates,
   generateTimeSlots,
   makeIsDateDisabled,
@@ -106,5 +107,73 @@ describe("generateTimeSlots", () => {
     // toWorkingHours writes "" for days with no configured hours, and the edit
     // form calls this before the real hours land.
     expect(generateTimeSlots("", "")).toEqual([]);
+  });
+});
+
+describe("filterPastTimeSlots", () => {
+  const slots = ["09:00", "09:30", "10:00", "13:00", "17:30"];
+
+  // Cairo is UTC+2 in winter and UTC+3 in summer — DST was reinstated in 2023 —
+  // so these instants are chosen to pin both, and to pin the day boundary the
+  // browser's own zone would get wrong.
+
+  it("drops slots that have already passed today", () => {
+    // 2026-01-15T08:00Z is 10:00 in Cairo (UTC+2, winter).
+    const now = new Date("2026-01-15T08:00:00Z");
+
+    expect(filterPastTimeSlots(slots, "2026-01-15", now)).toEqual([
+      "13:00",
+      "17:30",
+    ]);
+  });
+
+  it("uses the Cairo offset, not UTC", () => {
+    // 2026-07-15T08:00Z is 11:00 in Cairo (UTC+3, summer). Treating it as UTC
+    // would leave 09:30 and 10:00 on offer after they had passed.
+    const now = new Date("2026-07-15T08:00:00Z");
+
+    expect(filterPastTimeSlots(slots, "2026-07-15", now)).toEqual([
+      "13:00",
+      "17:30",
+    ]);
+  });
+
+  it("leaves any other date untouched", () => {
+    const now = new Date("2026-01-15T08:00:00Z");
+
+    expect(filterPastTimeSlots(slots, "2026-01-16", now)).toEqual(slots);
+    expect(filterPastTimeSlots(slots, "2026-01-14", now)).toEqual(slots);
+  });
+
+  it("decides 'today' in Cairo rather than in UTC", () => {
+    // 23:30Z on the 15th is already 01:30 on the 16th in Cairo. The 16th is
+    // therefore today, and its early slots have passed; the 15th is yesterday
+    // and is left alone.
+    const now = new Date("2026-01-15T23:30:00Z");
+
+    expect(filterPastTimeSlots(slots, "2026-01-16", now)).toEqual([
+      "09:00",
+      "09:30",
+      "10:00",
+      "13:00",
+      "17:30",
+    ]);
+    expect(filterPastTimeSlots(slots, "2026-01-15", now)).toEqual(slots);
+  });
+
+  it("empties the day once the last slot has gone", () => {
+    // 20:00 Cairo, after every slot above.
+    const now = new Date("2026-01-15T18:00:00Z");
+
+    expect(filterPastTimeSlots(slots, "2026-01-15", now)).toEqual([]);
+  });
+
+  it("keeps a slot at exactly the current minute out of the list", () => {
+    // 10:00 Cairo. A slot starting this minute is not bookable.
+    const now = new Date("2026-01-15T08:00:00Z");
+
+    expect(filterPastTimeSlots(["10:00", "10:30"], "2026-01-15", now)).toEqual([
+      "10:30",
+    ]);
   });
 });

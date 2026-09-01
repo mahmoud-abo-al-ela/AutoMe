@@ -11,6 +11,7 @@ import { requestTestDrive, getBookedTimeSlots } from "@/actions/test-drive";
 import {
     dayOfWeekFor,
     filterAvailableTimeSlots,
+    filterPastTimeSlots,
     generateTimeSlots,
     makeIsDateDisabled,
     type DayOfWeek,
@@ -86,7 +87,12 @@ export const useTestDriveForm = ({
         setValue("endTime", "");
 
         const { openTime, closeTime } = workingHours[dayOfWeek];
-        const allSlots = generateTimeSlots(openTime, closeTime);
+        // Opening hours say a 09:00 slot exists; they do not say it is still
+        // bookable at 14:00. On any other date this is a no-op.
+        const allSlots = filterPastTimeSlots(
+            generateTimeSlots(openTime, closeTime),
+            dateString
+        );
 
         try {
             // Fetch booked time slots for this date and car

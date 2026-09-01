@@ -11,6 +11,7 @@ import { editTestDrive, getBookedTimeSlots } from "@/actions/test-drive";
 import {
     dayOfWeekFor,
     filterAvailableTimeSlots,
+    filterPastTimeSlots,
     generateAvailableDates,
     generateTimeSlots,
     makeIsDateDisabled,
@@ -77,7 +78,12 @@ export const useEditTestDriveForm = ({
      */
     const loadTimeSlots = useCallback(
         async (dateString: string, hours: { openTime: string; closeTime: string }) => {
-            const allSlots = generateTimeSlots(hours.openTime, hours.closeTime);
+            // Same rule as the create form: today's slots stop being offered
+            // once they have passed.
+            const allSlots = filterPastTimeSlots(
+                generateTimeSlots(hours.openTime, hours.closeTime),
+                dateString
+            );
 
             try {
                 const bookedSlotsResult = await getBookedTimeSlots(carId, dateString);
