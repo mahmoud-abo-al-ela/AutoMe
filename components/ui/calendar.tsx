@@ -8,9 +8,20 @@ import {
 } from "lucide-react"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
 import { useDirection } from "@radix-ui/react-direction";
+import { useLocale } from "next-intl";
+import { ar as arDateFns, enUS as enDateFns } from "date-fns/locale";
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { intlLocale } from "@/lib/utils/intl-locale"
+import type { Locale } from "@/i18n/routing"
+
+/**
+ * Egypt's week starts on Saturday — the weekend is Friday–Saturday, not
+ * Saturday–Sunday. react-day-picker defaults to Sunday, which puts the weekend
+ * either side of the grid instead of together at the end.
+ */
+const WEEK_STARTS_ON = 6 as const;
 
 function Calendar({
   className,
@@ -32,9 +43,36 @@ function Calendar({
   // stock shadcn and only fixes the arrows, not the day order.
   const direction = useDirection();
 
+  // The month name, the weekday headers and the day numbers all came from the
+  // *system* locale before this — `toLocaleString("default", …)` below, and
+  // react-day-picker's own English default. So an Arabic booking page opened a
+  // picker captioned "September 2026" with Su–Sa headers and Western digits,
+  // directly under a trigger reading "الثلاثاء، ١ سبتمبر ٢٠٢٦".
+  const locale = useLocale() as Locale;
+  const tag = intlLocale(locale);
+
+  // The `locale` prop above already gives Arabic month and weekday names, so
+  // only the digits are overridden here: date-fns renders "سبتمبر 2026" — the
+  // month translated, the year still Western — and the numbering system is a
+  // product decision that lives in intlLocale, not in the date library.
+  const numeralFormatters = React.useMemo(
+    () => ({
+      formatCaption: (date: Date) =>
+        new Intl.DateTimeFormat(tag, { month: "long", year: "numeric" }).format(date),
+      formatYearDropdown: (date: Date) =>
+        new Intl.DateTimeFormat(tag, { year: "numeric" }).format(date),
+      formatDay: (date: Date) => new Intl.NumberFormat(tag).format(date.getDate()),
+      formatWeekNumber: (weekNumber: number) =>
+        new Intl.NumberFormat(tag).format(weekNumber),
+    }),
+    [tag]
+  );
+
   return (
     <DayPicker
       dir={direction}
+      locale={locale === "ar" ? arDateFns : enDateFns}
+      weekStartsOn={WEEK_STARTS_ON}
       showOutsideDays={showOutsideDays}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
@@ -44,8 +82,7 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+        ...numeralFormatters,
         ...formatters,
       }}
       classNames={{

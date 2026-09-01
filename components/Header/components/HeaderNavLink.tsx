@@ -41,12 +41,12 @@ export default function HeaderNavLink({
       href={href}
       className={cn(
         "group flex items-center text-sm font-medium transition-all duration-200 relative",
-        isMobile ? "py-1 space-x-2" : "rounded-md relative overflow-hidden",
+        isMobile ? "py-1 gap-2" : "rounded-md relative overflow-hidden",
         isMessagesIcon && !isMobile
           ? "p-2"
           : !isMobile
-            ? "px-3 py-2 space-x-2"
-            : "space-x-2",
+            ? "px-3 py-2 gap-2"
+            : "gap-2",
         isActive
           ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
           : "hover:text-primary"

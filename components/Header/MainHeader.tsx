@@ -59,12 +59,12 @@ function NavLink({
       href={href}
       className={cn(
         "group flex items-center text-sm font-medium transition-all duration-200 relative",
-        isMobile ? "py-1 space-x-2" : "rounded-md relative overflow-hidden",
+        isMobile ? "py-1 gap-2" : "rounded-md relative overflow-hidden",
         isMessagesIcon && !isMobile
           ? "p-2"
           : !isMobile
-            ? "px-3 py-2 space-x-2"
-            : "space-x-2",
+            ? "px-3 py-2 gap-2"
+            : "gap-2",
         isActive
           ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
           : "hover:text-primary",
@@ -184,7 +184,7 @@ export default function MainHeader({
         <div className="container flex h-14 md:h-16 items-center mx-auto">
           <Link
             href="/"
-            className="me-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
+            className="me-6 flex items-center gap-2 transition-transform duration-300 hover:scale-105"
             title={isOnSubdomain && organization?.name ? organization.name : t("home")}
             aria-label={isOnSubdomain && organization?.name ? organization.name : t("home")}
           >
@@ -204,7 +204,7 @@ export default function MainHeader({
             </span>
           </Link>
           <div className="hidden md:flex items-center justify-between w-full">
-            <nav className="flex justify-center space-x-1 lg:space-x-2 mx-6 flex-1">
+            <nav className="flex justify-center gap-1 lg:gap-2 mx-6 flex-1">
               {showAdminNav
                 ? // Show admin navigation for org members
                 adminNavItems.map((item) => (
@@ -241,7 +241,7 @@ export default function MainHeader({
               </div>
             )}
 
-            <div className="space-x-6">
+            <div className="flex items-center gap-6">
               <SignedOut>
                 {pathname !== "/sign-in" && pathname !== "/sign-up" && (
                   <Button
@@ -258,7 +258,7 @@ export default function MainHeader({
                 )}
               </SignedOut>
               <SignedIn>
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center gap-6">
                   {signedInLinks
                     .filter(
                       // Only notAdmin does any filtering. This also tested

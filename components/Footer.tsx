@@ -184,7 +184,7 @@ const Footer = async ({
             brand: brandName,
           })}
         </p>
-        <div className="flex items-center space-x-4 mt-4 sm:mt-0">
+        <div className="flex items-center gap-4 mt-4 sm:mt-0">
           <a
             href="https://facebook.com"
             target="_blank"

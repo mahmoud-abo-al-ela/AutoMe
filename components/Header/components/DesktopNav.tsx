@@ -8,7 +8,7 @@ export default function DesktopNav({ pathname }: { pathname: string }) {
   const t = useTranslations("nav");
 
   return (
-    <nav className="flex justify-center space-x-1 lg:space-x-2 mx-6 flex-1">
+    <nav className="flex justify-center gap-1 lg:gap-2 mx-6 flex-1">
       {navItems.map((item) => (
         <HeaderNavLink
           key={item.href}

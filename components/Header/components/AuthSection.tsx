@@ -18,7 +18,7 @@ export default function AuthSection({
   const t = useTranslations("nav");
 
   return (
-    <div className="space-x-6">
+    <div className="flex items-center gap-6">
       <SignedOut>
         <SignInButton mode="modal" forceRedirectUrl="/auth-redirect">
           <Button
@@ -30,7 +30,7 @@ export default function AuthSection({
         </SignInButton>
       </SignedOut>
       <SignedIn>
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center gap-6">
           {signedInLinks
             .filter((link) => !hasOrgMembership && !isAdmin)
             .map((link) => (
