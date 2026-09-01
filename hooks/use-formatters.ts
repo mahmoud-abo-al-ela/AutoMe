@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useLocale } from "next-intl";
 import type { Locale } from "@/i18n/routing";
 import {
+  formatClockTime,
   formatDate,
   formatDateTime,
   formatMessageTimestamp,
@@ -33,6 +34,8 @@ export function useFormatters() {
         formatDate(value, locale, options),
       time: (value: Date | string | number, options?: Intl.DateTimeFormatOptions) =>
         formatTime(value, locale, options),
+      /** A bare "HH:mm" clock string, not an instant. See formatClockTime. */
+      clockTime: (value: string) => formatClockTime(value, locale),
       dateTime: (value: Date | string | number, options?: Intl.DateTimeFormatOptions) =>
         formatDateTime(value, locale, options),
       pattern: (value: Date | string | number, pattern: string) =>

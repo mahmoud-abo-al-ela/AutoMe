@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatDateTime, formatTime } from "./datetime";
+import {
+  formatClockTime,
+  formatDate,
+  formatDateTime,
+  formatTime,
+} from "./datetime";
 import { formatCarPrice } from "./currency";
 import { formatMileage } from "./units";
 import { formatNumber } from "./number";
@@ -80,5 +85,37 @@ describe("invalid input", () => {
     expect(formatDate("not-a-date", "en")).toBe("");
     expect(formatTime("", "en")).toBe("");
     expect(formatDateTime("nope", "ar")).toBe("");
+  });
+});
+
+describe("formatClockTime", () => {
+  // These are bare "HH:mm" columns — a clock face with no date and no zone.
+
+  it("localizes the digits and the meridiem in Arabic", () => {
+    const output = formatClockTime("09:00", "ar");
+    expect(output).toMatch(EASTERN_ARABIC);
+    expect(output).not.toMatch(WESTERN);
+    // Arabic script, so it is a real translation rather than a fallback.
+    expect(output).toMatch(/[؀-ۿ]/);
+  });
+
+  it("keeps Western digits in English", () => {
+    const output = formatClockTime("09:00", "en");
+    expect(output).toMatch(WESTERN);
+    expect(output).not.toMatch(EASTERN_ARABIC);
+  });
+
+  it("does not shift the hour by the Cairo offset", () => {
+    // The whole point of formatting these in UTC: 09:00 is what the dealership
+    // typed, not an instant to be converted. Running it through Africa/Cairo
+    // would display 11:00 or 12:00 depending on the time of year.
+    expect(formatClockTime("09:00", "en")).toContain("9:00");
+    expect(formatClockTime("17:30", "en")).toContain("5:30");
+  });
+
+  it("returns malformed input unchanged rather than Invalid Date", () => {
+    for (const bad of ["", "not a time", "25:00", "09:70", "9"]) {
+      expect(formatClockTime(bad, "ar")).toBe(bad);
+    }
   });
 });

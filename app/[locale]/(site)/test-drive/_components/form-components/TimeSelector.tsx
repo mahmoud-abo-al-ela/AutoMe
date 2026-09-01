@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 const TimeSelector = ({
     label,
@@ -29,6 +30,7 @@ const TimeSelector = ({
     defaultValue?: string;
 }) => {
     const t = useTranslations("testDrive.form");
+    const { clockTime } = useFormatters();
 
     return (
         <div>
@@ -43,8 +45,10 @@ const TimeSelector = ({
                 </SelectTrigger>
                 <SelectContent>
                     {timeSlots.map((time) => (
+                        // The value stays the raw "HH:mm" the form and the
+                        // server expect; only the label is localized.
                         <SelectItem key={time} value={time}>
-                            {time}
+                            <span dir="auto">{clockTime(time)}</span>
                         </SelectItem>
                     ))}
                 </SelectContent>

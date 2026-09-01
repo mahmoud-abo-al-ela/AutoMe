@@ -70,6 +70,36 @@ export function formatTime(
   }).format(date);
 }
 
+/**
+ * Format a bare "HH:mm" wall-clock string.
+ *
+ * `WorkingHours.openTime`/`closeTime` and `TestDrive.startTime`/`endTime` hold
+ * a clock face, not an instant: no date, no zone. They were rendered raw, so
+ * an Arabic reader saw "09:00" in Latin digits with no meridiem while every
+ * date beside it was in Arabic.
+ *
+ * Anchored to an arbitrary UTC day and formatted in UTC, deliberately: running
+ * these through `Africa/Cairo` would apply the offset to a time that never had
+ * one and display an hour the dealership never chose.
+ *
+ * Returns the input unchanged when it is not "HH:mm", so a malformed column
+ * degrades to the raw value rather than to "Invalid Date".
+ */
+export function formatClockTime(value: string, locale: Locale = "en"): string {
+  const match = /^\s*(\d{1,2}):(\d{2})\s*$/.exec(value ?? "");
+  if (!match) return value;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return value;
+
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(2000, 0, 1, hours, minutes)));
+}
+
 /** Format a date and time together. */
 export function formatDateTime(
   value: DateInput,
