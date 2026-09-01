@@ -2,6 +2,7 @@
 
 import { Calendar } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
+import { useTranslations } from "next-intl";
 
 const TestDriveEmptyState = ({
     searchQuery,
@@ -10,11 +11,13 @@ const TestDriveEmptyState = ({
     searchQuery: string;
     onClearSearch: () => void;
 }) => {
+    const t = useTranslations("testDrive.list");
+
     if (searchQuery) {
         return (
             <EmptyState
                 variant="filtered"
-                title="No test drives match your search"
+                title={t("emptySearchTitle")}
                 onClearFilters={onClearSearch}
                 className="my-4"
             />
@@ -25,7 +28,7 @@ const TestDriveEmptyState = ({
         <EmptyState
             variant="standalone"
             icon={Calendar}
-            title="No test drives found"
+            title={t("emptyTitle")}
             className="my-4"
         />
     );

@@ -9,6 +9,7 @@ import {
     UserTestDrivesList,
     TestDriveSkeleton,
 } from "./index";
+import { useTranslations } from "next-intl";
 import type { useTestDrivePage } from "@/hooks/use-test-drive-page";
 
 const MODES = {
@@ -28,6 +29,7 @@ export const TestDrivePresenter = ({
     loadingTestDrive,
     handlers,
 }: ReturnType<typeof useTestDrivePage>) => {
+    const t = useTranslations("testDrive.titles");
     // The hours belong to the car's dealership, so they are keyed on whichever
     // car this page is about — the query param when creating, the booking's own
     // car when editing. Each form derives its own isDateDisabled from them.
@@ -37,13 +39,13 @@ export const TestDrivePresenter = ({
     const getTitle = () => {
         switch (mode) {
             case MODES.EDIT:
-                return "Edit Test Drive";
+                return t("edit");
             case MODES.VIEW:
-                return "Test Drive Details";
+                return t("view");
             case MODES.CREATE:
-                return "Schedule Test Drive";
+                return t("create");
             default:
-                return "Your Test Drives";
+                return t("list");
         }
     };
 

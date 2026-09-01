@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { requestTestDrive, getBookedTimeSlots } from "@/actions/test-drive";
 import {
     dayOfWeekFor,
@@ -17,13 +18,6 @@ import {
     type WorkingHours,
 } from "../../_lib/scheduling";
 
-const testDriveSchema = z.object({
-    date: z.string().min(1, "Date is required"),
-    startTime: z.string().min(1, "Start time is required"),
-    endTime: z.string().min(1, "End time is required"),
-    notes: z.string().optional(),
-});
-
 export const useTestDriveForm = ({
     carId,
     workingHours,
@@ -33,6 +27,21 @@ export const useTestDriveForm = ({
     workingHours: WorkingHours;
     onSuccess: () => void;
 }) => {
+    const t = useTranslations("testDrive");
+
+    // Built inside the hook because the messages are translated: a module-level
+    // schema would freeze whichever locale happened to load the module first.
+    const testDriveSchema = useMemo(
+        () =>
+            z.object({
+                date: z.string().min(1, t("form.validation.dateRequired")),
+                startTime: z.string().min(1, t("form.validation.startTimeRequired")),
+                endTime: z.string().min(1, t("form.validation.endTimeRequired")),
+                notes: z.string().optional(),
+            }),
+        [t]
+    );
+
     const [submitting, setSubmitting] = useState(false);
     const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(null);
     const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
@@ -65,7 +74,7 @@ export const useTestDriveForm = ({
         const dayOfWeek = dayOfWeekFor(date);
 
         if (!workingHours[dayOfWeek]?.isOpen) {
-            toast.error("The dealership is closed on this day");
+            toast.error(t("toasts.closedOnDay"));
             return;
         }
 
@@ -125,7 +134,7 @@ export const useTestDriveForm = ({
     // Form submission handler
     const onSubmit = async (data: TestDriveFormValues) => {
         if (!carId) {
-            toast.error("Car information is missing");
+            toast.error(t("toasts.carMissing"));
             return;
         }
 
@@ -141,14 +150,14 @@ export const useTestDriveForm = ({
             });
 
             if (result.success) {
-                toast.success("Test drive scheduled successfully!");
+                toast.success(t("toasts.scheduled"));
                 onSuccess();
             } else {
-                toast.error(result.error.message || "Failed to schedule test drive");
+                toast.error(result.error.message || t("toasts.scheduleFailed"));
             }
         } catch (error) {
             console.error("Error scheduling test drive:", error);
-            toast.error("An unexpected error occurred");
+            toast.error(t("toasts.unexpected"));
         } finally {
             setSubmitting(false);
         }

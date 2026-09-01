@@ -6,11 +6,12 @@ import { useRouter } from "@/i18n/navigation";
 import TestDriveSkeleton from "./TestDriveSkeleton";
 import TestDriveCard from "./TestDriveCard";
 import TestDriveFilters from "./TestDriveFilters";
-import TestDrivePagination from "./TestDrivePagination";
+import { Pagination } from "@/components/common/Pagination";
 import TestDriveEmptyState from "./TestDriveEmptyState";
+import { useTranslations } from "next-intl";
 import type {
   TestDriveListItem,
-  TestDrivePagination as Pagination,
+  TestDrivePagination as PaginationState,
 } from "../../_lib/test-drive-types";
 
 const UserTestDrivesList = ({
@@ -20,9 +21,10 @@ const UserTestDrivesList = ({
 }: {
   testDrives: TestDriveListItem[];
   loading: boolean;
-  pagination: Pagination | null;
+  pagination: PaginationState | null;
 }) => {
   const { date: fmtDate } = useFormatters();
+  const t = useTranslations("testDrive.list");
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState(pagination?.status || "all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,10 +41,10 @@ const UserTestDrivesList = ({
         return fmtDate(new Date(date), { month: "long" });
       } catch (error) {
         console.error("Date formatting error:", error);
-        return "Invalid date";
+        return t("invalidDate");
       }
     },
-    [fmtDate]
+    [fmtDate, t]
   );
 
   const shouldShowPagination = () => {
@@ -147,9 +149,10 @@ const UserTestDrivesList = ({
         </div>
       )}
 
-      {shouldShowPagination() && (
-        <TestDrivePagination
-          pagination={pagination}
+      {pagination && shouldShowPagination() && (
+        <Pagination
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
           onPageChange={handlePageChange}
         />
       )}

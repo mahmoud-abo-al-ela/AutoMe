@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { SearchX, FilterX } from "lucide-react";
@@ -33,6 +34,7 @@ export const EmptyState = ({
     onClearFilters,
     className = "",
 }: EmptyStateProps) => {
+    const t = useTranslations("common");
     const isFiltered = variant === "filtered";
     const DisplayIcon = isFiltered ? (Icon || FilterX) : Icon;
 
@@ -73,15 +75,15 @@ export const EmptyState = ({
                     <SearchX className="h-8 w-8 text-slate-400 dark:text-slate-500" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    {title || "No results found"}
+                    {title || t("states.noResults")}
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
-                    {description || "Try adjusting your search or filters to find what you're looking for."}
+                    {description || t("states.noResultsBody")}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                     {onClearFilters && (
                         <Button onClick={onClearFilters} variant="default" className="cursor-pointer">
-                            Clear Filters
+                            {t("actions.clearFilters")}
                         </Button>
                     )}
                     {actionLabel && actionHref && (

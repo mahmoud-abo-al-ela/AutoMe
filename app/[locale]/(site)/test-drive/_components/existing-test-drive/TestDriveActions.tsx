@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 const TestDriveActions = ({
@@ -11,6 +12,7 @@ const TestDriveActions = ({
     onEditClick: () => void;
     onCancelClick: () => void;
 }) => {
+    const t = useTranslations("common.actions");
     const isEditable = testDrive.status === "PENDING"; // Only pending test drives can be edited
     const isCancellable = testDrive.status !== "CANCELLED" && testDrive.status !== "COMPLETED";
 
@@ -23,7 +25,7 @@ const TestDriveActions = ({
                 disabled={!isEditable}
             >
                 <Edit className="h-4 w-4 me-2" />
-                Edit
+                {t("edit")}
             </Button>
             <Button
                 variant="destructive"
@@ -32,7 +34,7 @@ const TestDriveActions = ({
                 disabled={!isCancellable}
             >
                 <Trash2 className="h-4 w-4 me-2" />
-                Cancel
+                {t("cancel")}
             </Button>
         </div>
     );

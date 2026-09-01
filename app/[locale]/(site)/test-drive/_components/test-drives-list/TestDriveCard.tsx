@@ -1,5 +1,6 @@
 "use client";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,12 +20,14 @@ const TestDriveCard = ({
     onViewCar: (carId: string) => void;
 }) => {
   const { date: fmtDate } = useFormatters();
+    const t = useTranslations("testDrive");
+
     const formatDate = (date: string) => {
         try {
             return fmtDate(new Date(date), { month: "long" });
         } catch (error) {
             console.error("Date formatting error:", error);
-            return "Invalid date";
+            return t("list.invalidDate");
         }
     };
 
@@ -36,7 +39,7 @@ const TestDriveCard = ({
                         variant="outline"
                         className="bg-yellow-50 text-yellow-800 hover:bg-yellow-100 border-yellow-200"
                     >
-                        Pending
+                        {t("status.PENDING")}
                     </Badge>
                 );
             case "CONFIRMED":
@@ -45,7 +48,7 @@ const TestDriveCard = ({
                         variant="outline"
                         className="bg-green-50 text-green-800 hover:bg-green-100 border-green-200"
                     >
-                        Confirmed
+                        {t("status.CONFIRMED")}
                     </Badge>
                 );
             case "CANCELLED":
@@ -54,7 +57,7 @@ const TestDriveCard = ({
                         variant="outline"
                         className="bg-red-50 text-red-800 hover:bg-red-100 border-red-200"
                     >
-                        Cancelled
+                        {t("status.CANCELLED")}
                     </Badge>
                 );
             default:
@@ -75,7 +78,7 @@ const TestDriveCard = ({
                         <>
                             <Image
                                 src={testDrive.car.images[0]}
-                                alt={testDrive.car.title || "Car image"}
+                                alt={testDrive.car.title || t("list.carImageAlt")}
                                 fill
                                 sizes="(max-width: 640px) 100vw, 12rem"
                                 style={{ objectFit: "cover" }}
@@ -96,7 +99,7 @@ const TestDriveCard = ({
                     <div className="flex flex-wrap sm:flex-nowrap items-start justify-between gap-2">
                         <div>
                             <h3 className="font-semibold text-base sm:text-lg">
-                                {testDrive.car?.title || "Unknown Car"}
+                                {testDrive.car?.title || t("list.unknownCar")}
                             </h3>
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1 sm:gap-1.5">
@@ -126,7 +129,7 @@ const TestDriveCard = ({
                             onClick={() => testDrive.car && onViewCar(testDrive.car.id)}
                             disabled={!testDrive.car?.id}
                         >
-                            View Car
+                            {t("list.viewCar")}
                         </Button>
                         <Button
                             size="sm"
@@ -134,7 +137,9 @@ const TestDriveCard = ({
                             onClick={() => onViewDetails(testDrive.id)}
                             disabled={testDrive.status === "CANCELLED"}
                         >
-                            {testDrive.status === "CANCELLED" ? "Cancelled" : "Manage"}
+                            {testDrive.status === "CANCELLED"
+                                ? t("status.CANCELLED")
+                                : t("list.manage")}
                             {testDrive.status === "CANCELLED" ? null : (
                                 <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ms-1" />
                             )}

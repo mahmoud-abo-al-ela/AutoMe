@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import TestDriveSkeleton from "./TestDriveSkeleton";
 import TestDriveEmptyState from "./TestDriveEmptyState";
@@ -20,6 +21,7 @@ const ExistingTestDrive = ({
     onEditClick: () => void;
     loading: boolean;
 }) => {
+    const t = useTranslations("testDrive.existing");
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     if (loading) {
@@ -34,7 +36,7 @@ const ExistingTestDrive = ({
         <>
             <Card className="p-4 gap-3 mx-2 md:mx-0">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <h2 className="text-xl font-semibold">Test Drive Status</h2>
+                    <h2 className="text-xl font-semibold">{t("title")}</h2>
                     <TestDriveStatusBadge status={testDrive.status} />
                 </div>
 

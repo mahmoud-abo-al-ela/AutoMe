@@ -1,8 +1,10 @@
+import { useTranslations } from "next-intl";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 type Status = TestDriveDetail["status"];
 
 const TestDriveStatusBadge = ({ status }: { status: Status }) => {
+    const t = useTranslations("testDrive.status");
     const getStatusStyles = (status: Status) => {
         switch (status) {
             case "PENDING":
@@ -22,7 +24,7 @@ const TestDriveStatusBadge = ({ status }: { status: Status }) => {
         <span
             className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${getStatusStyles(status)}`}
         >
-            {status}
+            {t(status)}
         </span>
     );
 };

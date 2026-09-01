@@ -1,0 +1,86 @@
+{
+  "titles": {
+    "list": "Your Test Drives",
+    "create": "Schedule Test Drive",
+    "view": "Test Drive Details",
+    "edit": "Edit Test Drive"
+  },
+  "status": {
+    "PENDING": "Pending",
+    "CONFIRMED": "Confirmed",
+    "CANCELLED": "Cancelled",
+    "COMPLETED": "Completed"
+  },
+  "existing": {
+    "title": "Test Drive Status",
+    "notes": "Notes:",
+    "notAvailable": "N/A",
+    "emptyTitle": "No test drive selected",
+    "emptyDescription": "Please select a test drive from your list or schedule a new one.",
+    "viewAll": "View All Test Drives",
+    "browseCars": "Browse Cars",
+    "messages": {
+      "confirmed": "Your test drive has been confirmed. Please arrive {minutes} minutes before your scheduled time.",
+      "cancelled": "This test drive has been cancelled. You can schedule a new one if you’re still interested.",
+      "completed": "This test drive has been completed. We hope you enjoyed the experience!"
+    }
+  },
+  "cancelDialog": {
+    "title": "Cancel Test Drive",
+    "description": "Are you sure you want to cancel your test drive? This action cannot be undone.",
+    "keep": "Keep Test Drive",
+    "confirm": "Cancel Test Drive",
+    "cancelling": "Cancelling…"
+  },
+  "form": {
+    "selectDate": "Select Date",
+    "selectDatePlaceholder": "Select a date",
+    "businessHours": "Business hours: {open} – {close}",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "selectTime": "Select time",
+    "notes": "Additional Notes (Optional)",
+    "notesPlaceholder": "Any specific requirements or questions?",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "processing": "Processing…",
+    "updating": "Updating…",
+    "validation": {
+      "dateRequired": "Date is required",
+      "startTimeRequired": "Start time is required",
+      "endTimeRequired": "End time is required"
+    }
+  },
+  "sidebar": {
+    "title": "Important Information",
+    "availability": "Test drives are subject to availability",
+    "arriveEarly": "Please arrive {minutes} minutes before your scheduled time",
+    "bringDocuments": "Bring your driver’s licence and proof of insurance",
+    "confirmation": "Our staff will confirm your test drive appointment within {hours} hours."
+  },
+  "list": {
+    "searchPlaceholder": "Search by car or date…",
+    "filterAll": "All",
+    "carImageAlt": "Car image",
+    "unknownCar": "Unknown Car",
+    "invalidDate": "Invalid date",
+    "viewCar": "View Car",
+    "manage": "Manage",
+    "emptyTitle": "No test drives found",
+    "emptySearchTitle": "No test drives match your search"
+  },
+  "toasts": {
+    "closedOnDay": "The dealership is closed on this day",
+    "carMissing": "Car information is missing",
+    "scheduled": "Test drive scheduled successfully!",
+    "scheduleFailed": "Failed to schedule test drive",
+    "updated": "Test drive updated successfully",
+    "updateFailed": "Failed to update test drive",
+    "cancelled": "Test drive cancelled successfully",
+    "cancelFailed": "Failed to cancel test drive",
+    "loadFailed": "Failed to load test drive details",
+    "refreshFailed": "Failed to refresh test drive data",
+    "unexpected": "An unexpected error occurred"
+  }
+}

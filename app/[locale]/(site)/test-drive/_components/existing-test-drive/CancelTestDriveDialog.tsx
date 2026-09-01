@@ -1,5 +1,6 @@
 "use client";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useTranslations } from "next-intl";
 
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,11 +28,12 @@ const CancelTestDriveDialog = ({
     onClose: () => void;
 }) => {
   const { date: fmtDate } = useFormatters();
+    const t = useTranslations("testDrive");
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
 
     const formatDate = (date: string | null) => {
-        if (!date) return "N/A";
+        if (!date) return t("existing.notAvailable");
         return fmtDate(new Date(date), { weekday: "long", month: "long" });
     };
 
@@ -40,18 +42,18 @@ const CancelTestDriveDialog = ({
         try {
             const result = await cancelTestDriveByUser(testDrive.id);
             if (result.success) {
-                toast.success("Test drive cancelled successfully");
+                toast.success(t("toasts.cancelled"));
                 onClose();
                 router.push("/test-drive");
             } else {
                 // The action returns an error envelope rather than throwing, so
                 // without this branch a failed cancel did nothing at all: no
                 // toast, no close, just a button that stopped spinning.
-                toast.error(result.error.message || "Failed to cancel test drive");
+                toast.error(result.error.message || t("toasts.cancelFailed"));
             }
         } catch (error) {
             console.error("Error cancelling test drive:", error);
-            toast.error("An unexpected error occurred");
+            toast.error(t("toasts.unexpected"));
         } finally {
             setIsDeleting(false);
         }
@@ -61,10 +63,9 @@ const CancelTestDriveDialog = ({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Cancel Test Drive</DialogTitle>
+                    <DialogTitle>{t("cancelDialog.title")}</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to cancel your test drive? This action
-                        cannot be undone.
+                        {t("cancelDialog.description")}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mt-2">
@@ -87,7 +88,7 @@ const CancelTestDriveDialog = ({
                         disabled={isDeleting}
                         className="cursor-pointer"
                     >
-                        Keep Test Drive
+                        {t("cancelDialog.keep")}
                     </Button>
                     <Button
                         variant="destructive"
@@ -98,10 +99,10 @@ const CancelTestDriveDialog = ({
                         {isDeleting ? (
                             <>
                                 <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full me-2"></span>
-                                Cancelling...
+                                {t("cancelDialog.cancelling")}
                             </>
                         ) : (
-                            "Cancel Test Drive"
+                            t("cancelDialog.confirm")
                         )}
                     </Button>
                 </DialogFooter>

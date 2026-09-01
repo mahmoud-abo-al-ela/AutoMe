@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { getTestDrives, getTestDriveById } from "@/actions/test-drive";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
@@ -22,6 +23,7 @@ const MODES = {
 };
 
 export const useTestDrivePage = () => {
+    const t = useTranslations("testDrive.toasts");
     const router = useRouter();
     const searchParams = useSearchParams();
     const [mode, setMode] = useState(MODES.LIST);
@@ -83,11 +85,11 @@ export const useTestDrivePage = () => {
     useEffect(() => {
         if (testDriveData && !testDriveData.success) {
             toast.error(
-                testDriveData.error.message || "Failed to load test drive details"
+                testDriveData.error.message || t("loadFailed")
             );
             router.push("/test-drive");
         }
-    }, [testDriveData, router]);
+    }, [testDriveData, router, t]);
 
     const handleTestDriveSuccess = useCallback(() => {
         router.push(`/cars/${carId}`);
@@ -105,12 +107,12 @@ export const useTestDrivePage = () => {
         setMode(MODES.VIEW);
         try {
             await queryClient.invalidateQueries({ queryKey: queryKeys.testDrives.all });
-            toast.success("Test drive updated successfully");
+            toast.success(t("updated"));
         } catch (error) {
             logError("Error refreshing test drive data:", error);
-            toast.error("Failed to refresh test drive data");
+            toast.error(t("refreshFailed"));
         }
-    }, [queryClient]);
+    }, [queryClient, t]);
 
     const handleFilterChange = useCallback((newStatus: string) => {
         setStatusFilter(newStatus);

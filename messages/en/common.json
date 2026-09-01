@@ -9,13 +9,17 @@
     "save": "Save",
     "search": "Search",
     "viewDetails": "View details",
-    "viewDealer": "View dealer"
+    "viewDealer": "View dealer",
+    "clearFilters": "Clear Filters",
+    "clearSearch": "Clear search"
   },
   "states": {
     "empty": "Nothing here yet",
     "error": "Something went wrong",
     "loading": "Loading…",
-    "notTranslated": "Not available in Arabic — showing the English original"
+    "notTranslated": "Not available in Arabic — showing the English original",
+    "noResults": "No results found",
+    "noResultsBody": "Try adjusting your search or filters to find what you’re looking for."
   },
   "language": {
     "label": "Language",

@@ -6,5 +6,4 @@ export {
   UserTestDrivesList,
   TestDriveCard,
   TestDriveFilters,
-  TestDrivePagination,
 } from "../../test-drive/_components/test-drives-list";

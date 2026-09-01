@@ -68,7 +68,9 @@
   "testDrive": {
     "schedule": "Schedule Test Drive",
     "unavailable": "This car is not available for test drives",
-    "viewYours": "View Your Test Drive"
+    "viewYours": "View Your Test Drive",
+    "checking": "Checking…",
+    "processing": "Processing…"
   },
   "dealership": {
     "listedBy": "Listed by",

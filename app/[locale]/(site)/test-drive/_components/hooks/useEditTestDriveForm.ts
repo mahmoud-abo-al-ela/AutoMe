@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { editTestDrive, getBookedTimeSlots } from "@/actions/test-drive";
 import {
     dayOfWeekFor,
@@ -19,13 +20,6 @@ import {
 } from "../../_lib/scheduling";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
-const editTestDriveSchema = z.object({
-    date: z.string().min(1, "Date is required"),
-    startTime: z.string().min(1, "Start time is required"),
-    endTime: z.string().min(1, "End time is required"),
-    notes: z.string().optional(),
-});
-
 export const useEditTestDriveForm = ({
     testDrive,
     workingHours,
@@ -37,6 +31,21 @@ export const useEditTestDriveForm = ({
     carId: string;
     onSuccess: () => void;
 }) => {
+    const t = useTranslations("testDrive");
+
+    // See useTestDriveForm: the schema carries translated messages, so it has
+    // to be built per-locale rather than once at module load.
+    const editTestDriveSchema = useMemo(
+        () =>
+            z.object({
+                date: z.string().min(1, t("form.validation.dateRequired")),
+                startTime: z.string().min(1, t("form.validation.startTimeRequired")),
+                endTime: z.string().min(1, t("form.validation.endTimeRequired")),
+                notes: z.string().optional(),
+            }),
+        [t]
+    );
+
     const [submitting, setSubmitting] = useState(false);
     const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(null);
     const [availableDates, setAvailableDates] = useState<Date[]>([]);
@@ -122,7 +131,7 @@ export const useEditTestDriveForm = ({
         const dayOfWeek = dayOfWeekFor(date);
 
         if (!workingHours[dayOfWeek]?.isOpen) {
-            toast.error("The dealership is closed on this day");
+            toast.error(t("toasts.closedOnDay"));
             return;
         }
 
@@ -171,14 +180,14 @@ export const useEditTestDriveForm = ({
             });
 
             if (result.success) {
-                toast.success("Test drive updated successfully!");
+                toast.success(t("toasts.updated"));
                 onSuccess();
             } else {
-                toast.error(result.error.message || "Failed to update test drive");
+                toast.error(result.error.message || t("toasts.updateFailed"));
             }
         } catch (error) {
             console.error("Error updating test drive:", error);
-            toast.error("An unexpected error occurred");
+            toast.error(t("toasts.unexpected"));
         } finally {
             setSubmitting(false);
         }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 import DateSelector from "./DateSelector";
 import TimeSelector from "./TimeSelector";
 import NotesField from "./NotesField";
@@ -19,6 +20,8 @@ const TestDriveForm = ({
     availableDates: Date[];
     onSuccess: () => void;
 }) => {
+    const t = useTranslations("testDrive.form");
+
     const {
         register,
         handleSubmit,
@@ -57,7 +60,7 @@ const TestDriveForm = ({
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <TimeSelector
-                            label="Start Time"
+                            label={t("startTime")}
                             timeSlots={availableTimeSlots}
                             onTimeSelect={handleStartTimeSelect}
                             disabled={
@@ -70,7 +73,7 @@ const TestDriveForm = ({
 
                     <div>
                         <TimeSelector
-                            label="End Time"
+                            label={t("endTime")}
                             timeSlots={getAvailableEndTimes()}
                             onTimeSelect={handleEndTimeSelect}
                             disabled={
@@ -88,8 +91,8 @@ const TestDriveForm = ({
 
                 <FormActions
                     submitting={submitting}
-                    submitText="Submit"
-                    loadingText="Processing..."
+                    submitText={t("submit")}
+                    loadingText={t("processing")}
                 />
             </form>
         </Card>

@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const TestDriveFilters = ({
     searchQuery,
@@ -17,13 +18,16 @@ const TestDriveFilters = ({
     onStatusChange: (status: string) => void;
     onClearSearch: () => void;
 }) => {
+    const t = useTranslations("testDrive");
+    const tCommon = useTranslations("common.actions");
+
     return (
         <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
                 <div className="relative flex-1">
                     <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                        placeholder="Search by car or date..."
+                        placeholder={t("list.searchPlaceholder")}
                         className="ps-10 pe-10 text-sm"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
@@ -31,6 +35,7 @@ const TestDriveFilters = ({
                     {searchQuery && (
                         <button
                             onClick={onClearSearch}
+                            aria-label={tCommon("clearSearch")}
                             className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
                             <X className="h-4 w-4" />
@@ -51,28 +56,28 @@ const TestDriveFilters = ({
                                 value="all"
                                 className="text-xs sm:text-sm px-1 sm:px-3 cursor-pointer"
                             >
-                                All
+                                {t("list.filterAll")}
                             </TabsTrigger>
                             <TabsTrigger
                                 key="PENDING"
                                 value="PENDING"
                                 className="text-xs sm:text-sm px-1 sm:px-3 cursor-pointer"
                             >
-                                Pending
+                                {t("status.PENDING")}
                             </TabsTrigger>
                             <TabsTrigger
                                 key="CONFIRMED"
                                 value="CONFIRMED"
                                 className="text-xs sm:text-sm px-1 sm:px-3 cursor-pointer"
                             >
-                                Confirmed
+                                {t("status.CONFIRMED")}
                             </TabsTrigger>
                             <TabsTrigger
                                 key="CANCELLED"
                                 value="CANCELLED"
                                 className="text-xs sm:text-sm px-1 sm:px-3 cursor-pointer"
                             >
-                                Cancelled
+                                {t("status.CANCELLED")}
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>

@@ -1,11 +1,13 @@
 import { useFormatters } from "@/hooks/use-formatters";
+import { useTranslations } from "next-intl";
 import { Calendar, Clock, Info } from "lucide-react";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 const TestDriveDetails = ({ testDrive }: { testDrive: TestDriveDetail }) => {
   const { date: fmtDate } = useFormatters();
+    const t = useTranslations("testDrive.existing");
     const formatDate = (date: string | null) => {
-        if (!date) return "N/A";
+        if (!date) return t("notAvailable");
         return fmtDate(new Date(date), { weekday: "long", month: "long" });
     };
 
@@ -29,7 +31,7 @@ const TestDriveDetails = ({ testDrive }: { testDrive: TestDriveDetail }) => {
                     </div>
                     {testDrive.notes && (
                         <div className="text-sm text-blue-700 mt-2">
-                            <p className="font-medium">Notes:</p>
+                            <p className="font-medium">{t("notes")}</p>
                             <p>{testDrive.notes}</p>
                         </div>
                     )}

@@ -9,10 +9,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const TimeSelector = ({
     label,
-    placeholder = "Select time",
+    placeholder,
     timeSlots,
     onTimeSelect,
     disabled,
@@ -27,6 +28,8 @@ const TimeSelector = ({
     error?: string;
     defaultValue?: string;
 }) => {
+    const t = useTranslations("testDrive.form");
+
     return (
         <div>
             <Label className="block mb-2 font-medium">{label}</Label>
@@ -36,7 +39,7 @@ const TimeSelector = ({
                 defaultValue={defaultValue}
             >
                 <SelectTrigger className={cn(error && "border-red-500")}>
-                    <SelectValue placeholder={placeholder} />
+                    <SelectValue placeholder={placeholder ?? t("selectTime")} />
                 </SelectTrigger>
                 <SelectContent>
                     {timeSlots.map((time) => (

@@ -61,7 +61,7 @@ const TestDriveButton = ({
                 className="w-full py-3 sm:py-4 rounded-xl"
             >
                 <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin me-2"></div>
-                Checking...
+                {t("checking")}
             </Button>
         );
     }
@@ -91,7 +91,7 @@ const TestDriveButton = ({
             {isScheduleLoading ? (
                 <div className="flex items-center justify-center">
                     <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin me-2"></div>
-                    Processing...
+                    {t("processing")}
                 </div>
             ) : (
                 <>

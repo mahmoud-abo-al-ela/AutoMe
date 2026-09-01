@@ -5,17 +5,22 @@ import { Button } from "@/components/ui/button";
 const FormActions = ({
     onCancel,
     submitting,
-    cancelText = "Cancel",
-    submitText = "Submit",
-    loadingText = "Processing...",
+    cancelText,
+    submitText,
+    loadingText,
     variant = "single",
 }: {
     /** Required by the "split" variant, which is the only one with a cancel button. */
     onCancel?: () => void;
     submitting: boolean;
+    /** Required by the "split" variant, for the same reason as onCancel. */
     cancelText?: string;
-    submitText?: string;
-    loadingText?: string;
+    /**
+     * Required rather than defaulted, so the caller — which has a translation
+     * scope — supplies the wording. A default here would be an English literal.
+     */
+    submitText: string;
+    loadingText: string;
     variant?: "single" | "split";
 }) => {
     if (variant === "split") {

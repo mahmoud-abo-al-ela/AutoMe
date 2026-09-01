@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 import DateSelector from "./DateSelector";
 import TimeSelector from "./TimeSelector";
 import NotesField from "./NotesField";
@@ -22,6 +23,8 @@ const EditTestDriveForm = ({
     onCancel: () => void;
     onSuccess: () => void;
 }) => {
+    const t = useTranslations("testDrive");
+
     const {
         register,
         handleSubmit,
@@ -48,7 +51,7 @@ const EditTestDriveForm = ({
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                     <h2 className="text-xl font-semibold">{testDrive.car?.title}</h2>
                     <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                        {testDrive.status}
+                        {t(`status.${testDrive.status}`)}
                     </span>
                 </div>
 
@@ -69,7 +72,7 @@ const EditTestDriveForm = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <TimeSelector
-                                label="Start Time"
+                                label={t("form.startTime")}
                                 timeSlots={availableTimeSlots}
                                 onTimeSelect={handleStartTimeSelect}
                                 disabled={
@@ -83,7 +86,7 @@ const EditTestDriveForm = ({
 
                         <div>
                             <TimeSelector
-                                label="End Time"
+                                label={t("form.endTime")}
                                 timeSlots={getAvailableEndTimes()}
                                 onTimeSelect={handleEndTimeSelect}
                                 disabled={
@@ -104,9 +107,9 @@ const EditTestDriveForm = ({
                         variant="split"
                         onCancel={onCancel}
                         submitting={submitting}
-                        cancelText="Cancel"
-                        submitText="Save"
-                        loadingText="Updating..."
+                        cancelText={t("form.cancel")}
+                        submitText={t("form.save")}
+                        loadingText={t("form.updating")}
                     />
                 </form>
             </Card>

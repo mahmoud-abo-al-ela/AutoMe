@@ -1,5 +1,6 @@
 "use client";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -35,10 +36,12 @@ const DateSelector = ({
     workingHours: WorkingHours;
 }) => {
   const { date: fmtDate } = useFormatters();
+    const t = useTranslations("testDrive.form");
+
     return (
         <div>
             <Label htmlFor="date" className="block mb-2 font-medium">
-                Select Date
+                {t("selectDate")}
             </Label>
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
@@ -55,7 +58,7 @@ const DateSelector = ({
                         {selectedDate ? (
                             fmtDate(new Date(selectedDate), { weekday: "long", month: "long" })
                         ) : (
-                            <span>Select a date</span>
+                            <span>{t("selectDatePlaceholder")}</span>
                         )}
                     </Button>
                 </PopoverTrigger>
@@ -75,8 +78,10 @@ const DateSelector = ({
             {selectedDay && workingHours[selectedDay] && (
                 <div className="flex items-center text-xs mt-2 text-blue-600">
                     <Clock className="w-3 h-3 me-1" />
-                    Business hours: {workingHours[selectedDay].openTime} -{" "}
-                    {workingHours[selectedDay].closeTime}
+                    {t("businessHours", {
+                        open: workingHours[selectedDay].openTime,
+                        close: workingHours[selectedDay].closeTime,
+                    })}
                 </div>
             )}
         </div>

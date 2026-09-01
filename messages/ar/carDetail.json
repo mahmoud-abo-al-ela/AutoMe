@@ -68,7 +68,9 @@
   "testDrive": {
     "schedule": "احجز قيادة تجريبية",
     "unavailable": "هذه السيارة غير متاحة للقيادة التجريبية",
-    "viewYours": "عرض قيادتك التجريبية"
+    "viewYours": "عرض قيادتك التجريبية",
+    "checking": "جارٍ التحقق…",
+    "processing": "جارٍ المعالجة…"
   },
   "dealership": {
     "listedBy": "معروضة من",
