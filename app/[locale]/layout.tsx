@@ -95,7 +95,16 @@ export default async function LocaleLayout({
   // Clerk draws its own sign-in, sign-up and account UI, which next-intl
   // cannot reach into. Without this the auth screens stay English on /ar.
   return (
-    <ClerkProvider localization={clerkLocalization[locale]}>
+    <ClerkProvider
+      localization={clerkLocalization[locale]}
+      // NEXT_PUBLIC_CLERK_SIGN_IN_URL/SIGN_UP_URL are "/sign-in" and
+      // "/sign-up" with no locale, and Clerk builds its own footer links from
+      // them — so "إنشاء حساب جديد" on the Arabic sign-in card pointed at the
+      // unprefixed path and bounced the reader into English. Props win over
+      // the env vars, which is the only way to make them locale-aware.
+      signInUrl={`/${locale}/sign-in`}
+      signUpUrl={`/${locale}/sign-up`}
+    >
       <html
         lang={locale}
         dir={dir}

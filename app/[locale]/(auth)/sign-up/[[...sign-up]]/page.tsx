@@ -20,6 +20,11 @@ export default async function SignUpPage({
   const redirectUrl = safeRedirectPath(query?.redirect_url);
 
   return (
-    <SignUp forceRedirectUrl={redirectUrl} fallbackRedirectUrl={redirectUrl} />
+    <SignUp
+      forceRedirectUrl={redirectUrl}
+      fallbackRedirectUrl={redirectUrl}
+      // See the sign-in page: the footer link back to sign-in needs the locale.
+      signInUrl={`/${locale}/sign-in`}
+    />
   );
 }

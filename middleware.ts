@@ -229,6 +229,16 @@ const clerk = clerkMiddleware(async (auth, req) => {
   const locale = localeOf(url.pathname);
   const localeHome = `/${locale}`;
 
+  // Clerk builds redirectToSignIn() from NEXT_PUBLIC_CLERK_SIGN_IN_URL, which
+  // carries no locale, so an Arabic reader turned away from a guarded route
+  // landed on the English sign-in page. Redirect here instead, keeping both the
+  // locale and the return path.
+  const redirectToLocalizedSignIn = () => {
+    const target = new URL(`/${locale}/sign-in`, req.url);
+    target.searchParams.set("redirect_url", url.pathname + url.search);
+    return NextResponse.redirect(target);
+  };
+
   // Block main-domain-only routes on subdomains
   if (subdomain && isMainDomainOnlyRoute(req)) {
     // For onboarding, redirect to the main domain's onboarding page
@@ -250,8 +260,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
   // Admin routes (platform admin): require auth and ADMIN role (checked in layout)
   if (isSuperAdminRoute(req)) {
     if (!userId) {
-      const { redirectToSignIn } = await auth();
-      return redirectToSignIn();
+      return redirectToLocalizedSignIn();
     }
     // Role check happens in the super-admin layout
     return response;
@@ -259,14 +268,12 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   // Protected routes: require auth
   if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
+    return redirectToLocalizedSignIn();
   }
 
   // For org admin routes on subdomains, ensure user has access (checked in layout)
   if (subdomain && isProtectedRoute(req) && !userId) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
+    return redirectToLocalizedSignIn();
   }
 
   return response;

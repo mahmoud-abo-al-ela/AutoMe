@@ -20,6 +20,13 @@ export default async function SignInPage({
   const redirectUrl = safeRedirectPath(query?.redirect_url);
 
   return (
-    <SignIn forceRedirectUrl={redirectUrl} fallbackRedirectUrl={redirectUrl} />
+    <SignIn
+      forceRedirectUrl={redirectUrl}
+      fallbackRedirectUrl={redirectUrl}
+      // The card footer links to sign-up. Left to itself Clerk builds that from
+      // NEXT_PUBLIC_CLERK_SIGN_UP_URL ("/sign-up"), which has no locale, so an
+      // Arabic reader following it was dropped into English.
+      signUpUrl={`/${locale}/sign-up`}
+    />
   );
 }
