@@ -10,6 +10,7 @@ import LoadingProvider from "@/components/LoadingProvider";
 import { StreamChatProvider } from "@/components/StreamChat";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { routing, localeDirection } from "@/i18n/routing";
+import { clerkLocalization } from "@/i18n/clerk-localization";
 
 // NOTE: the font stack in globals.css names these families directly rather
 // than using the --font-* variables below. next/font expands those to
@@ -91,8 +92,10 @@ export default async function LocaleLayout({
 
   const dir = localeDirection[locale];
 
+  // Clerk draws its own sign-in, sign-up and account UI, which next-intl
+  // cannot reach into. Without this the auth screens stay English on /ar.
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={clerkLocalization[locale]}>
       <html
         lang={locale}
         dir={dir}

@@ -1,9 +1,20 @@
+import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { MapPin } from "lucide-react";
 import { contactMethods, faqQuickLinks } from "./contact-data";
 import ContactForm from "./_components/ContactForm";
 
-export default function ContactPage() {
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  // Statically rendered pages do not inherit the locale from the root layout
+  // the way dynamic ones do, so without this the whole tree — including the
+  // shared header and footer — renders in the default locale.
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
