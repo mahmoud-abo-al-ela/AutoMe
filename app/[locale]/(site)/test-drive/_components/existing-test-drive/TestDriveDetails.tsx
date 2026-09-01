@@ -1,6 +1,7 @@
 import { useFormatters } from "@/hooks/use-formatters";
 import { useTranslations } from "next-intl";
 import { Calendar, Clock, Info } from "lucide-react";
+import { TimeRange } from "../TimeRange";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 const TestDriveDetails = ({ testDrive }: { testDrive: TestDriveDetail }) => {
@@ -26,7 +27,10 @@ const TestDriveDetails = ({ testDrive }: { testDrive: TestDriveDetail }) => {
                         </div>
                         <div className="flex items-center text-sm text-blue-700">
                             <Clock className="h-4 w-4 me-2" />
-                            {testDrive.startTime} - {testDrive.endTime}
+                            <TimeRange
+                                start={testDrive.startTime}
+                                end={testDrive.endTime}
+                            />
                         </div>
                     </div>
                     {testDrive.notes && (

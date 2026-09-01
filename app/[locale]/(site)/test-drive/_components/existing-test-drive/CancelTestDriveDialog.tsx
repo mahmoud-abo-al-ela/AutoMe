@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
+import { TimeRange } from "../TimeRange";
 import {
     Dialog,
     DialogContent,
@@ -75,8 +76,11 @@ const CancelTestDriveDialog = ({
                             <p className="text-sm text-amber-800">
                                 {testDrive?.car?.title}
                                 <br />
-                                {formatDate(testDrive.date)} <br /> {testDrive.startTime} -{" "}
-                                {testDrive.endTime}
+                                {formatDate(testDrive.date)} <br />
+                                <TimeRange
+                                    start={testDrive.startTime}
+                                    end={testDrive.endTime}
+                                />
                             </p>
                         </div>
                     </div>

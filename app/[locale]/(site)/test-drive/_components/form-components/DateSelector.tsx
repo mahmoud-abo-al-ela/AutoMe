@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TimeRange } from "../TimeRange";
 import type { DayOfWeek, WorkingHours } from "../../_lib/scheduling";
 
 const DateSelector = ({
@@ -78,10 +79,11 @@ const DateSelector = ({
             {selectedDay && workingHours[selectedDay] && (
                 <div className="flex items-center text-xs mt-2 text-blue-600">
                     <Clock className="w-3 h-3 me-1" />
-                    {t("businessHours", {
-                        open: workingHours[selectedDay].openTime,
-                        close: workingHours[selectedDay].closeTime,
-                    })}
+                    {t("businessHours")}{" "}
+                    <TimeRange
+                        start={workingHours[selectedDay].openTime}
+                        end={workingHours[selectedDay].closeTime}
+                    />
                 </div>
             )}
         </div>

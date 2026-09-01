@@ -35,7 +35,7 @@
   "form": {
     "selectDate": "Select Date",
     "selectDatePlaceholder": "Select a date",
-    "businessHours": "Business hours: {open} – {close}",
+    "businessHours": "Business hours:",
     "startTime": "Start Time",
     "endTime": "End Time",
     "selectTime": "Select time",

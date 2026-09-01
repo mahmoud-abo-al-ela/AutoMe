@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock, Car, ChevronRight } from "lucide-react";
+import { TimeRange } from "../TimeRange";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -109,7 +110,10 @@ const TestDriveCard = ({
                                 <div className="flex items-center gap-1 sm:gap-1.5">
                                     <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
                                     <span>
-                                        {testDrive.startTime} - {testDrive.endTime}
+                                        <TimeRange
+                                            start={testDrive.startTime}
+                                            end={testDrive.endTime}
+                                        />
                                     </span>
                                 </div>
                             </div>
@@ -141,7 +145,7 @@ const TestDriveCard = ({
                                 ? t("status.CANCELLED")
                                 : t("list.manage")}
                             {testDrive.status === "CANCELLED" ? null : (
-                                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ms-1" />
+                                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ms-1 rtl:rotate-180" />
                             )}
                         </Button>
                     </div>

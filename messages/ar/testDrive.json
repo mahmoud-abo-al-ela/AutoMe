@@ -35,7 +35,7 @@
   "form": {
     "selectDate": "اختر التاريخ",
     "selectDatePlaceholder": "اختر تاريخًا",
-    "businessHours": "ساعات العمل: {open} – {close}",
+    "businessHours": "ساعات العمل:",
     "startTime": "وقت البداية",
     "endTime": "وقت النهاية",
     "selectTime": "اختر الوقت",
