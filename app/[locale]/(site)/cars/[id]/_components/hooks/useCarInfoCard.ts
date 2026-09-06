@@ -11,10 +11,12 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import type { CarDetail, PriceFormatter } from "../../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 
 export const useCarInfoCard = (car: CarDetail) => {
   const t = useTranslations("common.carActions");
+  const actionError = useActionError();
   const fmt = useFormatters();
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduleLoading, setIsScheduleLoading] = useState(false);
@@ -80,7 +82,7 @@ export const useCarInfoCard = (car: CarDetail) => {
       } else if (response.error.code === "AUTHENTICATION_ERROR") {
         toast.error(t("signInToSave"));
       } else {
-        toast.error(response.error.message || t("wishlistError"));
+        toast.error(actionError(response.error, t("wishlistError")));
       }
     } catch (error) {
       console.error("Failed to toggle wishlist", error);

@@ -1,0 +1,29 @@
+{
+  "generic": "حدث خطأ ما. من فضلك حاول مرة أخرى.",
+  "unauthorized": "من فضلك سجّل الدخول للمتابعة.",
+  "forbidden": "ليس لديك صلاحية للقيام بذلك.",
+  "notFound": "تعذّر العثور على {resource}.",
+  "conflict": "هذا موجود بالفعل.",
+  "rateLimit": "طلبات كثيرة جدًا. انتظر لحظة ثم حاول مرة أخرى.",
+  "serviceUnavailable": "الخدمة غير متاحة مؤقتًا. من فضلك حاول مرة أخرى.",
+  "planLimit": "لقد وصلت إلى حد باقتك من {resource}.",
+  "resources": {
+    "Resource": "العنصر",
+    "Car": "السيارة",
+    "Cars": "السيارات",
+    "User": "المستخدم",
+    "Organization": "المعرض",
+    "Dealership": "المعرض",
+    "Test drive": "تجربة القيادة",
+    "TestDrive": "تجربة القيادة",
+    "Plan": "الباقة",
+    "Subscription": "الاشتراك",
+    "Invoice": "الفاتورة",
+    "Review": "التقييم",
+    "Message": "الرسالة",
+    "Conversation": "المحادثة",
+    "Image": "الصورة",
+    "Membership": "العضوية",
+    "Working hours": "ساعات العمل"
+  }
+}

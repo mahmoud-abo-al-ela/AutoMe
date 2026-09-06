@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { getTestDrives, getTestDriveById } from "@/actions/test-drive";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
@@ -24,6 +25,7 @@ const MODES = {
 
 export const useTestDrivePage = () => {
     const t = useTranslations("testDrive.toasts");
+    const actionError = useActionError();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [mode, setMode] = useState(MODES.LIST);
@@ -85,11 +87,11 @@ export const useTestDrivePage = () => {
     useEffect(() => {
         if (testDriveData && !testDriveData.success) {
             toast.error(
-                testDriveData.error.message || t("loadFailed")
+                actionError(testDriveData.error, t("loadFailed"))
             );
             router.push("/test-drive");
         }
-    }, [testDriveData, router, t]);
+    }, [testDriveData, router, t, actionError]);
 
     const handleTestDriveSuccess = useCallback(() => {
         router.push(`/cars/${carId}`);

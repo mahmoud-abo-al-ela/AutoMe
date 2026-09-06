@@ -1,6 +1,7 @@
 "use client";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ const CancelTestDriveDialog = ({
 }) => {
   const { date: fmtDate } = useFormatters();
     const t = useTranslations("testDrive");
+    const actionError = useActionError();
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -50,7 +52,7 @@ const CancelTestDriveDialog = ({
                 // The action returns an error envelope rather than throwing, so
                 // without this branch a failed cancel did nothing at all: no
                 // toast, no close, just a button that stopped spinning.
-                toast.error(result.error.message || t("toasts.cancelFailed"));
+                toast.error(actionError(result.error, t("toasts.cancelFailed")));
             }
         } catch (error) {
             console.error("Error cancelling test drive:", error);

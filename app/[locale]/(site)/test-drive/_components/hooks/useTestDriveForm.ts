@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { requestTestDrive, getBookedTimeSlots } from "@/actions/test-drive";
 import {
     dayOfWeekFor,
@@ -29,6 +30,7 @@ export const useTestDriveForm = ({
     onSuccess: () => void;
 }) => {
     const t = useTranslations("testDrive");
+    const actionError = useActionError();
 
     // Built inside the hook because the messages are translated: a module-level
     // schema would freeze whichever locale happened to load the module first.
@@ -159,7 +161,7 @@ export const useTestDriveForm = ({
                 toast.success(t("toasts.scheduled"));
                 onSuccess();
             } else {
-                toast.error(result.error.message || t("toasts.scheduleFailed"));
+                toast.error(actionError(result.error, t("toasts.scheduleFailed")));
             }
         } catch (error) {
             console.error("Error scheduling test drive:", error);
