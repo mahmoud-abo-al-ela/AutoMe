@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
@@ -13,19 +14,19 @@ import type { CompareCar, CompareWinners } from "../_lib/compare-types";
  */
 const CATEGORY_WINNER_RULES: Record<
     string,
-    { keys: string[]; label: string }
+    { keys: string[]; labelKey: string }
 > = {
     basic: {
         keys: ["price", "year"],
-        label: "Best Value",
+        labelKey: "value",
     },
     performance: {
         keys: ["mileage", "seats"],
-        label: "Best Performance",
+        labelKey: "performance",
     },
     features: {
         keys: ["features"],
-        label: "Most Features",
+        labelKey: "features",
     },
 };
 
@@ -49,6 +50,8 @@ const CompareWinnerBadge = ({
     cars: CompareCar[];
     winners: CompareWinners;
 }) => {
+    const t = useTranslations("compare");
+
     const categoryWinner = useMemo(() => {
         const rules = CATEGORY_WINNER_RULES[categoryId];
         if (!rules || !winners) return null;
@@ -89,7 +92,7 @@ const CompareWinnerBadge = ({
 
         return {
             car: winnerCar,
-            label: rules.label,
+            labelKey: rules.labelKey,
         };
     }, [categoryId, cars, winners]);
 
@@ -107,7 +110,7 @@ const CompareWinnerBadge = ({
             )}
         >
             <Trophy className="h-3 w-3 text-emerald-600" />
-            <span>{categoryWinner.label}:</span>
+            <span>{t(`winners.${categoryWinner.labelKey}`)}:</span>
             <span className="font-semibold truncate max-w-[120px]">
                 {getCarTitle(categoryWinner.car)}
             </span>

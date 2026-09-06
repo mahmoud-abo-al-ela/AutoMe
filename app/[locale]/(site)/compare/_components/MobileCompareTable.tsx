@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatters } from "@/hooks/use-formatters";
+import { useTranslations } from "next-intl";
 import { useState, useCallback } from "react";
 import { Link } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,6 +49,9 @@ const MobileCompareTable = ({
   winners: CompareWinners;
   handlers: CompareHandlers;
 }) => {
+  const t = useTranslations("compare");
+  const tNouns = useTranslations("common.pagination.nouns");
+  const fmt = useFormatters();
   const [activeIndex, setActiveIndex] = useState(0);
   const [sideBySide, setSideBySide] = useState(false);
   const [api, setApi] = useState<CarouselApi>(undefined);
@@ -182,11 +187,13 @@ const MobileCompareTable = ({
       {cars.length < MAX_COMPARE_CARS && (
         <div className="p-4 flex flex-col items-center justify-center bg-gray-50 text-center border-t">
           <p className="text-muted-foreground text-xs mb-2">
-            Add {MAX_COMPARE_CARS - cars.length} more{" "}
-            {MAX_COMPARE_CARS - cars.length === 1 ? "car" : "cars"} to compare
+            {t("addMore", {
+              count: fmt.number(MAX_COMPARE_CARS - cars.length),
+              noun: tNouns("cars", { count: MAX_COMPARE_CARS - cars.length }),
+            })}
           </p>
           <Button asChild variant="outline" size="sm" className="text-xs">
-            <Link href="/cars">Browse Cars</Link>
+            <Link href="/cars">{t("slot.browseCars")}</Link>
           </Button>
         </div>
       )}

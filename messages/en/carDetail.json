@@ -37,16 +37,7 @@
     "title": "Technical Specifications",
     "subtitle": "Detailed information about this vehicle’s build and configuration.",
     "keyTitle": "Key Specifications",
-    "year": "Year",
-    "mileage": "Mileage",
-    "fuelType": "Fuel Type",
-    "transmission": "Transmission",
-    "bodyType": "Body Type",
-    "location": "Location",
-    "color": "Color",
-    "seats": "Seats",
     "seatsValue": "{count} seats",
-    "status": "Status",
     "notSpecified": "Not specified"
   },
   "actions": {

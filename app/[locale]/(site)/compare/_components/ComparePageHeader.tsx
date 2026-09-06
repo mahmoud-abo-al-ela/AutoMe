@@ -1,5 +1,8 @@
 "use client";
 
+import { MAX_COMPARE_CARS } from "./utils";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -33,6 +36,9 @@ const ComparePageHeader = ({
     highlightDifferences: boolean;
     handlers: CompareHandlers;
 }) => {
+    const t = useTranslations("compare.header");
+    const tNouns = useTranslations("common.pagination.nouns");
+    const fmt = useFormatters();
     const [showCopied, setShowCopied] = useState(false);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
 
@@ -65,17 +71,21 @@ const ComparePageHeader = ({
             <div>
                 <div className="flex items-center gap-2">
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-blue-600 bg-clip-text text-transparent print:text-black print:bg-none">
-                        Car Comparison
+                        {t("title")}
                     </h1>
                     <Badge
                         variant="secondary"
                         className="text-xs font-medium tabular-nums"
                     >
-                        {carCount} {carCount === 1 ? "car" : "cars"}
+                        {/* The noun is pluralised in its own message: the
+                            ternary encoded English's two forms, and Arabic has
+                            six categories. */}
+                        {fmt.number(carCount)}{" "}
+                        {tNouns("cars", { count: carCount })}
                     </Badge>
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                    Compare up to 3 cars side by side to help you make the right decision
+                    {t("subtitle", { max: MAX_COMPARE_CARS })}
                 </p>
             </div>
 
@@ -89,13 +99,13 @@ const ComparePageHeader = ({
                                 <Switch
                                     checked={highlightDifferences}
                                     onCheckedChange={handlers.toggleHighlight}
-                                    aria-label="Highlight differences"
+                                    aria-label={t("highlightDifferences")}
                                 />
-                                <span className="hidden sm:inline">Highlight Differences</span>
+                                <span className="hidden sm:inline">{t("highlightDifferencesLabel")}</span>
                             </label>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="sm:hidden">
-                            <p>Highlight Differences</p>
+                            <p>{t("highlightDifferencesLabel")}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -109,13 +119,13 @@ const ComparePageHeader = ({
                                 size="icon"
                                 onClick={handlers.printComparison}
                                 className="cursor-pointer print:hidden"
-                                aria-label="Print comparison"
+                                aria-label={t("print")}
                             >
                                 <Printer className="h-4 w-4" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom">
-                            <p>Print comparison</p>
+                            <p>{t("print")}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -129,7 +139,7 @@ const ComparePageHeader = ({
                                 size="icon"
                                 onClick={handleShare}
                                 className="cursor-pointer relative"
-                                aria-label="Share comparison"
+                                aria-label={t("share")}
                             >
                                 {showCopied ? (
                                     <motion.span
@@ -145,7 +155,7 @@ const ComparePageHeader = ({
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom">
-                            <p>{showCopied ? "Link copied!" : "Share comparison"}</p>
+                            <p>{showCopied ? t("linkCopied") : t("share")}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>

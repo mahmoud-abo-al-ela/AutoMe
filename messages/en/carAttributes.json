@@ -42,5 +42,19 @@
     "bronze": "Bronze",
     "purple": "Purple",
     "maroon": "Maroon"
+  },
+  "fields": {
+    "make": "Make",
+    "model": "Model",
+    "year": "Year",
+    "price": "Price",
+    "bodyType": "Body Type",
+    "mileage": "Mileage",
+    "fuelType": "Fuel Type",
+    "transmission": "Transmission",
+    "color": "Color",
+    "seats": "Seats",
+    "location": "Location",
+    "status": "Status"
   }
 }

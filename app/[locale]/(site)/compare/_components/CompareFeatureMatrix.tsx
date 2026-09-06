@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ const CompareFeatureMatrix = ({
     cars: CompareCar[];
     highlighted: boolean;
 }) => {
+    const t = useTranslations("compare");
     // Collect all unique features across all cars
     const allFeatures = useMemo(() => {
         const featureSet = new Set<string>();
@@ -37,11 +39,11 @@ const CompareFeatureMatrix = ({
         return (
             <div className="grid grid-cols-[200px_1fr] md:grid-cols-[250px_1fr] border-b">
                 <div className="p-3 text-sm text-muted-foreground border-e bg-gray-50">
-                    Features
+                    {t("features")}
                 </div>
                 <div className="grid grid-cols-3">
                     <div className="p-3 text-sm text-muted-foreground col-span-3 text-center">
-                        No features listed for any car
+                        {t("noFeaturesAny")}
                     </div>
                 </div>
             </div>

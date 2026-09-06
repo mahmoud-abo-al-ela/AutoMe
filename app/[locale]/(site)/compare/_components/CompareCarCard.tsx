@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +27,7 @@ const CompareCarCard = ({
     car: CompareCar;
     onRemove: (carId: string) => void;
 }) => {
+    const tCommon = useTranslations("common.actions");
     return (
         <AnimatePresence mode="popLayout">
             <motion.div
@@ -109,7 +111,7 @@ const CompareCarCard = ({
                     {/* View Details link */}
                     <Button asChild size="sm" className="w-full text-xs h-8 print:hidden">
                         <Link href={`/cars/${car.id}`}>
-                            View Details
+                            {tCommon("viewDetails")}
                             <ArrowRight className="ms-1 h-3 w-3" />
                         </Link>
                     </Button>

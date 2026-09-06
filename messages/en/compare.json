@@ -1,0 +1,36 @@
+{
+  "header": {
+    "title": "Car Comparison",
+    "subtitle": "Compare up to {max} cars side by side to help you make the right decision",
+    "highlightDifferences": "Highlight differences",
+    "print": "Print comparison",
+    "share": "Share comparison",
+    "highlightDifferencesLabel": "Highlight Differences",
+    "linkCopied": "Link copied!"
+  },
+  "sections": {
+    "basic": "Basic Information",
+    "performance": "Performance & Specifications"
+  },
+  "features": "Features",
+  "featuresComparison": "Features Comparison",
+  "noFeatures": "No features listed",
+  "noFeaturesAny": "No features listed for any car",
+  "winners": {
+    "value": "Best Value",
+    "performance": "Best Performance",
+    "features": "Most Features"
+  },
+  "slot": {
+    "addCar": "Add a car",
+    "browseCars": "Browse Cars"
+  },
+  "addMore": "Add {count} more {noun} to compare",
+  "empty": {
+    "addAnotherTitle": "Add Another Car to Compare",
+    "addAnotherBody": "You need at least 2 cars to start comparing. Browse our inventory and add another car to see them side by side.",
+    "noneTitle": "No Cars to Compare",
+    "noneBody": "Start by browsing our inventory and adding cars to your comparison list. You can compare up to {max} cars side by side.",
+    "browseCars": "Browse Cars"
+  }
+}

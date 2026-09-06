@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { Plus } from "lucide-react";
  *  - Links to /cars browse page
  */
 const AddCarSlot = (): React.ReactElement => {
+    const t = useTranslations("compare");
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -36,7 +38,7 @@ const AddCarSlot = (): React.ReactElement => {
                 <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
                     <Plus className="h-6 w-6 text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-400 font-medium">Add a car</p>
+                <p className="text-sm text-gray-400 font-medium">{t("slot.addCar")}</p>
             </motion.div>
 
             <Button
@@ -45,7 +47,7 @@ const AddCarSlot = (): React.ReactElement => {
                 size="sm"
                 className="mt-4 text-xs cursor-pointer"
             >
-                <Link href="/cars">Browse Cars</Link>
+                <Link href="/cars">{t("slot.browseCars")}</Link>
             </Button>
         </motion.div>
     );

@@ -31,7 +31,6 @@ const formatMileageCell = (value: SpecValue): string =>
 
 /** One row of the comparison table. */
 export interface SpecDefinition {
-    label: string;
     key: SpecKey;
     format?: (value: SpecValue) => string;
 }
@@ -39,36 +38,34 @@ export interface SpecDefinition {
 /** A tab of the comparison table. */
 export interface SpecCategory {
     id: string;
-    title: string;
     specs: SpecDefinition[];
 }
 
 /**
  * Shared specification categories used by both desktop and mobile compare views.
- * Each category contains an array of spec definitions with label, data key,
- * and an optional format function.
+ * Each category contains an array of spec definitions with a data key and an
+ * optional format function. The visible label comes from carAttributes.fields,
+ * keyed by that same data key, so the label and the column cannot drift apart.
  */
 export const specCategories: SpecCategory[] = [
     {
         id: "basic",
-        title: "Basic Information",
         specs: [
-            { label: "Make", key: "make" },
-            { label: "Model", key: "model" },
-            { label: "Year", key: "year" },
-            { label: "Price", key: "price", format: formatPriceCell },
-            { label: "Body Type", key: "bodyType" },
+            { key: "make" },
+            { key: "model" },
+            { key: "year" },
+            { key: "price", format: formatPriceCell },
+            { key: "bodyType" },
         ],
     },
     {
         id: "performance",
-        title: "Performance & Specifications",
         specs: [
-            { label: "Mileage", key: "mileage", format: formatMileageCell },
-            { label: "Fuel Type", key: "fuelType" },
-            { label: "Transmission", key: "transmission" },
-            { label: "Color", key: "color" },
-            { label: "Seats", key: "seats" },
+            { key: "mileage", format: formatMileageCell },
+            { key: "fuelType" },
+            { key: "transmission" },
+            { key: "color" },
+            { key: "seats" },
         ],
     },
 ];

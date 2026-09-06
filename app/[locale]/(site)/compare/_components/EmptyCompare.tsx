@@ -1,5 +1,7 @@
 "use client";
 
+import { MAX_COMPARE_CARS } from "./utils";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,7 @@ const EmptyCompare = ({ singleCar }: { singleCar: CompareCar | null }) => {
 // ─── Single Car State ────────────────────────────────────────────────────────
 
 const SingleCarState = ({ car }: { car: CompareCar }) => {
+  const t = useTranslations("compare.empty");
   return (
     <div className="flex flex-col md:flex-row">
       {/* Car card */}
@@ -104,11 +107,10 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
         </div>
 
         <h2 className="text-lg sm:text-xl font-semibold mb-2">
-          Add Another Car to Compare
+          {t("addAnotherTitle")}
         </h2>
         <p className="text-sm sm:text-base text-muted-foreground max-w-sm mb-6">
-          You need at least 2 cars to start comparing. Browse our
-          inventory and add another car to see them side by side.
+          {t("addAnotherBody")}
         </p>
 
         <Button
@@ -117,8 +119,8 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
         >
           <Link href="/cars">
             <Search className="me-2 h-4 w-4" />
-            Browse Cars
-            <ArrowRight className="ms-2 h-4 w-4" />
+            {t("browseCars")}
+            <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
           </Link>
         </Button>
       </motion.div>
@@ -129,6 +131,7 @@ const SingleCarState = ({ car }: { car: CompareCar }) => {
 // ─── No Cars State ───────────────────────────────────────────────────────────
 
 const NoCarsState = () => {
+  const t = useTranslations("compare.empty");
   return (
     <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-20 px-6 text-center">
       {/* Illustration: composed Lucide icons */}
@@ -174,11 +177,10 @@ const NoCarsState = () => {
         transition={{ duration: 0.4, delay: 0.3 }}
       >
         <h2 className="text-xl sm:text-2xl font-bold mb-2">
-          No Cars to Compare
+          {t("noneTitle")}
         </h2>
         <p className="text-sm sm:text-base text-muted-foreground max-w-md mb-8">
-          Start by browsing our inventory and adding cars to your
-          comparison list. You can compare up to 3 cars side by side.
+          {t("noneBody", { max: MAX_COMPARE_CARS })}
         </p>
       </motion.div>
 
@@ -195,8 +197,8 @@ const NoCarsState = () => {
         >
           <Link href="/cars">
             <Search className="me-2 h-4 w-4" />
-            Browse Cars
-            <ArrowRight className="ms-2 h-4 w-4" />
+            {t("browseCars")}
+            <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
           </Link>
         </Button>
       </motion.div>

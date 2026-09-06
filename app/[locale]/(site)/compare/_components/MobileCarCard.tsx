@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const MobileCarCard = ({
   compact?: boolean;
   onRemove: (carId: string) => void;
 }) => {
+  const tCommon = useTranslations("common.actions");
   return (
     <div className={cn("relative p-3", compact && "p-2")}>
       <Button
@@ -64,8 +66,8 @@ const MobileCarCard = ({
           {!compact && (
             <Button asChild size="sm" className="w-full text-xs h-7">
               <Link href={`/cars/${car.id}`}>
-                View Details
-                <ArrowRight className="ms-1 h-3 w-3" />
+                {tCommon("viewDetails")}
+                <ArrowRight className="ms-1 h-3 w-3 rtl:rotate-180" />
               </Link>
             </Button>
           )}

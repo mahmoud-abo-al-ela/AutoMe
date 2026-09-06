@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Tabs,
@@ -54,6 +55,8 @@ const CompareTable = ({
   winners: CompareWinners;
   handlers: CompareHandlers;
 }) => {
+  const t = useTranslations("compare");
+  const tFields = useTranslations("carAttributes.fields");
   const emptySlots = MAX_COMPARE_CARS - cars.length;
 
   return (
@@ -98,7 +101,7 @@ const CompareTable = ({
                   className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-b-primary px-4 py-2 text-sm gap-1.5"
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  {category.title}
+                  {t(`sections.${category.id}`)}
                 </TabsTrigger>
               );
             })}
@@ -108,7 +111,7 @@ const CompareTable = ({
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-b-primary px-4 py-2 text-sm gap-1.5"
             >
               <ListChecks className="h-3.5 w-3.5" />
-              Features
+              {t("features")}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -123,7 +126,7 @@ const CompareTable = ({
             {/* Winner badge */}
             <div className="px-4 py-2 bg-gradient-to-r from-gray-50 to-white border-b flex items-center justify-between">
               <h3 className="text-sm font-semibold text-muted-foreground">
-                {category.title}
+                {t(`sections.${category.id}`)}
               </h3>
               <CompareWinnerBadge
                 categoryId={category.id}
@@ -136,7 +139,7 @@ const CompareTable = ({
             {category.specs.map((spec, index) => (
               <CompareSpecRow
                 key={spec.key}
-                label={spec.label}
+                label={tFields(spec.key)}
                 specKey={spec.key}
                 cars={cars}
                 format={spec.format}
@@ -157,7 +160,7 @@ const CompareTable = ({
           {/* Winner badge */}
           <div className="px-4 py-2 bg-gradient-to-r from-gray-50 to-white border-b flex items-center justify-between">
             <h3 className="text-sm font-semibold text-muted-foreground">
-              Features Comparison
+              {t("featuresComparison")}
             </h3>
             <CompareWinnerBadge
               categoryId="features"

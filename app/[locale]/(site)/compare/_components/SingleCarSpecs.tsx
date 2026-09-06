@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Trophy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { specCategories } from "./utils";
@@ -25,13 +26,15 @@ const SingleCarSpecs = ({
   differences: CompareDifferences;
   winners: CompareWinners;
 }) => {
+    const t = useTranslations("compare");
+    const tFields = useTranslations("carAttributes.fields");
   return (
     <div>
       {specCategories.map((category) => (
         <div key={category.id}>
           {/* Sticky category header */}
           <div className="sticky top-0 z-[5] px-3 py-2 bg-gray-100 border-b text-xs font-semibold text-muted-foreground">
-            {category.title}
+            {t(`sections.${category.id}`)}
           </div>
           <div className="divide-y">
             {category.specs.map((spec) => {
@@ -50,7 +53,7 @@ const SingleCarSpecs = ({
                     isWinner && highlightDifferences && "bg-emerald-50/60"
                   )}
                 >
-                  <span className="text-muted-foreground">{spec.label}</span>
+                  <span className="text-muted-foreground">{tFields(spec.key)}</span>
                   <span className="font-medium flex items-center gap-1">
                     {isWinner && highlightDifferences && (
                       <Trophy className="h-3 w-3 text-emerald-600" />
@@ -67,7 +70,7 @@ const SingleCarSpecs = ({
       {/* Features */}
       <div>
         <div className="sticky top-0 z-[5] px-3 py-2 bg-gray-100 border-b text-xs font-semibold text-muted-foreground">
-          Features
+          {t("features")}
         </div>
         {car.features && car.features.length > 0 ? (
           <div className="divide-y">
@@ -97,7 +100,7 @@ const SingleCarSpecs = ({
           </div>
         ) : (
           <div className="px-3 py-4 text-xs text-muted-foreground text-center">
-            No features listed
+            {t("noFeatures")}
           </div>
         )}
       </div>

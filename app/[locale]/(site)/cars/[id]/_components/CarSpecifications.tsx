@@ -24,6 +24,7 @@ const CarSpecifications = ({
   variant?: "compact" | "full";
 }) => {
   const t = useTranslations("carDetail.specs");
+  const tFields = useTranslations("carAttributes.fields");
   const tHeader = useTranslations("carDetail.header");
   const fmt = useFormatters();
   const attr = useCarAttributes();
@@ -44,50 +45,50 @@ const CarSpecifications = ({
 
   const carSpecs = [
     {
-      label: t("year"),
+      label: tFields("year"),
       value: fmt.number(car.year, { useGrouping: false }),
       icon: CalendarIcon,
       color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20",
     },
     {
-      label: t("mileage"),
+      label: tFields("mileage"),
       value: fmt.mileage(car.mileage),
       icon: Gauge,
       color: "text-green-500 bg-green-50 dark:bg-green-950/20",
     },
     {
-      label: t("fuelType"),
+      label: tFields("fuelType"),
       value: attr.fuel(car.fuelType) || t("notSpecified"),
       icon: Fuel,
       color: "text-orange-500 bg-orange-50 dark:bg-orange-950/20",
     },
     {
-      label: t("transmission"),
+      label: tFields("transmission"),
       value: attr.transmission(car.transmission) || t("notSpecified"),
       icon: Cog,
       color: "text-purple-500 bg-purple-50 dark:bg-purple-950/20",
     },
     {
-      label: t("bodyType"),
+      label: tFields("bodyType"),
       value: attr.body(car.bodyType) || t("notSpecified"),
       icon: Users,
       color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20",
     },
     {
-      label: t("location"),
+      label: tFields("location"),
       value: car.location || t("notSpecified"),
       icon: MapPin,
       color: "text-red-500 bg-red-50 dark:bg-red-950/20",
     },
     ...(isFull ? [
       {
-        label: t("color"),
+        label: tFields("color"),
         value: attr.color(car.color) || t("notSpecified"),
         icon: Paintbrush,
         color: "text-pink-500 bg-pink-50 dark:bg-pink-950/20",
       },
       {
-        label: t("seats"),
+        label: tFields("seats"),
         value: car.seats
                   ? t("seatsValue", { count: fmt.number(car.seats) })
                   : t("notSpecified"),
@@ -95,7 +96,7 @@ const CarSpecifications = ({
         color: "text-cyan-500 bg-cyan-50 dark:bg-cyan-950/20",
       },
       {
-        label: t("status"),
+        label: tFields("status"),
         // car.status is a CarStatus enum member, so this rendered the raw
                 // "AVAILABLE" in both languages.
                 value: statusLabel(car.status),

@@ -24,6 +24,7 @@ const NAMESPACES = [
   "errors",
   "contact",
   "wishlist",
+  "compare",
 ] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {

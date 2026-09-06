@@ -37,16 +37,7 @@
     "title": "المواصفات الفنية",
     "subtitle": "معلومات تفصيلية عن تصنيع هذه السيارة وتجهيزاتها.",
     "keyTitle": "أبرز المواصفات",
-    "year": "سنة الصنع",
-    "mileage": "المسافة المقطوعة",
-    "fuelType": "نوع الوقود",
-    "transmission": "ناقل الحركة",
-    "bodyType": "نوع الهيكل",
-    "location": "الموقع",
-    "color": "اللون",
-    "seats": "المقاعد",
     "seatsValue": "{count} مقاعد",
-    "status": "الحالة",
     "notSpecified": "غير محدّد"
   },
   "actions": {

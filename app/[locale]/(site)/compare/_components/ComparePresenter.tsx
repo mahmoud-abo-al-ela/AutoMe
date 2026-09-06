@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export const ComparePresenter = ({
     winners,
     handlers,
 }: ComparePageData) => {
+    const tCommon = useTranslations("common");
     return (
         <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen py-20 print:bg-white print:py-4">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-10 sm:pb-16 md:pb-20 print:px-2 print:pb-4">
@@ -52,7 +54,7 @@ export const ComparePresenter = ({
                                     <AlertCircle className="h-7 w-7 text-red-500" />
                                 </div>
                                 <h2 className="text-lg sm:text-xl font-semibold">
-                                    Something went wrong
+                                    {tCommon("states.error")}
                                 </h2>
                                 <p className="text-sm sm:text-base text-muted-foreground max-w-md">
                                     {error}
@@ -63,7 +65,7 @@ export const ComparePresenter = ({
                                     className="cursor-pointer mt-2"
                                 >
                                     <RefreshCw className="me-2 h-4 w-4" />
-                                    Try Again
+                                    {tCommon("actions.retry")}
                                 </Button>
                             </div>
                         </motion.div>
