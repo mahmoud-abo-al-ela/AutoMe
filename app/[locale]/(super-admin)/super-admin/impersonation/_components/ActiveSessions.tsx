@@ -88,7 +88,7 @@ export default function ActiveSessions({
                 className="flex items-center justify-between p-4 border rounded-lg bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex -space-x-2">
+                  <div className="flex -space-x-2 rtl:space-x-reverse">
                     <Avatar className="border-2 border-background">
                       <AvatarImage
                         src={session.superAdmin.imageUrl ?? undefined}

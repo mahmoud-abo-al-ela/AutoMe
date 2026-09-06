@@ -34,7 +34,7 @@ export default function SuperAdminMobileSidebar({
       <SheetContent side="left" className="w-72 p-0 bg-sidebar">
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b border-sidebar-border">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>
@@ -91,7 +91,7 @@ export default function SuperAdminMobileSidebar({
         {/* User info & Footer */}
         <div className="p-3 border-t border-sidebar-border space-y-2 mt-auto">
           {user && (
-            <div className="px-2 py-2 flex items-center space-x-3">
+            <div className="px-2 py-2 flex items-center gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user.imageUrl ?? undefined} alt={user.name ?? ""} />
                 <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">

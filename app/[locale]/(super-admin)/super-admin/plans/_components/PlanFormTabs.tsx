@@ -199,7 +199,7 @@ export default function PlanFormTabs({
 
       <TabsContent value="features" className="space-y-4">
         <div className="space-y-3">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="aiProcessing"
               checked={features.aiProcessing?.enabled || false}
@@ -210,7 +210,7 @@ export default function PlanFormTabs({
             />
             <Label htmlFor="aiProcessing" className="cursor-pointer">AI-Powered Car Analysis</Label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="chat"
               checked={features.chat || false}
@@ -218,7 +218,7 @@ export default function PlanFormTabs({
             />
             <Label htmlFor="chat" className="cursor-pointer">Live Chat Support</Label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="prioritySupport"
               checked={features.prioritySupport || false}

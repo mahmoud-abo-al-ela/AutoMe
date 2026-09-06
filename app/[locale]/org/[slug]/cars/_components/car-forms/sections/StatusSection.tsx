@@ -59,7 +59,7 @@ const StatusSection = ({
         )}
       </div>
 
-      <div className="flex items-start sm:items-center space-x-2 p-3 sm:p-4 bg-blue-50 rounded-md border border-blue-100">
+      <div className="flex items-start sm:items-center gap-2 p-3 sm:p-4 bg-blue-50 rounded-md border border-blue-100">
         <Checkbox
           id="featured"
           checked={watch("featured")}

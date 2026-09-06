@@ -40,7 +40,7 @@ export default function SessionHistory({
                   className="flex items-center justify-between p-3 border rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex -space-x-2">
+                    <div className="flex -space-x-2 rtl:space-x-reverse">
                       <Avatar className="h-8 w-8 border-2 border-background">
                         <AvatarImage
                           src={session.superAdmin.imageUrl ?? undefined}

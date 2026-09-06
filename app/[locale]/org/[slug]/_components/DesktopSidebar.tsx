@@ -60,7 +60,7 @@ export default function DesktopSidebar({
         <div
           className={cn(
             "flex items-center",
-            collapsed ? "mx-auto cursor-pointer" : "space-x-2"
+            collapsed ? "mx-auto cursor-pointer" : "gap-2"
           )}
           onClick={collapsed ? () => setCollapsed(false) : undefined}
           title={collapsed ? orgName : undefined}

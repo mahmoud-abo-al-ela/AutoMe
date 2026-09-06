@@ -76,7 +76,7 @@ export default function AdminSidebar({ organization, userRole }: OrgSidebarProps
       <div className="md:hidden fixed top-0 start-0 end-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
           <MobileSidebar pathname={pathname} organization={organization} userRole={userRole} />
-          <div className="flex items-center space-x-2 ms-4">
+          <div className="flex items-center gap-2 ms-4">
             {organization?.logo ? (
               <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0 relative">
                 <Image
