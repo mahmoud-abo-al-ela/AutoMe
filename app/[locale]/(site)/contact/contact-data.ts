@@ -1,4 +1,9 @@
-// Static content for the contact page.
+// Structure for the contact page. The prose lives in messages/{en,ar}/contact.json.
+//
+// This file used to hold the copy itself, which no JSX string sweep would ever
+// find — the same trap as lib/WhyConfig.ts and lib/HeaderConfig.ts. What stays
+// here is what is not language: icons, hrefs, form values, and the two details
+// that are literally the same in both locales.
 import {
   Mail,
   MapPin,
@@ -10,59 +15,27 @@ import {
 } from "lucide-react";
 
 export const contactMethods = [
-  {
-    icon: Mail,
-    title: "Email Us",
-    description: "Our team typically responds within 24 hours.",
-    detail: "support@autome.com",
-  },
-  {
-    icon: Phone,
-    title: "Call Us",
-    description: "Sunday to Thursday, during business hours.",
-    detail: "+20 2 2480 1500",
-  },
-  {
-    icon: MapPin,
-    title: "Visit Us",
-    description: "Come say hello at our headquarters.",
-    detail: "12 El-Nasr Road, New Cairo, Cairo Governorate 11835",
-  },
-  {
-    icon: Clock,
-    title: "Business Hours",
-    description: "We're available during these times.",
-    // Egypt runs a Sunday–Thursday working week; EET is UTC+2 (UTC+3 in summer).
-    detail: "Sun – Thu: 9AM – 6PM (EET)",
-  },
-];
+  // `detail` set here is script-neutral and stays as-is; where it is omitted
+  // the copy comes from contact.methods.<key>.detail, because an address and a
+  // business-hours line are both language.
+  { key: "email", icon: Mail, detail: "support@autome.com" },
+  { key: "phone", icon: Phone, detail: "+20 2 2480 1500" },
+  { key: "visit", icon: MapPin },
+  { key: "hours", icon: Clock },
+] as const;
 
+/** `value` is what the form submits; the label comes from contact.topics. */
 export const topics = [
-  { value: "general", label: "General Inquiry" },
-  { value: "support", label: "Technical Support" },
-  { value: "sales", label: "Sales & Pricing" },
-  { value: "partnership", label: "Partnership Opportunity" },
-  { value: "feedback", label: "Feedback & Suggestions" },
-  { value: "bug", label: "Report a Bug" },
-];
+  { value: "general" },
+  { value: "support" },
+  { value: "sales" },
+  { value: "partnership" },
+  { value: "feedback" },
+  { value: "bug" },
+] as const;
 
 export const faqQuickLinks = [
-  {
-    icon: HelpCircle,
-    title: "Check our FAQ",
-    description: "Find quick answers to common questions.",
-    href: "/faq",
-  },
-  {
-    icon: Building2,
-    title: "Dealership Onboarding",
-    description: "Learn how to set up your digital dealership.",
-    href: "/onboarding",
-  },
-  {
-    icon: MessageSquare,
-    title: "Live Chat",
-    description: "Chat with us directly from your dashboard.",
-    href: "/messages",
-  },
-];
+  { key: "faq", icon: HelpCircle, href: "/faq" },
+  { key: "onboarding", icon: Building2, href: "/onboarding" },
+  { key: "chat", icon: MessageSquare, href: "/messages" },
+] as const;

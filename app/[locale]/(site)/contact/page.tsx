@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { MapPin } from "lucide-react";
 import { contactMethods, faqQuickLinks } from "./contact-data";
@@ -14,6 +14,8 @@ export default async function ContactPage({
   // shared header and footer — renders in the default locale.
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("contact");
+  const RESPONSE_HOURS = 24;
 
   return (
     <div className="flex flex-col">
@@ -25,17 +27,16 @@ export default async function ContactPage({
         </div>
         <div className="container mx-auto px-4 py-16 md:py-24 relative z-10 text-center">
           <span className="inline-block text-xs font-semibold uppercase tracking-widest text-blue-300 mb-4">
-            Contact Us
+            {t("hero.eyebrow")}
           </span>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 max-w-3xl mx-auto">
-            We&apos;d Love to{" "}
+            {t("hero.headline")}{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-              Hear From You
+              {t("hero.headlineAccent")}
             </span>
           </h1>
           <p className="text-lg text-gray-300 max-w-xl mx-auto">
-            Have a question, suggestion, or just want to say hi? Reach out and
-            our team will get back to you as soon as possible.
+            {t("hero.subtitle")}
           </p>
         </div>
       </section>
@@ -48,18 +49,26 @@ export default async function ContactPage({
               const Icon = method.icon;
               return (
                 <div
-                  key={method.title}
+                  key={method.key}
                   className="bg-card border rounded-xl p-6 text-center shadow-sm"
                 >
                   <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Icon className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold mb-1">{method.title}</h3>
+                  <h3 className="font-semibold mb-1">
+                    {t(`methods.${method.key}.title`)}
+                  </h3>
                   <p className="text-xs text-muted-foreground mb-2">
-                    {method.description}
+                    {t(`methods.${method.key}.description`, {
+                      hours: RESPONSE_HOURS,
+                    })}
                   </p>
-                  <p className="text-sm font-medium text-primary">
-                    {method.detail}
+                  {/* A phone number and an email address are Latin runs; dir
+                      keeps them from being reordered inside Arabic text. */}
+                  <p className="text-sm font-medium text-primary" dir="auto">
+                    {"detail" in method
+                      ? method.detail
+                      : t(`methods.${method.key}.detail`)}
                   </p>
                 </div>
               );
@@ -74,11 +83,10 @@ export default async function ContactPage({
           {/* Contact Form */}
           <div className="lg:col-span-3">
             <h2 className="text-2xl md:text-3xl font-bold mb-2">
-              Send Us a Message
+              {t("form.title")}
             </h2>
             <p className="text-muted-foreground mb-8">
-              Fill out the form below and we&apos;ll get back to you within 24
-              hours.
+              {t("form.subtitle", { hours: RESPONSE_HOURS })}
             </p>
 
             <ContactForm />
@@ -87,14 +95,14 @@ export default async function ContactPage({
           {/* Quick Links Sidebar */}
           <div className="lg:col-span-2">
             <h3 className="text-lg font-semibold mb-4">
-              Other Ways to Get Help
+              {t("help.title")}
             </h3>
             <div className="space-y-4">
               {faqQuickLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <Link
-                    key={link.title}
+                    key={link.key}
                     href={link.href}
                     className="group flex items-start gap-4 bg-card border rounded-xl p-5 shadow-sm hover:shadow-md transition-all hover:border-primary/30"
                   >
@@ -103,10 +111,10 @@ export default async function ContactPage({
                     </div>
                     <div>
                       <h4 className="font-medium text-sm mb-0.5 group-hover:text-primary transition-colors">
-                        {link.title}
+                        {t(`help.${link.key}.title`)}
                       </h4>
                       <p className="text-xs text-muted-foreground">
-                        {link.description}
+                        {t(`help.${link.key}.description`)}
                       </p>
                     </div>
                   </Link>
@@ -117,11 +125,11 @@ export default async function ContactPage({
             {/* Map placeholder */}
             <div className="mt-8 bg-muted/50 border rounded-xl p-6 text-center">
               <MapPin className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm font-medium mb-1">New Cairo, Cairo</p>
+              <p className="text-sm font-medium mb-1">{t("address.city")}</p>
               <p className="text-xs text-muted-foreground">
-                12 El-Nasr Road, Fifth Settlement
+                {t("address.lines")}
                 <br />
-                New Cairo, Cairo Governorate 11835
+                {t("methods.visit.detail")}
               </p>
             </div>
           </div>

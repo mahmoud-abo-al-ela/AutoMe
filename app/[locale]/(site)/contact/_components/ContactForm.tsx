@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Send, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { submitContactForm } from "@/actions/contact";
 import { topics } from "../contact-data";
 
@@ -37,6 +39,11 @@ export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const t = useTranslations("contact.form");
+  const tTopics = useTranslations("contact.topics");
+  const actionError = useActionError();
+  const RESPONSE_HOURS = 24;
+
   const handleChange = (field: keyof ContactFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
@@ -45,7 +52,7 @@ export default function ContactForm() {
     e.preventDefault();
 
     if (!formState.name || !formState.email || !formState.message) {
-      toast.error("Please fill in all required fields.");
+      toast.error(t("requiredFields"));
       return;
     }
 
@@ -56,15 +63,12 @@ export default function ContactForm() {
 
       if (result?.success) {
         setIsSubmitted(true);
-        toast.success("Message sent! We'll get back to you soon.");
+        toast.success(t("sent"));
       } else {
-        toast.error(
-          result?.error?.message ||
-            "Something went wrong. Please try again later."
-        );
+        toast.error(actionError(result?.error, t("failed")));
       }
     } catch (error) {
-      toast.error("Something went wrong. Please try again later.");
+      toast.error(t("failed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -76,10 +80,9 @@ export default function ContactForm() {
         <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">Message Sent!</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("successTitle")}</h3>
         <p className="text-muted-foreground mb-6">
-          Thank you for reaching out. Our team will review your message and
-          respond within 24 hours.
+          {t("successBody", { hours: RESPONSE_HOURS })}
         </p>
         <Button
           variant="outline"
@@ -88,7 +91,7 @@ export default function ContactForm() {
             setFormState(EMPTY_FORM);
           }}
         >
-          Send Another Message
+          {t("sendAnother")}
         </Button>
       </div>
     );
@@ -99,11 +102,11 @@ export default function ContactForm() {
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="contact-name">
-            Full Name <span className="text-destructive">*</span>
+            {t("name")} <span className="text-destructive">*</span>
           </Label>
           <Input
             id="contact-name"
-            placeholder="John Doe"
+            placeholder={t("namePlaceholder")}
             value={formState.name}
             onChange={(e) => handleChange("name", e.target.value)}
             required
@@ -111,12 +114,12 @@ export default function ContactForm() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="contact-email">
-            Email <span className="text-destructive">*</span>
+            {t("email")} <span className="text-destructive">*</span>
           </Label>
           <Input
             id="contact-email"
             type="email"
-            placeholder="john@example.com"
+            placeholder={t("emailPlaceholder")}
             value={formState.email}
             onChange={(e) => handleChange("email", e.target.value)}
             required
@@ -125,18 +128,18 @@ export default function ContactForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="contact-topic">Topic</Label>
+        <Label htmlFor="contact-topic">{t("topic")}</Label>
         <Select
           value={formState.topic}
           onValueChange={(value) => handleChange("topic", value)}
         >
           <SelectTrigger id="contact-topic">
-            <SelectValue placeholder="Select a topic" />
+            <SelectValue placeholder={t("topicPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {topics.map((topic) => (
               <SelectItem key={topic.value} value={topic.value}>
-                {topic.label}
+                {tTopics(topic.value)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -145,11 +148,11 @@ export default function ContactForm() {
 
       <div className="space-y-2">
         <Label htmlFor="contact-message">
-          Message <span className="text-destructive">*</span>
+          {t("message")} <span className="text-destructive">*</span>
         </Label>
         <Textarea
           id="contact-message"
-          placeholder="Tell us how we can help..."
+          placeholder={t("messagePlaceholder")}
           rows={6}
           value={formState.message}
           onChange={(e) => handleChange("message", e.target.value)}
@@ -166,12 +169,12 @@ export default function ContactForm() {
         {isSubmitting ? (
           <>
             <span className="animate-spin me-2">⏳</span>
-            Sending...
+            {t("sending")}
           </>
         ) : (
           <>
             <Send className="h-4 w-4 me-2" />
-            Send Message
+            {t("submit")}
           </>
         )}
       </Button>
