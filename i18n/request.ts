@@ -23,6 +23,7 @@ const NAMESPACES = [
   "testDrive",
   "errors",
   "contact",
+  "wishlist",
 ] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {

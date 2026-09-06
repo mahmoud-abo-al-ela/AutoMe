@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { LoadingGrid } from "@/components/common/LoadingStates";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import type { useWishlistPage } from "@/hooks/use-wishlist-page";
 
 export const WishlistPresenter = ({
@@ -16,6 +18,10 @@ export const WishlistPresenter = ({
     error,
     handlers,
 }: ReturnType<typeof useWishlistPage>) => {
+    const t = useTranslations("wishlist");
+    const tCount = useTranslations("common.pagination.nouns");
+    const tActions = useTranslations("common.actions");
+    const fmt = useFormatters();
     const isEmpty = !cars || cars.length === 0;
 
     return (
@@ -24,15 +30,20 @@ export const WishlistPresenter = ({
                 <div>
                     <div className="flex items-center gap-3 mb-2">
                         <Heart className="h-7 w-7 text-primary" />
-                        <h1 className="text-xl sm:text-3xl font-bold">Your Wishlist</h1>
+                        <h1 className="text-xl sm:text-3xl font-bold">{t("title")}</h1>
                         {!loading && !isEmpty && pagination && (
                             <Badge variant="outline" className="ms-2 bg-primary/5">
-                                {pagination.total} {pagination.total === 1 ? "car" : "cars"}
+                                {/* The count is formatted separately and the noun
+                                    pluralised inside its own message: the ternary
+                                    encoded English two-form plural, and Arabic has
+                                    six categories. */}
+                                {fmt.number(pagination.total)}{" "}
+                                {tCount("cars", { count: pagination.total })}
                             </Badge>
                         )}
                     </div>
                     <p className="text-muted-foreground text-sm">
-                        Save cars you&apos;re interested in and come back to them later.
+                        {t("subtitle")}
                     </p>
                 </div>
             </div>
@@ -42,7 +53,7 @@ export const WishlistPresenter = ({
             {!loading && error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                     <h3 className="text-lg font-semibold text-red-800 mb-2">
-                        Error loading wishlist
+                        {t("loadError")}
                     </h3>
                     <p className="text-red-600 mb-4">{error}</p>
                     <Button
@@ -50,7 +61,7 @@ export const WishlistPresenter = ({
                         variant="outline"
                         className="bg-white cursor-pointer"
                     >
-                        Try Again
+                        {tActions("retry")}
                     </Button>
                 </div>
             )}
@@ -58,9 +69,9 @@ export const WishlistPresenter = ({
             {!loading && !error && isEmpty && (
                 <EmptyState
                     icon={Heart}
-                    title="Your wishlist is empty"
-                    description="Browse our inventory and add cars to your wishlist by clicking the heart icon. Come back to compare your options later."
-                    actionLabel="Browse Cars"
+                    title={t("emptyTitle")}
+                    description={t("emptyBody")}
+                    actionLabel={t("browseCars")}
                     actionHref="/cars"
                 />
             )}
