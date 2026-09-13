@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import { SignUp } from "@clerk/nextjs";
 import { safeRedirectPath } from "@/lib/utils/safe-redirect";
 
@@ -12,7 +11,6 @@ export default async function SignUpPage({
   // See the contact page: without this the surrounding layout renders in the
   // default locale, which is what left the footer English on /ar.
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const query = await searchParams;
   // See the sign-in page: this value decides where an authenticated user is

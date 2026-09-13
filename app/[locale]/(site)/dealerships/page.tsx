@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import { Suspense } from "react";
 import { getDealerships } from "@/actions/dealerships";
 import { parseFiltersFromSearch } from "@/hooks/dealerships-url";
@@ -12,7 +11,6 @@ export default async function DealershipsPage({
     searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
     const { locale } = await routeParams;
-    setRequestLocale(locale);
 
     const params = await searchParams;
 

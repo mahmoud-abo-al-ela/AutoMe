@@ -1,5 +1,5 @@
 import { redirect } from "@/i18n/navigation";
-import { getLocale, setRequestLocale } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { checkUser } from "@/lib/checkUser";
 import { createOrganizationAfterCheckout } from "@/actions/onboarding";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +22,6 @@ export default async function OnboardingSuccessPage({
     searchParams: Promise<{ session_id?: string }>;
 }) {
     const { locale } = await params;
-    setRequestLocale(locale);
 
     const { session_id } = await searchParams;
 

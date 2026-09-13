@@ -2,7 +2,6 @@ import { Inter, Cairo } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
 import { DirectionProvider } from "@radix-ui/react-direction";
 import "../globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -88,7 +87,6 @@ export default async function LocaleLayout({
   }
 
   // Required for any statically-rendered page in this tree to see the locale.
-  setRequestLocale(locale);
 
   const dir = localeDirection[locale];
 

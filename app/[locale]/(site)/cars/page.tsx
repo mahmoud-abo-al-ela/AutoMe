@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import { getCars } from "@/actions/cars-listing";
 import ClientPage from "./ClientPage";
 import { Suspense } from "react";
@@ -26,7 +25,6 @@ export default async function BrowseCarsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { locale } = await routeParams;
-  setRequestLocale(locale);
 
   const params = await searchParams;
   const perPage = num(params.perPage) || DEFAULT_PER_PAGE;

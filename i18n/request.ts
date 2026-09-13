@@ -1,17 +1,7 @@
+import * as rootParams from "next/root-params";
 import { getRequestConfig } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { routing } from "./routing";
-
-/**
- * Message namespaces, mirroring the route structure.
- *
- * Listed explicitly rather than globbed because the bundler has to be able to
- * see each import statically — a dynamic directory read would defeat both
- * code-splitting and the build-time check that every namespace exists in every
- * locale. Adding a namespace means adding it here and creating the file in
- * *both* locales; a missing file is a build error, not a silent English
- * fallback, which is the behaviour we want.
- */
 const NAMESPACES = [
   "common",
   "nav",
@@ -29,8 +19,9 @@ const NAMESPACES = [
   "about",
 ] as const;
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const requested = await requestLocale;
+export default getRequestConfig(async ({ locale: explicitLocale }) => {
+  const requested = explicitLocale ?? (await rootParams.locale());
+
   const locale = hasLocale(routing.locales, requested)
     ? requested
     : routing.defaultLocale;

@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import MainHeader from "@/components/Header/MainHeader";
 import Footer from "@/components/Footer";
@@ -8,7 +7,6 @@ import BackToTop from "@/components/BackToTop";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import Loading from "@/components/Loading";
-
 
 export async function generateMetadata(): Promise<Metadata> {
   const organization = await getCurrentOrganization();
@@ -41,8 +39,6 @@ export default async function SiteLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
 
   const user = await checkUser();
   const organization = await getCurrentOrganization();

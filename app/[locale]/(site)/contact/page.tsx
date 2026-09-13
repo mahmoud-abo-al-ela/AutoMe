@@ -1,4 +1,4 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { MapPin } from "lucide-react";
 import { contactMethods, faqQuickLinks } from "./contact-data";
@@ -13,7 +13,6 @@ export default async function ContactPage({
   // the way dynamic ones do, so without this the whole tree — including the
   // shared header and footer — renders in the default locale.
   const { locale } = await params;
-  setRequestLocale(locale);
   const t = await getTranslations("contact");
   const RESPONSE_HOURS = 24;
 

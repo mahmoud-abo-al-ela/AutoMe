@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import {
   Accordion,
   AccordionItem,
@@ -16,8 +15,6 @@ export default async function FAQ({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
 
   const organization = await getCurrentOrganization();
   const brandName = organization?.name || "AutoMe";

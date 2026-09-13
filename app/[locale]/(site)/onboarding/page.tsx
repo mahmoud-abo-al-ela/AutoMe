@@ -1,6 +1,6 @@
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "@/i18n/navigation";
-import { getLocale, setRequestLocale } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { getOnboardingData } from "@/lib/services/onboarding";
 import OnboardingWizard from "./_components/OnboardingWizard";
 import { Suspense } from "react";
@@ -38,7 +38,6 @@ export default async function OnboardingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  setRequestLocale(locale);
 
   const user = await checkUser();
 

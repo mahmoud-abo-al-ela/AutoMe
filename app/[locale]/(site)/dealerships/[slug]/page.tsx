@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { getDealershipBySlug } from "@/actions/dealerships";
 import { DealershipDetailPresenter } from "./_components";
@@ -73,8 +72,6 @@ const DealershipDetailPage = async ({
 }: {
     params: Promise<{ slug: string; locale: string }>;
 }) => {
-    const { locale } = await params;
-    setRequestLocale(locale);
 
     return <DealershipDetailPresenter />;
 };

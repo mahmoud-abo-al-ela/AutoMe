@@ -1,4 +1,3 @@
-import { setRequestLocale } from "next-intl/server";
 import Footer from "@/components/Footer";
 import MainHeader from "@/components/Header/MainHeader";
 import React from "react";
@@ -14,7 +13,6 @@ const layout = async ({
   // here as well as in the pages — a page-level call happens too late for
   // the layout that wraps it.
   const { locale } = await params;
-  setRequestLocale(locale);
 
   return (
     <div className="flex flex-col min-h-screen">
