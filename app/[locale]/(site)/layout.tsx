@@ -1,3 +1,4 @@
+import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import MainHeader from "@/components/Header/MainHeader";
 import Footer from "@/components/Footer";
@@ -35,9 +36,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function SiteLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const user = await checkUser();
   const organization = await getCurrentOrganization();
   // `theme` is a Json column, so it can be any JSON value; only a plain object

@@ -1,5 +1,5 @@
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, setRequestLocale } from "next-intl/server";
 import { auth } from "@clerk/nextjs/server";
 import { UserChannelList, ChatWindow } from "@/components/StreamChat";
 import { getCurrentOrganization } from "@/lib/getOrganization";
@@ -10,7 +10,14 @@ export const metadata: Metadata = {
   description: "Chat with dealerships about cars you're interested in",
 };
 
-export default async function MessagesPage() {
+export default async function MessagesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const { userId } = await auth();
 
   if (!userId) {

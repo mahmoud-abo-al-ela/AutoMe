@@ -1,3 +1,4 @@
+import { setRequestLocale } from "next-intl/server";
 import Hero from "@/components/Hero/Hero";
 import Featured from "@/components/FeaturedCars/Featured";
 import Why from "@/components/Why/Why";
@@ -11,7 +12,14 @@ import FAQ from "@/components/FAQ/FAQ";
 import { getActivePlans } from "@/actions/billing";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const organization = await getCurrentOrganization();
   const isOnSubdomain = !!organization;
   // The whole ActionResponse envelope used to be handed to <Pricing>, whose

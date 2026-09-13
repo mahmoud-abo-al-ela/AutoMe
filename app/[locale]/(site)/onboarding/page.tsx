@@ -1,6 +1,6 @@
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, setRequestLocale } from "next-intl/server";
 import { getOnboardingData } from "@/lib/services/onboarding";
 import OnboardingWizard from "./_components/OnboardingWizard";
 import { Suspense } from "react";
@@ -32,7 +32,14 @@ function OnboardingLoader() {
   );
 }
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const user = await checkUser();
 
   // If no user, middleware will handle redirect

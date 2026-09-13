@@ -1,3 +1,4 @@
+import { setRequestLocale } from "next-intl/server";
 import { getCars } from "@/actions/cars-listing";
 import ClientPage from "./ClientPage";
 import { Suspense } from "react";
@@ -18,10 +19,15 @@ const num = (v: string | string[] | undefined) => {
 };
 
 export default async function BrowseCarsPage({
+  params: routeParams,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<SearchParams>;
 }) {
+  const { locale } = await routeParams;
+  setRequestLocale(locale);
+
   const params = await searchParams;
   const perPage = num(params.perPage) || DEFAULT_PER_PAGE;
   const page = num(params.page) || 1;
