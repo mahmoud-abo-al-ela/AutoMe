@@ -21,7 +21,7 @@ export default async function CookiePolicyPage({ params }: Props) {
   const items = ["i1", "i2", "i3", "i4"] as const;
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="container mx-auto px-4 pt-28 pb-12 md:pt-32 max-w-4xl">
       <h1 className="text-4xl font-bold mb-8">{t("cookies.title")}</h1>
       <div className="prose prose-blue max-w-none">
         <p className="text-gray-500 mb-8">
