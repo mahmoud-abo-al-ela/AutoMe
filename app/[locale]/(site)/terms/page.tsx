@@ -1,33 +1,46 @@
-export const metadata = {
-  title: "Terms of Service",
-  description: "Terms of Service for AutoMe platform",
-};
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { formatDate } from "@/lib/utils/datetime";
+import type { Locale } from "@/i18n/routing";
+import { LEGAL_LAST_UPDATED } from "../_lib/legal";
 
-export default function TermsPage() {
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "legal.terms" });
+
+  return { title: t("title"), description: t("description") };
+}
+
+export default async function TermsPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("legal");
+  const sections = ["s1", "s2", "s3"] as const;
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
+      <h1 className="text-4xl font-bold mb-8">{t("terms.title")}</h1>
       <div className="prose prose-blue max-w-none">
-        <p className="text-gray-500 mb-8">Last updated: {new Date().toLocaleDateString()}</p>
-        
-        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Acceptance of Terms</h2>
-        <p>
-          By accessing and using AutoMe, you accept and agree to be bound by the terms
-          and provision of this agreement.
+        <p className="text-gray-500 mb-8">
+          {t("lastUpdated", {
+            date: formatDate(LEGAL_LAST_UPDATED, locale as Locale),
+          })}
         </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">2. Description of Service</h2>
-        <p>
-          AutoMe provides a platform for car dealerships to manage inventory, test drives,
-          and customer interactions. We reserve the right to modify or discontinue,
-          temporarily or permanently, the Service with or without notice.
-        </p>
+        {sections.map((section) => (
+          <section key={section}>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">
+              {t(`terms.${section}.heading`)}
+            </h2>
+            <p>{t(`terms.${section}.body`)}</p>
+          </section>
+        ))}
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">3. User Conduct</h2>
-        <p>
-          You agree to use the Service only for lawful purposes. You agree not to take
-          any action that might compromise the security of the site, render the site
-          inaccessible to others or otherwise cause damage to the site or the Content.
+        <p className="text-sm text-gray-500 mt-12 border-t pt-6">
+          {t("governingLanguage")}
         </p>
       </div>
     </div>

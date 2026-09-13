@@ -1,0 +1,60 @@
+{
+  "lastUpdated": "Last updated: {date}",
+  "governingLanguage": "This document is published in English and Arabic. Where the two differ, the English version governs.",
+  "terms": {
+    "title": "Terms of Service",
+    "description": "Terms of Service for the AutoMe platform",
+    "s1": {
+      "heading": "1. Acceptance of Terms",
+      "body": "By accessing and using AutoMe, you accept and agree to be bound by the terms and provisions of this agreement."
+    },
+    "s2": {
+      "heading": "2. Description of Service",
+      "body": "AutoMe provides a platform for car dealerships to manage inventory, test drives, and customer interactions. We reserve the right to modify or discontinue, temporarily or permanently, the Service with or without notice."
+    },
+    "s3": {
+      "heading": "3. User Conduct",
+      "body": "You agree to use the Service only for lawful purposes. You agree not to take any action that might compromise the security of the site, render the site inaccessible to others, or otherwise cause damage to the site or the Content."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "Privacy Policy for the AutoMe platform",
+    "s1": {
+      "heading": "1. Information We Collect",
+      "body": "We collect information you provide directly to us, such as when you create or modify your account, request on-demand services, contact customer support, or otherwise communicate with us."
+    },
+    "s2": {
+      "heading": "2. How We Use Information",
+      "body": "We may use the information we collect about you to:",
+      "items": {
+        "i1": "Provide, maintain, and improve our Services",
+        "i2": "Process transactions and send related information",
+        "i3": "Send administrative messages, customer service responses, and technical notices",
+        "i4": "Communicate with you about products, services, offers, and events"
+      }
+    },
+    "s3": {
+      "heading": "3. Information Sharing",
+      "body": "We may share the information we collect about you with third parties such as our partners and service providers who need access to such information to carry out work on our behalf."
+    }
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "description": "Cookie Policy for the AutoMe platform",
+    "s1": {
+      "heading": "1. What are cookies?",
+      "body": "Cookies are small text files that are placed on your computer or mobile device when you visit a website. They are widely used to make websites work more efficiently and to provide information to the owners of the site."
+    },
+    "s2": {
+      "heading": "2. How we use cookies",
+      "body": "We use cookies to:",
+      "items": {
+        "i1": "Remember your preferences and settings",
+        "i2": "Understand how you use our platform",
+        "i3": "Improve your user experience",
+        "i4": "Maintain security and authentication"
+      }
+    }
+  }
+}
