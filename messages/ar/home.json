@@ -28,12 +28,16 @@
   },
   "stats": {
     "customersLabel": "عميل سعيد",
+    "customersValue": "+٥٠ ألف",
     "customersDescription": "يثق بنا آلاف المشترين",
     "vehiclesLabel": "سيارة معروضة",
+    "vehiclesValue": "+١٠ آلاف",
     "vehiclesDescription": "تشكيلة واسعة من السيارات المميزة",
     "dealershipsLabel": "معرض شريك",
+    "dealershipsValue": "+٥٠٠",
     "dealershipsDescription": "بائعون موثوقون ومعتمدون",
     "ratingLabel": "متوسط التقييم",
+    "ratingValue": "٤٫٩",
     "ratingDescription": "بناءً على تقييمات العملاء"
   },
   "featured": {

@@ -9,10 +9,13 @@ const Stats = () => {
     const t = useTranslations("home.stats");
 
     const stats = [
-      { icon: Users, value: "50K+", label: t("customersLabel"), description: t("customersDescription") },
-      { icon: Car, value: "10K+", label: t("vehiclesLabel"), description: t("vehiclesDescription") },
-      { icon: Building2, value: "500+", label: t("dealershipsLabel"), description: t("dealershipsDescription") },
-      { icon: Star, value: "4.9", label: t("ratingLabel"), description: t("ratingDescription") },
+      // The figures are translated rather than run through Intl: "50K+" has no
+      // sensible Arabic rendering as a formatted number, so each locale writes
+      // it out. None of these are measured values.
+      { icon: Users, key: "customers" },
+      { icon: Car, key: "vehicles" },
+      { icon: Building2, key: "dealerships" },
+      { icon: Star, key: "rating" },
     ];
 
     return (
@@ -34,13 +37,13 @@ const Stats = () => {
                                     <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
                                 </div>
                                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">
-                                    {stat.value}
+                                    {t(`${stat.key}Value`)}
                                 </div>
                                 <div className="text-sm sm:text-base font-semibold text-foreground mb-1">
-                                    {stat.label}
+                                    {t(`${stat.key}Label`)}
                                 </div>
                                 <div className="text-xs sm:text-sm text-muted-foreground">
-                                    {stat.description}
+                                    {t(`${stat.key}Description`)}
                                 </div>
                             </motion.div>
                         );

@@ -28,12 +28,16 @@
   },
   "stats": {
     "customersLabel": "Happy Customers",
+    "customersValue": "50K+",
     "customersDescription": "Trusted by thousands of car buyers",
     "vehiclesLabel": "Vehicles Listed",
+    "vehiclesValue": "10K+",
     "vehiclesDescription": "Wide selection of quality cars",
     "dealershipsLabel": "Partner Dealerships",
+    "dealershipsValue": "500+",
     "dealershipsDescription": "Verified and trusted sellers",
     "ratingLabel": "Average Rating",
+    "ratingValue": "4.9",
     "ratingDescription": "Based on customer reviews"
   },
   "featured": {
