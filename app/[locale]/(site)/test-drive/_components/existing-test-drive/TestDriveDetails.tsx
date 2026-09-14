@@ -1,7 +1,7 @@
 import { useFormatters } from "@/hooks/use-formatters";
 import { useTranslations } from "next-intl";
 import { Calendar, Clock, Info } from "lucide-react";
-import { TimeRange } from "../TimeRange";
+import { TimeRange } from "@/components/common/TimeRange";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
 
 const TestDriveDetails = ({ testDrive }: { testDrive: TestDriveDetail }) => {

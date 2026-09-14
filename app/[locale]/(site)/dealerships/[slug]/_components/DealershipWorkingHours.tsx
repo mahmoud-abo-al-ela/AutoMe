@@ -2,18 +2,24 @@
 
 import { useMemo } from "react";
 import { Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
-import { getOpenStatus } from "./OpenStatusBadge";
+import { TimeRange } from "@/components/common/TimeRange";
+import { useOpenStatusMessage } from "./OpenStatusBadge";
+import { getOpenStatus } from "@/lib/utils/open-status";
+import { cairoNow } from "@/lib/utils/datetime";
+import type { DayOfWeek } from "@/lib/generated/prisma";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
-const DAY_NAMES = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
+/** Indexed by `Date.getUTCDay()`, so Sunday first. */
+const DAY_KEYS: readonly DayOfWeek[] = [
+    "SUNDAY",
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
 ];
 
 export const DealershipWorkingHours = ({
@@ -21,8 +27,14 @@ export const DealershipWorkingHours = ({
 }: {
     workingHours?: WorkingHoursEntry[] | null;
 }) => {
-    const currentDay = useMemo(() => {
-        return DAY_NAMES[new Date().getDay()];
+    const t = useTranslations("dealerships");
+    const describe = useOpenStatusMessage();
+
+    // Which row to highlight is a Cairo question, like the open/closed status:
+    // a reader an hour behind should not see yesterday's row marked "today".
+    const currentDayKey = useMemo(() => {
+        const [year, month, day] = cairoNow().date.split("-").map(Number);
+        return DAY_KEYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
     }, []);
 
     const openStatus = useMemo(
@@ -41,7 +53,7 @@ export const DealershipWorkingHours = ({
                 <div className="flex items-center justify-between mb-5">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
                         <Clock className="h-5 w-5 text-slate-500" />
-                        Working Hours
+                        {t("workingHours.title")}
                     </h3>
                     <div
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${openStatus.isOpen
@@ -55,22 +67,25 @@ export const DealershipWorkingHours = ({
                                     : "bg-red-500"
                                 }`}
                         />
-                        {openStatus.isOpen ? "Open Now" : "Closed"}
-                        <span className="opacity-70">
-                            · {openStatus.message}
-                        </span>
+                        {openStatus.isOpen
+                            ? t("openStatus.openNow")
+                            : t("openStatus.closed")}
+                        {openStatus.statusKey !== "closed" && (
+                            <span className="opacity-70">
+                                · {describe(openStatus)}
+                            </span>
+                        )}
                     </div>
                 </div>
 
                 {/* Working hours list */}
                 <div className="space-y-1">
-                    {workingHours.map((wh, index) => {
-                        const isToday =
-                            wh.day.toLowerCase() === currentDay.toLowerCase();
+                    {workingHours.map((wh) => {
+                        const isToday = wh.dayKey === currentDayKey;
 
                         return (
                             <div
-                                key={index}
+                                key={wh.dayKey}
                                 className={`flex justify-between items-center text-sm px-3 py-2.5 rounded-lg transition-colors ${isToday
                                         ? "bg-primary/5 border border-primary/10 font-medium"
                                         : "hover:bg-slate-50"
@@ -85,10 +100,10 @@ export const DealershipWorkingHours = ({
                                     {isToday && (
                                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                                     )}
-                                    {wh.day}
+                                    {t(`days.${wh.dayKey}`)}
                                     {isToday && (
                                         <span className="text-micro uppercase tracking-wider text-primary/70 font-semibold">
-                                            Today
+                                            {t("workingHours.today")}
                                         </span>
                                     )}
                                 </span>
@@ -101,9 +116,14 @@ export const DealershipWorkingHours = ({
                                             : "text-red-500"
                                     }
                                 >
-                                    {wh.isOpen
-                                        ? `${wh.openTime} - ${wh.closeTime}`
-                                        : "Closed"}
+                                    {wh.isOpen ? (
+                                        <TimeRange
+                                            start={wh.openTime}
+                                            end={wh.closeTime}
+                                        />
+                                    ) : (
+                                        t("workingHours.closed")
+                                    )}
                                 </span>
                             </div>
                         );

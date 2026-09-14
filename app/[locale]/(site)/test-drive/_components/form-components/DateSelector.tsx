@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { TimeRange } from "../TimeRange";
+import { TimeRange } from "@/components/common/TimeRange";
 import type { DayOfWeek, WorkingHours } from "../../_lib/scheduling";
 
 const DateSelector = ({

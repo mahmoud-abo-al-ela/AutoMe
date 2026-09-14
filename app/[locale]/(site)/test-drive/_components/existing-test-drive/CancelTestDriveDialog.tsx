@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
-import { TimeRange } from "../TimeRange";
+import { TimeRange } from "@/components/common/TimeRange";
 import {
     Dialog,
     DialogContent,

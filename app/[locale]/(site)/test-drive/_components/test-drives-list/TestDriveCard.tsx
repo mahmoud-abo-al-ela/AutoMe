@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock, Car, ChevronRight } from "lucide-react";
-import { TimeRange } from "../TimeRange";
+import { TimeRange } from "@/components/common/TimeRange";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";

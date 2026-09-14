@@ -16,7 +16,6 @@ const entry = (
   closeTime: string,
   isOpen = true,
 ): WorkingHoursEntry => ({
-  day: dayKey,
   dayKey,
   openTime,
   closeTime,

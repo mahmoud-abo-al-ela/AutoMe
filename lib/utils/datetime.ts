@@ -85,6 +85,40 @@ export function formatTime(
  * Returns the input unchanged when it is not "HH:mm", so a malformed column
  * degrades to the raw value rather than to "Invalid Date".
  */
+/**
+ * The current date and wall-clock time in Africa/Cairo, as "YYYY-MM-DD" and
+ * "HH:mm".
+ *
+ * Anything asking "is it open right now?" or "has this slot passed?" has to ask
+ * in the dealership's zone. `new Date().getHours()` answers in the *visitor's*
+ * zone, so a reader in London would see a Cairo dealership close two hours
+ * early — and the server, usually on UTC, would disagree with both.
+ */
+export function cairoNow(now: Date = new Date()): {
+  date: string;
+  time: string;
+} {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    // h23 rather than hour12:false — the latter renders midnight as "24" on
+    // some ICU builds, which would compare above every slot and empty the day.
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? "";
+
+  return {
+    date: `${part("year")}-${part("month")}-${part("day")}`,
+    time: `${part("hour")}:${part("minute")}`,
+  };
+}
+
 export function formatClockTime(value: string, locale: Locale = "en"): string {
   const match = /^\s*(\d{1,2}):(\d{2})\s*$/.exec(value ?? "");
   if (!match) return value;

@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { StarRating } from "@/components/common/StarRating";
-import { getOpenStatus } from "../[slug]/_components/OpenStatusBadge";
+import { getOpenStatus } from "@/lib/utils/open-status";
 import type { DealershipListItem } from "../_lib/dealership-types";
 
 const formatPrice = (value: number) => formatCarPrice(value);

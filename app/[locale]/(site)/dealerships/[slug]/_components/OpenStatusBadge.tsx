@@ -1,155 +1,33 @@
 "use client";
 
 import { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
+import { getOpenStatus, type OpenStatus } from "@/lib/utils/open-status";
+import { formatClockTime } from "@/lib/utils/datetime";
+import type { Locale } from "@/i18n/routing";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
-export interface OpenStatus {
-    isOpen: boolean;
-    message: string;
-}
+/**
+ * Turn a status into its sentence. The status itself is computed in
+ * lib/utils/open-status, which knows nothing about language — it hands back a
+ * key and its parameters so both this badge and the working-hours card can word
+ * it in the reader's locale.
+ */
+export const useOpenStatusMessage = () => {
+    const t = useTranslations("dealerships");
+    const locale = useLocale() as Locale;
 
-const DAY_MAP: Record<number, string> = {
-    0: "Sunday",
-    1: "Monday",
-    2: "Tuesday",
-    3: "Wednesday",
-    4: "Thursday",
-    5: "Friday",
-    6: "Saturday",
+    return (status: OpenStatus) =>
+        t(`openStatus.${status.statusKey}`, {
+            // The clock face is localised here rather than in the message, so
+            // Arabic gets Eastern digits and the right meridiem.
+            time: status.params?.time
+                ? formatClockTime(status.params.time, locale)
+                : "",
+            day: status.params?.day ? t(`days.${status.params.day}`) : "",
+        });
 };
-
-/**
- * Parse a time string like "09:00" or "9:00 AM" into minutes since midnight.
- */
-function parseTimeToMinutes(timeStr: string | null | undefined): number | null {
-    if (!timeStr) return null;
-
-    const cleaned = timeStr.trim().toUpperCase();
-
-    // Handle "HH:MM AM/PM" format
-    const ampmMatch = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
-    if (ampmMatch) {
-        let hours = parseInt(ampmMatch[1], 10);
-        const minutes = parseInt(ampmMatch[2], 10);
-        const period = ampmMatch[3];
-
-        if (period === "AM" && hours === 12) hours = 0;
-        if (period === "PM" && hours !== 12) hours += 12;
-
-        return hours * 60 + minutes;
-    }
-
-    // Handle "HH:MM" 24-hour format
-    const match24 = cleaned.match(/^(\d{1,2}):(\d{2})$/);
-    if (match24) {
-        const hours = parseInt(match24[1], 10);
-        const minutes = parseInt(match24[2], 10);
-        return hours * 60 + minutes;
-    }
-
-    return null;
-}
-
-/**
- * Format minutes since midnight back to a readable time string.
- */
-function formatMinutesToTime(totalMinutes: number): string {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    const period = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-    return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
-}
-
-/**
- * Calculate the open/closed status based on working hours.
- */
-function getOpenStatus(
-    workingHours: WorkingHoursEntry[] | null | undefined
-): OpenStatus {
-    if (!workingHours || workingHours.length === 0) {
-        return { isOpen: false, message: "Hours not available" };
-    }
-
-    const now = new Date();
-    const currentDay = DAY_MAP[now.getDay()];
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-    // Find today's schedule
-    const todaySchedule = workingHours.find(
-        (wh) => wh.day.toLowerCase() === currentDay.toLowerCase()
-    );
-
-    if (!todaySchedule || !todaySchedule.isOpen) {
-        // Find next opening day
-        const nextOpen = findNextOpenDay(workingHours, now.getDay());
-        if (nextOpen) {
-            return {
-                isOpen: false,
-                message: `Opens ${nextOpen.day} at ${nextOpen.time}`,
-            };
-        }
-        return { isOpen: false, message: "Closed" };
-    }
-
-    const openMinutes = parseTimeToMinutes(todaySchedule.openTime);
-    const closeMinutes = parseTimeToMinutes(todaySchedule.closeTime);
-
-    if (openMinutes === null || closeMinutes === null) {
-        return { isOpen: false, message: "Hours not available" };
-    }
-
-    if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
-        return {
-            isOpen: true,
-            message: `Closes at ${formatMinutesToTime(closeMinutes)}`,
-        };
-    }
-
-    if (currentMinutes < openMinutes) {
-        return {
-            isOpen: false,
-            message: `Opens at ${formatMinutesToTime(openMinutes)}`,
-        };
-    }
-
-    // Past closing time, find next opening
-    const nextOpen = findNextOpenDay(workingHours, now.getDay());
-    if (nextOpen) {
-        return {
-            isOpen: false,
-            message: `Opens ${nextOpen.day} at ${nextOpen.time}`,
-        };
-    }
-
-    return { isOpen: false, message: "Closed" };
-}
-
-/**
- * Find the next day the dealership is open.
- */
-function findNextOpenDay(
-    workingHours: WorkingHoursEntry[],
-    currentDayIndex: number
-): { day: string; time: string } | null {
-    for (let i = 1; i <= 7; i++) {
-        const nextDayIndex = (currentDayIndex + i) % 7;
-        const nextDayName = DAY_MAP[nextDayIndex];
-        const schedule = workingHours.find(
-            (wh) => wh.day.toLowerCase() === nextDayName.toLowerCase()
-        );
-
-        if (schedule && schedule.isOpen && schedule.openTime) {
-            const dayLabel = i === 1 ? "tomorrow" : nextDayName;
-            return {
-                day: dayLabel,
-                time: schedule.openTime,
-            };
-        }
-    }
-    return null;
-}
 
 export const OpenStatusBadge = ({
     workingHours,
@@ -158,6 +36,8 @@ export const OpenStatusBadge = ({
     workingHours?: WorkingHoursEntry[] | null;
     className?: string;
 }) => {
+    const t = useTranslations("dealerships");
+    const describe = useOpenStatusMessage();
     const status = useMemo(() => getOpenStatus(workingHours), [workingHours]);
 
     return (
@@ -174,11 +54,18 @@ export const OpenStatusBadge = ({
                         : "bg-red-500"
                     }`}
             />
-            <span>{status.isOpen ? "Open Now" : "Closed"}</span>
-            <span className="text-micro opacity-70">· {status.message}</span>
+            <span>
+                {status.isOpen
+                    ? t("openStatus.openNow")
+                    : t("openStatus.closed")}
+            </span>
+            {/* The detail is dropped when it would only repeat the label — a
+                plain "closed", with no next opening to point at. */}
+            {status.statusKey !== "closed" && (
+                <span className="text-micro opacity-70">
+                    · {describe(status)}
+                </span>
+            )}
         </Badge>
     );
 };
-
-// Export the utility for reuse
-export { getOpenStatus };

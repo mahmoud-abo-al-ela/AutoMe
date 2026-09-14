@@ -1,0 +1,25 @@
+{
+  "days": {
+    "SATURDAY": "السبت",
+    "SUNDAY": "الأحد",
+    "MONDAY": "الإثنين",
+    "TUESDAY": "الثلاثاء",
+    "WEDNESDAY": "الأربعاء",
+    "THURSDAY": "الخميس",
+    "FRIDAY": "الجمعة"
+  },
+  "workingHours": {
+    "title": "مواعيد العمل",
+    "today": "اليوم",
+    "closed": "مغلق"
+  },
+  "openStatus": {
+    "openNow": "مفتوح الآن",
+    "closed": "مغلق",
+    "unavailable": "المواعيد غير متاحة",
+    "closesAt": "يغلق الساعة {time}",
+    "opensAt": "يفتح الساعة {time}",
+    "opensTomorrowAt": "يفتح غدًا الساعة {time}",
+    "opensOnDayAt": "يفتح {day} الساعة {time}"
+  }
+}
