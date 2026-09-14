@@ -5,6 +5,7 @@ import { FilterSection } from "./FilterSection";
 import type { SingleFacetProps } from "../../_lib/cars-types";
 import { FilterChip } from "./FilterChip";
 import { useTranslations } from "next-intl";
+import { usePlaceNames } from "@/hooks/use-place-names";
 
 const CityFilter = ({
   selected,
@@ -13,6 +14,8 @@ const CityFilter = ({
   isLoading,
 }: SingleFacetProps) => {
   const t = useTranslations("cars.filters");
+  const place = usePlaceNames();
+
   return (
     <FilterSection
       value="city"
@@ -28,7 +31,7 @@ const CityFilter = ({
           return (
             <FilterChip
               key={city}
-              label={city}
+              label={place.city(city)}
               selected={isSelected}
               disabled={isLoading}
               onClick={() => onSelect(isSelected ? undefined : city)}

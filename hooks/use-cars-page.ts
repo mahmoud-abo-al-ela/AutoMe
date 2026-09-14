@@ -16,6 +16,7 @@ import type { ActionResponse } from "@/lib/utils/response";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "./use-formatters";
 import { useCarAttributes } from "./use-car-attributes";
+import { usePlaceNames } from "./use-place-names";
 
 // Re-exported for backward-compatible import sites.
 export { DEFAULT_PER_PAGE, parseFiltersFromSearch, buildCarsUrl };
@@ -40,6 +41,7 @@ export const useCarsPage = (
   const t = useTranslations("cars.filters");
   const fmt = useFormatters();
   const attr = useCarAttributes();
+  const place = usePlaceNames();
 
   const [filters, setFilters] = useState({ ...DEFAULT_FILTERS, ...initial.filters });
   const [page, setPage] = useState(initial.page || 1);
@@ -321,11 +323,15 @@ export const useCarsPage = (
         if (type === "fuelType") return attr.fuel(value);
         if (type === "transmission") return attr.transmission(value);
         if (type === "color") return attr.color(value);
-        // "make" is a brand name — never translated.
+        // Brands render in their Arabic market form when they stand alone, as
+        // they do on a chip. Car titles keep "{make} {model}" Latin together,
+        // since the model is open-ended free text with no Arabic form.
+        if (type === "make") return attr.make(value);
         return value;
       },
+      place: (value: string) => place.city(value),
     }),
-    [t, fmt, attr]
+    [t, fmt, attr, place]
   );
 
   const getActiveFilters = useCallback(

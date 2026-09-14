@@ -134,6 +134,8 @@ export interface ChipFormatters {
   number: (value: number) => string;
   /** Translates a stored attribute value (body/fuel/transmission/colour). */
   attribute: (type: string, value: string) => string;
+  /** Translates a stored place name. Dealership names are left as entered. */
+  place: (value: string) => string;
 }
 
 /** Build the active-filter chip list shown above the results grid. */
@@ -151,7 +153,7 @@ export function buildActiveFilterChips(
     );
   });
   if (filters.dealership) chips.push({ type: "dealership", value: filters.dealership, label: filters.dealership });
-  if (filters.city) chips.push({ type: "city", value: filters.city, label: filters.city });
+  if (filters.city) chips.push({ type: "city", value: filters.city, label: fmt.place(filters.city) });
   if (filters.color) chips.push({ type: "color", value: filters.color, label: fmt.attribute("color", filters.color) });
   if (filters.minSeats) {
     chips.push({ type: "minSeats", value: String(filters.minSeats), label: `${fmt.number(filters.minSeats)}+` });

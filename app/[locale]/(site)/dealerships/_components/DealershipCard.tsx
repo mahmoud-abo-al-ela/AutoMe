@@ -4,6 +4,8 @@ import { useState } from "react";
 import { MapPin, Car, Building2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { usePlaceNames } from "@/hooks/use-place-names";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
@@ -34,6 +36,8 @@ const DealershipCard = ({
 
     const t = useTranslations("dealerships.card");
     const fmt = useFormatters();
+    const place = usePlaceNames();
+    const attr = useCarAttributes();
     const [imgError, setImgError] = useState(false);
     const reduceMotion = useReducedMotion();
 
@@ -99,7 +103,9 @@ const DealershipCard = ({
                     {(city || address) && (
                         <span className="inline-flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span className="line-clamp-1">{city || address}</span>
+                            <span className="line-clamp-1">
+                                {city ? place.city(city) : address}
+                            </span>
                         </span>
                     )}
                     {openStatus?.isOpen && (
@@ -116,9 +122,10 @@ const DealershipCard = ({
                         {brands.map((brand: string) => (
                             <span
                                 key={brand}
+                                dir="auto"
                                 className="rounded-full border border-border bg-muted px-2 py-0.5 text-micro text-muted-foreground"
                             >
-                                {brand}
+                                {attr.make(brand)}
                             </span>
                         ))}
                     </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { usePlaceNames } from "@/hooks/use-place-names";
 import type {
     DealershipActiveFilter,
     DealershipFilterOptions,
@@ -63,19 +64,23 @@ export const DealershipFilterBar = ({
     const t = useTranslations("dealerships.filters");
     const tSort = useTranslations("dealerships.sort");
     const fmt = useFormatters();
+    const place = usePlaceNames();
     const [sheetOpen, setSheetOpen] = useState(false);
 
     // The facet query groups by a nullable column, so organizations with no
     // city/region come back as a `value: null` bucket. Rendering it produced a
     // blank, unselectable chip.
     const withoutNullValues = (
-        options: { value: string | null; count: number }[] | undefined
+        options: { value: string | null; count: number }[] | undefined,
+        label: (value: string) => string
     ) =>
         (options ?? []).flatMap((option) =>
-            option.value === null ? [] : [{ value: option.value, count: option.count }]
+            option.value === null
+                ? []
+                : [{ value: option.value, label: label(option.value), count: option.count }]
         );
-    const cities = withoutNullValues(filterOptions?.cities);
-    const regions = withoutNullValues(filterOptions?.regions);
+    const cities = withoutNullValues(filterOptions?.cities, place.city);
+    const regions = withoutNullValues(filterOptions?.regions, place.region);
     const sortValue = filters.sort || DEFAULT_DEALERSHIP_SORT;
 
     const activeCount = activeFilters.length;
@@ -123,14 +128,14 @@ export const DealershipFilterBar = ({
                         <FilterPopover
                             label={t("city")}
                             activeCount={filters.city ? 1 : 0}
-                            activeLabel={filters.city}
+                            activeLabel={place.city(filters.city)}
                         >
                             {cityControl}
                         </FilterPopover>
                         <FilterPopover
                             label={t("region")}
                             activeCount={filters.region ? 1 : 0}
-                            activeLabel={filters.region}
+                            activeLabel={place.region(filters.region)}
                         >
                             {regionControl}
                         </FilterPopover>

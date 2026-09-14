@@ -18,6 +18,7 @@ const NAMESPACES = [
   "legal",
   "about",
   "dealerships",
+  "places",
 ] as const;
 
 export default getRequestConfig(async ({ locale: explicitLocale }) => {

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
+import { usePlaceNames } from "@/hooks/use-place-names";
 import type { CarDetail } from "../_lib/car-detail-types";
 import {
   Fuel,
@@ -28,6 +29,7 @@ const CarSpecifications = ({
   const tHeader = useTranslations("carDetail.header");
   const fmt = useFormatters();
   const attr = useCarAttributes();
+  const place = usePlaceNames();
 
   // Maps the CarStatus enum to a translated label. Rendering car.status
   // directly printed the raw "AVAILABLE" in both languages.
@@ -76,7 +78,7 @@ const CarSpecifications = ({
     },
     {
       label: tFields("location"),
-      value: car.location || t("notSpecified"),
+      value: place.location(car.location) || t("notSpecified"),
       icon: MapPin,
       color: "text-red-500 bg-red-50 dark:bg-red-950/20",
     },

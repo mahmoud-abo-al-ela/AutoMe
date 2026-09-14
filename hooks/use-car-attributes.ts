@@ -32,5 +32,14 @@ export function useCarAttributes() {
     // "Silver" as often as "silver".
     color: (value?: string | null) =>
       lookup("color", value?.toLowerCase().trim()) || value || "",
+    /**
+     * Brand names, in the Arabic forms the Egyptian market uses.
+     *
+     * Only for a make shown on its own — a brand badge, a filter chip, a facet
+     * row. Car titles read "{year} {make} {model}", and the model is open-ended
+     * free text that stays Latin, so translating the make there would put two
+     * scripts inside one title.
+     */
+    make: (value?: string | null) => lookup("make", value?.trim()),
   };
 }

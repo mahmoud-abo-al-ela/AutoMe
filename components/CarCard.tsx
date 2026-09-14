@@ -1,6 +1,7 @@
 "use client";
 import { useTranslations } from "next-intl";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
+import { usePlaceNames } from "@/hooks/use-place-names";
 import { useFormatters } from "@/hooks/use-formatters";
 import {
   Building2,
@@ -41,6 +42,7 @@ const CarCard = ({
 }) => {
   const t = useTranslations("common.actions");
   const attr = useCarAttributes();
+  const place = usePlaceNames();
   const fmt = useFormatters();
   const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
@@ -146,7 +148,9 @@ const CarCard = ({
                 <div className="me-1.5 rounded-full bg-muted p-1">
                   <MapPin className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
-                <span className="truncate font-medium text-foreground">{car.location}</span>
+                <span className="truncate font-medium text-foreground">
+                  {place.location(car.location)}
+                </span>
               </div>
             )}
           </div>

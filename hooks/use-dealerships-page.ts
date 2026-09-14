@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { usePlaceNames } from "@/hooks/use-place-names";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getDealerships, getDealershipFilters } from "@/actions/dealerships";
@@ -38,6 +39,7 @@ export const useDealershipsPage = (
 ) => {
   const t = useTranslations("dealerships.filters");
   const fmt = useFormatters();
+  const place = usePlaceNames();
 
   // Prefer the server-parsed state (identical on server and client → no
   // hydration mismatch); fall back to parsing the URL on the client only.
@@ -266,16 +268,20 @@ export const useDealershipsPage = (
   );
 
   // Chip labels are locale-dependent, so they are rebuilt when the locale
-  // changes and the memo is keyed on the translator. City and region are stored
-  // values, not prose, so they pass through untranslated — the same rule the
-  // car chips follow for make names.
+  // changes and the memo is keyed on the translator. The stored value on the
+  // chip is untouched and only the label is translated, so clearing a chip
+  // still matches the filter it came from.
   const getActiveFilters = useCallback(() => {
     const chips: { type: string; label: string }[] = [];
     if (filters.search) {
       chips.push({ type: "search", label: t("chips.search", { query: filters.search }) });
     }
-    if (filters.city) chips.push({ type: "city", label: filters.city });
-    if (filters.region) chips.push({ type: "region", label: filters.region });
+    if (filters.city) {
+      chips.push({ type: "city", label: place.city(filters.city) });
+    }
+    if (filters.region) {
+      chips.push({ type: "region", label: place.region(filters.region) });
+    }
     if (filters.minRating) {
       chips.push({
         type: "minRating",
@@ -292,7 +298,7 @@ export const useDealershipsPage = (
       });
     }
     return chips;
-  }, [filters, t, fmt]);
+  }, [filters, t, fmt, place]);
 
   const isError = !!error || (queryData && queryData.success === false);
 

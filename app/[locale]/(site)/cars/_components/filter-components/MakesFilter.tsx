@@ -7,6 +7,7 @@ import { FilterSection } from "./FilterSection";
 import { FilterChip } from "./FilterChip";
 import type { MultiFacetProps } from "../../_lib/cars-types";
 import { useTranslations } from "next-intl";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { useFormatters } from "@/hooks/use-formatters";
 
 const COLLAPSED_COUNT = 12;
@@ -19,12 +20,18 @@ const MakesFilter = ({
 }: MultiFacetProps) => {
   const t = useTranslations("cars.filters");
   const fmt = useFormatters();
+  const attr = useCarAttributes();
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 
-  const filtered = query
-    ? options.filter((o) => o.value.toLowerCase().includes(query.toLowerCase()))
-    : options;
+  const matches = (value: string) => {
+    const needle = query.toLowerCase();
+    return (
+      value.toLowerCase().includes(needle) ||
+      attr.make(value).toLowerCase().includes(needle)
+    );
+  };
+  const filtered = query ? options.filter((o) => matches(o.value)) : options;
   const visible = expanded ? filtered : filtered.slice(0, COLLAPSED_COUNT);
   const hiddenCount = filtered.length - visible.length;
 
@@ -53,7 +60,7 @@ const MakesFilter = ({
         {visible.map(({ value, count }) => (
           <FilterChip
             key={value}
-            label={value}
+            label={attr.make(value)}
             count={count}
             selected={selected.includes(value)}
             disabled={isLoading}
