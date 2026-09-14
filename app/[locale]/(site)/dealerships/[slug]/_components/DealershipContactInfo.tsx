@@ -1,4 +1,7 @@
+"use client";
+
 import { MapPin, Phone, Mail, Globe, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { LucideIcon } from "lucide-react";
 import type { DealershipDetail } from "../_lib/detail-types";
 
@@ -52,6 +55,7 @@ export const DealershipContactInfo = ({
 }: {
     dealership: DealershipDetail;
 }) => {
+    const t = useTranslations("dealerships.contact");
     const contacts: ContactCardProps[] = [];
 
     if (dealership.phone) {
@@ -59,7 +63,7 @@ export const DealershipContactInfo = ({
             icon: Phone,
             iconBgClass: "from-green-100 to-green-50",
             iconColorClass: "text-green-600",
-            label: "Call Now",
+            label: t("callNow"),
             value: dealership.phone,
             href: `tel:${dealership.phone}`,
             external: false,
@@ -71,7 +75,7 @@ export const DealershipContactInfo = ({
             icon: Mail,
             iconBgClass: "from-blue-100 to-blue-50",
             iconColorClass: "text-blue-600",
-            label: "Send Email",
+            label: t("sendEmail"),
             value: dealership.email,
             href: `mailto:${dealership.email}`,
             external: false,
@@ -83,7 +87,7 @@ export const DealershipContactInfo = ({
             icon: Globe,
             iconBgClass: "from-purple-100 to-purple-50",
             iconColorClass: "text-purple-600",
-            label: "Visit Website",
+            label: t("visitWebsite"),
             value: dealership.website.replace(/^https?:\/\//, ""),
             href: dealership.website,
             external: true,
@@ -95,7 +99,7 @@ export const DealershipContactInfo = ({
             icon: MapPin,
             iconBgClass: "from-red-100 to-red-50",
             iconColorClass: "text-red-500",
-            label: "Get Directions",
+            label: t("getDirections"),
             value: dealership.address,
             href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dealership.address)}`,
             external: true,
@@ -105,7 +109,7 @@ export const DealershipContactInfo = ({
     if (contacts.length === 0) {
         return (
             <p className="text-sm text-muted-foreground">
-                No contact information available.
+                {t("none")}
             </p>
         );
     }

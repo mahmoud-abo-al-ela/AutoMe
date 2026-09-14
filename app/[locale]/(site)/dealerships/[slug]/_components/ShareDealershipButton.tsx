@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Share2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
     Tooltip,
@@ -22,6 +23,7 @@ export const ShareDealershipButton = ({
     size?: React.ComponentProps<typeof Button>["size"];
     className?: string;
 }) => {
+    const t = useTranslations("dealerships.header");
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
     return (
@@ -33,21 +35,21 @@ export const ShareDealershipButton = ({
                         size={size}
                         onClick={() => setIsShareDialogOpen(true)}
                         className={`cursor-pointer ${className}`}
-                        aria-label="Share dealership"
+                        aria-label={t("shareDealership")}
                     >
                         <Share2 className="h-4 w-4" />
-                        {size !== "icon" && <span className="hidden sm:inline">Share</span>}
+                        {size !== "icon" && <span className="hidden sm:inline">{t("share")}</span>}
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>Share dealership</p>
+                    <p>{t("shareDealership")}</p>
                 </TooltipContent>
             </Tooltip>
 
             <ShareDialog
                 isOpen={isShareDialogOpen}
                 onOpenChange={setIsShareDialogOpen}
-                title="Share This Dealership"
+                title={t("shareDialogTitle")}
             />
         </>
     );

@@ -1,6 +1,7 @@
 "use client";
 
 import { Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   DealershipGridSkeleton,
   DealershipsErrorState,
@@ -36,6 +37,7 @@ export const DealershipsPagePresenter = ({
   activeFilters,
   handlers,
 }: DealershipsPageData) => {
+  const t = useTranslations("dealerships.empty");
   const hasActiveFilters = activeFilters.length > 0;
   // Keep the previous grid mounted (dimmed) while re-fetching after the first
   // load, so filtering/paging doesn't flash the whole grid to skeletons.
@@ -78,14 +80,10 @@ export const DealershipsPagePresenter = ({
           <EmptyState
             variant={hasActiveFilters ? "filtered" : "standalone"}
             icon={Building2}
-            title={hasActiveFilters ? "No matching dealerships" : "No dealerships yet"}
-            description={
-              hasActiveFilters
-                ? "Try adjusting your search or filters to find what you're looking for."
-                : "There are no dealerships to show right now. Check back soon."
-            }
+            title={t(hasActiveFilters ? "filteredTitle" : "noneTitle")}
+            description={t(hasActiveFilters ? "filteredBody" : "noneBody")}
             onClearFilters={hasActiveFilters ? handlers.resetAllFilters : undefined}
-            actionLabel={hasActiveFilters ? undefined : "Browse cars"}
+            actionLabel={hasActiveFilters ? undefined : t("browseCars")}
             actionHref={hasActiveFilters ? undefined : "/cars"}
           />
         )}

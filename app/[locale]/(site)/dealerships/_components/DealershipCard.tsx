@@ -1,16 +1,15 @@
 "use client";
-import { formatCarPrice } from "@/lib/utils/currency";
 
 import { useState } from "react";
 import { MapPin, Car, Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { StarRating } from "@/components/common/StarRating";
 import { getOpenStatus } from "@/lib/utils/open-status";
 import type { DealershipListItem } from "../_lib/dealership-types";
-
-const formatPrice = (value: number) => formatCarPrice(value);
 
 const DealershipCard = ({
     dealership,
@@ -33,6 +32,8 @@ const DealershipCard = ({
         workingHours,
     } = dealership;
 
+    const t = useTranslations("dealerships.card");
+    const fmt = useFormatters();
     const [imgError, setImgError] = useState(false);
     const reduceMotion = useReducedMotion();
 
@@ -79,14 +80,17 @@ const DealershipCard = ({
                         <>
                             <StarRating rating={averageRating} size={15} />
                             <span className="text-sm font-medium">
-                                {averageRating.toFixed(1)}
+                                {fmt.number(averageRating, {
+                                    minimumFractionDigits: 1,
+                                    maximumFractionDigits: 1,
+                                })}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                                ({totalReviews})
+                                ({fmt.number(totalReviews)})
                             </span>
                         </>
                     ) : (
-                        <span className="text-xs text-muted-foreground">No reviews yet</span>
+                        <span className="text-xs text-muted-foreground">{t("noReviews")}</span>
                     )}
                 </div>
 
@@ -101,7 +105,7 @@ const DealershipCard = ({
                     {openStatus?.isOpen && (
                         <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-500">
                             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                            Open now
+                            {t("openNow")}
                         </span>
                     )}
                 </div>
@@ -127,13 +131,16 @@ const DealershipCard = ({
                 <div className="mt-4 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 border-t border-border pt-4 text-sm">
                     <Car className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">
-                        {carCount} {carCount === 1 ? "car" : "cars"}
+                        {t("carCount", {
+                            count: carCount,
+                            value: fmt.number(carCount),
+                        })}
                     </span>
                     {priceFrom ? (
                         <>
                             <span className="text-muted-foreground">·</span>
                             <span className="text-muted-foreground">
-                                from {formatPrice(priceFrom)}
+                                {t("priceFrom", { price: fmt.price(priceFrom) })}
                             </span>
                         </>
                     ) : null}

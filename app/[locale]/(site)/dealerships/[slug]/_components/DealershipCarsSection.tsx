@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Car, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import CarCard from "@/components/CarCard";
 import { Pagination, PaginationInfo } from "@/components/common/Pagination";
 import { DealershipInventoryFilters } from "./DealershipInventoryFilters";
@@ -18,6 +19,7 @@ export const DealershipCarsSection = ({
     onFilterChange,
     availableFilters,
 }: DealershipInventoryProps & { carCount?: number }) => {
+    const t = useTranslations("dealerships.inventory");
     const totalCarCount = carCount ?? 0;
     const hasActiveFilters = 
         filters.search || 
@@ -50,11 +52,10 @@ export const DealershipCarsSection = ({
                         <Car className="h-8 w-8" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2 text-slate-900">
-                        No cars available
+                        {t("noCarsTitle")}
                     </h3>
                     <p className="text-muted-foreground max-w-sm mx-auto">
-                        This dealership doesn&apos;t have any cars listed at the
-                        moment. Check back later for new inventory.
+                        {t("noCarsBody")}
                     </p>
                 </div>
             )}
@@ -66,16 +67,16 @@ export const DealershipCarsSection = ({
                         <Search className="h-8 w-8" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2 text-slate-900">
-                        No matching cars
+                        {t("noMatchesTitle")}
                     </h3>
                     <p className="text-muted-foreground max-w-sm mx-auto mb-4">
-                        Try adjusting your filters or search terms to find what you are looking for.
+                        {t("noMatchesBody")}
                     </p>
                     <button
                         onClick={() => onFilterChange({ sortBy: "newest" })}
                         className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary/95 rounded-lg shadow-sm cursor-pointer transition-colors"
                     >
-                        Reset All Filters
+                        {t("resetAllFilters")}
                     </button>
                 </div>
             )}
@@ -102,6 +103,7 @@ export const DealershipCarsSection = ({
                                 currentPage={carsPagination.page}
                                 limit={carsPagination.limit}
                                 total={carsPagination.total}
+                                noun="cars"
                             />
                         </div>
                     )}

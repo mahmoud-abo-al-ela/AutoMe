@@ -1,7 +1,9 @@
 "use client";
 
 import { Car, MessageSquare, Info } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
     Tabs,
     TabsList,
@@ -31,6 +33,9 @@ export const DealershipTabs = ({
     dealership: DealershipDetail;
     defaultTab?: string;
 }) => {
+    const t = useTranslations("dealerships.tabs");
+    const fmt = useFormatters();
+
     return (
         <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="w-full sm:w-auto h-auto p-1 bg-muted/60 rounded-xl mb-6">
@@ -39,13 +44,13 @@ export const DealershipTabs = ({
                     className="gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm cursor-pointer"
                 >
                     <Car className="h-4 w-4" />
-                    <span>Inventory</span>
+                    <span>{t("inventory")}</span>
                     {dealership.carCount > 0 && (
                         <Badge
                             variant="secondary"
                             className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full"
                         >
-                            {dealership.carCount}
+                            {fmt.number(dealership.carCount)}
                         </Badge>
                     )}
                 </TabsTrigger>
@@ -55,13 +60,13 @@ export const DealershipTabs = ({
                     className="gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm cursor-pointer"
                 >
                     <MessageSquare className="h-4 w-4" />
-                    <span>Reviews</span>
+                    <span>{t("reviews")}</span>
                     {dealership.totalReviews > 0 && (
                         <Badge
                             variant="secondary"
                             className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full"
                         >
-                            {dealership.totalReviews}
+                            {fmt.number(dealership.totalReviews)}
                         </Badge>
                     )}
                 </TabsTrigger>
@@ -71,7 +76,7 @@ export const DealershipTabs = ({
                     className="gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm cursor-pointer"
                 >
                     <Info className="h-4 w-4" />
-                    <span>About</span>
+                    <span>{t("about")}</span>
                 </TabsTrigger>
             </TabsList>
 
@@ -95,7 +100,9 @@ export const DealershipTabs = ({
             <TabsContent value="reviews" className="mt-0">
                 <div id="dealership-reviews">
                     <h2 className="text-2xl font-bold mb-6">
-                        Customer Reviews ({dealership.totalReviews})
+                        {t("customerReviews", {
+                            count: fmt.number(dealership.totalReviews),
+                        })}
                     </h2>
                     <DealershipReviews organizationId={dealership.id} />
                 </div>
@@ -112,7 +119,7 @@ export const DealershipTabs = ({
                     {/* Contact Information */}
                     <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
                         <h3 className="text-lg font-semibold mb-4">
-                            Contact Information
+                            {t("contactInformation")}
                         </h3>
                         <DealershipContactInfo dealership={dealership} />
                     </div>

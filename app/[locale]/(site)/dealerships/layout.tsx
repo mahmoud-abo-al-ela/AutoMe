@@ -1,23 +1,30 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-    title: "Browse Dealerships",
-    description: "Find the perfect dealership for your next vehicle purchase. Browse our directory of automotive dealerships with ratings, reviews, and available cars.",
-    keywords: ["dealerships", "car dealerships", "automotive", "buy cars", "car sales", "vehicle dealership"],
-    openGraph: {
-        title: "Browse Dealerships",
-        description: "Find the perfect dealership for your next vehicle purchase",
-        type: "website",
-    },
-};
-
-export default async function DealershipsLayout({
-    children,
+export async function generateMetadata({
     params,
 }: {
-    children: React.ReactNode;
     params: Promise<{ locale: string }>;
-}) {
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({ locale, namespace: "dealerships.meta" });
 
+    return {
+        title: t("title"),
+        description: t("description"),
+        keywords: t("keywords"),
+        openGraph: {
+            title: t("title"),
+            description: t("ogDescription"),
+            type: "website",
+        },
+    };
+}
+
+export default function DealershipsLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return <>{children}</>;
 }

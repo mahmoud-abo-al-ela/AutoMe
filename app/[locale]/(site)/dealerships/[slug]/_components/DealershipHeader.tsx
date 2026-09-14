@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { StarRating } from "@/components/common/StarRating";
 import {
-    Star,
     Building2,
     Phone,
     Mail,
@@ -32,6 +34,8 @@ export const DealershipHeader = ({
 }: {
     dealership: DealershipDetail;
 }) => {
+    const t = useTranslations("dealerships.header");
+    const fmt = useFormatters();
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [isDescriptionClamped, setIsDescriptionClamped] = useState(false);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
@@ -44,41 +48,11 @@ export const DealershipHeader = ({
         }
     }, [dealership.description]);
 
-    const formatRating = (rating: number | null | undefined) => {
-        return rating ? rating.toFixed(1) : "0.0";
-    };
-
-    const renderStars = (rating: number | null | undefined) => {
-        const stars: React.ReactNode[] = [];
-        const fullStars = Math.floor(rating || 0);
-        const hasHalfStar = (rating || 0) - fullStars >= 0.5;
-
-        for (let i = 0; i < 5; i++) {
-            if (i < fullStars) {
-                stars.push(
-                    <Star
-                        key={i}
-                        className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                    />
-                );
-            } else if (i === fullStars && hasHalfStar) {
-                stars.push(
-                    <Star
-                        key={i}
-                        className="h-4 w-4 fill-yellow-400/50 text-yellow-400"
-                    />
-                );
-            } else {
-                stars.push(
-                    <Star
-                        key={i}
-                        className="h-4 w-4 text-gray-300"
-                    />
-                );
-            }
-        }
-        return stars;
-    };
+    const formatRating = (rating: number | null | undefined) =>
+        fmt.number(rating || 0, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+        });
 
     return (
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 via-white to-blue-50/30 shadow-md border border-slate-100 mb-6">
@@ -122,15 +96,20 @@ export const DealershipHeader = ({
                             {/* Star Rating */}
                             <div className="flex items-center gap-1.5">
                                 <div className="flex items-center gap-0.5">
-                                    {renderStars(dealership.averageRating)}
+                                    <StarRating
+                                        rating={dealership.averageRating || 0}
+                                        size={16}
+                                    />
                                 </div>
                                 <span className="text-lg font-semibold text-slate-900">
                                     {formatRating(dealership.averageRating)}
                                 </span>
                                 {dealership.totalReviews > 0 && (
                                     <span className="text-sm text-muted-foreground">
-                                        ({dealership.totalReviews} review
-                                        {dealership.totalReviews !== 1 ? "s" : ""})
+                                        {t("reviewCount", {
+                                            count: dealership.totalReviews,
+                                            value: fmt.number(dealership.totalReviews),
+                                        })}
                                     </span>
                                 )}
                             </div>
@@ -163,12 +142,12 @@ export const DealershipHeader = ({
                                     >
                                         {isDescriptionExpanded ? (
                                             <>
-                                                Show less
+                                                {t("showLess")}
                                                 <ChevronUp className="h-3.5 w-3.5" />
                                             </>
                                         ) : (
                                             <>
-                                                Read more
+                                                {t("readMore")}
                                                 <ChevronDown className="h-3.5 w-3.5" />
                                             </>
                                         )}
@@ -190,7 +169,7 @@ export const DealershipHeader = ({
                                         >
                                             <a href={`tel:${dealership.phone}`}>
                                                 <Phone className="h-4 w-4 text-green-600" />
-                                                <span className="hidden sm:inline">Call</span>
+                                                <span className="hidden sm:inline">{t("call")}</span>
                                             </a>
                                         </Button>
                                     </TooltipTrigger>
@@ -211,7 +190,7 @@ export const DealershipHeader = ({
                                         >
                                             <a href={`mailto:${dealership.email}`}>
                                                 <Mail className="h-4 w-4 text-blue-600" />
-                                                <span className="hidden sm:inline">Email</span>
+                                                <span className="hidden sm:inline">{t("email")}</span>
                                             </a>
                                         </Button>
                                     </TooltipTrigger>
@@ -236,12 +215,12 @@ export const DealershipHeader = ({
                                                 rel="noopener noreferrer"
                                             >
                                                 <Globe className="h-4 w-4 text-purple-600" />
-                                                <span className="hidden sm:inline">Website</span>
+                                                <span className="hidden sm:inline">{t("website")}</span>
                                             </a>
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Visit website</p>
+                                        <p>{t("visitWebsite")}</p>
                                     </TooltipContent>
                                 </Tooltip>
                             )}
@@ -261,7 +240,7 @@ export const DealershipHeader = ({
                                                 rel="noopener noreferrer"
                                             >
                                                 <MapPin className="h-4 w-4 text-red-500" />
-                                                <span className="hidden sm:inline">Directions</span>
+                                                <span className="hidden sm:inline">{t("directions")}</span>
                                             </a>
                                         </Button>
                                     </TooltipTrigger>

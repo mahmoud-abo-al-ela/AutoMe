@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Home, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { getDealershipBySlug, getDealershipCars, getDealershipCarFilters } from "@/actions/dealerships";
@@ -27,6 +28,7 @@ import type {
 } from "../_lib/detail-types";
 
 export const DealershipDetailPresenter = () => {
+    const t = useTranslations("dealerships");
     const params = useParams();
     const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
 
@@ -64,11 +66,11 @@ export const DealershipDetailPresenter = () => {
                     // Fetch cars for this dealership
                     await fetchCars(response.data.id, { sortBy: "newest" }, 1);
                 } else {
-                    setError(response.error?.message || "Failed to load dealership");
+                    setError(response.error?.message || t("errors.detailTitle"));
                 }
             } catch (err) {
                 console.error("Error fetching dealership:", err);
-                setError("Failed to load dealership. Please try again.");
+                setError(t("errors.detailTitle"));
             } finally {
                 setLoading(false);
             }
@@ -147,8 +149,8 @@ export const DealershipDetailPresenter = () => {
                     <StructuredData data={generateDealershipStructuredData(dealership)} />
                     <StructuredData
                         data={generateBreadcrumbStructuredData([
-                            { name: "Home", url: "/" },
-                            { name: "Dealerships", url: "/dealerships" },
+                            { name: t("breadcrumb.home"), url: "/" },
+                            { name: t("breadcrumb.dealerships"), url: "/dealerships" },
                             { name: dealership.name, url: `/dealerships/${dealership.slug}` },
                         ])}
                     />
@@ -158,7 +160,7 @@ export const DealershipDetailPresenter = () => {
             <div className="container mx-auto py-4 px-4 mt-18">
                 {/* Breadcrumb Navigation */}
                 <nav
-                    aria-label="Breadcrumb"
+                    aria-label={t("breadcrumb.label")}
                     className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6"
                 >
                     <Link
@@ -166,14 +168,14 @@ export const DealershipDetailPresenter = () => {
                         className="flex items-center gap-1 hover:text-foreground transition-colors"
                     >
                         <Home className="h-3.5 w-3.5" />
-                        <span>Home</span>
+                        <span>{t("breadcrumb.home")}</span>
                     </Link>
                     <ChevronRight className="h-3.5 w-3.5" />
                     <Link
                         href="/dealerships"
                         className="hover:text-foreground transition-colors"
                     >
-                        Dealerships
+                        {t("breadcrumb.dealerships")}
                     </Link>
                     <ChevronRight className="h-3.5 w-3.5" />
                     <span className="text-foreground font-medium truncate max-w-[200px]">

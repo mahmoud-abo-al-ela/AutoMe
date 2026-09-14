@@ -1,6 +1,7 @@
 "use client";
 
 import { X, RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +17,8 @@ export default function ActiveFilterChips({
   onRemove: (field: string, value?: string) => void;
   onClearAll: () => void;
 }) {
+  const t = useTranslations("dealerships.inventory");
+
   return (
     <AnimatePresence>
       {chips.length > 0 && (
@@ -52,7 +55,7 @@ export default function ActiveFilterChips({
             className="h-7 gap-1.5 px-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all font-semibold text-micro cursor-pointer"
           >
             <RotateCcw className="h-3 w-3" />
-            Clear All
+            {t("clearAll")}
           </Button>
         </motion.div>
       )}

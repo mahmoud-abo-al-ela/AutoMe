@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Star, MessageSquare, PenTool } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReviewCard } from "./ReviewCard";
@@ -16,6 +18,8 @@ import type {
 } from "../_lib/dealership-types";
 
 const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
+    const t = useTranslations("dealerships.reviews");
+    const fmt = useFormatters();
     const { user, isLoaded } = useUser();
     const [reviews, setReviews] = useState<DealershipReview[]>([]);
     const [pagination, setPagination] = useState<ReviewsPagination>({
@@ -99,10 +103,12 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
 
     const ratingDistribution = calculateRatingDistribution();
     const totalReviews = reviews.length;
-    const averageRating =
+    const averageRating = fmt.number(
         totalReviews > 0
-            ? (reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews).toFixed(1)
-            : "0.0";
+            ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
+            : 0,
+        { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+    );
 
     return (
         <div className="space-y-6">
@@ -110,7 +116,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                     <MessageSquare className="h-6 w-6" />
-                    Reviews ({totalReviews})
+                    {t("heading", { count: fmt.number(totalReviews) })}
                 </h2>
                 {user && (
                     <Button
@@ -119,7 +125,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                         className="gap-2"
                     >
                         <PenTool className="h-4 w-4" />
-                        {showForm ? "Cancel" : "Write a Review"}
+                        {showForm ? t("cancel") : t("writeReview")}
                     </Button>
                 )}
             </div>
@@ -132,7 +138,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                             {/* Average Rating */}
                             <div className="text-center">
                                 <p className="text-sm text-muted-foreground mb-2">
-                                    Average Rating
+                                    {t("averageRating")}
                                 </p>
                                 <div className="flex items-center justify-center gap-2">
                                     <Star className="h-8 w-8 fill-yellow-400 text-yellow-400" />
@@ -145,13 +151,13 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                             {/* Rating Distribution */}
                             <div>
                                 <p className="text-sm text-muted-foreground mb-4">
-                                    Rating Distribution
+                                    {t("distribution")}
                                 </p>
                                 <div className="space-y-2">
                                     {[5, 4, 3, 2, 1].map((rating) => (
                                         <div key={rating} className="flex items-center gap-3">
                                             <span className="text-sm w-8 text-end">
-                                                {rating}★
+                                                {fmt.number(rating)}★
                                             </span>
                                             <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                                                 <div
@@ -162,9 +168,14 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                                                 />
                                             </div>
                                             <span className="text-sm w-12 text-start">
-                                                {ratingDistribution[rating]} ({Math.round(
-                                                    (ratingDistribution[rating] / totalReviews) * 100
-                                                )}%)
+                                                {t("distributionRow", {
+                                                    count: fmt.number(ratingDistribution[rating]),
+                                                    percent: fmt.number(
+                                                        Math.round(
+                                                            (ratingDistribution[rating] / totalReviews) * 100
+                                                        )
+                                                    ),
+                                                })}
                                             </span>
                                         </div>
                                     ))}
@@ -196,9 +207,9 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
             ) : reviews.length === 0 ? (
                 <EmptyState
                     icon={MessageSquare}
-                    title="No reviews yet"
-                    description="Be the first to review this dealership!"
-                    actionLabel="Write a Review"
+                    title={t("emptyTitle")}
+                    description={t("emptyBody")}
+                    actionLabel={t("writeReview")}
                     onAction={() => setShowForm(true)}
                 />
             ) : (

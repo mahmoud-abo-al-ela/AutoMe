@@ -1,23 +1,28 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { formatNumber } from "@/lib/utils/number";
+import type { Locale } from "@/i18n/routing";
 import { getDealershipBySlug } from "@/actions/dealerships";
 import { DealershipDetailPresenter } from "./_components";
 
 export async function generateMetadata({
     params,
 }: {
-    params: Promise<{ slug: string }>;
+    params: Promise<{ slug: string; locale: string }>;
 }): Promise<Metadata> {
+    const { slug, locale } = await params;
+    const t = await getTranslations({ locale, namespace: "dealerships.meta" });
+
     try {
         // `params` is a promise in Next 15. Reading `.slug` off it directly gave
         // undefined, so every dealership page fell into the catch below and
         // served the generic fallback title/description/OG tags.
-        const { slug } = await params;
         const dealership = await getDealershipBySlug(slug);
 
         if (!dealership.success || !dealership.data) {
             return {
-                title: "Dealership Not Found",
-                description: "The requested dealership could not be found.",
+                title: t("notFoundTitle"),
+                description: t("notFoundDescription"),
             };
         }
 
@@ -31,12 +36,18 @@ export async function generateMetadata({
         // titles do not inherit it, so they spell the brand out themselves.
         const title = name;
         const socialTitle = name + " | AutoMe";
-        const desc = description || `View ${name}'s inventory, reviews, and contact information. ${carCount || 0} cars available.`;
+        const desc =
+            description ||
+            t("detailDescription", {
+                name,
+                count: carCount || 0,
+                value: formatNumber(carCount || 0, locale as Locale),
+            });
 
         return {
             title,
             description: desc,
-            keywords: [name, "dealership", "car dealership", "automotive", "cars for sale", city, region].filter(Boolean).join(", "),
+            keywords: [name, t("keywords"), city, region].filter(Boolean).join(", "),
             openGraph: {
                 title: socialTitle,
                 description: desc,
@@ -61,8 +72,8 @@ export async function generateMetadata({
     } catch (error) {
         console.error("Error generating metadata:", error);
         return {
-            title: "Dealership",
-            description: "View dealership information on AutoMe",
+            title: t("fallbackTitle"),
+            description: t("fallbackDescription"),
         };
     }
 }

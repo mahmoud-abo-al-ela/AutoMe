@@ -1,6 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { StarRating } from "@/components/common/StarRating";
 
 import { Star, User } from "lucide-react";
 import Image from "next/image";
@@ -11,19 +13,10 @@ import type { DealershipReview } from "../_lib/dealership-types";
 const ReviewCard = ({ review }: { review: DealershipReview }) => {
     const { rating, title, comment, user, createdAt } = review;
 
-    const { date: formatDateFor } = useFormatters();
+    const t = useTranslations("dealerships.reviews");
+    const { date: formatDateFor, number } = useFormatters();
     const formatDate = (date: Date | string) =>
         formatDateFor(date, { month: "long" });
-
-    const renderStars = (rating: number) => {
-        return Array.from({ length: 5 }).map((_, i) => (
-            <Star
-                key={i}
-                className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                    }`}
-            />
-        ));
-    };
 
     return (
         <Card className="border border-gray-200">
@@ -49,7 +42,7 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
                         {/* User Name and Date */}
                         <div>
                             <h4 className="font-semibold text-base">
-                                {user?.name || "Anonymous"}
+                                {user?.name || t("anonymous")}
                             </h4>
                             <p className="text-xs text-muted-foreground">
                                 {formatDate(createdAt)}
@@ -63,7 +56,12 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
                         className="bg-yellow-100 text-yellow-800 flex items-center gap-1"
                     >
                         <Star className="h-3 w-3 fill-current" />
-                        <span className="font-medium">{rating}.0</span>
+                        <span className="font-medium">
+                            {number(rating, {
+                                minimumFractionDigits: 1,
+                                maximumFractionDigits: 1,
+                            })}
+                        </span>
                     </Badge>
                 </div>
 
@@ -81,7 +79,7 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
 
                 {/* Star Rating Display */}
                 <div className="flex items-center gap-1 mt-3">
-                    {renderStars(rating)}
+                    <StarRating rating={rating} size={16} />
                 </div>
             </CardContent>
         </Card>

@@ -1,4 +1,73 @@
 {
+  "meta": {
+    "title": "Browse Dealerships",
+    "description": "Find the perfect dealership for your next vehicle purchase. Browse our directory of automotive dealerships with ratings, reviews, and available cars.",
+    "ogDescription": "Find the perfect dealership for your next vehicle purchase",
+    "notFoundTitle": "Dealership Not Found",
+    "notFoundDescription": "The requested dealership could not be found.",
+    "detailDescription": "View {name}'s inventory, reviews, and contact information. {count, plural, =0 {No cars} one {{value} car} other {{value} cars}} available.",
+    "keywords": "dealerships, car dealerships, automotive, buy cars, car sales, vehicle dealership",
+    "fallbackTitle": "Dealership",
+    "fallbackDescription": "View dealership information on AutoMe"
+  },
+  "hero": {
+    "title": "Browse Dealerships",
+    "subtitleFallback": "Find the perfect dealership for your next vehicle",
+    "subtitle": "Explore {count, plural, =0 {dealerships} one {{value} dealership} other {{value} dealerships}}",
+    "subtitleWithCities": "Explore {count, plural, =0 {dealerships} one {{value} dealership} other {{value} dealerships}} across {cityCount, plural, one {{cityValue} city} other {{cityValue} cities}}",
+    "searchPlaceholder": "Search dealerships by name or location…",
+    "searchLabel": "Search dealerships"
+  },
+  "filters": {
+    "resultCount": "{count, plural, =0 {No dealerships} one {{value} dealership} other {{value} dealerships}} found",
+    "city": "City",
+    "region": "Region",
+    "searchCities": "Search cities…",
+    "searchRegions": "Search regions…",
+    "noCities": "No cities available",
+    "noRegions": "No regions available",
+    "filters": "Filters",
+    "sheetTitle": "Filter dealerships",
+    "resetAll": "Reset all",
+    "showResults": "Show {count, plural, =0 {dealerships} one {{value} dealership} other {{value} dealerships}}",
+    "perPage": "{count} / page",
+    "perPageLabel": "Results per page",
+    "sortLabel": "Sort results",
+    "sortPlaceholder": "Sort by",
+    "chips": {
+      "search": "“{query}”",
+      "minRating": "{rating}+ stars",
+      "carCount": "{min}–{max} cars",
+      "any": "Any"
+    }
+  },
+  "sort": {
+    "rating": "Highest Rated",
+    "mostCars": "Most Cars",
+    "mostReviewed": "Most Reviewed",
+    "newest": "Newest",
+    "nameAsc": "Name (A–Z)"
+  },
+  "card": {
+    "noReviews": "No reviews yet",
+    "openNow": "Open now",
+    "carCount": "{count, plural, =0 {No cars} one {{value} car} other {{value} cars}}",
+    "priceFrom": "from {price}"
+  },
+  "empty": {
+    "noneTitle": "No dealerships yet",
+    "noneBody": "There are no dealerships to show right now. Check back soon.",
+    "filteredTitle": "No matching dealerships",
+    "filteredBody": "Try adjusting your search or filters to find what you’re looking for.",
+    "browseCars": "Browse cars"
+  },
+  "errors": {
+    "listTitle": "Error loading dealerships",
+    "listBody": "Something went wrong while loading dealerships.",
+    "detailTitle": "Error loading dealership",
+    "detailBody": "Dealership not found",
+    "backToList": "Back to Dealerships"
+  },
   "days": {
     "SATURDAY": "Saturday",
     "SUNDAY": "Sunday",
@@ -21,5 +90,110 @@
     "opensAt": "Opens at {time}",
     "opensTomorrowAt": "Opens tomorrow at {time}",
     "opensOnDayAt": "Opens {day} at {time}"
+  },
+  "header": {
+    "reviewCount": "({count, plural, one {{value} review} other {{value} reviews}})",
+    "showLess": "Show less",
+    "readMore": "Read more",
+    "call": "Call",
+    "email": "Email",
+    "website": "Website",
+    "visitWebsite": "Visit website",
+    "directions": "Directions",
+    "share": "Share",
+    "shareDealership": "Share dealership",
+    "shareDialogTitle": "Share This Dealership"
+  },
+  "stats": {
+    "availableCars": "Available Cars",
+    "averageRating": "Average Rating",
+    "established": "Established",
+    "memberSince": "Member since {date}",
+    "memberSinceUnknown": "Not available"
+  },
+  "tabs": {
+    "inventory": "Inventory",
+    "reviews": "Reviews",
+    "about": "About",
+    "customerReviews": "Customer Reviews ({count})",
+    "contactInformation": "Contact Information"
+  },
+  "contact": {
+    "callNow": "Call Now",
+    "sendEmail": "Send Email",
+    "visitWebsite": "Visit Website",
+    "getDirections": "Get Directions",
+    "none": "No contact information available."
+  },
+  "inventory": {
+    "heading": "Available Cars",
+    "matching": "({count} matching)",
+    "sortBy": "Sort by",
+    "sortPlaceholder": "Sort order",
+    "sort": {
+      "newest": "Newest First",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low",
+      "year": "Year: Newest",
+      "mileage": "Mileage: Lowest"
+    },
+    "searchPlaceholder": "Search make, model…",
+    "clearSearch": "Clear search",
+    "filters": "Filters",
+    "sheetTitle": "Filter Inventory",
+    "priceRange": "Price Range",
+    "minPrice": "Min Price",
+    "maxPrice": "Max Price",
+    "to": "to",
+    "set": "Set",
+    "bodyType": "Body Type",
+    "fuelType": "Fuel Type",
+    "transmission": "Transmission",
+    "resetAll": "Reset All",
+    "clearAll": "Clear All",
+    "showCars": "Show {count, plural, =0 {cars} one {{value} car} other {{value} cars}}",
+    "noCarsTitle": "No cars available",
+    "noCarsBody": "This dealership doesn’t have any cars listed at the moment. Check back later for new inventory.",
+    "noMatchesTitle": "No matching cars",
+    "noMatchesBody": "Try adjusting your filters or search terms to find what you are looking for.",
+    "resetAllFilters": "Reset All Filters",
+    "chips": {
+      "search": "Search: “{query}”",
+      "price": "Price: {min} – {max}"
+    }
+  },
+  "reviews": {
+    "heading": "Reviews ({count})",
+    "writeReview": "Write a Review",
+    "cancel": "Cancel",
+    "averageRating": "Average Rating",
+    "distribution": "Rating Distribution",
+    "distributionRow": "{count} ({percent}%)",
+    "emptyTitle": "No reviews yet",
+    "emptyBody": "Be the first to review this dealership!",
+    "anonymous": "Anonymous",
+    "form": {
+      "title": "Write a Review",
+      "overallRating": "Overall Rating",
+      "ratingLabel": "Rate {count, plural, one {{value} star} other {{value} stars}}",
+      "reviewTitle": "Review Title",
+      "titlePlaceholder": "Summarize your experience",
+      "yourReview": "Your Review",
+      "commentPlaceholder": "Tell us about your experience with this dealership…",
+      "counter": "{count}/{max}",
+      "submit": "Submit Review",
+      "submitting": "Submitting…",
+      "moderation": "Your review will be visible after approval by our moderation team.",
+      "needRating": "Please select a rating",
+      "needText": "Please provide a title or comment",
+      "success": "Review submitted successfully!",
+      "failed": "Failed to submit review",
+      "failedRetry": "Failed to submit review. Please try again."
+    }
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "dealerships": "Dealerships",
+    "label": "Breadcrumb"
   }
 }

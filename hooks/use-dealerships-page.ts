@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getDealerships, getDealershipFilters } from "@/actions/dealerships";
@@ -34,6 +36,9 @@ export const useDealershipsPage = (
   initialData: DealershipsInitialData | null = null,
   initialState: DealershipsInitialState | null = null
 ) => {
+  const t = useTranslations("dealerships.filters");
+  const fmt = useFormatters();
+
   // Prefer the server-parsed state (identical on server and client → no
   // hydration mismatch); fall back to parsing the URL on the client only.
   const initial =
@@ -260,19 +265,34 @@ export const useDealershipsPage = (
     [filters, applyFilters, resetAllFilters]
   );
 
+  // Chip labels are locale-dependent, so they are rebuilt when the locale
+  // changes and the memo is keyed on the translator. City and region are stored
+  // values, not prose, so they pass through untranslated — the same rule the
+  // car chips follow for make names.
   const getActiveFilters = useCallback(() => {
-    const chips = [];
-    if (filters.search) chips.push({ type: "search", label: `“${filters.search}”` });
+    const chips: { type: string; label: string }[] = [];
+    if (filters.search) {
+      chips.push({ type: "search", label: t("chips.search", { query: filters.search }) });
+    }
     if (filters.city) chips.push({ type: "city", label: filters.city });
     if (filters.region) chips.push({ type: "region", label: filters.region });
-    if (filters.minRating) chips.push({ type: "minRating", label: `${filters.minRating}+ stars` });
+    if (filters.minRating) {
+      chips.push({
+        type: "minRating",
+        label: t("chips.minRating", { rating: fmt.number(filters.minRating) }),
+      });
+    }
     if (filters.minCarCount || filters.maxCarCount) {
-      const min = filters.minCarCount || 0;
-      const max = filters.maxCarCount ? filters.maxCarCount : "Any";
-      chips.push({ type: "carCount", label: `${min}–${max} cars` });
+      chips.push({
+        type: "carCount",
+        label: t("chips.carCount", {
+          min: fmt.number(filters.minCarCount || 0),
+          max: filters.maxCarCount ? fmt.number(filters.maxCarCount) : t("chips.any"),
+        }),
+      });
     }
     return chips;
-  }, [filters]);
+  }, [filters, t, fmt]);
 
   const isError = !!error || (queryData && queryData.success === false);
 

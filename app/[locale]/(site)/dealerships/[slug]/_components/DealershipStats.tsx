@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Car, Star, Calendar } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
+import { useFormatters } from "@/hooks/use-formatters";
 import { motion, useInView } from "framer-motion";
 import type { DealershipDetail } from "../_lib/detail-types";
 
@@ -52,21 +54,6 @@ function useCountUp(
     return count;
 }
 
-/**
- * Format the createdAt date into "Member since Jan 2024" format.
- */
-function formatMemberSince(dateStr: string | Date | null | undefined): string {
-    if (!dateStr) return "N/A";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "N/A";
-
-    const months = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    return `${months[date.getMonth()]} ${date.getFullYear()}`;
-}
-
 const StatCard = ({
     icon: Icon,
     iconBgClass,
@@ -88,6 +75,7 @@ const StatCard = ({
     onClick?: () => void;
     delay?: number;
 }) => {
+    const fmt = useFormatters();
     const ref = useRef<HTMLDivElement>(null);
     const isInView = useInView(ref, { once: true, margin: "-50px" });
     const animatedValue = useCountUp(
@@ -97,9 +85,10 @@ const StatCard = ({
     );
 
     const displayValue = isAnimatedNumber
-        ? decimals > 0
-            ? animatedValue.toFixed(decimals)
-            : Math.round(animatedValue)
+        ? fmt.number(animatedValue, {
+              minimumFractionDigits: decimals,
+              maximumFractionDigits: decimals,
+          })
         : value;
 
     const isClickable = !!onClick;
@@ -145,9 +134,20 @@ export const DealershipStats = ({
 }: {
     dealership: DealershipDetail;
 }) => {
-    const formatRating = (rating: number | null | undefined) => {
-        return rating ? rating.toFixed(1) : "0.0";
-    };
+    const t = useTranslations("dealerships.stats");
+    const fmt = useFormatters();
+
+    // "Member since Jan 2024" — month and year only, so the date reads as a
+    // milestone rather than an exact day the dealership never chose.
+    const memberSince = dealership.createdAt
+        ? t("memberSince", {
+              date: fmt.date(dealership.createdAt, {
+                  month: "short",
+                  year: "numeric",
+                  day: undefined,
+              }),
+          })
+        : t("memberSinceUnknown");
 
     const scrollToSection = (sectionId: string) => {
         const element = document.getElementById(sectionId);
@@ -163,7 +163,7 @@ export const DealershipStats = ({
                 iconBgClass="from-blue-100 to-blue-50"
                 iconColorClass="text-blue-600"
                 value={dealership.carCount || 0}
-                label="Available Cars"
+                label={t("availableCars")}
                 isAnimatedNumber
                 delay={0}
                 onClick={() => scrollToSection("dealership-inventory")}
@@ -173,8 +173,8 @@ export const DealershipStats = ({
                 icon={Star}
                 iconBgClass="from-yellow-100 to-amber-50"
                 iconColorClass="text-yellow-600"
-                value={parseFloat(formatRating(dealership.averageRating))}
-                label="Average Rating"
+                value={dealership.averageRating || 0}
+                label={t("averageRating")}
                 isAnimatedNumber
                 decimals={1}
                 delay={0.1}
@@ -185,8 +185,8 @@ export const DealershipStats = ({
                 icon={Calendar}
                 iconBgClass="from-emerald-100 to-green-50"
                 iconColorClass="text-emerald-600"
-                value={`Member since ${formatMemberSince(dealership.createdAt)}`}
-                label="Established"
+                value={memberSince}
+                label={t("established")}
                 isAnimatedNumber={false}
                 delay={0.2}
             />

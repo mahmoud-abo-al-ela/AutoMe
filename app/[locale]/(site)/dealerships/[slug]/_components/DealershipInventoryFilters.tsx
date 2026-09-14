@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { ChevronDown } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { formatPrice, buildActiveChips } from "./inventory-filters/filter-utils";
+import { buildActiveChips } from "./inventory-filters/filter-utils";
 import FilterCheckboxPopover from "./inventory-filters/FilterCheckboxPopover";
 import FilterCheckboxGroup from "./inventory-filters/FilterCheckboxGroup";
 import ActiveFilterChips from "./inventory-filters/ActiveFilterChips";
@@ -45,6 +48,9 @@ export const DealershipInventoryFilters = ({
     totalCars?: number;
     isLoading?: boolean;
 }) => {
+    const t = useTranslations("dealerships.inventory");
+    const fmt = useFormatters();
+    const attr = useCarAttributes();
     const [searchVal, setSearchVal] = useState(filters.search || "");
     const [priceVal, setPriceVal] = useState<number[]>([
         Number(filters.minPrice) || 0,
@@ -142,7 +148,17 @@ export const DealershipInventoryFilters = ({
         }
     };
 
-    const activeChips = buildActiveChips(filters, availableFilters);
+    const activeChips = buildActiveChips(filters, availableFilters, {
+        formatPrice: fmt.price,
+        search: (query) => t("chips.search", { query }),
+        priceRange: (min, max) => t("chips.price", { min, max }),
+        attribute: (field, value) =>
+            field === "bodyType"
+                ? attr.body(value)
+                : field === "fuelType"
+                  ? attr.fuel(value)
+                  : attr.transmission(value),
+    });
 
     const bodyTypes = availableFilters?.bodyTypes || [];
     const fuelTypes = availableFilters?.fuelTypes || [];
@@ -154,24 +170,26 @@ export const DealershipInventoryFilters = ({
             {/* Row 1: Header + Sort */}
             <div className="flex items-center justify-between gap-4">
                 <h3 className="text-xl font-bold text-slate-900 flex items-baseline gap-2">
-                    Available Cars
+                    {t("heading")}
                     <span className="text-muted-foreground font-normal text-sm">
-                        ({totalCars} matching)
+                        {t("matching", { count: fmt.number(totalCars ?? 0) })}
                     </span>
                 </h3>
 
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground hidden sm:inline-block">Sort by</span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline-block">{t("sortBy")}</span>
                     <Select value={filters.sortBy || "newest"} onValueChange={handleSortChange}>
                         <SelectTrigger className="h-9 w-[160px] bg-white border border-slate-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary focus:border-primary">
-                            <SelectValue placeholder="Sort order" />
+                            <SelectValue placeholder={t("sortPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent className="bg-white border border-slate-100 shadow-lg rounded-xl">
-                            <SelectItem value="newest" className="text-xs">Newest First</SelectItem>
-                            <SelectItem value="priceAsc" className="text-xs">Price: Low to High</SelectItem>
-                            <SelectItem value="priceDesc" className="text-xs">Price: High to Low</SelectItem>
-                            <SelectItem value="year" className="text-xs">Year: Newest</SelectItem>
-                            <SelectItem value="mileage" className="text-xs">Mileage: Lowest</SelectItem>
+                            {(["newest", "priceAsc", "priceDesc", "year", "mileage"] as const).map(
+                                (value) => (
+                                    <SelectItem key={value} value={value} className="text-xs">
+                                        {t(`sort.${value}`)}
+                                    </SelectItem>
+                                )
+                            )}
                         </SelectContent>
                     </Select>
                 </div>
@@ -184,7 +202,7 @@ export const DealershipInventoryFilters = ({
                     <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                         type="text"
-                        placeholder="Search make, model..."
+                        placeholder={t("searchPlaceholder")}
                         value={searchVal}
                         onChange={handleSearchChange}
                         className="ps-9 pe-9 h-9.5 w-full bg-white border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
@@ -192,6 +210,7 @@ export const DealershipInventoryFilters = ({
                     {searchVal && (
                         <button
                             onClick={handleClearSearch}
+                            aria-label={t("clearSearch")}
                             className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                         >
                             <X className="h-4 w-4" />
@@ -205,10 +224,10 @@ export const DealershipInventoryFilters = ({
                         <SheetTrigger asChild>
                             <Button variant="outline" className="h-9.5 gap-2 px-3 border-slate-200 rounded-lg bg-white text-slate-700 font-medium hover:bg-slate-50">
                                 <SlidersHorizontal className="h-4 w-4 text-slate-500" />
-                                <span className="text-sm">Filters</span>
+                                <span className="text-sm">{t("filters")}</span>
                                 {activeChips.length > 0 && (
                                     <Badge className="ms-1 h-5 min-w-5 px-1.5 bg-primary text-white text-micro rounded-full flex items-center justify-center">
-                                        {activeChips.length}
+                                        {fmt.number(activeChips.length)}
                                     </Badge>
                                 )}
                             </Button>
@@ -217,7 +236,7 @@ export const DealershipInventoryFilters = ({
                             <SheetHeader className="px-6 py-4 border-b border-slate-100 flex flex-row items-center justify-between">
                                 <SheetTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
                                     <SlidersHorizontal className="h-4 w-4 text-primary" />
-                                    Filter Inventory
+                                    {t("sheetTitle")}
                                 </SheetTitle>
                                 <SheetClose className="rounded-full p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700">
                                     <X className="h-4 w-4" />
@@ -227,11 +246,11 @@ export const DealershipInventoryFilters = ({
                             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
                                 {/* Price Slider */}
                                 <div className="space-y-3">
-                                    <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Price Range</h4>
+                                    <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t("priceRange")}</h4>
                                     <div className="flex justify-between items-center gap-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                                        <span className="text-xs font-semibold text-slate-700">{formatPrice(priceVal[0])}</span>
-                                        <span className="text-micro font-bold text-slate-400">to</span>
-                                        <span className="text-xs font-semibold text-slate-700">{formatPrice(priceVal[1])}</span>
+                                        <span className="text-xs font-semibold text-slate-700">{fmt.price(priceVal[0])}</span>
+                                        <span className="text-micro font-bold text-slate-400">{t("to")}</span>
+                                        <span className="text-xs font-semibold text-slate-700">{fmt.price(priceVal[1])}</span>
                                     </div>
                                     <div className="px-2 pt-2">
                                         <Slider
@@ -245,19 +264,22 @@ export const DealershipInventoryFilters = ({
                                     </div>
                                 </div>
 
-                                <FilterCheckboxGroup label="Body Type" field="bodyType" options={bodyTypes} selectedCsv={filters.bodyType} onToggle={handleCheckboxToggle} />
-                                <FilterCheckboxGroup label="Fuel Type" field="fuelType" options={fuelTypes} selectedCsv={filters.fuelType} onToggle={handleCheckboxToggle} />
-                                <FilterCheckboxGroup label="Transmission" field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} />
+                                <FilterCheckboxGroup label={t("bodyType")} field="bodyType" options={bodyTypes} selectedCsv={filters.bodyType} onToggle={handleCheckboxToggle} />
+                                <FilterCheckboxGroup label={t("fuelType")} field="fuelType" options={fuelTypes} selectedCsv={filters.fuelType} onToggle={handleCheckboxToggle} />
+                                <FilterCheckboxGroup label={t("transmission")} field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} />
                             </div>
 
                             <SheetFooter className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-row gap-3">
                                 {activeChips.length > 0 && (
                                     <Button variant="outline" onClick={handleClearAll} className="flex-1 rounded-xl h-11 border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold text-xs transition-colors">
-                                        Reset All
+                                        {t("resetAll")}
                                     </Button>
                                 )}
                                 <Button onClick={() => setIsMobileOpen(false)} className="flex-1 rounded-xl h-11 bg-primary text-white font-semibold text-xs shadow-md shadow-primary/10 hover:bg-primary/95 transition-colors">
-                                    Show {totalCars} Cars
+                                    {t("showCars", {
+                                        count: totalCars ?? 0,
+                                        value: fmt.number(totalCars ?? 0),
+                                    })}
                                 </Button>
                             </SheetFooter>
                         </SheetContent>
@@ -267,20 +289,20 @@ export const DealershipInventoryFilters = ({
                 {/* Popover Filters (Desktop) */}
                 <div className="hidden md:flex items-center gap-2">
                     {bodyTypes.length > 0 && (
-                        <FilterCheckboxPopover label="Body Type" field="bodyType" options={bodyTypes} selectedCsv={filters.bodyType} onToggle={handleCheckboxToggle} idPrefix="body" contentWidthClass="w-[200px]" />
+                        <FilterCheckboxPopover label={t("bodyType")} field="bodyType" options={bodyTypes} selectedCsv={filters.bodyType} onToggle={handleCheckboxToggle} idPrefix="body" contentWidthClass="w-[200px]" />
                     )}
                     {fuelTypes.length > 0 && (
-                        <FilterCheckboxPopover label="Fuel Type" field="fuelType" options={fuelTypes} selectedCsv={filters.fuelType} onToggle={handleCheckboxToggle} idPrefix="fuel" contentWidthClass="w-[200px]" />
+                        <FilterCheckboxPopover label={t("fuelType")} field="fuelType" options={fuelTypes} selectedCsv={filters.fuelType} onToggle={handleCheckboxToggle} idPrefix="fuel" contentWidthClass="w-[200px]" />
                     )}
 
                     {/* Price Range Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline" className={`h-9.5 gap-1.5 px-3 rounded-lg bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-all ${(filters.minPrice || filters.maxPrice) ? 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10' : ''}`}>
-                                <span className="text-xs">Price Range</span>
+                                <span className="text-xs">{t("priceRange")}</span>
                                 {(filters.minPrice || filters.maxPrice) && (
                                     <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-micro rounded-full">
-                                        Set
+                                        {t("set")}
                                     </Badge>
                                 )}
                                 <ChevronDown className="h-3 w-3 opacity-60 ms-0.5" />
@@ -289,13 +311,13 @@ export const DealershipInventoryFilters = ({
                         <PopoverContent align="start" className="w-[280px] p-4 rounded-xl border border-slate-100 shadow-xl bg-white space-y-4">
                             <div className="flex justify-between items-center gap-2">
                                 <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 flex-1 text-center">
-                                    <p className="text-micro font-bold text-slate-400 uppercase tracking-wide">Min Price</p>
-                                    <span className="text-xs font-bold text-slate-700">{formatPrice(priceVal[0])}</span>
+                                    <p className="text-micro font-bold text-slate-400 uppercase tracking-wide">{t("minPrice")}</p>
+                                    <span className="text-xs font-bold text-slate-700">{fmt.price(priceVal[0])}</span>
                                 </div>
                                 <span className="text-slate-300">-</span>
                                 <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 flex-1 text-center">
-                                    <p className="text-micro font-bold text-slate-400 uppercase tracking-wide">Max Price</p>
-                                    <span className="text-xs font-bold text-slate-700">{formatPrice(priceVal[1])}</span>
+                                    <p className="text-micro font-bold text-slate-400 uppercase tracking-wide">{t("maxPrice")}</p>
+                                    <span className="text-xs font-bold text-slate-700">{fmt.price(priceVal[1])}</span>
                                 </div>
                             </div>
                             <div className="px-1.5 pt-1.5 pb-2">
@@ -312,7 +334,7 @@ export const DealershipInventoryFilters = ({
                     </Popover>
 
                     {transmissions.length > 0 && (
-                        <FilterCheckboxPopover label="Transmission" field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} idPrefix="trans" contentWidthClass="w-[180px]" />
+                        <FilterCheckboxPopover label={t("transmission")} field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} idPrefix="trans" contentWidthClass="w-[180px]" />
                     )}
                 </div>
             </div>

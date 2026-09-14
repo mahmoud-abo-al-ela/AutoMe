@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import type {
     DealershipActiveFilter,
     DealershipFilterOptions,
@@ -33,16 +35,7 @@ import {
     DEALERSHIP_PER_PAGE_OPTIONS,
     DEFAULT_DEALERSHIP_SORT,
     DEALERSHIP_SORT_ORDER,
-    DEALERSHIP_SORT_LABELS,
 } from "@/lib/constants/dealership-options";
-
-// Static — the sort options never change, so they render synchronously on the
-// server/first paint instead of waiting for the client filter-options fetch
-// (which would otherwise leave the sort label blank for a moment on load).
-const SORT_OPTIONS = DEALERSHIP_SORT_ORDER.map((value) => ({
-    value,
-    label: DEALERSHIP_SORT_LABELS[value],
-}));
 
 export const DealershipFilterBar = ({
     totalCount,
@@ -67,6 +60,9 @@ export const DealershipFilterBar = ({
     onClearFilter: DealershipHandlers["clearFilter"];
     onResetAll: DealershipHandlers["resetAllFilters"];
 }) => {
+    const t = useTranslations("dealerships.filters");
+    const tSort = useTranslations("dealerships.sort");
+    const fmt = useFormatters();
     const [sheetOpen, setSheetOpen] = useState(false);
 
     // The facet query groups by a nullable column, so organizations with no
@@ -90,8 +86,8 @@ export const DealershipFilterBar = ({
             options={cities}
             selectedValues={filters.city ? [filters.city] : []}
             onToggle={(v) => onToggleFilter("city", v)}
-            searchPlaceholder="Search cities..."
-            emptyLabel="No cities available"
+            searchPlaceholder={t("searchCities")}
+            emptyLabel={t("noCities")}
         />
     );
     const regionControl = (
@@ -99,37 +95,40 @@ export const DealershipFilterBar = ({
             options={regions}
             selectedValues={filters.region ? [filters.region] : []}
             onToggle={(v) => onToggleFilter("region", v)}
-            searchPlaceholder="Search regions..."
-            emptyLabel="No regions available"
+            searchPlaceholder={t("searchRegions")}
+            emptyLabel={t("noRegions")}
         />
     );
     return (
         <div className="mb-6 space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 {/* Result count */}
+                {/* One message, not a count plus a hand-pluralised noun: Arabic
+                    inflects the noun against six forms, and the bold span
+                    around the number cannot survive that. */}
                 <p
                     className="text-sm text-muted-foreground"
                     role="status"
                     aria-live="polite"
                 >
-                    <span className="font-medium text-foreground">
-                        {totalCount.toLocaleString()}
-                    </span>{" "}
-                    {totalCount === 1 ? "dealership" : "dealerships"} found
+                    {t("resultCount", {
+                        count: totalCount,
+                        value: fmt.number(totalCount),
+                    })}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2">
                     {/* Desktop popovers */}
                     <div className="hidden items-center gap-2 md:flex">
                         <FilterPopover
-                            label="City"
+                            label={t("city")}
                             activeCount={filters.city ? 1 : 0}
                             activeLabel={filters.city}
                         >
                             {cityControl}
                         </FilterPopover>
                         <FilterPopover
-                            label="Region"
+                            label={t("region")}
                             activeCount={filters.region ? 1 : 0}
                             activeLabel={filters.region}
                         >
@@ -145,10 +144,10 @@ export const DealershipFilterBar = ({
                             onClick={() => setSheetOpen(true)}
                         >
                             <SlidersHorizontal className="h-4 w-4" />
-                            Filters
+                            {t("filters")}
                             {activeCount > 0 && (
                                 <Badge className="h-5 min-w-5 justify-center rounded-full bg-primary px-1.5 text-micro text-primary-foreground">
-                                    {activeCount}
+                                    {fmt.number(activeCount)}
                                 </Badge>
                             )}
                         </Button>
@@ -158,14 +157,14 @@ export const DealershipFilterBar = ({
                     <Select value={String(perPage)} onValueChange={(v) => onPerPageChange(Number(v))}>
                         <SelectTrigger
                             className="hidden h-9 w-[110px] text-sm sm:flex"
-                            aria-label="Results per page"
+                            aria-label={t("perPageLabel")}
                         >
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             {DEALERSHIP_PER_PAGE_OPTIONS.map((n) => (
                                 <SelectItem key={n} value={String(n)}>
-                                    {n} / page
+                                    {t("perPage", { count: fmt.number(n) })}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -173,13 +172,13 @@ export const DealershipFilterBar = ({
 
                     {/* Sort */}
                     <Select value={sortValue} onValueChange={onSortChange}>
-                        <SelectTrigger className="h-9 flex-1 text-sm sm:w-[180px] sm:flex-none" aria-label="Sort results">
-                            <SelectValue placeholder="Sort by" />
+                        <SelectTrigger className="h-9 flex-1 text-sm sm:w-[180px] sm:flex-none" aria-label={t("sortLabel")}>
+                            <SelectValue placeholder={t("sortPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                            {SORT_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
+                            {DEALERSHIP_SORT_ORDER.map((value) => (
+                                <SelectItem key={value} value={value}>
+                                    {tSort(value)}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -195,13 +194,13 @@ export const DealershipFilterBar = ({
                     <SheetHeader className="border-b border-border px-5 py-4">
                         <SheetTitle className="flex items-center gap-2 text-base">
                             <SlidersHorizontal className="h-4 w-4 text-primary" />
-                            Filter dealerships
+                            {t("sheetTitle")}
                         </SheetTitle>
                     </SheetHeader>
 
                     <div className="flex-1 space-y-6 overflow-y-auto px-5 py-4">
-                        <FilterSheetSection title="City">{cityControl}</FilterSheetSection>
-                        <FilterSheetSection title="Region">{regionControl}</FilterSheetSection>
+                        <FilterSheetSection title={t("city")}>{cityControl}</FilterSheetSection>
+                        <FilterSheetSection title={t("region")}>{regionControl}</FilterSheetSection>
                     </div>
 
                     <SheetFooter className="flex flex-row gap-3 border-t border-border bg-muted/30 p-4">
@@ -213,12 +212,14 @@ export const DealershipFilterBar = ({
                                     onResetAll();
                                 }}
                             >
-                                Reset all
+                                {t("resetAll")}
                             </Button>
                         )}
                         <Button className="flex-1" onClick={() => setSheetOpen(false)}>
-                            Show {totalCount.toLocaleString()}{" "}
-                            {totalCount === 1 ? "dealership" : "dealerships"}
+                            {t("showResults", {
+                                count: totalCount,
+                                value: fmt.number(totalCount),
+                            })}
                         </Button>
                     </SheetFooter>
                 </SheetContent>

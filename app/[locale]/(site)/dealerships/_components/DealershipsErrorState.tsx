@@ -1,4 +1,7 @@
+"use client";
+
 import { RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 export const DealershipsErrorState = ({
@@ -8,6 +11,9 @@ export const DealershipsErrorState = ({
     error?: string;
     onRetry?: () => void;
 }) => {
+    const t = useTranslations("dealerships.errors");
+    const tCommon = useTranslations("common");
+
     const handleRetry = () => {
         if (onRetry) {
             onRetry();
@@ -22,14 +28,14 @@ export const DealershipsErrorState = ({
             className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center"
         >
             <h3 className="mb-2 text-lg font-semibold text-destructive">
-                Error loading dealerships
+                {t("listTitle")}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground">
-                {error || "Something went wrong while loading dealerships."}
+                {error || t("listBody")}
             </p>
             <Button onClick={handleRetry} variant="outline" className="gap-2">
                 <RefreshCw className="h-4 w-4" />
-                Try Again
+                {tCommon("actions.retry")}
             </Button>
         </div>
     );

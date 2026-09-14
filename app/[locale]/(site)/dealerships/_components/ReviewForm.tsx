@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Star, Send } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -16,6 +18,8 @@ const ReviewForm = ({
     organizationId: string;
     onSuccess: () => void;
 }) => {
+    const t = useTranslations("dealerships.reviews.form");
+    const fmt = useFormatters();
     const [rating, setRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
     const [title, setTitle] = useState("");
@@ -29,6 +33,10 @@ const ReviewForm = ({
                 onClick={() => setRating(value)}
                 onMouseEnter={() => setHoveredRating(value)}
                 onMouseLeave={() => setHoveredRating(0)}
+                aria-label={t("ratingLabel", {
+                    count: value,
+                    value: fmt.number(value),
+                })}
                 className="transition-transform hover:scale-110"
             >
                 <Star
@@ -45,12 +53,12 @@ const ReviewForm = ({
         e.preventDefault();
 
         if (rating === 0) {
-            toast.error("Please select a rating");
+            toast.error(t("needRating"));
             return;
         }
 
         if (!title.trim() && !comment.trim()) {
-            toast.error("Please provide a title or comment");
+            toast.error(t("needText"));
             return;
         }
 
@@ -64,7 +72,7 @@ const ReviewForm = ({
             });
 
             if (response.success) {
-                toast.success(response.message || "Review submitted successfully!");
+                toast.success(t("success"));
                 // Reset form
                 setRating(0);
                 setHoveredRating(0);
@@ -74,11 +82,11 @@ const ReviewForm = ({
                     onSuccess();
                 }
             } else {
-                toast.error(response.error?.message || "Failed to submit review");
+                toast.error(response.error?.message || t("failed"));
             }
         } catch (error) {
             console.error("Error submitting review:", error);
-            toast.error("Failed to submit review. Please try again.");
+            toast.error(t("failedRetry"));
         } finally {
             setIsSubmitting(false);
         }
@@ -87,14 +95,14 @@ const ReviewForm = ({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Write a Review</CardTitle>
+                <CardTitle>{t("title")}</CardTitle>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Rating */}
                     <div className="space-y-2">
                         <Label className="text-base font-medium">
-                            Overall Rating <span className="text-red-500">*</span>
+                            {t("overallRating")} <span className="text-red-500">*</span>
                         </Label>
                         <div className="flex gap-2">
                             {[1, 2, 3, 4, 5].map((value) => renderStar(value))}
@@ -104,14 +112,14 @@ const ReviewForm = ({
                     {/* Title */}
                     <div className="space-y-2">
                         <Label htmlFor="review-title" className="text-base font-medium">
-                            Review Title
+                            {t("reviewTitle")}
                         </Label>
                         <input
                             id="review-title"
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Summarize your experience"
+                            placeholder={t("titlePlaceholder")}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             maxLength={100}
                         />
@@ -120,18 +128,21 @@ const ReviewForm = ({
                     {/* Comment */}
                     <div className="space-y-2">
                         <Label htmlFor="review-comment" className="text-base font-medium">
-                            Your Review
+                            {t("yourReview")}
                         </Label>
                         <Textarea
                             id="review-comment"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            placeholder="Tell us about your experience with this dealership..."
+                            placeholder={t("commentPlaceholder")}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
                             maxLength={500}
                         />
                         <p className="text-xs text-muted-foreground text-end">
-                            {comment.length}/500
+                            {t("counter", {
+                                count: fmt.number(comment.length),
+                                max: fmt.number(500),
+                            })}
                         </p>
                     </div>
 
@@ -142,13 +153,13 @@ const ReviewForm = ({
                         className="w-full gap-2"
                     >
                         <Send className="h-4 w-4" />
-                        {isSubmitting ? "Submitting..." : "Submit Review"}
+                        {isSubmitting ? t("submitting") : t("submit")}
                     </Button>
                 </form>
 
                 {/* Info Text */}
                 <p className="text-xs text-muted-foreground mt-4">
-                    Your review will be visible after approval by our moderation team.
+                    {t("moderation")}
                 </p>
             </CardContent>
         </Card>
