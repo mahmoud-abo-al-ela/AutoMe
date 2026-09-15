@@ -1,4 +1,7 @@
-import { expandSearchTerm } from "@/lib/utils/search-aliases";
+import {
+  expandSearchTerm,
+  expandSearchTermForText,
+} from "@/lib/utils/search-aliases";
 
 /**
  * The `where` fragment for a dealership free-text search.
@@ -11,13 +14,23 @@ import { expandSearchTerm } from "@/lib/utils/search-aliases";
  * OR across fields), so "cairo gallery" matches "Cairo Auto Gallery", which a
  * single substring `contains` on the whole phrase would miss.
  *
- * Each word is also expanded to the English value it displays as, so a reader
- * who sees "القاهرة" on the page can type it back and find Cairo. Both the
- * whole phrase and the individual words are expanded: "المحلة الكبرى" is a
- * two-word alias for one stored value, while "معرض القاهرة" is a free word
- * next to an alias.
+ * Each word is also expanded to the value the column actually holds, so a
+ * reader who sees "القاهرة" on the page can type it back and find Cairo. Both
+ * the whole phrase and the individual words are expanded: "المحلة الكبرى" is a
+ * two-word name for one stored value, while "معرض القاهرة" is a free word next
+ * to a place name.
  */
-const SEARCH_FIELDS = ["name", "description", "address", "city", "region"];
+
+/** Free text, matched by substring. */
+const TEXT_FIELDS = ["name", "description", "address"];
+
+/**
+ * Canonical values — a governorate code and a city slug — matched by equality.
+ *
+ * Substring matching these would be wrong as well as slow: Cairo's governorate
+ * code is "C", and `contains "C"` matches nearly every row in the table.
+ */
+const EXACT_FIELDS = ["city", "region"];
 
 type Clause = Record<string, unknown>;
 
@@ -27,30 +40,50 @@ const tokenize = (value: string): string[] =>
     .map((token) => token.trim())
     .filter(Boolean);
 
-const matchesToken = (token: string): Clause => ({
-  // One OR arm per (variant, field) pair: the word itself, plus anything it is
-  // the display form of.
-  OR: expandSearchTerm(token).flatMap((variant) =>
-    SEARCH_FIELDS.map((field) => ({
-      [field]: { contains: variant, mode: "insensitive" },
-    }))
-  ),
-});
+const matchesToken = (token: string): Clause => {
+  const or: Clause[] = [];
+
+  for (const variant of expandSearchTermForText(token)) {
+    for (const field of TEXT_FIELDS) {
+      or.push({ [field]: { contains: variant, mode: "insensitive" } });
+    }
+  }
+
+  for (const variant of expandSearchTerm(token)) {
+    for (const field of EXACT_FIELDS) {
+      or.push({ [field]: { equals: variant, mode: "insensitive" } });
+    }
+  }
+
+  return { OR: or };
+};
 
 export function buildSearchClause(search?: string | null): Clause | null {
   const trimmed = search?.trim();
   if (!trimmed) return null;
 
-  // Whole-phrase aliases first, so a multi-word place name resolves as a unit.
-  const phrases = expandSearchTerm(trimmed);
+  const tokens = tokenize(trimmed);
+  if (tokens.length === 0) return null;
 
-  const clauses = phrases
-    .map((phrase) => tokenize(phrase))
-    .filter((tokens) => tokens.length > 0)
-    .map((tokens) => ({ AND: tokens.map(matchesToken) }));
+  const wordsMatch: Clause = { AND: tokens.map(matchesToken) };
 
-  if (clauses.length === 0) return null;
-  if (clauses.length === 1) return clauses[0];
+  // A multi-word place resolves to one stored value that no single word
+  // matches, so the whole phrase is tried against the canonical columns too.
+  //
+  // Only against those columns, and only by equality. Feeding a canonical
+  // value back through the text matchers is what made searching "القاهرة"
+  // return every dealership with a "c" in its description: Cairo's governorate
+  // code is "C", and it came back as a phrase to substring-match on.
+  const [, ...phraseCanonicals] = expandSearchTerm(trimmed);
+  if (phraseCanonicals.length === 0) return wordsMatch;
 
-  return { OR: clauses };
+  const phraseMatch: Clause = {
+    OR: phraseCanonicals.flatMap((variant) =>
+      EXACT_FIELDS.map((field) => ({
+        [field]: { equals: variant, mode: "insensitive" },
+      }))
+    ),
+  };
+
+  return { OR: [wordsMatch, phraseMatch] };
 }

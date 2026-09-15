@@ -1,11 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { expandSearchTerm, hasAlias } from "./search-aliases";
+import {
+  expandSearchTerm,
+  expandSearchTermForText,
+  hasAlias,
+} from "./search-aliases";
 
 describe("expandSearchTerm", () => {
-  it("maps an Arabic city to the value stored in the column", () => {
-    expect(expandSearchTerm("القاهرة")).toContain("Cairo");
-    expect(expandSearchTerm("الجيزة")).toContain("Giza");
-    expect(expandSearchTerm("الإسكندرية")).toContain("Alexandria");
+  it("maps a place name to the value the column stores", () => {
+    // Organization.city holds a slug and Organization.region a governorate
+    // code, both from lib/constants/egypt-locations.
+    expect(expandSearchTerm("القاهرة")).toContain("cairo");
+    expect(expandSearchTerm("القاهرة")).toContain("C");
+    expect(expandSearchTerm("الجيزة")).toContain("giza");
+    expect(expandSearchTerm("الإسكندرية")).toContain("alexandria");
+  });
+
+  it("maps the English spelling to the same stored value", () => {
+    // Both languages are display forms; neither is what the column holds.
+    expect(expandSearchTerm("Cairo")).toContain("cairo");
+    expect(expandSearchTerm("Giza")).toContain("giza");
   });
 
   it("maps an Arabic brand to the stored brand", () => {
@@ -25,19 +38,16 @@ describe("expandSearchTerm", () => {
   });
 
   it("tolerates how Arabic is actually typed", () => {
-    // Without the definite article, with a ha for ta marbuta, and with a bare
-    // alef for hamza — all of which readers type.
-    expect(expandSearchTerm("القاهره")).toContain("Cairo");
-    expect(expandSearchTerm("الاسكندرية")).toContain("Alexandria");
-    expect(expandSearchTerm("الإسكندريه")).toContain("Alexandria");
+    // Without the hamza, and with a ha for the ta marbuta.
+    expect(expandSearchTerm("الاسكندرية")).toContain("alexandria");
+    expect(expandSearchTerm("الاسكندريه")).toContain("alexandria");
   });
 
-  it("returns several stored values when one Arabic name covers them", () => {
-    // "المحلة الكبرى" is stored three different ways in live data.
-    const mahalla = expandSearchTerm("المحلة الكبرى");
-
-    expect(mahalla).toContain("Al Mahallah al Kubra");
-    expect(mahalla.length).toBeGreaterThan(2);
+  it("resolves a multi-word place name as one unit", () => {
+    expect(expandSearchTerm("المحلة الكبرى")).toContain("el-mahalla-el-kubra");
+    expect(expandSearchTerm("El Mahalla El Kubra")).toContain(
+      "el-mahalla-el-kubra"
+    );
   });
 
   it("leaves unknown terms alone", () => {
@@ -49,5 +59,31 @@ describe("expandSearchTerm", () => {
   it("handles empty input", () => {
     expect(expandSearchTerm("")).toEqual([]);
     expect(expandSearchTerm("   ")).toEqual([]);
+  });
+});
+
+describe("expandSearchTermForText", () => {
+  it("drops variants too short to substring-match safely", () => {
+    // Cairo's governorate code is "C". A `contains "C"` — or a `c:*` tsquery
+    // prefix — matches nearly every row, so it must never reach a text matcher.
+    const all = expandSearchTerm("القاهرة");
+    const text = expandSearchTermForText("القاهرة");
+
+    expect(all).toContain("C");
+    expect(text).not.toContain("C");
+    expect(text).toContain("cairo");
+  });
+
+  it("keeps everything long enough to be a real filter", () => {
+    expect(expandSearchTermForText("نيسان")).toContain("Nissan");
+    expect(expandSearchTermForText("الجيزة")).toContain("giza");
+  });
+
+  it("never returns a variant under three characters", () => {
+    for (const term of ["القاهرة", "الجيزة", "السويس", "قنا", "Cairo"]) {
+      for (const variant of expandSearchTermForText(term)) {
+        expect(variant.length).toBeGreaterThanOrEqual(3);
+      }
+    }
   });
 });

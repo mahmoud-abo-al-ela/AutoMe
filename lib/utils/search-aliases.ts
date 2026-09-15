@@ -1,5 +1,5 @@
-import arPlaces from "@/messages/ar/places.json";
 import arCarAttributes from "@/messages/ar/carAttributes.json";
+import { placeAliasIndex } from "@/lib/utils/place-names";
 
 /**
  * Lets an Arabic reader search for what they can see.
@@ -32,10 +32,15 @@ function buildAliasIndex(): Map<string, string[]> {
     }
   };
 
+  // Places resolve to the code or slug now stored in the column, and every
+  // spelling the UI can show — English and Arabic alike — has to reach it.
+  for (const [surface, canonicals] of placeAliasIndex()) {
+    for (const canonical of canonicals) add(surface, canonical);
+  }
+
+  // Car attributes are still stored as their English value, so only the Arabic
+  // display form needs widening.
   const groups: Record<string, string>[] = [
-    arPlaces.cities,
-    arPlaces.regions,
-    arPlaces.countries,
     arCarAttributes.make,
     arCarAttributes.fuel,
     arCarAttributes.body,
@@ -53,6 +58,9 @@ function buildAliasIndex(): Map<string, string[]> {
 }
 
 const ALIASES = buildAliasIndex();
+
+/** Below this, a substring match is noise rather than a filter. */
+const MIN_TEXT_MATCH_LENGTH = 3;
 
 /**
  * Arabic definite article, and the alef forms that are written
@@ -97,7 +105,28 @@ export function expandSearchTerm(term: string): string[] {
   return [...new Set([trimmed, ...direct, ...normalized])];
 }
 
-/** True when the term maps to at least one stored English value. */
+/**
+ * The variants that are safe to use in a substring or prefix match.
+ *
+ * Governorate codes are short — Cairo's is "C" — and a `contains "C"` or a
+ * `c:*` tsquery prefix matches almost every row in the table. Columns holding
+ * a canonical value should be compared with equality instead, and only these
+ * longer variants fed to the text matchers.
+ */
+export function expandSearchTermForText(term: string): string[] {
+  const [original, ...aliases] = expandSearchTerm(term);
+  if (original === undefined) return [];
+
+  // The reader's own words are never dropped, however short — "X5" and "A4"
+  // are real models. Only the canonical values this module adds are filtered,
+  // since those were never asked for.
+  return [
+    original,
+    ...aliases.filter((alias) => alias.length >= MIN_TEXT_MATCH_LENGTH),
+  ];
+}
+
+/** True when the term maps to at least one stored value. */
 export function hasAlias(term: string): boolean {
   return expandSearchTerm(term).length > 1;
 }

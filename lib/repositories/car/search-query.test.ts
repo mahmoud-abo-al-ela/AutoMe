@@ -10,8 +10,19 @@ describe("toPrefixTsquery", () => {
     expect(toPrefixTsquery("نيسان")).toBe("nissan:*");
   });
 
-  it("expands an Arabic city", () => {
+  it("expands an Arabic city to the stored slug", () => {
+    // Slugs are hyphenated, and the reduction splits them into words, so the
+    // city's own words end up ANDed together.
     expect(toPrefixTsquery("القاهرة")).toBe("cairo:*");
+  });
+
+  it("never emits a prefix short enough to match everything", () => {
+    // Cairo's governorate code is "C". A bare "c:*" would match most rows.
+    for (const term of ["القاهرة", "الجيزة", "قنا", "السويس"]) {
+      for (const piece of toPrefixTsquery(term).split(/[^a-z0-9]+/).filter(Boolean)) {
+        expect(piece.length).toBeGreaterThanOrEqual(2);
+      }
+    }
   });
 
   it("expands an Arabic attribute value", () => {
@@ -24,25 +35,10 @@ describe("toPrefixTsquery", () => {
     expect(toPrefixTsquery("نيسان 2020")).toBe("nissan:* & 2020:*");
   });
 
-  it("ORs the alternatives when one name maps to several stored values", () => {
-    // "المحلة الكبرى" is spelled three ways in the data.
-    const query = toPrefixTsquery("المحلة الكبرى");
-
-    expect(query.startsWith("(")).toBe(true);
-    expect(query).toContain(" | ");
-    // Each alternative keeps its own words ANDed together. Repeated words are
-    // dropped, so "Al Mahallah al Kubra" contributes one "al".
-    expect(query).toContain("al:* & mahallah:* & kubra:*");
-    expect(query).toContain("el:* & mahalla:* & kubra:*");
-  });
-
-  it("folds Latin diacritics so a marked name is not split mid-word", () => {
-    // "Al Maḩallah al Kubrá" is in live data. Without folding, the reduction
-    // split it at the mark into "ma" and "allah" and produced a third,
-    // useless alternative; folded, it collapses onto the unmarked spelling.
-    expect(toPrefixTsquery("المحلة الكبرى")).toBe(
-      "(al:* & mahallah:* & kubra:* | el:* & mahalla:* & kubra:*)"
-    );
+  it("resolves a multi-word place name to its single stored value", () => {
+    // One curated entry per place, so there is nothing left to OR between —
+    // the dataset replaced three inconsistent spellings with one slug.
+    expect(toPrefixTsquery("المحلة الكبرى")).toBe("el:* & mahalla:* & kubra:*");
   });
 
   it("returns empty for input that reduces to nothing", () => {
@@ -54,9 +50,16 @@ describe("toPrefixTsquery", () => {
 
   it("strips anything that could break out of to_tsquery", () => {
     // Quotes, backslashes and tsquery operators must not survive reduction.
-    const query = toPrefixTsquery("a' | b & c:* ! d\\");
+    const query = toPrefixTsquery("ab' | cd & ef:* ! gh\\");
 
-    expect(query).toBe("a:* & b:* & c:* & d:*");
+    expect(query).toBe("ab:* & cd:* & ef:* & gh:*");
+  });
+
+  it("keeps the reader's own short words, however short", () => {
+    // Alias expansion filters short values it invents, but never the words
+    // that were typed: "X5" and "A4" are real models.
+    expect(toPrefixTsquery("BMW X5")).toBe("bmw:* & x5:*");
+    expect(toPrefixTsquery("A4")).toBe("a4:*");
   });
 
   it("lowercases, matching the simple text-search config", () => {

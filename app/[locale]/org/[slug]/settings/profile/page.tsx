@@ -15,8 +15,6 @@ export default function OrganizationProfileSettingsPage() {
     stateOptions,
     cityOptions,
     selectedStateCode,
-    loadingStates,
-    loadingCities,
     updateField,
     handleCountryChange,
     handleStateChange,
@@ -53,10 +51,8 @@ export default function OrganizationProfileSettingsPage() {
               handleCountryChange={handleCountryChange}
               stateOptions={stateOptions}
               selectedStateCode={selectedStateCode}
-              loadingStates={loadingStates}
               handleStateChange={handleStateChange}
               cityOptions={cityOptions}
-              loadingCities={loadingCities}
             />
           )}
         </CardContent>

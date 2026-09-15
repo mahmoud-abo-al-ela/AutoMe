@@ -24,10 +24,8 @@ export default function OrganizationProfileForm({
   handleCountryChange,
   stateOptions,
   selectedStateCode,
-  loadingStates,
   handleStateChange,
   cityOptions,
-  loadingCities,
 }: OrganizationProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -84,10 +82,10 @@ export default function OrganizationProfileForm({
             id="region"
             value={selectedStateCode || undefined}
             options={stateOptions}
-            placeholder={loadingStates ? "Loading states..." : "Select state"}
+            placeholder="Select governorate"
             searchPlaceholder="Search states..."
             emptyMessage="No states found."
-            disabled={!profile.country || loadingStates || stateOptions.length === 0}
+            disabled={!profile.country || stateOptions.length === 0}
             onValueChange={handleStateChange}
           />
         </div>
@@ -97,10 +95,10 @@ export default function OrganizationProfileForm({
             id="city"
             value={profile.city || undefined}
             options={cityOptions}
-            placeholder={loadingCities ? "Loading cities..." : "Select city"}
+            placeholder="Select city"
             searchPlaceholder="Search cities..."
             emptyMessage="No cities found."
-            disabled={!selectedStateCode || loadingCities || cityOptions.length === 0}
+            disabled={!selectedStateCode || cityOptions.length === 0}
             onValueChange={(city) => updateField("city", city)}
           />
         </div>

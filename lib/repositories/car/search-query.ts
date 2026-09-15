@@ -1,4 +1,4 @@
-import { expandSearchTerm } from "@/lib/utils/search-aliases";
+import { expandSearchTermForText } from "@/lib/utils/search-aliases";
 
 /**
  * Builds the Postgres prefix tsquery for the car search box.
@@ -64,7 +64,7 @@ export function toPrefixTsquery(term: string): string {
   if (!trimmed) return "";
 
   // A multi-word place name is one alias, so the whole phrase is tried first.
-  const phraseVariants = expandSearchTerm(trimmed);
+  const phraseVariants = expandSearchTermForText(trimmed);
   if (phraseVariants.length > 1) {
     const group = orGroup(phraseVariants);
     if (group) return group;
@@ -75,7 +75,7 @@ export function toPrefixTsquery(term: string): string {
   const groups = trimmed
     .split(/\s+/)
     .filter(Boolean)
-    .map((token) => orGroup(expandSearchTerm(token)))
+    .map((token) => orGroup(expandSearchTermForText(token)))
     .filter(Boolean);
 
   return groups.join(" & ");
@@ -90,6 +90,6 @@ export function toTrigramTerm(term: string): string {
   const trimmed = term?.trim();
   if (!trimmed) return "";
 
-  const [, firstAlias] = expandSearchTerm(trimmed);
+  const [, firstAlias] = expandSearchTermForText(trimmed);
   return firstAlias ?? trimmed;
 }

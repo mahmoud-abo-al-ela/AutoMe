@@ -4,12 +4,7 @@ import {
   getOrganizationProfile,
   updateOrganizationProfile,
 } from "@/actions/settings";
-import { getCities, getCountries, getStates } from "@/actions/locations";
-import type {
-  CityOption,
-  CountryOption,
-  StateOption,
-} from "@/lib/services/locations/country-state-city";
+import { useEgyptLocations } from "@/hooks/use-egypt-locations";
 import type { OrganizationProfileInput } from "@/lib/validations/schemas";
 
 /**
@@ -65,102 +60,23 @@ const normalizeProfile = (
 
 export function useOrganizationProfile() {
   const [profile, setProfile] = useState<OrganizationProfileFormState>(emptyProfile);
-  const [countries, setCountries] = useState<CountryOption[]>([]);
-  const [states, setStates] = useState<StateOption[]>([]);
-  const [cities, setCities] = useState<CityOption[]>([]);
-  const [selectedStateCode, setSelectedStateCode] = useState("");
   const [loading, setLoading] = useState(true);
-  const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const countryOptions: SelectOption[] = countries.map((country) => ({
-    value: country.code,
-    label: `${country.emoji ? `${country.emoji} ` : ""}${country.name}`,
-  }));
-  const stateOptions: SelectOption[] = states.map((state) => ({
-    value: state.code,
-    label: state.name,
-  }));
-  const cityOptions: SelectOption[] = cities.map((city) => ({
-    value: city.name,
-    label: city.name,
-  }));
-
-  const loadCities = async (countryCode: string, stateCode: string) => {
-    if (!countryCode || !stateCode) {
-      setCities([]);
-      return;
-    }
-
-    setLoadingCities(true);
-    try {
-      const response = await getCities(countryCode, stateCode);
-      if (!response.success) {
-        toast.error(response.error?.message || "Failed to load cities");
-        setCities([]);
-        return;
-      }
-
-      setCities(response.data || []);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load cities",
-      );
-      setCities([]);
-    } finally {
-      setLoadingCities(false);
-    }
-  };
-
-  const loadStates = async (countryCode: string, savedRegion = "") => {
-    if (!countryCode) {
-      setStates([]);
-      setSelectedStateCode("");
-      return;
-    }
-
-    setLoadingStates(true);
-    try {
-      const response = await getStates(countryCode);
-      if (!response.success) {
-        toast.error(response.error?.message || "Failed to load states");
-        setStates([]);
-        setSelectedStateCode("");
-        return;
-      }
-
-      const stateOptions = response.data || [];
-      const selectedState = stateOptions.find(
-        (state) => state.name === savedRegion,
-      );
-
-      setStates(stateOptions);
-      setSelectedStateCode(selectedState?.code || "");
-
-      if (selectedState?.code) {
-        await loadCities(countryCode, selectedState.code);
-      } else {
-        setCities([]);
-      }
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load states",
-      );
-      setStates([]);
-      setSelectedStateCode("");
-    } finally {
-      setLoadingStates(false);
-    }
-  };
+  // Options come from lib/constants/egypt-locations, so there is nothing to
+  // fetch and nothing to fail. `region` holds the governorate code, which is
+  // exactly what the select is keyed by — previously it held the display name
+  // and the hook had to search the fetched list for a matching name to restore
+  // its own value.
+  const { countryOptions, governorateOptions, cityOptions } = useEgyptLocations(
+    profile.region
+  );
+  const stateOptions = governorateOptions;
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const [profileResponse, countriesResponse] = await Promise.all([
-          getOrganizationProfile(),
-          getCountries(),
-        ]);
+        const profileResponse = await getOrganizationProfile();
 
         if (!profileResponse.success) {
           toast.error(
@@ -170,20 +86,11 @@ export function useOrganizationProfile() {
           return;
         }
 
-        if (!countriesResponse.success) {
-          toast.error(
-            countriesResponse.error?.message || "Failed to load countries",
-          );
-          return;
-        }
-
         const normalizedProfile = normalizeProfile(
           profileResponse.data.profile,
         );
 
-        setCountries(countriesResponse.data || []);
         setProfile(normalizedProfile);
-        await loadStates(normalizedProfile.country, normalizedProfile.region);
       } catch (error) {
         toast.error(
           error instanceof Error
@@ -196,7 +103,6 @@ export function useOrganizationProfile() {
     };
 
     loadProfile();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateField = (
@@ -206,29 +112,14 @@ export function useOrganizationProfile() {
     setProfile((current) => ({ ...current, [field]: value }));
   };
 
-  const handleCountryChange = async (countryCode: string) => {
-    setProfile((current) => ({
-      ...current,
-      country: countryCode,
-      region: "",
-      city: "",
-    }));
-    setCities([]);
-    setSelectedStateCode("");
-    await loadStates(countryCode);
+  const handleCountryChange = (country: string) => {
+    setProfile((current) => ({ ...current, country, region: "", city: "" }));
   };
 
-  const handleStateChange = async (stateCode: string) => {
-    const selectedState = states.find((state) => state.code === stateCode);
-
-    setSelectedStateCode(stateCode);
-    setProfile((current) => ({
-      ...current,
-      region: selectedState?.name || "",
-      city: "",
-    }));
-
-    await loadCities(profile.country, stateCode);
+  // Changing governorate clears the city: the old one belongs to a different
+  // governorate and is no longer in the list.
+  const handleStateChange = (region: string) => {
+    setProfile((current) => ({ ...current, region, city: "" }));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -266,9 +157,7 @@ export function useOrganizationProfile() {
     countryOptions,
     stateOptions,
     cityOptions,
-    selectedStateCode,
-    loadingStates,
-    loadingCities,
+    selectedStateCode: profile.region,
     updateField,
     handleCountryChange,
     handleStateChange,
