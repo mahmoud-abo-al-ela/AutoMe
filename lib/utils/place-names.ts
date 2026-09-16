@@ -32,7 +32,13 @@ const normalize = (value: string) =>
     .toLowerCase()
     .replace(/[''`‘’ʻʼ-]/g, " ")
     .replace(/[^a-z0-9 ]/g, " ")
+    // "Alexandria Governorate" and "Alexandria" are the same place; the old
+    // location API wrote the suffix and the current list does not.
+    .replace(/\bgovernorates?\b/g, " ")
     .replace(/\b(al|el)\b/g, " ")
+    // A final ta marbuta is written both ways — "Mahalla" and "Mahallah" are
+    // one town, and live data holds the second spelling.
+    .replace(/([aeiou])h\b/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -73,6 +79,30 @@ const countries: Record<Locale, Record<string, string>> = {
   ar: arPlaces.countries,
 };
 
+/**
+ * Areas that are not governorates, but which the `region` column holds anyway.
+ *
+ * The onboarding form only recently began offering a fixed list; before that
+ * the column collected whatever a dealer or an import wrote, and half the
+ * current rows describe a broad area — "Greater Cairo", "Upper Egypt" — rather
+ * than an administrative unit. No governorate code corresponds to them, so a
+ * backfill cannot resolve them either: which governorate "Canal Zone" means is
+ * a question only a person can answer.
+ *
+ * They are translated here so those rows still read correctly in Arabic while
+ * they wait for that answer.
+ */
+const LEGACY_AREA_NAMES: Record<string, string> = {
+  "greater cairo": "القاهرة الكبرى",
+  "canal zone": "منطقة القناة",
+  "upper egypt": "صعيد مصر",
+  "lower egypt": "الوجه البحري",
+  "north coast": "الساحل الشمالي",
+  delta: "الدلتا",
+  "nile delta": "دلتا النيل",
+  sinai: "سيناء",
+};
+
 const pick = (entry: Entry, locale: Locale) =>
   locale === "ar" ? entry.ar : entry.en;
 
@@ -83,8 +113,16 @@ const resolve = (
 
 export function governorateName(value: string | null | undefined, locale: Locale) {
   if (!value) return "";
-  const found = resolve(governorates, value.trim());
-  return found ? pick(found, locale) : value;
+  const trimmed = value.trim();
+
+  const found = resolve(governorates, trimmed);
+  if (found) return pick(found, locale);
+
+  if (locale === "ar") {
+    const area = LEGACY_AREA_NAMES[normalize(trimmed)];
+    if (area) return area;
+  }
+  return value;
 }
 
 export function cityName(value: string | null | undefined, locale: Locale) {

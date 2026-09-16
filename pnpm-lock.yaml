@@ -236,6 +236,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
+      egydata:
+        specifier: ^1.1.1
+        version: 1.1.1
       eslint:
         specifier: ^9
         version: 9.39.5(jiti@2.4.2)
@@ -3655,6 +3658,9 @@ packages:
 
   effect@3.18.4:
     resolution: {integrity: sha512-b1LXQJLe9D11wfnOKAk3PKxuqYshQ0Heez+y5pnkd3jLj1yx9QhM72zZ9uUrOQyNvrs2GZZd/3maL0ZV18YuDA==}
+
+  egydata@1.1.1:
+    resolution: {integrity: sha512-X1JZr5+/AGSoz+8IKDcIyc4kJlC5XxThpW7ZaKEHmUbu+xKzVIVzyZaTRUMUkE5VU+4LlksZw15ChDv2eRI8lg==}
 
   electron-to-chromium@1.5.152:
     resolution: {integrity: sha512-xBOfg/EBaIlVsHipHl2VdTPJRSvErNUaqW8ejTq5OlOlIYx1wOllCHsAvAIrr55jD1IYEfdR86miUEt8H5IeJg==}
@@ -9576,6 +9582,8 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.0.0
       fast-check: 3.23.2
+
+  egydata@1.1.1: {}
 
   electron-to-chromium@1.5.152: {}
 

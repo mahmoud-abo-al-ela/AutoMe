@@ -90,6 +90,46 @@ describe("resolving a stored place for display", () => {
     expect(cityName("El Mahalla El Kubra", "ar")).toBe("المحلة الكبرى");
   });
 
+  it("resolves every entry to itself, in both languages", () => {
+    // The lookup normalises loosely — it folds diacritics, the definite
+    // article and a trailing ta marbuta — so that live data spelled
+    // "Al Maḩallah al Kubrá" finds "El Mahalla El Kubra". Loose matching can
+    // merge two genuinely different places, which would silently render one as
+    // the other, so every entry is checked against itself.
+    const wrong: string[] = [];
+
+    for (const city of EGYPT_CITIES) {
+      if (cityName(city.en, "en") !== city.en) wrong.push(city.en);
+      if (cityName(city.ar, "ar") !== city.ar) wrong.push(city.ar);
+    }
+    for (const governorate of EGYPT_GOVERNORATES) {
+      if (governorateName(governorate.ar, "ar") !== governorate.ar) {
+        wrong.push(governorate.ar);
+      }
+    }
+
+    expect(wrong).toEqual([]);
+  });
+
+  it("resolves the spellings actually present in the database", () => {
+    // Taken from the live facet payload, which is what un-backfilled rows hold.
+    expect(cityName("Al Maḩallah al Kubrá", "ar")).toBe("المحلة الكبرى");
+    expect(cityName("Port Said", "ar")).toBe("بورسعيد");
+    expect(governorateName("Alexandria Governorate", "ar")).toBe("الإسكندرية");
+    expect(governorateName("Dakahlia", "ar")).toBe("الدقهلية");
+  });
+
+  it("translates the broad areas that are not governorates", () => {
+    // Half the current rows describe an area rather than an administrative
+    // unit. No code corresponds to them, so a backfill cannot resolve them
+    // either — but they still have to read correctly in Arabic.
+    expect(governorateName("Greater Cairo", "ar")).toBe("القاهرة الكبرى");
+    expect(governorateName("Canal Zone", "ar")).toBe("منطقة القناة");
+    expect(governorateName("Upper Egypt", "ar")).toBe("صعيد مصر");
+    // English keeps what was written, since that is already English.
+    expect(governorateName("Greater Cairo", "en")).toBe("Greater Cairo");
+  });
+
   it("leaves a value it does not recognise exactly as typed", () => {
     expect(cityName("Some Village", "ar")).toBe("Some Village");
     expect(governorateName("Atlantis", "ar")).toBe("Atlantis");
