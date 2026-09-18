@@ -10,6 +10,8 @@ import { StreamChatProvider } from "@/components/StreamChat";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { routing, localeDirection } from "@/i18n/routing";
 import { clerkLocalization } from "@/i18n/clerk-localization";
+import { getTranslations } from "next-intl/server";
+import { getCurrentOrganization } from "@/lib/getOrganization";
 
 // NOTE: the font stack in globals.css names these families directly rather
 // than using the --font-* variables below. next/font expands those to
@@ -42,25 +44,62 @@ const arabic = Cairo({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  /**
-   * The brand suffix is applied here, once, and nowhere else.
-   *
-   * Every page used to append its own — with three different separators
-   * ("|", "-") and three different brand strings ("AutoMe", "AutoMe Admin",
-   * "AutoMe Platform"). Once the Arabic pages started supplying a translated
-   * title that also carried the brand, tabs read
-   * "تصفح السيارات | أوتومي | AutoMe". Pages now set only their own name.
-   *
-   * The brand stays Latin in both locales: it is a proper noun, and per the
-   * i18n rule we do not transliterate names.
-   */
-  title: {
-    default: "AutoMe",
-    template: "%s | AutoMe",
-  },
-  description: "Find your dream car",
-};
+/**
+ * The title is resolved here and nowhere else.
+ *
+ * Every page used to append its own brand — with three different separators
+ * ("|", "-") and three different brand strings ("AutoMe", "AutoMe Admin",
+ * "AutoMe Platform"). Once the Arabic pages started supplying a translated
+ * title that also carried the brand, tabs read
+ * "تصفح السيارات | أوتومي | AutoMe". Pages now set only their own name.
+ *
+ * "Once" has to mean once *in the tree*, not once per layout: `title.default`
+ * is itself a title as far as the parent is concerned, so the site layout
+ * declaring its own `{ default: "AutoMe", template: "%s | AutoMe" }` got that
+ * default fed through this template and the home tab read "AutoMe | AutoMe".
+ * Resolving the storefront brand up here is what lets that second declaration
+ * go away.
+ *
+ * On a dealership subdomain the brand *is* the dealership, so the whole thing
+ * — default, template and favicon — swaps over to it. That costs nothing on
+ * the main domain: `getCurrentOrganization` returns null on a missing header
+ * without touching the database, and is request-cached when it does.
+ *
+ * The brand stays Latin in both locales: it is a proper noun, and per the
+ * i18n rule we do not transliterate names.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home.meta" });
+  const organization = await getCurrentOrganization();
+
+  if (organization) {
+    return {
+      title: {
+        default: organization.name,
+        template: `%s | ${organization.name}`,
+      },
+      description:
+        organization.description || `${organization.name} — AutoMe`,
+      icons: { icon: organization.logo || "/favicon.ico" },
+    };
+  }
+
+  return {
+    // The home tab is the one place worth more than the bare brand: it is the
+    // title a search result leads with, and "AutoMe" alone says nothing about
+    // what the product does.
+    title: {
+      default: t("title"),
+      template: "%s | AutoMe",
+    },
+    description: t("description"),
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import MainHeader from "@/components/Header/MainHeader";
 import Footer from "@/components/Footer";
 import { checkUser } from "@/lib/checkUser";
@@ -7,30 +6,6 @@ import BackToTop from "@/components/BackToTop";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import Loading from "@/components/Loading";
-
-export async function generateMetadata(): Promise<Metadata> {
-  const organization = await getCurrentOrganization();
-  if (organization) {
-    return {
-      title: {
-        template: `%s | ${organization.name}`,
-        default: organization.name,
-      },
-      description: organization.description || `Welcome to ${organization.name}`,
-      icons: {
-        icon: organization.logo || "/favicon.ico",
-      },
-    };
-  }
-
-  return {
-    title: {
-      template: "%s | AutoMe",
-      default: "AutoMe",
-    },
-    description: "Find your dream car",
-  };
-}
 
 export default async function SiteLayout({
   children,
