@@ -20,7 +20,13 @@ function Switch({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0"
+          // A transform is physical: translateX(+n) moves right in both writing
+          // directions. In Arabic the thumb starts at the *right* end of the
+          // track, so the shared rule shoved it off the track entirely and the
+          // switch rendered as a solid pill with no knob in it. The two
+          // variants are mutually exclusive, so neither has to outrank the
+          // other.
+          "bg-background dark:data-[state=unchecked]:bg-foreground dark:data-[state=checked]:bg-primary-foreground pointer-events-none block size-4 rounded-full ring-0 transition-transform data-[state=unchecked]:translate-x-0 ltr:data-[state=checked]:translate-x-[calc(100%-2px)] rtl:data-[state=checked]:-translate-x-[calc(100%-2px)]"
         )} />
     </SwitchPrimitive.Root>
   );
