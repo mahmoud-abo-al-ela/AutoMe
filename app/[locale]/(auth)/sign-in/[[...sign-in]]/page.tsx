@@ -15,7 +15,11 @@ export default async function SignInPage({
   const query = await searchParams;
   // Never pass the raw query value to Clerk: it decides where the user lands
   // once authenticated, so an unvalidated absolute URL here is an open redirect.
-  const redirectUrl = safeRedirectPath(query?.redirect_url);
+  // The fallback has to carry the locale. DEFAULT_REDIRECT is "/", which has
+  // no prefix, and `localePrefix: "always"` with detection off resolves that
+  // to the default locale — so signing in on /ar with no return path landed
+  // the reader on /en.
+  const redirectUrl = safeRedirectPath(query?.redirect_url, `/${locale}`);
 
   return (
     <SignIn

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { signedInLinks } from "@/lib/HeaderConfig";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import HeaderNavLink from "./HeaderNavLink";
 
 export default function AuthSection({
@@ -16,11 +17,12 @@ export default function AuthSection({
   isAdmin?: boolean;
 }) {
   const t = useTranslations("nav");
+  const { afterSignIn, afterSignOut } = useAuthRedirects();
 
   return (
     <div className="flex items-center gap-6">
       <SignedOut>
-        <SignInButton mode="modal" forceRedirectUrl="/auth-redirect">
+        <SignInButton mode="modal" forceRedirectUrl={afterSignIn}>
           <Button
             variant="default"
             className="cursor-pointer transition-all duration-300 hover:shadow-md"
@@ -46,7 +48,7 @@ export default function AuthSection({
               />
             ))}
           <UserButton
-            afterSignOutUrl="/"
+            afterSignOutUrl={afterSignOut}
             appearance={{
               elements: {
                 avatarBox: "hover:scale-110 transition-transform duration-300",
