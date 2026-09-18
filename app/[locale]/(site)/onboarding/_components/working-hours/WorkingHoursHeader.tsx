@@ -2,8 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WorkingHoursHeader() {
+    const t = useTranslations("onboarding.workingHours");
+
     return (
         <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -16,11 +19,9 @@ export default function WorkingHoursHeader() {
             </div>
             <div className="flex-1">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-indigo-900 bg-clip-text text-transparent">
-                    Working Hours
+                    {t("title")}
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                    Set your dealership&apos;s opening hours
-                </p>
+                <p className="text-sm text-gray-600 mt-1">{t("subtitle")}</p>
             </div>
         </motion.div>
     );

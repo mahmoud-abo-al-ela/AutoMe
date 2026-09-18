@@ -1,12 +1,26 @@
 import { checkUser } from "@/lib/checkUser";
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getOnboardingData } from "@/lib/services/onboarding";
 import OnboardingWizard from "./_components/OnboardingWizard";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "onboarding.meta" });
+
+  // Page name only. The "| AutoMe" suffix comes from the root layout's title
+  // template, which is the one place the brand is applied.
+  return { title: t("title"), description: t("description") };
+}
 
 function OnboardingLoader() {
   return (

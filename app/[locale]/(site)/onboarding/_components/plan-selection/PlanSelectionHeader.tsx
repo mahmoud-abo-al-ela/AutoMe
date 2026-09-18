@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { CreditCard } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { BillingToggle } from "./BillingToggle";
 import type { BillingPeriod } from "../../_lib/onboarding-types";
 
@@ -14,6 +15,8 @@ export function PlanSelectionHeader({
     onToggleBilling: () => void;
     savingsPercentage: number;
 }) {
+    const t = useTranslations("onboarding.planSelection");
+
     return (
         <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -27,12 +30,9 @@ export function PlanSelectionHeader({
                 </div>
                 <div className="text-start">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
-                        Choose Your Plan
+                        {t("title")}
                     </h2>
-                    <p className="text-sm text-gray-600 mt-1">
-                        Select the perfect plan for your dealership. You can upgrade
-                        anytime.
-                    </p>
+                    <p className="text-sm text-gray-600 mt-1">{t("subtitle")}</p>
                 </div>
             </div>
 

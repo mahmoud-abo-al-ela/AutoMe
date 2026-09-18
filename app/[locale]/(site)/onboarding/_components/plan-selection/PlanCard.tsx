@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,12 @@ import {
     CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+    formatPlanPrice,
+    planKeyFor,
+    planPeriodKey,
+} from "@/components/Pricing/pricing-plans";
+import { useFormatters } from "@/hooks/use-formatters";
 import { PlanFeatureList } from "./PlanFeatureList";
 import type { PlanConfig } from "./constants";
 import type {
@@ -34,23 +41,24 @@ export function PlanCard({
     index: number;
     billingPeriod: BillingPeriod;
 }) {
+    const t = useTranslations("onboarding.planSelection");
+    const tPlans = useTranslations("plans");
+    const fmt = useFormatters();
     const Icon = config.icon;
     const isPro = plan.type === "PRO";
 
-    const formatPrice = () => {
-        if (plan.monthlyPrice === 0 || plan.monthlyPrice === null) {
-            return plan.type === "ENTERPRISE" ? "Custom" : "Free";
-        }
-        const price = billingPeriod === "monthly"
-            ? plan.monthlyPrice
-            : (plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8);
-        return `$${Math.floor(price / 100)}`;
-    };
+    // A plan whose `type` the product does not know has no message key, so it
+    // falls back to the untranslated name from the database rather than
+    // rendering blank.
+    const planKey = planKeyFor(plan.type);
+    const name = planKey ? tPlans(`plans.${planKey}.name`) : plan.name;
 
-    const formatPeriod = () => {
-        if (plan.monthlyPrice === 0) return "forever";
-        return billingPeriod === "monthly" ? "per month" : "per year";
-    };
+    // Enterprise is quoted, not priced; anything else at zero is free.
+    const price =
+        plan.monthlyPrice === null || plan.monthlyPrice === 0
+            ? tPlans(plan.type === "ENTERPRISE" ? "custom" : "free")
+            : formatPlanPrice(plan, billingPeriod, fmt.locale);
+    const periodKey = planPeriodKey(plan, billingPeriod);
 
     return (
         <motion.div
@@ -82,7 +90,7 @@ export function PlanCard({
                     className={`absolute inset-0 bg-gradient-to-br ${config.bg} opacity-50 -z-10`}
                 />
 
-                {config.badge && !isSelected && (
+                {config.badgeKey && !isSelected && (
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -90,7 +98,7 @@ export function PlanCard({
                         className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
                     >
                         <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-1.5 shadow-lg text-sm font-semibold">
-                            {config.badge}
+                            {tPlans(config.badgeKey)}
                         </Badge>
                     </motion.div>
                 )}
@@ -102,7 +110,7 @@ export function PlanCard({
                         className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
                     >
                         <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-1.5 shadow-lg text-sm font-semibold">
-                            ✓ Selected
+                            {t("selectedBadge")}
                         </Badge>
                     </motion.div>
                 )}
@@ -119,18 +127,19 @@ export function PlanCard({
                         >
                             <Icon className="h-6 w-6" />
                         </motion.div>
-                        <CardTitle className="text-xl font-bold">
-                            {plan.name}
-                        </CardTitle>
+                        <CardTitle className="text-xl font-bold">{name}</CardTitle>
                     </div>
                     <div className="pt-2">
                         <div className="flex items-baseline gap-1">
                             <span className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
-                                {formatPrice()}
+                                {price}
                             </span>
-                            <span className="text-gray-600 text-lg font-medium">
-                                /{formatPeriod()}
-                            </span>
+                            {/* A quoted plan has no period to name. */}
+                            {periodKey && (
+                                <span className="text-gray-600 text-lg font-medium">
+                                    /{tPlans(periodKey)}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </CardHeader>
@@ -155,12 +164,12 @@ export function PlanCard({
                         {isSelected ? (
                             <>
                                 <Check className="h-5 w-5 me-2" />
-                                Selected
+                                {t("selected")}
                             </>
                         ) : (
                             <>
-                                {`Select ${plan.name}`}
-                                <ArrowRight className="h-5 w-5 ms-2" />
+                                {t("select", { plan: name })}
+                                <ArrowRight className="h-5 w-5 ms-2 rtl:rotate-180" />
                             </>
                         )}
                     </Button>

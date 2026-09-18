@@ -24,6 +24,10 @@ export default function PricingCard({
   index: number;
 }) {
   const t = useTranslations("home.pricing");
+  // Plan names, bullets and billing copy are shared with the onboarding
+  // wizard, so they live in their own namespace rather than under the home
+  // page that happened to render them first.
+  const tPlans = useTranslations("plans");
   const fmt = useFormatters();
   // Feature bullets interpolate a plan limit. The number is formatted here
   // rather than left to ICU, which would use the bare `ar` tag and render
@@ -31,12 +35,12 @@ export default function PricingCard({
   const featureParams = (feature: UiPlan["features"][number]) =>
     feature.params ? { value: fmt.number(feature.params.count) } : undefined;
   const Icon = plan.icon;
-  const price = formatPlanPrice(plan, billingPeriod);
+  const price = formatPlanPrice(plan, billingPeriod, fmt.locale);
   const periodKey = planPeriodKey(plan, billingPeriod);
   // A DB plan with an unrecognised `type` has no message key, so it falls back
   // to the untranslated DB name rather than rendering blank.
-  const name = plan.planKey ? t(`plans.${plan.planKey}.name`) : plan.name;
-  const description = plan.planKey ? t(`plans.${plan.planKey}.description`) : null;
+  const name = plan.planKey ? tPlans(`plans.${plan.planKey}.name`) : plan.name;
+  const description = plan.planKey ? tPlans(`plans.${plan.planKey}.description`) : null;
 
   return (
     <motion.div
@@ -52,7 +56,7 @@ export default function PricingCard({
       {plan.popular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
           <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
-            {t("mostPopular")}
+            {tPlans("mostPopular")}
           </div>
         </div>
       )}
@@ -91,13 +95,13 @@ export default function PricingCard({
             className={`text-4xl sm:text-5xl font-bold ${plan.popular ? "text-white" : "text-foreground"
               }`}
           >
-            {price ?? t("custom")}
+            {price ?? tPlans("custom")}
           </span>
           <span
             className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
               }`}
           >
-            {periodKey ? `/${t(periodKey)}` : null}
+            {periodKey ? `/${tPlans(periodKey)}` : null}
           </span>
         </div>
       </div>
@@ -127,7 +131,7 @@ export default function PricingCard({
                   : ""
                 }`}
             >
-              {t(`features.${feature.key}`, featureParams(feature))}
+              {tPlans(`features.${feature.key}`, featureParams(feature))}
             </span>
           </li>
         ))}

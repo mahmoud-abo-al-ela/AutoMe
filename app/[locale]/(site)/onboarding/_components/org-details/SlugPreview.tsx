@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, Loader2, Globe } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { SlugStatus } from "../../_lib/onboarding-types";
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "autome.com";
@@ -21,6 +22,8 @@ export default function SlugPreview({
     slug: string;
     status: SlugStatus;
 }) {
+    const t = useTranslations("onboarding.orgDetails.slug");
+
     if (!slug) return null;
 
     const tone =
@@ -37,8 +40,11 @@ export default function SlugPreview({
             className={`flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border px-3 py-2 ${tone}`}
         >
             <Globe className="h-4 w-4 shrink-0 text-gray-400" />
-            <span className="text-xs text-gray-500">Your site will be</span>
-            <span className="font-mono text-sm font-semibold text-gray-900 break-all">
+            <span className="text-xs text-gray-500">{t("prefix")}</span>
+            <span
+                dir="ltr"
+                className="font-mono text-sm font-semibold text-gray-900 break-all"
+            >
                 {slug}
                 <span className="font-normal text-gray-500">.{ROOT_DOMAIN}</span>
             </span>
@@ -53,7 +59,7 @@ export default function SlugPreview({
                         className="ms-auto flex items-center gap-1 text-xs font-medium text-gray-500"
                     >
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Checking
+                        {t("checking")}
                     </motion.span>
                 )}
                 {status === "available" && (
@@ -65,7 +71,7 @@ export default function SlugPreview({
                         className="ms-auto flex items-center gap-1 text-xs font-semibold text-green-700"
                     >
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        Available
+                        {t("available")}
                     </motion.span>
                 )}
                 {status === "taken" && (
@@ -77,7 +83,7 @@ export default function SlugPreview({
                         className="ms-auto flex items-center gap-1 text-xs font-semibold text-red-700"
                     >
                         <XCircle className="h-3.5 w-3.5" />
-                        Taken — try another name
+                        {t("taken")}
                     </motion.span>
                 )}
             </AnimatePresence>

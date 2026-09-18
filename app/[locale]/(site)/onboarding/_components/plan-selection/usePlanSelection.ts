@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { planSelectionSchema } from "../schemas";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
+import { calculateSavingsPercentage } from "@/components/Pricing/pricing-plans";
+import { createPlanSelectionSchema } from "../schemas";
 import { createCheckoutSession } from "@/actions/payment";
 import { createOrganization, saveOnboardingFormData } from "@/actions/onboarding";
+import { clearOnboardingDraft } from "../../_lib/onboarding-draft";
 import type { z } from "zod";
 import type {
     BillingPeriod,
@@ -15,7 +19,9 @@ import type {
 } from "../../_lib/onboarding-types";
 
 /** Step 3's own slice of the wizard's form data. */
-export type PlanSelectionFormValues = z.infer<typeof planSelectionSchema>;
+export type PlanSelectionFormValues = z.infer<
+    ReturnType<typeof createPlanSelectionSchema>
+>;
 
 export function usePlanSelection({
     plans,
@@ -29,6 +35,16 @@ export function usePlanSelection({
     userId: string;
 }) {
     const router = useRouter();
+    const t = useTranslations("onboarding.planSelection.toasts");
+    const tValidation = useTranslations("onboarding.orgDetails.validation");
+    const actionError = useActionError();
+
+    // Built inside the hook because its message is translated; see ../schemas.
+    const planSelectionSchema = useMemo(
+        () => createPlanSelectionSchema(tValidation),
+        [tValidation]
+    );
+
     const {
         setValue,
         watch,
@@ -46,25 +62,9 @@ export function usePlanSelection({
     const [loading, setLoading] = useState(false);
     const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
 
-    // Calculate average savings percentage from paid plans
-    const calculateSavingsPercentage = () => {
-        const paidPlans = plans.filter(
-            (plan) => plan.monthlyPrice > 0 && plan.monthlyPrice !== null
-        );
-
-        if (paidPlans.length === 0) return 0;
-
-        const totalSavings = paidPlans.reduce((sum, plan) => {
-            const monthlyTotal = plan.monthlyPrice * 12;
-            const yearlyPrice = plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8;
-            const savings = ((monthlyTotal - yearlyPrice) / monthlyTotal) * 100;
-            return sum + savings;
-        }, 0);
-
-        return Math.round(totalSavings / paidPlans.length);
-    };
-
-    const savingsPercentage = calculateSavingsPercentage();
+    // Same maths as the public pricing section, which is the point: the two
+    // surfaces quote the same discount because they share one function.
+    const savingsPercentage = calculateSavingsPercentage(plans);
 
     const handleSelectPlan = (planId: string) => {
         setValue("planId", planId, { shouldValidate: true });
@@ -83,15 +83,19 @@ export function usePlanSelection({
             });
 
             if (result.success) {
+                // The dealership exists now, so the saved answers are spent.
+                // Left behind, they would refill the wizard for whoever opens
+                // this tab next.
+                clearOnboardingDraft();
                 updateFormData({ planId: selectedPlanId, billingPeriod });
                 // Redirect to dashboard with onboarding complete flag
                 router.push(`/org/${result.data.organization.slug}/dashboard?onboarding=complete`);
             } else {
-                toast.error(result.error.message || "Failed to create organization");
+                toast.error(actionError(result.error, t("createFailed")));
             }
         } catch (error) {
             console.error("Error creating organization:", error);
-            toast.error("Something went wrong. Please try again.");
+            toast.error(t("createFailed"));
         } finally {
             setLoading(false);
         }
@@ -116,7 +120,7 @@ export function usePlanSelection({
                 });
 
                 if (!sessionRes.success) {
-                    toast.error(sessionRes.error.message || "Failed to save onboarding data");
+                    toast.error(actionError(sessionRes.error, t("saveFailed")));
                     setLoading(false);
                     return;
                 }
@@ -134,15 +138,15 @@ export function usePlanSelection({
                 } else if (res.success) {
                     // Stripe can return a session without a url; assigning null
                     // to location.href navigates to "/null" instead of failing.
-                    toast.error("Could not start checkout. Please try again.");
+                    toast.error(t("checkoutFailed"));
                     setLoading(false);
                 } else {
-                    toast.error(res.error.message || "Failed to initiate payment");
+                    toast.error(actionError(res.error, t("paymentFailed")));
                     setLoading(false);
                 }
             } catch (error) {
                 console.error("Error initiating checkout:", error);
-                toast.error("An unexpected error occurred. Please try again.");
+                toast.error(t("checkoutFailed"));
                 setLoading(false);
             }
         }

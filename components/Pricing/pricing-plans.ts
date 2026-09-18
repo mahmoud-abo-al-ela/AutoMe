@@ -1,6 +1,8 @@
 // Pricing plan data + pure mapping/format helpers.
 import { Zap, Shield, Headphones, type LucideIcon } from "lucide-react";
 import type { Prisma } from "@/lib/generated/prisma";
+import type { Locale } from "@/i18n/routing";
+import { formatNumber } from "@/lib/utils/number";
 
 /**
  * A feature bullet, as a message key plus its ICU params rather than a
@@ -45,7 +47,8 @@ export type UiPlan = {
   type?: string | null;
 };
 
-function planKeyFor(type?: string | null): PlanKey | null {
+/** Message key under `plans.plans` for a DB plan `type`, or null if unrecognised. */
+export function planKeyFor(type?: string | null): PlanKey | null {
   if (!type) return null;
   return PLAN_KEY_BY_TYPE[type as keyof typeof PLAN_KEY_BY_TYPE] ?? null;
 }
@@ -142,19 +145,18 @@ export const defaultPlans: UiPlan[] = [
   },
 ];
 
-function mapDbPlanToUi(plan: DbPlan): UiPlan {
-  const isPro = plan.type === "PRO";
-  const isEnterprise = plan.type === "ENTERPRISE";
-
-  let icon = Zap;
-  if (isPro) icon = Shield;
-  if (isEnterprise) icon = Headphones;
-
-  const ctaLink = "/onboarding";
-
+/**
+ * The bullets a plan's limits and flags produce, as message keys.
+ *
+ * Exported because the onboarding wizard lists the same plans and used to
+ * derive the same bullets itself — from a camelCase-to-Title-Case split of
+ * whatever keys the Json column happened to hold, which produces English by
+ * construction and so could not be translated at all.
+ */
+export function planFeatureKeys(plan: DbPlan): PlanFeature[] {
   const f = featureFlags(plan.features);
 
-  const features: PlanFeature[] = [
+  return [
     plan.maxCars === -1
       ? { key: "carListingsUnlimited", included: true }
       : { key: "carListings", params: { count: plan.maxCars ?? 0 }, included: true },
@@ -173,13 +175,22 @@ function mapDbPlanToUi(plan: DbPlan): UiPlan {
     { key: "aiProcessing", included: !!f.aiProcessing?.enabled },
     { key: "prioritySupport", included: !!f.prioritySupport },
   ];
+}
+
+function mapDbPlanToUi(plan: DbPlan): UiPlan {
+  const isPro = plan.type === "PRO";
+  const isEnterprise = plan.type === "ENTERPRISE";
+
+  let icon = Zap;
+  if (isPro) icon = Shield;
+  if (isEnterprise) icon = Headphones;
 
   return {
     ...plan,
     planKey: planKeyFor(plan.type),
     popular: isPro,
-    features,
-    ctaLink,
+    features: planFeatureKeys(plan),
+    ctaLink: "/onboarding",
     icon,
   };
 }
@@ -189,10 +200,20 @@ export function resolvePlans(dbPlans?: DbPlan[] | null): UiPlan[] {
   return dbPlans && dbPlans.length > 0 ? dbPlans.map(mapDbPlanToUi) : defaultPlans;
 }
 
+/**
+ * The two price columns every pricing surface reads. Narrower than `UiPlan` so
+ * the onboarding wizard, whose plans come straight from Prisma, can share the
+ * helpers below without first being reshaped into a card model.
+ */
+export type PlanPricing = {
+  monthlyPrice: number | null;
+  yearlyPrice?: number | null;
+};
+
 /** Average yearly savings percentage across paid plans. */
-export function calculateSavingsPercentage(plans: UiPlan[]): number {
+export function calculateSavingsPercentage(plans: PlanPricing[]): number {
   const paidPlans = plans.filter(
-    (plan): plan is UiPlan & { monthlyPrice: number } =>
+    (plan): plan is PlanPricing & { monthlyPrice: number } =>
       plan.monthlyPrice !== null && plan.monthlyPrice > 0,
   );
   if (paidPlans.length === 0) return 0;
@@ -209,23 +230,33 @@ export function calculateSavingsPercentage(plans: UiPlan[]): number {
 
 /**
  * The rendered price, or null for "contact us" pricing — the caller renders
- * `home.pricing.custom` in that case rather than this module returning the
- * English word "Custom".
+ * `plans.custom` in that case rather than this module returning the English
+ * word "Custom".
  *
- * Plan pricing is deliberately USD and does NOT go through formatCarPrice.
+ * Plan pricing is deliberately USD and does NOT go through formatCarPrice:
+ * Stripe charges these in dollars (lib/services/stripe/plan.ts), so showing
+ * them as EGP would misstate what the customer is billed.
+ *
+ * The digits, however, are the reader's — `formatNumber` routes them through
+ * `intlLocale`, so an Arabic page reads ٤٩ like every other number on it
+ * rather than being the one place that stays Western.
  */
-export function formatPlanPrice(plan: UiPlan, billingPeriod: string): string | null {
+export function formatPlanPrice(
+  plan: PlanPricing,
+  billingPeriod: string,
+  locale: Locale = "en",
+): string | null {
   if (plan.monthlyPrice === null) return null;
   const price =
     billingPeriod === "monthly"
       ? plan.monthlyPrice
       : plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8;
-  return `$${Math.floor(price / 100)}`;
+  return `$${formatNumber(Math.floor(price / 100), locale)}`;
 }
 
-/** Message key under `home.pricing` for the billing period, or null to render nothing. */
+/** Message key under `plans` for the billing period, or null to render nothing. */
 export function planPeriodKey(
-  plan: UiPlan,
+  plan: PlanPricing,
   billingPeriod: string,
 ): "forever" | "perMonth" | "perYear" | null {
   if (plan.monthlyPrice === null) return null;

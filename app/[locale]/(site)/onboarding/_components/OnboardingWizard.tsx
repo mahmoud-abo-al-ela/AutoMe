@@ -19,6 +19,7 @@ export default function OnboardingWizard({
   plans: OnboardingPlan[];
 }) {
   const {
+    restored,
     currentStep,
     formData,
     updateFormData,
@@ -26,6 +27,10 @@ export default function OnboardingWizard({
     prevStep,
     steps,
   } = useWizard(user?.email);
+
+  // One frame, while the saved draft is read. Rendering the steps first would
+  // freeze the empty defaults into react-hook-form and throw the draft away.
+  if (!restored) return null;
 
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4">

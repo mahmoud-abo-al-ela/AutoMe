@@ -67,19 +67,23 @@ export type OnboardingLocationPatch = Partial<OnboardingLocation>;
 /** Availability of the generated slug; null before a name is long enough. */
 export type SlugStatus = "checking" | "available" | "taken" | null;
 
-/** One row of the working-hours editor. */
+/**
+ * One row of the working-hours editor. The day name is looked up from
+ * `onboarding.workingHours.days` by `key`, so it is not carried here — a
+ * label baked into a constant is English for every reader.
+ */
 export interface WorkingHoursDay {
   key: OnboardingDay;
-  label: string;
-  short: string;
 }
 
-/** One entry in the step indicator row. */
+/**
+ * One entry in the step indicator row. `key` names the step's copy under
+ * `onboarding.wizard.steps`; `id` is its position in the flow.
+ */
 export interface WizardStep {
   id: number;
-  name: string;
+  key: "organization" | "workingHours" | "plan";
   icon: LucideIcon;
-  description: string;
 }
 
 /** The plans offered on the plan-selection step. */

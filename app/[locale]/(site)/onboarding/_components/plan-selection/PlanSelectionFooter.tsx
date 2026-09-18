@@ -9,9 +9,12 @@ import {
     RefreshCw,
     CreditCard,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { FieldErrors } from "react-hook-form";
 import type { PlanSelectionFormValues } from "./usePlanSelection";
+
+const SALES_EMAIL = "sales@autome.com";
 
 export function PlanSelectionFooter({
     onPrev,
@@ -24,6 +27,9 @@ export function PlanSelectionFooter({
     loading: boolean;
     errors: FieldErrors<PlanSelectionFormValues>;
 }) {
+    const t = useTranslations("onboarding.planSelection");
+    const tActions = useTranslations("onboarding.actions");
+
     return (
         <>
             {errors.planId && (
@@ -32,7 +38,7 @@ export function PlanSelectionFooter({
                     animate={{ opacity: 1, y: 0 }}
                     className="text-sm text-red-600 text-center font-medium"
                 >
-                    Please select a plan to continue
+                    {t("noPlanSelected")}
                 </motion.p>
             )}
 
@@ -47,19 +53,21 @@ export function PlanSelectionFooter({
             >
                 <span className="flex items-center gap-1.5">
                     <ShieldCheck className="h-4 w-4 text-green-600" />
-                    Secure checkout by Stripe
+                    {t("trust.stripe")}
                 </span>
                 <span className="flex items-center gap-1.5">
                     <RefreshCw className="h-4 w-4 text-green-600" />
-                    Cancel anytime
+                    {t("trust.cancelAnytime")}
                 </span>
                 <span className="flex items-center gap-1.5">
                     <CreditCard className="h-4 w-4 text-green-600" />
-                    No setup fees
+                    {t("trust.noSetupFees")}
                 </span>
             </motion.div>
 
-            {/* Help Text */}
+            {/* Help Text. One message with the link inside it rather than three
+                siblings: Arabic does not put the clause in the same order, and
+                no amount of RTL flipping fixes word order. */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -67,14 +75,16 @@ export function PlanSelectionFooter({
                 className="text-center bg-blue-50 p-4 rounded-xl border border-blue-100"
             >
                 <p className="text-sm text-gray-700">
-                    All plans include secure data storage and email support.{" "}
-                    <a
-                        href="mailto:sales@autome.com"
-                        className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
-                    >
-                        Contact sales
-                    </a>{" "}
-                    for custom solutions.
+                    {t.rich("help", {
+                        link: (chunks) => (
+                            <a
+                                href={`mailto:${SALES_EMAIL}`}
+                                className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                            >
+                                {chunks}
+                            </a>
+                        ),
+                    })}
                 </p>
             </motion.div>
 
@@ -91,8 +101,8 @@ export function PlanSelectionFooter({
                     onClick={onPrev}
                     className="cursor-pointer px-6 py-6 text-base font-semibold"
                 >
-                    <ArrowLeft className="h-5 w-5 me-2" />
-                    Back
+                    <ArrowLeft className="h-5 w-5 me-2 rtl:rotate-180" />
+                    {tActions("back")}
                 </Button>
                 <Button
                     type="submit"
@@ -103,12 +113,12 @@ export function PlanSelectionFooter({
                     {loading ? (
                         <>
                             <Loader2 className="h-5 w-5 me-2 animate-spin" />
-                            Processing...
+                            {tActions("processing")}
                         </>
                     ) : (
                         <>
-                            Continue
-                            <ArrowRight className="h-5 w-5 ms-2" />
+                            {tActions("continue")}
+                            <ArrowRight className="h-5 w-5 ms-2 rtl:rotate-180" />
                         </>
                     )}
                 </Button>

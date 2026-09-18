@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 
 import { motion } from "framer-motion";
 import { useDirection } from "@radix-ui/react-direction";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /** Track is w-16 (64px), knob is w-6 (24px), inset 4px on each side. */
 const KNOB_TRAVEL = 36;
@@ -16,8 +17,9 @@ export function BillingToggle({
     onToggle: () => void;
     savingsPercentage?: number;
 }) {
-  const t = useTranslations("home.pricing");
+  const t = useTranslations("plans");
   const direction = useDirection();
+  const fmt = useFormatters();
   const isYearly = billingPeriod === "yearly";
   // A CSS transform is physical: translateX(+n) moves right in both writing
   // directions, and `dir` does not flip it. Without this the Arabic knob rests
@@ -57,7 +59,7 @@ export function BillingToggle({
                     animate={{ opacity: 1, scale: 1 }}
                     className="ms-2 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"
                 >
-                    {t("save", { percentage: savingsPercentage ?? 0 })}
+                    {t("save", { percentage: fmt.number(savingsPercentage ?? 0) })}
                 </motion.span>
             )}
         </div>

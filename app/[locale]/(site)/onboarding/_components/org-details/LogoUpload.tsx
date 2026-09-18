@@ -6,6 +6,8 @@ import { X, ImageIcon, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /**
  * `compact` renders the control as a 48px row, the same height as an Input, so
@@ -13,6 +15,9 @@ import { toast } from "sonner";
  * square tile it replaced was 112px tall and sat beside a 48px name field,
  * leaving a block of dead space that no other row had.
  */
+/** Matches the size the messages quote, so copy and check cannot disagree. */
+const MAX_LOGO_MB = 5;
+
 export default function LogoUpload({
   value,
   onChange,
@@ -24,6 +29,9 @@ export default function LogoUpload({
   error?: string;
   compact?: boolean;
 }) {
+  const t = useTranslations("onboarding.orgDetails.logo");
+  const fmt = useFormatters();
+  const maxSizeLabel = fmt.number(MAX_LOGO_MB);
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,12 +66,12 @@ export default function LogoUpload({
     // Both rejections used to be a bare `return`, so dropping a PDF or an
     // oversized photo did nothing at all — no message, no state change.
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file");
+      toast.error(t("notAnImage"));
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Logo must be smaller than 5MB");
+    if (file.size > MAX_LOGO_MB * 1024 * 1024) {
+      toast.error(t("tooLarge", { size: maxSizeLabel }));
       return;
     }
 
@@ -101,7 +109,7 @@ export default function LogoUpload({
   return (
     <div className="space-y-2">
       <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-        Dealership Logo
+        {t("label")}
         <span className="text-red-500">*</span>
       </Label>
 
@@ -123,18 +131,18 @@ export default function LogoUpload({
                 <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-white">
                   <Image
                     src={value}
-                    alt="Organization logo"
+                    alt={t("alt")}
                     fill
                     className="object-contain p-0.5"
                   />
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
-                  Logo added
+                  {t("added")}
                 </span>
                 <button
                   type="button"
                   onClick={handleRemove}
-                  aria-label="Remove logo"
+                  aria-label={t("remove")}
                   // A solid red fill on hover was heavier than the green row it
                   // sits in; tinting the icon reads as destructive without
                   // becoming the loudest thing on the form.
@@ -147,13 +155,14 @@ export default function LogoUpload({
               <>
                 <Image
                   src={value}
-                  alt="Organization logo"
+                  alt={t("alt")}
                   fill
                   className="object-contain p-2"
                 />
                 <button
                   type="button"
                   onClick={handleRemove}
+                  aria-label={t("remove")}
                   className="absolute top-1 end-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                 >
                   <X className="h-3 w-3" />
@@ -194,16 +203,16 @@ export default function LogoUpload({
             {isUploading ? (
               <div className="flex items-center justify-center gap-3 py-2">
                 <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
-                <p className="text-sm text-gray-500">Uploading...</p>
+                <p className="text-sm text-gray-500">{t("uploading")}</p>
               </div>
             ) : compact ? (
               <div className="flex w-full items-center gap-2">
                 <ImageIcon className="h-5 w-5 shrink-0 text-gray-400" />
                 <span className="text-sm font-medium text-gray-600">
-                  Add logo
+                  {t("addShort")}
                 </span>
                 <span className="ms-auto text-xs text-gray-400">
-                  PNG/JPG · 5MB
+                  {t("constraintShort", { size: maxSizeLabel })}
                 </span>
               </div>
             ) : (
@@ -213,10 +222,15 @@ export default function LogoUpload({
                 </div>
                 <div className="text-start">
                   <p className="text-sm font-medium text-gray-700">
-                    Drop your logo here or{" "}
-                    <span className="text-blue-600">browse</span>
+                    {t.rich("dropHint", {
+                      browse: (chunks) => (
+                        <span className="text-blue-600">{chunks}</span>
+                      ),
+                    })}
                   </p>
-                  <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                  <p className="text-xs text-gray-500">
+                    {t("constraint", { size: maxSizeLabel })}
+                  </p>
                 </div>
               </div>
             )}

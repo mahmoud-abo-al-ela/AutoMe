@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import StepIndicator from "./StepIndicator";
 import type { WizardStep } from "../../_lib/onboarding-types";
 
@@ -18,10 +20,16 @@ export default function StepIndicators({
     steps: WizardStep[];
     currentStep: number;
 }) {
+    const t = useTranslations("onboarding.wizard");
+    const fmt = useFormatters();
+
     return (
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
             <p className="mb-4 text-sm font-semibold text-gray-500">
-                Step {currentStep} of {steps.length}
+                {t("stepOf", {
+                    current: fmt.number(currentStep),
+                    total: fmt.number(steps.length),
+                })}
             </p>
 
             <div className="flex items-start">

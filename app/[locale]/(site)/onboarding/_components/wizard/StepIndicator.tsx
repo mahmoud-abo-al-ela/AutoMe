@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { WizardStep } from "../../_lib/onboarding-types";
 
 export default function StepIndicator({
@@ -13,6 +14,7 @@ export default function StepIndicator({
     index: number;
     currentStep: number;
 }) {
+    const t = useTranslations("onboarding.wizard.steps");
     const StepIcon = step.icon;
     const isCompleted = currentStep > step.id;
     const isCurrent = currentStep === step.id;
@@ -57,10 +59,10 @@ export default function StepIndicator({
             </motion.div>
             <div className="text-center">
                 <span className="text-xs sm:text-sm font-semibold block whitespace-nowrap">
-                    {step.name}
+                    {t(`${step.key}.name`)}
                 </span>
                 <span className="text-micro sm:text-xs text-gray-500 block">
-                    {step.description}
+                    {t(`${step.key}.description`)}
                 </span>
             </div>
         </motion.div>

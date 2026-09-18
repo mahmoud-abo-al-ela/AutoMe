@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Controller } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "lucide-react";
+import { useTranslations } from "next-intl";
 import TimeInputs from "./TimeInputs";
 import type { Control } from "react-hook-form";
 import type { WorkingHoursFormValues } from "./useWorkingHours";
@@ -23,6 +24,8 @@ export default function DayRow({
     control: Control<WorkingHoursFormValues>;
     index: number;
 }) {
+    const t = useTranslations("onboarding.workingHours");
+
     return (
         <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -44,7 +47,7 @@ export default function DayRow({
                     </div>
                     <div>
                         <span className="font-bold text-lg text-gray-900">
-                            {day.label}
+                            {t(`days.${day.key}`)}
                         </span>
                     </div>
                 </div>
@@ -68,7 +71,7 @@ export default function DayRow({
                                 : "bg-green-100 text-green-700"
                             }`}
                     >
-                        {dayData.closed ? "Closed" : "Open"}
+                        {dayData.closed ? t("closed") : t("open")}
                     </span>
                 </div>
             </div>
@@ -92,7 +95,7 @@ export default function DayRow({
                             : "bg-green-100 text-green-700"
                         }`}
                 >
-                    {dayData.closed ? "Closed" : "Open"}
+                    {dayData.closed ? t("closed") : t("open")}
                 </span>
             </div>
 

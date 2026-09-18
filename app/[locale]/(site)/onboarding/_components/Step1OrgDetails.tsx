@@ -9,6 +9,7 @@ import {
   useOrgDetails,
   getInputFields,
 } from "./org-details";
+import { useTranslations } from "next-intl";
 import type {
   OnboardingFormData,
   UpdateFormData,
@@ -23,6 +24,7 @@ export default function Step1OrgDetails({
   updateFormData: UpdateFormData;
   onNext: () => void;
 }) {
+  const t = useTranslations("onboarding.orgDetails.hints");
   const {
     register,
     handleSubmit,
@@ -86,9 +88,9 @@ export default function Step1OrgDetails({
         disabled={isDisabled}
         hint={
           slugStatus === "checking"
-            ? "Checking name availability…"
+            ? t("checking")
             : slugStatus === "taken"
-              ? "Choose an available dealership name"
+              ? t("taken")
               : null
         }
       />

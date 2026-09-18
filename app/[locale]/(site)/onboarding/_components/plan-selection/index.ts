@@ -6,4 +6,3 @@ export { PlanSelectionFooter } from "./PlanSelectionFooter";
 export { BillingToggle } from "./BillingToggle";
 export { usePlanSelection } from "./usePlanSelection";
 export { PLAN_CONFIG } from "./constants";
-export { formatPrice, getFeatures, formatFeatureName } from "./utils";

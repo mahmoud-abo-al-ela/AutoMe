@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { checkSlugAvailability } from "@/actions/onboarding";
-import { orgDetailsSchema } from "../schemas";
+import { toLocalEgyptPhone } from "@/lib/utils/phone";
+import { createOrgDetailsSchema } from "../schemas";
 import type { z } from "zod";
 import type {
     OnboardingFormData,
@@ -14,7 +17,9 @@ import type {
 } from "../../_lib/onboarding-types";
 
 /** Step 1's own slice of the wizard's form data. */
-export type OrgDetailsFormValues = z.infer<typeof orgDetailsSchema>;
+export type OrgDetailsFormValues = z.infer<
+    ReturnType<typeof createOrgDetailsSchema>
+>;
 
 export function useOrgDetails({
     formData,
@@ -25,6 +30,17 @@ export function useOrgDetails({
     updateFormData: UpdateFormData;
     onNext: () => void;
 }) {
+    const t = useTranslations("onboarding.orgDetails.validation");
+    const fmt = useFormatters();
+
+    // Rebuilt when the language changes: a schema held at module scope would
+    // keep whichever locale first imported it, so a reader who switched
+    // languages mid-form would go on seeing the old one's errors.
+    const orgDetailsSchema = useMemo(
+        () => createOrgDetailsSchema(t, fmt.number),
+        [t, fmt]
+    );
+
     const [slugStatus, setSlugStatus] = useState<SlugStatus>(null);
     const [generatedSlug, setGeneratedSlug] = useState("");
     const [slugCheckTimeout, setSlugCheckTimeout] =
@@ -44,7 +60,9 @@ export function useOrgDetails({
         defaultValues: {
             name: formData.name || "",
             email: formData.email || "",
-            phone: formData.phone || "",
+            // Re-normalised on the way in, so a number stored in some older
+            // shape (with a country code, say) still opens in this one.
+            phone: toLocalEgyptPhone(formData.phone || ""),
             address: formData.address || "",
             country: formData.country || "EG",
             region: formData.region || "",
@@ -120,7 +138,7 @@ export function useOrgDetails({
             return;
         }
         if (!logo) {
-            setLogoError("Please upload a logo for your dealership");
+            setLogoError(t("logoRequired"));
             return;
         }
         updateFormData({ ...data, slug: generatedSlug, logo });

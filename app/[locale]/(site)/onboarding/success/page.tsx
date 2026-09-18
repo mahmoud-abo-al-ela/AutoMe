@@ -1,18 +1,35 @@
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { checkUser } from "@/lib/checkUser";
 import { createOrganizationAfterCheckout } from "@/actions/onboarding";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import {
+    resolveActionError,
+    type ActionError,
+    type ErrorTranslator,
+} from "@/lib/utils/error-messages";
 import type { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-    title: "Setup Complete",
-    description: "Your dealership has been set up successfully.",
-};
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+    const { locale } = await params;
+    const t = await getTranslations({
+        locale,
+        namespace: "onboarding.success.meta",
+    });
+
+    return { title: t("title"), description: t("description") };
+}
+
+/** The four things a new dealer is pointed at, in the order they matter. */
+const NEXT_STEPS = ["listCar", "inviteTeam", "brand", "hours"] as const;
 
 export default async function OnboardingSuccessPage({
     params,
@@ -55,7 +72,21 @@ export default async function OnboardingSuccessPage({
         );
     }
 
-    // If there was an error, show an error page
+    return <FailurePage error={result.error} />;
+}
+
+async function FailurePage({ error }: { error: ActionError }) {
+    const t = await getTranslations("onboarding.success.failed");
+    const tErrors = await getTranslations("errors");
+
+    // The action names its error with a key; the English `message` it also
+    // carries is only the developer-facing fallback.
+    const message = resolveActionError(
+        tErrors as unknown as ErrorTranslator,
+        error,
+        t("body")
+    );
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
             <Card className="max-w-md w-full">
@@ -63,27 +94,21 @@ export default async function OnboardingSuccessPage({
                     <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
                         <AlertCircle className="h-6 w-6 text-destructive" />
                     </div>
-                    <h1 className="text-xl font-semibold">Setup Failed</h1>
-                    <p className="text-muted-foreground text-sm">
-                        {result.error.message ||
-                            "Something went wrong while setting up your dealership."}
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                        Your payment was successful. Please try again or contact support if
-                        the issue persists.
-                    </p>
+                    <h1 className="text-xl font-semibold">{t("title")}</h1>
+                    <p className="text-muted-foreground text-sm">{message}</p>
+                    <p className="text-muted-foreground text-sm">{t("paid")}</p>
                     <div className="flex flex-col gap-2 pt-2">
                         <Link
                             href="/onboarding"
                             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                         >
-                            Return to Onboarding
+                            {t("retry")}
                         </Link>
                         <Link
                             href="mailto:support@autome.com"
                             className="text-sm text-muted-foreground hover:text-foreground underline"
                         >
-                            Contact Support
+                            {t("support")}
                         </Link>
                     </div>
                 </CardContent>
@@ -92,13 +117,14 @@ export default async function OnboardingSuccessPage({
     );
 }
 
-function SuccessPage({
+async function SuccessPage({
     orgSlug,
     dashboardUrl,
 }: {
     orgSlug?: string;
     dashboardUrl: string;
 }) {
+    const t = await getTranslations("onboarding.success");
     const siteUrl = orgSlug ? `/org/${orgSlug}` : "#";
 
     return (
@@ -110,33 +136,32 @@ function SuccessPage({
                         <CheckCircle2 className="h-10 w-10 text-green-600" />
                     </div>
                     <h1 className="text-3xl font-bold text-gray-900">
-                        🎉 You&apos;re All Set!
+                        {t("title")}
                     </h1>
-                    <p className="text-lg text-gray-600">
-                        Your dealership has been successfully created and your subscription
-                        is active.
-                    </p>
+                    <p className="text-lg text-gray-600">{t("subtitle")}</p>
                 </div>
 
                 {/* Action Buttons */}
                 <Card className="shadow-lg border-0">
                     <CardContent className="pt-6 space-y-4">
                         <h2 className="text-lg font-semibold text-center text-gray-800">
-                            What would you like to do next?
+                            {t("nextPrompt")}
                         </h2>
                         <div className="flex flex-col sm:flex-row gap-3">
                             <Link
                                 href={dashboardUrl}
                                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300"
                             >
-                                Go to Dashboard
-                                <ArrowRight className="h-5 w-5" />
+                                {t("dashboard")}
+                                <ArrowRight className="h-5 w-5 rtl:rotate-180" />
                             </Link>
                             <Link
                                 href={siteUrl}
                                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-gray-200 hover:border-gray-300 bg-white text-gray-700 px-6 py-3 text-base font-semibold hover:bg-gray-50 transition-all duration-300"
                             >
-                                View Your Site
+                                {t("viewSite")}
+                                {/* Not mirrored: the box-and-arrow means "opens
+                                    elsewhere", not a direction of travel. */}
                                 <ExternalLink className="h-4 w-4" />
                             </Link>
                         </div>
@@ -147,25 +172,15 @@ function SuccessPage({
                 <Card className="shadow-md border-0 bg-white/80">
                     <CardContent className="pt-6">
                         <h3 className="font-semibold text-gray-800 mb-3">
-                            Recommended Next Steps
+                            {t("nextStepsTitle")}
                         </h3>
                         <ul className="space-y-2 text-sm text-gray-600">
-                            <li className="flex items-start gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                <span>Add your first car listing to start attracting customers</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                <span>Invite team members to help manage your dealership</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                <span>Customize your dealership profile and branding</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                <span>Review your working hours and contact information</span>
-                            </li>
+                            {NEXT_STEPS.map((step) => (
+                                <li key={step} className="flex items-start gap-2">
+                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                                    <span>{t(`nextSteps.${step}`)}</span>
+                                </li>
+                            ))}
                         </ul>
                     </CardContent>
                 </Card>

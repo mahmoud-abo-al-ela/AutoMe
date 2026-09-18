@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
@@ -11,6 +12,8 @@ export default function WorkingHoursFooter({
     onPrev: () => void;
     loading: boolean;
 }) {
+    const t = useTranslations("onboarding.actions");
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -25,8 +28,8 @@ export default function WorkingHoursFooter({
                 disabled={loading}
                 className="cursor-pointer px-6 py-6 text-base font-semibold"
             >
-                <ArrowLeft className="h-5 w-5 me-2" />
-                Back
+                <ArrowLeft className="h-5 w-5 me-2 rtl:rotate-180" />
+                {t("back")}
             </Button>
             <Button
                 type="submit"
@@ -36,12 +39,12 @@ export default function WorkingHoursFooter({
                 {loading ? (
                     <>
                         <Loader2 className="h-5 w-5 me-2 animate-spin" />
-                        Loading...
+                        {t("loading")}
                     </>
                 ) : (
                     <>
-                        Continue
-                        <ArrowRight className="h-5 w-5 ms-2" />
+                        {t("continue")}
+                        <ArrowRight className="h-5 w-5 ms-2 rtl:rotate-180" />
                     </>
                 )}
             </Button>
