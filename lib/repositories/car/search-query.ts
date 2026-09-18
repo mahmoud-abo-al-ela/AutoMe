@@ -1,4 +1,4 @@
-import { expandSearchTermForText } from "@/lib/utils/search-aliases";
+import { expandSearchTermForText } from "@/lib/locations";
 
 /**
  * Builds the Postgres prefix tsquery for the car search box.

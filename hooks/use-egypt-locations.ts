@@ -6,7 +6,7 @@ import {
   EGYPT_COUNTRY_CODE,
   EGYPT_GOVERNORATES,
   findGovernorate,
-} from "@/lib/constants/egypt-locations";
+} from "@/lib/locations/data";
 
 /** What `SearchableLocationSelect` consumes. */
 export interface LocationOption {
@@ -16,7 +16,7 @@ export interface LocationOption {
 
 /**
  * Options for the country → governorate → city cascade, read straight from
- * `lib/constants/egypt-locations`.
+ * `lib/locations`.
  *
  * Replaces three awaited round-trips to an external API that stood on the
  * critical path of onboarding a dealer. Because the data is local, there is no

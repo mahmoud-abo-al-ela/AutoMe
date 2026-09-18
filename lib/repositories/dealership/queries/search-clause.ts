@@ -1,7 +1,4 @@
-import {
-  expandSearchTerm,
-  expandSearchTermForText,
-} from "@/lib/utils/search-aliases";
+import { expandSearchTerm } from "@/lib/locations";
 
 /**
  * The `where` fragment for a dealership free-text search.
@@ -24,12 +21,7 @@ import {
 /** Free text, matched by substring. */
 const TEXT_FIELDS = ["name", "description", "address"];
 
-/**
- * Canonical values — a governorate code and a city slug — matched by equality.
- *
- * Substring matching these would be wrong as well as slow: Cairo's governorate
- * code is "C", and `contains "C"` matches nearly every row in the table.
- */
+/** Canonical values — a governorate code and a city slug — matched by equality. */
 const EXACT_FIELDS = ["city", "region"];
 
 type Clause = Record<string, unknown>;
@@ -40,22 +32,26 @@ const tokenize = (value: string): string[] =>
     .map((token) => token.trim())
     .filter(Boolean);
 
+const equalsAny = (variants: string[]): Clause[] =>
+  variants.flatMap((variant) =>
+    EXACT_FIELDS.map((field) => ({
+      [field]: { equals: variant, mode: "insensitive" },
+    }))
+  );
+
 const matchesToken = (token: string): Clause => {
-  const or: Clause[] = [];
+  const { exact, text } = expandSearchTerm(token);
 
-  for (const variant of expandSearchTermForText(token)) {
-    for (const field of TEXT_FIELDS) {
-      or.push({ [field]: { contains: variant, mode: "insensitive" } });
-    }
-  }
-
-  for (const variant of expandSearchTerm(token)) {
-    for (const field of EXACT_FIELDS) {
-      or.push({ [field]: { equals: variant, mode: "insensitive" } });
-    }
-  }
-
-  return { OR: or };
+  return {
+    OR: [
+      ...text.flatMap((variant) =>
+        TEXT_FIELDS.map((field) => ({
+          [field]: { contains: variant, mode: "insensitive" },
+        }))
+      ),
+      ...equalsAny(exact),
+    ],
+  };
 };
 
 export function buildSearchClause(search?: string | null): Clause | null {
@@ -69,21 +65,8 @@ export function buildSearchClause(search?: string | null): Clause | null {
 
   // A multi-word place resolves to one stored value that no single word
   // matches, so the whole phrase is tried against the canonical columns too.
-  //
-  // Only against those columns, and only by equality. Feeding a canonical
-  // value back through the text matchers is what made searching "القاهرة"
-  // return every dealership with a "c" in its description: Cairo's governorate
-  // code is "C", and it came back as a phrase to substring-match on.
-  const [, ...phraseCanonicals] = expandSearchTerm(trimmed);
-  if (phraseCanonicals.length === 0) return wordsMatch;
+  const { exact } = expandSearchTerm(trimmed);
+  if (exact.length === 0) return wordsMatch;
 
-  const phraseMatch: Clause = {
-    OR: phraseCanonicals.flatMap((variant) =>
-      EXACT_FIELDS.map((field) => ({
-        [field]: { equals: variant, mode: "insensitive" },
-      }))
-    ),
-  };
-
-  return { OR: [wordsMatch, phraseMatch] };
+  return { OR: [wordsMatch, { OR: equalsAny(exact) }] };
 }

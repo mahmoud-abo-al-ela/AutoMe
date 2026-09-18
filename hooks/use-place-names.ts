@@ -8,13 +8,13 @@ import {
   governorateName,
   locationName,
   placeName,
-} from "@/lib/utils/place-names";
+} from "@/lib/locations";
 import type { Locale } from "@/i18n/routing";
 
 /**
  * Display names for the places stored on `Organization` and `Car`.
  *
- * Thin binding over `lib/utils/place-names`, which holds the resolution rules
+ * Thin binding over `lib/locations`, which holds the resolution rules
  * and stays React-free so the server-side search layer can share the same
  * index. See that module for how a stored value is resolved.
  */

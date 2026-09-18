@@ -1,7 +1,7 @@
 "use client";
 
 import { useEgyptLocations } from "@/hooks/use-egypt-locations";
-import { EGYPT_COUNTRY_CODE } from "@/lib/constants/egypt-locations";
+import { EGYPT_COUNTRY_CODE } from "@/lib/locations/data";
 import type {
   OnboardingLocation,
   OnboardingLocationPatch,
@@ -14,7 +14,7 @@ import type {
  * organization landed with null city/region/country and could not be filtered
  * or sorted by location until the owner went and edited their profile.
  *
- * The options now come from `lib/constants/egypt-locations` rather than from
+ * The options now come from `lib/locations` rather than from
  * three awaited calls to an external API, which is why there is no loading or
  * error state left here.
  *

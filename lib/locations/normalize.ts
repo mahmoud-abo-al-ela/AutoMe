@@ -1,0 +1,47 @@
+/**
+ * The one way a place name is folded before it is looked up.
+ *
+ * Both the display index and the search index key on this, so a spelling that
+ * resolves for display resolves for search too. Keeping two normalizers is how
+ * the previous version came to have an Arabic-aware one on the search side and
+ * an ASCII-only one on the display side — the latter reduced every Arabic name
+ * to the empty string, silently dropping half of each index.
+ *
+ * Latin marks are stripped so "Al Maḩallah al Kubrá" reaches "El Mahalla El
+ * Kubra". Arabic is decomposed first, which turns أ إ آ into a bare alef plus a
+ * combining hamza, so the same pass folds the alef forms a reader writes
+ * interchangeably. The ta marbuta and alef maqsura do not decompose, so they
+ * are folded by hand: someone typing "القاهره" means "القاهرة".
+ */
+
+const LATIN_MARKS = /[̀-ͯ]/g;
+/** Arabic diacritics, the combining hamzas NFD leaves behind, and dagger alef. */
+const ARABIC_MARKS = /[ً-ٰٕ]/g;
+const TA_MARBUTA = /ة/g;
+const ALEF_MAQSURA = /ى/g;
+/** Anything that is neither a latin alphanumeric nor an Arabic letter. */
+const SEPARATORS = /[^a-z0-9؀-ۿ]+/g;
+
+export function normalizePlaceName(value: string): string {
+  return (
+    value
+      .normalize("NFD")
+      .replace(LATIN_MARKS, "")
+      .replace(ARABIC_MARKS, "")
+      .toLowerCase()
+      .replace(TA_MARBUTA, "ه")
+      .replace(ALEF_MAQSURA, "ي")
+      // Punctuation, apostrophe variants and hyphens all read as separators, so
+      // a slug folds to the same key as the name it was derived from.
+      .replace(SEPARATORS, " ")
+      // "Alexandria Governorate" and "Alexandria" are the same place; the old
+      // location API wrote the suffix and egydata does not.
+      .replace(/\bgovernorates?\b/g, " ")
+      .replace(/\b(al|el)\b/g, " ")
+      // A final ta marbuta is transliterated both ways — "Mahalla" and
+      // "Mahallah" are one town.
+      .replace(/([aeiou])h\b/g, "$1")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}

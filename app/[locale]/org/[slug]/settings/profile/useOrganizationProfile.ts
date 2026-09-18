@@ -63,7 +63,7 @@ export function useOrganizationProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Options come from lib/constants/egypt-locations, so there is nothing to
+  // Options come from lib/locations, so there is nothing to
   // fetch and nothing to fail. `region` holds the governorate code, which is
   // exactly what the select is keyed by — previously it held the display name
   // and the hook had to search the fetched list for a matching name to restore

@@ -2,6 +2,7 @@ import { PrismaClient } from "../lib/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { faker } from "@faker-js/faker";
+import { findCity } from "../lib/locations/data";
 import "dotenv/config";
 
 const { Pool } = pg;
@@ -699,8 +700,8 @@ const DEMO_ORGANIZATIONS = [
     email: "sales@cairoautogallery.com",
     phone: "+201001234567",
     address: "Autostrad Road, Nasr City, Cairo, Egypt",
-    city: "Cairo",
-    region: "Greater Cairo",
+    city: "nasr-city",
+    region: "CAI",
     country: "EG",
     description: "Cairo's premier luxury and mainstream car dealership. Family-owned since 2005, offering new and certified pre-owned vehicles with in-house financing.",
   },
@@ -710,8 +711,8 @@ const DEMO_ORGANIZATIONS = [
     email: "info@alexandriamotors.com",
     phone: "+201122345678",
     address: "Corniche Road, Stanley, Alexandria, Egypt",
-    city: "Alexandria",
-    region: "Alexandria Governorate",
+    city: "stanley",
+    region: "ALX",
     country: "EG",
     description: "Trusted dealership serving Alexandria and the North Coast. Specializing in Toyota, Honda, and Hyundai with a dedicated service center.",
   },
@@ -721,8 +722,8 @@ const DEMO_ORGANIZATIONS = [
     email: "contact@gizapremium.com",
     phone: "+201233456789",
     address: "Sheikh Zayed City, 6th of October, Giza, Egypt",
-    city: "Giza",
-    region: "Greater Cairo",
+    city: "sheikh-zayed",
+    region: "GIZ",
     country: "EG",
     description: "West Cairo's destination for BMW, Mercedes-Benz, and Audi. State-of-the-art showroom with certified technicians and premium customer service.",
   },
@@ -732,8 +733,8 @@ const DEMO_ORGANIZATIONS = [
     email: "sales@deltawheels.com",
     phone: "+201044567890",
     address: "El Geish Street, Mansoura, Egypt",
-    city: "Mansoura",
-    region: "Dakahlia",
+    city: "mansoura",
+    region: "DKH",
     country: "EG",
     description: "The Delta region's largest multi-brand dealership. From budget-friendly sedans to heavy-duty trucks, we have something for every driver.",
   },
@@ -743,8 +744,8 @@ const DEMO_ORGANIZATIONS = [
     email: "info@tantaautocenter.com",
     phone: "+201055678901",
     address: "El Bahr Street, Tanta, Egypt",
-    city: "Tanta",
-    region: "Gharbia",
+    city: "tanta",
+    region: "GHR",
     country: "EG",
     description: "Serving the heart of Egypt with quality new and used vehicles. Competitive pricing, flexible financing, and a 12-month warranty on every car.",
   },
@@ -754,8 +755,8 @@ const DEMO_ORGANIZATIONS = [
     email: "sales@upperegyptauto.com",
     phone: "+201066789012",
     address: "Corniche El Nile, Luxor, Egypt",
-    city: "Luxor",
-    region: "Upper Egypt",
+    city: "luxor-city",
+    region: "LXR",
     country: "EG",
     description: "Upper Egypt's trusted automotive partner. Bringing quality vehicles and professional service to Luxor and surrounding areas since 2010.",
   },
@@ -765,8 +766,8 @@ const DEMO_ORGANIZATIONS = [
     email: "info@aswancarmart.com",
     phone: "+201077890123",
     address: "Saad Zaghloul Street, Aswan, Egypt",
-    city: "Aswan",
-    region: "Upper Egypt",
+    city: "aswan-city",
+    region: "ASN",
     country: "EG",
     description: "Southern Egypt's finest car dealership. Personalized service, honest pricing, and a wide selection of vehicles for every budget.",
   },
@@ -776,8 +777,8 @@ const DEMO_ORGANIZATIONS = [
     email: "sales@portsaidauto.com",
     phone: "+201088901234",
     address: "El Gomhoria Street, Port Said, Egypt",
-    city: "Port Said",
-    region: "Canal Zone",
+    city: "arab-district",
+    region: "PTS",
     country: "EG",
     description: "Canal Zone's top dealer for imported and local vehicles. Specializing in American and Japanese brands with port-side delivery options.",
   },
@@ -787,8 +788,8 @@ const DEMO_ORGANIZATIONS = [
     email: "info@ismailiacargallery.com",
     phone: "+201099012345",
     address: "Sultan Hussein Street, Ismailia, Egypt",
-    city: "Ismailia",
-    region: "Canal Zone",
+    city: "ismailia-city",
+    region: "ISM",
     country: "EG",
     description: "Your gateway to premium cars in Ismailia. New models, certified pre-owned, and professional after-sales service all under one roof.",
   },
@@ -798,8 +799,8 @@ const DEMO_ORGANIZATIONS = [
     email: "sales@redseamotors.com",
     phone: "+201011123456",
     address: "Sheraton Road, Hurghada, Egypt",
-    city: "Hurghada",
-    region: "Red Sea",
+    city: "hurghada",
+    region: "RED",
     country: "EG",
     description: "Red Sea coast's leading dealership. From beach-ready SUVs to luxury sedans, drive your dream car by the beautiful Red Sea.",
   },
@@ -855,7 +856,19 @@ const COLORS = [
   "Midnight Blue", "Crystal Black", "Storm Silver",
 ];
 
-function generateCar(organizationId: string) {
+/**
+ * `Car.location` is free text a dealer types, so the seed writes what one
+ * would: the English name of the dealership's own city. Picking it at random
+ * from a list, as this did, produced cars in Aswan belonging to a showroom in
+ * Alexandria — and made every location-related query look like it worked when
+ * it had simply matched noise.
+ */
+function carLocation(org: { city: string | null }) {
+  const city = findCity(org.city);
+  return city ? `${city.en}, Egypt` : "Egypt";
+}
+
+function generateCar(org: { id: string; city: string | null }) {
   const makeData = faker.helpers.arrayElement(CAR_MAKES);
   const modelData = faker.helpers.arrayElement(makeData.models);
   const year = faker.number.int({ min: 2019, max: 2025 });
@@ -881,7 +894,7 @@ function generateCar(organizationId: string) {
   const images = faker.helpers.arrayElements(modelData.images, imageCount);
 
   return {
-    organizationId,
+    organizationId: org.id,
     make: makeData.make,
     model: modelData.model,
     year,
@@ -901,11 +914,7 @@ function generateCar(organizationId: string) {
     images,
     title: `${year} ${makeData.make} ${modelData.model}`,
     description: modelData.description,
-    location: faker.helpers.arrayElement([
-      "Cairo, Egypt", "Alexandria, Egypt", "Giza, Egypt",
-      "Mansoura, Egypt", "Tanta, Egypt", "Luxor, Egypt",
-      "Aswan, Egypt", "Port Said, Egypt", "Ismailia, Egypt", "Hurghada, Egypt",
-    ]),
+    location: carLocation(org),
     features,
   };
 }
@@ -1192,7 +1201,7 @@ async function main() {
 
     for (let i = 0; i < carCount; i++) {
       const car = await prisma.car.create({
-        data: generateCar(org.id),
+        data: generateCar(org),
       });
       allCars.push({ car, org });
     }

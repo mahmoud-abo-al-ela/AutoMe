@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildSearchClause } from "./search-clause";
+import { EGYPT_CITIES, EGYPT_GOVERNORATES } from "@/lib/locations";
 
 /** Every `contains` value anywhere in the clause tree. */
 function containsValues(node: unknown, found: string[] = []): string[] {
@@ -48,14 +49,22 @@ describe("buildSearchClause", () => {
     expect(values).toContain("gallery");
   });
 
-  // The regression this file exists for. Cairo's governorate code is "C", so
-  // letting a canonical value reach a `contains` matched every dealership with
-  // a "c" anywhere in its name, description or address — searching "القاهرة"
-  // returned eleven of them instead of three.
-  it("never substring-matches a short canonical value", () => {
+  // The regression this file exists for. Letting a canonical value reach a
+  // `contains` matched every dealership with a "c" anywhere in its name,
+  // description or address — searching "القاهرة" returned eleven of them
+  // instead of three. The clause now takes its text variants from a bucket
+  // that cannot contain a code or a slug, so the invariant is checked
+  // directly rather than through a length proxy.
+  it("never substring-matches a canonical value", () => {
+    const canonical = new Set([
+      ...EGYPT_GOVERNORATES.map((governorate) => governorate.code),
+      ...EGYPT_CITIES.map((city) => city.slug),
+    ]);
+
     for (const term of ["القاهرة", "Cairo", "الجيزة", "Giza", "قنا", "Qena"]) {
       for (const value of containsValues(buildSearchClause(term))) {
-        expect(value.length).toBeGreaterThanOrEqual(3);
+        if (value === term) continue; // The reader's own words always stand.
+        expect(canonical.has(value)).toBe(false);
       }
     }
   });
@@ -73,8 +82,8 @@ describe("buildSearchClause", () => {
   it("resolves a place name to the value the column holds", () => {
     const clause = JSON.stringify(buildSearchClause("الجيزة"));
 
-    expect(clause).toContain("giza");
-    expect(clause).toContain("GZ");
+    expect(clause).toContain("giza-district");
+    expect(clause).toContain("GIZ");
   });
 
   it("resolves a multi-word place name as a unit", () => {

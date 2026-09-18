@@ -2,16 +2,12 @@ import { describe, it, expect } from "vitest";
 import {
   EGYPT_CITIES,
   EGYPT_GOVERNORATES,
+  citySlug,
   findCity,
   findGovernorate,
-} from "./egypt-locations";
-import {
-  cityName,
-  governorateName,
-  locationName,
-  placeName,
-} from "@/lib/utils/place-names";
-import { expandSearchTerm } from "@/lib/utils/search-aliases";
+} from "./data";
+import { cityName, countryName, governorateName, locationName, placeName } from "./names";
+import { normalizePlaceName } from "./normalize";
 
 /**
  * This dataset is the single source of truth for what a dealer can pick, what
@@ -26,26 +22,23 @@ describe("the Egypt location dataset", () => {
     expect(EGYPT_GOVERNORATES).toHaveLength(27);
   });
 
-  it("gives every governorate a unique ISO 3166-2:EG code", () => {
+  it("gives every governorate a unique code", () => {
     const codes = EGYPT_GOVERNORATES.map((governorate) => governorate.code);
 
     expect(new Set(codes).size).toBe(codes.length);
-    for (const code of codes) expect(code).toMatch(/^[A-Z]{1,3}$/);
+    for (const code of codes) expect(code).toMatch(/^[A-Z]{2,4}$/);
   });
 
-  it("gives every city a unique slug", () => {
-    // Slugs are stored in Organization.city. A duplicate would silently move a
-    // dealership to another governorate's city of the same name.
+  it("derives every slug from the English name, without collisions", () => {
+    // The slug is stored in Organization.city, so a collision would silently
+    // move a dealership to a different place.
     const slugs = EGYPT_CITIES.map((city) => city.slug);
-    const duplicates = slugs.filter((slug, i) => slugs.indexOf(slug) !== i);
 
-    expect(duplicates).toEqual([]);
-  });
-
-  it("uses url-safe slugs", () => {
     for (const city of EGYPT_CITIES) {
+      expect(city.slug).toBe(citySlug(city.en));
       expect(city.slug).toMatch(/^[a-z0-9-]+$/);
     }
+    expect(new Set(slugs).size).toBe(slugs.length);
   });
 
   it("gives every governorate at least one city", () => {
@@ -60,34 +53,67 @@ describe("the Egypt location dataset", () => {
     const rows = [...EGYPT_GOVERNORATES, ...EGYPT_CITIES];
 
     for (const row of rows) {
-      expect(row.en).not.toMatch(/[\u0600-\u06FF]/);
-      expect(row.ar).toMatch(/[\u0600-\u06FF]/);
+      expect(row.en).not.toMatch(/[؀-ۿ]/);
+      expect(row.ar).toMatch(/[؀-ۿ]/);
       expect(row.ar).not.toMatch(/[A-Za-z]/);
     }
   });
 
   it("looks a place up by what is stored", () => {
-    expect(findGovernorate("C")?.en).toBe("Cairo");
-    expect(findCity("6th-of-october")?.ar).toBe("مدينة السادس من أكتوبر");
+    expect(findGovernorate("CAI")?.en).toBe("Cairo");
+    expect(findCity("6th-of-october")?.ar).toBe("6 أكتوبر");
     expect(findGovernorate("nope")).toBeUndefined();
     expect(findCity(null)).toBeUndefined();
   });
 });
 
+describe("normalizing a place name", () => {
+  it("keeps Arabic, rather than reducing it to nothing", () => {
+    // The previous normalizer stripped every non-ASCII character, so each
+    // Arabic name folded to "" and was dropped from the index by the guard
+    // that skips empty keys. Half of every index was dead.
+    expect(normalizePlaceName("القاهرة")).not.toBe("");
+    expect(normalizePlaceName("المعادي")).not.toBe("");
+  });
+
+  it("folds the alef and ta marbuta forms that are written interchangeably", () => {
+    expect(normalizePlaceName("القاهره")).toBe(normalizePlaceName("القاهرة"));
+    expect(normalizePlaceName("الاسكندرية")).toBe(
+      normalizePlaceName("الإسكندرية")
+    );
+  });
+
+  it("folds a slug onto the name it came from", () => {
+    expect(normalizePlaceName("el-mahalla-el-kubra")).toBe(
+      normalizePlaceName("El Mahalla El Kubra")
+    );
+  });
+
+  it("folds the spellings the old location API wrote", () => {
+    expect(normalizePlaceName("Alexandria Governorate")).toBe(
+      normalizePlaceName("Alexandria")
+    );
+    expect(normalizePlaceName("Al Maḩallah al Kubrá")).toBe(
+      normalizePlaceName("El Mahalla El Kubra")
+    );
+  });
+});
+
 describe("resolving a stored place for display", () => {
   it("renders a code and a slug in either language", () => {
-    expect(governorateName("C", "en")).toBe("Cairo");
-    expect(governorateName("C", "ar")).toBe("القاهرة");
-    expect(cityName("giza", "ar")).toBe("الجيزة");
+    expect(governorateName("CAI", "en")).toBe("Cairo");
+    expect(governorateName("CAI", "ar")).toBe("القاهرة");
+    expect(cityName("giza-district", "ar")).toBe("الجيزة");
     expect(cityName("sharm-el-sheikh", "ar")).toBe("شرم الشيخ");
   });
 
-  it("still renders rows written before the change", () => {
-    // These held display names from the old location API, so the fallback has
-    // to recognise a name as well as a code.
+  it("renders a name a dealer typed, in either script", () => {
+    // Car.location is free text, so a name has to resolve as well as a key —
+    // and Arabic input has to resolve too, which it did not before.
     expect(governorateName("Cairo", "ar")).toBe("القاهرة");
     expect(cityName("Mansoura", "ar")).toBe("المنصورة");
-    expect(cityName("El Mahalla El Kubra", "ar")).toBe("المحلة الكبرى");
+    expect(cityName("المعادي", "en")).toBe("Maadi");
+    expect(governorateName("القاهرة", "en")).toBe("Cairo");
   });
 
   it("resolves every entry to itself, in both languages", () => {
@@ -103,6 +129,9 @@ describe("resolving a stored place for display", () => {
       if (cityName(city.ar, "ar") !== city.ar) wrong.push(city.ar);
     }
     for (const governorate of EGYPT_GOVERNORATES) {
+      if (governorateName(governorate.en, "en") !== governorate.en) {
+        wrong.push(governorate.en);
+      }
       if (governorateName(governorate.ar, "ar") !== governorate.ar) {
         wrong.push(governorate.ar);
       }
@@ -111,23 +140,11 @@ describe("resolving a stored place for display", () => {
     expect(wrong).toEqual([]);
   });
 
-  it("resolves the spellings actually present in the database", () => {
-    // Taken from the live facet payload, which is what un-backfilled rows hold.
+  it("resolves the loose spellings that reach the database", () => {
     expect(cityName("Al Maḩallah al Kubrá", "ar")).toBe("المحلة الكبرى");
     expect(cityName("Port Said", "ar")).toBe("بورسعيد");
     expect(governorateName("Alexandria Governorate", "ar")).toBe("الإسكندرية");
     expect(governorateName("Dakahlia", "ar")).toBe("الدقهلية");
-  });
-
-  it("translates the broad areas that are not governorates", () => {
-    // Half the current rows describe an area rather than an administrative
-    // unit. No code corresponds to them, so a backfill cannot resolve them
-    // either — but they still have to read correctly in Arabic.
-    expect(governorateName("Greater Cairo", "ar")).toBe("القاهرة الكبرى");
-    expect(governorateName("Canal Zone", "ar")).toBe("منطقة القناة");
-    expect(governorateName("Upper Egypt", "ar")).toBe("صعيد مصر");
-    // English keeps what was written, since that is already English.
-    expect(governorateName("Greater Cairo", "en")).toBe("Greater Cairo");
   });
 
   it("leaves a value it does not recognise exactly as typed", () => {
@@ -138,8 +155,15 @@ describe("resolving a stored place for display", () => {
 
   it("resolves a place that could be a city or a governorate", () => {
     // Dealers fill the two fields inconsistently.
-    expect(placeName("aswan", "ar")).toBe("أسوان");
+    expect(placeName("Aswan", "ar")).toBe("أسوان");
     expect(placeName("ASN", "ar")).toBe("أسوان");
+  });
+
+  it("renders a country from its code, its name or its Arabic name", () => {
+    expect(countryName("EG", "ar")).toBe("مصر");
+    expect(countryName("Egypt", "ar")).toBe("مصر");
+    expect(countryName("مصر", "en")).toBe("Egypt");
+    expect(countryName("Kuwait", "ar")).toBe("الكويت");
   });
 
   it("translates a composed location part by part", () => {
@@ -147,18 +171,5 @@ describe("resolving a stored place for display", () => {
     expect(locationName("Cairo, Egypt", "en")).toBe("Cairo, Egypt");
     // An unmapped part survives intact rather than dropping out.
     expect(locationName("Nowhere, Egypt", "ar")).toBe("Nowhere، مصر");
-  });
-});
-
-describe("searching for what is displayed", () => {
-  it("finds the stored value from either language", () => {
-    for (const city of EGYPT_CITIES) {
-      expect(expandSearchTerm(city.en)).toContain(city.slug);
-      expect(expandSearchTerm(city.ar)).toContain(city.slug);
-    }
-    for (const governorate of EGYPT_GOVERNORATES) {
-      expect(expandSearchTerm(governorate.en)).toContain(governorate.code);
-      expect(expandSearchTerm(governorate.ar)).toContain(governorate.code);
-    }
   });
 });

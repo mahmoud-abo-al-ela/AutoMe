@@ -10,14 +10,15 @@ describe("toPrefixTsquery", () => {
     expect(toPrefixTsquery("نيسان")).toBe("nissan:*");
   });
 
-  it("expands an Arabic city to the stored slug", () => {
-    // Slugs are hyphenated, and the reduction splits them into words, so the
-    // city's own words end up ANDed together.
+  it("expands an Arabic city to the English name the columns hold", () => {
+    // The Arabic word itself has no ASCII left after reduction, so what
+    // survives is the English name the free-text columns hold.
     expect(toPrefixTsquery("القاهرة")).toBe("cairo:*");
   });
 
   it("never emits a prefix short enough to match everything", () => {
-    // Cairo's governorate code is "C". A bare "c:*" would match most rows.
+    // A canonical value never reaches this path, so nothing as short as a
+    // governorate code can become a bare prefix here.
     for (const term of ["القاهرة", "الجيزة", "قنا", "السويس"]) {
       for (const piece of toPrefixTsquery(term).split(/[^a-z0-9]+/).filter(Boolean)) {
         expect(piece.length).toBeGreaterThanOrEqual(2);
@@ -36,8 +37,7 @@ describe("toPrefixTsquery", () => {
   });
 
   it("resolves a multi-word place name to its single stored value", () => {
-    // One curated entry per place, so there is nothing left to OR between —
-    // the dataset replaced three inconsistent spellings with one slug.
+    // One entry per place, so there is nothing left to OR between.
     expect(toPrefixTsquery("المحلة الكبرى")).toBe("el:* & mahalla:* & kubra:*");
   });
 
