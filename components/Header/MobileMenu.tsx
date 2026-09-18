@@ -4,13 +4,14 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, useClerk, useAuth } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getNavIcon } from "./mobile-menu-icons";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import NavLink from "./MobileMenuNavLink";
 import type { HeaderUser, HeaderOrganization } from "./MainHeader";
 
@@ -30,8 +31,19 @@ export default function MobileMenu({
   const t = useTranslations("nav");
   const pathname = usePathname();
 
-  // Check if user has any organization membership
-  const hasOrgMembership = (user?.memberships?.length ?? 0) > 0;
+  // Sign-out is a client event; `user` is the server's answer from the last
+  // render, so a moment after signing out the prop still describes a member.
+  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
+  // live state has to gate anything derived from the prop.
+  //
+  // While Clerk is still loading, the server's answer stands: a signed-out
+  // visitor has no `user` to derive anything from anyway, so trusting it costs
+  // nothing and spares a signed-in one a flicker.
+  const { isLoaded, isSignedIn } = useAuth();
+  const signedIn = !isLoaded || isSignedIn === true;
+
+  const hasOrgMembership =
+    signedIn && (user?.memberships?.length ?? 0) > 0;
 
   // Get user's first organization (for dashboard link)
   const userOrg = user?.memberships?.[0]?.organization;
@@ -41,7 +53,7 @@ export default function MobileMenu({
   const isOnSubdomain = !!organizationSlug;
 
   // Check if user is a platform super admin (UserRole.ADMIN)
-  const isSuperAdmin = user?.role === "ADMIN";
+  const isSuperAdmin = signedIn && user?.role === "ADMIN";
 
   // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
@@ -50,6 +62,7 @@ export default function MobileMenu({
 
   const menuRef = useRef<HTMLDivElement>(null);
   const { signOut } = useClerk();
+  const { afterSignOut } = useAuthRedirects();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
   const isOnOrgPath = pathname?.startsWith("/org/");
 
@@ -125,7 +138,7 @@ export default function MobileMenu({
               <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
                 <div className="flex items-center gap-3">
                   <UserButton
-                    afterSignOutUrl="/"
+                    afterSignOutUrl={afterSignOut}
                     appearance={{
                       elements: {
                         avatarBox: "w-11 h-11 rounded-full shadow-md",
@@ -143,7 +156,7 @@ export default function MobileMenu({
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
-                      signOut({ redirectUrl: "/" });
+                      signOut({ redirectUrl: afterSignOut });
                     }}
                     className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
                     aria-label={t("signOut")}

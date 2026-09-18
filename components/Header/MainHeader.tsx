@@ -13,11 +13,12 @@ import {
 } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import { Button } from "@/components/ui/button";
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UserButton, SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { UnreadBadge } from "@/components/StreamChat";
 import { useTranslations } from "next-intl";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
@@ -136,8 +137,19 @@ export default function MainHeader({
   organizationSlug?: string | null;
   organization?: HeaderOrganization;
 }) {
-  // Check if user has any organization membership
-  const hasOrgMembership = (user?.memberships?.length ?? 0) > 0;
+  // Sign-out is a client event; `user` is the server's answer from the last
+  // render, so a moment after signing out the prop still describes a member.
+  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
+  // live state has to gate anything derived from the prop.
+  //
+  // While Clerk is still loading, the server's answer stands: a signed-out
+  // visitor has no `user` to derive anything from anyway, so trusting it costs
+  // nothing and spares a signed-in one a flicker.
+  const { isLoaded, isSignedIn } = useAuth();
+  const signedIn = !isLoaded || isSignedIn === true;
+
+  const hasOrgMembership =
+    signedIn && (user?.memberships?.length ?? 0) > 0;
 
   // Get user's first organization (for admin link)
   const userOrg = user?.memberships?.[0]?.organization;
@@ -147,7 +159,7 @@ export default function MainHeader({
   const isOnSubdomain = !!organizationSlug;
 
   // Check if user is a platform super admin (UserRole.ADMIN)
-  const isSuperAdmin = user?.role === "ADMIN";
+  const isSuperAdmin = signedIn && user?.role === "ADMIN";
 
   // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
@@ -155,6 +167,7 @@ export default function MainHeader({
     (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
   const t = useTranslations("nav");
+  const { afterSignOut } = useAuthRedirects();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
@@ -282,7 +295,7 @@ export default function MainHeader({
                       />
                     ))}
                   <UserButton
-                    afterSignOutUrl="/"
+                    afterSignOutUrl={afterSignOut}
                     appearance={{
                       elements: {
                         avatarBox:
