@@ -51,5 +51,8 @@
     "compareAdded": "Added to comparison",
     "compareRemoved": "Removed from comparison",
     "compareLimit": "You can compare up to {max} cars at a time"
+  },
+  "time": {
+    "togglePeriod": "Switch between AM and PM"
   }
 }

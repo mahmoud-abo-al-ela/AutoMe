@@ -70,6 +70,9 @@ export function formatTime(
   }).format(date);
 }
 
+/** A bare clock string, as WorkingHours stores one: "9:00", "09:00", "17:30". */
+const CLOCK_PATTERN = /^\s*(\d{1,2}):(\d{2})\s*$/;
+
 /**
  * Format a bare "HH:mm" wall-clock string.
  *
@@ -120,7 +123,7 @@ export function cairoNow(now: Date = new Date()): {
 }
 
 export function formatClockTime(value: string, locale: Locale = "en"): string {
-  const match = /^\s*(\d{1,2}):(\d{2})\s*$/.exec(value ?? "");
+  const match = CLOCK_PATTERN.exec(value ?? "");
   if (!match) return value;
 
   const hours = Number(match[1]);
@@ -132,6 +135,68 @@ export function formatClockTime(value: string, locale: Locale = "en"): string {
     minute: "2-digit",
     timeZone: "UTC",
   }).format(new Date(Date.UTC(2000, 0, 1, hours, minutes)));
+}
+
+/**
+ * The locale's own AM/PM markers — "ص" and "م" in Arabic.
+ *
+ * Read out of Intl rather than written into a message file, so the marker
+ * beside a time input and the one inside a formatted time cannot disagree.
+ */
+export function dayPeriodLabels(locale: Locale = "en"): {
+  am: string;
+  pm: string;
+} {
+  const format = new Intl.DateTimeFormat(intlLocale(locale), {
+    hour: "numeric",
+    hour12: true,
+    timeZone: "UTC",
+  });
+
+  const marker = (hour: number) =>
+    format
+      .formatToParts(new Date(Date.UTC(2000, 0, 1, hour)))
+      .find((part) => part.type === "dayPeriod")?.value ??
+    (hour < 12 ? "AM" : "PM");
+
+  return { am: marker(9), pm: marker(21) };
+}
+
+/** Which half of the day a "HH:mm" clock string falls in, or null if malformed. */
+export function dayPeriodOf(value: string): "am" | "pm" | null {
+  const parts = clockParts(value);
+  return parts ? (parts.hours < 12 ? "am" : "pm") : null;
+}
+
+/**
+ * The same clock time in the other half of the day: 09:00 becomes 21:00 and
+ * back again.
+ *
+ * Twelve hours forward modulo the day, not a branch on am/pm, because that is
+ * the same arithmetic in both directions and has no midnight/noon special case
+ * to get wrong. Malformed input is returned untouched.
+ */
+export function flipDayPeriod(value: string): string {
+  const parts = clockParts(value);
+  if (!parts) return value;
+
+  const hours = (parts.hours + 12) % 24;
+
+  return `${String(hours).padStart(2, "0")}:${String(parts.minutes).padStart(
+    2,
+    "0"
+  )}`;
+}
+
+/** Shared parse for the two above. Null for anything that is not "HH:mm". */
+function clockParts(value: string): { hours: number; minutes: number } | null {
+  const match = CLOCK_PATTERN.exec(value ?? "");
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  return hours > 23 || minutes > 59 ? null : { hours, minutes };
 }
 
 /** Format a date and time together. */

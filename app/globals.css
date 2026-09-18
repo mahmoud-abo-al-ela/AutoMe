@@ -444,3 +444,28 @@
 .animate-empty-entrance {
   animation: empty-entrance 0.5s ease-out forwards;
 }
+
+/*
+ * Arabic AM/PM on a native `<input type="time">`.
+ *
+ * The input formats its own value from the *browser's* UI language and ignores
+ * the page's — `lang="ar"`, `lang="ar-EG"` and `lang="ar-EG-u-nu-latn"` on the
+ * element all still render "04:00 PM" in Chromium. The marker is therefore
+ * hidden and re-rendered beside the field, in Arabic, by TimeInput.
+ *
+ * Both rules live behind one @supports: a browser that does not know the
+ * pseudo-element keeps its own marker and hides ours, rather than showing two.
+ */
+.time-period-chip {
+  display: none;
+}
+
+@supports selector(::-webkit-datetime-edit-ampm-field) {
+  .time-input-localized::-webkit-datetime-edit-ampm-field {
+    display: none;
+  }
+
+  .time-period-chip {
+    display: inline-flex;
+  }
+}

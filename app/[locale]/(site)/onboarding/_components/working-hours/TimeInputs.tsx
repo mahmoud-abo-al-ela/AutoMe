@@ -2,9 +2,10 @@
 
 import { motion } from "framer-motion";
 import { Controller } from "react-hook-form";
-import { Input } from "@/components/ui/input";
+import TimeInput from "@/components/common/TimeInput";
 import { Label } from "@/components/ui/label";
 import { Sun, Moon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Control } from "react-hook-form";
 import type { WorkingHoursFormValues } from "./useWorkingHours";
 import type { WorkingHoursDay } from "../../_lib/onboarding-types";
@@ -16,6 +17,8 @@ export default function TimeInputs({
     day: WorkingHoursDay;
     control: Control<WorkingHoursFormValues>;
 }) {
+    const t = useTranslations("onboarding.workingHours");
+
     return (
         <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -30,17 +33,19 @@ export default function TimeInputs({
                         htmlFor={`${day.key}-open`}
                         className="text-sm font-semibold text-gray-700 whitespace-nowrap"
                     >
-                        Opens
+                        {t("opens")}
                     </Label>
                 </div>
                 <Controller
                     name={`workingHours.${day.key}.open`}
                     control={control}
                     render={({ field }) => (
-                        <Input
+                        <TimeInput
                             id={`${day.key}-open`}
-                            type="time"
-                            {...field}
+                            name={field.name}
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
                             className="w-full sm:w-36 h-11 text-base border-blue-300 focus:border-blue-500 focus:ring-blue-500/20"
                         />
                     )}
@@ -53,17 +58,19 @@ export default function TimeInputs({
                         htmlFor={`${day.key}-close`}
                         className="text-sm font-semibold text-gray-700 whitespace-nowrap"
                     >
-                        Closes
+                        {t("closes")}
                     </Label>
                 </div>
                 <Controller
                     name={`workingHours.${day.key}.close`}
                     control={control}
                     render={({ field }) => (
-                        <Input
+                        <TimeInput
                             id={`${day.key}-close`}
-                            type="time"
-                            {...field}
+                            name={field.name}
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
                             className="w-full sm:w-36 h-11 text-base border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500/20"
                         />
                     )}
