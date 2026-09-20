@@ -32,5 +32,21 @@
     "ending": "جارٍ الإنهاء…",
     "ended": "تم إنهاء انتحال الهوية",
     "endFailed": "تعذّر إنهاء انتحال الهوية"
+  },
+  "upgradeBanner": {
+    "notIncluded": "باقة {plan} لا تشمل {resource}.",
+    "notIncludedBody": "قم بترقية باقتك لتفعيلها.",
+    "atLimit": "لقد وصلت إلى حد {resource} في باقة {plan}.",
+    "nearLimit": "لقد استخدمت {current} من {limit} {resource} في باقة {plan}.",
+    "body": "قم بترقية باقتك للحصول على حدود أعلى ومزايا إضافية.",
+    "cta": "ترقية الباقة",
+    "dismiss": "إغلاق التنبيه",
+    "resources": {
+      "cars": "السيارات",
+      "members": "أعضاء الفريق",
+      "aiProcessing": "طلبات المعالجة بالذكاء الاصطناعي"
+    },
+    "noPlan": "ليس لديك باقة مفعّلة بعد.",
+    "noPlanBody": "اختر باقة لتفعيل {resource}."
   }
 }

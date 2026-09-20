@@ -32,5 +32,21 @@
     "ending": "Ending…",
     "ended": "Impersonation ended",
     "endFailed": "Couldn’t end impersonation"
+  },
+  "upgradeBanner": {
+    "notIncluded": "The {plan} plan doesn’t include {resource}.",
+    "notIncludedBody": "Upgrade your plan to unlock it.",
+    "atLimit": "You’ve reached your {resource} limit on the {plan} plan.",
+    "nearLimit": "You’ve used {current} of {limit} {resource} on the {plan} plan.",
+    "body": "Upgrade your plan to unlock higher limits and premium features.",
+    "cta": "Upgrade Plan",
+    "dismiss": "Dismiss banner",
+    "resources": {
+      "cars": "cars",
+      "members": "team members",
+      "aiProcessing": "AI processing requests"
+    },
+    "noPlan": "You don’t have an active plan yet.",
+    "noPlanBody": "Choose a plan to unlock {resource}."
   }
 }
