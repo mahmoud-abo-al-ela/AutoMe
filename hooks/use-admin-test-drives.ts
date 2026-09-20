@@ -4,11 +4,13 @@ import { logError } from "@/lib/utils/errors";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getTestDrives, updateTestDriveStatus } from "@/actions/test-drive";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { useDebounce } from "@/hooks/use-debounce";
 
 export const useAdminTestDrives = () => {
+    const t = useTranslations("org.testDrives.toasts");
     const queryClient = useQueryClient();
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
@@ -79,17 +81,22 @@ export const useAdminTestDrives = () => {
             });
 
             if (response.success) {
-                toast.success(`Test drive ${newStatus.toLowerCase()} successfully`);
+                // The status was interpolated into an English sentence before,
+                // which no translation can follow — each outcome gets its own
+                // message, and anything else falls back to the generic one.
+                const byStatus: Record<string, string> = {
+                    CONFIRMED: "confirmed",
+                    CANCELLED: "cancelled",
+                };
+                toast.success(t(byStatus[newStatus] ?? "statusChanged"));
             } else {
-                toast.error(
-                    response.error.message || "Failed to update test drive status"
-                );
+                toast.error(response.error.message || t("updateFailed"));
             }
         } catch (error) {
             logError("Error updating test drive status:", error);
-            toast.error("An error occurred while updating test drive status");
+            toast.error(t("unexpected"));
         }
-    }, [updateStatusFn]);
+    }, [updateStatusFn, t]);
 
     const handleFilterChange = useCallback((value: string) => {
         setStatusFilter(value);

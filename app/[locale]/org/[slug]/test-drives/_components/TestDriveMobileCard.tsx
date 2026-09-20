@@ -10,14 +10,13 @@ import {
   Eye,
   MoreVertical,
 } from "lucide-react";
-import { format } from "date-fns";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import { TestDriveDetailsModal } from "./TestDriveDetailsModal";
 import { useState } from "react";
 import { useFormatters } from "@/hooks/use-formatters";
-import { formatCarPrice } from "@/lib/utils/currency";
+import { useTranslations } from "next-intl";
 import type { TestDriveCar, TestDriveItemProps } from "./TestDrivesPresenter";
 import {
   DropdownMenu,
@@ -26,31 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const formatTime = (timeString: string | null | undefined) => {
-  if (!timeString) return "";
-
-  if (/^\d{2}:\d{2}$/.test(timeString)) {
-    return timeString;
-  }
-
-  try {
-    const [time, modifier] = timeString.split(" ");
-    let [hours, minutes] = time.split(":");
-
-    if (hours === "12") {
-      hours = "00";
-    }
-
-    if (modifier === "PM") {
-      hours = String(parseInt(hours, 10) + 12);
-    }
-
-    return `${hours.padStart(2, "0")}:${minutes}`;
-  } catch (error) {
-    return timeString;
-  }
-};
-
 export const TestDriveMobileCard = ({
   testDrive,
   onStatusChange,
@@ -58,7 +32,8 @@ export const TestDriveMobileCard = ({
   isUpdating = false,
 }: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const { date: shortDate } = useFormatters();
+  const t = useTranslations("org.testDrives");
+  const { date: shortDate, clockTime, price } = useFormatters();
   const formatDate = (dateString: string | Date) => shortDate(new Date(dateString));
 
   // Nullable by serializeTestDrive's signature only; carId is a required FK.
@@ -106,7 +81,7 @@ export const TestDriveMobileCard = ({
                 {car.title}
               </Link>
               <p className="flex gap-4 font-bold text-lg text-green-700">
-                {formatCarPrice(Number(car.price))}
+                {price(Number(car.price))}
                 <TestDriveStatusBadge status={testDrive.status} />
               </p>
               <div className="flex items-center gap-1 text-gray-600 text-xs">
@@ -115,8 +90,10 @@ export const TestDriveMobileCard = ({
                   {shortDate(testDrive.date)}
                 </span>
                 <span>
-                  {formatTime(testDrive.startTime)} -{" "}
-                  {formatTime(testDrive.endTime)}
+                  {t("table.timeRange", {
+                    start: clockTime(testDrive.startTime ?? ""),
+                    end: clockTime(testDrive.endTime ?? ""),
+                  })}
                 </span>
               </div>
             </div>
@@ -130,13 +107,14 @@ export const TestDriveMobileCard = ({
                     className="h-8 w-8 p-0 hover:bg-gray-100"
                     disabled={isDisabled}
                   >
+                    <span className="sr-only">{t("actions.openMenu")}</span>
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setShowDetailsModal(true)}>
                     <Eye className="h-4 w-4 me-2" />
-                    View Details
+                    {t("actions.viewDetails")}
                   </DropdownMenuItem>
                   {testDrive.status === "PENDING" && (
                     <>
@@ -147,7 +125,7 @@ export const TestDriveMobileCard = ({
                         className="text-green-600 focus:text-green-600"
                       >
                         <Check className="h-4 w-4 me-2" />
-                        Confirm
+                        {t("actions.confirm")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
@@ -156,7 +134,7 @@ export const TestDriveMobileCard = ({
                         className="text-red-600 focus:text-red-600"
                       >
                         <X className="h-4 w-4 me-2" />
-                        Cancel
+                        {t("actions.cancel")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -166,7 +144,7 @@ export const TestDriveMobileCard = ({
                       className="text-red-600 focus:text-red-600"
                     >
                       <X className="h-4 w-4 me-2" />
-                      Cancel
+                      {t("actions.cancel")}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>

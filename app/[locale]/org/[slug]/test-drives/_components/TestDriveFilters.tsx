@@ -12,6 +12,7 @@ import { Search, X, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const TestDriveFilters = ({
   searchTerm,
@@ -26,6 +27,8 @@ export const TestDriveFilters = ({
   onFilterChange: (value: string) => void;
   disabled: boolean;
 }) => {
+  const t = useTranslations("org.testDrives.filter");
+  const tStatus = useTranslations("testDrive.status");
   const [isFocused, setIsFocused] = useState(false);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -51,7 +54,7 @@ export const TestDriveFilters = ({
                 } transition-colors`}
               />
               <Input
-                placeholder="Search by car model or customer name"
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`ps-8 sm:ps-10 text-sm h-9 sm:h-10 bg-gray-50 border-gray-200 ${
@@ -62,7 +65,7 @@ export const TestDriveFilters = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 disabled={disabled}
-                aria-label="Search test drives"
+                aria-label={t("searchLabel")}
               />
               {searchTerm && (
                 <button
@@ -70,7 +73,7 @@ export const TestDriveFilters = ({
                   onClick={handleClearSearch}
                   className="absolute end-2 sm:end-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600 transition-colors"
                   disabled={disabled}
-                  aria-label="Clear search"
+                  aria-label={t("clearSearch")}
                 >
                   <X className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
@@ -103,14 +106,14 @@ export const TestDriveFilters = ({
                           : "text-gray-400"
                       }`}
                     />
-                    <SelectValue placeholder="Filter by status" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                  <SelectItem value="all">{t("allStatus")}</SelectItem>
+                  <SelectItem value="PENDING">{tStatus("PENDING")}</SelectItem>
+                  <SelectItem value="CONFIRMED">{tStatus("CONFIRMED")}</SelectItem>
+                  <SelectItem value="CANCELLED">{tStatus("CANCELLED")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -130,7 +133,7 @@ export const TestDriveFilters = ({
                 disabled={disabled}
               >
                 <X className="h-3 w-3 sm:h-4 sm:w-4 me-1" />
-                Clear filters
+                {t("clearFilters")}
               </Button>
             </div>
           )}
@@ -140,7 +143,7 @@ export const TestDriveFilters = ({
             <div className="flex items-center justify-center py-1">
               <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-gray-400" />
               <span className="ms-2 text-xs sm:text-sm text-gray-500">
-                Loading...
+                {t("loading")}
               </span>
             </div>
           )}

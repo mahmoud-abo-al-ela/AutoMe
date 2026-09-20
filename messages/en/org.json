@@ -376,5 +376,71 @@
       "imagesRequired": "Add at least one image",
       "imagesTooMany": "You can add at most {max} images"
     }
+  },
+  "testDrives": {
+    "title": "Test Drive Management",
+    "subtitle": "Manage test drive requests and appointments",
+    "filter": {
+      "searchPlaceholder": "Search by car model or customer name",
+      "searchLabel": "Search test drives",
+      "clearSearch": "Clear search",
+      "statusPlaceholder": "Filter by status",
+      "allStatus": "All statuses",
+      "clearFilters": "Clear filters",
+      "loading": "Loading…"
+    },
+    "stats": {
+      "title": "Test Drive Requests",
+      "pending": "{count} pending",
+      "confirmed": "{count} confirmed",
+      "cancelled": "{count} cancelled",
+      "total": "{count} total",
+      "refresh": "Refresh"
+    },
+    "table": {
+      "car": "Car",
+      "customer": "Customer",
+      "dateTime": "Date & Time",
+      "status": "Status",
+      "actions": "Actions",
+      "timeRange": "{start} – {end}"
+    },
+    "actions": {
+      "details": "Details",
+      "viewDetails": "View details",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "openMenu": "Open menu"
+    },
+    "customer": {
+      "unknown": "Unknown customer",
+      "noEmail": "No email on file"
+    },
+    "empty": {
+      "title": "No test drive requests found",
+      "filtered": "Try adjusting your search or filters.",
+      "body": "Test drive requests appear here once customers start booking."
+    },
+    "modal": {
+      "title": "Test Drive Details",
+      "description": "Everything recorded for this test drive request",
+      "carSection": "Car",
+      "customerSection": "Customer Information",
+      "scheduleSection": "Schedule",
+      "notesSection": "Customer Notes",
+      "requestSection": "Request Information",
+      "date": "Date:",
+      "time": "Time:",
+      "status": "Status:",
+      "created": "Created:",
+      "close": "Close"
+    },
+    "toasts": {
+      "statusChanged": "Test drive updated",
+      "confirmed": "Test drive confirmed",
+      "cancelled": "Test drive cancelled",
+      "updateFailed": "Couldn’t update the test drive",
+      "unexpected": "Something went wrong while updating the test drive."
+    }
   }
 }

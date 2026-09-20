@@ -376,5 +376,71 @@
       "imagesRequired": "أضف صورة واحدة على الأقل",
       "imagesTooMany": "يمكنك إضافة {max} صور كحد أقصى"
     }
+  },
+  "testDrives": {
+    "title": "إدارة القيادات التجريبية",
+    "subtitle": "إدارة طلبات القيادة التجريبية والمواعيد",
+    "filter": {
+      "searchPlaceholder": "ابحث بموديل السيارة أو اسم العميل",
+      "searchLabel": "البحث في القيادات التجريبية",
+      "clearSearch": "مسح البحث",
+      "statusPlaceholder": "تصفية حسب الحالة",
+      "allStatus": "كل الحالات",
+      "clearFilters": "مسح عوامل التصفية",
+      "loading": "جارٍ التحميل…"
+    },
+    "stats": {
+      "title": "طلبات القيادة التجريبية",
+      "pending": "{count} قيد الانتظار",
+      "confirmed": "{count} مؤكدة",
+      "cancelled": "{count} ملغاة",
+      "total": "{count} إجمالًا",
+      "refresh": "تحديث"
+    },
+    "table": {
+      "car": "السيارة",
+      "customer": "العميل",
+      "dateTime": "التاريخ والوقت",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "timeRange": "{start} – {end}"
+    },
+    "actions": {
+      "details": "التفاصيل",
+      "viewDetails": "عرض التفاصيل",
+      "confirm": "تأكيد",
+      "cancel": "إلغاء",
+      "openMenu": "فتح القائمة"
+    },
+    "customer": {
+      "unknown": "عميل غير معروف",
+      "noEmail": "لا يوجد بريد إلكتروني"
+    },
+    "empty": {
+      "title": "لا توجد طلبات قيادة تجريبية",
+      "filtered": "جرّب تعديل البحث أو عوامل التصفية.",
+      "body": "ستظهر طلبات القيادة التجريبية هنا بمجرد أن يبدأ العملاء في الحجز."
+    },
+    "modal": {
+      "title": "تفاصيل القيادة التجريبية",
+      "description": "كل ما هو مسجّل عن طلب القيادة التجريبية هذا",
+      "carSection": "السيارة",
+      "customerSection": "بيانات العميل",
+      "scheduleSection": "الموعد",
+      "notesSection": "ملاحظات العميل",
+      "requestSection": "بيانات الطلب",
+      "date": "التاريخ:",
+      "time": "الوقت:",
+      "status": "الحالة:",
+      "created": "تاريخ الطلب:",
+      "close": "إغلاق"
+    },
+    "toasts": {
+      "statusChanged": "تم تحديث القيادة التجريبية",
+      "confirmed": "تم تأكيد القيادة التجريبية",
+      "cancelled": "تم إلغاء القيادة التجريبية",
+      "updateFailed": "تعذّر تحديث القيادة التجريبية",
+      "unexpected": "حدث خطأ أثناء تحديث القيادة التجريبية."
+    }
   }
 }

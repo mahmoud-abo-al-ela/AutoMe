@@ -3,6 +3,8 @@ import enOrg from "@/messages/en/org.json";
 import arOrg from "@/messages/ar/org.json";
 import enCarAttributes from "@/messages/en/carAttributes.json";
 import arCarAttributes from "@/messages/ar/carAttributes.json";
+import enTestDrive from "@/messages/en/testDrive.json";
+import arTestDrive from "@/messages/ar/testDrive.json";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import {
   BODY_TYPES,
@@ -47,6 +49,7 @@ describe("org messages", () => {
       "dashboard.inventory.legend",
       "cars.pagination.showingShort",
       "carForm.form.step",
+      "testDrives.table.timeRange",
     ]);
 
     const untranslated = flatten(enOrg)
@@ -169,6 +172,19 @@ describe("car form options resolve to labels", () => {
 
     for (const [token, dbValue] of Object.entries(STATUS_FORM_TO_DB)) {
       expect(at(messages, `status.${dbValue}`), `missing for ${token}`).toBeTruthy();
+    }
+  });
+});
+
+describe("test-drive status labels are shared, not duplicated", () => {
+  it.each(["en", "ar"] as const)("names every status in %s", (locale) => {
+    // The org badge, the filter dropdown and the public test-drive surface
+    // all read `testDrive.status`. The badge renders nothing for a status it
+    // has no class for, which is how COMPLETED used to show a blank cell.
+    const messages = locale === "en" ? enTestDrive : arTestDrive;
+
+    for (const status of ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]) {
+      expect(at(messages, `status.${status}`), `missing ${status}`).toBeTruthy();
     }
   });
 });

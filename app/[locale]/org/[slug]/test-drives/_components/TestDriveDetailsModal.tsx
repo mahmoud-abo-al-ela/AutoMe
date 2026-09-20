@@ -12,32 +12,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import type { AdminTestDrive, TestDriveCar } from "./TestDrivesPresenter";
-import { formatCarPrice } from "@/lib/utils/currency";
-
-const formatTime = (timeString: string | null | undefined) => {
-  if (!timeString) return "";
-
-  if (/^\d{2}:\d{2}$/.test(timeString)) {
-    return timeString;
-  }
-
-  try {
-    const [time, modifier] = timeString.split(" ");
-    let [hours, minutes] = time.split(":");
-
-    if (hours === "12") {
-      hours = "00";
-    }
-
-    if (modifier === "PM") {
-      hours = String(parseInt(hours, 10) + 12);
-    }
-
-    return `${hours.padStart(2, "0")}:${minutes}`;
-  } catch (error) {
-    return timeString;
-  }
-};
+import { useTranslations } from "next-intl";
 
 export const TestDriveDetailsModal = ({
   testDrive,
@@ -48,7 +23,14 @@ export const TestDriveDetailsModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const { date: fmtDate, dateTime: fmtDateTime } = useFormatters();
+  const t = useTranslations("org.testDrives");
+  const tCommon = useTranslations("testDrive.existing");
+  const {
+    date: fmtDate,
+    dateTime: fmtDateTime,
+    clockTime,
+    price,
+  } = useFormatters();
   const formatDate = (dateString: string | Date) =>
     fmtDate(new Date(dateString), { month: "long" });
 
@@ -64,10 +46,8 @@ export const TestDriveDetailsModal = ({
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="text-start space-y-1.5">
-          <DialogTitle>Test Drive Details</DialogTitle>
-          <DialogDescription>
-            Complete information for this test drive request
-          </DialogDescription>
+          <DialogTitle>{t("modal.title")}</DialogTitle>
+          <DialogDescription>{t("modal.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -98,7 +78,7 @@ export const TestDriveDetailsModal = ({
                 {/* Was a hardcoded "$" template literal, which the earlier
                     currency sweep missed because it looked for
                     Intl.NumberFormat rather than a "$" prefix. */}
-                {formatCarPrice(Number(car.price))}
+                {price(Number(car.price))}
               </p>
             </div>
           </div>
@@ -107,7 +87,7 @@ export const TestDriveDetailsModal = ({
           <div className="p-3 sm:p-4 border rounded-lg">
             <h3 className="font-semibold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
               <User className="h-4 w-4" />
-              Customer Information
+              {t("modal.customerSection")}
             </h3>
             <div className="flex items-center gap-3">
               <div className="relative h-10 w-10 sm:h-12 sm:w-12 overflow-hidden rounded-full flex-shrink-0">
@@ -126,10 +106,10 @@ export const TestDriveDetailsModal = ({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate text-sm sm:text-base">
-                  {testDrive.user?.name || "Unknown User"}
+                  {testDrive.user?.name || t("customer.unknown")}
                 </p>
                 <p className="text-gray-600 text-xs sm:text-sm truncate">
-                  {testDrive.user?.email || "No email"}
+                  {testDrive.user?.email || t("customer.noEmail")}
                 </p>
               </div>
             </div>
@@ -139,18 +119,20 @@ export const TestDriveDetailsModal = ({
           <div className="p-3 sm:p-4 border rounded-lg">
             <h3 className="font-semibold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
               <Calendar className="h-4 w-4" />
-              Schedule
+              {t("modal.scheduleSection")}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm ps-6 sm:ps-2">
               <div className="flex items-center gap-2">
-                <span className="font-medium">Date:</span>
+                <span className="font-medium">{t("modal.date")}</span>
                 <span>{formatDate(testDrive.date)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-medium">Time:</span>
+                <span className="font-medium">{t("modal.time")}</span>
                 <span>
-                  {formatTime(testDrive.startTime)} -{" "}
-                  {formatTime(testDrive.endTime)}
+                  {t("table.timeRange", {
+                    start: clockTime(testDrive.startTime ?? ""),
+                    end: clockTime(testDrive.endTime ?? ""),
+                  })}
                 </span>
               </div>
             </div>
@@ -161,7 +143,7 @@ export const TestDriveDetailsModal = ({
             <div className="p-3 sm:p-4 border rounded-lg">
               <h3 className="font-semibold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
                 <FileText className="h-4 w-4" />
-                Customer Notes
+                {t("modal.notesSection")}
               </h3>
               <div className="bg-gray-50 p-2 sm:p-3 rounded-md">
                 <p className="text-gray-700 whitespace-pre-wrap text-sm">
@@ -174,19 +156,19 @@ export const TestDriveDetailsModal = ({
           {/* Request Information */}
           <div className="p-3 sm:p-4 border rounded-lg">
             <h3 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">
-              Request Information
+              {t("modal.requestSection")}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-2 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-gray-500">Status:</span>
+                <span className="text-gray-500">{t("modal.status")}</span>
                 <TestDriveStatusBadge status={testDrive.status} />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-gray-500">Created:</span>
+                <span className="text-gray-500">{t("modal.created")}</span>
                 <p className="truncate">
                   {testDrive.createdAt
                     ? fmtDateTime(new Date(testDrive.createdAt))
-                    : "N/A"}
+                    : tCommon("notAvailable")}
                 </p>
               </div>
             </div>
@@ -199,7 +181,7 @@ export const TestDriveDetailsModal = ({
             onClick={onClose}
             className="cursor-pointer w-full sm:w-auto"
           >
-            Close
+            {t("modal.close")}
           </Button>
         </div>
       </DialogContent>

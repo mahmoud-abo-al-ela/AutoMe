@@ -18,6 +18,7 @@ import { TestDriveMobileCard } from "./TestDriveMobileCard";
 import { TestDriveStatsDisplay } from "./TestDriveStatsDisplay";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Calendar } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { useAdminTestDrives } from "@/hooks/use-admin-test-drives";
 
 /**
@@ -66,6 +67,7 @@ export const TestDrivesPresenter = ({
     testDriveStats,
     handlers,
 }: TestDrivesPresenterProps) => {
+    const t = useTranslations("org.testDrives");
     if (loading && testDrives.length === 0) {
         return (
             <div>
@@ -168,10 +170,10 @@ export const TestDrivesPresenter = ({
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-                            Test Drive Management
+                            {t("title")}
                         </h1>
                         <p className="text-gray-600 text-sm md:text-base">
-                            Manage test drive requests and appointments
+                            {t("subtitle")}
                         </p>
                     </div>
                 </div>
@@ -205,10 +207,11 @@ export const TestDrivesPresenter = ({
                         <EmptyState 
                             variant={searchTerm || statusFilter !== "all" ? "filtered" : "standalone"}
                             icon={Calendar}
-                            title="No test drive requests found"
-                            description={searchTerm || statusFilter !== "all" 
-                                ? "Try adjusting your search or filter criteria"
-                                : "Test drive requests will appear here when customers book appointments"
+                            title={t("empty.title")}
+                            description={
+                                searchTerm || statusFilter !== "all"
+                                    ? t("empty.filtered")
+                                    : t("empty.body")
                             }
                             onClearFilters={searchTerm || statusFilter !== "all" ? handlers.handleClearFilters : undefined}
                             className="py-16 border-0 shadow-none bg-transparent"
