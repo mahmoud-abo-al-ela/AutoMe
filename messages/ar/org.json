@@ -544,5 +544,159 @@
         "unexpected": "حدث خطأ أثناء تحديث الصلاحية."
       }
     }
+  },
+  "billing": {
+    "title": "الفوترة والاشتراك",
+    "subtitle": "إدارة باقة اشتراكك وبيانات الفوترة",
+    "nonOwner": {
+      "title": "صلاحية اطّلاع فقط",
+      "body": "يمكنك الاطّلاع على الباقة الحالية والاستخدام، لكن مالك المعرض وحده من يمكنه إدارة الفوترة أو تغيير الباقة أو تحديث وسيلة الدفع.",
+      "ownerLabel": "مالك المعرض"
+    },
+    "status": {
+      "ACTIVE": "نشط",
+      "TRIALING": "تجريبي",
+      "PAST_DUE": "متأخر السداد",
+      "CANCELED": "ملغى"
+    },
+    "current": {
+      "title": "الباقة الحالية",
+      "defaultPlan": "Starter",
+      "renewsOn": "يتجدد في {date}",
+      "trialEndsOn": "تنتهي الفترة التجريبية في {date}",
+      "pastDue": "السداد متأخر — يرجى تحديث وسيلة الدفع",
+      "accessEndsOn": "ينتهي الوصول في {date}",
+      "freePlan": "أنت على باقة Starter المجانية",
+      "manage": "إدارة الاشتراك",
+      "carListings": "السيارات المعروضة",
+      "teamMembers": "أعضاء الفريق",
+      "testDrives": "القيادات التجريبية (هذا الشهر)",
+      "portalFailed": "تعذّر فتح بوابة الفوترة. حاول مرة أخرى."
+    },
+    "usage": {
+      "unlimited": "غير محدود",
+      "tooltipUnlimited": "{current} {label} مستخدمة — بلا حد",
+      "tooltip": "{current} من {limit} مستخدمة ({percent}) — يتبقى {remaining}",
+      "runningLow": "أوشكت على الحد؟",
+      "upgradeLink": "ترقَّ للحصول على المزيد"
+    },
+    "banner": {
+      "trialEndsToday": "فترتك التجريبية تنتهي اليوم!",
+      "trialTitle": "الفترة التجريبية",
+      "trialEndingSoon": "فترتك التجريبية تقترب من نهايتها. أضف وسيلة دفع للاستمرار بعد انتهائها.",
+      "trialActive": "فترتك التجريبية نشطة. أضف وسيلة دفع للاستمرار بعد انتهائها.",
+      "canceledTitle": "تم إلغاء الاشتراك",
+      "canceled": "تم إلغاء اشتراكك.",
+      "pastDueTitle": "فشل السداد",
+      "updatePayment": "تحديث وسيلة الدفع",
+      "dismiss": "إغلاق التنبيه",
+      "pastDueBody": "فشلت آخر عملية سداد. يرجى تحديث وسيلة الدفع لتفادي انقطاع الخدمة.",
+      "trialEndsInDays": "{count, plural, zero {تنتهي الفترة التجريبية خلال {value} يوم} one {تنتهي الفترة التجريبية غدًا} two {تنتهي الفترة التجريبية خلال يومين} few {تنتهي الفترة التجريبية خلال {value} أيام} many {تنتهي الفترة التجريبية خلال {value} يومًا} other {تنتهي الفترة التجريبية خلال {value} يوم}}",
+      "trialEndsOnBody": "تنتهي فترتك التجريبية في {date}. أضف وسيلة دفع لمواصلة استخدام كل المزايا.",
+      "addPayment": "إضافة وسيلة دفع",
+      "canceledWithDate": "تم إلغاء اشتراكك. تحتفظ بمزايا باقتك الحالية حتى {date}.",
+      "resubscribe": "إعادة الاشتراك",
+      "freeTitle": "الباقة المجانية",
+      "freeBody": "أنت على باقة Starter المجانية. قم بالترقية لعرض المزيد من السيارات وإضافة أعضاء ومزايا إضافية.",
+      "upgradeNow": "الترقية الآن",
+      "yourTrialEndsToday": "فترتك التجريبية تنتهي اليوم!",
+      "yourTrialEndsInDays": "{count, plural, zero {فترتك التجريبية تنتهي خلال {value} يوم} one {فترتك التجريبية تنتهي غدًا} two {فترتك التجريبية تنتهي خلال يومين} few {فترتك التجريبية تنتهي خلال {value} أيام} many {فترتك التجريبية تنتهي خلال {value} يومًا} other {فترتك التجريبية تنتهي خلال {value} يوم}}",
+      "canceledAccessEnds": "تم إلغاء اشتراكك. ينتهي الوصول في {date}."
+    },
+    "plans": {
+      "title": "اختر باقتك",
+      "subtitle": "اختر الباقة التي تناسب معرضك",
+      "compare": "مقارنة",
+      "cards": "بطاقات",
+      "feature": "الميزة",
+      "currentBadge": "باقتك الحالية",
+      "currentShort": "الحالية",
+      "select": "اختيار",
+      "ownerOnly": "للمالك فقط",
+      "ownerOnlyLong": "المالك وحده من يمكنه تغيير الباقة",
+      "switchTo": "التحويل إلى {plan}",
+      "changePlan": "تغيير الباقة",
+      "confirm": "تأكيد",
+      "perMonthShort": "شهر",
+      "perYearShort": "سنة",
+      "priceWithPeriod": "{price}/{period}",
+      "changeFailed": "تعذّر تغيير الباقة. حاول مرة أخرى.",
+      "changed": "تم تحديث باقتك.",
+      "changedTitle": "تم تحديث الباقة",
+      "backToBilling": "العودة إلى الفوترة",
+      "footerNote": "كل الباقات تشمل تخزينًا آمنًا للبيانات ودعمًا عبر البريد الإلكتروني. <link>تواصل مع المبيعات</link> للحلول المخصصة.",
+      "includedFeatures": "المزايا المشمولة:",
+      "switchDialogWithPrice": "التحويل إلى <b>{plan}</b> مقابل <b>{price}</b>؟",
+      "switchDialogFree": "التحويل إلى <b>{plan}</b>؟",
+      "processing": "جارٍ المعالجة…",
+      "switchedTo": "لقد انتقلت إلى باقة <b>{plan}</b>.",
+      "featuresActive": "مزايا باقتك الجديدة مفعّلة الآن. سيظهر أي تغيير في الفوترة على فاتورتك التالية."
+    },
+    "payment": {
+      "title": "وسيلة الدفع",
+      "subtitle": "إدارة البطاقة التي يُحصَّل منها اشتراكك",
+      "card": "بطاقة",
+      "update": "تحديث",
+      "securedByStripe": "مؤمَّن بواسطة Stripe",
+      "unavailable": "تعذّر تحميل وسيلة الدفع",
+      "loadFailed": "تعذّر تحميل وسيلة الدفع",
+      "brands": {
+        "amex": "أمريكان إكسبريس",
+        "diners": "دايترز كلوب"
+      },
+      "onFile": "وسيلة الدفع المسجّلة لتحصيل اشتراكك",
+      "noneTitle": "لا توجد وسيلة دفع مسجّلة",
+      "noneBody": "أضف وسيلة دفع للاشتراك في باقة مدفوعة",
+      "add": "إضافة وسيلة دفع",
+      "endingIn": "{brand} تنتهي بـ {last4}",
+      "expires": "تنتهي في {month}/{year}",
+      "expiringSoon": "— على وشك الانتهاء",
+      "portalFailed": "تعذّر فتح بوابة الفوترة. حاول مرة أخرى."
+    },
+    "invoices": {
+      "title": "الفواتير",
+      "subtitle": "فواتيرك وإيصالاتك السابقة",
+      "date": "التاريخ",
+      "description": "الوصف",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "downloadPdf": "تنزيل PDF",
+      "viewInvoice": "عرض الفاتورة",
+      "loadMore": "تحميل المزيد",
+      "emptyTitle": "لا توجد فواتير بعد",
+      "emptyBody": "ستظهر الفواتير هنا بعد أول عملية سداد",
+      "loadFailed": "تعذّر تحميل فواتيرك",
+      "historyTitle": "سجل الفواتير",
+      "historySubtitle": "اطّلع على فواتيرك السابقة ونزّلها من Stripe",
+      "tryAgain": "حاول مرة أخرى",
+      "invoiceNumber": "رقم {number}",
+      "statuses": {
+        "PAID": "مدفوعة",
+        "OPEN": "مستحقة",
+        "DRAFT": "مسودة",
+        "VOID": "ملغاة",
+        "UNCOLLECTIBLE": "غير قابلة للتحصيل",
+        "UNKNOWN": "غير معروفة"
+      }
+    },
+    "history": {
+      "title": "سجل الفوترة",
+      "subtitle": "اطّلع على تغييرات اشتراكك وأحداث الفوترة",
+      "date": "التاريخ",
+      "event": "الحدث",
+      "description": "الوصف",
+      "emptyTitle": "لا يوجد سجل فوترة بعد",
+      "loadFailed": "تعذّر تحميل سجل الفوترة",
+      "by": "بواسطة",
+      "needHelp": "تحتاج مساعدة في الفوترة؟ <link>تواصل مع فريق الفوترة</link>",
+      "events": {
+        "SUBSCRIPTION_CREATED": "إنشاء",
+        "SUBSCRIPTION_UPGRADED": "ترقية",
+        "SUBSCRIPTION_DOWNGRADED": "تخفيض",
+        "SUBSCRIPTION_CANCELED": "إلغاء",
+        "SUBSCRIPTION_RENEWED": "تجديد"
+      }
+    }
   }
 }

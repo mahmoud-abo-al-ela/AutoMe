@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState } from "react";
@@ -42,6 +43,8 @@ export default function SubscriptionAlert({
     organizationId: string;
 }) {
     const [isPortalLoading, setIsPortalLoading] = useState(false);
+    const t = useTranslations("org.billing.banner");
+    const { number } = useFormatters();
     const [isDismissed, setIsDismissed] = useState(false);
     const pathname = usePathname();
     const { date: formatDateFor } = useFormatters();
@@ -60,10 +63,7 @@ export default function SubscriptionAlert({
             // .data. See CurrentPlan.tsx and PaymentMethod.tsx.
             const result = await createBillingPortalSession(organizationId, pathname);
             if (!result.success) {
-                toast.error(
-                    result.error.message ||
-                        "Failed to open billing portal. Please try again."
-                );
+                toast.error(result.error.message || t("portalFailed"));
                 setIsPortalLoading(false);
                 return;
             }
@@ -71,8 +71,7 @@ export default function SubscriptionAlert({
         } catch (error) {
             console.error("Failed to open billing portal:", error);
             toast.error(
-                (error instanceof Error && error.message) ||
-                    "Failed to open billing portal. Please try again."
+                (error instanceof Error && error.message) || t("portalFailed")
             );
             setIsPortalLoading(false);
         }
@@ -84,12 +83,11 @@ export default function SubscriptionAlert({
             <Alert className="border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 relative">
                 <AlertTriangle className="h-4 w-4 text-red-600" />
                 <AlertTitle className="text-red-800 dark:text-red-400 font-semibold">
-                    Payment Failed
+                    {t("pastDueTitle")}
                 </AlertTitle>
                 <AlertDescription className="text-red-700 dark:text-red-300">
                     <p>
-                        Your payment failed. Please update your payment method to avoid
-                        service interruption.
+                        {t("pastDueBody")}
                     </p>
                     {isOwner && (
                         <Button
@@ -104,14 +102,14 @@ export default function SubscriptionAlert({
                             ) : (
                                 <CreditCard className="h-4 w-4 me-2" />
                             )}
-                            Update Payment Method
+                            {t("updatePayment")}
                         </Button>
                     )}
                 </AlertDescription>
                 <button
                     onClick={() => setIsDismissed(true)}
                     className="absolute top-3 end-3 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300 transition-colors"
-                    aria-label="Dismiss alert"
+                    aria-label={t("dismiss")}
                 >
                     <X className="h-4 w-4" />
                 </button>
@@ -132,14 +130,19 @@ export default function SubscriptionAlert({
                 <Clock className="h-4 w-4 text-amber-600" />
                 <AlertTitle className="text-amber-800 dark:text-amber-400 font-semibold">
                     {daysLeft === 0
-                        ? "Your Trial Ends Today!"
-                        : `Your Trial Ends in ${daysLeft} Day${daysLeft !== 1 ? "s" : ""}`}
+                        ? t("yourTrialEndsToday")
+                        : t("yourTrialEndsInDays", {
+                              count: daysLeft,
+                              value: number(daysLeft),
+                          })}
                 </AlertTitle>
                 <AlertDescription className="text-amber-700 dark:text-amber-300">
                     <p>
                         {trialEnd
-                            ? `Your trial ends on ${formatDate(trialEnd)}. Add a payment method to continue using all features.`
-                            : "Your trial is ending soon. Add a payment method to continue after the trial ends."}
+                            ? t("trialEndsOnBody", {
+                                  date: formatDate(trialEnd),
+                              })
+                            : t("trialEndingSoon")}
                     </p>
                     {isOwner && (
                         <Button
@@ -154,14 +157,14 @@ export default function SubscriptionAlert({
                             ) : (
                                 <CreditCard className="h-4 w-4 me-2" />
                             )}
-                            Add Payment Method
+                            {t("addPayment")}
                         </Button>
                     )}
                 </AlertDescription>
                 <button
                     onClick={() => setIsDismissed(true)}
                     className="absolute top-3 end-3 text-amber-400 hover:text-amber-600 dark:text-amber-500 dark:hover:text-amber-300 transition-colors"
-                    aria-label="Dismiss alert"
+                    aria-label={t("dismiss")}
                 >
                     <X className="h-4 w-4" />
                 </button>
@@ -177,19 +180,21 @@ export default function SubscriptionAlert({
             <Alert className="border-gray-300 bg-gray-50 dark:bg-gray-900/30 dark:border-gray-700 relative">
                 <XCircle className="h-4 w-4 text-gray-500" />
                 <AlertTitle className="text-gray-800 dark:text-gray-300 font-semibold">
-                    Subscription Canceled
+                    {t("canceledTitle")}
                 </AlertTitle>
                 <AlertDescription className="text-gray-600 dark:text-gray-400">
                     <p>
                         {accessEnd
-                            ? `Your subscription has been canceled. Access ends on ${formatDate(accessEnd)}.`
-                            : "Your subscription has been canceled."}
+                            ? t("canceledAccessEnds", {
+                                  date: formatDate(accessEnd),
+                              })
+                            : t("canceled")}
                     </p>
                 </AlertDescription>
                 <button
                     onClick={() => setIsDismissed(true)}
                     className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-                    aria-label="Dismiss alert"
+                    aria-label={t("dismiss")}
                 >
                     <X className="h-4 w-4" />
                 </button>

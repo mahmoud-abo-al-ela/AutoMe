@@ -1,4 +1,8 @@
+"use client";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Button } from "@/components/ui/button";
 import {
   ArrowUpRight,
@@ -23,6 +27,8 @@ export default function StatusBanner({
   onManageSubscription: () => void;
   isPortalLoading: boolean;
 }) {
+  const t = useTranslations("org.billing.banner");
+  const { locale, number } = useFormatters();
   const status = subscription?.status;
 
   // PAST_DUE — Red alert with "Update Payment Method" CTA
@@ -31,12 +37,11 @@ export default function StatusBanner({
       <Alert className="border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
         <AlertTriangle className="h-4 w-4 text-red-600" />
         <AlertTitle className="text-red-800 dark:text-red-400">
-          Payment Failed
+          {t("pastDueTitle")}
         </AlertTitle>
         <AlertDescription className="text-red-700 dark:text-red-300">
           <p>
-            Your last payment failed. Please update your payment method to avoid
-            service interruption.
+            {t("pastDueBody")}
           </p>
           {isOwner && (
             <Button
@@ -51,7 +56,7 @@ export default function StatusBanner({
               ) : (
                 <CreditCard className="h-4 w-4 me-2" />
               )}
-              Update Payment Method
+              {t("updatePayment")}
             </Button>
           )}
         </AlertDescription>
@@ -77,15 +82,18 @@ export default function StatusBanner({
         <AlertTitle className="text-amber-800 dark:text-amber-400">
           {daysLeft !== null
             ? daysLeft === 0
-              ? "Trial Ends Today"
-              : `Trial Ends in ${daysLeft} Day${daysLeft !== 1 ? "s" : ""}`
-            : "Trial Period"}
+              ? t("trialEndsToday")
+              : t("trialEndsInDays", {
+                  count: daysLeft,
+                  value: number(daysLeft),
+                })
+            : t("trialTitle")}
         </AlertTitle>
         <AlertDescription className="text-amber-700 dark:text-amber-300">
           <p>
             {trialEnd
-              ? `Your trial ends on ${formatDate(trialEnd)}. Add a payment method to continue using all features.`
-              : "Your trial is active. Add a payment method to continue after the trial ends."}
+              ? t("trialEndsOnBody", { date: formatDate(trialEnd, locale) })
+              : t("trialActive")}
           </p>
           {isOwner && (
             <Button
@@ -100,7 +108,7 @@ export default function StatusBanner({
               ) : (
                 <CreditCard className="h-4 w-4 me-2" />
               )}
-              Add Payment Method
+              {t("addPayment")}
             </Button>
           )}
         </AlertDescription>
@@ -116,18 +124,18 @@ export default function StatusBanner({
       <Alert className="border-gray-300 bg-gray-50 dark:bg-gray-900/30 dark:border-gray-700">
         <XCircle className="h-4 w-4 text-gray-500" />
         <AlertTitle className="text-gray-800 dark:text-gray-300">
-          Subscription Canceled
+          {t("canceledTitle")}
         </AlertTitle>
         <AlertDescription className="text-gray-600 dark:text-gray-400">
           <p>
             {accessEnd
-              ? `Your subscription has been canceled. You'll retain access to your current plan features until ${formatDate(accessEnd)}.`
-              : "Your subscription has been canceled."}
+              ? t("canceledWithDate", { date: formatDate(accessEnd, locale) })
+              : t("canceled")}
           </p>
           {isOwner && (
             <Button size="sm" className="mt-2">
               <ArrowUpRight className="h-4 w-4 me-2" />
-              Re-subscribe
+              {t("resubscribe")}
             </Button>
           )}
         </AlertDescription>
@@ -141,17 +149,16 @@ export default function StatusBanner({
       <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800">
         <Info className="h-4 w-4 text-blue-600" />
         <AlertTitle className="text-blue-800 dark:text-blue-400">
-          Free Plan
+          {t("freeTitle")}
         </AlertTitle>
         <AlertDescription className="text-blue-700 dark:text-blue-300">
           <p>
-            You&apos;re on the free Starter plan. Upgrade to unlock more car
-            listings, team members, and premium features.
+            {t("freeBody")}
           </p>
           {isOwner && (
             <Button size="sm" className="mt-2">
               <ArrowUpRight className="h-4 w-4 me-2" />
-              Upgrade Now
+              {t("upgradeNow")}
             </Button>
           )}
         </AlertDescription>

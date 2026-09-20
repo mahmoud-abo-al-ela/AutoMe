@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState, useEffect } from "react";
@@ -62,12 +63,12 @@ export default function BillingHistory({
       try {
         const result = await getBillingHistory(organizationId);
         if (!result.success) {
-          throw new Error(result.error?.message || "Failed to load billing history");
+          throw new Error(result.error?.message || t("loadFailed"));
         }
         setBillingHistory(result.data.history || []);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load billing history"
+          err instanceof Error ? err.message : t("loadFailed")
         );
       } finally {
         setLoading(false);
@@ -75,23 +76,21 @@ export default function BillingHistory({
     }
 
     fetchBillingHistory();
+  // `t` is read only for the error fallback. Listing it would refetch on a
+  // language switch, which is a network round trip for the same data.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
+  const t = useTranslations("org.billing.history");
   const { dateTime } = useFormatters();
   const formatDate = (date: Date | string) => {
     return dateTime(date);
   };
 
-  const formatActionLabel = (action: string) => {
-    const labels: Record<string, string> = {
-      SUBSCRIPTION_CREATED: "Created",
-      SUBSCRIPTION_UPGRADED: "Upgraded",
-      SUBSCRIPTION_DOWNGRADED: "Downgraded",
-      SUBSCRIPTION_CANCELED: "Canceled",
-      SUBSCRIPTION_RENEWED: "Renewed",
-    };
-    return labels[action] || action;
-  };
+  // The audit action is the message key. An action with no message falls back
+  // to the raw enum rather than rendering blank — it is at least identifiable.
+  const formatActionLabel = (action: string) =>
+    t.has(`events.${action}`) ? t(`events.${action}`) : action;
 
   if (loading) {
     return (
@@ -99,9 +98,9 @@ export default function BillingHistory({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />
-            Billing History
+            {t("title")}
           </CardTitle>
-          <CardDescription>View your subscription changes and billing events</CardDescription>
+          <CardDescription>{t("subtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -135,21 +134,21 @@ export default function BillingHistory({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Receipt className="h-5 w-5" />
-          Billing History
+          {t("title")}
         </CardTitle>
-        <CardDescription>View your subscription changes and billing events</CardDescription>
+        <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
         {billingHistory.length === 0 ? (
-          <EmptyState variant="inline" icon={Receipt} title="No billing history yet" />
+          <EmptyState variant="inline" icon={Receipt} title={t("emptyTitle")} />
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>By</TableHead>
+                <TableHead>{t("date")}</TableHead>
+                <TableHead>{t("event")}</TableHead>
+                <TableHead>{t("description")}</TableHead>
+                <TableHead>{t("by")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -179,13 +178,16 @@ export default function BillingHistory({
 
         <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
           <p>
-            Need help with billing?{" "}
-            <a
-              href="mailto:billing@autome.com"
-              className="text-primary hover:underline"
-            >
-              Contact our billing team
-            </a>
+            {t.rich("needHelp", {
+              link: (chunks) => (
+                <a
+                  href="mailto:billing@autome.com"
+                  className="text-primary hover:underline"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
         </div>
       </CardContent>

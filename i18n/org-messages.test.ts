@@ -7,6 +7,10 @@ import enTestDrive from "@/messages/en/testDrive.json";
 import arTestDrive from "@/messages/ar/testDrive.json";
 import enOnboarding from "@/messages/en/onboarding.json";
 import arOnboarding from "@/messages/ar/onboarding.json";
+import enPlans from "@/messages/en/plans.json";
+import arPlans from "@/messages/ar/plans.json";
+import { planFeatureKeys } from "@/components/Pricing/pricing-plans";
+import { getAllFeatureKeys } from "@/app/[locale]/org/[slug]/billing/_components/_lib/plan-display";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import {
   BODY_TYPES,
@@ -49,6 +53,8 @@ describe("org messages", () => {
     // bracket direction is the renderer's job.
     const NOT_LANGUAGE = new Set([
       "settings.team.invite.emailPlaceholder",
+      "billing.current.defaultPlan",
+      "billing.plans.priceWithPeriod",
       "dashboard.funnel.share",
       "dashboard.inventory.legend",
       "cars.pagination.showingShort",
@@ -63,13 +69,20 @@ describe("org messages", () => {
     expect(untranslated).toEqual([]);
   });
 
-  it("uses {value} rather than ICU # for interpolated numbers", () => {
-    // `#` formats with the bare routing locale, which gives Western digits in
-    // Arabic while every other number on the page uses Eastern ones. See
-    // lib/utils/intl-locale.
+  it("uses {value} rather than ICU # inside plurals", () => {
+    // Inside a plural, `#` formats with the bare routing locale, which gives
+    // Western digits in Arabic while every other number on the page uses
+    // Eastern ones. See lib/utils/intl-locale.
+    //
+    // Only inside a plural: elsewhere ICU treats `#` as a literal character,
+    // and an invoice number is written "#123" in English.
     const withHash = [enOrg, arOrg].flatMap((messages) =>
       flatten(messages)
-        .filter(([, value]) => value.includes("#"))
+        .filter(
+          ([, value]) =>
+            value.includes("#") &&
+            (value.includes("plural,") || value.includes("selectordinal,"))
+        )
         .map(([key]) => key)
     );
 
@@ -236,5 +249,57 @@ describe("settings reuses the onboarding copy it shares", () => {
         ).toBeTruthy();
       }
     }
+  });
+});
+
+describe("billing reads the shared plan source", () => {
+  // The billing page used to derive its own feature bullets from the plan's
+  // columns and a camelCase split of the Json column's keys — English by
+  // construction, and different English from the marketing cards. Both read
+  // `planFeatureKeys` now, so every key it can emit needs a message.
+  const PLANS: Parameters<typeof planFeatureKeys>[0][] = [
+    {
+      name: "Starter",
+      monthlyPrice: 0,
+      maxCars: 15,
+      maxMembers: 2,
+      maxImagesPerCar: 5,
+      auditLogRetentionDays: 90,
+      features: { chat: false, aiProcessing: { enabled: false }, prioritySupport: false },
+    },
+    {
+      name: "Enterprise",
+      monthlyPrice: null,
+      maxCars: -1,
+      maxMembers: -1,
+      maxImagesPerCar: 20,
+      auditLogRetentionDays: null,
+      features: { chat: true, aiProcessing: { enabled: true }, prioritySupport: true },
+    },
+  ];
+
+  it.each(["en", "ar"] as const)("names every feature bullet in %s", (locale) => {
+    const messages = locale === "en" ? enPlans : arPlans;
+
+    // Both the limited and the unlimited branch of every bullet.
+    const keys = new Set(
+      PLANS.flatMap((plan) => planFeatureKeys(plan)).map((f) => f.key)
+    );
+
+    expect(keys.size).toBeGreaterThan(0);
+    for (const key of keys) {
+      expect(at(messages, `features.${key}`), `missing features.${key}`).toBeTruthy();
+    }
+  });
+
+  it("gives the comparison table one row per feature key", () => {
+    // Rows used to be keyed by the rendered name, so the row set changed with
+    // the reader's language.
+    const rows = getAllFeatureKeys(PLANS);
+    const keys = rows.map((row) => row.key);
+
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(keys).toContain("carListings");
+    expect(keys).toContain("aiProcessing");
   });
 });

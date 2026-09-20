@@ -29,6 +29,10 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { getInvoices } from "@/actions/billing";
+import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
+import { intlLocale } from "@/lib/utils/intl-locale";
+import type { Locale } from "@/i18n/routing";
 import { EmptyState } from "@/components/common/EmptyState";
 
 const STATUS_STYLES = {
@@ -43,8 +47,10 @@ const STATUS_STYLES = {
 
 // Currency comes from the Stripe invoice rather than being assumed, which is
 // why this one is not routed through lib/utils/currency.
-function formatCurrency(amount: number, currency = "usd") {
-    return new Intl.NumberFormat("en-US", {
+function formatCurrency(amount: number, currency = "usd", locale: Locale = "en") {
+    // The currency is Stripe's, which is why this is not routed through
+    // lib/utils/currency — but the digits and separators are the reader's.
+    return new Intl.NumberFormat(intlLocale(locale), {
         style: "currency",
         currency: currency.toUpperCase(),
         minimumFractionDigits: 2,
@@ -72,25 +78,29 @@ function InvoicesSkeleton() {
 }
 
 function EmptyInvoices() {
+    const t = useTranslations("org.billing.invoices");
+
     return (
         <EmptyState 
             variant="inline" 
             icon={Receipt} 
-            title="No invoices yet" 
-            description="Invoices will appear here after your first payment" 
+            title={t("emptyTitle")}
+            description={t("emptyBody")}
         />
     );
 }
 
 function InvoicesError({ onRetry }: { onRetry: () => void }) {
+    const t = useTranslations("org.billing.invoices");
+
     return (
         <div className="flex flex-col items-center justify-center py-8 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground/40 mb-3" />
             <p className="text-sm text-muted-foreground">
-                Failed to load invoices
+                {t("loadFailed")}
             </p>
             <Button variant="outline" size="sm" className="mt-3" onClick={onRetry}>
-                Try Again
+                {t("tryAgain")}
             </Button>
         </div>
     );
@@ -113,6 +123,8 @@ export default function InvoiceHistory({
     const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
     const [nextCursor, setNextCursor] = useState<string | null>(null);
+    const t = useTranslations("org.billing.invoices");
+    const locale = useLocale() as Locale;
     const { date: formatDate } = useFormatters();
 
     const fetchInvoices = useCallback(async (cursor: string | null = null) => {
@@ -130,7 +142,7 @@ export default function InvoiceHistory({
             });
 
             if (!result.success) {
-                throw new Error(result.error?.message || "Failed to load invoices");
+                throw new Error(result.error?.message || t("loadFailed"));
             }
 
             const { invoices: fetched, hasMore, nextCursor } = result.data;
@@ -145,12 +157,15 @@ export default function InvoiceHistory({
         } catch (err) {
             console.error("Failed to fetch invoices:", err);
             setError(
-                (err instanceof Error && err.message) || "Failed to load invoices"
+                (err instanceof Error && err.message) || t("loadFailed")
             );
         } finally {
             setIsLoading(false);
             setIsLoadingMore(false);
         }
+    // `t` is read only for the error fallback. Listing it would refetch on a
+    // language switch, which is a network round trip for the same data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [organizationId]);
 
     useEffect(() => {
@@ -168,10 +183,10 @@ export default function InvoiceHistory({
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Invoice History
+                    {t("historyTitle")}
                 </CardTitle>
                 <CardDescription>
-                    View and download your past invoices from Stripe
+                    {t("historySubtitle")}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -187,11 +202,11 @@ export default function InvoiceHistory({
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Description</TableHead>
-                                        <TableHead>Amount</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-end">Actions</TableHead>
+                                        <TableHead>{t("date")}</TableHead>
+                                        <TableHead>{t("description")}</TableHead>
+                                        <TableHead>{t("amount")}</TableHead>
+                                        <TableHead>{t("status")}</TableHead>
+                                        <TableHead className="text-end">{t("actions")}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -204,12 +219,16 @@ export default function InvoiceHistory({
                                                 {invoice.description}
                                                 {invoice.number && (
                                                     <span className="block text-xs text-muted-foreground">
-                                                        #{invoice.number}
+                                                        {t("invoiceNumber", { number: invoice.number })}
                                                     </span>
                                                 )}
                                             </TableCell>
                                             <TableCell className="font-medium whitespace-nowrap">
-                                                {formatCurrency(invoice.amount, invoice.currency)}
+                                                {formatCurrency(
+                                                    invoice.amount,
+                                                    invoice.currency,
+                                                    locale
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge
@@ -218,7 +237,7 @@ export default function InvoiceHistory({
                                                         STATUS_STYLES.UNKNOWN
                                                     }
                                                 >
-                                                    {invoice.status}
+                                                    {t(`statuses.${invoice.status}`)}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-end">
@@ -234,7 +253,7 @@ export default function InvoiceHistory({
                                                                 href={invoice.pdfUrl}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                title="Download PDF"
+                                                                title={t("downloadPdf")}
                                                             >
                                                                 <Download className="h-4 w-4" />
                                                             </a>
@@ -251,7 +270,7 @@ export default function InvoiceHistory({
                                                                 href={invoice.hostedUrl}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                title="View invoice"
+                                                                title={t("viewInvoice")}
                                                             >
                                                                 <ExternalLink className="h-4 w-4" />
                                                             </a>
@@ -278,7 +297,7 @@ export default function InvoiceHistory({
                                             Loading...
                                         </>
                                     ) : (
-                                        "Load More"
+                                        t("loadMore")
                                     )}
                                 </Button>
                             </div>

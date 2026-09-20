@@ -544,5 +544,159 @@
         "unexpected": "Something went wrong while updating the role."
       }
     }
+  },
+  "billing": {
+    "title": "Billing & Subscription",
+    "subtitle": "Manage your subscription plan and billing information",
+    "nonOwner": {
+      "title": "View-Only Access",
+      "body": "You can see the current plan and usage, but only the organization owner can manage billing, change plans or update payment methods.",
+      "ownerLabel": "Organization Owner"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "TRIALING": "Trial",
+      "PAST_DUE": "Past Due",
+      "CANCELED": "Canceled"
+    },
+    "current": {
+      "title": "Current Plan",
+      "defaultPlan": "Starter",
+      "renewsOn": "Renews on {date}",
+      "trialEndsOn": "Trial ends on {date}",
+      "pastDue": "Payment overdue — please update your payment method",
+      "accessEndsOn": "Access ends on {date}",
+      "freePlan": "You’re on the free Starter plan",
+      "manage": "Manage Subscription",
+      "carListings": "Car Listings",
+      "teamMembers": "Team Members",
+      "testDrives": "Test Drives (This Month)",
+      "portalFailed": "Couldn’t open the billing portal. Please try again."
+    },
+    "usage": {
+      "unlimited": "Unlimited",
+      "tooltipUnlimited": "{current} {label} used — no limit",
+      "tooltip": "{current} of {limit} used ({percent}) — {remaining} remaining",
+      "runningLow": "Running low?",
+      "upgradeLink": "Upgrade for more"
+    },
+    "banner": {
+      "trialEndsToday": "Your Trial Ends Today!",
+      "trialTitle": "Trial Period",
+      "trialEndingSoon": "Your trial is ending soon. Add a payment method to continue after it ends.",
+      "trialActive": "Your trial is active. Add a payment method to continue after it ends.",
+      "canceledTitle": "Subscription Canceled",
+      "canceled": "Your subscription has been canceled.",
+      "pastDueTitle": "Payment Failed",
+      "updatePayment": "Update Payment Method",
+      "dismiss": "Dismiss alert",
+      "pastDueBody": "Your last payment failed. Please update your payment method to avoid an interruption.",
+      "trialEndsInDays": "{count, plural, one {Trial Ends in {value} Day} other {Trial Ends in {value} Days}}",
+      "trialEndsOnBody": "Your trial ends on {date}. Add a payment method to keep using all features.",
+      "addPayment": "Add Payment Method",
+      "canceledWithDate": "Your subscription has been canceled. You keep your current plan’s features until {date}.",
+      "resubscribe": "Re-subscribe",
+      "freeTitle": "Free Plan",
+      "freeBody": "You’re on the free Starter plan. Upgrade to unlock more car listings, team members and premium features.",
+      "upgradeNow": "Upgrade Now",
+      "yourTrialEndsToday": "Your Trial Ends Today!",
+      "yourTrialEndsInDays": "{count, plural, one {Your Trial Ends in {value} Day} other {Your Trial Ends in {value} Days}}",
+      "canceledAccessEnds": "Your subscription has been canceled. Access ends on {date}."
+    },
+    "plans": {
+      "title": "Choose Your Plan",
+      "subtitle": "Pick the plan that fits your dealership",
+      "compare": "Compare",
+      "cards": "Cards",
+      "feature": "Feature",
+      "currentBadge": "Current Plan",
+      "currentShort": "Current",
+      "select": "Select",
+      "ownerOnly": "Owner Only",
+      "ownerOnlyLong": "Only the owner can change the plan",
+      "switchTo": "Switch to {plan}",
+      "changePlan": "Change Plan",
+      "confirm": "Confirm",
+      "perMonthShort": "mo",
+      "perYearShort": "yr",
+      "priceWithPeriod": "{price}/{period}",
+      "changeFailed": "Couldn’t change the plan. Please try again.",
+      "changed": "Your plan has been updated.",
+      "changedTitle": "Plan Updated",
+      "backToBilling": "Back to Billing",
+      "footerNote": "All plans include secure data storage and email support. <link>Contact sales</link> for custom solutions.",
+      "includedFeatures": "Included features:",
+      "switchDialogWithPrice": "Switch to <b>{plan}</b> for <b>{price}</b>?",
+      "switchDialogFree": "Switch to <b>{plan}</b>?",
+      "processing": "Processing…",
+      "switchedTo": "You’ve switched to the <b>{plan}</b> plan.",
+      "featuresActive": "Your new plan features are active now. Any billing change appears on your next invoice."
+    },
+    "payment": {
+      "title": "Payment Method",
+      "subtitle": "Manage the card your subscription is billed to",
+      "card": "Card",
+      "update": "Update",
+      "securedByStripe": "Secured by Stripe",
+      "unavailable": "Unable to load payment method",
+      "loadFailed": "Couldn’t load your payment method",
+      "brands": {
+        "amex": "American Express",
+        "diners": "Diners Club"
+      },
+      "onFile": "Your payment method on file for subscription billing",
+      "noneTitle": "No payment method on file",
+      "noneBody": "Add a payment method to subscribe to a paid plan",
+      "add": "Add Payment Method",
+      "endingIn": "{brand} ending in {last4}",
+      "expires": "Expires {month}/{year}",
+      "expiringSoon": "— Expiring soon",
+      "portalFailed": "Couldn’t open the billing portal. Please try again."
+    },
+    "invoices": {
+      "title": "Invoices",
+      "subtitle": "Your past invoices and receipts",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions",
+      "downloadPdf": "Download PDF",
+      "viewInvoice": "View invoice",
+      "loadMore": "Load More",
+      "emptyTitle": "No invoices yet",
+      "emptyBody": "Invoices appear here after your first payment",
+      "loadFailed": "Couldn’t load your invoices",
+      "historyTitle": "Invoice History",
+      "historySubtitle": "View and download your past invoices from Stripe",
+      "tryAgain": "Try Again",
+      "invoiceNumber": "#{number}",
+      "statuses": {
+        "PAID": "Paid",
+        "OPEN": "Open",
+        "DRAFT": "Draft",
+        "VOID": "Void",
+        "UNCOLLECTIBLE": "Uncollectible",
+        "UNKNOWN": "Unknown"
+      }
+    },
+    "history": {
+      "title": "Billing History",
+      "subtitle": "View your subscription changes and billing events",
+      "date": "Date",
+      "event": "Event",
+      "description": "Description",
+      "emptyTitle": "No billing history yet",
+      "loadFailed": "Couldn’t load your billing history",
+      "by": "By",
+      "needHelp": "Need help with billing? <link>Contact our billing team</link>",
+      "events": {
+        "SUBSCRIPTION_CREATED": "Created",
+        "SUBSCRIPTION_UPGRADED": "Upgraded",
+        "SUBSCRIPTION_DOWNGRADED": "Downgraded",
+        "SUBSCRIPTION_CANCELED": "Canceled",
+        "SUBSCRIPTION_RENEWED": "Renewed"
+      }
+    }
   }
 }

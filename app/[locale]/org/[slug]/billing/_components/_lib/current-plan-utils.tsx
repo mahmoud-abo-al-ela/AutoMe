@@ -17,7 +17,8 @@ export const STATUS_CONFIG: Partial<
     SubscriptionStatus,
     {
       badge: string;
-      badgeLabel: string;
+      /** Key under `org.billing.status`; the Prisma enum value itself. */
+      badgeLabelKey: string;
       cardBorder: string;
       icon: LucideIcon;
       iconColor: string;
@@ -26,28 +27,28 @@ export const STATUS_CONFIG: Partial<
 > = {
   ACTIVE: {
     badge: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    badgeLabel: "Active",
+    badgeLabelKey: "ACTIVE",
     cardBorder: "border-green-200 dark:border-green-800",
     icon: CheckCircle2,
     iconColor: "text-green-600",
   },
   TRIALING: {
     badge: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-    badgeLabel: "Trial",
+    badgeLabelKey: "TRIALING",
     cardBorder: "border-amber-200 dark:border-amber-800",
     icon: Clock,
     iconColor: "text-amber-600",
   },
   PAST_DUE: {
     badge: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    badgeLabel: "Past Due",
+    badgeLabelKey: "PAST_DUE",
     cardBorder: "border-red-300 dark:border-red-800",
     icon: AlertTriangle,
     iconColor: "text-red-600",
   },
   CANCELED: {
     badge: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
-    badgeLabel: "Canceled",
+    badgeLabelKey: "CANCELED",
     cardBorder: "border-gray-300 dark:border-gray-700",
     icon: XCircle,
     iconColor: "text-gray-500",

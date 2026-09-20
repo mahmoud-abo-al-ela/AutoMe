@@ -23,6 +23,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { createBillingPortalSession } from "@/actions/billing";
 import {
   STATUS_CONFIG,
@@ -44,6 +46,9 @@ export default function CurrentPlan({
   isOwner: boolean;
   organizationId: string;
 }) {
+  const t = useTranslations("org.billing.current");
+  const tStatus = useTranslations("org.billing.status");
+  const { locale } = useFormatters();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const pathname = usePathname();
   const plan = subscription?.plan;
@@ -63,10 +68,7 @@ export default function CurrentPlan({
       // the same defect as the onboarding checkout one, missed in that sweep.
       const result = await createBillingPortalSession(organizationId, pathname);
       if (!result.success) {
-        toast.error(
-          result.error.message ||
-            "Failed to open billing portal. Please try again."
-        );
+        toast.error(result.error.message || t("portalFailed"));
         setIsPortalLoading(false);
         return;
       }
@@ -74,8 +76,7 @@ export default function CurrentPlan({
     } catch (error) {
       console.error("Failed to open billing portal:", error);
       toast.error(
-        (error instanceof Error && error.message) ||
-          "Failed to open billing portal. Please try again."
+        (error instanceof Error && error.message) || t("portalFailed")
       );
       setIsPortalLoading(false);
     }
@@ -103,16 +104,16 @@ export default function CurrentPlan({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                Current Plan
+                {t("title")}
                 <Badge className={PLAN_COLORS[planType]}>
-                  {plan?.name || "Starter"}
+                  {plan?.name || t("defaultPlan")}
                 </Badge>
                 {statusConfig && (
                   <Badge className={statusConfig.badge}>
                     {StatusIcon && (
                       <StatusIcon className="h-3 w-3 me-1" />
                     )}
-                    {statusConfig.badgeLabel}
+                    {tStatus(statusConfig.badgeLabelKey)}
                   </Badge>
                 )}
               </CardTitle>
@@ -120,36 +121,41 @@ export default function CurrentPlan({
                 {subscription && status === "ACTIVE" && subscription.currentPeriodEnd && (
                   <span className="flex items-center gap-1">
                     <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                    Renews on {formatDate(subscription.currentPeriodEnd)}
+                    {t("renewsOn", {
+                      date: formatDate(subscription.currentPeriodEnd, locale),
+                    })}
                   </span>
                 )}
                 {subscription && status === "TRIALING" && (
                   <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                     <Clock className="h-3.5 w-3.5" />
-                    Trial ends on{" "}
                     {/* A TRIALING subscription with neither date set would be a
                         data anomaly; previously it rendered the epoch. */}
-                    {formatDate(
-                      (subscription.trialEndsAt ||
-                        subscription.currentPeriodEnd)!
-                    )}
+                    {t("trialEndsOn", {
+                      date: formatDate(
+                        (subscription.trialEndsAt ||
+                          subscription.currentPeriodEnd)!,
+                        locale
+                      ),
+                    })}
                   </span>
                 )}
                 {status === "PAST_DUE" && (
                   <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
                     <AlertTriangle className="h-3.5 w-3.5" />
-                    Payment overdue — please update your payment method
+                    {t("pastDue")}
                   </span>
                 )}
                 {subscription && status === "CANCELED" && subscription.currentPeriodEnd && (
                   <span className="flex items-center gap-1 text-gray-500">
                     <XCircle className="h-3.5 w-3.5" />
-                    Access ends on{" "}
-                    {formatDate(subscription.currentPeriodEnd)}
+                    {t("accessEndsOn", {
+                      date: formatDate(subscription.currentPeriodEnd, locale),
+                    })}
                   </span>
                 )}
                 {!subscription && (
-                  <span>You&apos;re on the free Starter plan</span>
+                  <span>{t("freePlan")}</span>
                 )}
               </CardDescription>
             </div>
@@ -165,7 +171,7 @@ export default function CurrentPlan({
                   ) : (
                     <Settings className="h-4 w-4 me-2" />
                   )}
-                  Manage Subscription
+                  {t("manage")}
                 </Button>
               )}
             </div>
@@ -175,19 +181,19 @@ export default function CurrentPlan({
           <div className="grid gap-6 md:grid-cols-3">
             <UsageBar
               icon={Car}
-              label="Car Listings"
+              label={t("carListings")}
               current={usage.carCount}
               limit={plan?.maxCars ?? 0}
             />
             <UsageBar
               icon={Users}
-              label="Team Members"
+              label={t("teamMembers")}
               current={usage.memberCount}
               limit={plan?.maxMembers ?? 0}
             />
             <UsageBar
               icon={Calendar}
-              label="Test Drives (This Month)"
+              label={t("testDrives")}
               current={usage.testDriveCount}
               limit={-1}
             />

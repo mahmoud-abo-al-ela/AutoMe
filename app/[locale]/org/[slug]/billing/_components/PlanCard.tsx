@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -8,7 +10,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
-import { formatPrice, getFeatures, PLAN_CONFIG } from "./_lib/plan-display";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { PLAN_CONFIG } from "./_lib/plan-display";
+import {
+  planFeatureKeys,
+  planKeyFor,
+  formatPlanPrice,
+} from "@/components/Pricing/pricing-plans";
 import type { PlanType } from "@/lib/generated/prisma";
 import type { BillingPlan } from "./_lib/billing-types";
 
@@ -35,24 +44,41 @@ export default function PlanCard({
   isOwner: boolean;
   onSelect: (plan: BillingPlan) => void;
 }) {
+  const t = useTranslations("org.billing.plans");
+  const tPlans = useTranslations("plans");
+  const { number, locale } = useFormatters();
   const Icon = config.icon;
+
+  // The plan name and its feature bullets come from the same source the
+  // marketing pricing cards and the onboarding wizard read. A DB plan with an
+  // unrecognised `type` has no key, so it falls back to the untranslated name
+  // rather than rendering blank.
+  const planKey = planKeyFor(plan.type);
+  const name = planKey ? tPlans(`plans.${planKey}.name`) : plan.name;
+  const features = planFeatureKeys(plan);
+  const price = formatPlanPrice(plan, billingCycle, locale);
+
+  // The limit a bullet quotes is formatted here rather than left to ICU,
+  // which would use the bare `ar` tag and render Western digits.
+  const featureParams = (feature: (typeof features)[number]) =>
+    feature.params ? { value: number(feature.params.count) } : undefined;
 
   return (
     <Card
       className={`relative transition-all duration-300 hover:shadow-lg mt-6 min-w-[280px] snap-center ${isCurrent ? "ring-2 ring-green-600 shadow-md" : config.border
         } ${isPro && !isCurrent ? "md:scale-105 md:z-10" : ""}`}
     >
-      {config.badge && !isCurrent && (
+      {config.badgeKey && !isCurrent && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
           <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1">
-            {config.badge}
+            {tPlans(config.badgeKey)}
           </Badge>
         </div>
       )}
       {isCurrent && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
           <Badge className="bg-green-600 hover:bg-green-700 text-white px-3 py-1">
-            Current Plan
+            {t("currentBadge")}
           </Badge>
         </div>
       )}
@@ -62,27 +88,25 @@ export default function PlanCard({
           <div className={`p-2 rounded-lg bg-background/80 ${config.color}`}>
             <Icon className="h-5 w-5" />
           </div>
-          <CardTitle className="text-xl">{plan.name}</CardTitle>
+          <CardTitle className="text-xl">{name}</CardTitle>
         </div>
         <div className="pt-2">
           {displayPrice === 0 ? (
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold">Free</span>
+              <span className="text-4xl font-bold">{tPlans("free")}</span>
             </div>
           ) : (
             <div>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold">
-                  {formatPrice(displayPrice)}
-                </span>
+                <span className="text-4xl font-bold">{price}</span>
                 <span className="text-muted-foreground text-sm">
-                  /{billingCycle === "yearly" ? "year" : "month"}
+                  {tPlans(billingCycle === "yearly" ? "perYear" : "perMonth")}
                 </span>
               </div>
               {billingCycle === "yearly" && savings > 0 && (
                 <div className="mt-1">
                   <Badge variant="secondary" className="text-xs">
-                    Save {savings}%
+                    {tPlans("save", { percentage: number(savings) })}
                   </Badge>
                 </div>
               )}
@@ -93,8 +117,8 @@ export default function PlanCard({
 
       <CardContent className="pb-4">
         <ul className="space-y-2.5">
-          {getFeatures(plan).map((feature, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm">
+          {features.map((feature) => (
+            <li key={feature.key} className="flex items-start gap-2 text-sm">
               {feature.included ? (
                 <Check className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0 mt-0.5" />
               ) : (
@@ -103,7 +127,7 @@ export default function PlanCard({
               <span
                 className={feature.included ? "" : "text-muted-foreground"}
               >
-                {feature.name}
+                {tPlans(`features.${feature.key}`, featureParams(feature))}
               </span>
             </li>
           ))}
@@ -115,7 +139,7 @@ export default function PlanCard({
           isCurrent ? (
             <Button className="w-full" variant="outline" disabled>
               <Check className="h-4 w-4 me-2" />
-              Current Plan
+              {t("currentBadge")}
             </Button>
           ) : (
             <Button
@@ -123,12 +147,12 @@ export default function PlanCard({
               variant={isPro ? "default" : "outline"}
               onClick={() => onSelect(plan)}
             >
-              Switch to {plan.name}
+              {t("switchTo", { plan: name })}
             </Button>
           )
         ) : (
           <Button className="w-full" variant="outline" disabled>
-            Only Owner Can Change
+            {t("ownerOnlyLong")}
           </Button>
         )}
       </CardFooter>
