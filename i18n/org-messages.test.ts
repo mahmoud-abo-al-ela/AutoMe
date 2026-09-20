@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import enOrg from "@/messages/en/org.json";
 import arOrg from "@/messages/ar/org.json";
+import enCarAttributes from "@/messages/en/carAttributes.json";
+import arCarAttributes from "@/messages/ar/carAttributes.json";
 import { sidebarItems } from "@/lib/SidebarConfig";
 
 /**
@@ -31,9 +33,16 @@ describe("org messages", () => {
     );
   });
 
-  it("translates every key", () => {
+  it("translates every key, bar the ones that carry no words", () => {
+    // Pure punctuation around already-formatted values. There is nothing in
+    // either to translate, and the bracket direction is the renderer's job.
+    const NOT_LANGUAGE = new Set([
+      "dashboard.funnel.share",
+      "dashboard.inventory.legend",
+    ]);
+
     const untranslated = flatten(enOrg)
-      .filter(([key, value]) => at(arOrg, key) === value)
+      .filter(([key, value]) => !NOT_LANGUAGE.has(key) && at(arOrg, key) === value)
       .map(([key]) => key);
 
     expect(untranslated).toEqual([]);
@@ -74,6 +83,40 @@ describe("sidebar config and messages agree", () => {
         at(messages, `nav.${item.labelKey}`),
         `missing nav.${item.labelKey}`
       ).toBeTruthy();
+    }
+  });
+});
+
+describe("dashboard messages cover every series the charts render", () => {
+  // The chart configs name their series by key. A series added to a chart
+  // without its label renders the raw key in the legend, which no type check
+  // catches.
+  it.each(["en", "ar"] as const)("names every overview series in %s", (locale) => {
+    const messages = locale === "en" ? enOrg : arOrg;
+
+    for (const series of ["users", "cars", "testDrives"]) {
+      expect(at(messages, `dashboard.overview.series.${series}`)).toBeTruthy();
+    }
+  });
+
+  it.each(["en", "ar"] as const)("names every time range in %s", (locale) => {
+    const messages = locale === "en" ? enOrg : arOrg;
+
+    for (const range of ["last7", "last14", "last30", "last90"]) {
+      expect(at(messages, `dashboard.ranges.${range}`)).toBeTruthy();
+    }
+  });
+
+  it.each(["en", "ar"] as const)("names every car status in %s", (locale) => {
+    // The inventory pie and the popular-cars badges both read these. They
+    // live in carAttributes because a car status is a car attribute, not a
+    // dashboard one — carDetail still carries its own copy under
+    // "badges.status*", which should fold into this when the cars surface is
+    // translated.
+    const messages = locale === "en" ? enCarAttributes : arCarAttributes;
+
+    for (const status of ["AVAILABLE", "SOLD", "UNAVAILABLE"]) {
+      expect(at(messages, `status.${status}`)).toBeTruthy();
     }
   });
 });

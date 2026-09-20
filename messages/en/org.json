@@ -48,5 +48,83 @@
     },
     "noPlan": "You don’t have an active plan yet.",
     "noPlanBody": "Choose a plan to unlock {resource}."
+  },
+  "dashboard": {
+    "meta": {
+      "title": "Dashboard",
+      "description": "Your dealership at a glance"
+    },
+    "title": "Dashboard",
+    "subtitle": "Welcome back — here’s what’s happening with your dealership.",
+    "tabs": {
+      "overview": "Overview",
+      "analytics": "Analytics"
+    },
+    "stats": {
+      "users": "Total Users",
+      "cars": "Cars Listed",
+      "testDrives": "Test Drives"
+    },
+    "ranges": {
+      "label": "Select a time range",
+      "last7": "Last 7 days",
+      "last14": "Last 14 days",
+      "last30": "Last 30 days",
+      "last90": "Last 3 months"
+    },
+    "overview": {
+      "title": "Overview",
+      "description": "Users, cars, and test drives over time",
+      "emptyDescription": "No data available",
+      "emptyBody": "No chart data available",
+      "series": {
+        "users": "Users",
+        "cars": "Cars",
+        "testDrives": "Test Drives"
+      }
+    },
+    "analytics": {
+      "totalValue": "Total Inventory Value",
+      "averagePrice": "Average Car Price",
+      "conversionRate": "Conversion Rate",
+      "conversionRateNote": "Requests to confirmed",
+      "addedThisMonth": "Cars Added (This Month)",
+      "overall": "Overall",
+      "vsLastMonth": "{percent} vs last month"
+    },
+    "funnel": {
+      "title": "Test Drive Funnel",
+      "description": "Conversion rates across the test drive pipeline",
+      "total": "Total Requests",
+      "confirmed": "Confirmed Test Drives",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "share": "({percent})",
+      "shareOfTotal": "({percent} of total)",
+      "shareOfConfirmed": "({percent} of confirmed)"
+    },
+    "popularCars": {
+      "title": "Popular Cars",
+      "description": "Most wishlisted inventory",
+      "descriptionTop": "Top {count} most wishlisted inventory",
+      "emptyTitle": "No wishlisted cars yet",
+      "emptyBody": "When users save cars to their wishlist, they will appear here.",
+      "saved": "Saved by {count}"
+    },
+    "inventory": {
+      "title": "Inventory Status",
+      "description": "Breakdown by availability",
+      "emptyTitle": "No inventory yet",
+      "emptyBody": "Add cars to see your inventory breakdown.",
+      "totalCars": "Total Cars",
+      "legend": "{value} ({percent})"
+    },
+    "trends": {
+      "title": "Test Drive Trends",
+      "description": "Booking volume by status over time",
+      "emptyDescription": "Volume over time",
+      "emptyTitle": "No test drive data",
+      "emptyBody": "Trends will appear once customers start booking test drives."
+    }
   }
 }

@@ -141,5 +141,10 @@
     "seats": "Seats",
     "location": "Location",
     "status": "Status"
+  },
+  "status": {
+    "AVAILABLE": "Available",
+    "SOLD": "Sold",
+    "UNAVAILABLE": "Unavailable"
   }
 }

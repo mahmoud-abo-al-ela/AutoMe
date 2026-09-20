@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -14,37 +16,43 @@ export type InventoryBreakdownData = {
   unavailable: number;
 };
 
+// Module scope, so the identity is stable: built inside the component it was
+// a fresh object every render, which made it useless as a memo dependency.
+const STATUS_COLORS = {
+  available: "#10b981", // emerald-500
+  sold: "#3b82f6", // blue-500
+  unavailable: "#94a3b8", // slate-400
+};
+
 const InventoryBreakdown = ({
   breakdown,
 }: {
   breakdown: InventoryBreakdownData | null | undefined;
 }) => {
-  const STATUS_COLORS = {
-    available: "#10b981", // emerald-500
-    sold: "#3b82f6", // blue-500
-    unavailable: "#94a3b8", // slate-400
-  };
+  const t = useTranslations("org.dashboard.inventory");
+  const tStatus = useTranslations("carAttributes.status");
+  const { number } = useFormatters();
 
   const chartData = useMemo(() => {
     if (!breakdown) return [];
     return [
-      { name: "Available", value: breakdown.available, fill: STATUS_COLORS.available },
-      { name: "Sold", value: breakdown.sold, fill: STATUS_COLORS.sold },
-      { name: "Unavailable", value: breakdown.unavailable, fill: STATUS_COLORS.unavailable },
+      { name: tStatus("AVAILABLE"), value: breakdown.available, fill: STATUS_COLORS.available },
+      { name: tStatus("SOLD"), value: breakdown.sold, fill: STATUS_COLORS.sold },
+      { name: tStatus("UNAVAILABLE"), value: breakdown.unavailable, fill: STATUS_COLORS.unavailable },
     ].filter(item => item.value > 0);
-  }, [breakdown]);
+  }, [breakdown, tStatus]);
 
   const chartConfig = {
     available: {
-      label: "Available",
+      label: tStatus("AVAILABLE"),
       color: STATUS_COLORS.available,
     },
     sold: {
-      label: "Sold",
+      label: tStatus("SOLD"),
       color: STATUS_COLORS.sold,
     },
     unavailable: {
-      label: "Unavailable",
+      label: tStatus("UNAVAILABLE"),
       color: STATUS_COLORS.unavailable,
     },
   };
@@ -53,16 +61,16 @@ const InventoryBreakdown = ({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Inventory Status</CardTitle>
-          <CardDescription>Breakdown by availability</CardDescription>
+          <CardTitle>{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center h-[300px]">
           <div className="bg-muted rounded-full p-4 mb-4">
             <CarFront className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-lg font-medium">No inventory yet</p>
+          <p className="text-lg font-medium">{t("emptyTitle")}</p>
           <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
-            Add cars to see your inventory breakdown.
+            {t("emptyBody")}
           </p>
         </CardContent>
       </Card>
@@ -72,8 +80,8 @@ const InventoryBreakdown = ({
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
-        <CardTitle>Inventory Status</CardTitle>
-        <CardDescription>Breakdown by availability</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-4 flex flex-col justify-center">
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px] w-full">
@@ -107,7 +115,7 @@ const InventoryBreakdown = ({
                 dominantBaseline="middle"
                 className="fill-foreground font-bold text-3xl"
               >
-                {breakdown.total}
+                {number(breakdown.total)}
               </text>
               <text 
                 x="50%" 
@@ -116,7 +124,7 @@ const InventoryBreakdown = ({
                 dominantBaseline="middle"
                 className="fill-muted-foreground text-xs"
               >
-                Total Cars
+                {t("totalCars")}
               </text>
             </PieChart>
           </ResponsiveContainer>
@@ -125,7 +133,10 @@ const InventoryBreakdown = ({
         {/* Custom Legend */}
         <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
           {chartData.map((entry, index) => {
-            const percentage = ((entry.value / breakdown.total) * 100).toFixed(1);
+            const percentage = number(entry.value / breakdown.total, {
+              style: "percent",
+              maximumFractionDigits: 1,
+            });
             return (
               <div key={index} className="flex items-center gap-2">
                 <div 
@@ -134,7 +145,9 @@ const InventoryBreakdown = ({
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-medium">{entry.name}</span>
-                  <span className="text-micro text-muted-foreground">{entry.value} ({percentage}%)</span>
+                  <span className="text-micro text-muted-foreground">
+                    {t("legend", { value: number(entry.value), percent: percentage })}
+                  </span>
                 </div>
               </div>
             );

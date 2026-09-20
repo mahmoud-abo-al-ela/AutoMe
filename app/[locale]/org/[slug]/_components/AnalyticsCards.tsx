@@ -1,10 +1,11 @@
 "use client";
-import { formatCarPrice } from "@/lib/utils/currency";
 
 import React, { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Car, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 
 /** Revenue metrics from the dashboard repository, via getAnalytics(). */
 export type RevenueMetrics = {
@@ -27,10 +28,10 @@ export type ConversionFunnelData = {
 // Helper for animated numbers
 const AnimatedNumber = ({
   value,
-  formatter = (v: number) => v.toString(),
+  formatter,
 }: {
   value: number;
-  formatter?: (v: number) => string;
+  formatter: (v: number) => string;
 }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const currentValueRef = useRef(0);
@@ -44,11 +45,11 @@ const AnimatedNumber = ({
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      
+
       // Easing function (easeOutQuart)
       const easeProgress = 1 - Math.pow(1 - progress, 4);
       const currentValue = startValue + (value - startValue) * easeProgress;
-      
+
       currentValueRef.current = currentValue;
       setDisplayValue(currentValue);
 
@@ -72,15 +73,29 @@ const AnimatedNumber = ({
   return <span>{formatter(displayValue)}</span>;
 };
 
-const TrendBadge = ({ value, label = "" }: { value: number; label?: string }) => {
+/**
+ * `value` decides the direction, `label` carries the already-translated,
+ * already-formatted sentence — the percentage inside it has to be formatted
+ * before it reaches the message, or it renders Western digits on an otherwise
+ * Eastern-numeral card.
+ */
+const TrendBadge = ({ value, label }: { value: number; label: string }) => {
   const isPositive = value >= 0;
   return (
-    <div className={cn(
-      "flex items-center text-xs font-medium px-2 py-0.5 rounded-full",
-      isPositive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-    )}>
-      {isPositive ? <TrendingUp className="h-3 w-3 me-1" /> : <TrendingUp className="h-3 w-3 me-1 rotate-180" />}
-      {Math.abs(value)}% {label}
+    <div
+      className={cn(
+        "flex items-center text-xs font-medium px-2 py-0.5 rounded-full",
+        isPositive
+          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+      )}
+    >
+      {isPositive ? (
+        <TrendingUp className="h-3 w-3 me-1" />
+      ) : (
+        <TrendingUp className="h-3 w-3 me-1 rotate-180" />
+      )}
+      {label}
     </div>
   );
 };
@@ -92,6 +107,9 @@ const AnalyticsCards = ({
   revenue: RevenueMetrics | null | undefined;
   conversionFunnel: ConversionFunnelData | null;
 }) => {
+  const t = useTranslations("org.dashboard");
+  const { price, number } = useFormatters();
+
   // Calculate inventory growth trend
   const lastMonth = revenue?.addedLastMonth || 0;
   const thisMonth = revenue?.addedThisMonth || 0;
@@ -103,11 +121,18 @@ const AnalyticsCards = ({
   }
 
   // These aggregate Car.price, so they are EGP like every other car figure.
-  const formatCurrency = (val: number) => formatCarPrice(val);
+  // Previously called without a locale, which meant the analytics cards were
+  // the one place prices ignored the reader's.
+  const formatCurrency = (val: number) => price(val);
+
+  // Rates arrive as 0-100, so they are divided back down: `style: "percent"`
+  // takes a fraction, and it is what places the sign correctly in Arabic.
+  const formatRate = (val: number) =>
+    number(val / 100, { style: "percent", maximumFractionDigits: 1 });
 
   const cards = [
     {
-      title: "Total Inventory Value",
+      title: t("analytics.totalValue"),
       value: revenue?.totalValue || 0,
       formatter: formatCurrency,
       icon: DollarSign,
@@ -115,31 +140,34 @@ const AnalyticsCards = ({
       iconBg: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
     },
     {
-      title: "Average Car Price",
+      title: t("analytics.averagePrice"),
       value: revenue?.averagePrice || 0,
       formatter: formatCurrency,
       icon: TrendingUp,
       color: "from-emerald-500 to-emerald-600",
-      iconBg: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+      iconBg:
+        "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
     },
     {
-      title: "Conversion Rate",
+      title: t("analytics.conversionRate"),
       value: conversionFunnel?.confirmedRate || 0,
-      formatter: (v: number) => `${v.toFixed(1)}%`,
+      formatter: formatRate,
       icon: Percent,
       color: "from-purple-500 to-purple-600",
-      iconBg: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-      description: "Requests to confirmed"
+      iconBg:
+        "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+      description: t("analytics.conversionRateNote"),
     },
     {
-      title: "Cars Added (This Month)",
+      title: t("analytics.addedThisMonth"),
       value: revenue?.addedThisMonth || 0,
-      formatter: (v: number) => Math.round(v).toString(),
+      formatter: (v: number) => number(Math.round(v)),
       icon: Car,
       color: "from-amber-500 to-amber-600",
-      iconBg: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-      trend: inventoryTrend
-    }
+      iconBg:
+        "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+      trend: inventoryTrend,
+    },
   ];
 
   return (
@@ -154,7 +182,10 @@ const AnalyticsCards = ({
                 </p>
                 <div className="flex items-center gap-2">
                   <h3 className="text-2xl font-bold tracking-tight text-foreground">
-                    <AnimatedNumber value={card.value} formatter={card.formatter} />
+                    <AnimatedNumber
+                      value={card.value}
+                      formatter={card.formatter}
+                    />
                   </h3>
                 </div>
               </div>
@@ -162,17 +193,33 @@ const AnalyticsCards = ({
                 <card.icon className="h-5 w-5" />
               </div>
             </div>
-            
+
             <div className="mt-4 flex items-center text-sm">
               {card.trend !== undefined ? (
-                <TrendBadge value={card.trend} label="vs last month" />
+                <TrendBadge
+                  value={card.trend}
+                  label={t("analytics.vsLastMonth", {
+                    percent: number(card.trend / 100, {
+                      style: "percent",
+                      maximumFractionDigits: 0,
+                      signDisplay: "exceptZero",
+                    }),
+                  })}
+                />
               ) : (
-                <span className="text-muted-foreground">{card.description || "Overall"}</span>
+                <span className="text-muted-foreground">
+                  {card.description || t("analytics.overall")}
+                </span>
               )}
             </div>
-            
+
             {/* Decorative background gradient line */}
-            <div className={cn("absolute bottom-0 start-0 end-0 h-1 bg-gradient-to-r", card.color)} />
+            <div
+              className={cn(
+                "absolute bottom-0 start-0 end-0 h-1 bg-gradient-to-r",
+                card.color
+              )}
+            />
           </CardContent>
         </Card>
       ))}
