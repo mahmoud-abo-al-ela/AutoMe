@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
     Card,
     CardContent,
@@ -70,6 +72,9 @@ export const CarFormPresenter = ({
     maxImages = 5,
     isEditMode = false,
 }: CarFormPresenterProps) => {
+    const t = useTranslations("org.carForm.form");
+    const tSection = useTranslations("org.carForm.sections");
+    const { number } = useFormatters();
     const themeColors = getThemeColors(isAIMode);
     const { register, formState: { errors }, watch, setValue, trigger } = form;
 
@@ -97,7 +102,7 @@ export const CarFormPresenter = ({
                                         : themeColors.stepLabelInactive
                                     }`}
                             >
-                                {section.label}
+                                {tSection(section.id)}
                             </span>
                         </div>
                     ))}
@@ -106,9 +111,13 @@ export const CarFormPresenter = ({
                 {/* Mobile section indicator */}
                 <div className="sm:hidden flex items-center justify-center mb-4">
                     <span className={`${themeColors.stepLabelActive}`}>
-                        {formSections.find((s) => s.id === currentSection)?.label} (
-                        {formSections.findIndex((s) => s.id === currentSection) + 1}/
-                        {formSections.length})
+                        {t("step", {
+                            name: tSection(currentSection),
+                            current: number(
+                                formSections.findIndex((s) => s.id === currentSection) + 1
+                            ),
+                            total: number(formSections.length),
+                        })}
                     </span>
                 </div>
 
@@ -140,17 +149,17 @@ export const CarFormPresenter = ({
                                     />
                                 )}
                                 {isEditMode
-                                    ? "Edit Car Information"
+                                    ? t("titleEdit")
                                     : isAIMode
-                                    ? "AI-Extracted Car Information"
-                                    : "Car Information"}
+                                    ? t("titleAi")
+                                    : t("titleAdd")}
                             </CardTitle>
                             <CardDescription className="text-sm">
                                 {isEditMode
-                                    ? "Update the details for this vehicle listing"
+                                    ? t("subtitleEdit")
                                     : isAIMode
-                                    ? "Review and edit the AI-extracted details before submitting"
-                                    : "Enter all the details about the car you want to list"}
+                                    ? t("subtitleAi")
+                                    : t("subtitleAdd")}
                             </CardDescription>
                             {isAIMode && aiConfidence && (
                                 <div className="mt-2">
@@ -180,7 +189,7 @@ export const CarFormPresenter = ({
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={URL.createObjectURL(uploadedImage)}
-                                            alt="Uploaded car"
+                                            alt={t("uploadedAlt")}
                                             className="w-12 h-12 object-cover rounded-md border"
                                         />
                                         <span className="text-xs text-gray-500">
@@ -269,7 +278,7 @@ export const CarFormPresenter = ({
                                     formSections.findIndex((s) => s.id === currentSection) === 0
                                 }
                             >
-                                Previous
+                                {t("previous")}
                             </Button>
 
                             {currentSection !== formSections[formSections.length - 1].id ? (
@@ -282,7 +291,7 @@ export const CarFormPresenter = ({
                                     }}
                                     className="cursor-pointer text-sm sm:text-base px-3 sm:px-4 h-10"
                                 >
-                                    Next
+                                    {t("next")}
                                 </Button>
                             ) : (
                                 <Button
@@ -292,11 +301,11 @@ export const CarFormPresenter = ({
                                 >
                                     {loading
                                         ? isEditMode
-                                            ? "Updating Car..."
-                                            : "Adding Car..."
+                                            ? t("submittingEdit")
+                                            : t("submittingAdd")
                                         : isEditMode
-                                        ? "Update Car"
-                                        : "Add Car"}
+                                        ? t("submitEdit")
+                                        : t("submitAdd")}
                                 </Button>
                             )}
                         </div>

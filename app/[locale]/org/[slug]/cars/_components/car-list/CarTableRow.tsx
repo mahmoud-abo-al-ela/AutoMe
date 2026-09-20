@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
-import { formatCarPrice } from "@/lib/utils/currency";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,9 @@ const CarTableRow = ({
   onUpdateCar,
   onConfirmDelete,
 }: CarRowProps) => {
+  const t = useTranslations("org.cars");
+  const tStatus = useTranslations("carAttributes.status");
+  const { price, number, date } = useFormatters();
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug;
@@ -87,7 +91,7 @@ const CarTableRow = ({
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:gap-3 text-xs md:text-sm text-gray-500 mt-1">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 md:h-4 md:w-4" />
-                <span>{car.year}</span>
+                <span>{number(car.year, { useGrouping: false })}</span>
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="h-3 w-3 md:h-4 md:w-4" />
@@ -97,7 +101,7 @@ const CarTableRow = ({
               </div>
               <div className="flex md:hidden items-center gap-1 bg-green-50 px-2 py-1 rounded">
                 <span className="font-semibold text-green-700 text-sm">
-                  {formatCarPrice(Number(car.price))}
+                  {price(Number(car.price))}
                 </span>
               </div>
               <div className="flex md:hidden">
@@ -105,7 +109,7 @@ const CarTableRow = ({
               </div>
               <div className="hidden lg:flex items-center gap-1">
                 <span className="text-xs text-gray-500">
-                  Added: {new Date(car.createdAt).toLocaleDateString()}
+                  {t("table.added", { date: date(car.createdAt) })}
                 </span>
               </div>
             </div>
@@ -116,7 +120,7 @@ const CarTableRow = ({
         <div className="space-y-2">
           <div className="flex items-center gap-1">
             <span className="font-bold text-base md:text-lg text-gray-900">
-              {formatCarPrice(Number(car.price))}
+              {price(Number(car.price))}
             </span>
           </div>
         </div>
@@ -131,12 +135,12 @@ const CarTableRow = ({
           {car.featured ? (
             <div className="flex items-center gap-1 bg-yellow-500/20 p-2 rounded-md">
               <Star className="h-4 w-4 text-yellow-400" size={20} />
-              <span className="text-xs text-gray-500">Featured</span>
+              <span className="text-xs text-gray-500">{t("table.featured")}</span>
             </div>
           ) : (
             <div className="flex items-center gap-1 bg-gray-500/20 p-2 rounded-md">
               <XCircle className="h-4 w-4 text-gray-600" size={20} />
-              <span className="text-xs text-gray-500">Not Featured</span>
+              <span className="text-xs text-gray-500">{t("table.notFeatured")}</span>
             </div>
           )}
         </div>
@@ -151,7 +155,7 @@ const CarTableRow = ({
                 className="h-7 w-7 sm:h-8 sm:w-8 p-0 relative cursor-pointer"
                 disabled={isCarDisabled}
               >
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t("rowActions.openMenu")}</span>
                 {isThisCarUpdating || isThisCarDeleting ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
                 ) : (
@@ -164,7 +168,7 @@ const CarTableRow = ({
               className="w-40 sm:w-48 bg-white border shadow-lg"
             >
               <DropdownMenuLabel className="text-xs sm:text-sm">
-                Actions
+                {t("rowActions.label")}
               </DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() => window.open(`/cars/${car.id}`, "_blank")}
@@ -172,7 +176,7 @@ const CarTableRow = ({
                 disabled={isCarDisabled}
               >
                 <Eye className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">View</span>
+                <span className="text-xs sm:text-sm">{t("rowActions.view")}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push(`/org/${slug}/cars/${car.id}/edit`)}
@@ -180,7 +184,7 @@ const CarTableRow = ({
                 disabled={isCarDisabled}
               >
                 <Pencil className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Edit</span>
+                <span className="text-xs sm:text-sm">{t("rowActions.edit")}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>
@@ -194,12 +198,14 @@ const CarTableRow = ({
               >
                 <Star className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="text-xs sm:text-sm">
-                  {car.featured ? "Unfeature" : "Feature"}
+                  {car.featured
+                    ? t("rowActions.unfeature")
+                    : t("rowActions.feature")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs sm:text-sm">
-                Status
+                {t("rowActions.statusLabel")}
               </DropdownMenuLabel>
               {carStatus !== "available" && (
                 <DropdownMenuItem
@@ -213,7 +219,7 @@ const CarTableRow = ({
                   disabled={isCarDisabled}
                 >
                   <CheckCircle className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                  <span className="text-xs sm:text-sm">Available</span>
+                  <span className="text-xs sm:text-sm">{tStatus("AVAILABLE")}</span>
                 </DropdownMenuItem>
               )}{" "}
               {carStatus !== "sold" && (
@@ -228,7 +234,7 @@ const CarTableRow = ({
                   disabled={isCarDisabled}
                 >
                   <XCircle className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
-                  <span className="text-xs sm:text-sm">Sold</span>
+                  <span className="text-xs sm:text-sm">{tStatus("SOLD")}</span>
                 </DropdownMenuItem>
               )}{" "}
               {carStatus !== "unavailable" && (
@@ -243,7 +249,7 @@ const CarTableRow = ({
                   disabled={isCarDisabled}
                 >
                   <Clock className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
-                  <span className="text-xs sm:text-sm">Unavailable</span>
+                  <span className="text-xs sm:text-sm">{tStatus("UNAVAILABLE")}</span>
                 </DropdownMenuItem>
               )}{" "}
               <DropdownMenuSeparator />
@@ -253,7 +259,7 @@ const CarTableRow = ({
                 disabled={isCarDisabled}
               >
                 <Trash2 className="me-1 sm:me-2 h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="text-xs sm:text-sm">Delete</span>
+                <span className="text-xs sm:text-sm">{t("rowActions.delete")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

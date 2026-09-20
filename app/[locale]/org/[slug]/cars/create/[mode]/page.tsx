@@ -8,11 +8,13 @@ import { ArrowLeft, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { getCarPlanLimits } from "@/actions/cars";
+import { useTranslations } from "next-intl";
 
 const readParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
 const CreateCarByModePage = () => {
+  const t = useTranslations("org.carForm.modePage");
   const params = useParams();
   const router = useRouter();
   const slug = readParam(params.slug);
@@ -61,31 +63,29 @@ const CreateCarByModePage = () => {
             onClick={goBack}
             className="hover:bg-slate-100"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
           </Button>
-          <h1 className="text-2xl font-bold">AI-Powered Car Upload</h1>
+          <h1 className="text-2xl font-bold">{t("aiTitle")}</h1>
         </div>
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="bg-amber-50 w-20 h-20 rounded-full flex items-center justify-center mb-6">
             <Lock className="h-10 w-10 text-amber-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            AI Upload Requires a Paid Plan
+            {t("lockedTitle")}
           </h2>
           <p className="text-gray-500 max-w-md mb-6">
-            Upgrade to the Pro or Enterprise plan to unlock AI-powered car
-            uploads with automatic detail extraction, market price estimation,
-            and feature recognition.
+            {t("lockedBody")}
           </p>
           <div className="flex gap-3">
             <Button variant="outline" onClick={goBack}>
-              Go Back
+              {t("goBack")}
             </Button>
             <Button
               onClick={() => router.push(`/org/${slug}/billing`)}
               className="bg-purple-600 hover:bg-purple-700"
             >
-              Upgrade Plan
+              {t("upgrade")}
             </Button>
           </div>
         </div>
@@ -104,9 +104,9 @@ const CreateCarByModePage = () => {
             onClick={goBack}
             className="hover:bg-slate-100"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
           </Button>
-          <h1 className="text-2xl font-bold">AI-Powered Car Upload</h1>
+          <h1 className="text-2xl font-bold">{t("aiTitle")}</h1>
         </div>
         <div className="flex items-center justify-center py-16">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
@@ -124,10 +124,10 @@ const CreateCarByModePage = () => {
           onClick={goBack}
           className="hover:bg-slate-100"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
         </Button>
         <h1 className="text-2xl font-bold">
-          {mode === "manual" ? "Manual Car Entry" : "AI-Powered Car Upload"}
+          {mode === "manual" ? t("manualTitle") : t("aiTitle")}
         </h1>
       </div>
 

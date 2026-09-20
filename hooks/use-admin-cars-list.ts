@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tansta
 import { queryKeys } from "@/lib/query-client";
 import { getCars, deleteCar, updateCar } from "@/actions/cars";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { SerializedCar } from "@/lib/utils/serializers";
 
@@ -19,6 +20,7 @@ function messageOf(error: unknown): string | undefined {
 }
 
 export const useAdminCarsList = () => {
+    const t = useTranslations("org.cars.toasts");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -113,29 +115,31 @@ export const useAdminCarsList = () => {
         setIsRefreshing(true);
         try {
             await fetchCarsFn();
-            toast.success("Data refreshed successfully");
+            toast.success(t("refreshed"));
         } catch (error) {
-            toast.error("Failed to refresh data");
+            toast.error(t("refreshFailed"));
         } finally {
             setIsRefreshing(false);
         }
-    }, [fetchCarsFn]);
+    }, [fetchCarsFn, t]);
 
     // Delete car handler
     const handleDeleteCar = async (carId: string) => {
         try {
             const response = await deleteCarFn(carId);
             if (response.success) {
-                toast.success("Car deleted successfully", {
-                    description: "The car has been removed from your inventory.",
+                toast.success(t("deleted"), {
+                    description: t("deletedBody"),
                 });
             } else {
+                // The thrown message is developer-facing; the catch below shows
+                // it when there is one and falls back to the translated line
+                // otherwise, matching resolveActionError's order.
                 throw new Error(response.error.message || "Delete operation failed");
             }
         } catch (error) {
-            toast.error("Delete operation failed", {
-                description:
-                    messageOf(error) || "Unable to delete the car. Please try again.",
+            toast.error(t("deleteFailed"), {
+                description: messageOf(error) || t("deleteFailedBody"),
             });
         } finally {
             setDeleteDialogOpen(false);
@@ -154,16 +158,15 @@ export const useAdminCarsList = () => {
         try {
             const response = await updateCarFn({ carId, updates });
             if (response.success) {
-                toast.success("Car updated successfully", {
-                    description: "The car details have been updated.",
+                toast.success(t("updated"), {
+                    description: t("updatedBody"),
                 });
             } else {
                 throw new Error(response.error.message || "Update operation failed");
             }
         } catch (error) {
-            toast.error("Update operation failed", {
-                description:
-                    messageOf(error) || "Unable to update the car. Please try again.",
+            toast.error(t("updateFailed"), {
+                description: messageOf(error) || t("updateFailedBody"),
             });
         }
     };

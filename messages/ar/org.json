@@ -126,5 +126,255 @@
       "emptyTitle": "لا توجد بيانات قيادات تجريبية",
       "emptyBody": "ستظهر الاتجاهات بمجرد أن يبدأ العملاء في حجز قيادات تجريبية."
     }
+  },
+  "cars": {
+    "meta": {
+      "title": "السيارات",
+      "description": "إدارة سياراتك ومخزونك"
+    },
+    "title": "إدارة السيارات",
+    "subtitle": "إدارة قوائم سياراتك ومخزونك",
+    "filter": {
+      "searchPlaceholder": "ابحث بالموديل أو العنوان…",
+      "searchLabel": "البحث في السيارات",
+      "clearSearch": "مسح البحث",
+      "statusPlaceholder": "تصفية حسب الحالة",
+      "allStatus": "كل الحالات",
+      "clear": "مسح",
+      "addCar": "إضافة سيارة"
+    },
+    "stats": {
+      "title": "مخزون السيارات",
+      "available": "{count} متاحة",
+      "sold": "{count} مباعة",
+      "unavailable": "{count} غير متاحة",
+      "featured": "{count} مميزة",
+      "refresh": "تحديث"
+    },
+    "table": {
+      "vehicle": "السيارة",
+      "pricing": "السعر",
+      "status": "الحالة",
+      "featured": "مميزة",
+      "actions": "الإجراءات",
+      "added": "أُضيفت في: {date}",
+      "notFeatured": "غير مميزة",
+      "unknownStatus": "غير معروفة"
+    },
+    "rowActions": {
+      "openMenu": "فتح القائمة",
+      "label": "الإجراءات",
+      "view": "عرض",
+      "viewDetails": "عرض التفاصيل",
+      "edit": "تعديل",
+      "feature": "تمييز",
+      "unfeature": "إلغاء التمييز",
+      "makeFeatured": "تمييز السيارة",
+      "removeFeatured": "إلغاء تمييز السيارة",
+      "statusLabel": "الحالة",
+      "changeStatus": "تغيير الحالة",
+      "markAvailable": "تعيين كمتاحة",
+      "markSold": "تعيين كمباعة",
+      "markUnavailable": "تعيين كغير متاحة",
+      "delete": "حذف",
+      "deleteCar": "حذف السيارة"
+    },
+    "empty": {
+      "title": "لا توجد سيارات",
+      "filtered": "جرّب تعديل البحث أو عوامل التصفية للعثور على ما تبحث عنه.",
+      "body": "أضف سيارتك الأولى لتبدأ في بناء مخزونك."
+    },
+    "error": {
+      "title": "تعذّر تحميل السيارات",
+      "body": "حدث خطأ أثناء تحميل مخزونك."
+    },
+    "deleteDialog": {
+      "title": "حذف السيارة",
+      "body": "هل أنت متأكد من حذف <b>«{title}»</b>؟ لا يمكن التراجع عن هذا، وستُزال السيارة من مخزونك نهائيًا.",
+      "deleting": "جارٍ الحذف…"
+    },
+    "pagination": {
+      "showing": "عرض {start} إلى {end} من {total} سيارة",
+      "showingShort": "{start}–{end} من {total}",
+      "perPage": "عدد العناصر في الصفحة",
+      "first": "الصفحة الأولى",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "last": "الصفحة الأخيرة"
+    },
+    "toasts": {
+      "refreshed": "تم تحديث المخزون",
+      "refreshFailed": "تعذّر تحديث المخزون",
+      "deleted": "تم حذف السيارة",
+      "deletedBody": "تمت إزالة السيارة من مخزونك.",
+      "deleteFailed": "تعذّر حذف السيارة",
+      "deleteFailedBody": "لم نتمكن من حذف السيارة. حاول مرة أخرى.",
+      "updated": "تم تحديث السيارة",
+      "updatedBody": "تم حفظ بيانات السيارة.",
+      "updateFailed": "تعذّر تحديث السيارة",
+      "updateFailedBody": "لم نتمكن من تحديث السيارة. حاول مرة أخرى."
+    }
+  },
+  "carForm": {
+    "meta": {
+      "title": "إضافة سيارة",
+      "description": "أضف سيارة إلى مخزونك"
+    },
+    "modePicker": {
+      "title": "إضافة سيارة جديدة",
+      "subtitle": "اختر طريقة إدخال بيانات سيارتك",
+      "manual": {
+        "title": "إدخال يدوي",
+        "body": "أدخل كل بيانات السيارة بنفسك عبر النموذج الكامل. الأنسب عندما تكون المعلومات جاهزة لديك.",
+        "point1": "تحكم كامل في التفاصيل",
+        "point2": "تسعير ومزايا مخصصة",
+        "point3": "سريع ومباشر",
+        "cta": "ابدأ الإدخال اليدوي"
+      },
+      "ai": {
+        "title": "الرفع بالذكاء الاصطناعي",
+        "body": "ارفع صور السيارة ودع الذكاء الاصطناعي يستخرج التفاصيل. ذكي وسريع ودقيق.",
+        "point1": "استخراج تلقائي للتفاصيل",
+        "point2": "تقدير السعر السوقي",
+        "point3": "التعرف على المزايا",
+        "cta": "الرفع بالذكاء الاصطناعي",
+        "badge": "باقة Pro",
+        "locked": "ترقَّ إلى Pro لتفعيلها"
+      }
+    },
+    "modePage": {
+      "manualTitle": "الإدخال اليدوي للسيارة",
+      "aiTitle": "رفع السيارة بالذكاء الاصطناعي",
+      "lockedTitle": "الرفع بالذكاء الاصطناعي يتطلب باقة مدفوعة",
+      "lockedBody": "قم بالترقية إلى باقة Pro أو Enterprise لتفعيل الرفع بالذكاء الاصطناعي مع استخراج التفاصيل تلقائيًا وتقدير السعر السوقي والتعرف على المزايا.",
+      "goBack": "رجوع",
+      "upgrade": "ترقية الباقة"
+    },
+    "edit": {
+      "title": "تعديل بيانات السيارة",
+      "errorTitle": "تعذّر تحميل هذه السيارة",
+      "errorBody": "لم يتم العثور على السيارة، أو ليس لديك صلاحية الوصول إليها."
+    },
+    "sections": {
+      "basic": "البيانات الأساسية",
+      "specs": "المواصفات",
+      "details": "تفاصيل إضافية",
+      "status": "الحالة والظهور"
+    },
+    "form": {
+      "titleAdd": "بيانات السيارة",
+      "titleEdit": "تعديل بيانات السيارة",
+      "titleAi": "البيانات المستخرجة بالذكاء الاصطناعي",
+      "subtitleAdd": "أدخل كل تفاصيل السيارة التي تريد عرضها",
+      "subtitleEdit": "حدّث تفاصيل هذا الإعلان",
+      "subtitleAi": "راجع التفاصيل المستخرجة وعدّلها قبل الإرسال",
+      "uploadedAlt": "السيارة المرفوعة",
+      "submitAdd": "إضافة السيارة",
+      "submitEdit": "تحديث السيارة",
+      "submittingAdd": "جارٍ إضافة السيارة…",
+      "submittingEdit": "جارٍ تحديث السيارة…",
+      "validationToastTitle": "أكمِل كل الحقول المطلوبة",
+      "validationToastBody": "املأ الحقول المُظللة للمتابعة",
+      "addedToast": "تمت إضافة السيارة",
+      "updatedToast": "تم تحديث السيارة",
+      "addFailed": "تعذّرت إضافة السيارة",
+      "updateFailed": "تعذّر تحديث السيارة",
+      "previous": "السابق",
+      "next": "التالي",
+      "step": "{name} ({current}/{total})"
+    },
+    "fields": {
+      "makeHint": "الشركة المصنّعة للسيارة",
+      "modelHint": "اسم موديل السيارة",
+      "yearHint": "سنة صنع السيارة",
+      "titleLabel": "عنوان الإعلان",
+      "titleHint": "يُنشأ من الماركة والموديل وسنة الصنع",
+      "titlePlaceholder": "يُنشأ بعد إدخال الماركة والموديل وسنة الصنع",
+      "titleReady": "تم إنشاء العنوان",
+      "titlePending": "أدخل الماركة والموديل وسنة الصنع لإنشاء العنوان",
+      "priceLabel": "السعر (ج.م)",
+      "priceHint": "سعر الإعلان بالجنيه المصري",
+      "mileageHint": "المسافة التي قطعتها السيارة",
+      "bodyTypeHint": "شكل هيكل السيارة",
+      "bodyTypePlaceholder": "اختر نوع الهيكل",
+      "fuelTypeHint": "نوع الوقود الذي تستخدمه السيارة",
+      "fuelTypePlaceholder": "اختر نوع الوقود",
+      "transmissionHint": "نوع ناقل الحركة",
+      "transmissionPlaceholder": "اختر ناقل الحركة",
+      "seatsHint": "عدد المقاعد في السيارة",
+      "seatsPlaceholder": "اختر عدد المقاعد",
+      "seatsCount": "{count, plural, zero {{value} مقعد} one {مقعد واحد} two {مقعدان} few {{value} مقاعد} many {{value} مقعدًا} other {{value} مقعد}}",
+      "seatsMore": "أكثر من {count} مقاعد",
+      "colorHint": "اللون الخارجي للسيارة",
+      "colorPlaceholder": "مثال: فضي، أسود، أحمر",
+      "locationHint": "مكان وجود السيارة حاليًا",
+      "locationPlaceholder": "القاهرة الجديدة، القاهرة",
+      "descriptionLabel": "الوصف",
+      "descriptionHint": "وصف تفصيلي للسيارة",
+      "descriptionPlaceholder": "اكتب وصفًا تفصيليًا للسيارة…",
+      "descriptionMin": "{count} حرفًا على الأقل",
+      "descriptionCount": "{count} حرفًا",
+      "featuresLabel": "المزايا",
+      "featuresHint": "اكتب المزايا الرئيسية مفصولة بفواصل",
+      "featuresPlaceholder": "كهربائية، قيادة ذاتية، مدى طويل، فرش فاخر",
+      "statusHint": "حالة توفر السيارة حاليًا",
+      "statusPlaceholder": "اختر الحالة",
+      "featuredLabel": "تمييز هذه السيارة في الصفحة الرئيسية",
+      "featuredHint": "السيارات المميزة تظهر في قسم الأبرز",
+      "featuredCurrent": "الحالي: {value}",
+      "yes": "نعم",
+      "no": "لا",
+      "readyTitle": "جاهزة للإرسال",
+      "readyBody": "كل البيانات المطلوبة مكتملة. يمكنك إضافة هذه السيارة إلى مخزونك."
+    },
+    "images": {
+      "label": "الصور",
+      "hint": "أضف حتى {count} صور للسيارة",
+      "drop": "أفلت الصور هنا",
+      "prompt": "اسحب الصور وأفلتها هنا، أو اضغط للاختيار",
+      "limits": "حتى {count} صور، {size} ميجابايت لكل صورة",
+      "full": "لقد أضفت الحد الأقصى وهو {count} صور. احذف صورة لإضافة أخرى.",
+      "previewAlt": "معاينة {index}",
+      "remove": "حذف الصورة {index}",
+      "tooMany": "يمكنك رفع {count} صور كحد أقصى.",
+      "failed": "تعذّرت إضافة الصورة. حاول مرة أخرى."
+    },
+    "ai": {
+      "processingTitle": "الذكاء الاصطناعي يقرأ الصورة",
+      "processingBody": "يقوم الذكاء الاصطناعي بتحليل صورتك واستخراج تفاصيل السيارة…",
+      "processingWait": "يستغرق هذا عادةً من ٣٠ إلى ٦٠ ثانية",
+      "uploadTitle": "ارفع صورة السيارة",
+      "uploadPrompt": "أفلت صورة السيارة هنا، أو اضغط للتصفح. سيستخرج الذكاء الاصطناعي التفاصيل تلقائيًا.",
+      "uploadDropping": "أفلت صورة سيارتك هنا…",
+      "choose": "اختر صورة",
+      "formats": "JPG وPNG وWEBP، حتى ١٠ ميجابايت لكل صورة",
+      "featuresTitle": "ما الذي يقوم به الذكاء الاصطناعي",
+      "feature1": "التعرف على الماركة والموديل وسنة الصنع",
+      "feature2": "تقدير السعر من بيانات السوق",
+      "feature3": "استخراج المزايا من الصورة",
+      "feature4": "تقييم الجودة والحالة",
+      "invalidType": "نوع الملف غير مدعوم. ارفع صورة JPG أو PNG أو WEBP.",
+      "tooLarge": "حجم الملف أكبر من {size} ميجابايت.",
+      "extracted": "تم استخراج بيانات السيارة",
+      "processFailed": "تعذّرت قراءة هذه الصورة.",
+      "unexpected": "حدث خطأ أثناء معالجة الصورة."
+    },
+    "validation": {
+      "titleRequired": "عنوان الإعلان مطلوب",
+      "makeRequired": "الماركة مطلوبة",
+      "modelRequired": "الموديل مطلوب",
+      "yearInvalid": "يجب أن تكون سنة الصنع بين {min} و{max}",
+      "priceInvalid": "يجب أن يكون السعر أكبر من {min}",
+      "mileageInvalid": "يجب أن تكون المسافة المقطوعة {min} أو أكثر",
+      "bodyTypeRequired": "نوع الهيكل مطلوب",
+      "fuelTypeRequired": "نوع الوقود مطلوب",
+      "transmissionRequired": "ناقل الحركة مطلوب",
+      "colorRequired": "اللون مطلوب",
+      "seatsInvalid": "يجب أن يكون عدد المقاعد بين {min} و{max}",
+      "locationRequired": "الموقع مطلوب",
+      "descriptionTooShort": "يجب ألا يقل الوصف عن {min} حرفًا",
+      "imagesRequired": "أضف صورة واحدة على الأقل",
+      "imagesTooMany": "يمكنك إضافة {max} صور كحد أقصى"
+    }
   }
 }

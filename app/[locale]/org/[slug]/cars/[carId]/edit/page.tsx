@@ -11,8 +11,11 @@ import { STATUS_DB_TO_FORM } from "@/lib/constants/car-options";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 export default function EditCarPage() {
+  const t = useTranslations("org.carForm.edit");
+  const tPage = useTranslations("org.carForm.modePage");
   const params = useParams();
   const router = useRouter();
   const carId = Array.isArray(params.carId) ? params.carId[0] : params.carId;
@@ -44,7 +47,7 @@ export default function EditCarPage() {
             onClick={goBack}
             className="hover:bg-slate-100"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
           </Button>
           <Skeleton className="h-8 w-48" />
         </div>
@@ -60,9 +63,9 @@ export default function EditCarPage() {
   if (error || !car) {
     return (
       <div className="p-6 text-center">
-        <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Car</h2>
-        <p className="text-gray-600 mb-4">{error?.message || "Car not found or unauthorized access"}</p>
-        <Button onClick={goBack}>Go Back</Button>
+        <h2 className="text-xl font-bold text-red-600 mb-2">{t("errorTitle")}</h2>
+        <p className="text-gray-600 mb-4">{error?.message || t("errorBody")}</p>
+        <Button onClick={goBack}>{tPage("goBack")}</Button>
       </div>
     );
   }
@@ -87,9 +90,9 @@ export default function EditCarPage() {
           onClick={goBack}
           className="hover:bg-slate-100"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
         </Button>
-        <h1 className="text-2xl font-bold">Edit Vehicle Details</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
 
       <CarFormShared

@@ -126,5 +126,255 @@
       "emptyTitle": "No test drive data",
       "emptyBody": "Trends will appear once customers start booking test drives."
     }
+  },
+  "cars": {
+    "meta": {
+      "title": "Cars",
+      "description": "Manage your car listings and inventory"
+    },
+    "title": "Car Management",
+    "subtitle": "Manage your car listings and inventory",
+    "filter": {
+      "searchPlaceholder": "Search by model or title…",
+      "searchLabel": "Search cars",
+      "clearSearch": "Clear search",
+      "statusPlaceholder": "Filter by status",
+      "allStatus": "All statuses",
+      "clear": "Clear",
+      "addCar": "Add Car"
+    },
+    "stats": {
+      "title": "Car Inventory",
+      "available": "{count} available",
+      "sold": "{count} sold",
+      "unavailable": "{count} unavailable",
+      "featured": "{count} featured",
+      "refresh": "Refresh"
+    },
+    "table": {
+      "vehicle": "Vehicle",
+      "pricing": "Pricing",
+      "status": "Status",
+      "featured": "Featured",
+      "actions": "Actions",
+      "added": "Added: {date}",
+      "notFeatured": "Not featured",
+      "unknownStatus": "Unknown"
+    },
+    "rowActions": {
+      "openMenu": "Open menu",
+      "label": "Actions",
+      "view": "View",
+      "viewDetails": "View details",
+      "edit": "Edit",
+      "feature": "Feature",
+      "unfeature": "Unfeature",
+      "makeFeatured": "Make featured",
+      "removeFeatured": "Remove featured",
+      "statusLabel": "Status",
+      "changeStatus": "Change status",
+      "markAvailable": "Mark available",
+      "markSold": "Mark as sold",
+      "markUnavailable": "Mark unavailable",
+      "delete": "Delete",
+      "deleteCar": "Delete car"
+    },
+    "empty": {
+      "title": "No cars found",
+      "filtered": "Try adjusting your search or filters to find what you’re looking for.",
+      "body": "Add your first car to start building your inventory."
+    },
+    "error": {
+      "title": "Couldn’t load cars",
+      "body": "Something went wrong while loading your inventory."
+    },
+    "deleteDialog": {
+      "title": "Delete car",
+      "body": "Are you sure you want to delete <b>“{title}”</b>? This cannot be undone, and the car is removed from your inventory permanently.",
+      "deleting": "Deleting…"
+    },
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} cars",
+      "showingShort": "{start}–{end} of {total}",
+      "perPage": "Items per page",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "toasts": {
+      "refreshed": "Inventory refreshed",
+      "refreshFailed": "Couldn’t refresh the inventory",
+      "deleted": "Car deleted",
+      "deletedBody": "The car has been removed from your inventory.",
+      "deleteFailed": "Couldn’t delete the car",
+      "deleteFailedBody": "Unable to delete the car. Please try again.",
+      "updated": "Car updated",
+      "updatedBody": "The car details have been saved.",
+      "updateFailed": "Couldn’t update the car",
+      "updateFailedBody": "Unable to update the car. Please try again."
+    }
+  },
+  "carForm": {
+    "meta": {
+      "title": "Add a car",
+      "description": "Add a car to your inventory"
+    },
+    "modePicker": {
+      "title": "Add a New Vehicle",
+      "subtitle": "Choose how you’d like to add your vehicle details",
+      "manual": {
+        "title": "Manual Entry",
+        "body": "Fill in all car details yourself using our full form. Best when you already have the information to hand.",
+        "point1": "Complete control over details",
+        "point2": "Custom pricing and features",
+        "point3": "Quick and straightforward",
+        "cta": "Start Manual Entry"
+      },
+      "ai": {
+        "title": "AI Upload",
+        "body": "Upload car images and let our AI extract the details. Smart, fast and accurate.",
+        "point1": "Automatic detail extraction",
+        "point2": "Market price estimation",
+        "point3": "Feature recognition",
+        "cta": "Upload with AI",
+        "badge": "Pro plan",
+        "locked": "Upgrade to Pro to unlock"
+      }
+    },
+    "modePage": {
+      "manualTitle": "Manual Car Entry",
+      "aiTitle": "AI-Powered Car Upload",
+      "lockedTitle": "AI upload requires a paid plan",
+      "lockedBody": "Upgrade to Pro or Enterprise to unlock AI-powered uploads with automatic detail extraction, market price estimation and feature recognition.",
+      "goBack": "Go back",
+      "upgrade": "Upgrade Plan"
+    },
+    "edit": {
+      "title": "Edit Vehicle Details",
+      "errorTitle": "Couldn’t load this car",
+      "errorBody": "The car was not found, or you do not have access to it."
+    },
+    "sections": {
+      "basic": "Basic Info",
+      "specs": "Specifications",
+      "details": "Additional Details",
+      "status": "Status & Visibility"
+    },
+    "form": {
+      "titleAdd": "Car Information",
+      "titleEdit": "Edit Car Information",
+      "titleAi": "AI-Extracted Car Information",
+      "subtitleAdd": "Enter all the details about the car you want to list",
+      "subtitleEdit": "Update the details for this vehicle listing",
+      "subtitleAi": "Review and edit the AI-extracted details before submitting",
+      "uploadedAlt": "Uploaded car",
+      "submitAdd": "Add Car",
+      "submitEdit": "Update Car",
+      "submittingAdd": "Adding car…",
+      "submittingEdit": "Updating car…",
+      "validationToastTitle": "Please complete all required fields",
+      "validationToastBody": "Fill in the highlighted fields to continue",
+      "addedToast": "Car added",
+      "updatedToast": "Car updated",
+      "addFailed": "Couldn’t add the car",
+      "updateFailed": "Couldn’t update the car",
+      "previous": "Previous",
+      "next": "Next",
+      "step": "{name} ({current}/{total})"
+    },
+    "fields": {
+      "makeHint": "The manufacturer of the vehicle",
+      "modelHint": "The model name of the vehicle",
+      "yearHint": "Vehicle production year",
+      "titleLabel": "Listing title",
+      "titleHint": "Generated from make, model and year",
+      "titlePlaceholder": "Generated once you enter make, model and year",
+      "titleReady": "Title generated",
+      "titlePending": "Fill in make, model and year to generate the title",
+      "priceLabel": "Price (EGP)",
+      "priceHint": "The listing price, in Egyptian pounds",
+      "mileageHint": "Distance the vehicle has travelled",
+      "bodyTypeHint": "The physical configuration of the vehicle",
+      "bodyTypePlaceholder": "Select a body type",
+      "fuelTypeHint": "The type of fuel the vehicle uses",
+      "fuelTypePlaceholder": "Select a fuel type",
+      "transmissionHint": "The type of transmission",
+      "transmissionPlaceholder": "Select a transmission",
+      "seatsHint": "Number of seats in the vehicle",
+      "seatsPlaceholder": "Select a number of seats",
+      "seatsCount": "{count, plural, one {{value} seat} other {{value} seats}}",
+      "seatsMore": "More than {count} seats",
+      "colorHint": "The exterior colour of the vehicle",
+      "colorPlaceholder": "e.g. Silver, Black, Red",
+      "locationHint": "Where the vehicle is currently located",
+      "locationPlaceholder": "New Cairo, Cairo",
+      "descriptionLabel": "Description",
+      "descriptionHint": "A detailed description of the vehicle",
+      "descriptionPlaceholder": "Describe the vehicle in detail…",
+      "descriptionMin": "At least {count} characters",
+      "descriptionCount": "{count} characters",
+      "featuresLabel": "Features",
+      "featuresHint": "List the major features, separated by commas",
+      "featuresPlaceholder": "Electric, Autopilot, Long Range, Premium Interior",
+      "statusHint": "Current availability of the vehicle",
+      "statusPlaceholder": "Select a status",
+      "featuredLabel": "Feature this car on the homepage",
+      "featuredHint": "Featured cars appear in the spotlight section",
+      "featuredCurrent": "Currently: {value}",
+      "yes": "Yes",
+      "no": "No",
+      "readyTitle": "Ready to submit",
+      "readyBody": "All the required information is there. You can add this vehicle to your inventory."
+    },
+    "images": {
+      "label": "Images",
+      "hint": "Add up to {count} images of the vehicle",
+      "drop": "Drop the images here",
+      "prompt": "Drag and drop images here, or click to choose",
+      "limits": "Up to {count} images, {size} MB each",
+      "full": "You have added the maximum of {count} images. Remove one to add another.",
+      "previewAlt": "Preview {index}",
+      "remove": "Remove image {index}",
+      "tooMany": "You can only upload up to {count} images.",
+      "failed": "Couldn’t add that image. Please try again."
+    },
+    "ai": {
+      "processingTitle": "AI is reading the image",
+      "processingBody": "Our AI is analysing your image and extracting the car’s details…",
+      "processingWait": "This usually takes 30–60 seconds",
+      "uploadTitle": "Upload a car image",
+      "uploadPrompt": "Drop a car image here, or click to browse. Our AI will extract the details automatically.",
+      "uploadDropping": "Drop your car image here…",
+      "choose": "Choose image",
+      "formats": "JPG, PNG and WEBP, up to 10MB each",
+      "featuresTitle": "What the AI does",
+      "feature1": "Detects make, model and year",
+      "feature2": "Estimates a price from market data",
+      "feature3": "Extracts features from the image",
+      "feature4": "Assesses quality and condition",
+      "invalidType": "That file type isn’t supported. Upload a JPG, PNG or WEBP.",
+      "tooLarge": "That file is larger than {size} MB.",
+      "extracted": "Car details extracted",
+      "processFailed": "Couldn’t read that image.",
+      "unexpected": "Something went wrong while processing the image."
+    },
+    "validation": {
+      "titleRequired": "A listing title is required",
+      "makeRequired": "Make is required",
+      "modelRequired": "Model is required",
+      "yearInvalid": "Year must be between {min} and {max}",
+      "priceInvalid": "Price must be greater than {min}",
+      "mileageInvalid": "Mileage must be {min} or more",
+      "bodyTypeRequired": "Body type is required",
+      "fuelTypeRequired": "Fuel type is required",
+      "transmissionRequired": "Transmission is required",
+      "colorRequired": "Colour is required",
+      "seatsInvalid": "Seats must be between {min} and {max}",
+      "locationRequired": "Location is required",
+      "descriptionTooShort": "Description must be at least {min} characters",
+      "imagesRequired": "Add at least one image",
+      "imagesTooMany": "You can add at most {max} images"
+    }
   }
 }

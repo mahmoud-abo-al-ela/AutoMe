@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useTranslations } from "next-intl";
 import type { AdminCarRow } from "./CarsListPresenter";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,18 +30,22 @@ const DeleteConfirmationDialog = ({
   onDelete: (carId: string) => void | Promise<void>;
   isDeleting: boolean;
 }) => {
+  const t = useTranslations("org.cars.deleteDialog");
+  const tCommon = useTranslations("common.actions");
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md p-4 sm:p-6 max-w-[90vw]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-red-600 text-base sm:text-lg">
             <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-            Delete Car
+            {t("title")}
           </DialogTitle>
           <DialogDescription className="text-gray-600 text-sm sm:text-base">
-            Are you sure you want to delete <strong>&quot;{car?.title}&quot;</strong>?
-            This action cannot be undone and will permanently remove the car
-            from your inventory.
+            {t.rich("body", {
+              title: car?.title ?? "",
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 flex-col sm:flex-row mt-4">
@@ -48,7 +55,7 @@ const DeleteConfirmationDialog = ({
             disabled={isDeleting}
             className="w-full sm:w-auto order-2 sm:order-1 cursor-pointer"
           >
-            Cancel
+            {tCommon("cancel")}
           </Button>
           {/* The dialog only opens with a car queued, so the guard below is
               unreachable; before, a null car called onDelete(undefined). */}
@@ -61,12 +68,12 @@ const DeleteConfirmationDialog = ({
             {isDeleting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white me-2" />
-                Deleting...
+                {t("deleting")}
               </>
             ) : (
               <>
                 <Trash2 className="me-2 h-4 w-4" />
-                Delete Car
+                {t("title")}
               </>
             )}
           </Button>

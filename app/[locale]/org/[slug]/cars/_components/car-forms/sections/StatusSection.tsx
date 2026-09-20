@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check } from "lucide-react";
@@ -11,8 +14,12 @@ import {
 } from "@/components/ui/select";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "../shared/FieldInfo";
+import { STATUS_FORM_TO_DB } from "@/lib/constants/car-options";
 import type { CarFormSectionProps } from "../shared/section-props";
 import type { CarFormValues } from "@/hooks/use-car-form";
+
+/** The three form-level status tokens, in the order they are offered. */
+const STATUS_OPTIONS = ["Available", "Sold", "Unavailable"] as const;
 
 const StatusSection = ({
   errors,
@@ -23,13 +30,23 @@ const StatusSection = ({
   CarFormSectionProps,
   "errors" | "watch" | "setValue" | "trigger"
 >) => {
-  const watchStatus = watch("status");
+  const t = useTranslations("org.carForm");
+  const tField = useTranslations("carAttributes.fields");
+  const tStatus = useTranslations("carAttributes.status");
+
+  const watchStatus = watch("status") || "Available";
+
+  // The stored value stays the English form token — it is what the schema
+  // validates and what STATUS_FORM_TO_DB maps to the Prisma enum. Only the
+  // label the dealer reads is translated.
+  const statusLabel = (value: string) =>
+    tStatus(STATUS_FORM_TO_DB[value as keyof typeof STATUS_FORM_TO_DB]);
 
   return (
-    <FormSection title="Status & Visibility">
+    <FormSection title={t("sections.status")}>
       <div className="space-y-2">
         <Label htmlFor="status" className="flex items-center">
-          Status <FieldInfo text="Current availability of the vehicle" />
+          {tField("status")} <FieldInfo text={t("fields.statusHint")} />
         </Label>
         <Select
           onValueChange={(value) => {
@@ -40,18 +57,20 @@ const StatusSection = ({
               trigger("status");
             }
           }}
-          value={watchStatus || "Available"}
-          defaultValue={watchStatus || "Available"}
+          value={watchStatus}
+          defaultValue={watchStatus}
         >
           <SelectTrigger id="status">
-            <SelectValue placeholder="Select status">
-              {watchStatus || "Available"}
+            <SelectValue placeholder={t("fields.statusPlaceholder")}>
+              {statusLabel(watchStatus)}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Available">Available</SelectItem>
-            <SelectItem value="Sold">Sold</SelectItem>
-            <SelectItem value="Unavailable">Unavailable</SelectItem>
+            {STATUS_OPTIONS.map((value) => (
+              <SelectItem key={value} value={value}>
+                {statusLabel(value)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {errors.status && (
@@ -72,13 +91,15 @@ const StatusSection = ({
         />
         <div className="space-y-1 sm:space-y-2">
           <Label htmlFor="featured" className="font-medium">
-            Feature this car on homepage
+            {t("fields.featuredLabel")}
           </Label>
           <p className="text-xs sm:text-sm text-gray-500">
-            Featured cars appear in the spotlight section
+            {t("fields.featuredHint")}
           </p>
           <p className="text-xs text-blue-600">
-            Current value: {watch("featured") ? "Yes" : "No"}
+            {t("fields.featuredCurrent", {
+              value: watch("featured") ? t("fields.yes") : t("fields.no"),
+            })}
           </p>
         </div>
       </div>
@@ -86,11 +107,10 @@ const StatusSection = ({
       <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 rounded-md border border-green-100">
         <h4 className="text-green-700 font-medium flex items-center gap-1.5">
           <Check className="h-4 w-4" />
-          Ready to submit
+          {t("fields.readyTitle")}
         </h4>
         <p className="text-xs sm:text-sm text-green-600 mt-1">
-          All required information has been provided. You can now add this
-          vehicle to your inventory.
+          {t("fields.readyBody")}
         </p>
       </div>
     </FormSection>

@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileImage, Upload, Brain } from "lucide-react";
 import React from "react";
@@ -18,6 +21,7 @@ const AIUploadSection = ({
   error,
   isDragActive,
 }: AIUploadSectionProps) => {
+  const t = useTranslations("org.carForm.ai");
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
@@ -39,10 +43,10 @@ const AIUploadSection = ({
                 <Brain className="h-10 w-10 text-purple-600 animate-pulse" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                AI Processing Image
+                {t("processingTitle")}
               </h3>
               <p className="text-gray-600 mb-6">
-                Our AI is analyzing your image and extracting car details...
+                {t("processingBody")}
               </p>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
                 <div
@@ -51,7 +55,7 @@ const AIUploadSection = ({
                 ></div>
               </div>
               <p className="text-sm text-gray-500">
-                This usually takes 30-60 seconds
+                {t("processingWait")}
               </p>
             </div>
           ) : (
@@ -71,22 +75,20 @@ const AIUploadSection = ({
                   <FileImage className="h-8 w-8 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Upload Car Image
+                  {t("uploadTitle")}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {isDragActive
-                    ? "Drop your car image here..."
-                    : "Drop your car image here or click to browse. Our AI will automatically extract car details."}
+                  {isDragActive ? t("uploadDropping") : t("uploadPrompt")}
                 </p>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 mb-4"
                   disabled={isProcessing}
                 >
                   <Upload className="h-4 w-4 me-2" />
-                  Choose Image
+                  {t("choose")}
                 </Button>
                 <p className="text-sm text-gray-500">
-                  Supports JPG, PNG, WEBP up to 10MB each
+                  {t("formats")}
                 </p>
               </div>
 
@@ -103,13 +105,13 @@ const AIUploadSection = ({
                   </div>
                   <div>
                     <h4 className="font-semibold text-blue-900 mb-2">
-                      AI Features
+                      {t("featuresTitle")}
                     </h4>
                     <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• Automatic make, model, and year detection</li>
-                      <li>• Price estimation based on market data</li>
-                      <li>• Feature extraction from images</li>
-                      <li>• Quality and condition assessment</li>
+                      <li>• {t("feature1")}</li>
+                      <li>• {t("feature2")}</li>
+                      <li>• {t("feature3")}</li>
+                      <li>• {t("feature4")}</li>
                     </ul>
                   </div>
                 </div>

@@ -2,8 +2,14 @@ import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { processCarImageGated } from "@/actions/cars";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import CarFormShared from "../shared/CarFormShared";
 import AIUploadSection from "../sections/AIUploadSection";
+
+/** The upload cap the copy quotes, stated once so the two cannot disagree. */
+const MAX_UPLOAD_MB = 10;
+const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 
 /**
  * What the vision model extracts. The action checks only that these keys are
@@ -33,6 +39,8 @@ const AICarForm = () => {
   const [carData, setCarData] = useState<ExtractedCarData | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const t = useTranslations("org.carForm.ai");
+  const { number } = useFormatters();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -45,10 +53,10 @@ const AICarForm = () => {
       const file = acceptedFiles[0];
       const validTypes = ["image/jpeg", "image/png", "image/webp"];
       if (!validTypes.includes(file.type)) {
-        throw new Error("Invalid file type. Please upload JPG, PNG, or WEBP.");
+        throw new Error(t("invalidType"));
       }
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error("File size exceeds 10MB limit.");
+      if (file.size > MAX_UPLOAD_BYTES) {
+        throw new Error(t("tooLarge", { size: number(MAX_UPLOAD_MB) }));
       }
 
       setUploadedImage(file);
@@ -56,20 +64,20 @@ const AICarForm = () => {
       if (result.success) {
         setCarData(result.data as ExtractedCarData);
         setShowForm(true);
-        toast.success("Car details extracted successfully");
+        toast.success(t("extracted"));
       } else {
-        throw new Error(result.error?.message || "Failed to process image.");
+        throw new Error(result.error?.message || t("processFailed"));
       }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "An error occurred while processing the image.",
+          : t("unexpected"),
       );
     } finally {
       setIsProcessing(false);
     }
-  }, []);
+  }, [t, number]);
 
   const { isDragActive } = useDropzone({
     onDrop,

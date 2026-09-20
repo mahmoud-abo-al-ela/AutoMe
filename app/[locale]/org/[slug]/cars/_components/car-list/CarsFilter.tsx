@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 const CarsFilter = ({
   searchTerm,
@@ -27,6 +28,8 @@ const CarsFilter = ({
   setStatusFilter: (value: string) => void;
   disabled: boolean;
 }) => {
+  const t = useTranslations("org.cars.filter");
+  const tStatus = useTranslations("carAttributes.status");
   const router = useRouter();
   const { slug } = useParams();
   const [isFocused, setIsFocused] = useState(false);
@@ -56,7 +59,7 @@ const CarsFilter = ({
                   } transition-colors`}
               />
               <Input
-                placeholder="Search by model or title..."
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`ps-8 sm:ps-10 text-sm h-9 sm:h-10 bg-gray-50 border-gray-200 ${isFocused
@@ -66,7 +69,7 @@ const CarsFilter = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 disabled={disabled}
-                aria-label="Search cars"
+                aria-label={t("searchLabel")}
               />
               {searchTerm && (
                 <button
@@ -74,7 +77,7 @@ const CarsFilter = ({
                   onClick={handleClearSearch}
                   className="absolute end-2 sm:end-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600 transition-colors"
                   disabled={disabled}
-                  aria-label="Clear search"
+                  aria-label={t("clearSearch")}
                 >
                   <X className="h-3 w-3 sm:h-4 sm:w-4" />
                 </button>
@@ -105,14 +108,14 @@ const CarsFilter = ({
                         : "text-gray-400"
                         }`}
                     />
-                    <SelectValue placeholder="Filter by status" />
+                    <SelectValue placeholder={t("statusPlaceholder")} />
                   </div>
                 </SelectTrigger>
                 <SelectContent className="text-xs sm:text-sm">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="sold">Sold</SelectItem>
-                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                  <SelectItem value="all">{t("allStatus")}</SelectItem>
+                  <SelectItem value="available">{tStatus("AVAILABLE")}</SelectItem>
+                  <SelectItem value="sold">{tStatus("SOLD")}</SelectItem>
+                  <SelectItem value="unavailable">{tStatus("UNAVAILABLE")}</SelectItem>
                 </SelectContent>
               </Select>
               {hasActiveFilters && (
@@ -127,7 +130,7 @@ const CarsFilter = ({
                   className="text-gray-500 hover:text-gray-700 text-sm h-9 sm:h-10 px-3"
                 >
                   <X className="h-3 w-3 me-1" />
-                  Clear
+                  {t("clear")}
                 </Button>
               )}
             </div>
@@ -138,7 +141,7 @@ const CarsFilter = ({
               onClick={() => router.push(`/org/${slug}/cars/create`)}
             >
               <Plus className="h-3 w-3 sm:h-4 sm:w-4 me-1 sm:me-2" />
-              Add Car
+              {t("addCar")}
             </Button>
 
           </div>

@@ -1,4 +1,8 @@
+"use client";
+
 import React from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +34,13 @@ const SpecificationsSection = ({
   fuelTypes,
   transmissions,
 }: SpecificationsSectionProps) => {
+  const t = useTranslations("org.carForm");
+  const tField = useTranslations("carAttributes.fields");
+  const tBody = useTranslations("carAttributes.body");
+  const tFuel = useTranslations("carAttributes.fuel");
+  const tTransmission = useTranslations("carAttributes.transmission");
+  const { number } = useFormatters();
+
   // The Zod schema's output type for `features` is string[], but the textarea
   // is registered directly, so react-hook-form holds the raw comma-separated
   // string until the transform runs at validation time. Both shapes are real
@@ -43,13 +54,13 @@ const SpecificationsSection = ({
     : (featuresValue?.split(",") ?? []);
 
   return (
-    <FormSection title="Specifications">
+    <FormSection title={t("sections.specs")}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 col-span-1 sm:col-span-2">
           <div className="space-y-2">
             <Label htmlFor="bodyType" className="flex items-center">
-              Body Type{" "}
-              <FieldInfo text="The physical configuration of the vehicle" />
+              {tField("bodyType")}{" "}
+              <FieldInfo text={t("fields.bodyTypeHint")} />
             </Label>
             <Select
               onValueChange={(value) => {
@@ -62,12 +73,12 @@ const SpecificationsSection = ({
                 id="bodyType"
                 className={errors.bodyType ? "border-red-500" : ""}
               >
-                <SelectValue placeholder="Select body type" />
+                <SelectValue placeholder={t("fields.bodyTypePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {bodyTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {tBody(type)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -80,7 +91,7 @@ const SpecificationsSection = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="fuelType" className="flex items-center">
-              Fuel Type <FieldInfo text="The type of fuel the vehicle uses" />
+              {tField("fuelType")} <FieldInfo text={t("fields.fuelTypeHint")} />
             </Label>
             <Select
               onValueChange={(value) => {
@@ -93,12 +104,12 @@ const SpecificationsSection = ({
                 id="fuelType"
                 className={errors.fuelType ? "border-red-500" : ""}
               >
-                <SelectValue placeholder="Select fuel type" />
+                <SelectValue placeholder={t("fields.fuelTypePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {fuelTypes.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {tFuel(type)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -112,7 +123,8 @@ const SpecificationsSection = ({
 
           <div className="space-y-2">
             <Label htmlFor="transmission" className="flex items-center">
-              Transmission <FieldInfo text="The type of transmission system" />
+              {tField("transmission")}{" "}
+              <FieldInfo text={t("fields.transmissionHint")} />
             </Label>
             <Select
               onValueChange={(value) => {
@@ -125,12 +137,12 @@ const SpecificationsSection = ({
                 id="transmission"
                 className={errors.transmission ? "border-red-500" : ""}
               >
-                <SelectValue placeholder="Select transmission" />
+                <SelectValue placeholder={t("fields.transmissionPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {transmissions.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {type}
+                    {tTransmission(type)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -143,7 +155,7 @@ const SpecificationsSection = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="seats" className="flex items-center">
-              Seats <FieldInfo text="Number of seats in the vehicle" />
+              {tField("seats")} <FieldInfo text={t("fields.seatsHint")} />
             </Label>
             <Select
               onValueChange={(value) => {
@@ -156,15 +168,17 @@ const SpecificationsSection = ({
                 id="seats"
                 className={errors.seats ? "border-red-500" : ""}
               >
-                <SelectValue placeholder="Select number of seats" />
+                <SelectValue placeholder={t("fields.seatsPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {[1, 2, 3, 4, 5].map((num) => (
                   <SelectItem key={num} value={num.toString()}>
-                    {num} {num === 1 ? "seat" : "seats"}
+                    {t("fields.seatsCount", { count: num, value: number(num) })}
                   </SelectItem>
                 ))}
-                <SelectItem value="6"> More than 5 seats</SelectItem>
+                <SelectItem value="6">
+                  {t("fields.seatsMore", { count: number(5) })}
+                </SelectItem>
               </SelectContent>
             </Select>
             {errors.seats && (
@@ -177,12 +191,12 @@ const SpecificationsSection = ({
       </div>
       <div className="space-y-2">
         <Label htmlFor="color" className="flex items-center">
-          Color <FieldInfo text="The exterior color of the vehicle" />
+          {tField("color")} <FieldInfo text={t("fields.colorHint")} />
         </Label>
         <Input
           type="text"
           id="color"
-          placeholder="e.g., Silver, Black, Red"
+          placeholder={t("fields.colorPlaceholder")}
           {...register("color")}
           className={errors.color ? "border-red-500" : ""}
         />
@@ -192,11 +206,12 @@ const SpecificationsSection = ({
       </div>
       <div className="space-y-2">
         <Label htmlFor="features" className="flex items-center">
-          Features <FieldInfo text="List major features separated by commas" />
+          {t("fields.featuresLabel")}{" "}
+          <FieldInfo text={t("fields.featuresHint")} />
         </Label>
         <Textarea
           id="features"
-          placeholder="Electric, Autopilot, Long Range, Premium Interior"
+          placeholder={t("fields.featuresPlaceholder")}
           className={`min-h-[80px] ${errors.features ? "border-red-500" : ""}`}
           {...register("features")}
         />

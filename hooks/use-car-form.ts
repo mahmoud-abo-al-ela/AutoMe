@@ -9,38 +9,92 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { addCar, updateCarFull } from "@/actions/cars";
-import { VALIDATION_RULES, ERROR_MESSAGES } from "@/lib/constants/validation";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { VALIDATION_RULES } from "@/lib/constants/validation";
 
-const createCarFormSchema = (maxImages = VALIDATION_RULES.CAR.MAX_IMAGES, isEditMode = false) =>
+/**
+ * A translator scoped to `org.carForm.validation`, plus the number formatter
+ * for the limits its messages quote.
+ *
+ * The schema is a factory rather than a module constant because its messages
+ * are translated: a module-level schema would freeze whichever locale loaded
+ * the module first. Same arrangement as the onboarding schemas.
+ *
+ * `n` is passed rather than left to ICU because next-intl formats numeric
+ * arguments against the bare `ar` tag, whose numbering system is Western — a
+ * limit rendered that way would read "1900" beside Arabic digits everywhere
+ * else on the form.
+ */
+type Translate = (
+    key: string,
+    values?: Record<string, string | number | Date>
+) => string;
+type FormatNumber = (value: number) => string;
+
+const createCarFormSchema = (
+    t: Translate,
+    n: FormatNumber,
+    maxImages = VALIDATION_RULES.CAR.MAX_IMAGES,
+    isEditMode = false
+) =>
     z.object({
-        title: z.string().min(1, ERROR_MESSAGES.CAR.TITLE_REQUIRED),
-        make: z.string().min(1, ERROR_MESSAGES.CAR.MAKE_REQUIRED),
-        model: z.string().min(1, ERROR_MESSAGES.CAR.MODEL_REQUIRED),
+        title: z.string().min(1, t("titleRequired")),
+        make: z.string().min(1, t("makeRequired")),
+        model: z.string().min(1, t("modelRequired")),
         year: z
             .number()
             .refine(
                 (val) => val >= VALIDATION_RULES.CAR.YEAR_MIN && val <= VALIDATION_RULES.CAR.YEAR_MAX,
-                ERROR_MESSAGES.CAR.YEAR_INVALID
+                t("yearInvalid", {
+                    min: n(VALIDATION_RULES.CAR.YEAR_MIN),
+                    max: n(VALIDATION_RULES.CAR.YEAR_MAX),
+                })
             ),
-        price: z.number().min(VALIDATION_RULES.CAR.PRICE_MIN, ERROR_MESSAGES.CAR.PRICE_INVALID),
-        mileage: z.number().min(VALIDATION_RULES.CAR.MILEAGE_MIN, ERROR_MESSAGES.CAR.MILEAGE_INVALID),
-        bodyType: z.string().min(1, ERROR_MESSAGES.CAR.BODY_TYPE_REQUIRED),
-        fuelType: z.string().min(1, ERROR_MESSAGES.CAR.FUEL_TYPE_REQUIRED),
-        transmission: z.string().min(1, ERROR_MESSAGES.CAR.TRANSMISSION_REQUIRED),
-        color: z.string().min(1, ERROR_MESSAGES.CAR.COLOR_REQUIRED),
-        seats: z.number().min(VALIDATION_RULES.CAR.SEATS_MIN, ERROR_MESSAGES.CAR.SEATS_INVALID),
-        location: z.string().min(1, ERROR_MESSAGES.CAR.LOCATION_REQUIRED),
+        price: z
+            .number()
+            .min(
+                VALIDATION_RULES.CAR.PRICE_MIN,
+                t("priceInvalid", { min: n(VALIDATION_RULES.CAR.PRICE_MIN - 1) })
+            ),
+        mileage: z
+            .number()
+            .min(
+                VALIDATION_RULES.CAR.MILEAGE_MIN,
+                t("mileageInvalid", { min: n(VALIDATION_RULES.CAR.MILEAGE_MIN) })
+            ),
+        bodyType: z.string().min(1, t("bodyTypeRequired")),
+        fuelType: z.string().min(1, t("fuelTypeRequired")),
+        transmission: z.string().min(1, t("transmissionRequired")),
+        color: z.string().min(1, t("colorRequired")),
+        seats: z
+            .number()
+            .min(
+                VALIDATION_RULES.CAR.SEATS_MIN,
+                t("seatsInvalid", {
+                    min: n(VALIDATION_RULES.CAR.SEATS_MIN),
+                    max: n(VALIDATION_RULES.CAR.SEATS_MAX),
+                })
+            ),
+        location: z.string().min(1, t("locationRequired")),
         features: z.union([
             z.array(z.string()),
             z.string().transform(val => val.split(',').map(f => f.trim()).filter(Boolean))
         ]).optional(),
-        description: z.string().min(VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH, ERROR_MESSAGES.CAR.DESCRIPTION_TOO_SHORT),
+        description: z
+            .string()
+            .min(
+                VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH,
+                t("descriptionTooShort", {
+                    min: n(VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH),
+                })
+            ),
         status: z.enum(["Available", "Sold", "Unavailable"]),
         featured: z.boolean().default(false),
         images: z
             .array(isEditMode ? z.union([z.instanceof(File), z.string()]) : z.instanceof(File))
-            .min(VALIDATION_RULES.CAR.MIN_IMAGES, ERROR_MESSAGES.CAR.IMAGES_REQUIRED)
-            .max(maxImages, `Maximum of ${maxImages} images allowed`),
+            .min(VALIDATION_RULES.CAR.MIN_IMAGES, t("imagesRequired"))
+            .max(maxImages, t("imagesTooMany", { max: n(maxImages) })),
     });
 
 /** The form's validated shape, inferred from the schema factory. */
@@ -55,12 +109,14 @@ export type CarFormInitialData = Partial<
   Record<keyof CarFormValues, unknown>
 >;
 
+/** Section ids, in order. The labels live in `org.carForm.sections`, keyed by
+ * id, so the stepper and the section headings read one source. */
 const formSections = [
-    { id: "basic", label: "Basic Info" },
-    { id: "specs", label: "Specifications" },
-    { id: "details", label: "Additional Details" },
-    { id: "status", label: "Status & Visibility" },
-];
+    { id: "basic" },
+    { id: "specs" },
+    { id: "details" },
+    { id: "status" },
+] as const;
 
 export const useCarForm = (
     initialData: CarFormInitialData = {},
@@ -71,7 +127,14 @@ export const useCarForm = (
     const [currentSection, setCurrentSection] = useState("basic");
     const router = useRouter();
 
-    const carFormSchema = useMemo(() => createCarFormSchema(maxImages, isEditMode), [maxImages, isEditMode]);
+    const t = useTranslations("org.carForm.validation");
+    const tForm = useTranslations("org.carForm.form");
+    const { number } = useFormatters();
+
+    const carFormSchema = useMemo(
+        () => createCarFormSchema(t, number, maxImages, isEditMode),
+        [t, number, maxImages, isEditMode]
+    );
     const resolver = useMemo(() => zodResolver(carFormSchema), [carFormSchema]);
 
     const form = useForm<CarFormValues>({
@@ -202,8 +265,8 @@ export const useCarForm = (
                 setCurrentSection(formSections[currentIndex + 1].id);
             }
         } else {
-            toast.error("Please complete all required fields", {
-                description: "Fill in the highlighted fields to proceed",
+            toast.error(tForm("validationToastTitle"), {
+                description: tForm("validationToastBody"),
                 className: "text-sm",
             });
         }
@@ -230,13 +293,15 @@ export const useCarForm = (
         const fn = isEditMode ? updateCarFn : addCarFn;
         const response = await fn({ data });
         if (response?.success) {
-            toast.success(isEditMode ? "Car updated successfully" : "Car added successfully");
+            toast.success(isEditMode ? tForm("updatedToast") : tForm("addedToast"));
             const slug = window.location.pathname.split('/')[2];
             router.push(`/org/${slug}/cars`);
         } else {
+            // The action's own message wins when it sent one; otherwise the
+            // translated fallback. Same order as resolveActionError.
             const errorMessage =
                 response?.error?.message ||
-                (isEditMode ? "Failed to update car" : "Failed to add car");
+                (isEditMode ? tForm("updateFailed") : tForm("addFailed"));
             toast.error(errorMessage);
         }
     };

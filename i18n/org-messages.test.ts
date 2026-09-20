@@ -4,6 +4,12 @@ import arOrg from "@/messages/ar/org.json";
 import enCarAttributes from "@/messages/en/carAttributes.json";
 import arCarAttributes from "@/messages/ar/carAttributes.json";
 import { sidebarItems } from "@/lib/SidebarConfig";
+import {
+  BODY_TYPES,
+  FUEL_TYPES,
+  TRANSMISSIONS,
+  STATUS_FORM_TO_DB,
+} from "@/lib/constants/car-options";
 
 /**
  * Message-shape checks for the org dashboard shell.
@@ -39,6 +45,8 @@ describe("org messages", () => {
     const NOT_LANGUAGE = new Set([
       "dashboard.funnel.share",
       "dashboard.inventory.legend",
+      "cars.pagination.showingShort",
+      "carForm.form.step",
     ]);
 
     const untranslated = flatten(enOrg)
@@ -117,6 +125,50 @@ describe("dashboard messages cover every series the charts render", () => {
 
     for (const status of ["AVAILABLE", "SOLD", "UNAVAILABLE"]) {
       expect(at(messages, `status.${status}`)).toBeTruthy();
+    }
+  });
+});
+
+describe("car form options resolve to labels", () => {
+  // The selects render `t(value)` against carAttributes, where the value IS
+  // the key — it is also the string stored in the database. A constant added
+  // to car-options without its label shows the dealer a raw key in a dropdown,
+  // and no type check sees it.
+  it.each(["en", "ar"] as const)("names every body type in %s", (locale) => {
+    const messages = locale === "en" ? enCarAttributes : arCarAttributes;
+
+    expect(BODY_TYPES.length).toBeGreaterThan(0);
+    for (const type of BODY_TYPES) {
+      expect(at(messages, `body.${type}`), `missing body.${type}`).toBeTruthy();
+    }
+  });
+
+  it.each(["en", "ar"] as const)("names every fuel type in %s", (locale) => {
+    const messages = locale === "en" ? enCarAttributes : arCarAttributes;
+
+    for (const type of FUEL_TYPES) {
+      expect(at(messages, `fuel.${type}`), `missing fuel.${type}`).toBeTruthy();
+    }
+  });
+
+  it.each(["en", "ar"] as const)("names every transmission in %s", (locale) => {
+    const messages = locale === "en" ? enCarAttributes : arCarAttributes;
+
+    for (const type of TRANSMISSIONS) {
+      expect(
+        at(messages, `transmission.${type}`),
+        `missing transmission.${type}`
+      ).toBeTruthy();
+    }
+  });
+
+  it("maps every form status token to a translated status", () => {
+    // StatusSection stores the English form token and translates through this
+    // map, so a token without a mapping would render the key.
+    const messages = enCarAttributes;
+
+    for (const [token, dbValue] of Object.entries(STATUS_FORM_TO_DB)) {
+      expect(at(messages, `status.${dbValue}`), `missing for ${token}`).toBeTruthy();
     }
   });
 });
