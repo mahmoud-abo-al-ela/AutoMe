@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import { OrgUnreadBadge } from "@/components/StreamChat";
+import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import type { OrgSidebarProps } from "./AdminSidebar";
 
 const iconMap = {
@@ -136,7 +137,10 @@ export default function MobileSidebar({
 
           </nav>
 
-          <div className="p-4 border-t border-sidebar-border">
+          <div className="p-4 border-t border-sidebar-border space-y-1">
+            <LanguageSwitcher
+              onSwitch={() => setOpen(false)}
+              className="w-full h-auto justify-start px-4 py-3 gap-3 text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg" />
             <Link
               href="/"
               onClick={() => setOpen(false)}

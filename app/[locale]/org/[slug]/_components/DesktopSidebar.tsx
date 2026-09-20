@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import { OrgUnreadBadge } from "@/components/StreamChat";
+import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import type { Dispatch, SetStateAction } from "react";
 import type { OrgSidebarProps } from "./AdminSidebar";
 
@@ -182,7 +183,14 @@ export default function DesktopSidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-sidebar-border">
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        <LanguageSwitcher
+          showLabel={!collapsed}
+          className={cn(
+            "w-full h-auto text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg",
+            collapsed ? "justify-center px-3 py-3" : "justify-start px-4 py-3 gap-3"
+          )}
+        />
         <Link
           href="/"
           className={cn(
