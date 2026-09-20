@@ -1,14 +1,22 @@
 import { Building2, Clock, Users } from "lucide-react";
 import React from "react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
 import SharedSettingCard, {
   type SettingsPageLink,
 } from "./_components/SharedSettingCard";
 
-export const metadata: Metadata = {
-  title: "Settings",
-  description: "Manage your settings",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "org.settings.meta" });
+
+  return { title: t("title"), description: t("description") };
+}
 
 const SettingsPage = async ({
   params,
@@ -16,24 +24,29 @@ const SettingsPage = async ({
   params: Promise<{ slug: string }>;
 }) => {
   const { slug } = await params;
+  const t = await getTranslations("org.settings");
+
   const settingsPages: SettingsPageLink[] = [
     {
-      title: "Organization Profile",
-      description: "Manage public dealership details and discovery location",
+      key: "profile",
+      title: t("cards.profile.title"),
+      description: t("cards.profile.description"),
       icon: Building2,
       path: `/org/${slug}/settings/profile`,
       color: "bg-purple-50 text-purple-600",
     },
     {
-      title: "Working Hours",
-      description: "Configure business operating hours and availability",
+      key: "workingHours",
+      title: t("cards.workingHours.title"),
+      description: t("cards.workingHours.description"),
       icon: Clock,
       path: `/org/${slug}/settings/working-hours`,
       color: "bg-blue-50 text-blue-600",
     },
     {
-      title: "Team Members",
-      description: "Manage your team members",
+      key: "team",
+      title: t("cards.team.title"),
+      description: t("cards.team.description"),
       icon: Users,
       path: `/org/${slug}/settings/team`,
       color: "bg-green-50 text-green-600",
@@ -46,15 +59,15 @@ const SettingsPage = async ({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              Settings
+              {t("title")}
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              Manage your settings and preferences
+              {t("subtitle")}
             </p>
           </div>
         </div>
       </div>
-      <SharedSettingCard settingsPages={settingsPages} />
+      <SharedSettingCard settingsPages={settingsPages} cta={t("configure")} />
     </div>
   );
 };

@@ -5,6 +5,8 @@ import enCarAttributes from "@/messages/en/carAttributes.json";
 import arCarAttributes from "@/messages/ar/carAttributes.json";
 import enTestDrive from "@/messages/en/testDrive.json";
 import arTestDrive from "@/messages/ar/testDrive.json";
+import enOnboarding from "@/messages/en/onboarding.json";
+import arOnboarding from "@/messages/ar/onboarding.json";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import {
   BODY_TYPES,
@@ -42,9 +44,11 @@ describe("org messages", () => {
   });
 
   it("translates every key, bar the ones that carry no words", () => {
-    // Pure punctuation around already-formatted values. There is nothing in
-    // either to translate, and the bracket direction is the renderer's job.
+    // Pure punctuation around already-formatted values, or an example address
+    // that is not language. There is nothing in either to translate, and the
+    // bracket direction is the renderer's job.
     const NOT_LANGUAGE = new Set([
+      "settings.team.invite.emailPlaceholder",
       "dashboard.funnel.share",
       "dashboard.inventory.legend",
       "cars.pagination.showingShort",
@@ -185,6 +189,52 @@ describe("test-drive status labels are shared, not duplicated", () => {
 
     for (const status of ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]) {
       expect(at(messages, `status.${status}`), `missing ${status}`).toBeTruthy();
+    }
+  });
+});
+
+describe("settings reuses the onboarding copy it shares", () => {
+  // The dealer sets the profile and the working hours during onboarding and
+  // edits them again in settings. Both surfaces read one source, so a key
+  // renamed on one side has to fail here rather than render raw in the other.
+  it.each(["en", "ar"] as const)("names every day of the week in %s", (locale) => {
+    const messages = locale === "en" ? enOnboarding : arOnboarding;
+
+    for (const day of [
+      "saturday",
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+    ]) {
+      expect(
+        at(messages, `workingHours.days.${day}`),
+        `missing workingHours.days.${day}`
+      ).toBeTruthy();
+    }
+  });
+
+  it.each(["en", "ar"] as const)("labels every profile field in %s", (locale) => {
+    const messages = locale === "en" ? enOnboarding : arOnboarding;
+
+    for (const field of ["name", "email", "phone", "address"]) {
+      expect(at(messages, `orgDetails.fields.${field}.label`)).toBeTruthy();
+    }
+
+    for (const part of ["country", "region", "city"]) {
+      for (const key of [
+        "label",
+        "placeholder",
+        "searchPlaceholder",
+        "emptyMessage",
+      ]) {
+        expect(
+          at(messages, `orgDetails.location.${part}.${key}`),
+          `missing orgDetails.location.${part}.${key}`
+        ).toBeTruthy();
+      }
     }
   });
 });

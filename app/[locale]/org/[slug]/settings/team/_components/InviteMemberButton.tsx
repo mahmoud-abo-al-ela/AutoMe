@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { inviteTeamMember } from "@/actions/team";
 import { queryKeys } from "@/lib/query-client";
@@ -35,6 +36,9 @@ export default function InviteMemberButton({
   organizationId,
   canAdd,
 }: InviteMemberButtonProps) {
+  const t = useTranslations("org.settings.team.invite");
+  const tRoles = useTranslations("org.settings.team.roles");
+  const tCommon = useTranslations("common.actions");
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<TeamMemberRole>("MEMBER");
@@ -46,7 +50,7 @@ export default function InviteMemberButton({
 
   const handleInvite = async () => {
     if (!email) {
-      toast.error("Please enter an email address");
+      toast.error(t("emailRequired"));
       return;
     }
 
@@ -58,17 +62,17 @@ export default function InviteMemberButton({
       });
 
       if (response?.success) {
-        toast.success("Member invited successfully");
+        toast.success(t("invited"));
         setOpen(false);
         setEmail("");
         setRole("MEMBER");
         queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) }); // Refresh to show new member
       } else {
-        toast.error(response?.error?.message || "Failed to invite member");
+        toast.error(response?.error?.message || t("failed"));
       }
     } catch (error) {
       console.error("Invite error:", error);
-      toast.error("An error occurred while inviting the member");
+      toast.error(t("unexpected"));
     }
   };
 
@@ -76,7 +80,7 @@ export default function InviteMemberButton({
     return (
       <Button disabled variant="outline" size="sm">
         <UserPlus className="h-4 w-4 me-2" />
-        Member Limit Reached
+        {t("limitReached")}
       </Button>
     );
   }
@@ -86,30 +90,27 @@ export default function InviteMemberButton({
       <DialogTrigger asChild>
         <Button size="sm" className="cursor-pointer">
           <UserPlus className="h-4 w-4 me-2" />
-          Invite Member
+          {t("cta")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite Team Member</DialogTitle>
-          <DialogDescription>
-            Invite a new member to join your organization. They must have an
-            account to accept the invitation.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email">{t("emailLabel")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="member@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="role">{t("roleLabel")}</Label>
             {/* Radix hands back a plain string; the only two items rendered
                 below are the two roles, so the narrowing is sound. */}
             <Select
@@ -120,24 +121,24 @@ export default function InviteMemberButton({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MEMBER">Member</SelectItem>
-                <SelectItem value="OWNER">Owner</SelectItem>
+                <SelectItem value="MEMBER">{tRoles("MEMBER")}</SelectItem>
+                <SelectItem value="OWNER">{tRoles("OWNER")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button onClick={handleInvite} disabled={loading} className="cursor-pointer">
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                Inviting...
+                {t("submitting")}
               </>
             ) : (
-              "Send Invitation"
+              t("submit")
             )}
           </Button>
         </DialogFooter>

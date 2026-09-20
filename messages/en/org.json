@@ -442,5 +442,107 @@
       "updateFailed": "Couldn’t update the test drive",
       "unexpected": "Something went wrong while updating the test drive."
     }
+  },
+  "settings": {
+    "meta": {
+      "title": "Settings",
+      "description": "Manage your dealership settings"
+    },
+    "title": "Settings",
+    "subtitle": "Manage your settings and preferences",
+    "configure": "Configure",
+    "back": "Back to settings",
+    "cards": {
+      "profile": {
+        "title": "Organization Profile",
+        "description": "Manage public dealership details and discovery location"
+      },
+      "workingHours": {
+        "title": "Working Hours",
+        "description": "Configure business operating hours and availability"
+      },
+      "team": {
+        "title": "Team Members",
+        "description": "Manage your team members and their roles"
+      }
+    },
+    "profile": {
+      "title": "Organization Profile",
+      "subtitle": "Manage the public details customers see across dealership and car discovery pages.",
+      "loading": "Loading profile…",
+      "website": "Website",
+      "description": "Description",
+      "save": "Save Profile",
+      "saving": "Saving…",
+      "toasts": {
+        "loadFailed": "Couldn’t load your organization profile",
+        "updated": "Profile saved",
+        "updateFailed": "Couldn’t save your organization profile"
+      }
+    },
+    "workingHours": {
+      "title": "Working Hours",
+      "subtitle": "Configure your business operating hours",
+      "cardTitle": "Business Hours",
+      "cardDescription": "Set your opening hours for each day. Customers see these on your storefront.",
+      "to": "to",
+      "closed": "Closed",
+      "openLabel": "Opens",
+      "closeLabel": "Closes",
+      "save": "Save Working Hours",
+      "saving": "Saving…",
+      "toasts": {
+        "incomplete": "Please set hours for every day of the week",
+        "updated": "Working hours saved",
+        "updateFailed": "Couldn’t save your working hours"
+      }
+    },
+    "team": {
+      "title": "Team Members",
+      "count": "{count} of {limit} members",
+      "unlimited": "unlimited",
+      "cardTitle": "Team Members",
+      "cardDescription": "Manage your team members and their roles within the organization.",
+      "emptyTitle": "No team members yet",
+      "emptyBody": "Invite members to collaborate with your organization",
+      "noName": "No name",
+      "you": "You",
+      "joined": "Joined {when}",
+      "roles": {
+        "OWNER": "Owner",
+        "MEMBER": "Member"
+      },
+      "invite": {
+        "cta": "Invite Member",
+        "limitReached": "Member limit reached",
+        "title": "Invite Team Member",
+        "description": "Invite someone to join your organization. They need an account to accept.",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "member@example.com",
+        "roleLabel": "Role",
+        "submit": "Send Invitation",
+        "submitting": "Inviting…",
+        "emailRequired": "Enter an email address",
+        "invited": "Invitation sent",
+        "failed": "Couldn’t invite that member",
+        "unexpected": "Something went wrong while inviting the member."
+      },
+      "remove": {
+        "label": "Remove member",
+        "title": "Remove Team Member",
+        "body": "Are you sure you want to remove <b>{name}</b> from the organization? This cannot be undone.",
+        "confirm": "Remove Member",
+        "removing": "Removing…",
+        "removed": "Member removed",
+        "failed": "Couldn’t remove that member",
+        "unexpected": "Something went wrong while removing the member.",
+        "ownerBlocked": "The organization owner cannot be removed"
+      },
+      "roleChange": {
+        "updated": "Role updated",
+        "failed": "Couldn’t update that role",
+        "unexpected": "Something went wrong while updating the role."
+      }
+    }
   }
 }

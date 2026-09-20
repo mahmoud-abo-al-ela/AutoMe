@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMemberRole, removeMember } from "@/actions/team";
 import { queryKeys } from "@/lib/query-client";
 import type { TeamMember, TeamMemberRole } from "../_lib/team-types";
 
 export function useTeamActions(organizationId: string) {
+    const tRemove = useTranslations("org.settings.team.remove");
+    const tRole = useTranslations("org.settings.team.roleChange");
     const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
     const queryClient = useQueryClient();
@@ -19,7 +22,7 @@ export function useTeamActions(organizationId: string) {
 
     const handleRemoveMember = (member: TeamMember) => {
         if (member.role === "OWNER") {
-            toast.error("Cannot remove the organization owner");
+            toast.error(tRemove("ownerBlocked"));
             return;
         }
 
@@ -40,14 +43,14 @@ export function useTeamActions(organizationId: string) {
             setMemberToRemove(null);
 
             if (response?.success) {
-                toast.success("Member removed successfully");
+                toast.success(tRemove("removed"));
                 queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
-                toast.error(response?.error?.message || "Failed to remove member");
+                toast.error(response?.error?.message || tRemove("failed"));
             }
         } catch (error) {
             console.error("Remove member error:", error);
-            toast.error("An error occurred while removing the member");
+            toast.error(tRemove("unexpected"));
             setRemoveDialogOpen(false);
             setMemberToRemove(null);
         }
@@ -62,16 +65,14 @@ export function useTeamActions(organizationId: string) {
             });
 
             if (response?.success) {
-                toast.success("Member role updated successfully");
+                toast.success(tRole("updated"));
                 queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
-                toast.error(
-                    response?.error?.message || "Failed to update member role"
-                );
+                toast.error(response?.error?.message || tRole("failed"));
             }
         } catch (error) {
             console.error("Update role error:", error);
-            toast.error("An error occurred while updating the role");
+            toast.error(tRole("unexpected"));
         }
     };
 
