@@ -21,6 +21,7 @@ const NAMESPACES = [
   "places",
   "plans",
   "onboarding",
+  "org",
 ] as const;
 
 export default getRequestConfig(async ({ locale: explicitLocale }) => {

@@ -7,25 +7,34 @@ import { Suspense } from "react";
 import Loading from "@/components/Loading";
 import { notFound } from "next/navigation";
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { getLocale, getTranslations } from "next-intl/server";
 import AdminSidebar from "./_components/AdminSidebar";
 import ImpersonationBanner from "./_components/ImpersonationBanner";
 
-type OrgParams = { params: Promise<{ slug: string }> };
+// The route params as Next generates them for the layout validator: it
+// requires a plain string, so the narrowed Locale is used only where this
+// code passes it on to next-intl.
+type OrgParams = { params: Promise<{ locale: string; slug: string }> };
 
-export async function generateMetadata({ params }: OrgParams) {
-    const { slug } = await params;
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: Locale; slug: string }>;
+}) {
+    const { locale, slug } = await params;
+    const t = await getTranslations({ locale, namespace: "org.meta" });
     const organization = await getOrganizationBySlug(slug);
 
     if (!organization) {
         return {
-            title: "Organization Not Found",
+            title: t("notFoundTitle"),
         };
     }
 
     return {
         title: `${organization.name}`,
-        description: `Browse cars from ${organization.name}`,
+        description: t("description", { name: organization.name }),
     };
 }
 
@@ -67,7 +76,10 @@ export default async function OrganizationLayout({
             <AdminSidebar organization={organization} userRole={membership?.role} />
             <main
                 className="flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0"
-                style={{ paddingLeft: "var(--sidebar-width, 0)" }}
+                // The sidebar is pinned to the inline-start edge, which is the
+                // right-hand one in Arabic; a physical paddingLeft put the
+                // content underneath it there.
+                style={{ paddingInlineStart: "var(--sidebar-width, 0)" }}
             >
                 {isImpersonating && impersonationSession && (
                     <ImpersonationBanner

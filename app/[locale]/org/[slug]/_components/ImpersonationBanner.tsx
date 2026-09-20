@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { AlertCircle, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { endImpersonationAction } from "@/actions/impersonation";
 import { toast } from "sonner";
+import { useActionError } from "@/hooks/use-action-error";
 import type { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
 import type { Organization } from "@/lib/generated/prisma";
 
@@ -25,6 +27,10 @@ export default function ImpersonationBanner({
   session: ImpersonationSession;
   organization: Organization;
 }) {
+  const t = useTranslations("org.impersonation");
+  const tError = useTranslations("errors");
+  const actionError = useActionError();
+  const locale = useLocale();
   const router = useRouter();
   const [ending, setEnding] = useState(false);
 
@@ -34,15 +40,18 @@ export default function ImpersonationBanner({
       const result = await endImpersonationAction();
 
       if (result.success) {
-        toast.success("Impersonation ended");
-        // Redirect back to super admin
-        window.location.href = "/super-admin";
+        toast.success(t("ended"));
+        // A hard reload, because ending the session changes the server-side
+        // context every page reads. The locale has to be written back in: both
+        // locales are prefixed, so a bare "/super-admin" would land the reader
+        // in English no matter which side they were reading.
+        window.location.href = `/${locale}/super-admin`;
       } else {
-        toast.error(result.error?.message || "Failed to end impersonation");
+        toast.error(actionError(result.error, t("endFailed")));
         setEnding(false);
       }
     } catch (error) {
-      toast.error("An error occurred");
+      toast.error(tError("generic"));
       setEnding(false);
     }
   };
@@ -53,16 +62,14 @@ export default function ImpersonationBanner({
         <div className="flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
           <span className="text-sm font-medium">
-            Viewing as <strong>{session?.targetUser?.name || "User"}</strong>
-            {organization && (
-              <>
-                {" "}
-                in <strong>{organization.name}</strong>
-              </>
-            )}
+            {t.rich(organization ? "viewingAsIn" : "viewingAs", {
+              name: session?.targetUser?.name || t("unknownUser"),
+              org: organization?.name,
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
           </span>
           <span className="text-xs opacity-75">
-            (Super Admin: {session?.superAdmin?.name})
+            {t("superAdmin", { name: session?.superAdmin?.name ?? "" })}
           </span>
         </div>
         <Button
@@ -75,12 +82,12 @@ export default function ImpersonationBanner({
           {ending ? (
             <>
               <Loader2 className="h-3 w-3 me-1 animate-spin" />
-              Ending...
+              {t("ending")}
             </>
           ) : (
             <>
               <LogOut className="h-3 w-3 me-1" />
-              Exit Impersonation
+              {t("exit")}
             </>
           )}
         </Button>

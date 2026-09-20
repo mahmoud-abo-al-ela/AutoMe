@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "cars": "السيارات",
+    "testDrives": "القيادات التجريبية",
+    "messages": "الرسائل",
+    "billing": "الفوترة",
+    "auditLogs": "سجل النشاط",
+    "settings": "الإعدادات",
+    "fallbackOrgName": "لوحة تحكم AutoMe",
+    "openSidebar": "فتح القائمة الجانبية",
+    "collapseSidebar": "طي القائمة الجانبية",
+    "expandSidebar": "توسيع القائمة الجانبية",
+    "backToSite": "العودة إلى الموقع"
+  },
+  "meta": {
+    "notFoundTitle": "المعرض غير موجود",
+    "description": "تصفح سيارات {name}"
+  },
+  "error": {
+    "title": "حدث خطأ ما",
+    "body": "نعتذر عن الإزعاج. حدث خطأ غير متوقع.",
+    "retry": "حاول مرة أخرى",
+    "home": "العودة إلى الرئيسية"
+  },
+  "impersonation": {
+    "viewingAs": "تتصفح باسم <b>{name}</b>",
+    "viewingAsIn": "تتصفح باسم <b>{name}</b> داخل <b>{org}</b>",
+    "unknownUser": "مستخدم",
+    "superAdmin": "(المشرف العام: {name})",
+    "exit": "إنهاء انتحال الهوية",
+    "ending": "جارٍ الإنهاء…",
+    "ended": "تم إنهاء انتحال الهوية",
+    "endFailed": "تعذّر إنهاء انتحال الهوية"
+  }
+}

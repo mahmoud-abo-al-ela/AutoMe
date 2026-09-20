@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "cars": "Cars",
+    "testDrives": "Test Drives",
+    "messages": "Messages",
+    "billing": "Billing",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings",
+    "fallbackOrgName": "AutoMe Admin",
+    "openSidebar": "Open sidebar menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "backToSite": "Back to site"
+  },
+  "meta": {
+    "notFoundTitle": "Organization not found",
+    "description": "Browse cars from {name}"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "We apologize for the inconvenience. An unexpected error has occurred.",
+    "retry": "Try again",
+    "home": "Go back home"
+  },
+  "impersonation": {
+    "viewingAs": "Viewing as <b>{name}</b>",
+    "viewingAsIn": "Viewing as <b>{name}</b> in <b>{org}</b>",
+    "unknownUser": "User",
+    "superAdmin": "(Super Admin: {name})",
+    "exit": "Exit impersonation",
+    "ending": "Ending…",
+    "ended": "Impersonation ended",
+    "endFailed": "Couldn’t end impersonation"
+  }
+}
