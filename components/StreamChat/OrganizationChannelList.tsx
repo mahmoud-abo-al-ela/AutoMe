@@ -2,6 +2,7 @@
 import { logError } from "@/lib/utils/errors";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChannelList } from "stream-chat-react";
 import { useChatContext } from "stream-chat-react";
 import { getOrganizationMemberIds } from "@/actions/stream-chat";
@@ -14,6 +15,7 @@ export function OrganizationChannelList({
 }: {
     organizationSlug: string;
 }) {
+    const t = useTranslations("chat.orgInbox");
     const { client } = useChatContext();
     const [filters, setFilters] = useState<ChannelFilters | null>(null);
     const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export function OrganizationChannelList({
     if (!filters) {
         return (
             <div className="p-4 text-center text-muted-foreground">
-                Unable to load conversations
+                {t("loadFailed")}
             </div>
         );
     }
@@ -72,7 +74,7 @@ export function OrganizationChannelList({
             <div className="p-4 border-b bg-background shrink-0">
                 <div className="flex items-center gap-2">
                     <MessageSquare className="h-5 w-5 text-primary" />
-                    <h2 className="font-semibold text-lg">Customer Messages</h2>
+                    <h2 className="font-semibold text-lg">{t("listTitle")}</h2>
                 </div>
             </div>
 

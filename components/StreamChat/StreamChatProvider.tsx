@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StreamChat } from "stream-chat";
 import { Chat } from "stream-chat-react";
 import { useUser } from "@clerk/nextjs";
+import { useLocale } from "next-intl";
 import { getStreamToken } from "@/actions/stream-chat";
+import { createStreamI18n } from "@/i18n/stream-chat-i18n";
+import type { Locale } from "@/i18n/routing";
 import { logError } from "@/lib/utils/errors";
 
 import "stream-chat-react/dist/css/v2/index.css";
@@ -13,8 +16,14 @@ let chatClient: StreamChat | null = null;
 
 export function StreamChatProvider({ children }: { children: React.ReactNode }) {
     const { user: clerkUser, isLoaded } = useUser();
+    const locale = useLocale() as Locale;
     const [client, setClient] = useState<StreamChat | null>(null);
     const [isConnecting, setIsConnecting] = useState(true);
+
+    // Rebuilt on a language switch rather than mutated through setLanguage:
+    // the instance also carries the dayjs locale used for every timestamp, and
+    // a switch remounts the tree anyway.
+    const i18nInstance = useMemo(() => createStreamI18n(locale), [locale]);
 
     useEffect(() => {
         if (!isLoaded || !clerkUser) {
@@ -94,7 +103,11 @@ export function StreamChatProvider({ children }: { children: React.ReactNode }) 
     }
 
     return (
-        <Chat client={client} theme="str-chat__theme-light">
+        <Chat
+            client={client}
+            theme="str-chat__theme-light"
+            i18nInstance={i18nInstance}
+        >
             {children}
         </Chat>
     );

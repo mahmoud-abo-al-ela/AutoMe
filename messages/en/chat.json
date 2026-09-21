@@ -1,0 +1,56 @@
+{
+  "inbox": {
+    "meta": {
+      "title": "Messages",
+      "description": "Chat with dealerships about cars you're interested in"
+    },
+    "title": "Messages",
+    "subtitle": "Chat with dealerships about cars you're interested in",
+    "subtitleForOrg": "Chat with {name} about cars you're interested in"
+  },
+  "orgInbox": {
+    "meta": {
+      "title": "Messages",
+      "description": "Manage customer conversations"
+    },
+    "title": "Customer Messages",
+    "subtitle": "Manage conversations with your customers",
+    "listTitle": "Customer Messages",
+    "loadFailed": "Unable to load conversations"
+  },
+  "window": {
+    "emptyTitle": "Select a conversation",
+    "emptyBody": "Choose a conversation from the list to start messaging",
+    "untitled": "Conversation",
+    "viewDetails": "View details"
+  },
+  "preview": {
+    "noMessages": "No messages yet",
+    "ownPrefix": "You: {text}",
+    "attachment": "Sent an attachment",
+    "unknownUser": "Unknown User"
+  },
+  "sidebar": {
+    "label": "Chat sidebar",
+    "fallbackTitle": "Chat",
+    "loadingTitle": "Loading conversation…",
+    "loadingBody": "Checking for existing messages",
+    "startTitle": "Start a conversation",
+    "startBody": "Send a message to inquire about this vehicle. The dealer will be notified and respond shortly.",
+    "askingAbout": "Asking about:",
+    "inputPlaceholder": "Type your message…",
+    "inputLabel": "Message input",
+    "clear": "Clear message",
+    "send": "Send message",
+    "messageDealer": "Message Dealer",
+    "toasts": {
+      "carFailed": "Failed to load car information",
+      "startFailed": "Failed to start conversation",
+      "sent": "Message sent!",
+      "sendFailed": "Failed to send message"
+    }
+  },
+  "badge": {
+    "overflow": "{max}+"
+  }
+}

@@ -2,6 +2,7 @@
 import { logError } from "@/lib/utils/errors";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
     Channel,
     MessageInput,
@@ -18,6 +19,7 @@ import { Button } from "../ui/button";
 import { formatCarPrice } from "@/lib/utils/currency";
 
 function DMChannelHeader({ channel }: { channel: StreamChannel }) {
+    const t = useTranslations("chat.window");
     const { client } = useChatContext();
 
     // Get the other user in the conversation
@@ -102,7 +104,7 @@ function DMChannelHeader({ channel }: { channel: StreamChannel }) {
                 <div className="flex justify-between items-center w-full gap-3">
                     <div className="min-w-0">
                         <h3 className="font-semibold text-base truncate">
-                            {title || "Conversation"}
+                            {title || t("untitled")}
                         </h3>
                         {price !== null && Number.isFinite(price) && (
                             <div className="flex items-center text-sm text-muted-foreground">
@@ -118,7 +120,7 @@ function DMChannelHeader({ channel }: { channel: StreamChannel }) {
                                 size="sm"
                                 className="h-7 px-2 text-xs bg-primary hover:bg-primary/80 cursor-pointer"
                             >
-                                View Details
+                                {t("viewDetails")}
                             </Button>
                         </Link>
                     )}
@@ -129,6 +131,7 @@ function DMChannelHeader({ channel }: { channel: StreamChannel }) {
 }
 
 export function ChatWindow() {
+    const t = useTranslations("chat.window");
     const { channel } = useChatContext();
 
     // Mark channel as read when it becomes active
@@ -149,10 +152,10 @@ export function ChatWindow() {
                         <MessageSquare className="w-8 h-8 md:w-10 md:h-10 text-primary" />
                     </div>
                     <h3 className="font-semibold text-base md:text-lg mb-2">
-                        Select a conversation
+                        {t("emptyTitle")}
                     </h3>
                     <p className="text-xs md:text-sm text-muted-foreground">
-                        Choose a conversation from the list to start messaging
+                        {t("emptyBody")}
                     </p>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 
@@ -18,6 +19,8 @@ export function StartConversationButton({
     className?: string;
     onChatOpen?: (carId: string) => void;
 }) {
+    const t = useTranslations("chat.sidebar");
+
     const handleClick = () => {
         // Just open the chat sidebar, don't create channel yet
         if (onChatOpen) {
@@ -33,7 +36,7 @@ export function StartConversationButton({
             className={className}
         >
             <MessageSquare className="h-4 w-4 me-2" />
-            Message Dealer
+            {t("messageDealer")}
         </Button>
     );
 }

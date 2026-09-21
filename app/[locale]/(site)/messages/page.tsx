@@ -1,14 +1,21 @@
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@clerk/nextjs/server";
 import { UserChannelList, ChatWindow } from "@/components/StreamChat";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import type { Metadata } from "next";
+import type { Locale } from "@/i18n/routing";
 
-export const metadata: Metadata = {
-  title: "Messages",
-  description: "Chat with dealerships about cars you're interested in",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "chat.inbox.meta" });
+
+  return { title: t("title"), description: t("description") };
+}
 
 export default async function MessagesPage({
   params,
@@ -16,6 +23,7 @@ export default async function MessagesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations("chat.inbox");
 
   const { userId } = await auth();
 
@@ -29,11 +37,11 @@ export default async function MessagesPage({
   return (
     <div className="container mx-auto px-4 pb-6 pt-20 max-w-[1600px]">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Messages</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-sm md:text-base text-muted-foreground">
           {organization
-            ? `Chat with ${organization.name} about cars you're interested in`
-            : "Chat with dealerships about cars you're interested in"}
+            ? t("subtitleForOrg", { name: organization.name })
+            : t("subtitle")}
         </p>
       </div>
 

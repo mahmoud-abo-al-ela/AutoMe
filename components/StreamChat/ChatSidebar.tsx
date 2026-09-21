@@ -2,6 +2,7 @@
 import { logError } from "@/lib/utils/errors";
 
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Channel, MessageInput, MessageList, Window, useChatContext } from "stream-chat-react";
 import { Loader2, Car, Send, MessageSquare, X } from "lucide-react";
@@ -24,6 +25,7 @@ export function ChatSidebar({
     // without one, so the sidebar can mount before a selection exists.
     carId: string | null;
 }) {
+    const t = useTranslations("chat.sidebar");
     const { client } = useChatContext();
     const [channel, setChannel] = useState<StreamChannel | null>(null);
     const [loading, setLoading] = useState(false);
@@ -92,7 +94,7 @@ export function ChatSidebar({
                 }
             } catch (error) {
                 logError("Error loading car info:", error);
-                toast.error("Failed to load car information");
+                toast.error(t("toasts.carFailed"));
             } finally {
                 setLoading(false);
                 setCheckingChannel(false);
@@ -100,6 +102,10 @@ export function ChatSidebar({
         };
 
         loadCarInfoAndChannel();
+    // `t` is read only for the failure toast. Listing it would re-run the
+    // lookup on a language switch, which refetches the car and re-watches the
+    // channel for the same conversation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, carId, client]);
 
     // Handle sending the first message - this creates the channel
@@ -119,7 +125,7 @@ export function ChatSidebar({
                     // `result.error` is the ActionResponse error object, not a
                     // string — passing it whole rendered "[object Object]".
                     toast.error(
-                        result.error?.message || "Failed to start conversation"
+                        result.error?.message || t("toasts.startFailed")
                     );
                     return;
                 }
@@ -136,10 +142,10 @@ export function ChatSidebar({
                 });
 
                 setMessageText("");
-                toast.success("Message sent!");
+                toast.success(t("toasts.sent"));
             } catch (error) {
                 logError("Error creating channel:", error);
-                toast.error("Failed to send message");
+                toast.error(t("toasts.sendFailed"));
             } finally {
                 setLoading(false);
             }
@@ -151,7 +157,7 @@ export function ChatSidebar({
             <SheetContent
                 side="right"
                 className="w-full sm:w-[540px] p-0 flex flex-col"
-                aria-label="Chat sidebar"
+                aria-label={t("label")}
             >
                 {/* Custom Header */}
                 <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-background via-muted/10 to-background shrink-0">
@@ -194,7 +200,7 @@ export function ChatSidebar({
                             </div>
                         </div>
                     ) : (
-                        <SheetTitle>Chat</SheetTitle>
+                        <SheetTitle>{t("fallbackTitle")}</SheetTitle>
                     )}
                 </SheetHeader>
 
@@ -210,8 +216,8 @@ export function ChatSidebar({
                                     <div className="absolute inset-0 w-16 h-16 rounded-full bg-primary/5 animate-ping mx-auto" />
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-sm font-medium">Loading conversation...</p>
-                                    <p className="text-xs text-muted-foreground">Checking for existing messages</p>
+                                    <p className="text-sm font-medium">{t("loadingTitle")}</p>
+                                    <p className="text-xs text-muted-foreground">{t("loadingBody")}</p>
                                 </div>
                             </div>
                         </div>
@@ -238,9 +244,9 @@ export function ChatSidebar({
                                     </div>
 
                                     <div className="space-y-2">
-                                        <h3 className="font-semibold text-lg">Start a conversation</h3>
+                                        <h3 className="font-semibold text-lg">{t("startTitle")}</h3>
                                         <p className="text-sm text-muted-foreground leading-relaxed">
-                                            Send a message to inquire about this vehicle. The dealer will be notified and respond shortly.
+                                            {t("startBody")}
                                         </p>
                                     </div>
 
@@ -248,7 +254,7 @@ export function ChatSidebar({
                                         <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-xl p-4 text-start border border-border/50 shadow-sm">
                                             <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                                                 <Car className="h-3 w-3" />
-                                                Asking about:
+                                                {t("askingAbout")}
                                             </p>
                                             <p className="font-semibold text-sm">
                                                 {carInfo.year} {carInfo.make} {carInfo.model}
@@ -274,17 +280,17 @@ export function ChatSidebar({
                                                 type="text"
                                                 value={messageText}
                                                 onChange={(e) => setMessageText(e.target.value)}
-                                                placeholder="Type your message..."
+                                                placeholder={t("inputPlaceholder")}
                                                 disabled={loading}
                                                 className="w-full px-4 py-3 pe-10 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed bg-background transition-all duration-200 placeholder:text-muted-foreground/60"
-                                                aria-label="Message input"
+                                                aria-label={t("inputLabel")}
                                             />
                                             {messageText && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setMessageText("")}
                                                     className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                                    aria-label="Clear message"
+                                                    aria-label={t("clear")}
                                                 >
                                                     <X className="h-4 w-4" />
                                                 </button>
@@ -294,7 +300,7 @@ export function ChatSidebar({
                                             type="submit"
                                             disabled={loading || !messageText.trim()}
                                             className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
-                                            aria-label="Send message"
+                                            aria-label={t("send")}
                                         >
                                             {loading ? (
                                                 <Loader2 className="h-5 w-5 animate-spin" />

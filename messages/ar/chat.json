@@ -1,0 +1,56 @@
+{
+  "inbox": {
+    "meta": {
+      "title": "الرسائل",
+      "description": "تحدّث مع المعارض عن السيارات التي تهمّك"
+    },
+    "title": "الرسائل",
+    "subtitle": "تحدّث مع المعارض عن السيارات التي تهمّك",
+    "subtitleForOrg": "تحدّث مع {name} عن السيارات التي تهمّك"
+  },
+  "orgInbox": {
+    "meta": {
+      "title": "الرسائل",
+      "description": "إدارة محادثات العملاء"
+    },
+    "title": "رسائل العملاء",
+    "subtitle": "أدر محادثاتك مع عملائك",
+    "listTitle": "رسائل العملاء",
+    "loadFailed": "تعذّر تحميل المحادثات"
+  },
+  "window": {
+    "emptyTitle": "اختر محادثة",
+    "emptyBody": "اختر محادثة من القائمة لبدء المراسلة",
+    "untitled": "محادثة",
+    "viewDetails": "عرض التفاصيل"
+  },
+  "preview": {
+    "noMessages": "لا رسائل بعد",
+    "ownPrefix": "أنت: {text}",
+    "attachment": "أرسل مرفقًا",
+    "unknownUser": "مستخدم غير معروف"
+  },
+  "sidebar": {
+    "label": "لوحة المحادثة",
+    "fallbackTitle": "محادثة",
+    "loadingTitle": "جارٍ تحميل المحادثة…",
+    "loadingBody": "نبحث عن رسائل سابقة",
+    "startTitle": "ابدأ محادثة",
+    "startBody": "أرسل رسالة للاستفسار عن هذه السيارة. سيصل إشعار إلى المعرض وسيرد عليك قريبًا.",
+    "askingAbout": "بخصوص:",
+    "inputPlaceholder": "اكتب رسالتك…",
+    "inputLabel": "حقل الرسالة",
+    "clear": "مسح الرسالة",
+    "send": "إرسال الرسالة",
+    "messageDealer": "راسل المعرض",
+    "toasts": {
+      "carFailed": "تعذّر تحميل بيانات السيارة",
+      "startFailed": "تعذّر بدء المحادثة",
+      "sent": "تم إرسال الرسالة!",
+      "sendFailed": "تعذّر إرسال الرسالة"
+    }
+  },
+  "badge": {
+    "overflow": "{max}+"
+  }
+}
