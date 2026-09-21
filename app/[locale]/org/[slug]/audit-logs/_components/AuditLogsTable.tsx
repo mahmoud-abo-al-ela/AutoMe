@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSearchParams, useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useState } from "react";
@@ -29,6 +30,7 @@ export default function AuditLogsTable({
   logs,
   pagination,
 }: AuditLogsTableProps) {
+  const t = useTranslations("org.auditLogs");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { slug } = useParams();
@@ -42,7 +44,12 @@ export default function AuditLogsTable({
 
   if (!logs || logs.length === 0) {
     return (
-      <EmptyState variant="inline" icon={ScrollText} title="No audit logs found" className="border rounded-lg" />
+      <EmptyState
+        variant="inline"
+        icon={ScrollText}
+        title={t("empty.title")}
+        className="border rounded-lg"
+      />
     );
   }
 
@@ -52,11 +59,11 @@ export default function AuditLogsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[180px]">Timestamp</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Entity</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead className="w-[80px]">Details</TableHead>
+              <TableHead className="w-[180px]">{t("table.timestamp")}</TableHead>
+              <TableHead>{t("table.action")}</TableHead>
+              <TableHead>{t("table.entity")}</TableHead>
+              <TableHead>{t("table.user")}</TableHead>
+              <TableHead className="w-[80px]">{t("table.details")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -38,7 +38,10 @@
     "label": "Pagination",
     "previous": "Previous page",
     "next": "Next page",
-    "page": "Page {number}"
+    "page": "Page {number}",
+    "previousShort": "Previous",
+    "nextShort": "Next",
+    "morePages": "More pages"
   },
   "carActions": {
     "addToFavorites": "Add to favorites",

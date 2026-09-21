@@ -1,10 +1,12 @@
+import { useTranslations } from "next-intl";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, Settings } from "lucide-react";
+import { useFormatters } from "@/hooks/use-formatters";
 import { ACTION_COLORS, ENTITY_ICONS } from "./constants";
-import { formatActionLabel, formatDate } from "./utils";
+import { useAuditLabels } from "../../_lib/use-audit-labels";
 import type { AuditLogWithUser } from "../../_lib/audit-types";
 
 interface AuditLogTableRowProps {
@@ -16,6 +18,9 @@ export default function AuditLogTableRow({
   log,
   onView,
 }: AuditLogTableRowProps) {
+  const t = useTranslations("org.auditLogs");
+  const { dateTime } = useFormatters();
+  const label = useAuditLabels();
   const EntityIcon = ENTITY_ICONS[log.entityType] || Settings;
 
   // Get initials for avatar fallback
@@ -31,7 +36,7 @@ export default function AuditLogTableRow({
   return (
     <TableRow className="group hover:bg-muted/50 transition-colors">
       <TableCell className="text-muted-foreground text-sm font-mono whitespace-nowrap">
-        {formatDate(log.createdAt)}
+        {dateTime(log.createdAt)}
       </TableCell>
       <TableCell>
         <Badge
@@ -39,7 +44,7 @@ export default function AuditLogTableRow({
             ACTION_COLORS[log.action] || "bg-gray-100 dark:bg-gray-800"
           } font-medium border-0`}
         >
-          {formatActionLabel(log.action)}
+          {label.action(log.action)}
         </Badge>
       </TableCell>
       <TableCell>
@@ -47,7 +52,9 @@ export default function AuditLogTableRow({
           <div className="p-2 bg-muted rounded-md">
             <EntityIcon className="h-4 w-4 text-foreground" />
           </div>
-          <span className="text-sm font-medium">{log.entityType}</span>
+          <span className="text-sm font-medium">
+            {label.entity(log.entityType)}
+          </span>
         </div>
       </TableCell>
       <TableCell>
@@ -63,7 +70,7 @@ export default function AuditLogTableRow({
           </Avatar>
           <div className="flex flex-col">
             <span className="text-sm font-medium leading-none">
-              {log.user?.name || "Unknown User"}
+              {log.user?.name || t("unknownUser")}
             </span>
             <span className="text-xs text-muted-foreground mt-1">
               {log.userEmail}
@@ -73,7 +80,7 @@ export default function AuditLogTableRow({
                 variant="outline"
                 className="text-micro px-1 py-0 h-4 mt-1 w-fit border-amber-500/50 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20"
               >
-                Impersonated
+                {t("table.impersonated")}
               </Badge>
             )}
           </div>
@@ -84,7 +91,7 @@ export default function AuditLogTableRow({
           variant="ghost"
           size="icon"
           onClick={() => onView(log)}
-          aria-label="View details"
+          aria-label={t("table.viewDetails")}
           className="opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <Eye className="h-4 w-4" />

@@ -698,5 +698,103 @@
         "SUBSCRIPTION_RENEWED": "تجديد"
       }
     }
+  },
+  "auditLogs": {
+    "meta": {
+      "title": "سجل النشاط",
+      "description": "تتبّع كل الإجراءات والتغييرات داخل معرضك"
+    },
+    "title": "سجل النشاط",
+    "subtitle": "تتبّع كل الإجراءات والتغييرات داخل معرضك",
+    "unknownUser": "مستخدم غير معروف",
+    "retention": {
+      "label": "مدة الاحتفاظ: {value}",
+      "withPlan": "{duration} ({plan})",
+      "unlimited": "غير محدودة",
+      "days": "{count, plural, zero {{value} يوم} one {يوم واحد} two {يومان} few {{value} أيام} many {{value} يومًا} other {{value} يوم}}",
+      "years": "{count, plural, zero {{value} سنة} one {سنة واحدة} two {سنتان} few {{value} سنوات} many {{value} سنة} other {{value} سنة}}",
+      "tooltip": "تُحذف سجلات النشاط تلقائيًا بعد انتهاء مدة الاحتفاظ. ارتقِ بخطتك للحصول على مدة أطول."
+    },
+    "filters": {
+      "label": "عوامل التصفية:",
+      "searchPlaceholder": "ابحث بمعرّف المستخدم…",
+      "dateRangePlaceholder": "اختر نطاقًا زمنيًا",
+      "dateRange": "{start} – {end}",
+      "entityTypePlaceholder": "نوع العنصر",
+      "actionPlaceholder": "الإجراء",
+      "allEntityTypes": "كل الأنواع",
+      "allActions": "كل الإجراءات",
+      "reset": "إعادة تعيين"
+    },
+    "table": {
+      "timestamp": "التوقيت",
+      "action": "الإجراء",
+      "entity": "العنصر",
+      "user": "المستخدم",
+      "details": "التفاصيل",
+      "impersonated": "بانتحال الهوية",
+      "viewDetails": "عرض التفاصيل"
+    },
+    "empty": {
+      "title": "لا توجد سجلات نشاط"
+    },
+    "pagination": {
+      "showing": "عرض {start} إلى {end} من إجمالي {total} سجل"
+    },
+    "details": {
+      "title": "تفاصيل سجل النشاط",
+      "recordedOn": "سُجّل في {date}",
+      "action": "الإجراء",
+      "entityType": "نوع العنصر",
+      "entityId": "معرّف العنصر",
+      "ipAddress": "عنوان IP",
+      "executedBy": "نفّذه",
+      "impersonatedAction": "إجراء بانتحال الهوية",
+      "previousState": "الحالة السابقة",
+      "newState": "الحالة الجديدة"
+    },
+    "actions": {
+      "ORG_CREATED": "إنشاء المعرض",
+      "ORG_UPDATED": "تحديث المعرض",
+      "ORG_DELETED": "حذف المعرض",
+      "ORG_SUSPENDED": "إيقاف المعرض",
+      "ORG_ACTIVATED": "تفعيل المعرض",
+      "MEMBER_INVITED": "دعوة عضو",
+      "MEMBER_ACCEPTED": "قبول العضوية",
+      "MEMBER_REMOVED": "إزالة عضو",
+      "MEMBER_ROLE_CHANGED": "تغيير صلاحية عضو",
+      "SUBSCRIPTION_CREATED": "إنشاء اشتراك",
+      "SUBSCRIPTION_UPGRADED": "ترقية الاشتراك",
+      "SUBSCRIPTION_DOWNGRADED": "خفض الاشتراك",
+      "SUBSCRIPTION_CANCELED": "إلغاء الاشتراك",
+      "SUBSCRIPTION_RENEWED": "تجديد الاشتراك",
+      "CAR_CREATED": "إضافة سيارة",
+      "CAR_UPDATED": "تحديث سيارة",
+      "CAR_DELETED": "حذف سيارة",
+      "CAR_STATUS_CHANGED": "تغيير حالة سيارة",
+      "CAR_FEATURED_TOGGLED": "تغيير تمييز سيارة",
+      "TEST_DRIVE_CREATED": "طلب قيادة تجريبية",
+      "TEST_DRIVE_CONFIRMED": "تأكيد قيادة تجريبية",
+      "TEST_DRIVE_CANCELED": "إلغاء قيادة تجريبية",
+      "TEST_DRIVE_COMPLETED": "إتمام قيادة تجريبية",
+      "USER_CREATED": "إنشاء مستخدم",
+      "USER_UPDATED": "تحديث مستخدم",
+      "USER_ROLE_CHANGED": "تغيير صلاحية مستخدم",
+      "USER_DELETED": "حذف مستخدم",
+      "WORKING_HOURS_UPDATED": "تحديث ساعات العمل",
+      "ORG_SETTINGS_UPDATED": "تحديث الإعدادات",
+      "IMPERSONATION_STARTED": "بدء انتحال الهوية",
+      "IMPERSONATION_ENDED": "إنهاء انتحال الهوية"
+    },
+    "entities": {
+      "ORGANIZATION": "المعرض",
+      "USER": "المستخدم",
+      "CAR": "السيارة",
+      "TEST_DRIVE": "القيادة التجريبية",
+      "MEMBERSHIP": "العضوية",
+      "SUBSCRIPTION": "الاشتراك",
+      "WORKING_HOURS": "ساعات العمل",
+      "IMPERSONATION_SESSION": "جلسة انتحال الهوية"
+    }
   }
 }

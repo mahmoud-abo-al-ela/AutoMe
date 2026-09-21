@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Pagination,
   PaginationContent,
@@ -23,6 +25,11 @@ export default function AuditLogsPagination({
   limit,
   onPageChange,
 }: AuditLogsPaginationProps) {
+  const t = useTranslations("org.auditLogs.pagination");
+  const { number } = useFormatters();
+  // A page number is an ordinal, not a quantity: no grouping separator.
+  const pageLabel = (page: number) => number(page, { useGrouping: false });
+
   // Helper to generate page numbers
   const getPageNumbers = () => {
     const pages: (number | "...")[] = [];
@@ -57,8 +64,11 @@ export default function AuditLogsPagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
       <p className="text-sm text-muted-foreground order-2 sm:order-1">
-        Showing {(currentPage - 1) * limit + 1} to{" "}
-        {Math.min(currentPage * limit, totalEntries)} of {totalEntries} entries
+        {t("showing", {
+          start: number(Math.min((currentPage - 1) * limit + 1, totalEntries)),
+          end: number(Math.min(currentPage * limit, totalEntries)),
+          total: number(totalEntries),
+        })}
       </p>
 
       {totalPages > 1 && (
@@ -94,7 +104,7 @@ export default function AuditLogsPagination({
                       }}
                       isActive={currentPage === page}
                     >
-                      {page}
+                      {pageLabel(page)}
                     </PaginationLink>
                   )}
                 </PaginationItem>

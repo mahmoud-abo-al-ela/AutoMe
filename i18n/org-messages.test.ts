@@ -60,6 +60,8 @@ describe("org messages", () => {
       "cars.pagination.showingShort",
       "carForm.form.step",
       "testDrives.table.timeRange",
+      "auditLogs.retention.withPlan",
+      "auditLogs.filters.dateRange",
     ]);
 
     const untranslated = flatten(enOrg)

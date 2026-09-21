@@ -698,5 +698,103 @@
         "SUBSCRIPTION_RENEWED": "Renewed"
       }
     }
+  },
+  "auditLogs": {
+    "meta": {
+      "title": "Audit Logs",
+      "description": "Track all actions and changes in your organization"
+    },
+    "title": "Audit Logs",
+    "subtitle": "Track all actions and changes in your organization",
+    "unknownUser": "Unknown User",
+    "retention": {
+      "label": "Retention: {value}",
+      "withPlan": "{duration} ({plan})",
+      "unlimited": "Unlimited",
+      "days": "{count, plural, one {{value} day} other {{value} days}}",
+      "years": "{count, plural, one {{value} year} other {{value} years}}",
+      "tooltip": "Audit logs are automatically deleted after the retention period. Upgrade your plan for longer retention."
+    },
+    "filters": {
+      "label": "Filters:",
+      "searchPlaceholder": "Search by User ID…",
+      "dateRangePlaceholder": "Pick a date range",
+      "dateRange": "{start} – {end}",
+      "entityTypePlaceholder": "Entity Type",
+      "actionPlaceholder": "Action",
+      "allEntityTypes": "All Types",
+      "allActions": "All Actions",
+      "reset": "Reset"
+    },
+    "table": {
+      "timestamp": "Timestamp",
+      "action": "Action",
+      "entity": "Entity",
+      "user": "User",
+      "details": "Details",
+      "impersonated": "Impersonated",
+      "viewDetails": "View details"
+    },
+    "empty": {
+      "title": "No audit logs found"
+    },
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} entries"
+    },
+    "details": {
+      "title": "Audit Log Details",
+      "recordedOn": "Recorded on {date}",
+      "action": "Action",
+      "entityType": "Entity Type",
+      "entityId": "Entity ID",
+      "ipAddress": "IP Address",
+      "executedBy": "Executed by",
+      "impersonatedAction": "Impersonated Action",
+      "previousState": "Previous State",
+      "newState": "New State"
+    },
+    "actions": {
+      "ORG_CREATED": "Organization Created",
+      "ORG_UPDATED": "Organization Updated",
+      "ORG_DELETED": "Organization Deleted",
+      "ORG_SUSPENDED": "Organization Suspended",
+      "ORG_ACTIVATED": "Organization Activated",
+      "MEMBER_INVITED": "Member Invited",
+      "MEMBER_ACCEPTED": "Member Accepted",
+      "MEMBER_REMOVED": "Member Removed",
+      "MEMBER_ROLE_CHANGED": "Member Role Changed",
+      "SUBSCRIPTION_CREATED": "Subscription Created",
+      "SUBSCRIPTION_UPGRADED": "Subscription Upgraded",
+      "SUBSCRIPTION_DOWNGRADED": "Subscription Downgraded",
+      "SUBSCRIPTION_CANCELED": "Subscription Canceled",
+      "SUBSCRIPTION_RENEWED": "Subscription Renewed",
+      "CAR_CREATED": "Car Created",
+      "CAR_UPDATED": "Car Updated",
+      "CAR_DELETED": "Car Deleted",
+      "CAR_STATUS_CHANGED": "Car Status Changed",
+      "CAR_FEATURED_TOGGLED": "Car Featured Toggled",
+      "TEST_DRIVE_CREATED": "Test Drive Created",
+      "TEST_DRIVE_CONFIRMED": "Test Drive Confirmed",
+      "TEST_DRIVE_CANCELED": "Test Drive Canceled",
+      "TEST_DRIVE_COMPLETED": "Test Drive Completed",
+      "USER_CREATED": "User Created",
+      "USER_UPDATED": "User Updated",
+      "USER_ROLE_CHANGED": "User Role Changed",
+      "USER_DELETED": "User Deleted",
+      "WORKING_HOURS_UPDATED": "Working Hours Updated",
+      "ORG_SETTINGS_UPDATED": "Settings Updated",
+      "IMPERSONATION_STARTED": "Impersonation Started",
+      "IMPERSONATION_ENDED": "Impersonation Ended"
+    },
+    "entities": {
+      "ORGANIZATION": "Organization",
+      "USER": "User",
+      "CAR": "Car",
+      "TEST_DRIVE": "Test Drive",
+      "MEMBERSHIP": "Membership",
+      "SUBSCRIPTION": "Subscription",
+      "WORKING_HOURS": "Working Hours",
+      "IMPERSONATION_SESSION": "Impersonation Session"
+    }
   }
 }

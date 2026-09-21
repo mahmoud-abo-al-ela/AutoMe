@@ -38,7 +38,10 @@
     "label": "ترقيم الصفحات",
     "previous": "الصفحة السابقة",
     "next": "الصفحة التالية",
-    "page": "صفحة {number}"
+    "page": "صفحة {number}",
+    "previousShort": "السابق",
+    "nextShort": "التالي",
+    "morePages": "المزيد من الصفحات"
   },
   "carActions": {
     "addToFavorites": "أضف إلى المفضلة",
