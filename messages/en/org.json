@@ -601,7 +601,8 @@
       "upgradeNow": "Upgrade Now",
       "yourTrialEndsToday": "Your Trial Ends Today!",
       "yourTrialEndsInDays": "{count, plural, one {Your Trial Ends in {value} Day} other {Your Trial Ends in {value} Days}}",
-      "canceledAccessEnds": "Your subscription has been canceled. Access ends on {date}."
+      "canceledAccessEnds": "Your subscription has been canceled. Access ends on {date}.",
+      "portalFailed": "Couldn’t open the billing portal. Please try again."
     },
     "plans": {
       "title": "Choose Your Plan",
