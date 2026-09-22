@@ -44,7 +44,12 @@ export function assertArcjetAllowed(
         ).toLocaleString()}`
       );
     }
-    throw new ValidationError("Request denied", "request");
+    // Shield and bot detection reach this branch. They run on the action path
+    // now rather than in middleware, and the public photo search is the one
+    // caller a real visitor can trip, so the reason has to be translatable.
+    throw new ValidationError("Request denied", "request", {
+      key: "errors.requestDenied",
+    });
   }
 }
 

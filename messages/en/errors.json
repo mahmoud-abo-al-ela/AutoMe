@@ -35,5 +35,6 @@
     "noImage": "No image was provided.",
     "unsupportedImage": "That image type is not supported. Use JPG, PNG or WebP.",
     "imageTooLarge": "The image must be under {max}MB."
-  }
+  },
+  "requestDenied": "That request was blocked. If you think this is a mistake, please try again."
 }
