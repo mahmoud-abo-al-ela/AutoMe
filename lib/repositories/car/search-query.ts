@@ -1,4 +1,5 @@
 import { expandSearchTermForText } from "@/lib/locations";
+import { searchWords } from "@/lib/utils/search-text";
 
 /**
  * Builds the Postgres prefix tsquery for the car search box.
@@ -7,48 +8,33 @@ import { expandSearchTermForText } from "@/lib/locations";
  * that is injected into `to_tsquery`, where a malformed grouping is a runtime
  * SQL error rather than a wrong result.
  *
- * Two jobs:
+ * Three jobs:
  *
  * - **Prefix matching**, so as-you-type queries hit partial words:
  *   "toyota cor" → `toyota:* & cor:*`.
- * - **Alias expansion**, so an Arabic query reaches English columns. The old
- *   version reduced the term with `/[a-z0-9]+/`, which discards Arabic
- *   entirely — "نيسان" produced an empty query and therefore no results, while
- *   the filter chip beside the search box said "نيسان".
+ * - **Alias expansion**, so an Arabic query reaches the English columns a
+ *   reader sees translated. "نيسان" has to find the Nissans, because that is
+ *   what the filter chip beside the search box says.
+ * - **Arabic normalization**, so a query reaches Arabic text a dealer wrote.
+ *   Words are folded by `searchWords`, the same fold the stored vector is
+ *   built through — see lib/utils/search-text.ts, and the warning there about
+ *   folding one side only.
  *
- * Reducing to alphanumerics is also what keeps the string safe to inject: no
- * quote, backslash or tsquery operator can survive it.
+ * Reducing to letters and digits is also what keeps the string safe to inject:
+ * no quote, backslash or tsquery operator can survive it.
  */
-
-/**
- * The alphanumeric words of a term, lowercased.
- *
- * Latin diacritics are folded first. Place names reach the database carrying
- * them — "Al Maḩallah al Kubrá" is in live data — and without folding, the
- * reduction splits the word at the mark and searches for "ma" and "allah"
- * separately.
- */
-function words(value: string): string[] {
-  return (
-    value
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .toLowerCase()
-      .match(/[a-z0-9]+/g) ?? []
-  );
-}
 
 /** `a:* & b:*` for one variant — all of its words must be present. */
 function variantClause(variant: string): string | null {
-  const parts = [...new Set(words(variant))];
+  const parts = [...new Set(searchWords(variant))];
   if (parts.length === 0) return null;
   return parts.map((word) => `${word}:*`).join(" & ");
 }
 
 /**
  * One OR group for a term and everything it is the display form of:
- * `(nissan:* | ...)`. Returns null when nothing survives reduction, which is
- * what happens to an Arabic word with no alias.
+ * `(nissan:* | نيسان:* | ...)`. Returns null only when nothing survives
+ * reduction — punctuation on its own, now that Arabic is kept.
  */
 function orGroup(variants: string[]): string | null {
   const clauses = [...new Set(variants.map(variantClause).filter(Boolean))] as string[];

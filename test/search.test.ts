@@ -9,6 +9,8 @@ vi.hoisted(() => {
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { searchCarsRanked } from "@/lib/repositories/car/search";
+import { foldSearchText } from "@/lib/utils/search-text";
+import { FOLD_FIXTURES } from "@/lib/utils/search-text.fixtures";
 import { findManyCars } from "@/lib/repositories/car/queries";
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
@@ -108,5 +110,57 @@ describe.skipIf(!hasTestDb)("findManyCars plain-listing branch (real Postgres)",
 
     expect(pagination.total).toBe(3);
     expect(cars).toHaveLength(3);
+  });
+});
+
+
+// The whole Arabic search story rests on one claim: `foldSearchText` in
+// TypeScript and `fold_search_text` in SQL do the same thing. The query is
+// built through the first and the stored `searchVector` through the second, so
+// if they ever disagree the index answers questions nobody asked — results stop
+// being merely incomplete and start being arbitrary.
+//
+// Two implementations in two languages against two string APIs cannot be kept
+// in step by reading them. This runs the same fixtures through both.
+describe.skipIf(!hasTestDb)("the search fold agrees across TS and SQL", () => {
+  afterAll(async () => {
+    await db.$disconnect();
+  });
+
+  it.each(FOLD_FIXTURES)("folds %j the same way", async (value) => {
+    const [row] = await db.$queryRaw<{ folded: string }[]>`
+      SELECT fold_search_text(${value}) AS folded
+    `;
+
+    expect(row?.folded).toBe(foldSearchText(value));
+  });
+
+  it("finds an Arabic listing by a differently spelled query", async () => {
+    // The end-to-end version of the same claim: written with a ta marbuta,
+    // searched with a heh.
+    await db.organization.deleteMany({ where: { id: ORG_ID } });
+    await db.organization.create({
+      data: { id: ORG_ID, name: "Test Search Dealer", slug: ORG_SLUG, isActive: true },
+    });
+    await db.car.createMany({
+      data: [
+        car({
+          make: "Toyota",
+          model: "Corolla",
+          title: "سيارة نظيفة جدًا",
+          description: "موديل ٢٠٢٠ فابريكا بالكامل",
+        }),
+      ],
+    });
+
+    try {
+      for (const term of ["سياره", "سيارة", "نظيفه", "2020"]) {
+        const { cars } = await searchCarsRanked({ search: term, organizationId: ORG_ID });
+        expect(cars.length, `no match for "${term}"`).toBeGreaterThan(0);
+      }
+    } finally {
+      await db.car.deleteMany({ where: { organizationId: ORG_ID } });
+      await db.organization.deleteMany({ where: { id: ORG_ID } });
+    }
   });
 });
