@@ -1,4 +1,3 @@
-import arcjet, { detectBot, shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import createIntlMiddleware from "next-intl/middleware";
 import {
@@ -89,87 +88,6 @@ function getImpersonationContext(request: NextRequest) {
   return null;
 }
 
-// Use DRY_RUN in development to avoid blocking browser requests locally;
-// LIVE mode is used in production for full protection.
-const arcjetMode =
-  process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN";
-
-const ARCJET_KEY = process.env.ARCJET_KEY;
-
-// Arcjet is only enforced in production. In development the rules run in
-// DRY_RUN anyway, so an absent key is not a security gap there.
-const arcjetRequired = process.env.NODE_ENV === "production";
-
-const aj = arcjet({
-  key: ARCJET_KEY ?? "",
-  rules: [
-    shield({
-      mode: arcjetMode,
-    }),
-    detectBot({
-      mode: arcjetMode,
-      allow: ["CATEGORY:SEARCH_ENGINE"],
-    }),
-  ],
-});
-
-function serviceUnavailable() {
-  return new NextResponse("Service Unavailable", {
-    status: 503,
-    headers: { "cache-control": "no-store" },
-  });
-}
-
-/**
- * Shield + bot detection, failing **closed**.
- *
- * Previously this was `createMiddleware(aj, clerk)`, which allows the request
- * through whenever Arcjet cannot reach a verdict — and `key` was a bare
- * non-null assertion, so an unset ARCJET_KEY in production silently configured
- * both rules with `undefined` and disabled them outright. Either way the site
- * served traffic with no shield and nothing in the logs to say so.
- *
- * Now: a missing key in production, or an errored decision, rejects with 503.
- * Denials reject with 429 for rate limits and 403 otherwise.
- */
-async function arcjetGuard(req: NextRequest): Promise<NextResponse | null> {
-  if (!ARCJET_KEY) {
-    if (arcjetRequired) {
-      console.error("ARCJET_KEY is not configured; rejecting request");
-      return serviceUnavailable();
-    }
-    return null;
-  }
-
-  let decision;
-  try {
-    decision = await aj.protect(req);
-  } catch (error) {
-    console.error("Arcjet protect threw; rejecting request", error);
-    return arcjetRequired ? serviceUnavailable() : null;
-  }
-
-  if (decision.isErrored()) {
-    console.error("Arcjet returned an errored decision", decision.reason);
-    return arcjetRequired ? serviceUnavailable() : null;
-  }
-
-  if (decision.isDenied()) {
-    if (decision.reason.isRateLimit()) {
-      return new NextResponse("Too Many Requests", {
-        status: 429,
-        headers: { "cache-control": "no-store" },
-      });
-    }
-    return new NextResponse("Forbidden", {
-      status: 403,
-      headers: { "cache-control": "no-store" },
-    });
-  }
-
-  return null;
-}
-
 const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
@@ -182,12 +100,6 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   // Determine effective organization slug
   const effectiveOrgSlug = impersonation?.organizationSlug || subdomain;
-
-  // Forward tenant context on the *request* headers so server components and
-  // actions can read it back via next/headers `headers()`. Setting them on the
-  // response (the previous behaviour) never reached the app, so
-  // getCurrentOrganization() always returned null and resolveTenantContext fell
-  // back to an arbitrary membership.
   const requestHeaders = new Headers(req.headers);
 
   // A client can send any header it likes. Strip our internal ones before we
@@ -224,15 +136,9 @@ const clerk = clerkMiddleware(async (auth, req) => {
     return response;
   }
 
-  // Redirects below must keep the locale the visitor is already reading, or
-  // every subdomain bounce silently drops an Arabic user into English.
   const locale = localeOf(url.pathname);
   const localeHome = `/${locale}`;
 
-  // Clerk builds redirectToSignIn() from NEXT_PUBLIC_CLERK_SIGN_IN_URL, which
-  // carries no locale, so an Arabic reader turned away from a guarded route
-  // landed on the English sign-in page. Redirect here instead, keeping both the
-  // locale and the return path.
   const redirectToLocalizedSignIn = () => {
     const target = new URL(`/${locale}/sign-in`, req.url);
     target.searchParams.set("redirect_url", url.pathname + url.search);
@@ -279,29 +185,10 @@ const clerk = clerkMiddleware(async (auth, req) => {
   return response;
 });
 
-/**
- * Chain: Arcjet (fail-closed) → next-intl → Clerk.
- *
- * The order matters and each step is doing something the next one cannot undo:
- *
- * - Arcjet first, so a blocked request never reaches auth or locale resolution.
- * - next-intl second, but **only to catch its redirect**. On a path with no
- *   locale prefix it issues a 308 to the prefixed URL; returning that
- *   immediately is correct, and Clerk re-runs against the redirected request.
- * - Clerk last, because it owns the response: it is the step that forwards the
- *   sanitized tenant headers on the *request*, and rebuilding that response
- *   from intl's would drop them.
- *
- * API routes skip intl entirely — they carry no locale prefix, and running them
- * through it would add a redirect hop to every fetch and webhook.
- */
 export default async function middleware(
   req: NextRequest,
   event: NextFetchEvent
 ) {
-  const blocked = await arcjetGuard(req);
-  if (blocked) return blocked;
-
   if (isApiRoute(req)) {
     return clerk(req, event);
   }
@@ -315,8 +202,6 @@ export default async function middleware(
 
   const response = await clerk(req, event);
 
-  // Carry over anything intl set on a pass-through response — the NEXT_LOCALE
-  // cookie in particular, which is what makes the choice stick across visits.
   if (response instanceof NextResponse) {
     for (const cookie of intlResponse.cookies.getAll()) {
       response.cookies.set(cookie);
