@@ -390,6 +390,20 @@ model Car {
   images        String[]
   title         String?
   description   String?
+
+  // Bilingual listing copy, written by the vision model at extraction time and
+  // editable by the dealer. Nullable and additive: `title`/`description` above
+  // stay the source of record, so a car created before this existed still
+  // renders. `resolveCarTitle`/`resolveCarDescription` in lib/utils/car-text.ts
+  // pick per locale and fall back rather than showing a reader a blank.
+  //
+  // All four feed the searchVector — see the 20260922160000 migration. Text
+  // that is not an argument to car_search_document cannot be searched.
+  titleEn       String?
+  titleAr       String?
+  descriptionEn String?
+  descriptionAr String?
+
   location      String?
   features      String[]
 

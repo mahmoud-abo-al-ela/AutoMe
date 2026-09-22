@@ -164,3 +164,124 @@ describe.skipIf(!hasTestDb)("the search fold agrees across TS and SQL", () => {
     }
   });
 });
+
+// Bilingual listing copy only helps if it is reachable. `searchVector` is a
+// STORED generated column, so a column that is not an argument to
+// car_search_document is invisible to search however it is indexed — a dealer's
+// Arabic description would land in a column nobody could query. That is the
+// same class of bug 20260922120000 fixed, arriving through a different door,
+// so it gets the same kind of test.
+describe.skipIf(!hasTestDb)("bilingual listing text (real Postgres)", () => {
+  const BILINGUAL_ORG = "org_test_bilingual";
+
+  beforeAll(async () => {
+    await db.car.deleteMany({ where: { organizationId: BILINGUAL_ORG } });
+    await db.organization.deleteMany({ where: { id: BILINGUAL_ORG } });
+    await db.organization.create({
+      data: {
+        id: BILINGUAL_ORG,
+        name: "Bilingual Dealer",
+        slug: "bilingual-dealer",
+        isActive: true,
+      },
+    });
+    await db.car.createMany({
+      data: [
+        car({
+          make: "Porsche",
+          model: "Panamera",
+          organizationId: BILINGUAL_ORG,
+          titleEn: "Porsche Panamera Turbo 2018",
+          titleAr: "بورشه باناميرا تيربو ٢٠١٨",
+          descriptionEn: "Well kept, single owner, full service history.",
+          descriptionAr: "سيارة نظيفة جداً بحالة ممتازة وصيانة كاملة",
+        }),
+        car({
+          make: "Kia",
+          model: "Sportage",
+          organizationId: BILINGUAL_ORG,
+          titleEn: "Kia Sportage 2021",
+          titleAr: "كيا سبورتاج ٢٠٢١",
+        }),
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    await db.car.deleteMany({ where: { organizationId: BILINGUAL_ORG } });
+    await db.organization.deleteMany({ where: { id: BILINGUAL_ORG } });
+  });
+
+  it("finds a car by text that exists only in its Arabic description", async () => {
+    const { cars } = await searchCarsRanked({
+      search: "ممتازة",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Panamera"]);
+  });
+
+  it("finds a car by its Arabic title", async () => {
+    const { cars } = await searchCarsRanked({
+      search: "سبورتاج",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Sportage"]);
+  });
+
+  it("folds the query against Arabic stored text, both directions", async () => {
+    // Stored with ة, queried with ه — the single most common way an Arabic
+    // reader's spelling differs from the dealer's.
+    const { cars } = await searchCarsRanked({
+      search: "نظيفه",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Panamera"]);
+  });
+
+  it("matches an Arabic title written in Arabic-Indic digits from a Western-digit query", async () => {
+    // The title stores ٢٠٢١; a buyer types 2021.
+    const { cars } = await searchCarsRanked({
+      search: "2021",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toContain("Sportage");
+  });
+
+  it("finds a car by its English bilingual title", async () => {
+    const { cars } = await searchCarsRanked({
+      search: "Turbo",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Panamera"]);
+  });
+
+  it("returns the bilingual columns to the client", async () => {
+    // CAR_COLUMNS is an explicit select; a new column that is not listed there
+    // simply never reaches the page, however well it is stored.
+    const { cars } = await searchCarsRanked({
+      search: "Panamera",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars[0]).toMatchObject({
+      titleAr: "بورشه باناميرا تيربو ٢٠١٨",
+      descriptionAr: "سيارة نظيفة جداً بحالة ممتازة وصيانة كاملة",
+      titleEn: "Porsche Panamera Turbo 2018",
+    });
+  });
+
+  it("keeps title ranked above description", async () => {
+    // Both cars carry Arabic text; the one matching in a title must lead.
+    const { cars } = await searchCarsRanked({
+      search: "باناميرا",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars[0]?.model).toBe("Panamera");
+  });
+});
