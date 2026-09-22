@@ -12,6 +12,7 @@ import {
 import { assertPlatformCapacity } from "@/lib/ai/breaker";
 import * as cache from "@/lib/ai/cache";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
+import { recordAiFailure } from "@/lib/ai/telemetry";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
 import {
   ServiceUnavailableError,
@@ -310,15 +311,29 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
 
       if (!canRetry) throw error;
     } finally {
+      const latencyMs = Date.now() - started;
+
       await meter({
         ctx: input.ctx,
         feature: input.feature,
         model: input.model,
         usage,
-        latencyMs: Date.now() - started,
+        latencyMs,
         success,
         errorCode,
       });
+
+      if (!success) {
+        // Aggregates live in the ledger; this is only so a captured exception
+        // later in the request carries the provider history behind it.
+        await recordAiFailure({
+          feature: input.feature,
+          model: input.model,
+          errorCode: errorCode ?? "UNKNOWN",
+          latencyMs,
+          attempt,
+        });
+      }
     }
   }
 
