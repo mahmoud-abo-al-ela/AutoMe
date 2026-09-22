@@ -93,8 +93,15 @@ export async function generate(req: ProviderRequest): Promise<ProviderResult> {
   };
 }
 
-/** HTTP statuses worth a second attempt: transient server and throttling faults. */
-const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+/**
+ * Statuses worth another attempt against the *same* model: a blip in front of
+ * it, not a statement about the model itself.
+ *
+ * 429 and 503 are deliberately absent. They mean the model is saturated, and
+ * repeating the request 200ms later asks the same overloaded model the same
+ * question — `isCapacityError` routes those to a different model instead.
+ */
+const RETRY_SAME_MODEL_STATUSES = new Set([408, 500, 502, 504]);
 
 function statusOf(error: unknown): number | undefined {
   const status = (error as { status?: unknown })?.status;
@@ -122,10 +129,23 @@ export function isRetryableError(error: unknown): boolean {
   if (isAbortError(error)) return false;
 
   const status = statusOf(error);
-  if (status !== undefined) return RETRYABLE_STATUSES.has(status);
+  if (status !== undefined) return RETRY_SAME_MODEL_STATUSES.has(status);
 
   // No status means it never reached the API — DNS, socket, TLS. Worth a retry.
   return true;
+}
+
+/**
+ * The model is saturated rather than broken.
+ *
+ * Observed live on `gemini-3.7-flash`: "This model is currently experiencing
+ * high demand." Retrying the same model is the one response that cannot help,
+ * because the condition is about that model's capacity — a different model in
+ * the chain has its own. So these walk the chain instead of retrying.
+ */
+export function isCapacityError(error: unknown): boolean {
+  const status = statusOf(error);
+  return status === 429 || status === 503;
 }
 
 /**
@@ -146,4 +166,32 @@ export function errorCodeOf(error: unknown): string {
   if (typeof name === "string" && name) return name;
 
   return "UNKNOWN";
+}
+
+/**
+ * Whether the model itself is the problem rather than the request.
+ *
+ * Google retires a model for an API key without notice — this repo already
+ * carries a comment about `gemini-2.5-flash` 404ing for newer keys. Retrying
+ * cannot help, but the next model in the chain can, so the client treats this
+ * separately from both retryable and fatal errors.
+ */
+export function isModelUnavailableError(error: unknown): boolean {
+  const status = statusOf(error);
+  if (status === 404) return true;
+
+  // Some retirements arrive as a 400 naming the model rather than a 404.
+  if (status === 400) {
+    const message = String(
+      (error as { message?: unknown })?.message ?? ""
+    ).toLowerCase();
+    return (
+      message.includes("not found") ||
+      message.includes("not supported") ||
+      message.includes("is not available") ||
+      message.includes("unsupported model")
+    );
+  }
+
+  return false;
 }

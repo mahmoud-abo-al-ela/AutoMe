@@ -5,7 +5,7 @@ import type { AiPart } from "@/lib/ai/provider/gemini";
 import type { AiFeature } from "@/lib/ai/features";
 import {
   estimateCostMicroUsd,
-  modelFor,
+  modelsFor,
   type ModelTask,
   type TokenUsage,
 } from "@/lib/ai/models";
@@ -19,7 +19,6 @@ import {
   AppError,
   logError,
 } from "@/lib/utils/errors";
-
 
 export interface AiCallerContext {
   organizationId: string | null;
@@ -47,6 +46,10 @@ export interface GenerateStructuredInput<T> {
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 
+/**
+ * Two, not three. Every attempt is a request against a free-tier cap, and
+ * `isRetryableError` has already excluded the faults a retry cannot fix.
+ */
 const DEFAULT_MAX_ATTEMPTS = 2;
 
 const ZERO_USAGE: TokenUsage = {
@@ -82,6 +85,13 @@ function timeoutError(): Error {
   return error;
 }
 
+/**
+ * Run one provider call under a wall-clock budget.
+ *
+ * The abort signal is the right mechanism, but the race is kept as well so the
+ * budget holds even if the SDK declines to honour the signal — a hung call
+ * otherwise pins a serverless invocation until the platform ceiling.
+ */
 async function callWithTimeout(
   req: Omit<provider.ProviderRequest, "signal">,
   timeoutMs: number
@@ -118,6 +128,11 @@ interface MeterInput {
   errorCode: string | null;
 }
 
+/**
+ * Write one ledger row. Never throws: losing a usage row is bad, but failing a
+ * dealer's upload because the ledger write failed is worse. Awaited rather than
+ * detached, because a floating promise dies when the function returns.
+ */
 async function meter(input: MeterInput): Promise<void> {
   try {
     await createAiUsage({
@@ -154,42 +169,26 @@ function toPublicError(error: unknown): Error {
   });
 }
 
-export async function generateStructured<T>(
-  input: GenerateStructuredInput<T>
-): Promise<T> {
-  if (!provider.isConfigured()) {
-    // A config fault, not a user fault — and it must not look like a rate limit.
-    throw new ServiceUnavailableError("GEMINI_API_KEY is not configured", {
-      key: "errors.ai.unavailable",
-    });
-  }
+interface AttemptInput<T> {
+  model: string;
+  feature: AiFeature;
+  parts: AiPart[];
+  schema: ZodType<T>;
+  responseJsonSchema: unknown;
+  ctx: AiCallerContext | null | undefined;
+  timeoutMs: number;
+  temperature: number | undefined;
+  maxAttempts: number;
+}
 
-  const model = modelFor(input.task);
-  const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  const maxAttempts = input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
-
-  const key =
-    input.cacheBytes === undefined
-      ? null
-      : cache.cacheKey({
-          feature: input.feature,
-          model,
-          promptVersion: input.promptVersion,
-          bytes: input.cacheBytes,
-        });
-
-  if (key) {
-    const hit = cache.get<T>(key);
-    // No provider call happened, so no ledger row is written — a row means "a
-    // request was sent", and reporting would otherwise overstate usage.
-    if (hit !== undefined) return hit;
-  }
-
-  await assertPlatformCapacity();
-
-  const responseJsonSchema = jsonSchemaFor(input.schema);
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+/**
+ * Drive one model to a validated result, retrying only genuine transients.
+ *
+ * Throws the *original* error rather than a mapped one, so the caller can still
+ * tell a retired model from a broken request and move down the chain.
+ */
+async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
+  for (let attempt = 1; attempt <= input.maxAttempts; attempt++) {
     const started = Date.now();
     let usage: TokenUsage = ZERO_USAGE;
     let success = false;
@@ -198,12 +197,12 @@ export async function generateStructured<T>(
     try {
       const result = await callWithTimeout(
         {
-          model,
+          model: input.model,
           parts: input.parts,
-          responseJsonSchema,
+          responseJsonSchema: input.responseJsonSchema,
           temperature: input.temperature,
         },
-        timeoutMs
+        input.timeoutMs
       );
       usage = result.usage;
 
@@ -226,7 +225,7 @@ export async function generateStructured<T>(
         // not reach the logs.
         logError("AI response failed schema validation", {
           feature: input.feature,
-          model,
+          model: input.model,
           issues: validated.error.issues.map((issue) => ({
             path: issue.path.join("."),
             code: issue.code,
@@ -240,7 +239,6 @@ export async function generateStructured<T>(
       }
 
       success = true;
-      if (key) cache.set(key, validated.data);
       return validated.data;
     } catch (error) {
       if (errorCode === null) errorCode = provider.errorCodeOf(error);
@@ -252,14 +250,16 @@ export async function generateStructured<T>(
       const providerFault =
         errorCode !== "INVALID_JSON" && errorCode !== "SCHEMA_REJECTED";
       const canRetry =
-        providerFault && provider.isRetryableError(error) && attempt < maxAttempts;
+        providerFault &&
+        provider.isRetryableError(error) &&
+        attempt < input.maxAttempts;
 
-      if (!canRetry) throw toPublicError(error);
+      if (!canRetry) throw error;
     } finally {
       await meter({
         ctx: input.ctx,
         feature: input.feature,
-        model,
+        model: input.model,
         usage,
         latencyMs: Date.now() - started,
         success,
@@ -268,9 +268,91 @@ export async function generateStructured<T>(
     }
   }
 
-  // Unreachable: the final attempt either returns or throws above. Present so
-  // the function is total rather than relying on the loop bound for its type.
+  // Unreachable: the final attempt either returns or throws above.
   throw new ServiceUnavailableError("The AI provider could not be reached", {
     key: "errors.ai.unavailable",
   });
+}
+
+export async function generateStructured<T>(
+  input: GenerateStructuredInput<T>
+): Promise<T> {
+  if (!provider.isConfigured()) {
+    // A config fault, not a user fault — and it must not look like a rate limit.
+    throw new ServiceUnavailableError("GEMINI_API_KEY is not configured", {
+      key: "errors.ai.unavailable",
+    });
+  }
+
+  const models = modelsFor(input.task);
+  const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const maxAttempts = input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
+
+  const keyFor = (model: string) =>
+    input.cacheBytes === undefined
+      ? null
+      : cache.cacheKey({
+          feature: input.feature,
+          model,
+          promptVersion: input.promptVersion,
+          bytes: input.cacheBytes,
+        });
+
+  // Checked across the whole chain before any call: an answer a fallback model
+  // gave earlier is still a valid answer. A hit writes no ledger row, because a
+  // row means "a request reached the provider".
+  for (const model of models) {
+    const key = keyFor(model);
+    if (!key) break;
+
+    const hit = cache.get<T>(key);
+    if (hit !== undefined) return hit;
+  }
+
+  await assertPlatformCapacity();
+
+  const responseJsonSchema = jsonSchemaFor(input.schema);
+  let lastError: unknown = null;
+
+  for (let index = 0; index < models.length; index++) {
+    const model = models[index];
+
+    try {
+      const result = await attemptModel({
+        model,
+        feature: input.feature,
+        parts: input.parts,
+        schema: input.schema,
+        responseJsonSchema,
+        ctx: input.ctx,
+        timeoutMs,
+        temperature: input.temperature,
+        maxAttempts,
+      });
+
+      const key = keyFor(model);
+      if (key) cache.set(key, result);
+      return result;
+    } catch (error) {
+      lastError = error;
+
+      // Two things earn the next link in the chain: a retired model, and a
+      // saturated one. Both are statements about *this* model that a different
+      // model may not share. A malformed request or an unusable response fails
+      // identically on every model, and walking the chain would spend the quota
+      // three times to learn that.
+      const anotherModelMightWork =
+        provider.isModelUnavailableError(error) || provider.isCapacityError(error);
+      const canFallBack = index < models.length - 1 && anotherModelMightWork;
+
+      if (!canFallBack) throw toPublicError(error);
+
+      logError(
+        `AI model ${model} unusable (${provider.errorCodeOf(error)}); falling back to ${models[index + 1]}`,
+        error
+      );
+    }
+  }
+
+  throw toPublicError(lastError);
 }

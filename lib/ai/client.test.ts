@@ -128,7 +128,7 @@ describe("generateStructured — provider failures", () => {
 
   it("retries a transient status and writes one row per attempt", async () => {
     generate
-      .mockRejectedValueOnce(httpError(503))
+      .mockRejectedValueOnce(httpError(500))
       .mockResolvedValueOnce(ok('{"make":"Nissan","year":2021}'));
 
     const result = await call();
@@ -136,14 +136,31 @@ describe("generateStructured — provider failures", () => {
     expect(result).toEqual({ make: "Nissan", year: 2021 });
     expect(generate).toHaveBeenCalledTimes(2);
 
+    // Same model both times — a 500 is a blip in front of the model, not a
+    // statement about it.
+    const [first, second] = generate.mock.calls.map((c) => c[0].model);
+    expect(second).toBe(first);
+
     // Two attempts reached the provider, so the ledger — which the free-tier
     // breaker reads — must show two requests, not one.
     expect(createAiUsage).toHaveBeenCalledTimes(2);
     expect(createAiUsage.mock.calls[0][0]).toMatchObject({
       success: false,
-      errorCode: "HTTP_503",
+      errorCode: "HTTP_500",
     });
     expect(createAiUsage.mock.calls[1][0]).toMatchObject({ success: true });
+  });
+
+  it("retries the same model when the request never reached the API", async () => {
+    // No status: DNS, socket, TLS. The model is fine; the path to it was not.
+    generate
+      .mockRejectedValueOnce(new Error("ECONNRESET"))
+      .mockResolvedValueOnce(ok('{"make":"Suzuki","year":2020}'));
+
+    await expect(call()).resolves.toEqual({ make: "Suzuki", year: 2020 });
+
+    const [first, second] = generate.mock.calls.map((c) => c[0].model);
+    expect(second).toBe(first);
   });
 
   it("never lets a metering failure break the user's request", async () => {
@@ -288,5 +305,123 @@ describe("generateStructured — response cache", () => {
     await call();
 
     expect(generate).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("generateStructured — model fallback", () => {
+  it("moves to the next model when one has been retired", async () => {
+    // Google retires a model for a key without notice; the repo already
+    // carries a comment about gemini-2.5-flash 404ing for newer keys.
+    generate
+      .mockRejectedValueOnce(httpError(404))
+      .mockResolvedValueOnce(ok('{"make":"Peugeot","year":2022}'));
+
+    await expect(call()).resolves.toEqual({ make: "Peugeot", year: 2022 });
+
+    const [first, second] = generate.mock.calls.map((c) => c[0].model);
+    expect(second).not.toBe(first);
+  });
+
+  it("records the failed model and the one that answered", async () => {
+    generate
+      .mockRejectedValueOnce(httpError(404))
+      .mockResolvedValueOnce(ok('{"make":"Renault","year":2021}'));
+
+    await call();
+
+    expect(createAiUsage).toHaveBeenCalledTimes(2);
+    expect(createAiUsage.mock.calls[0][0]).toMatchObject({
+      success: false,
+      errorCode: "HTTP_404",
+    });
+    expect(createAiUsage.mock.calls[1][0]).toMatchObject({ success: true });
+    // Which model burned the request has to be answerable from the ledger.
+    expect(createAiUsage.mock.calls[0][0].model).not.toBe(
+      createAiUsage.mock.calls[1][0].model
+    );
+  });
+
+  it("treats a 400 naming the model as a retirement", async () => {
+    generate
+      .mockRejectedValueOnce(
+        Object.assign(new Error("models/x is not found for API version v1"), {
+          status: 400,
+        })
+      )
+      .mockResolvedValueOnce(ok('{"make":"Cupra","year":2023}'));
+
+    await expect(call()).resolves.toEqual({ make: "Cupra", year: 2023 });
+  });
+
+  it("does not walk the chain for a fault every model would share", async () => {
+    generate.mockRejectedValue(httpError(400));
+
+    await expect(call()).rejects.toThrow();
+
+    // A malformed request fails identically on every model; walking the chain
+    // would spend the quota three times to learn that.
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not walk the chain when the response is unusable", async () => {
+    generate.mockResolvedValue(ok("not json"));
+
+    await expect(call()).rejects.toBeInstanceOf(ValidationError);
+
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives up once the last model is exhausted", async () => {
+    generate.mockRejectedValue(httpError(404));
+
+    await expect(call()).rejects.toBeInstanceOf(ServiceUnavailableError);
+
+    // Every model in the chain was tried exactly once — 404 is not retryable.
+    expect(generate.mock.calls.length).toBeGreaterThan(1);
+    const models = generate.mock.calls.map((c) => c[0].model);
+    expect(new Set(models).size).toBe(models.length);
+  });
+});
+
+describe("generateStructured — saturated models", () => {
+  it.each([
+    ["503 high demand", 503],
+    ["429 rate limited", 429],
+  ])("moves to a different model on %s", async (_label, status) => {
+    // Observed live: gemini-3.7-flash answered "This model is currently
+    // experiencing high demand." Asking the same overloaded model again is the
+    // one response that cannot help.
+    generate
+      .mockRejectedValueOnce(httpError(status))
+      .mockResolvedValueOnce(ok('{"make":"Mitsubishi","year":2019}'));
+
+    await expect(call()).resolves.toEqual({ make: "Mitsubishi", year: 2019 });
+
+    expect(generate).toHaveBeenCalledTimes(2);
+    const [first, second] = generate.mock.calls.map((c) => c[0].model);
+    expect(second).not.toBe(first);
+  });
+
+  it("spends one request per model rather than retrying a busy one", async () => {
+    generate.mockRejectedValue(httpError(503));
+
+    await expect(call()).rejects.toBeInstanceOf(ServiceUnavailableError);
+
+    // Every model tried exactly once — no model is asked twice while busy.
+    const models = generate.mock.calls.map((c) => c[0].model);
+    expect(new Set(models).size).toBe(models.length);
+    expect(models.length).toBeGreaterThan(1);
+  });
+
+  it("records every saturated model it tried", async () => {
+    generate.mockRejectedValue(httpError(503));
+
+    await expect(call()).rejects.toThrow();
+
+    // Each one was a real request against the free-tier cap the breaker reads.
+    expect(createAiUsage).toHaveBeenCalledTimes(generate.mock.calls.length);
+    for (const [row] of createAiUsage.mock.calls) {
+      expect(row).toMatchObject({ success: false, errorCode: "HTTP_503" });
+    }
   });
 });
