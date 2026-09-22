@@ -58,7 +58,7 @@ const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
 
             {/* Description Tab */}
             <TabsContent value="description" className="mt-0">
-                <CarDescription description={car.description} />
+                <CarDescription car={car} />
             </TabsContent>
 
             {/* Features Tab */}

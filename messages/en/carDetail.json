@@ -28,7 +28,8 @@
   },
   "description": {
     "title": "Vehicle Description",
-    "empty": "No description available for this vehicle."
+    "empty": "No description available for this vehicle.",
+    "notTranslated": "Not available in English — showing the original listing."
   },
   "features": {
     "title": "Features & Equipment"

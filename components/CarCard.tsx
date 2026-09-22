@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { usePlaceNames } from "@/hooks/use-place-names";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -21,6 +21,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname } from "@/i18n/navigation";
 import { getCarColorHex } from "@/lib/constants/car-options";
+import { resolveCarTitle } from "@/lib/utils/car-text";
+import { localeDirection, type Locale } from "@/i18n/routing";
 import CarCardActions from "./CarCardActions";
 import type { SerializedCar } from "@/lib/utils/serializers";
 
@@ -41,6 +43,7 @@ const CarCard = ({
   index?: number;
 }) => {
   const t = useTranslations("common.actions");
+  const locale = useLocale() as Locale;
   const attr = useCarAttributes();
   const place = usePlaceNames();
   const fmt = useFormatters();
@@ -58,8 +61,12 @@ const CarCard = ({
   // "2,020" in English and "٢٬٠٢٠" in Arabic.
   const formatYear = (year: number) => fmt.number(year, { useGrouping: false });
 
+  // The generated form stays as the last resort: a car with no stored title in
+  // any language still needs a heading, and building it needs the locale-aware
+  // year formatting above.
+  const resolvedTitle = resolveCarTitle(car, locale);
   const carTitle =
-    car.title || `${formatYear(car.year)} ${car.make} ${car.model}`;
+    resolvedTitle?.text ?? `${formatYear(car.year)} ${car.make} ${car.model}`;
   const subtitle = [attr.body(car.bodyType), attr.transmission(car.transmission)]
     .filter(Boolean)
     .join(" • ");
@@ -112,7 +119,14 @@ const CarCard = ({
       <div className="flex flex-grow flex-col bg-card p-3 sm:p-5">
         <Link href={detailHref} className="block">
           <div className="mb-2 sm:mb-2.5">
-            <h3 className="line-clamp-1 text-sm font-semibold tracking-tight sm:text-base">
+            {/* dir follows the title's own language, so an untranslated
+                English title inside an RTL card does not render reordered. */}
+            <h3
+              dir={
+                resolvedTitle ? localeDirection[resolvedTitle.locale] : undefined
+              }
+              className="line-clamp-1 text-sm font-semibold tracking-tight sm:text-base"
+            >
               {carTitle}
             </h3>
             {subtitle && (
