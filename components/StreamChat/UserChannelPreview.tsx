@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Car, Building2 } from "lucide-react";
 import { useChatContext } from "stream-chat-react";
 import { cn } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 import type { Channel as StreamChannel } from "stream-chat";
 
 export function UserChannelPreview({
@@ -31,29 +32,7 @@ export function UserChannelPreview({
     const lastMessage = channel.state.messages[channel.state.messages.length - 1];
     const lastMessageTime = lastMessage?.created_at;
 
-    // Format time
-    const formatTime = (date?: string | Date | null) => {
-        if (!date) return "";
-        const now = new Date();
-        const messageDate = new Date(date);
-        const diffInHours =
-            (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
-
-        if (diffInHours < 24) {
-            return messageDate.toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true,
-            });
-        } else if (diffInHours < 168) {
-            return messageDate.toLocaleDateString("en-US", { weekday: "short" });
-        } else {
-            return messageDate.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-            });
-        }
-    };
+    const { messageTimestamp: formatTime } = useFormatters();
 
     // Get last message preview
     const getMessagePreview = () => {
@@ -93,8 +72,8 @@ export function UserChannelPreview({
                     </AvatarFallback>
                 </Avatar>
                 {unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-primary-foreground">
+                    <div className="absolute -top-1 -end-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                        <span className="text-micro font-bold text-primary-foreground">
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                     </div>
@@ -102,7 +81,7 @@ export function UserChannelPreview({
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 text-left">
+            <div className="flex-1 min-w-0 text-start">
                 {/* Top row: Title and Time */}
                 <div className="flex items-start justify-between gap-2 mb-1">
                     <h4 className={cn(

@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "title": "تصفح المعارض",
+    "description": "اعثر على المعرض المناسب لسيارتك القادمة. تصفح دليل معارض السيارات مع التقييمات والمراجعات والسيارات المتاحة.",
+    "ogDescription": "اعثر على المعرض المناسب لسيارتك القادمة",
+    "notFoundTitle": "المعرض غير موجود",
+    "notFoundDescription": "تعذر العثور على المعرض المطلوب.",
+    "detailDescription": "تصفح سيارات {name} ومراجعاته وبيانات التواصل معه. {count, plural, =0 {لا توجد سيارات متاحة} one {سيارة واحدة متاحة} two {سيارتان متاحتان} few {{value} سيارات متاحة} many {{value} سيارة متاحة} other {{value} سيارة متاحة}}.",
+    "keywords": "معارض سيارات, معارض السيارات, بيع السيارات, شراء سيارة, وكلاء السيارات, معرض سيارات",
+    "fallbackTitle": "معرض سيارات",
+    "fallbackDescription": "اطّلع على بيانات المعرض على AutoMe"
+  },
+  "hero": {
+    "title": "تصفح المعارض",
+    "subtitleFallback": "اعثر على المعرض المناسب لسيارتك القادمة",
+    "subtitle": "استكشف {count, plural, =0 {المعارض} one {معرضًا واحدًا} two {معرضين} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
+    "subtitleWithCities": "استكشف {count, plural, =0 {المعارض} one {معرضًا واحدًا} two {معرضين} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}} في {cityCount, plural, one {مدينة واحدة} two {مدينتين} few {{cityValue} مدن} many {{cityValue} مدينة} other {{cityValue} مدينة}}",
+    "searchPlaceholder": "ابحث عن معرض بالاسم أو الموقع…",
+    "searchLabel": "البحث في المعارض"
+  },
+  "filters": {
+    "resultCount": "{count, plural, =0 {لا توجد معارض} one {معرض واحد} two {معرضان} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
+    "city": "المدينة",
+    "region": "المنطقة",
+    "searchCities": "ابحث عن مدينة…",
+    "searchRegions": "ابحث عن منطقة…",
+    "noCities": "لا توجد مدن متاحة",
+    "noRegions": "لا توجد مناطق متاحة",
+    "filters": "التصفية",
+    "sheetTitle": "تصفية المعارض",
+    "resetAll": "إعادة تعيين الكل",
+    "showResults": "عرض {count, plural, =0 {المعارض} one {معرض واحد} two {معرضين} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
+    "perPage": "{count} / صفحة",
+    "perPageLabel": "عدد النتائج في الصفحة",
+    "sortLabel": "ترتيب النتائج",
+    "sortPlaceholder": "الترتيب حسب",
+    "chips": {
+      "search": "«{query}»",
+      "minRating": "{rating}+ نجوم",
+      "carCount": "{min}–{max} سيارة",
+      "any": "الكل"
+    }
+  },
+  "sort": {
+    "rating": "الأعلى تقييمًا",
+    "mostCars": "الأكثر سيارات",
+    "mostReviewed": "الأكثر مراجعات",
+    "newest": "الأحدث",
+    "nameAsc": "الاسم (أ–ي)"
+  },
+  "card": {
+    "noReviews": "لا توجد مراجعات بعد",
+    "openNow": "مفتوح الآن",
+    "carCount": "{count, plural, =0 {لا توجد سيارات} one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
+    "priceFrom": "تبدأ من {price}"
+  },
+  "empty": {
+    "noneTitle": "لا توجد معارض بعد",
+    "noneBody": "لا توجد معارض لعرضها حاليًا. تحقق مرة أخرى قريبًا.",
+    "filteredTitle": "لا توجد معارض مطابقة",
+    "filteredBody": "جرّب تعديل البحث أو عوامل التصفية للعثور على ما تبحث عنه.",
+    "browseCars": "تصفح السيارات"
+  },
+  "errors": {
+    "listTitle": "تعذر تحميل المعارض",
+    "listBody": "حدث خطأ أثناء تحميل المعارض.",
+    "detailTitle": "تعذر تحميل المعرض",
+    "detailBody": "المعرض غير موجود",
+    "backToList": "العودة إلى المعارض"
+  },
+  "days": {
+    "SATURDAY": "السبت",
+    "SUNDAY": "الأحد",
+    "MONDAY": "الإثنين",
+    "TUESDAY": "الثلاثاء",
+    "WEDNESDAY": "الأربعاء",
+    "THURSDAY": "الخميس",
+    "FRIDAY": "الجمعة"
+  },
+  "workingHours": {
+    "title": "مواعيد العمل",
+    "today": "اليوم",
+    "closed": "مغلق"
+  },
+  "openStatus": {
+    "openNow": "مفتوح الآن",
+    "closed": "مغلق",
+    "unavailable": "المواعيد غير متاحة",
+    "closesAt": "يغلق الساعة {time}",
+    "opensAt": "يفتح الساعة {time}",
+    "opensTomorrowAt": "يفتح غدًا الساعة {time}",
+    "opensOnDayAt": "يفتح {day} الساعة {time}"
+  },
+  "header": {
+    "reviewCount": "({count, plural, one {مراجعة واحدة} two {مراجعتان} few {{value} مراجعات} many {{value} مراجعة} other {{value} مراجعة}})",
+    "showLess": "عرض أقل",
+    "readMore": "عرض المزيد",
+    "call": "اتصال",
+    "email": "بريد إلكتروني",
+    "website": "الموقع الإلكتروني",
+    "visitWebsite": "زيارة الموقع الإلكتروني",
+    "directions": "الاتجاهات",
+    "share": "مشاركة",
+    "shareDealership": "مشاركة المعرض",
+    "shareDialogTitle": "مشاركة هذا المعرض"
+  },
+  "stats": {
+    "availableCars": "السيارات المتاحة",
+    "averageRating": "متوسط التقييم",
+    "established": "تاريخ الانضمام",
+    "memberSince": "عضو منذ {date}",
+    "memberSinceUnknown": "غير متاح"
+  },
+  "tabs": {
+    "inventory": "السيارات",
+    "reviews": "المراجعات",
+    "about": "نبذة",
+    "customerReviews": "مراجعات العملاء ({count})",
+    "contactInformation": "بيانات التواصل"
+  },
+  "contact": {
+    "callNow": "اتصل الآن",
+    "sendEmail": "أرسل بريدًا إلكترونيًا",
+    "visitWebsite": "زر الموقع الإلكتروني",
+    "getDirections": "احصل على الاتجاهات",
+    "none": "لا تتوفر بيانات تواصل."
+  },
+  "inventory": {
+    "heading": "السيارات المتاحة",
+    "matching": "({count} مطابقة)",
+    "sortBy": "الترتيب حسب",
+    "sortPlaceholder": "طريقة الترتيب",
+    "sort": {
+      "newest": "الأحدث أولًا",
+      "priceAsc": "السعر: من الأقل للأعلى",
+      "priceDesc": "السعر: من الأعلى للأقل",
+      "year": "سنة الصنع: الأحدث",
+      "mileage": "المسافة المقطوعة: الأقل"
+    },
+    "searchPlaceholder": "ابحث بالماركة أو الموديل…",
+    "clearSearch": "مسح البحث",
+    "filters": "التصفية",
+    "sheetTitle": "تصفية السيارات",
+    "priceRange": "نطاق السعر",
+    "minPrice": "أقل سعر",
+    "maxPrice": "أعلى سعر",
+    "to": "إلى",
+    "set": "محدد",
+    "bodyType": "نوع الهيكل",
+    "fuelType": "نوع الوقود",
+    "transmission": "ناقل الحركة",
+    "resetAll": "إعادة تعيين الكل",
+    "clearAll": "مسح الكل",
+    "showCars": "عرض {count, plural, =0 {السيارات} one {سيارة واحدة} two {سيارتين} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
+    "noCarsTitle": "لا توجد سيارات متاحة",
+    "noCarsBody": "لا توجد سيارات مدرجة لدى هذا المعرض حاليًا. تحقق مرة أخرى لاحقًا.",
+    "noMatchesTitle": "لا توجد سيارات مطابقة",
+    "noMatchesBody": "جرّب تعديل عوامل التصفية أو كلمات البحث للعثور على ما تبحث عنه.",
+    "resetAllFilters": "إعادة تعيين كل عوامل التصفية",
+    "chips": {
+      "search": "البحث: «{query}»",
+      "price": "السعر: {min} – {max}"
+    }
+  },
+  "reviews": {
+    "heading": "المراجعات ({count})",
+    "writeReview": "اكتب مراجعة",
+    "cancel": "إلغاء",
+    "averageRating": "متوسط التقييم",
+    "distribution": "توزيع التقييمات",
+    "distributionRow": "{count} ({percent}%)",
+    "emptyTitle": "لا توجد مراجعات بعد",
+    "emptyBody": "كن أول من يكتب مراجعة عن هذا المعرض!",
+    "anonymous": "مستخدم مجهول",
+    "form": {
+      "title": "اكتب مراجعة",
+      "overallRating": "التقييم العام",
+      "ratingLabel": "قيّم بـ {count, plural, one {نجمة واحدة} two {نجمتين} few {{value} نجوم} many {{value} نجمة} other {{value} نجمة}}",
+      "reviewTitle": "عنوان المراجعة",
+      "titlePlaceholder": "لخّص تجربتك",
+      "yourReview": "مراجعتك",
+      "commentPlaceholder": "أخبرنا عن تجربتك مع هذا المعرض…",
+      "counter": "{count}/{max}",
+      "submit": "إرسال المراجعة",
+      "submitting": "جارٍ الإرسال…",
+      "moderation": "ستظهر مراجعتك بعد موافقة فريق المراجعة لدينا.",
+      "needRating": "من فضلك اختر تقييمًا",
+      "needText": "من فضلك اكتب عنوانًا أو تعليقًا",
+      "success": "تم إرسال المراجعة بنجاح!",
+      "failed": "تعذر إرسال المراجعة",
+      "failedRetry": "تعذر إرسال المراجعة. من فضلك حاول مرة أخرى."
+    }
+  },
+  "breadcrumb": {
+    "home": "الرئيسية",
+    "dealerships": "المعارض",
+    "label": "مسار التنقل"
+  }
+}

@@ -1,31 +1,58 @@
+/**
+ * Navigation config.
+ *
+ * Items carry a `labelKey` into the `nav` message namespace rather than an
+ * English string. `navIcon` is an explicit key too: the mobile menu used to
+ * look its icon up by the English label, which meant every translated item
+ * silently fell back to the generic Home icon.
+ */
+
+/** A key in messages/{locale}/nav.json. */
+export type NavLabelKey =
+  | "browseCars"
+  | "dealerships"
+  | "compare"
+  | "faq"
+  | "dashboard"
+  | "cars"
+  | "testDrives"
+  | "testDrive"
+  | "messages"
+  | "wishlist";
+
+export type NavItem = {
+  href: string;
+  labelKey: NavLabelKey;
+};
+
 // Navigation for the main platform domain
-export const navItems = [
-  { href: "/cars", label: "Browse Cars" },
-  { href: "/dealerships", label: "Dealerships" },
-  { href: "/compare", label: "Compare" },
-  { href: "/faq", label: "FAQ" },
+export const navItems: NavItem[] = [
+  { href: "/cars", labelKey: "browseCars" },
+  { href: "/dealerships", labelKey: "dealerships" },
+  { href: "/compare", labelKey: "compare" },
+  { href: "/faq", labelKey: "faq" },
 ];
 
 // Navigation for subdomain (single dealership context)
 // Hides "Dealerships" since user is already on a specific dealership
-export const subdomainNavItems = [
-  { href: "/cars", label: "Browse Cars" },
-  { href: "/compare", label: "Compare" },
-  { href: "/faq", label: "FAQ" },
+export const subdomainNavItems: NavItem[] = [
+  { href: "/cars", labelKey: "browseCars" },
+  { href: "/compare", labelKey: "compare" },
+  { href: "/faq", labelKey: "faq" },
 ];
 
 // Admin navigation for organization members (OWNER, ADMIN, MEMBER)
-export const adminNavItems = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/cars", label: "Cars" },
-  { href: "/admin/test-drives", label: "Test Drives" },
-  { href: "/admin/messages", label: "Messages" },
+export const adminNavItems: NavItem[] = [
+  { href: "/admin", labelKey: "dashboard" },
+  { href: "/admin/cars", labelKey: "cars" },
+  { href: "/admin/test-drives", labelKey: "testDrives" },
+  { href: "/admin/messages", labelKey: "messages" },
 ];
 
 export const signedInLinks = [
   {
     href: "/messages",
-    label: "Messages",
+    labelKey: "messages",
     icon: "MessageSquare",
     iconClass: "hover:text-primary",
     size: 24,
@@ -34,7 +61,7 @@ export const signedInLinks = [
   },
   {
     href: "/wishlist",
-    label: "Wishlist",
+    labelKey: "wishlist",
     icon: "Heart",
     iconClass: "hover:text-red-500",
     size: 24,
@@ -42,10 +69,18 @@ export const signedInLinks = [
   },
   {
     href: "/test-drive",
-    label: "Test Drive",
+    labelKey: "testDrive",
     icon: "CarFront",
     iconClass: "hover:text-primary",
     size: 24,
     notAdmin: true,
   },
-];
+] satisfies Array<{
+  href: string;
+  labelKey: NavLabelKey;
+  icon: string;
+  iconClass: string;
+  size: number;
+  notAdmin: boolean;
+  showUnreadBadge?: boolean;
+}>;

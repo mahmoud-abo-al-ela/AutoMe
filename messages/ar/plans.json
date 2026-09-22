@@ -1,0 +1,39 @@
+{
+  "mostPopular": "الأكثر شيوعًا",
+  "custom": "حسب الطلب",
+  "free": "مجانية",
+  "forever": "مجانًا للأبد",
+  "perMonth": "شهريًا",
+  "perYear": "سنويًا",
+  "monthly": "شهري",
+  "yearly": "سنوي",
+  "save": "وفّر {percentage}%",
+  "saving": "توفّر {percentage}%",
+  "billingPeriodLabel": "تبديل الاشتراك السنوي",
+  "plans": {
+    "starter": {
+      "name": "المبتدئة",
+      "description": "مثالية للمعارض الصغيرة"
+    },
+    "pro": {
+      "name": "الاحترافية",
+      "description": "للمعارض المتنامية"
+    },
+    "enterprise": {
+      "name": "المؤسسات",
+      "description": "لمجموعات المعارض الكبيرة"
+    }
+  },
+  "features": {
+    "carListings": "{value} إعلان سيارة",
+    "carListingsUnlimited": "إعلانات سيارات بلا حدود",
+    "teamMembers": "{value} عضو في الفريق",
+    "teamMembersUnlimited": "أعضاء فريق بلا حدود",
+    "imagesPerCar": "{value} صور لكل سيارة",
+    "auditLogs": "سجلات تدقيق لمدة {value} يومًا",
+    "auditLogsUnlimited": "سجلات تدقيق بلا حدود",
+    "liveChat": "محادثة مباشرة",
+    "aiProcessing": "معالجة بالذكاء الاصطناعي",
+    "prioritySupport": "دعم ذو أولوية"
+  }
+}

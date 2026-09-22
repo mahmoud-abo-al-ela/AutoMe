@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "title": "AutoMe — Buy and Sell Cars in Egypt",
+    "description": "Browse cars from trusted dealerships across Egypt. Compare prices, book a test drive, and buy with confidence."
+  },
+  "hero": {
+    "headline": "Find Your Perfect Car",
+    "headlineAccent": "Powered by AI",
+    "subheadline": "Our AI technology analyzes thousands of vehicles to match you with the perfect car based on your preferences, budget, and needs.",
+    "searchPlaceholder": "Search by model, keyword, or drop a photo…",
+    "searchByPhoto": "Search by photo",
+    "closePhotoSearch": "Close photo search",
+    "selectedCarAlt": "Selected car",
+    "searchWithImage": "Search With Image",
+    "emptySearch": "Please enter a search term",
+    "scrollToFeatured": "Scroll to featured section",
+    "quickElectric": "Electric Vehicles",
+    "quickSuv": "SUVs",
+    "quickSedan": "Sedans",
+    "quickAutomatic": "Automatic",
+    "dropImage": "Drop image to search",
+    "trustRecommendations": "AI-Powered Recommendations",
+    "trustPriceAnalysis": "Market Price Analysis",
+    "trustVirtualTours": "Virtual Car Tours",
+    "analyzingImage": "Analyzing image…",
+    "analyzing": "Analyzing…",
+    "changeImage": "Change",
+    "invalidImageType": "Please choose an image file",
+    "imageTooLarge": "Image must be under {max}MB",
+    "noImageSelected": "Please select an image",
+    "detected": "Detected {attributes}"
+  },
+  "stats": {
+    "customersLabel": "Happy Customers",
+    "customersValue": "50K+",
+    "customersDescription": "Trusted by thousands of car buyers",
+    "vehiclesLabel": "Vehicles Listed",
+    "vehiclesValue": "10K+",
+    "vehiclesDescription": "Wide selection of quality cars",
+    "dealershipsLabel": "Partner Dealerships",
+    "dealershipsValue": "500+",
+    "dealershipsDescription": "Verified and trusted sellers",
+    "ratingLabel": "Average Rating",
+    "ratingValue": "4.9",
+    "ratingDescription": "Based on customer reviews"
+  },
+  "featured": {
+    "title": "Featured Cars",
+    "subtitle": "Explore our curated selection of premium vehicles",
+    "viewAll": "View All Vehicles"
+  },
+  "why": {
+    "badge": "Why Choose Us",
+    "title": "The Smarter Way to",
+    "titleAccent": "Buy Cars",
+    "subtitle": "Experience a revolutionary car buying journey powered by advanced AI technology that puts you in control",
+    "cards": {
+      "insightsTitle": "AI-Powered Insights",
+      "insightsDescription": "Get real-time market analysis and personalized recommendations based on your preferences and budget.",
+      "secureTitle": "Secure Transactions",
+      "secureDescription": "Every purchase is protected with advanced security measures and comprehensive buyer protection.",
+      "supportTitle": "24/7 Support",
+      "supportDescription": "Access round-the-clock customer support and AI assistance whenever you need help with your purchase.",
+      "toursTitle": "Virtual Car Tours",
+      "toursDescription": "Experience 360° virtual tours and detailed walkthroughs from the comfort of your home.",
+      "compareTitle": "Price Comparison",
+      "compareDescription": "Compare prices across multiple dealerships and get the best deal with our market analysis tools.",
+      "financingTitle": "Instant Financing",
+      "financingDescription": "Get pre-approved for financing in minutes with our integrated lending partners."
+    }
+  },
+  "reservation": {
+    "badge": "Easy Scheduling",
+    "title": "Schedule Your Test Drive Online",
+    "description": "Skip the wait and book your test drive appointment in minutes. Choose your preferred date and time, and we'll have the car ready for you.",
+    "cta": "Find a Car",
+    "schedulingTitle": "Easy Scheduling",
+    "schedulingDescription": "Choose from available dates and times that work best for your schedule.",
+    "noWaitTitle": "No Wait Times",
+    "noWaitDescription": "Your car will be ready when you arrive. No unnecessary waiting."
+  },
+  "dealer": {
+    "badge": "For Dealerships",
+    "title": "Start Your Own",
+    "titleAccent": "Digital Dealership",
+    "description": "Join AutoMe and get your dealership online in minutes. Manage inventory, handle customer inquiries, and schedule test drives — all in one powerful platform.",
+    "benefitFree": "Free to get started",
+    "benefitListings": "AI-powered car listings",
+    "benefitTestDrives": "Manage test drives online",
+    "benefitMessaging": "Built-in customer messaging",
+    "startTrial": "Start Free Trial",
+    "learnMore": "Learn More",
+    "dashboardPreview": "Your Dealership Dashboard",
+    "proPlan": "Pro Plan",
+    "statCars": "Cars",
+    "statTestDrives": "Test Drives",
+    "statMessages": "Messages",
+    "newLeads": "+{value} New Leads Today"
+  },
+  "pricing": {
+    "badge": "Pricing Plans",
+    "title": "Simple, Transparent",
+    "titleAccent": "Pricing",
+    "subtitle": "Choose the perfect plan for your dealership. No hidden fees, cancel anytime.",
+    "cta": "Get Started"
+  },
+  "testimonials": {
+    "badge": "Customer Reviews",
+    "title": "Loved by Thousands of",
+    "titleAccent": "Happy Customers",
+    "subtitle": "See what our customers have to say about their experience with {brand}",
+    "reviews": {
+      "r1": {
+        "role": "First-time Buyer",
+        "content": "AutoMe made finding my first car incredibly easy. The AI recommendations were spot-on, and I found the perfect SUV within my budget. The test drive scheduling was seamless!"
+      },
+      "r2": {
+        "role": "Business Owner",
+        "content": "As a busy professional, I needed a quick and reliable way to find a company car. AutoMe's platform saved me hours of research. The virtual tours were incredibly helpful."
+      },
+      "r3": {
+        "role": "Car Enthusiast",
+        "content": "I've bought many cars over the years, but AutoMe offers the best experience I've ever had. The detailed specs, market analysis, and dealer reviews gave me complete confidence in my purchase."
+      },
+      "r4": {
+        "role": "Family Man",
+        "content": "Found the perfect family minivan through AutoMe. The safety features comparison and child seat compatibility info were exactly what I needed. Highly recommend!"
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to find your perfect car?",
+    "description": "Let's discover your dream car and make your driving experience unforgettable.",
+    "browseAll": "Browse All Vehicles"
+  },
+  "faq": {
+    "badge": "FAQ",
+    "title": "Frequently Asked",
+    "titleAccent": "Questions",
+    "subtitle": "Everything you need to know about {brand}. Can’t find your answer?",
+    "contactUs": "Contact us",
+    "q1": "How does {brand}’s AI recommendation system work?",
+    "a1": "Our AI analyzes thousands of data points including your budget, preferences, driving habits, and market trends to recommend the perfect car for you. The system learns from millions of successful car purchases to provide increasingly accurate suggestions.",
+    "q2": "Is it free to use {brand} as a buyer?",
+    "a2": "Yes! {brand} is completely free for car buyers. You can browse listings, get AI recommendations, schedule test drives, and communicate with dealers at no cost. We only charge dealerships for premium features.",
+    "q3": "How do I schedule a test drive?",
+    "a3": "Simply find a car you’re interested in, click the “Schedule Test Drive” button, and choose your preferred date and time. The dealership will confirm your appointment, and the car will be ready when you arrive. No waiting, no hassle.",
+    "q4": "Are the cars on {brand} verified?",
+    "a4": "Yes, all vehicles listed on {brand} go through a rigorous verification process. Our team checks vehicle history, condition reports, and dealer credentials. We also provide market price analysis to ensure you’re getting a fair deal.",
+    "q5": "Can I sell my car on {brand}?",
+    "a5": "Currently, {brand} focuses on connecting buyers with verified dealerships. However, we’re working on a peer-to-peer marketplace feature that will allow individual sellers to list their vehicles. Stay tuned for updates!",
+    "q6": "What payment methods are accepted?",
+    "a6": "{brand} supports various payment methods including bank transfers, financing through our partner lenders, and dealership payment plans. All transactions are secured with advanced encryption and buyer protection."
+  }
+}

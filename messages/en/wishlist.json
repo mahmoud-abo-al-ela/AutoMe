@@ -1,0 +1,8 @@
+{
+  "title": "Your Wishlist",
+  "subtitle": "Save cars you’re interested in and come back to them later.",
+  "emptyTitle": "Your wishlist is empty",
+  "emptyBody": "Browse our inventory and add cars to your wishlist by tapping the heart icon. Come back to compare your options later.",
+  "browseCars": "Browse Cars",
+  "loadError": "Couldn’t load your wishlist"
+}

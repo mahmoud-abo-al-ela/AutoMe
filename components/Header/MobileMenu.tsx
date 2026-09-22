@@ -1,14 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, useClerk, useAuth } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getNavIcon } from "./mobile-menu-icons";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import NavLink from "./MobileMenuNavLink";
 import type { HeaderUser, HeaderOrganization } from "./MainHeader";
 
@@ -25,10 +28,22 @@ export default function MobileMenu({
   organizationSlug?: string | null;
   organization?: HeaderOrganization;
 }) {
+  const t = useTranslations("nav");
   const pathname = usePathname();
 
-  // Check if user has any organization membership
-  const hasOrgMembership = (user?.memberships?.length ?? 0) > 0;
+  // Sign-out is a client event; `user` is the server's answer from the last
+  // render, so a moment after signing out the prop still describes a member.
+  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
+  // live state has to gate anything derived from the prop.
+  //
+  // While Clerk is still loading, the server's answer stands: a signed-out
+  // visitor has no `user` to derive anything from anyway, so trusting it costs
+  // nothing and spares a signed-in one a flicker.
+  const { isLoaded, isSignedIn } = useAuth();
+  const signedIn = !isLoaded || isSignedIn === true;
+
+  const hasOrgMembership =
+    signedIn && (user?.memberships?.length ?? 0) > 0;
 
   // Get user's first organization (for dashboard link)
   const userOrg = user?.memberships?.[0]?.organization;
@@ -38,7 +53,7 @@ export default function MobileMenu({
   const isOnSubdomain = !!organizationSlug;
 
   // Check if user is a platform super admin (UserRole.ADMIN)
-  const isSuperAdmin = user?.role === "ADMIN";
+  const isSuperAdmin = signedIn && user?.role === "ADMIN";
 
   // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
@@ -47,6 +62,7 @@ export default function MobileMenu({
 
   const menuRef = useRef<HTMLDivElement>(null);
   const { signOut } = useClerk();
+  const { afterSignOut } = useAuthRedirects();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
   const isOnOrgPath = pathname?.startsWith("/org/");
 
@@ -114,7 +130,7 @@ export default function MobileMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-14 left-3 right-3 bg-background border rounded-3xl shadow-2xl md:hidden overflow-hidden"
+            className="fixed top-14 start-3 end-3 bg-background border rounded-3xl shadow-2xl md:hidden overflow-hidden"
             style={{ zIndex: 40, maxHeight: "calc(100vh - 5rem)" }}
           >
             {/* User section */}
@@ -122,7 +138,7 @@ export default function MobileMenu({
               <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
                 <div className="flex items-center gap-3">
                   <UserButton
-                    afterSignOutUrl="/"
+                    afterSignOutUrl={afterSignOut}
                     appearance={{
                       elements: {
                         avatarBox: "w-11 h-11 rounded-full shadow-md",
@@ -131,7 +147,7 @@ export default function MobileMenu({
                   />
                   <div className="flex-1">
                     <p className="font-semibold text-sm">
-                      {user?.name || "Welcome back"}
+                      {user?.name || t("welcomeBack")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {user?.email}
@@ -140,10 +156,10 @@ export default function MobileMenu({
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
-                      signOut({ redirectUrl: "/" });
+                      signOut({ redirectUrl: afterSignOut });
                     }}
                     className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                    aria-label="Sign out"
+                    aria-label={t("signOut")}
                   >
                     <LogOut className="w-5 h-5" />
                   </button>
@@ -170,13 +186,13 @@ export default function MobileMenu({
                         variant="outline"
                         className="w-full py-6 rounded-2xl font-semibold"
                       >
-                        View Storefront
+                        {t("viewStorefront")}
                       </Button>
                     </Link>
                   ) : (
                     <Link href={orgDashboardHref} onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        Dashboard
+                        {t("dashboard")}
                       </Button>
                     </Link>
                   )}
@@ -186,12 +202,12 @@ export default function MobileMenu({
               {/* Main nav */}
               <div className="space-y-1">
                 {navToShow.map((item, index) => {
-                  const NavIcon = getNavIcon(item.label);
+                  const NavIcon = getNavIcon(item.labelKey);
                   return (
                     <NavLink
                       key={item.href}
                       href={item.href}
-                      label={item.label}
+                      label={t(item.labelKey)}
                       IconComponent={NavIcon}
                       onClick={() => setIsMenuOpen(false)}
                       isActive={pathname === item.href}
@@ -217,7 +233,7 @@ export default function MobileMenu({
                       <NavLink
                         key={link.href}
                         href={link.href}
-                        label={link.label}
+                        label={t(link.labelKey)}
                         icon={link.icon}
                         iconClass={link.iconClass}
                         size={18}
@@ -242,7 +258,7 @@ export default function MobileMenu({
                   >
                     <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        Sign In
+                        {t("signIn")}
                       </Button>
                     </Link>
                   </motion.div>
@@ -252,7 +268,7 @@ export default function MobileMenu({
 
             {/* Footer */}
             <div className="px-5 py-3 border-t bg-muted/30 text-center">
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-micro text-muted-foreground">
                 {isOnSubdomain && organization?.name
                   ? `© 2026 ${organization.name} • Powered by AutoMe`
                   : "© 2026 AutoMe • All rights reserved"}

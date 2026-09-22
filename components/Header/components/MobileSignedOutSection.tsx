@@ -1,14 +1,18 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { SignedOut, SignInButton } from "@clerk/nextjs";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 
 export default function MobileSignedOutSection({
   setIsMenuOpen,
 }: {
   setIsMenuOpen: (open: boolean) => void;
 }) {
+  const t = useTranslations("nav");
+  const { afterSignIn } = useAuthRedirects();
   return (
     <SignedOut>
       <motion.div
@@ -17,12 +21,12 @@ export default function MobileSignedOutSection({
         transition={{ duration: 0.2, delay: 0.15 }}
         className="mt-4"
       >
-        <SignInButton mode="modal" forceRedirectUrl="/auth-redirect">
+        <SignInButton mode="modal" forceRedirectUrl={afterSignIn}>
           <Button
             className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25"
             onClick={() => setIsMenuOpen(false)}
           >
-            Sign In
+            {t("signIn")}
           </Button>
         </SignInButton>
       </motion.div>

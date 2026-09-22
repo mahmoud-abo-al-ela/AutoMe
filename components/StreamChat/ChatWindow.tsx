@@ -13,7 +13,7 @@ import {
 import type { Channel as StreamChannel } from "stream-chat";
 import { MessageSquare, Car, Building2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "../ui/button";
 import { formatCarPrice } from "@/lib/utils/currency";
 

@@ -1,0 +1,58 @@
+{
+  "actions": {
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "search": "بحث",
+    "viewDetails": "عرض التفاصيل",
+    "viewDealer": "عرض المعرض",
+    "clearFilters": "مسح عوامل التصفية",
+    "clearSearch": "مسح البحث"
+  },
+  "states": {
+    "empty": "لا يوجد شيء هنا بعد",
+    "error": "حدث خطأ ما",
+    "loading": "جارٍ التحميل…",
+    "notTranslated": "غير متوفر بالعربية — يتم عرض النص الإنجليزي الأصلي",
+    "noResults": "لا توجد نتائج",
+    "noResultsBody": "جرّب تعديل بحثك أو عوامل التصفية للعثور على ما تبحث عنه."
+  },
+  "language": {
+    "label": "اللغة",
+    "switchTo": "التبديل إلى {language}",
+    "suggestionBody": "هذا الموقع متاح أيضًا بـ{language}.",
+    "suggestionAccept": "التبديل إلى {language}",
+    "suggestionDismiss": "المتابعة بـ{language}"
+  },
+  "pagination": {
+    "showing": "عرض {start} إلى {end} من إجمالي {total} {noun}",
+    "nouns": {
+      "items": "{count, plural, one {عنصر} two {عنصران} few {عناصر} many {عنصرًا} other {عنصر}}",
+      "cars": "{count, plural, one {سيارة} two {سيارتان} few {سيارات} many {سيارة} other {سيارة}}",
+      "dealerships": "{count, plural, one {معرض} two {معرضان} few {معارض} many {معرضًا} other {معرض}}"
+    },
+    "label": "ترقيم الصفحات",
+    "previous": "الصفحة السابقة",
+    "next": "الصفحة التالية",
+    "page": "صفحة {number}"
+  },
+  "carActions": {
+    "addToFavorites": "أضف إلى المفضلة",
+    "removeFromFavorites": "إزالة من المفضلة",
+    "addToCompare": "أضف إلى المقارنة",
+    "removeFromCompare": "إزالة من المقارنة",
+    "signInToSave": "سجّل الدخول لحفظ السيارات في قائمة رغباتك",
+    "signIn": "تسجيل الدخول",
+    "wishlistError": "تعذّر تحديث قائمة الرغبات",
+    "compareAdded": "تمت الإضافة إلى المقارنة",
+    "compareRemoved": "تمت الإزالة من المقارنة",
+    "compareLimit": "يمكنك مقارنة {max} سيارات كحد أقصى في المرة الواحدة"
+  },
+  "time": {
+    "togglePeriod": "التبديل بين صباحًا ومساءً"
+  }
+}

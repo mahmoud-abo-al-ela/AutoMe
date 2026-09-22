@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -12,6 +13,7 @@ import {
 import PricingCard from "./PricingCard";
 
 const Pricing = ({ plans: dbPlans }: { plans?: DbPlan[] | null }) => {
+  const t = useTranslations("home.pricing");
   const [billingPeriod, setBillingPeriod] = useState("monthly");
 
   const plans = resolvePlans(dbPlans);
@@ -29,17 +31,16 @@ const Pricing = ({ plans: dbPlans }: { plans?: DbPlan[] | null }) => {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
             <Shield className="h-4 w-4" />
-            <span>Pricing Plans</span>
+            <span>{t("badge")}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Simple, Transparent{" "}
+            {t("title")}{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-brand-accent">
-              Pricing
+              {t("titleAccent")}
             </span>
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Choose the perfect plan for your dealership. No hidden fees, cancel
-            anytime.
+            {t("subtitle")}
           </p>
 
           <BillingToggle

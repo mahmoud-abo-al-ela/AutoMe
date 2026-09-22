@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "title": "About Us",
+    "description": "Learn about AutoMe — the modern platform helping dealerships digitize operations and buyers find their perfect vehicle."
+  },
+  "hero": {
+    "eyebrow": "About AutoMe",
+    "headline": "Reimagining the Way Cars Are",
+    "headlineAccent": "Bought & Sold",
+    "subtitle": "AutoMe is the modern automotive platform that empowers dealerships with powerful digital tools and helps buyers discover their perfect vehicle — all in one seamless experience.",
+    "browseCars": "Browse Cars",
+    "getInTouch": "Get in Touch"
+  },
+  "stats": {
+    "dealerships": { "value": "500+", "label": "Active Dealerships" },
+    "cars": { "value": "25K+", "label": "Cars Listed" },
+    "buyers": { "value": "100K+", "label": "Happy Buyers" },
+    "uptime": { "value": "99.9%", "label": "Uptime" }
+  },
+  "mission": {
+    "eyebrow": "Our Mission",
+    "headline": "Making automotive commerce",
+    "headlineAccent": "simple, smart, and human",
+    "body1": "The traditional car buying experience is broken — fragmented listings, outdated tools, and frustrating back-and-forth. We started AutoMe to change that.",
+    "body2": "Our platform gives dealerships the digital storefront they deserve, complete with AI-powered features, real-time communications, and actionable analytics. For buyers, we offer a curated, transparent experience that makes finding the right car genuinely enjoyable."
+  },
+  "features": {
+    "inventory": {
+      "title": "Smart Inventory Management",
+      "description": "AI-generated descriptions, bulk photo uploads, and intelligent categorization make listing cars effortless."
+    },
+    "messaging": {
+      "title": "Built-in Messaging",
+      "description": "Real-time chat between dealers and buyers eliminates phone tag and keeps conversations organized."
+    },
+    "analytics": {
+      "title": "Analytics Dashboard",
+      "description": "Track views, leads, and conversions with detailed analytics that help dealerships make data-driven decisions."
+    },
+    "multiLocation": {
+      "title": "Multi-location Support",
+      "description": "Manage multiple dealership locations from a single dashboard with role-based team access."
+    }
+  },
+  "values": {
+    "heading": "What We Stand For",
+    "subtitle": "Our values guide every decision we make, from the features we build to the partnerships we form.",
+    "trust": {
+      "title": "Trust & Transparency",
+      "description": "We believe car buying should be straightforward. Every listing is verified, every price is honest, and every interaction is built on trust."
+    },
+    "innovation": {
+      "title": "Innovation First",
+      "description": "From AI-powered descriptions to real-time messaging, we leverage cutting-edge technology to make the automotive experience smarter."
+    },
+    "community": {
+      "title": "Community Driven",
+      "description": "We’re building more than a platform — we’re creating a community where dealerships and buyers connect meaningfully."
+    },
+    "customer": {
+      "title": "Customer Obsessed",
+      "description": "Every feature we build starts with a simple question: does this make life better for our users? If not, we go back to the drawing board."
+    }
+  },
+  "cta": {
+    "heading": "Ready to Get Started?",
+    "body": "Whether you’re a dealership looking to go digital or a buyer searching for the perfect ride, AutoMe has you covered.",
+    "startTrial": "Start Free Trial",
+    "contactUs": "Contact Us"
+  }
+}

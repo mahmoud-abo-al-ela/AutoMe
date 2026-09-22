@@ -9,7 +9,10 @@ export interface SuccessResponse<T> {
 export interface ErrorResponse {
     success: false;
     error: {
+        /** Developer-facing fallback. Prefer messageKey for anything a user reads. */
         message: string;
+        messageKey?: string;
+        messageParams?: Record<string, string | number>;
         code: string;
         resource?: string;
         planType?: string;
@@ -32,6 +35,8 @@ export type ActionResponse<T> = SuccessResponse<T> | ErrorResponse;
 // whatever was caught (AppError, Error, or anything).
 interface ErrorLike {
     message?: string;
+    messageKey?: string;
+    messageParams?: Record<string, string | number>;
     code?: string;
     resource?: string;
     planType?: string;
@@ -72,6 +77,13 @@ export function createErrorResponse(error: unknown): ErrorResponse {
             code: err.code || "UNKNOWN_ERROR",
         },
     };
+
+    // The key and params are what the client renders; message is the fallback
+    // for anything thrown outside the AppError hierarchy.
+    if (err.messageKey) {
+        response.error.messageKey = err.messageKey;
+        if (err.messageParams) response.error.messageParams = err.messageParams;
+    }
 
     // Add plan limit fields
     if (err.code === "PLAN_LIMIT_EXCEEDED") {

@@ -3,33 +3,19 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Users, Car, Building2, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const Stats = () => {
+    const t = useTranslations("home.stats");
+
     const stats = [
-        {
-            icon: Users,
-            value: "50K+",
-            label: "Happy Customers",
-            description: "Trusted by thousands of car buyers",
-        },
-        {
-            icon: Car,
-            value: "10K+",
-            label: "Vehicles Listed",
-            description: "Wide selection of quality cars",
-        },
-        {
-            icon: Building2,
-            value: "500+",
-            label: "Partner Dealerships",
-            description: "Verified and trusted sellers",
-        },
-        {
-            icon: Star,
-            value: "4.9",
-            label: "Average Rating",
-            description: "Based on customer reviews",
-        },
+      // The figures are translated rather than run through Intl: "50K+" has no
+      // sensible Arabic rendering as a formatted number, so each locale writes
+      // it out. None of these are measured values.
+      { icon: Users, key: "customers" },
+      { icon: Car, key: "vehicles" },
+      { icon: Building2, key: "dealerships" },
+      { icon: Star, key: "rating" },
     ];
 
     return (
@@ -51,13 +37,13 @@ const Stats = () => {
                                     <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
                                 </div>
                                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">
-                                    {stat.value}
+                                    {t(`${stat.key}Value`)}
                                 </div>
                                 <div className="text-sm sm:text-base font-semibold text-foreground mb-1">
-                                    {stat.label}
+                                    {t(`${stat.key}Label`)}
                                 </div>
                                 <div className="text-xs sm:text-sm text-muted-foreground">
-                                    {stat.description}
+                                    {t(`${stat.key}Description`)}
                                 </div>
                             </motion.div>
                         );

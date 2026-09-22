@@ -1,6 +1,8 @@
 "use client";
-import { formatCarPrice } from "@/lib/utils/currency";
-import { formatMileage as formatMileageKm } from "@/lib/utils/units";
+import { useTranslations } from "next-intl";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
+import { usePlaceNames } from "@/hooks/use-place-names";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Building2,
   Calendar,
@@ -11,13 +13,13 @@ import {
   Fuel,
   Gauge,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { getCarColorHex } from "@/lib/constants/car-options";
 import CarCardActions from "./CarCardActions";
 import type { SerializedCar } from "@/lib/utils/serializers";
@@ -38,16 +40,29 @@ const CarCard = ({
   onWishlistChange?: (removedCarId: string) => void;
   index?: number;
 }) => {
+  const t = useTranslations("common.actions");
+  const attr = useCarAttributes();
+  const place = usePlaceNames();
+  const fmt = useFormatters();
   const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
   const isWishlistPage = pathname === "/wishlist";
 
-  const formatPrice = (price: number) => formatCarPrice(price);
+  // Reads the listing's own currency rather than assuming the market default.
+  const formatPrice = (price: number) =>
+    fmt.price(price, car.priceCurrency);
 
-  const formatMileage = (mileage: number) => formatMileageKm(mileage);
+  const formatMileage = (mileage: number) => fmt.mileage(mileage);
 
-  const carTitle = car.title || `${car.year} ${car.make} ${car.model}`;
-  const subtitle = [car.bodyType, car.transmission].filter(Boolean).join(" • ");
+  // A year is a number but never a quantity: grouping would render 2020 as
+  // "2,020" in English and "٢٬٠٢٠" in Arabic.
+  const formatYear = (year: number) => fmt.number(year, { useGrouping: false });
+
+  const carTitle =
+    car.title || `${formatYear(car.year)} ${car.make} ${car.model}`;
+  const subtitle = [attr.body(car.bodyType), attr.transmission(car.transmission)]
+    .filter(Boolean)
+    .join(" • ");
   const detailHref = `/cars/${car.id}`;
 
   return (
@@ -76,8 +91,8 @@ const CarCard = ({
               </div>
             )}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
-            <div className="absolute bottom-3 left-3 z-10">
-              <span className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/90 px-3 py-1.5 text-sm font-extrabold text-slate-900 shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 sm:text-base">
+            <div className="absolute bottom-3 start-3 z-10">
+              <span className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/90 px-3 py-1.5 text-sm font-bold text-slate-900 shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 sm:text-base">
                 {formatPrice(car.price)}
               </span>
             </div>
@@ -107,14 +122,14 @@ const CarCard = ({
 
           <div className="mb-3 grid grid-cols-2 gap-x-2 gap-y-2 text-xs text-muted-foreground sm:mb-4 sm:gap-y-2.5">
             <div className="flex items-center">
-              <div className="mr-1.5 rounded-full bg-muted p-1">
+              <div className="me-1.5 rounded-full bg-muted p-1">
                 <Calendar className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
               </div>
-              <span className="font-medium text-foreground">{car.year}</span>
+              <span className="font-medium text-foreground">{formatYear(car.year)}</span>
             </div>
             {car.mileage != null && (
               <div className="flex items-center">
-                <div className="mr-1.5 rounded-full bg-muted p-1">
+                <div className="me-1.5 rounded-full bg-muted p-1">
                   <Gauge className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
                 <span className="truncate font-medium text-foreground">{formatMileage(car.mileage)}</span>
@@ -122,43 +137,45 @@ const CarCard = ({
             )}
             {car.fuelType && (
               <div className="flex items-center">
-                <div className="mr-1.5 rounded-full bg-muted p-1">
+                <div className="me-1.5 rounded-full bg-muted p-1">
                   <Fuel className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
-                <span className="truncate font-medium text-foreground">{car.fuelType}</span>
+                <span className="truncate font-medium text-foreground">{attr.fuel(car.fuelType)}</span>
               </div>
             )}
             {car.location && (
               <div className="flex items-center">
-                <div className="mr-1.5 rounded-full bg-muted p-1">
+                <div className="me-1.5 rounded-full bg-muted p-1">
                   <MapPin className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
-                <span className="truncate font-medium text-foreground">{car.location}</span>
+                <span className="truncate font-medium text-foreground">
+                  {place.location(car.location)}
+                </span>
               </div>
             )}
           </div>
 
           <div className="mb-4 flex flex-wrap gap-1.5 sm:mb-5 sm:gap-2">
             {car.bodyType && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px] font-medium">
-                {car.bodyType}
+              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-micro font-medium">
+                {attr.body(car.bodyType)}
               </Badge>
             )}
             {car.transmission && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-[11px] font-medium">
-                {car.transmission}
+              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-micro font-medium">
+                {attr.transmission(car.transmission)}
               </Badge>
             )}
             {car.color && (
               <Badge
                 variant="outline"
-                className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-micro font-medium"
               >
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full border border-border shadow-inner"
                   style={{ backgroundColor: getCarColorHex(car.color) }}
                 />
-                {car.color}
+                {attr.color(car.color)}
               </Badge>
             )}
           </div>
@@ -187,8 +204,8 @@ const CarCard = ({
               <span className="truncate text-xs font-medium text-muted-foreground transition-colors group-hover/dealer:text-primary">
                 {car.organization.name}
               </span>
-              <span className="ml-auto flex items-center text-[10px] text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
-                View dealer <ChevronRight className="h-3 w-3" />
+              <span className="ms-auto flex items-center text-micro text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
+                {t("viewDealer")} <ChevronRight className="h-3 w-3" />
               </span>
             </Link>
           </>
@@ -200,7 +217,7 @@ const CarCard = ({
               size="sm"
               className="group/cta h-8 w-full gap-1.5 rounded-lg text-xs shadow-md transition-all duration-300 hover:shadow-lg sm:h-9"
             >
-              View Details
+              {t("viewDetails")}
               <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-1 sm:h-3.5 sm:w-3.5" />
             </Button>
           </Link>

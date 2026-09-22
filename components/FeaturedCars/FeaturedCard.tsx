@@ -1,10 +1,11 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { Button } from "../ui/button";
 import { GalleryHorizontal } from "lucide-react";
 import { getFeaturedCars } from "@/actions/home";
 import CarCard from "../CarCard";
 import CarCardSkeleton from "../CarCardSkeleton";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   Carousel,
   CarouselContent,
@@ -14,10 +15,16 @@ import AutoPlay from "embla-carousel-autoplay";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 
+// Required rather than defaulted: an English default here would silently
+// reappear in the Arabic tree if anything ever rendered this directly.
 const FeaturedCard = ({
-  title = "Featured Cars",
-  subtitle = "Explore our curated selection of premium vehicles",
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle: string;
 }) => {
+  const t = useTranslations("home.featured");
   const {
     data: featuredCars,
     isLoading: loading,
@@ -44,7 +51,7 @@ const FeaturedCard = ({
               size="lg"
               className="bg-primary hover:bg-primary/90 cursor-pointer text-primary-foreground rounded-full px-6 sm:px-8 shadow-lg hover:shadow-xl transition-all duration-300 w-full md:w-auto"
             >
-              <GalleryHorizontal className="mr-2 h-4 w-4" /> View All Vehicles
+              <GalleryHorizontal className="me-2 h-4 w-4" /> {t("viewAll")}
             </Button>
           </Link>
         </div>

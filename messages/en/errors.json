@@ -1,0 +1,29 @@
+{
+  "generic": "Something went wrong. Please try again.",
+  "unauthorized": "Please sign in to continue.",
+  "forbidden": "You do not have permission to do that.",
+  "notFound": "{resource} could not be found.",
+  "conflict": "That already exists.",
+  "rateLimit": "Too many requests. Please wait a moment and try again.",
+  "serviceUnavailable": "The service is temporarily unavailable. Please try again.",
+  "planLimit": "You have reached your plan's limit for {resource}.",
+  "resources": {
+    "Resource": "The item",
+    "Car": "The car",
+    "Cars": "The cars",
+    "User": "The user",
+    "Organization": "The dealership",
+    "Dealership": "The dealership",
+    "Test drive": "The test drive",
+    "TestDrive": "The test drive",
+    "Plan": "The plan",
+    "Subscription": "The subscription",
+    "Invoice": "The invoice",
+    "Review": "The review",
+    "Message": "The message",
+    "Conversation": "The conversation",
+    "Image": "The image",
+    "Membership": "The membership",
+    "Working hours": "The working hours"
+  }
+}

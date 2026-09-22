@@ -129,7 +129,13 @@ model Organization {
   description String?
   isActive    Boolean   @default(true)
 
-  // Location fields for platform discovery and filtering
+  // Location fields for platform discovery and filtering.
+  //
+  // Canonical values from lib/locations, never display names: `region` holds an
+  // egydata governorate code ("CAI"), `city` an English-derived slug ("maadi"),
+  // `country` an ISO country code. They are compared by equality and rendered
+  // through lib/locations/names, so a dealer switching the site to Arabic sees
+  // their own address change language.
   city        String?
   region      String?
   country     String?   @default("EG")
@@ -164,6 +170,10 @@ model Organization {
   @@index([isActive])
   @@index([averageRating])
   @@index([city])
+  // The dealership listing and the car city facet both filter on the location
+  // columns together; only `city` was indexed, so the governorate half of every
+  // such query was a scan.
+  @@index([country, region, city])
   @@index([isActive, deletedAt])
 }
 
@@ -363,6 +373,12 @@ model Car {
   model         String
   year          Int
   price         Decimal
+  // Currency of record for `price`. AutoMe is Egypt-only, so this is always
+  // "EGP" today and nothing converts it — the column exists so that a listing
+  // carries its own currency rather than inheriting one from a global
+  // assumption. Backfilling it after the fact is the expensive part; the column
+  // itself is near-free now. See lib/utils/currency.ts.
+  priceCurrency String         @default("EGP")
   mileage       Int
   fuelType      String
   transmission  String

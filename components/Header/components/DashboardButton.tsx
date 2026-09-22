@@ -1,5 +1,6 @@
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 /** Only the slug is read here; the rest of the Clerk/Prisma user is irrelevant. */
 type UserWithMemberships = {
@@ -23,6 +24,7 @@ export default function DashboardButton({
   onClick?: () => void;
   variant?: React.ComponentProps<typeof Button>["variant"];
 }) {
+  const t = useTranslations("nav");
   if (!hasOrgMembership && !isAdmin) return null;
 
   // Prioritize organizationSlug if it was passed 
@@ -36,7 +38,7 @@ export default function DashboardButton({
     <div className={className}>
       <Button variant={variant} size="sm" asChild className={buttonClassName}>
         <Link href={href} onClick={onClick}>
-          Dashboard
+          {t("dashboard")}
         </Link>
       </Button>
     </div>

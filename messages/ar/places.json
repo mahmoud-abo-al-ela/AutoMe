@@ -1,0 +1,16 @@
+{
+  "countries": {
+    "Egypt": "مصر",
+    "Saudi Arabia": "السعودية",
+    "United Arab Emirates": "الإمارات",
+    "UAE": "الإمارات",
+    "Kuwait": "الكويت",
+    "Qatar": "قطر",
+    "Bahrain": "البحرين",
+    "Oman": "عُمان",
+    "Jordan": "الأردن",
+    "Lebanon": "لبنان",
+    "Libya": "ليبيا",
+    "Sudan": "السودان"
+  }
+}

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,11 +7,13 @@ import { Search, Camera, Upload } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 
 const HeroSearch = () => {
+  const t = useTranslations("home.hero");
+  const tActions = useTranslations("common.actions");
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
@@ -18,7 +21,7 @@ const HeroSearch = () => {
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) {
-      toast.error("Please enter a search term");
+      toast.error(t("emptySearch"));
       return;
     }
     router.push(`/cars?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -42,21 +45,21 @@ const HeroSearch = () => {
           >
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 sm:size-[18px]"
+              className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 sm:size-[18px]"
             />
             <Input
               type="search"
-              placeholder="Search by model, keyword, or drop a photo..."
-              className="pl-9 h-10 sm:h-11 md:h-12 text-sm md:text-base text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg border-0 focus-visible:ring-primary shadow-lg"
+              placeholder={t("searchPlaceholder")}
+              className="ps-9 h-10 sm:h-11 md:h-12 text-sm md:text-base text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg border-0 focus-visible:ring-primary shadow-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
               type="button"
               onClick={image.openPicker}
-              title="Search by photo"
-              aria-label="Search by photo"
-              className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-colors ${
+              title={t("searchByPhoto")}
+              aria-label={t("searchByPhoto")}
+              className={`absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-colors ${
                 searchQuery.trim() ? "hidden" : "block"
               }`}
             >
@@ -81,7 +84,7 @@ const HeroSearch = () => {
                   className="absolute inset-0 z-20 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary bg-white/95 text-sm font-medium text-primary backdrop-blur-sm pointer-events-none"
                 >
                   <Upload size={16} />
-                  Drop image to search
+                  {t("dropImage")}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -93,7 +96,7 @@ const HeroSearch = () => {
             className="bg-primary hover:bg-primary/90 text-white h-10 sm:h-11 md:h-12 text-sm md:text-base cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg px-4 sm:px-6"
             disabled={image.loading}
           >
-            Search
+            {tActions("search")}
           </Button>
         </motion.form>
       )}

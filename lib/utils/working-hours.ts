@@ -14,35 +14,27 @@ export interface WorkingHoursRow {
 }
 
 export interface WorkingHoursEntry {
-    day: string;
     dayKey: DayOfWeek;
     openTime: string;
     closeTime: string;
     isOpen: boolean;
 }
 
+// Saturday-first, matching the week the date picker renders (weekStartsOn: 6).
+// Egypt's weekend is Friday-Saturday, so a Monday-first list splits it across
+// the two ends of the table.
 const DAY_ORDER: DayOfWeek[] = [
+    "SATURDAY",
+    "SUNDAY",
     "MONDAY",
     "TUESDAY",
     "WEDNESDAY",
     "THURSDAY",
     "FRIDAY",
-    "SATURDAY",
-    "SUNDAY",
 ];
 
-const DAY_NAMES: Record<DayOfWeek, string> = {
-    MONDAY: "Monday",
-    TUESDAY: "Tuesday",
-    WEDNESDAY: "Wednesday",
-    THURSDAY: "Thursday",
-    FRIDAY: "Friday",
-    SATURDAY: "Saturday",
-    SUNDAY: "Sunday",
-};
-
 /**
- * Flatten WorkingHours rows into one entry per day, sorted Mon→Sun. A single
+ * Flatten WorkingHours rows into one entry per day, sorted Sat→Fri. A single
  * row may cover several days (dayOfWeek is an array), so every day is emitted.
  */
 export function formatWorkingHours(
@@ -57,7 +49,6 @@ export function formatWorkingHours(
         const days = Array.isArray(wh.dayOfWeek) ? wh.dayOfWeek : [wh.dayOfWeek];
         for (const dayKey of days) {
             entries.push({
-                day: DAY_NAMES[dayKey] || dayKey,
                 dayKey,
                 openTime: wh.openTime,
                 closeTime: wh.closeTime,

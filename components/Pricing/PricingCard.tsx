@@ -1,15 +1,17 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { motion } from "framer-motion";
 import { Check, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import {
   formatPlanPrice,
-  formatPlanPeriod,
+  planPeriodKey,
   type UiPlan,
 } from "./pricing-plans";
+import { useFormatters } from "@/hooks/use-formatters";
 
 // A single pricing plan card.
 export default function PricingCard({
@@ -21,7 +23,24 @@ export default function PricingCard({
   billingPeriod: string;
   index: number;
 }) {
+  const t = useTranslations("home.pricing");
+  // Plan names, bullets and billing copy are shared with the onboarding
+  // wizard, so they live in their own namespace rather than under the home
+  // page that happened to render them first.
+  const tPlans = useTranslations("plans");
+  const fmt = useFormatters();
+  // Feature bullets interpolate a plan limit. The number is formatted here
+  // rather than left to ICU, which would use the bare `ar` tag and render
+  // Western digits against the Eastern ones everywhere else on the card.
+  const featureParams = (feature: UiPlan["features"][number]) =>
+    feature.params ? { value: fmt.number(feature.params.count) } : undefined;
   const Icon = plan.icon;
+  const price = formatPlanPrice(plan, billingPeriod, fmt.locale);
+  const periodKey = planPeriodKey(plan, billingPeriod);
+  // A DB plan with an unrecognised `type` has no message key, so it falls back
+  // to the untranslated DB name rather than rendering blank.
+  const name = plan.planKey ? tPlans(`plans.${plan.planKey}.name`) : plan.name;
+  const description = plan.planKey ? tPlans(`plans.${plan.planKey}.description`) : null;
 
   return (
     <motion.div
@@ -37,7 +56,7 @@ export default function PricingCard({
       {plan.popular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
           <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
-            Most Popular
+            {tPlans("mostPopular")}
           </div>
         </div>
       )}
@@ -59,13 +78,13 @@ export default function PricingCard({
             className={`text-xl font-bold ${plan.popular ? "text-white" : "text-foreground"
               }`}
           >
-            {plan.name}
+            {name}
           </h3>
           <p
             className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
               }`}
           >
-            {plan.description}
+            {description}
           </p>
         </div>
       </div>
@@ -76,13 +95,13 @@ export default function PricingCard({
             className={`text-4xl sm:text-5xl font-bold ${plan.popular ? "text-white" : "text-foreground"
               }`}
           >
-            {formatPlanPrice(plan, billingPeriod)}
+            {price ?? tPlans("custom")}
           </span>
           <span
             className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
               }`}
           >
-            /{formatPlanPeriod(plan, billingPeriod)}
+            {periodKey ? `/${tPlans(periodKey)}` : null}
           </span>
         </div>
       </div>
@@ -112,7 +131,7 @@ export default function PricingCard({
                   : ""
                 }`}
             >
-              {feature.name}
+              {tPlans(`features.${feature.key}`, featureParams(feature))}
             </span>
           </li>
         ))}
@@ -131,7 +150,7 @@ export default function PricingCard({
             href={plan.ctaLink}
             className="flex items-center justify-center gap-2"
           >
-            {plan.cta}
+            {t("cta")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
@@ -149,7 +168,7 @@ export default function PricingCard({
             href={`/sign-up?redirect_url=${encodeURIComponent(plan.ctaLink)}`}
             className="flex items-center justify-center gap-2"
           >
-            {plan.cta}
+            {t("cta")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>

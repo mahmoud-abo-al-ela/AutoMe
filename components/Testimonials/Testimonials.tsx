@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -10,37 +11,34 @@ import {
 } from "@/components/ui/carousel";
 import AutoPlay from "embla-carousel-autoplay";
 
+/** Proper nouns — never translated, and index-aligned with `reviews.r1..r4`. */
+const REVIEWER_NAMES = [
+    "Sarah Johnson",
+    "Michael Chen",
+    "Emily Rodriguez",
+    "David Thompson",
+] as const;
+
+const REVIEWER_IMAGES = [
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+] as const;
+
 const Testimonials = () => {
-    const testimonials = [
-        {
-            name: "Sarah Johnson",
-            role: "First-time Buyer",
-            image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-            rating: 5,
-            content: "AutoMe made finding my first car incredibly easy. The AI recommendations were spot-on, and I found the perfect SUV within my budget. The test drive scheduling was seamless!",
-        },
-        {
-            name: "Michael Chen",
-            role: "Business Owner",
-            image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-            rating: 5,
-            content: "As a busy professional, I needed a quick and reliable way to find a company car. AutoMe's platform saved me hours of research. The virtual tours were incredibly helpful.",
-        },
-        {
-            name: "Emily Rodriguez",
-            role: "Car Enthusiast",
-            image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-            rating: 5,
-            content: "I've bought many cars over the years, but AutoMe offers the best experience I've ever had. The detailed specs, market analysis, and dealer reviews gave me complete confidence in my purchase.",
-        },
-        {
-            name: "David Thompson",
-            role: "Family Man",
-            image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-            rating: 5,
-            content: "Found the perfect family minivan through AutoMe. The safety features comparison and child seat compatibility info were exactly what I needed. Highly recommend!",
-        },
-    ];
+  const t = useTranslations("home.testimonials");
+    // STILL PLACEHOLDER CONTENT. These are invented reviews, now translated on
+    // the user's instruction so the Arabic page has no English islands in it.
+    // Reviewer names stay Latin — they are proper nouns, and per the i18n rule
+    // we do not transliterate names. They need replacing with real reviews.
+    const testimonials = ([1, 2, 3, 4] as const).map((n) => ({
+        name: REVIEWER_NAMES[n - 1],
+        role: t(`reviews.r${n}.role`),
+        image: REVIEWER_IMAGES[n - 1],
+        rating: 5,
+        content: t(`reviews.r${n}.content`),
+    }));
 
     return (
         <section className="py-16 sm:py-24 bg-gradient-to-b from-muted to-background">
@@ -54,16 +52,16 @@ const Testimonials = () => {
                 >
                     <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
                         <Star className="h-4 w-4 fill-current" />
-                        <span>Customer Reviews</span>
+                        <span>{t("badge")}</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-                        Loved by Thousands of{" "}
+                        {t("title")}{" "}
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-brand-accent">
-                            Happy Customers
+                            {t("titleAccent")}
                         </span>
                     </h2>
                     <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-                        See what our customers have to say about their experience with AutoMe
+                        {t("subtitle", { brand: "AutoMe" })}
                     </p>
                 </motion.div>
 
@@ -76,11 +74,11 @@ const Testimonials = () => {
                     plugins={[AutoPlay({ delay: 6000 })]}
                     className="w-full"
                 >
-                    <CarouselContent className="-ml-2 md:-ml-4">
+                    <CarouselContent className="-ms-2 md:-ms-4">
                         {testimonials.map((testimonial, index) => (
                             <CarouselItem
                                 key={index}
-                                className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3"
+                                className="ps-2 md:ps-4 basis-full md:basis-1/2 lg:basis-1/3"
                             >
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}

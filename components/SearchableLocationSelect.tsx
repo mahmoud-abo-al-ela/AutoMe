@@ -70,12 +70,12 @@ export default function SearchableLocationSelect({
           <span className={cn("truncate", !selectedOption && "text-muted-foreground")}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <div className="flex items-center border-b px-3">
-          <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+          <Search className="me-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -94,14 +94,14 @@ export default function SearchableLocationSelect({
                 key={option.value}
                 type="button"
                 className={cn(
-                  "flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                  "flex w-full items-center rounded-sm px-2 py-1.5 text-start text-sm outline-none hover:bg-accent hover:text-accent-foreground",
                   option.value === value && "bg-accent text-accent-foreground"
                 )}
                 onClick={() => selectOption(option.value)}
               >
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
+                    "me-2 h-4 w-4",
                     option.value === value ? "opacity-100" : "opacity-0"
                   )}
                 />

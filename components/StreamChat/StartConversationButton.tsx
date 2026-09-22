@@ -32,7 +32,7 @@ export function StartConversationButton({
             size={size}
             className={className}
         >
-            <MessageSquare className="h-4 w-4 mr-2" />
+            <MessageSquare className="h-4 w-4 me-2" />
             Message Dealer
         </Button>
     );

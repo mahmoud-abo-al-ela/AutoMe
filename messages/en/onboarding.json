@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "title": "Onboarding",
+    "description": "Set up your dealership on AutoMe in a few simple steps."
+  },
+  "wizard": {
+    "badge": "Quick Setup",
+    "title": "Create Your Dealership",
+    "subtitle": "Set up your online presence in just a few simple steps",
+    "stepOf": "Step {current} of {total}",
+    "steps": {
+      "organization": {
+        "name": "Organization",
+        "description": "Basic info"
+      },
+      "workingHours": {
+        "name": "Working Hours",
+        "description": "Availability"
+      },
+      "plan": {
+        "name": "Select Plan",
+        "description": "Choose tier"
+      }
+    }
+  },
+  "actions": {
+    "back": "Back",
+    "continue": "Continue",
+    "loading": "Loading…",
+    "processing": "Processing…"
+  },
+  "orgDetails": {
+    "optional": "Optional",
+    "fields": {
+      "name": {
+        "label": "Dealership Name",
+        "placeholder": "Cairo Premium Cars"
+      },
+      "email": {
+        "label": "Contact Email",
+        "placeholder": "contact@yourdealership.com"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "01001234567"
+      },
+      "address": {
+        "label": "Street Address",
+        "placeholder": "12 El Nasr Street"
+      }
+    },
+    "location": {
+      "country": {
+        "label": "Country",
+        "placeholder": "Select a country",
+        "searchPlaceholder": "Search countries…",
+        "emptyMessage": "No countries found"
+      },
+      "region": {
+        "label": "State / Governorate",
+        "placeholder": "Select a governorate",
+        "searchPlaceholder": "Search governorates…",
+        "emptyMessage": "No governorates found"
+      },
+      "city": {
+        "label": "City",
+        "placeholder": "Select a city",
+        "searchPlaceholder": "Search cities…",
+        "emptyMessage": "No cities found"
+      }
+    },
+    "logo": {
+      "label": "Dealership Logo",
+      "alt": "Dealership logo",
+      "added": "Logo added",
+      "remove": "Remove logo",
+      "uploading": "Uploading…",
+      "addShort": "Add logo",
+      "constraintShort": "PNG/JPG · {size}MB",
+      "dropHint": "Drop your logo here or <browse>browse</browse>",
+      "constraint": "PNG, JPG up to {size}MB",
+      "notAnImage": "Please choose an image file",
+      "tooLarge": "Logo must be smaller than {size}MB"
+    },
+    "slug": {
+      "prefix": "Your site will be",
+      "checking": "Checking",
+      "available": "Available",
+      "taken": "Taken — try another name"
+    },
+    "hints": {
+      "checking": "Checking name availability…",
+      "taken": "Choose an available dealership name"
+    },
+    "validation": {
+      "nameRequired": "Dealership name is required",
+      "nameTooShort": "Name must be at least {min} characters",
+      "nameTooLong": "Name must be less than {max} characters",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Enter a valid Egyptian phone number, {min} to {max} digits",
+      "addressTooLong": "Address must be less than {max} characters",
+      "countryRequired": "Country is required",
+      "regionRequired": "State / governorate is required",
+      "cityRequired": "City is required",
+      "logoRequired": "Please upload a logo for your dealership",
+      "planRequired": "Please select a plan"
+    }
+  },
+  "workingHours": {
+    "title": "Working Hours",
+    "subtitle": "Set your dealership's opening hours",
+    "open": "Open",
+    "closed": "Closed",
+    "opens": "Opens",
+    "closes": "Closes",
+    "days": {
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday"
+    }
+  },
+  "planSelection": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the perfect plan for your dealership. You can upgrade anytime.",
+    "selectedBadge": "✓ Selected",
+    "selected": "Selected",
+    "select": "Select {plan}",
+    "noPlanSelected": "Please select a plan to continue",
+    "trust": {
+      "stripe": "Secure checkout by Stripe",
+      "cancelAnytime": "Cancel anytime",
+      "noSetupFees": "No setup fees"
+    },
+    "help": "All plans include secure data storage and email support. <link>Contact sales</link> for custom solutions.",
+    "toasts": {
+      "createFailed": "Couldn’t create your dealership",
+      "saveFailed": "Couldn’t save your details",
+      "checkoutFailed": "Couldn’t start checkout. Please try again.",
+      "paymentFailed": "Couldn’t start the payment"
+    }
+  },
+  "success": {
+    "meta": {
+      "title": "Setup Complete",
+      "description": "Your dealership has been set up successfully."
+    },
+    "pending": {
+      "title": "Completing Your Setup",
+      "body": "We’re setting up your dealership. This will only take a moment…"
+    },
+    "failed": {
+      "title": "Setup Failed",
+      "body": "Something went wrong while setting up your dealership.",
+      "paid": "Your payment was successful. Please try again or contact support if the issue persists.",
+      "retry": "Return to Onboarding",
+      "support": "Contact Support"
+    },
+    "title": "🎉 You’re All Set!",
+    "subtitle": "Your dealership has been successfully created and your subscription is active.",
+    "nextPrompt": "What would you like to do next?",
+    "dashboard": "Go to Dashboard",
+    "viewSite": "View Your Site",
+    "nextStepsTitle": "Recommended Next Steps",
+    "nextSteps": {
+      "listCar": "Add your first car listing to start attracting customers",
+      "inviteTeam": "Invite team members to help manage your dealership",
+      "brand": "Customize your dealership profile and branding",
+      "hours": "Review your working hours and contact information"
+    }
+  }
+}

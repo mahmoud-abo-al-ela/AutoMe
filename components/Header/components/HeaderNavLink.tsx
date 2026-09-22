@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Heart, CarFront, MessageSquare } from "lucide-react";
 import { UnreadBadge } from "@/components/StreamChat";
@@ -41,12 +41,12 @@ export default function HeaderNavLink({
       href={href}
       className={cn(
         "group flex items-center text-sm font-medium transition-all duration-200 relative",
-        isMobile ? "py-1 space-x-2" : "rounded-md relative overflow-hidden",
+        isMobile ? "py-1 gap-2" : "rounded-md relative overflow-hidden",
         isMessagesIcon && !isMobile
           ? "p-2"
           : !isMobile
-            ? "px-3 py-2 space-x-2"
-            : "space-x-2",
+            ? "px-3 py-2 gap-2"
+            : "gap-2",
         isActive
           ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
           : "hover:text-primary"
@@ -74,7 +74,7 @@ export default function HeaderNavLink({
             )}
           />
           {showUnreadBadge && (
-            <UnreadBadge className="absolute -top-0.5 -right-0.5" />
+            <UnreadBadge className="absolute -top-0.5 -end-0.5" />
           )}
         </span>
       )}
@@ -82,10 +82,10 @@ export default function HeaderNavLink({
         <>
           <span className={isActive ? "font-medium" : ""}>{label}</span>
           {!isMobile && isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
           )}
           {!isMobile && !isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           )}
         </>
       )}

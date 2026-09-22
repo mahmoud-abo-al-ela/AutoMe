@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   Menu,
   X,
@@ -13,10 +13,13 @@ import {
 } from "lucide-react";
 import MobileMenu from "./MobileMenu";
 import { Button } from "@/components/ui/button";
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+import { UserButton, SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
+import { usePathname } from "@/i18n/navigation";
 import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
 import { UnreadBadge } from "@/components/StreamChat";
+import { useTranslations } from "next-intl";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 const NAV_ICONS = { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare };
@@ -57,12 +60,12 @@ function NavLink({
       href={href}
       className={cn(
         "group flex items-center text-sm font-medium transition-all duration-200 relative",
-        isMobile ? "py-1 space-x-2" : "rounded-md relative overflow-hidden",
+        isMobile ? "py-1 gap-2" : "rounded-md relative overflow-hidden",
         isMessagesIcon && !isMobile
           ? "p-2"
           : !isMobile
-            ? "px-3 py-2 space-x-2"
-            : "space-x-2",
+            ? "px-3 py-2 gap-2"
+            : "gap-2",
         isActive
           ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
           : "hover:text-primary",
@@ -90,7 +93,7 @@ function NavLink({
             )}
           />
           {showUnreadBadge && (
-            <UnreadBadge className="absolute -top-0.5 -right-0.5" organizationId={organizationId} />
+            <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organizationId} />
           )}
         </span>
       )}
@@ -98,10 +101,10 @@ function NavLink({
         <>
           <span className={isActive ? "font-medium" : ""}>{label}</span>
           {!isMobile && isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
           )}
           {!isMobile && !isActive && (
-            <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           )}
         </>
       )}
@@ -134,8 +137,19 @@ export default function MainHeader({
   organizationSlug?: string | null;
   organization?: HeaderOrganization;
 }) {
-  // Check if user has any organization membership
-  const hasOrgMembership = (user?.memberships?.length ?? 0) > 0;
+  // Sign-out is a client event; `user` is the server's answer from the last
+  // render, so a moment after signing out the prop still describes a member.
+  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
+  // live state has to gate anything derived from the prop.
+  //
+  // While Clerk is still loading, the server's answer stands: a signed-out
+  // visitor has no `user` to derive anything from anyway, so trusting it costs
+  // nothing and spares a signed-in one a flicker.
+  const { isLoaded, isSignedIn } = useAuth();
+  const signedIn = !isLoaded || isSignedIn === true;
+
+  const hasOrgMembership =
+    signedIn && (user?.memberships?.length ?? 0) > 0;
 
   // Get user's first organization (for admin link)
   const userOrg = user?.memberships?.[0]?.organization;
@@ -145,13 +159,15 @@ export default function MainHeader({
   const isOnSubdomain = !!organizationSlug;
 
   // Check if user is a platform super admin (UserRole.ADMIN)
-  const isSuperAdmin = user?.role === "ADMIN";
+  const isSuperAdmin = signedIn && user?.role === "ADMIN";
 
   // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
   const isOwner =
     isSuperAdmin ||
     (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
+  const t = useTranslations("nav");
+  const { afterSignOut } = useAuthRedirects();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
@@ -181,18 +197,18 @@ export default function MainHeader({
         <div className="container flex h-14 md:h-16 items-center mx-auto">
           <Link
             href="/"
-            className="mr-6 flex items-center space-x-2 transition-transform duration-300 hover:scale-105"
-            title={isOnSubdomain && organization?.name ? organization.name : "Home"}
-            aria-label={isOnSubdomain && organization?.name ? organization.name : "Home"}
+            className="me-6 flex items-center gap-2 transition-transform duration-300 hover:scale-105"
+            title={isOnSubdomain && organization?.name ? organization.name : t("home")}
+            aria-label={isOnSubdomain && organization?.name ? organization.name : t("home")}
           >
             {isOnSubdomain && organization?.logo ? (
               <img
                 src={organization.logo}
                 alt={organization.name ?? ""}
-                className="h-8 w-8 rounded-full object-cover ml-4 md:ml-0"
+                className="h-8 w-8 rounded-full object-cover ms-4 md:ms-0"
               />
             ) : null}
-            <span className="text-2xl font-bold text-primary ml-4 md:ml-0">
+            <span className="text-2xl font-bold text-primary ms-4 md:ms-0">
               {isOnSubdomain && organization?.name ? (
                 <span className="text-black dark:text-white">{organization.name}</span>
               ) : (
@@ -201,14 +217,14 @@ export default function MainHeader({
             </span>
           </Link>
           <div className="hidden md:flex items-center justify-between w-full">
-            <nav className="flex justify-center space-x-1 lg:space-x-2 mx-6 flex-1">
+            <nav className="flex justify-center gap-1 lg:gap-2 mx-6 flex-1">
               {showAdminNav
                 ? // Show admin navigation for org members
                 adminNavItems.map((item) => (
                   <NavLink
                     key={item.href}
                     href={item.href}
-                    label={item.label}
+                    label={t(item.labelKey)}
                     isActive={pathname === item.href}
                   />
                 ))
@@ -217,7 +233,7 @@ export default function MainHeader({
                   <NavLink
                     key={item.href}
                     href={item.href}
-                    label={item.label}
+                    label={t(item.labelKey)}
                     isActive={pathname === item.href}
                   />
                 ))}
@@ -225,20 +241,20 @@ export default function MainHeader({
 
             {/* Context switcher for org members */}
             {(hasOrgMembership || isSuperAdmin) && !isOnOrgPath && (
-              <div className="mr-4">
+              <div className="me-4">
                 {isOnAdminPath ? (
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="/">View Storefront</Link>
+                    <Link href="/">{t("viewStorefront")}</Link>
                   </Button>
                 ) : (
                   <Button variant="default" size="sm" asChild>
-                    <Link href={orgDashboardHref}>Dashboard</Link>
+                    <Link href={orgDashboardHref}>{t("dashboard")}</Link>
                   </Button>
                 )}
               </div>
             )}
 
-            <div className="space-x-6">
+            <div className="flex items-center gap-6">
               <SignedOut>
                 {pathname !== "/sign-in" && pathname !== "/sign-up" && (
                   <Button
@@ -249,13 +265,13 @@ export default function MainHeader({
                       href="/sign-in"
                       className="w-full flex items-center justify-center"
                     >
-                      Sign In
+                      {t("signIn")}
                     </Link>
                   </Button>
                 )}
               </SignedOut>
               <SignedIn>
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center gap-6">
                   {signedInLinks
                     .filter(
                       // Only notAdmin does any filtering. This also tested
@@ -269,7 +285,7 @@ export default function MainHeader({
                       <NavLink
                         key={link.href}
                         href={link.href}
-                        label={link.label}
+                        label={t(link.labelKey)}
                         icon={link.icon}
                         iconClass={link.iconClass}
                         size={link.size}
@@ -279,7 +295,7 @@ export default function MainHeader({
                       />
                     ))}
                   <UserButton
-                    afterSignOutUrl="/"
+                    afterSignOutUrl={afterSignOut}
                     appearance={{
                       elements: {
                         avatarBox:
@@ -289,21 +305,23 @@ export default function MainHeader({
                   />
                 </div>
               </SignedIn>
+              <LanguageSwitcher />
             </div>
           </div>
 
           {/* Mobile icons - Messages and Menu */}
-          <div className="md:hidden ml-auto flex items-center gap-1">
+          <div className="md:hidden ms-auto flex items-center gap-1">
+            <LanguageSwitcher />
             {/* Messages icon with unread badge - only show when signed in and not org owner */}
             <SignedIn>
               {!isOwner && (
                 <Link
                   href="/messages"
                   className="relative flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
-                  title="Messages"
+                  title={t("messages")}
                 >
                   <MessageSquare className="h-5 w-5" />
-                  <UnreadBadge className="absolute -top-0.5 -right-0.5" organizationId={organization?.id} />
+                  <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organization?.id} />
                 </Link>
               )}
             </SignedIn>
@@ -312,7 +330,7 @@ export default function MainHeader({
             <button
               className="flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={isMenuOpen ? t("closeMenu") : t("openMenu")}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
             >

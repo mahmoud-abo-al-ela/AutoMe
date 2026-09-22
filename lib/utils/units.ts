@@ -10,24 +10,22 @@
  * decision, recorded here rather than repeated at each render site.
  */
 
+import type { Locale } from "@/i18n/routing";
+import { intlLocale } from "./intl-locale";
+
 /**
  * Format a car's mileage for display.
  *
- * The `-u-nu-latn` on the Arabic locale matches `formatCarPrice`: Intl renders
- * Eastern Arabic numerals for "ar-EG" by default, and Egyptian listings use
- * Western digits.
+ * The Arabic numbering system is decided in `intlLocale`, not here.
  */
 export function formatMileage(
   mileage: number,
-  locale: "en" | "ar" = "en"
+  locale: Locale = "en"
 ): string {
-  return new Intl.NumberFormat(
-    locale === "ar" ? "ar-EG-u-nu-latn" : "en-EG",
-    {
-      style: "unit",
-      unit: "kilometer",
-      unitDisplay: "short",
-      maximumFractionDigits: 0,
-    }
-  ).format(mileage || 0);
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: "unit",
+    unit: "kilometer",
+    unitDisplay: "short",
+    maximumFractionDigits: 0,
+  }).format(mileage || 0);
 }

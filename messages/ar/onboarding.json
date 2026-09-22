@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "title": "إعداد المعرض",
+    "description": "جهّز معرضك على أوتومي في خطوات بسيطة."
+  },
+  "wizard": {
+    "badge": "إعداد سريع",
+    "title": "أنشئ معرضك",
+    "subtitle": "جهّز حضورك على الإنترنت في خطوات بسيطة",
+    "stepOf": "الخطوة {current} من {total}",
+    "steps": {
+      "organization": {
+        "name": "المعرض",
+        "description": "بيانات أساسية"
+      },
+      "workingHours": {
+        "name": "مواعيد العمل",
+        "description": "أوقات الفتح"
+      },
+      "plan": {
+        "name": "اختر الباقة",
+        "description": "حدّد اشتراكك"
+      }
+    }
+  },
+  "actions": {
+    "back": "رجوع",
+    "continue": "متابعة",
+    "loading": "جارٍ التحميل…",
+    "processing": "جارٍ المعالجة…"
+  },
+  "orgDetails": {
+    "optional": "اختياري",
+    "fields": {
+      "name": {
+        "label": "اسم المعرض",
+        "placeholder": "سيارات القاهرة الفاخرة"
+      },
+      "email": {
+        "label": "البريد الإلكتروني للتواصل",
+        "placeholder": "contact@yourdealership.com"
+      },
+      "phone": {
+        "label": "رقم الهاتف",
+        "placeholder": "01001234567"
+      },
+      "address": {
+        "label": "عنوان الشارع",
+        "placeholder": "١٢ شارع النصر"
+      }
+    },
+    "location": {
+      "country": {
+        "label": "الدولة",
+        "placeholder": "اختر الدولة",
+        "searchPlaceholder": "ابحث عن دولة…",
+        "emptyMessage": "لا توجد دول"
+      },
+      "region": {
+        "label": "المحافظة",
+        "placeholder": "اختر المحافظة",
+        "searchPlaceholder": "ابحث عن محافظة…",
+        "emptyMessage": "لا توجد محافظات"
+      },
+      "city": {
+        "label": "المدينة",
+        "placeholder": "اختر المدينة",
+        "searchPlaceholder": "ابحث عن مدينة…",
+        "emptyMessage": "لا توجد مدن"
+      }
+    },
+    "logo": {
+      "label": "شعار المعرض",
+      "alt": "شعار المعرض",
+      "added": "تمت إضافة الشعار",
+      "remove": "إزالة الشعار",
+      "uploading": "جارٍ الرفع…",
+      "addShort": "أضف الشعار",
+      "constraintShort": "PNG/JPG · {size} ميجابايت",
+      "dropHint": "اسحب الشعار هنا أو <browse>تصفّح ملفاتك</browse>",
+      "constraint": "PNG أو JPG حتى {size} ميجابايت",
+      "notAnImage": "اختر ملف صورة",
+      "tooLarge": "يجب أن يكون حجم الشعار أقل من {size} ميجابايت"
+    },
+    "slug": {
+      "prefix": "سيكون رابط موقعك",
+      "checking": "جارٍ التحقق",
+      "available": "متاح",
+      "taken": "محجوز — جرّب اسمًا آخر"
+    },
+    "hints": {
+      "checking": "جارٍ التحقق من توفّر الاسم…",
+      "taken": "اختر اسم معرض متاحًا"
+    },
+    "validation": {
+      "nameRequired": "اسم المعرض مطلوب",
+      "nameTooShort": "يجب ألا يقل الاسم عن {min} أحرف",
+      "nameTooLong": "يجب ألا يزيد الاسم عن {max} حرف",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "phoneInvalid": "أدخل رقم هاتف مصري صحيح من {min} إلى {max} أرقام",
+      "addressTooLong": "يجب ألا يزيد العنوان عن {max} حرفًا",
+      "countryRequired": "الدولة مطلوبة",
+      "regionRequired": "المحافظة مطلوبة",
+      "cityRequired": "المدينة مطلوبة",
+      "logoRequired": "ارفع شعارًا لمعرضك",
+      "planRequired": "اختر باقة"
+    }
+  },
+  "workingHours": {
+    "title": "مواعيد العمل",
+    "subtitle": "حدّد مواعيد فتح معرضك",
+    "open": "مفتوح",
+    "closed": "مغلق",
+    "opens": "يفتح",
+    "closes": "يغلق",
+    "days": {
+      "saturday": "السبت",
+      "sunday": "الأحد",
+      "monday": "الإثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة"
+    }
+  },
+  "planSelection": {
+    "title": "اختر باقتك",
+    "subtitle": "اختر الباقة المناسبة لمعرضك، ويمكنك الترقية في أي وقت.",
+    "selectedBadge": "✓ مختارة",
+    "selected": "مختارة",
+    "select": "اختر {plan}",
+    "noPlanSelected": "اختر باقة للمتابعة",
+    "trust": {
+      "stripe": "دفع آمن عبر Stripe",
+      "cancelAnytime": "إلغاء في أي وقت",
+      "noSetupFees": "بدون رسوم تأسيس"
+    },
+    "help": "تشمل كل الباقات تخزينًا آمنًا للبيانات ودعمًا عبر البريد الإلكتروني. <link>تواصل مع المبيعات</link> للحلول المخصصة.",
+    "toasts": {
+      "createFailed": "تعذّر إنشاء معرضك",
+      "saveFailed": "تعذّر حفظ بياناتك",
+      "checkoutFailed": "تعذّر بدء عملية الدفع. حاول مرة أخرى.",
+      "paymentFailed": "تعذّر بدء عملية الدفع"
+    }
+  },
+  "success": {
+    "meta": {
+      "title": "اكتمل الإعداد",
+      "description": "تم إعداد معرضك بنجاح."
+    },
+    "pending": {
+      "title": "جارٍ إكمال الإعداد",
+      "body": "نجهّز معرضك الآن، ولن يستغرق الأمر سوى لحظات…"
+    },
+    "failed": {
+      "title": "تعذّر إكمال الإعداد",
+      "body": "حدث خطأ أثناء إعداد معرضك.",
+      "paid": "تمت عملية الدفع بنجاح. حاول مرة أخرى أو تواصل مع الدعم إذا استمرت المشكلة.",
+      "retry": "العودة إلى الإعداد",
+      "support": "تواصل مع الدعم"
+    },
+    "title": "🎉 كل شيء جاهز!",
+    "subtitle": "تم إنشاء معرضك بنجاح، واشتراكك فعّال الآن.",
+    "nextPrompt": "ما الذي تودّ فعله الآن؟",
+    "dashboard": "الذهاب إلى لوحة التحكم",
+    "viewSite": "عرض موقعك",
+    "nextStepsTitle": "الخطوات التالية المقترحة",
+    "nextSteps": {
+      "listCar": "أضف أول إعلان سيارة لتبدأ في جذب العملاء",
+      "inviteTeam": "ادعُ أعضاء فريقك للمساعدة في إدارة المعرض",
+      "brand": "خصّص ملف معرضك وهويته البصرية",
+      "hours": "راجع مواعيد العمل وبيانات التواصل"
+    }
+  }
+}
