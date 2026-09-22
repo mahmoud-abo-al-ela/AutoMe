@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { processImagesSearch } from "@/actions/home";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useActionError } from "@/hooks/use-action-error";
 
 const MAX_IMAGE_MB = 10;
 
@@ -19,6 +20,7 @@ export function useImageSearch() {
   const t = useTranslations("home.hero");
   const fmt = useFormatters();
   const router = useRouter();
+  const actionError = useActionError();
   const [isActive, setIsActive] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -33,23 +35,39 @@ export function useImageSearch() {
     mutateAsync,
   } = useMutation({ mutationFn: processImagesSearch });
 
+  // Only fires for a thrown/transport failure; a refused or failed action comes
+  // back as a value and is handled below.
   useEffect(() => {
-    if (error) toast.error(error.message);
-  }, [error]);
+    if (error) toast.error(t("searchFailed"));
+  }, [error, t]);
 
-  // On success, announce what was detected and jump to the filtered listing.
   useEffect(() => {
-    if (!result?.success) return;
+    if (!result) return;
+
+    // The action returns its failure rather than throwing, so this branch used
+    // to fall through and the user saw nothing at all.
+    if (!result.success) {
+      toast.error(actionError(result.error, t("searchFailed")));
+      return;
+    }
+
     const { make, bodyType, color } = result.data;
-    const detected = [color, make, bodyType].filter(Boolean).join(" ");
-    if (detected) toast.success(t("detected", { attributes: detected }));
-
     const params = new URLSearchParams();
     if (make) params.append("make", make);
     if (bodyType) params.append("bodyType", bodyType);
     if (color) params.append("color", color);
+
+    // Nothing recognised. Pushing to an unfiltered listing would look like the
+    // search silently did nothing, so say so and stay put.
+    if (params.size === 0) {
+      toast.error(t("notRecognized"));
+      return;
+    }
+
+    const detected = [color, make, bodyType].filter(Boolean).join(" ");
+    toast.success(t("detected", { attributes: detected }));
     router.push(`/cars?${params.toString()}`);
-  }, [result, router, t]);
+  }, [result, router, t, actionError]);
 
   const selectFile = (file: File | undefined) => {
     if (!file) return;

@@ -28,7 +28,9 @@
     "invalidImageType": "Please choose an image file",
     "imageTooLarge": "Image must be under {max}MB",
     "noImageSelected": "Please select an image",
-    "detected": "Detected {attributes}"
+    "detected": "Detected {attributes}",
+    "searchFailed": "We could not search with that photo. Please try again.",
+    "notRecognized": "We could not recognise a car in that photo. Try a clearer shot."
   },
   "stats": {
     "customersLabel": "Happy Customers",

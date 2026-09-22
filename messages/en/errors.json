@@ -25,5 +25,15 @@
     "Image": "The image",
     "Membership": "The membership",
     "Working hours": "The working hours"
+  },
+  "ai": {
+    "busy": "Our AI is at capacity right now. Please try again in a few minutes.",
+    "timeout": "The analysis took too long. Please try again.",
+    "unavailable": "AI analysis is unavailable right now. Please try again later.",
+    "unreadable": "We could not read the analysis result. Please try again.",
+    "invalidResponse": "The analysis came back in an unexpected form. Please try again.",
+    "noImage": "No image was provided.",
+    "unsupportedImage": "That image type is not supported. Use JPG, PNG or WebP.",
+    "imageTooLarge": "The image must be under {max}MB."
   }
 }
