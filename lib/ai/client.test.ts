@@ -425,3 +425,56 @@ describe("generateStructured — saturated models", () => {
     }
   });
 });
+
+describe("generateStructured — the wall-clock budget", () => {
+  it("stops walking the chain once the budget is gone", async () => {
+    // Each model burns the whole budget being slow, then 503s.
+    generate.mockImplementation(
+      () =>
+        new Promise((_, reject) =>
+          setTimeout(() => reject(httpError(503)), 40)
+        )
+    );
+
+    await expect(call({ budgetMs: 60, timeoutMs: 5_000 })).rejects.toBeInstanceOf(
+      ServiceUnavailableError
+    );
+
+    // Without a budget this would have tried every model in the chain.
+    expect(generate.mock.calls.length).toBeLessThan(3);
+  });
+
+  it("refuses rather than spending a request it cannot hear the answer to", async () => {
+    generate.mockResolvedValue(ok('{"make":"Audi","year":2020}'));
+
+    // Already past the deadline before the first attempt.
+    await expect(call({ budgetMs: -1 })).rejects.toBeInstanceOf(
+      ServiceUnavailableError
+    );
+
+    // A request sent into a function about to be killed is pure waste: the
+    // caller never receives it and the ledger write never runs.
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("clamps an attempt to the budget rather than its own timeout", async () => {
+    generate.mockImplementation(() => new Promise(() => {}));
+
+    const started = Date.now();
+    await expect(call({ budgetMs: 40, timeoutMs: 30_000 })).rejects.toThrow();
+
+    // The 30s per-attempt ceiling must not outlive a 40ms budget.
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
+  it("still records the attempt it gave up on", async () => {
+    generate.mockImplementation(() => new Promise(() => {}));
+
+    await expect(call({ budgetMs: 40, timeoutMs: 30_000 })).rejects.toThrow();
+
+    // The point of budgeting inside the process: the ledger write still runs,
+    // where a platform kill would have lost the row entirely.
+    expect(createAiUsage).toHaveBeenCalled();
+    expect(createAiUsage.mock.calls[0][0]).toMatchObject({ success: false });
+  });
+});

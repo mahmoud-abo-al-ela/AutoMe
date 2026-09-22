@@ -40,11 +40,47 @@ export interface GenerateStructuredInput<T> {
   /** Bytes to key the cache on. Omit to bypass the cache entirely. */
   cacheBytes?: Buffer | string;
   timeoutMs?: number;
+  /** Wall-clock ceiling for the whole call. Defaults to AI_REQUEST_BUDGET_MS. */
+  budgetMs?: number;
   temperature?: number;
   maxAttempts?: number;
 }
 
-const DEFAULT_TIMEOUT_MS = 30_000;
+/**
+ * Per-attempt ceiling. Measured worst case against the real API is ~17s
+ * (gemini-3.5-flash on the bilingual prompt, which spends ~2000 thinking
+ * tokens), so 20s leaves headroom without letting one slow model eat a budget
+ * that has two more models to fund.
+ */
+const DEFAULT_TIMEOUT_MS = 20_000;
+
+/**
+ * Wall-clock budget for the entire call — every model in the chain and every
+ * retry inside them.
+ *
+ * Per-attempt timeouts alone do not bound anything useful: three models at 20s
+ * each is a minute, and the platform kills the function long before that. A
+ * platform kill is the worst available outcome, because the `finally` that
+ * writes the ledger row never runs — the request is spent, invisible to the
+ * breaker, and the user gets a bare 504 instead of a typed error. So the budget
+ * has to expire *inside* the process, comfortably before the function does.
+ *
+ * 45s sits under the 60s `maxDuration` the AI route segments declare, leaving
+ * room for the upload, the DB writes and the response.
+ */
+const DEFAULT_BUDGET_MS = 45_000;
+
+function budgetFromEnv(): number {
+  const raw = process.env.AI_REQUEST_BUDGET_MS;
+  if (!raw) return DEFAULT_BUDGET_MS;
+
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    logError(`AI_REQUEST_BUDGET_MS is not a positive integer; using ${DEFAULT_BUDGET_MS}`);
+    return DEFAULT_BUDGET_MS;
+  }
+  return parsed;
+}
 
 /**
  * Two, not three. Every attempt is a request against a free-tier cap, and
@@ -177,8 +213,21 @@ interface AttemptInput<T> {
   responseJsonSchema: unknown;
   ctx: AiCallerContext | null | undefined;
   timeoutMs: number;
+  /** Absolute epoch-ms cutoff for the whole operation, chain included. */
+  deadline: number;
   temperature: number | undefined;
   maxAttempts: number;
+}
+
+/** How long an attempt may take: its own ceiling, or whatever budget is left. */
+function remainingFor(input: { timeoutMs: number; deadline: number }): number {
+  return Math.min(input.timeoutMs, input.deadline - Date.now());
+}
+
+function budgetExhausted(): Error {
+  return new ServiceUnavailableError("The AI request ran out of time", {
+    key: "errors.ai.timeout",
+  });
 }
 
 /**
@@ -189,6 +238,11 @@ interface AttemptInput<T> {
  */
 async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
   for (let attempt = 1; attempt <= input.maxAttempts; attempt++) {
+    const allowance = remainingFor(input);
+    // Starting an attempt with no budget left would spend a request the caller
+    // can never receive — the function is killed before the reply arrives.
+    if (allowance <= 0) throw budgetExhausted();
+
     const started = Date.now();
     let usage: TokenUsage = ZERO_USAGE;
     let success = false;
@@ -202,7 +256,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
           responseJsonSchema: input.responseJsonSchema,
           temperature: input.temperature,
         },
-        input.timeoutMs
+        allowance
       );
       usage = result.usage;
 
@@ -287,6 +341,7 @@ export async function generateStructured<T>(
   const models = modelsFor(input.task);
   const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const maxAttempts = input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
+  const deadline = Date.now() + (input.budgetMs ?? budgetFromEnv());
 
   const keyFor = (model: string) =>
     input.cacheBytes === undefined
@@ -326,6 +381,7 @@ export async function generateStructured<T>(
         responseJsonSchema,
         ctx: input.ctx,
         timeoutMs,
+        deadline,
         temperature: input.temperature,
         maxAttempts,
       });
@@ -343,7 +399,10 @@ export async function generateStructured<T>(
       // three times to learn that.
       const anotherModelMightWork =
         provider.isModelUnavailableError(error) || provider.isCapacityError(error);
-      const canFallBack = index < models.length - 1 && anotherModelMightWork;
+      // Falling back is only worth it if there is time to hear the answer.
+      const timeLeft = deadline - Date.now() > 0;
+      const canFallBack =
+        index < models.length - 1 && anotherModelMightWork && timeLeft;
 
       if (!canFallBack) throw toPublicError(error);
 

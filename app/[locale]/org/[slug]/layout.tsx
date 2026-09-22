@@ -1,3 +1,13 @@
+/**
+ * Set here rather than on the AI car-form page because that page is a client
+ * component, and route segment config is only read from Server Components.
+ * This is the nearest server ancestor. See the matching note on the public home
+ * page — the dealer photo extraction has the same 10s-default problem.
+ *
+ * A ceiling, not a reservation: fast requests are unaffected.
+ */
+export const maxDuration = 60;
+
 import { checkUser } from "@/lib/checkUser";
 import { getOrganizationBySlug, getUserMembership } from "@/lib/getOrganization";
 import { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
