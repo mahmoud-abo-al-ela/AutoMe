@@ -77,5 +77,11 @@
   "errors": {
     "fetchFailed": "تعذّر جلب تفاصيل السيارة",
     "fetchError": "حدث خطأ أثناء جلب تفاصيل السيارة"
+  },
+  "meta": {
+    "notFoundTitle": "السيارة غير موجودة",
+    "notFoundDescription": "هذا الإعلان لم يعد متاحًا. تصفّح باقي السيارات المعروضة للبيع في مصر.",
+    "generatedTitle": "{make} {model} {year} للبيع",
+    "generatedDescription": "{make} {model} موديل {year} للبيع في مصر. شاهد الصور والمواصفات والسعر وبيانات المعرض على أوتومي."
   }
 }

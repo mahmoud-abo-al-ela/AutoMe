@@ -77,5 +77,11 @@
   "errors": {
     "fetchFailed": "Failed to fetch car details",
     "fetchError": "An error occurred while fetching car details"
+  },
+  "meta": {
+    "notFoundTitle": "Car not found",
+    "notFoundDescription": "This listing is no longer available. Browse our other cars for sale in Egypt.",
+    "generatedTitle": "{year} {make} {model} for sale",
+    "generatedDescription": "{year} {make} {model} for sale in Egypt. See photos, specifications, price and dealership details on AutoMe."
   }
 }
