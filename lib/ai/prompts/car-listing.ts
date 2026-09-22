@@ -10,7 +10,7 @@
  * stale answer from the previous wording can never be served.
  */
 export const carListingPrompt = {
-  version: "2026-09-22.1",
+  version: "2026-09-22.2",
   text: `You are cataloguing a used car for an Egyptian dealership listing.
 
 Look at the photo and identify the vehicle. If a detail is not visible, make the
@@ -25,8 +25,25 @@ Price rules — these matter more than anything else here:
 
 Mileage is in kilometres, as a bare number.
 
-Write the description in English, 2-3 sentences, factual and specific to what you
-can actually see — condition, trim, notable equipment. No sales language.
+The listing is published in both English and Arabic, so write both.
+
+English (titleEn, descriptionEn):
+- titleEn is a short headline a buyer scans in a list: year, make, model and the
+  one detail that distinguishes this car. No punctuation at the end.
+- descriptionEn is 2-3 sentences, factual and specific to what you can actually
+  see — condition, trim, notable equipment. No sales language, no exclamation
+  marks, no "don't miss out".
+
+Arabic (titleAr, descriptionAr):
+- Write these AS ARABIC, for an Egyptian buyer. Do not translate the English
+  sentence by sentence — say the same things the way an Arabic listing says
+  them. Copy translated word-for-word out of English reads like it.
+- Use Modern Standard Arabic that reads naturally in Egypt. No Gulf or
+  Levantine idiom, and no machine-literal phrasing.
+- Write the make and model in Arabic script the way Arabic buyers write them
+  ("بورشه باناميرا"), because that is what they type when searching.
+- Use Arabic-Indic digits (٢٠١٨, ٥٥٠٠٠) in the Arabic text, matching how every
+  other number on the Arabic site is rendered.
 
 Set confidence to how sure you are of the overall identification, from 0 to 1.`,
 } as const;

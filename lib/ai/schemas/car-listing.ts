@@ -37,7 +37,22 @@ export const carListingSchema = z.object({
   fuelType: z.enum(tuple(FUEL_TYPES)),
   transmission: z.enum(tuple(TRANSMISSIONS)),
   seats: z.coerce.number().int().min(1).max(12),
-  description: z.string().max(2000),
+
+  /**
+   * Bilingual listing copy. Both languages come out of the one call that was
+   * already being paid for, which is what makes this close to free: a dealer
+   * types nothing and gets a listing that reads correctly to either half of the
+   * market.
+   *
+   * The Arabic is asked for as Arabic rather than as a translation of the
+   * English — Arabic is the primary market language here, and copy translated
+   * word-for-word out of English reads like it.
+   */
+  titleEn: z.string().min(1).max(200),
+  titleAr: z.string().min(1).max(200),
+  descriptionEn: z.string().max(2000),
+  descriptionAr: z.string().max(2000),
+
   /** A union because the model has historically answered with either shape. */
   features: z.union([z.array(z.string()), z.string()]),
   confidence: z.coerce.number().min(0).max(1),

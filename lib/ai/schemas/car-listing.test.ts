@@ -15,7 +15,10 @@ const valid = {
   fuelType: "Gasoline",
   transmission: "Automatic",
   seats: 5,
-  description: "Well kept, single owner.",
+  titleEn: "Toyota Corolla 2020",
+  titleAr: "تويوتا كورولا ٢٠٢٠",
+  descriptionEn: "Well kept, single owner.",
+  descriptionAr: "بحالة ممتازة، مالك واحد.",
   features: ["Bluetooth", "Cruise control"],
   confidence: 0.82,
 };
@@ -125,5 +128,49 @@ describe("the schema sent to the provider", () => {
     delete json.$schema;
 
     expect(json).not.toHaveProperty("$schema");
+  });
+});
+
+describe("bilingual listing copy", () => {
+  it.each(["titleEn", "titleAr", "descriptionEn", "descriptionAr"])(
+    "requires %s",
+    (field) => {
+      const { [field]: _dropped, ...without } = valid as Record<string, unknown>;
+      expect(carListingSchema.safeParse(without).success).toBe(false);
+    }
+  );
+
+  it.each(["titleEn", "titleAr"])("rejects an empty %s", (field) => {
+    // An empty title is worse than none: the UI falls back to a generated
+    // "2020 Toyota Corolla" only when the field is absent, not when it is "".
+    expect(carListingSchema.safeParse({ ...valid, [field]: "" }).success).toBe(false);
+  });
+
+  it("allows an empty description in either language", () => {
+    // A photo the model cannot say much about should still yield a listing.
+    const parsed = carListingSchema.safeParse({
+      ...valid,
+      descriptionEn: "",
+      descriptionAr: "",
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("keeps Arabic text intact through validation", () => {
+    const parsed = carListingSchema.parse(valid);
+
+    expect(parsed.titleAr).toBe("تويوتا كورولا ٢٠٢٠");
+    expect(parsed.descriptionAr).toBe("بحالة ممتازة، مالك واحد.");
+  });
+
+  it("sends all four language fields to the provider as required", () => {
+    const json = zodToJsonSchema(carListingSchema, { $refStrategy: "none" }) as {
+      required: string[];
+    };
+
+    expect(json.required).toEqual(
+      expect.arrayContaining(["titleEn", "titleAr", "descriptionEn", "descriptionAr"])
+    );
   });
 });
