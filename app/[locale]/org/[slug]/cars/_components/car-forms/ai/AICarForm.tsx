@@ -96,6 +96,17 @@ const AICarForm = () => {
         seats: carData.seats,
         features: carData.features,
         description: carData.description,
+        // The Arabic half of what the model wrote. Without these two the
+        // extraction is discarded on the way into the form, and the bilingual
+        // listing silently becomes an English-only one.
+        //
+        // There is no `titleEn` here on purpose: the form auto-generates
+        // `title` from make/model/year and mirrors it into `titleEn` on submit,
+        // so passing the model's richer English headline would only be
+        // overwritten. That asymmetry — a fuller Arabic title than English one —
+        // is a product call about the auto-generation, not this feature's.
+        titleAr: carData.titleAr,
+        descriptionAr: carData.descriptionAr,
         images: uploadedImage ? [uploadedImage] : [],
       }
     : {};

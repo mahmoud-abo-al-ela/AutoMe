@@ -167,6 +167,49 @@ const DetailsSection = ({
         </div>
       </div>
 
+      {/*
+        The Arabic half of the listing. Always editable, never auto-filled from
+        the English: when the vision model writes it, the dealer is the only one
+        who can tell whether it reads right, and this is where they fix it.
+        Left blank, the public page falls back to the English with a note.
+
+        `dir="rtl"` is on the inputs themselves rather than inherited, because
+        the dealer dashboard renders in whichever language the dealer chose —
+        an Arabic field inside an English dashboard still has to type RTL.
+      */}
+      <div className="space-y-2">
+        <Label htmlFor="titleAr" className="flex items-center">
+          {t("fields.titleArLabel")}{" "}
+          <FieldInfo text={t("fields.titleArHint")} />
+        </Label>
+        <Input
+          type="text"
+          id="titleAr"
+          dir="rtl"
+          lang="ar"
+          placeholder={t("fields.titleArPlaceholder")}
+          {...register("titleAr")}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="descriptionAr" className="flex items-center">
+          {t("fields.descriptionArLabel")}{" "}
+          <FieldInfo text={t("fields.descriptionArHint")} />
+        </Label>
+        <Textarea
+          id="descriptionAr"
+          dir="rtl"
+          lang="ar"
+          placeholder={t("fields.descriptionArPlaceholder")}
+          className="min-h-[120px] sm:min-h-[150px]"
+          {...register("descriptionAr")}
+        />
+        <p className="text-xs sm:text-base text-gray-500">
+          {t("fields.descriptionArOptional")}
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="images" className="flex items-center">
           {t("images.label")}{" "}

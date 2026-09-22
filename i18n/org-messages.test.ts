@@ -62,6 +62,12 @@ describe("org messages", () => {
       "testDrives.table.timeRange",
       "auditLogs.retention.withPlan",
       "auditLogs.filters.dateRange",
+      // Sample Arabic text shown inside the Arabic-only listing fields. The
+      // placeholder demonstrates what to type, so it is Arabic regardless of
+      // which language the dealer runs the dashboard in — identical in both
+      // files is the correct state, not a missing translation.
+      "carForm.fields.titleArPlaceholder",
+      "carForm.fields.descriptionArPlaceholder",
     ]);
 
     const untranslated = flatten(enOrg)

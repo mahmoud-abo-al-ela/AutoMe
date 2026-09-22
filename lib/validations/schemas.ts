@@ -1,5 +1,19 @@
 import { z } from "zod";
 
+/**
+ * The per-language title and description columns, shared by the create and
+ * full-update schemas so the two cannot drift.
+ *
+ * Nullable as well as optional: clearing a field in the dealer form sends null,
+ * and that has to mean "remove it" rather than fail validation.
+ */
+const bilingualCarText = {
+  titleEn: z.string().max(200).optional().nullable(),
+  titleAr: z.string().max(200).optional().nullable(),
+  descriptionEn: z.string().max(2000).optional().nullable(),
+  descriptionAr: z.string().max(2000).optional().nullable(),
+};
+
 export const carSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   make: z.string().min(1, "Make is required").max(50),
@@ -13,6 +27,10 @@ export const carSchema = z.object({
   color: z.string().min(1, "Color is required"),
   seats: z.coerce.number().int().min(1).max(12),
   description: z.string().min(10, "Description must be at least 10 characters").max(2000),
+  // Bilingual copy. Optional because a manually entered listing has none, and
+  // because Zod strips unknown keys — without these the AI-written Arabic is
+  // silently discarded on the way to the database.
+  ...bilingualCarText,
   location: z.string().min(1, "Location is required"),
   status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
   featured: z.boolean().optional(),
@@ -38,6 +56,7 @@ export const updateCarFullSchema = z.object({
   color: z.string().min(1, "Color is required"),
   seats: z.coerce.number().int().min(1).max(12),
   description: z.string().min(10, "Description must be at least 10 characters").max(2000),
+  ...bilingualCarText,
   location: z.string().min(1, "Location is required"),
   status: z.enum(["Available", "Sold", "Unavailable", "AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
   featured: z.boolean().optional(),

@@ -325,7 +325,14 @@
       "yes": "Yes",
       "no": "No",
       "readyTitle": "Ready to submit",
-      "readyBody": "All the required information is there. You can add this vehicle to your inventory."
+      "readyBody": "All the required information is there. You can add this vehicle to your inventory.",
+      "titleArLabel": "Arabic title",
+      "titleArHint": "The headline Arabic-speaking buyers see. Leave blank to show the English one.",
+      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨",
+      "descriptionArLabel": "Arabic description",
+      "descriptionArHint": "Written by AI when you upload a photo. Edit it — you are the one who can tell whether it reads right.",
+      "descriptionArPlaceholder": "سيارة بحالة ممتازة...",
+      "descriptionArOptional": "Optional. Left blank, Arabic visitors see the English description with a note that it is untranslated."
     },
     "images": {
       "label": "Images",

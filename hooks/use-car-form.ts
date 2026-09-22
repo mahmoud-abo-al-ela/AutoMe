@@ -40,6 +40,12 @@ const createCarFormSchema = (
 ) =>
     z.object({
         title: z.string().min(1, t("titleRequired")),
+        // Only the Arabic half is a form field. The English title and
+        // description already have inputs — `title` is auto-generated below and
+        // `description` is the existing textarea — so duplicating them as
+        // "English" fields would give the dealer two boxes for one value.
+        titleAr: z.string().max(200).optional(),
+        descriptionAr: z.string().max(2000).optional(),
         make: z.string().min(1, t("makeRequired")),
         model: z.string().min(1, t("modelRequired")),
         year: z
@@ -159,6 +165,8 @@ export const useCarForm = (
             location: initialData.location || "",
             features: initialData.features || [],
             description: initialData.description || "",
+            titleAr: initialData.titleAr || "",
+            descriptionAr: initialData.descriptionAr || "",
             status: initialData.status || "Available",
             featured: initialData.featured || false,
             images: initialData.images || [],
@@ -290,8 +298,17 @@ export const useCarForm = (
                 .filter(Boolean);
         }
 
+        // The English columns mirror the single-language fields the dealer
+        // actually edits, so `titleEn`/`descriptionEn` never drift from what is
+        // on screen. The Arabic half comes straight from its own inputs.
+        const payload = {
+            ...data,
+            titleEn: data.title,
+            descriptionEn: data.description,
+        } as CarFormValues;
+
         const fn = isEditMode ? updateCarFn : addCarFn;
-        const response = await fn({ data });
+        const response = await fn({ data: payload });
         if (response?.success) {
             toast.success(isEditMode ? tForm("updatedToast") : tForm("addedToast"));
             const slug = window.location.pathname.split('/')[2];
