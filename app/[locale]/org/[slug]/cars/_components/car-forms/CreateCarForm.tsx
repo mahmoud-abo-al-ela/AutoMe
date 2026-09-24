@@ -22,8 +22,10 @@ type CarFormMode = "manual" | "ai";
 const CreateCarForm = () => {
   const t = useTranslations("org.carForm.modePicker");
   const [selectedMode, setSelectedMode] = useState<CarFormMode | null>(null);
-  const [aiEnabled, setAiEnabled] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // null until the plan check answers. Starting at false painted the AI card
+  // locked ("Pro plan") on every load and then flipped it open, which read as
+  // "paid only" to plans that include AI.
+  const [aiEnabled, setAiEnabled] = useState<boolean | null>(null);
   const router = useRouter();
   const { slug } = useParams();
 
@@ -31,24 +33,24 @@ const CreateCarForm = () => {
     const fetchPlanLimits = async () => {
       try {
         const result = await getCarPlanLimits();
-        if (result?.success) {
-          setAiEnabled(result.data?.aiProcessingEnabled ?? false);
-        }
+        setAiEnabled(result?.success ? (result.data?.aiProcessingEnabled ?? false) : false);
       } catch (error) {
         console.error("Failed to fetch plan limits:", error);
-      } finally {
-        setLoading(false);
+        setAiEnabled(false);
       }
     };
     fetchPlanLimits();
   }, []);
 
   const handleModeSelect = (mode: CarFormMode) => {
-    if (mode === "ai" && !aiEnabled) return;
+    if (mode === "ai" && aiEnabled !== true) return;
     setSelectedMode(mode);
     router.push(`/org/${slug}/cars/create/${mode}`);
   };
 
+  // Every plan carries AI now, so the card renders available while the check
+  // runs (with its button disabled) and only locks once the plan says so.
+  const aiAvailable = aiEnabled !== false;
 
   return (
     <div className="w-full max-w-6xl mx-auto sm:px-6 sm:py-8 md:py-10">
@@ -109,9 +111,9 @@ const CreateCarForm = () => {
         </div>
 
         {/* AI Upload Option */}
-        <div className={`transform transition-transform duration-300 ${aiEnabled ? "hover:scale-[1.02]" : "opacity-75"}`}>
+        <div className={`transform transition-transform duration-300 ${aiAvailable ? "hover:scale-[1.02]" : "opacity-75"}`}>
           <Card
-            className={`transition-all duration-300 border-2 overflow-hidden h-full py-0 sm:py-4 ${!aiEnabled
+            className={`transition-all duration-300 border-2 overflow-hidden h-full py-0 sm:py-4 ${!aiAvailable
               ? "cursor-not-allowed border-gray-200 bg-gray-50"
               : selectedMode === "ai"
                 ? "cursor-pointer hover:shadow-xl border-purple-500 ring-2 ring-purple-300"
@@ -120,7 +122,7 @@ const CreateCarForm = () => {
             onClick={() => handleModeSelect("ai")}
           >
             <CardContent className="p-4 sm:p-6 md:p-8 text-center relative h-full flex flex-col">
-              {!aiEnabled && (
+              {!aiAvailable && (
                 <Badge
                   variant="secondary"
                   className="absolute top-3 end-3 sm:top-4 sm:end-4 bg-amber-100 text-amber-800 border-amber-200 text-xs"
@@ -129,34 +131,35 @@ const CreateCarForm = () => {
                   {t("ai.badge")}
                 </Badge>
               )}
-              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 ${aiEnabled
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 ${aiAvailable
                 ? "bg-gradient-to-br from-purple-50 to-indigo-50"
                 : "bg-gray-100"
                 }`}>
-                <Brain className={`h-8 w-8 sm:h-10 sm:w-10 ${aiEnabled ? "text-purple-600" : "text-gray-400"}`} />
+                <Brain className={`h-8 w-8 sm:h-10 sm:w-10 ${aiAvailable ? "text-purple-600" : "text-gray-400"}`} />
               </div>
-              <h3 className={`text-xl sm:text-2xl font-bold mb-2 sm:mb-4 ${aiEnabled ? "text-gray-900" : "text-gray-500"}`}>
+              <h3 className={`text-xl sm:text-2xl font-bold mb-2 sm:mb-4 ${aiAvailable ? "text-gray-900" : "text-gray-500"}`}>
                 {t("ai.title")}
               </h3>
-              <p className={`text-sm sm:text-base mb-4 sm:mb-6 ${aiEnabled ? "text-gray-600" : "text-gray-400"}`}>
+              <p className={`text-sm sm:text-base mb-4 sm:mb-6 ${aiAvailable ? "text-gray-600" : "text-gray-400"}`}>
                 {t("ai.body")}
               </p>
               <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm mb-4 sm:mb-6 mt-auto">
                 <div className="flex items-center justify-center gap-2">
-                  <Sparkles className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${aiEnabled ? "text-purple-500" : "text-gray-300"}`} />
-                  <span className={aiEnabled ? "text-gray-500" : "text-gray-400"}>{t("ai.point1")}</span>
+                  <Sparkles className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${aiAvailable ? "text-purple-500" : "text-gray-300"}`} />
+                  <span className={aiAvailable ? "text-gray-500" : "text-gray-400"}>{t("ai.point1")}</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <Sparkles className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${aiEnabled ? "text-purple-500" : "text-gray-300"}`} />
-                  <span className={aiEnabled ? "text-gray-500" : "text-gray-400"}>{t("ai.point2")}</span>
+                  <Sparkles className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${aiAvailable ? "text-purple-500" : "text-gray-300"}`} />
+                  <span className={aiAvailable ? "text-gray-500" : "text-gray-400"}>{t("ai.point2")}</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <Sparkles className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${aiEnabled ? "text-purple-500" : "text-gray-300"}`} />
-                  <span className={aiEnabled ? "text-gray-500" : "text-gray-400"}>{t("ai.point3")}</span>
+                  <Sparkles className={`h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 ${aiAvailable ? "text-purple-500" : "text-gray-300"}`} />
+                  <span className={aiAvailable ? "text-gray-500" : "text-gray-400"}>{t("ai.point3")}</span>
                 </div>
               </div>
-              {aiEnabled ? (
+              {aiAvailable ? (
                 <Button
+                  disabled={aiEnabled === null}
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 group cursor-pointer text-xs sm:text-sm"
                   onClick={(e) => {
                     e.stopPropagation();

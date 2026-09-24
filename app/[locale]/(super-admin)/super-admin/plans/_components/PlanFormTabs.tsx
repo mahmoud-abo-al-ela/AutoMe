@@ -7,10 +7,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Dispatch, SetStateAction } from "react";
 import type { PlanType } from "@/lib/generated/prisma";
-import type {
-  PlanFeatures,
-  PlanFormInputValues,
-  PlanFormState,
+import {
+  parseAiLimit,
+  type PlanFeatures,
+  type PlanFormInputValues,
+  type PlanFormState,
 } from "./usePlanForm";
 
 // The three-tab body (Basic / Limits / Features) of the plan form dialog.
@@ -206,10 +207,32 @@ export default function PlanFormTabs({
               // Radix's CheckedState is boolean | "indeterminate". None of
               // these checkboxes is ever indeterminate, so the stored value is
               // a boolean; cast rather than coerce, to keep behaviour identical.
-              onCheckedChange={(checked) => handleFeatureChange("aiProcessing", { enabled: checked as boolean })}
+              // Spread, not replace: `{ enabled }` alone used to drop the limit,
+              // and a missing limit is enforced as 0.
+              onCheckedChange={(checked) =>
+                handleFeatureChange("aiProcessing", { ...features.aiProcessing, enabled: checked as boolean })
+              }
             />
             <Label htmlFor="aiProcessing" className="cursor-pointer">AI-Powered Car Analysis</Label>
           </div>
+          {features.aiProcessing?.enabled && (
+            <div className="grid gap-2 ps-6">
+              <Label htmlFor="aiProcessingLimit">AI calls per month (-1 = unlimited)</Label>
+              <Input
+                id="aiProcessingLimit"
+                type="number"
+                min={-1}
+                placeholder="0"
+                value={inputValues.aiProcessingLimit}
+                onChange={(e) => setInputValues({ ...inputValues, aiProcessingLimit: e.target.value })}
+              />
+              {parseAiLimit(inputValues.aiProcessingLimit) === 0 && (
+                <p className="text-xs text-destructive">
+                  A limit of 0 blocks every AI call, so the feature is on but unusable.
+                </p>
+              )}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Checkbox
               id="chat"

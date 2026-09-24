@@ -6,7 +6,11 @@ import type { PlanFormInput } from "@/lib/services/super-admin/plan";
 
 /** The feature flags stored in Plan.features (a Json column). */
 export type PlanFeatures = {
-  aiProcessing: { enabled: boolean };
+  /**
+   * `limit` is AI calls per month, -1 for unlimited. withUsageLimit treats a
+   * missing limit as 0, so `enabled` without one blocks every call.
+   */
+  aiProcessing: { enabled: boolean; limit?: number };
   chat: boolean;
   prioritySupport: boolean;
   apiAccess: boolean;
@@ -53,16 +57,26 @@ export type PlanFormInputValues = {
   maxImagesPerCar: string;
   auditLogRetentionDays: string;
   trialDays: string;
+  aiProcessingLimit: string;
 };
 
 export const DEFAULT_FEATURES: PlanFeatures = {
-  aiProcessing: { enabled: false },
+  aiProcessing: { enabled: false, limit: 0 },
   chat: false,
   prioritySupport: false,
   apiAccess: false,
   customBranding: false,
   dedicatedSupport: false,
 };
+
+/**
+ * -1 is the only negative withUsageLimit understands; any other would refuse
+ * every call while reading like a typo, so it becomes 0 (no AI calls) instead.
+ */
+export function parseAiLimit(raw: string): number {
+  const value = parseInt(raw, 10);
+  return Number.isNaN(value) || value < -1 ? 0 : value;
+}
 
 const EMPTY_INPUTS: PlanFormInputValues = {
   monthlyPrice: "",
@@ -72,6 +86,7 @@ const EMPTY_INPUTS: PlanFormInputValues = {
   maxImagesPerCar: "",
   auditLogRetentionDays: "",
   trialDays: "",
+  aiProcessingLimit: "",
 };
 
 const EMPTY_FORM: PlanFormState = {
@@ -130,6 +145,7 @@ export function usePlanForm({
         maxImagesPerCar: plan.maxImagesPerCar === 0 ? "" : plan.maxImagesPerCar.toString(),
         auditLogRetentionDays: plan.auditLogRetentionDays === null ? "" : plan.auditLogRetentionDays.toString(),
         trialDays: !plan.trialDays ? "" : plan.trialDays.toString(),
+        aiProcessingLimit: (plan.features as PlanFeatures | null)?.aiProcessing?.limit?.toString() ?? "",
       });
     } else if (mode === "create") {
       setFormData(EMPTY_FORM);
@@ -151,6 +167,15 @@ export function usePlanForm({
   // Prices are converted from major units back to minor units here.
   const getSubmitData = (): PlanFormSubmitData => ({
     ...formData,
+    // The limit is read from its input here, like the numeric columns below,
+    // so toggling the checkbox can never drop it.
+    features: {
+      ...formData.features,
+      aiProcessing: {
+        ...formData.features.aiProcessing,
+        limit: parseAiLimit(inputValues.aiProcessingLimit),
+      },
+    },
     monthlyPrice: Math.round(parseFloat(inputValues.monthlyPrice) * 100) || 0,
     yearlyPrice: Math.round(parseFloat(inputValues.yearlyPrice) * 100) || 0,
     maxCars: inputValues.maxCars === "" ? 0 : parseInt(inputValues.maxCars),

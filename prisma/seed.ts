@@ -993,7 +993,8 @@ async function main() {
       maxImagesPerCar: 5,
       auditLogRetentionDays: 90,
       features: {
-        aiProcessing: { enabled: false, limit: 0 },
+        // A taste, not a meal: enough to feel AI listing, not to live on it.
+        aiProcessing: { enabled: true, limit: 5 },
         analytics: "basic",
         chat: false,
         apiAccess: false,

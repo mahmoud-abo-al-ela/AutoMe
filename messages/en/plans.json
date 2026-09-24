@@ -34,6 +34,8 @@
     "auditLogsUnlimited": "Unlimited audit logs",
     "liveChat": "Live Chat",
     "aiProcessing": "AI Processing",
+    "aiProcessingMonthly": "{value} AI listings per month",
+    "aiProcessingUnlimited": "Unlimited AI listings",
     "prioritySupport": "Priority Support"
   }
 }
