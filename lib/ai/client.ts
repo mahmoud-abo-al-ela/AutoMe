@@ -6,10 +6,11 @@ import type { AiFeature } from "@/lib/ai/features";
 import {
   estimateCostMicroUsd,
   modelsFor,
+  supportsThinkingConfig,
   type ModelTask,
   type TokenUsage,
 } from "@/lib/ai/models";
-import { assertPlatformCapacity } from "@/lib/ai/breaker";
+import { assertPlatformCapacity, type CapacityPriority } from "@/lib/ai/breaker";
 import * as cache from "@/lib/ai/cache";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { recordAiFailure } from "@/lib/ai/telemetry";
@@ -23,8 +24,30 @@ import {
 
 export interface AiCallerContext {
   organizationId: string | null;
+  /** The database User.id — not the Clerk id, which the AiUsage foreign key rejects. */
   userId: string | null;
+  /** Share of the platform cap this caller may use. Defaults to "standard". */
+  priority?: CapacityPriority;
 }
+
+/**
+ * What actually happened during a call, for a caller that streams progress to
+ * the user. Every event is a real occurrence — nothing here is estimated.
+ */
+export type AiProgressEvent =
+  /** Served from the response cache; no request is sent. */
+  | { type: "cached" }
+  /** A request is about to go to `model`: the first, a retry, or a fallback. */
+  | {
+      type: "attempt";
+      model: string;
+      /** 0-based position in the task's model chain. */
+      modelIndex: number;
+      modelCount: number;
+      retry: boolean;
+    }
+  /** The model's reply so far. Only emitted while streaming. */
+  | { type: "text"; text: string };
 
 export interface GenerateStructuredInput<T> {
   feature: AiFeature;
@@ -45,6 +68,24 @@ export interface GenerateStructuredInput<T> {
   budgetMs?: number;
   temperature?: number;
   maxAttempts?: number;
+  /** See ProviderRequest.thinking. Skipped for models without the control. */
+  thinking?: "low";
+  /**
+   * How long a model may take to START answering before it is treated as
+   * queued and the next model in the chain is tried. Applies to every model
+   * but the last, which keeps whatever budget is left.
+   *
+   * Measured on the free tier: a busy model either answers 503 in seconds or
+   * accepts the request and queues it for minutes before the first byte — and
+   * once it starts, the reply arrives in about a second. So the first byte is
+   * the signal that separates "queued" from "working".
+   */
+  firstTokenTimeoutMs?: number;
+  /**
+   * Called with real progress. Setting it also streams the provider reply, so
+   * "text" events arrive as the model writes rather than all at once.
+   */
+  onProgress?: (event: AiProgressEvent) => void;
 }
 
 /**
@@ -89,6 +130,14 @@ function budgetFromEnv(): number {
  */
 const DEFAULT_MAX_ATTEMPTS = 2;
 
+/**
+ * Every reply this client asks for is a small JSON object — the car listing is
+ * ~400 output tokens plus ~270 of thinking. The ceiling exists for the model
+ * that loops: gemma-4-26b-a4b ran 11.6 minutes and wrote 176 KB of unterminated
+ * JSON when measured on 2026-09-24. Capped, the same failure costs seconds.
+ */
+const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
+
 const ZERO_USAGE: TokenUsage = {
   inputTokens: 0,
   outputTokens: 0,
@@ -116,6 +165,19 @@ function jsonSchemaFor(schema: ZodType<unknown>): unknown {
   return json;
 }
 
+/**
+ * A model accepted the request but had not started answering by the
+ * first-token deadline — it is queued, not broken. Walks the chain like a 503.
+ */
+export class QueueTimeoutError extends Error {
+  readonly code = "QUEUE_TIMEOUT";
+
+  constructor() {
+    super("The AI model did not start answering in time");
+    this.name = "QueueTimeoutError";
+  }
+}
+
 function timeoutError(): Error {
   const error = new Error("AI request timed out");
   error.name = "AbortError";
@@ -131,10 +193,12 @@ function timeoutError(): Error {
  */
 async function callWithTimeout(
   req: Omit<provider.ProviderRequest, "signal">,
-  timeoutMs: number
+  timeoutMs: number,
+  firstTokenMs?: number
 ): Promise<provider.ProviderResult> {
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let firstTimer: ReturnType<typeof setTimeout> | undefined;
 
   const expiry = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
@@ -143,15 +207,44 @@ async function callWithTimeout(
     }, timeoutMs);
   });
 
-  const call = provider.generate({ ...req, signal: controller.signal });
+  // Only worth arming when it would fire before the overall ceiling. Watching
+  // for the first byte needs the reply streamed, so this streams even when the
+  // caller did not ask for text.
+  const watchFirstToken = firstTokenMs !== undefined && firstTokenMs < timeoutMs;
+  let started = false;
+  const queued = watchFirstToken
+    ? new Promise<never>((_, reject) => {
+        firstTimer = setTimeout(() => {
+          if (started) return;
+          // Reject BEFORE aborting: abort() rejects the call synchronously, and
+          // whichever settles first wins the race — as a plain AbortError it
+          // would read as a timeout and never walk the chain.
+          reject(new QueueTimeoutError());
+          controller.abort();
+        }, firstTokenMs);
+      })
+    : null;
+
+  const onText = watchFirstToken
+    ? (text: string) => {
+        if (!started) {
+          started = true;
+          if (firstTimer) clearTimeout(firstTimer);
+        }
+        req.onText?.(text);
+      }
+    : req.onText;
+
+  const call = provider.generate({ ...req, onText, signal: controller.signal });
   // When the timeout wins the race, the call's own rejection still arrives and
   // would otherwise surface as an unhandled rejection.
   call.catch(() => {});
 
   try {
-    return await Promise.race([call, expiry]);
+    return await Promise.race(queued ? [call, expiry, queued] : [call, expiry]);
   } finally {
     if (timer) clearTimeout(timer);
+    if (firstTimer) clearTimeout(firstTimer);
   }
 }
 
@@ -195,7 +288,7 @@ async function meter(input: MeterInput): Promise<void> {
 function toPublicError(error: unknown): Error {
   if (error instanceof AppError) return error;
 
-  if (provider.isAbortError(error)) {
+  if (provider.isAbortError(error) || error instanceof QueueTimeoutError) {
     return new ServiceUnavailableError("The AI request timed out", {
       key: "errors.ai.timeout",
     });
@@ -218,6 +311,12 @@ interface AttemptInput<T> {
   deadline: number;
   temperature: number | undefined;
   maxAttempts: number;
+  thinking: "low" | undefined;
+  firstTokenMs: number | undefined;
+  modelIndex: number;
+  modelCount: number;
+  emit: (event: AiProgressEvent) => void;
+  streaming: boolean;
 }
 
 /** How long an attempt may take: its own ceiling, or whatever budget is left. */
@@ -244,6 +343,14 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
     // can never receive — the function is killed before the reply arrives.
     if (allowance <= 0) throw budgetExhausted();
 
+    input.emit({
+      type: "attempt",
+      model: input.model,
+      modelIndex: input.modelIndex,
+      modelCount: input.modelCount,
+      retry: attempt > 1,
+    });
+
     const started = Date.now();
     let usage: TokenUsage = ZERO_USAGE;
     let success = false;
@@ -256,8 +363,14 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
           parts: input.parts,
           responseJsonSchema: input.responseJsonSchema,
           temperature: input.temperature,
+          thinking: supportsThinkingConfig(input.model) ? input.thinking : undefined,
+          maxOutputTokens: DEFAULT_MAX_OUTPUT_TOKENS,
+          onText: input.streaming
+            ? (text) => input.emit({ type: "text", text })
+            : undefined,
         },
-        allowance
+        allowance,
+        input.firstTokenMs
       );
       usage = result.usage;
 
@@ -304,8 +417,11 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
       // burn the customer's monthly quota — they received nothing usable.
       const providerFault =
         errorCode !== "INVALID_JSON" && errorCode !== "SCHEMA_REJECTED";
+      // A queued model is not retried in place: the same queue would answer
+      // the same way. The chain moves on instead.
       const canRetry =
         providerFault &&
+        !(error instanceof QueueTimeoutError) &&
         provider.isRetryableError(error) &&
         attempt < input.maxAttempts;
 
@@ -355,6 +471,16 @@ export async function generateStructured<T>(
 
   const models = modelsFor(input.task);
   const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  // A progress listener is the caller's UI; a throw from it must never cost
+  // the call it is reporting on.
+  const emit = (event: AiProgressEvent) => {
+    if (!input.onProgress) return;
+    try {
+      input.onProgress(event);
+    } catch (error) {
+      logError("AI progress listener threw; ignoring", error);
+    }
+  };
   const maxAttempts = input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   const deadline = Date.now() + (input.budgetMs ?? budgetFromEnv());
 
@@ -376,10 +502,13 @@ export async function generateStructured<T>(
     if (!key) break;
 
     const hit = cache.get<T>(key);
-    if (hit !== undefined) return hit;
+    if (hit !== undefined) {
+      emit({ type: "cached" });
+      return hit;
+    }
   }
 
-  await assertPlatformCapacity();
+  await assertPlatformCapacity(input.ctx?.priority);
 
   const responseJsonSchema = jsonSchemaFor(input.schema);
   let lastError: unknown = null;
@@ -399,6 +528,14 @@ export async function generateStructured<T>(
         deadline,
         temperature: input.temperature,
         maxAttempts,
+        thinking: input.thinking,
+        // The last model keeps the rest of the budget: there is nowhere left
+        // to hand over to, so cutting it short only guarantees a failure.
+        firstTokenMs: index < models.length - 1 ? input.firstTokenTimeoutMs : undefined,
+        modelIndex: index,
+        modelCount: models.length,
+        emit,
+        streaming: Boolean(input.onProgress),
       });
 
       const key = keyFor(model);
@@ -413,7 +550,9 @@ export async function generateStructured<T>(
       // identically on every model, and walking the chain would spend the quota
       // three times to learn that.
       const anotherModelMightWork =
-        provider.isModelUnavailableError(error) || provider.isCapacityError(error);
+        provider.isModelUnavailableError(error) ||
+        provider.isCapacityError(error) ||
+        error instanceof QueueTimeoutError;
       // Falling back is only worth it if there is time to hear the answer.
       const timeLeft = deadline - Date.now() > 0;
       const canFallBack =

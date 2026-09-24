@@ -96,11 +96,6 @@ const StatusSection = ({
           <p className="text-xs sm:text-sm text-gray-500">
             {t("fields.featuredHint")}
           </p>
-          <p className="text-xs text-blue-600">
-            {t("fields.featuredCurrent", {
-              value: watch("featured") ? t("fields.yes") : t("fields.no"),
-            })}
-          </p>
         </div>
       </div>
 

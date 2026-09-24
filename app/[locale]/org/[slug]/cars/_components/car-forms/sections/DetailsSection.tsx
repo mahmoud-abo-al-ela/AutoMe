@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,10 @@ const DetailsSection = ({
   const t = useTranslations("org.carForm");
   const tField = useTranslations("carAttributes.fields");
   const { number } = useFormatters();
+  // One language of listing text on screen: the dashboard's. The other is
+  // written by translation on save (see fillOtherLanguage in actions/cars).
+  const isArabic = useLocale() === "ar";
+  const descriptionField = isArabic ? "descriptionAr" : "description";
   const watchImages = watch("images");
   const [imagePreviews, setImagePreviews] = useState<
     Record<number, ImagePreview>
@@ -129,6 +133,7 @@ const DetailsSection = ({
         <Input
           type="text"
           id="location"
+          dir="auto"
           placeholder={t("fields.locationPlaceholder")}
           {...register("location")}
           className={`${errors.location ? "border-red-500" : ""}`}
@@ -138,21 +143,43 @@ const DetailsSection = ({
         )}
       </div>
 
+      {isArabic && (
+        <div className="space-y-2">
+          <Label htmlFor="titleAr" className="flex items-center">
+            {t("fields.titleArLabel")}{" "}
+            <FieldInfo text={t("fields.titleArHint")} />
+          </Label>
+          <Input
+            type="text"
+            id="titleAr"
+            dir="rtl"
+            lang="ar"
+            placeholder={t("fields.titleArPlaceholder")}
+            {...register("titleAr")}
+          />
+        </div>
+      )}
+
       <div className="space-y-2">
-        <Label htmlFor="description" className="flex items-center">
+        <Label htmlFor={descriptionField} className="flex items-center">
           {t("fields.descriptionLabel")}{" "}
           <FieldInfo text={t("fields.descriptionHint")} />
         </Label>
+        {/* Keyed so switching fields remounts rather than reusing the
+            registered element. dir/lang follow the field's language. */}
         <Textarea
-          id="description"
+          key={descriptionField}
+          id={descriptionField}
+          dir={isArabic ? "rtl" : "ltr"}
+          lang={isArabic ? "ar" : "en"}
           placeholder={t("fields.descriptionPlaceholder")}
-          className={`min-h-[120px] sm:min-h-[150px] ${errors.description ? "border-red-500" : ""
+          className={`min-h-[120px] sm:min-h-[150px] ${errors[descriptionField] ? "border-red-500" : ""
             }`}
-          {...register("description")}
+          {...register(descriptionField)}
         />
-        {errors.description && (
+        {errors[descriptionField] && (
           <p className="text-red-500 text-sm mt-1">
-            {errors.description.message}
+            {errors[descriptionField]?.message}
           </p>
         )}
         <div className="flex justify-between mt-1 text-xs sm:text-base">
@@ -161,53 +188,10 @@ const DetailsSection = ({
           </p>
           <p className="text-gray-500">
             {t("fields.descriptionCount", {
-              count: number(watch("description")?.length || 0),
+              count: number(watch(descriptionField)?.length || 0),
             })}
           </p>
         </div>
-      </div>
-
-      {/*
-        The Arabic half of the listing. Always editable, never auto-filled from
-        the English: when the vision model writes it, the dealer is the only one
-        who can tell whether it reads right, and this is where they fix it.
-        Left blank, the public page falls back to the English with a note.
-
-        `dir="rtl"` is on the inputs themselves rather than inherited, because
-        the dealer dashboard renders in whichever language the dealer chose —
-        an Arabic field inside an English dashboard still has to type RTL.
-      */}
-      <div className="space-y-2">
-        <Label htmlFor="titleAr" className="flex items-center">
-          {t("fields.titleArLabel")}{" "}
-          <FieldInfo text={t("fields.titleArHint")} />
-        </Label>
-        <Input
-          type="text"
-          id="titleAr"
-          dir="rtl"
-          lang="ar"
-          placeholder={t("fields.titleArPlaceholder")}
-          {...register("titleAr")}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="descriptionAr" className="flex items-center">
-          {t("fields.descriptionArLabel")}{" "}
-          <FieldInfo text={t("fields.descriptionArHint")} />
-        </Label>
-        <Textarea
-          id="descriptionAr"
-          dir="rtl"
-          lang="ar"
-          placeholder={t("fields.descriptionArPlaceholder")}
-          className="min-h-[120px] sm:min-h-[150px]"
-          {...register("descriptionAr")}
-        />
-        <p className="text-xs sm:text-base text-gray-500">
-          {t("fields.descriptionArOptional")}
-        </p>
       </div>
 
       <div className="space-y-2">

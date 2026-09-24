@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, type GenerateContentResponse } from "@google/genai";
 import type { TokenUsage } from "@/lib/ai/models";
 
 /**
@@ -56,6 +56,19 @@ export interface ProviderRequest {
   /** JSON Schema for the reply. Paired with `responseMimeType: application/json`. */
   responseJsonSchema?: unknown;
   temperature?: number;
+  /**
+   * "low" for structured extraction and translation: the answer is constrained
+   * by the schema, and the default thinking (~2000 tokens measured) was most of
+   * the latency — and bills at the output rate.
+   */
+  thinking?: "low";
+  /** Hard ceiling on the reply, thinking included. */
+  maxOutputTokens?: number;
+  /**
+   * When set, the reply is streamed and this is called with the text received
+   * so far after every chunk — the only real progress signal the provider has.
+   */
+  onText?: (textSoFar: string) => void;
   signal?: AbortSignal;
 }
 
@@ -67,29 +80,50 @@ export interface ProviderResult {
 
 /** One provider call. No retry, no timeout, no metering — those belong to the client. */
 export async function generate(req: ProviderRequest): Promise<ProviderResult> {
-  const response = await getClient().models.generateContent({
+  const params = {
     model: req.model,
     contents: [{ role: "user", parts: req.parts }],
     config: {
       temperature: req.temperature ?? 0.2,
       responseMimeType: "application/json",
+      ...(req.maxOutputTokens ? { maxOutputTokens: req.maxOutputTokens } : {}),
       ...(req.responseJsonSchema ? { responseJsonSchema: req.responseJsonSchema } : {}),
+      ...(req.thinking === "low" ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } : {}),
       ...(req.signal ? { abortSignal: req.signal } : {}),
     },
-  });
+  };
 
-  const meta = response.usageMetadata;
+  if (!req.onText) {
+    const response = await getClient().models.generateContent(params);
+    return { text: response.text, usage: usageOf(response) };
+  }
 
-  // Each count is defaulted to 0 because the field is absent on some error and
-  // safety-block paths, and `AiUsage` stores non-null Ints.
+  const stream = await getClient().models.generateContentStream(params);
+  let text = "";
+  let last: GenerateContentResponse | undefined;
+  for await (const chunk of stream) {
+    last = chunk;
+    const piece = chunk.text;
+    if (piece) {
+      text += piece;
+      req.onText(text);
+    }
+  }
+  // Usage arrives on the final chunk; the running total is what was billed.
+  return { text: text || undefined, usage: usageOf(last) };
+}
+
+/**
+ * Each count is defaulted to 0 because the field is absent on some error and
+ * safety-block paths, and `AiUsage` stores non-null Ints.
+ */
+function usageOf(response: GenerateContentResponse | undefined): TokenUsage {
+  const meta = response?.usageMetadata;
   return {
-    text: response.text,
-    usage: {
-      inputTokens: meta?.promptTokenCount ?? 0,
-      outputTokens: meta?.candidatesTokenCount ?? 0,
-      thinkingTokens: meta?.thoughtsTokenCount ?? 0,
-      cachedTokens: meta?.cachedContentTokenCount ?? 0,
-    },
+    inputTokens: meta?.promptTokenCount ?? 0,
+    outputTokens: meta?.candidatesTokenCount ?? 0,
+    thinkingTokens: meta?.thoughtsTokenCount ?? 0,
+    cachedTokens: meta?.cachedContentTokenCount ?? 0,
   };
 }
 

@@ -406,6 +406,10 @@ model Car {
 
   location      String?
   features      String[]
+  // The Arabic feature list, beside `features` (which stays the English source
+  // of record). Written by the vision model, editable by the dealer; resolved
+  // per locale by `resolveCarFeatures`. Feeds the searchVector too.
+  featuresAr    String[]
 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt

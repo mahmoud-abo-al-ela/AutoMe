@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   BODY_TYPES,
+  CAR_COLORS,
   FUEL_TYPES,
   TRANSMISSIONS,
 } from "@/lib/constants/car-options";
@@ -26,7 +27,12 @@ export const carListingSchema = z.object({
   make: z.string().min(1).max(50),
   model: z.string().min(1).max(50),
   year: z.coerce.number().int().min(1900).max(currentYear + 1),
-  color: z.string().min(1).max(50),
+  /**
+   * An allowlist, like bodyType, and stored in English. The site translates it
+   * per reader through `carAttributes.color`, which only works for colours that
+   * have an entry there.
+   */
+  color: z.enum(tuple(CAR_COLORS)),
   /**
    * EGP, never converted. Egypt is the only market, and a model that helpfully
    * "converts to USD" silently divides every listing price by ~50.
@@ -53,8 +59,13 @@ export const carListingSchema = z.object({
   descriptionEn: z.string().max(2000),
   descriptionAr: z.string().max(2000),
 
-  /** A union because the model has historically answered with either shape. */
-  features: z.union([z.array(z.string()), z.string()]),
+  /**
+   * Both languages, for the same reason as the copy above. Arrays only: the
+   * old string-or-array union was for free-form replies, and the response
+   * schema now makes the model answer with the declared shape.
+   */
+  featuresEn: z.array(z.string().max(80)).max(30),
+  featuresAr: z.array(z.string().max(80)).max(30),
   confidence: z.coerce.number().min(0).max(1),
 });
 

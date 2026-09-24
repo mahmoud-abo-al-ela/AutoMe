@@ -269,6 +269,9 @@
       "subtitleEdit": "حدّث تفاصيل هذا الإعلان",
       "subtitleAi": "راجع التفاصيل المستخرجة وعدّلها قبل الإرسال",
       "uploadedAlt": "السيارة المرفوعة",
+      "uploadedImage": "الصورة المرفوعة",
+      "startOver": "البدء من جديد",
+      "aiConfidence": "دقة الذكاء الاصطناعي:",
       "submitAdd": "إضافة السيارة",
       "submitEdit": "تحديث السيارة",
       "submittingAdd": "جارٍ إضافة السيارة…",
@@ -281,7 +284,8 @@
       "updateFailed": "تعذّر تحديث السيارة",
       "previous": "السابق",
       "next": "التالي",
-      "step": "{name} ({current}/{total})"
+      "step": "{name} ({current}/{total})",
+      "translationSkipped": "تم الحفظ بدون النسخة {other, select, en {الإنجليزية} other {العربية}} — تعذّر على الذكاء الاصطناعي كتابتها (غير متاحة في باقتك، أو انتهى رصيد هذا الشهر، أو خطأ مؤقت). سيرى هؤلاء الزوار نصك مع تنبيه بأنه غير مترجم."
     },
     "fields": {
       "makeHint": "الشركة المصنّعة للسيارة",
@@ -306,7 +310,7 @@
       "seatsCount": "{count, plural, zero {{value} مقعد} one {مقعد واحد} two {مقعدان} few {{value} مقاعد} many {{value} مقعدًا} other {{value} مقعد}}",
       "seatsMore": "أكثر من {count} مقاعد",
       "colorHint": "اللون الخارجي للسيارة",
-      "colorPlaceholder": "مثال: فضي، أسود، أحمر",
+      "colorPlaceholder": "اختر اللون",
       "locationHint": "مكان وجود السيارة حاليًا",
       "locationPlaceholder": "القاهرة الجديدة، القاهرة",
       "descriptionLabel": "الوصف",
@@ -316,23 +320,16 @@
       "descriptionCount": "{count} حرفًا",
       "featuresLabel": "المزايا",
       "featuresHint": "اكتب المزايا الرئيسية مفصولة بفواصل",
-      "featuresPlaceholder": "كهربائية، قيادة ذاتية، مدى طويل، فرش فاخر",
+      "featuresPlaceholder": "فرش جلد، فتحة سقف، كاميرا خلفية",
       "statusHint": "حالة توفر السيارة حاليًا",
       "statusPlaceholder": "اختر الحالة",
       "featuredLabel": "تمييز هذه السيارة في الصفحة الرئيسية",
       "featuredHint": "السيارات المميزة تظهر في قسم الأبرز",
-      "featuredCurrent": "الحالي: {value}",
-      "yes": "نعم",
-      "no": "لا",
       "readyTitle": "جاهزة للإرسال",
       "readyBody": "كل البيانات المطلوبة مكتملة. يمكنك إضافة هذه السيارة إلى مخزونك.",
       "titleArLabel": "العنوان بالعربية",
       "titleArHint": "العنوان الذي يراه المشترون العرب. اتركه فارغًا لعرض العنوان الإنجليزي.",
-      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨",
-      "descriptionArLabel": "الوصف بالعربية",
-      "descriptionArHint": "يكتبه الذكاء الاصطناعي عند رفع صورة. راجعه وعدّله — أنت الأقدر على الحكم على صياغته.",
-      "descriptionArPlaceholder": "سيارة بحالة ممتازة...",
-      "descriptionArOptional": "اختياري. إذا تُرك فارغًا سيرى الزوار الوصف الإنجليزي مع تنبيه بأنه غير مترجم."
+      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨"
     },
     "images": {
       "label": "الصور",
@@ -349,7 +346,6 @@
     "ai": {
       "processingTitle": "الذكاء الاصطناعي يقرأ الصورة",
       "processingBody": "يقوم الذكاء الاصطناعي بتحليل صورتك واستخراج تفاصيل السيارة…",
-      "processingWait": "يستغرق هذا عادةً من ٣٠ إلى ٦٠ ثانية",
       "uploadTitle": "ارفع صورة السيارة",
       "uploadPrompt": "أفلت صورة السيارة هنا، أو اضغط للتصفح. سيستخرج الذكاء الاصطناعي التفاصيل تلقائيًا.",
       "uploadDropping": "أفلت صورة سيارتك هنا…",
@@ -364,7 +360,12 @@
       "tooLarge": "حجم الملف أكبر من {size} ميجابايت.",
       "extracted": "تم استخراج بيانات السيارة",
       "processFailed": "تعذّرت قراءة هذه الصورة.",
-      "unexpected": "حدث خطأ أثناء معالجة الصورة."
+      "unexpected": "حدث خطأ أثناء معالجة الصورة.",
+      "stageUploading": "جارٍ رفع الصورة — {percent}",
+      "stageWaiting": "في انتظار بدء الذكاء الاصطناعي…",
+      "stageWaitingNote": "تنتظر خدمة الذكاء الاصطناعي دورها عند الضغط. قد يستغرق ذلك دقيقة أو دقيقتين، وتظهر التفاصيل فور بدء الكتابة.",
+      "stageWriting": "جارٍ كتابة التفاصيل — {done} من {total}",
+      "stageDone": "تم"
     },
     "validation": {
       "titleRequired": "عنوان الإعلان مطلوب",

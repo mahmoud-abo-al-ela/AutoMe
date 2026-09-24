@@ -12,13 +12,16 @@ import CarDescription from "./CarDescription";
 import CarFeatures from "./CarFeatures";
 import CarSpecifications from "./CarSpecifications";
 import type { CarDetail } from "../_lib/car-detail-types";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { resolveCarFeatures } from "@/lib/utils/car-text";
 import { useFormatters } from "@/hooks/use-formatters";
 
 const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
   const t = useTranslations("carDetail.tabs");
   const fmt = useFormatters();
-    const hasFeatures = car.features && car.features.length > 0;
+  const features = resolveCarFeatures(car, useLocale() as Locale);
+    const hasFeatures = features.features.length > 0;
 
     return (
         <Tabs defaultValue="description" className="w-full">
@@ -42,7 +45,7 @@ const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
                             variant="default"
                             className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full bg-primary text-primary-foreground tabular-nums"
                         >
-                            {fmt.number(car.features.length)}
+                            {fmt.number(features.features.length)}
                         </Badge>
                     </TabsTrigger>
                 )}
@@ -64,7 +67,7 @@ const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
             {/* Features Tab */}
             {hasFeatures && (
                 <TabsContent value="features" className="mt-0">
-                    <CarFeatures features={car.features} />
+                    <CarFeatures resolved={features} />
                 </TabsContent>
             )}
 

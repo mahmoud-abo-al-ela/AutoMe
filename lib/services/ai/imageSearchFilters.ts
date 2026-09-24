@@ -36,6 +36,9 @@ export async function extractSearchFilters(
     promptVersion: imageSearchPrompt.version,
     ctx,
     cacheBytes: image.bytes,
+    // A buyer is waiting on the home page: a queued model gets 10 s to start
+    // before the next one (Gemma last) is tried.
+    firstTokenTimeoutMs: 10_000,
   });
 
   return {

@@ -12,12 +12,13 @@
  * next model instead of a failed upload.
  */
 
-export type ModelTask = "vision" | "visionFast";
+export type ModelTask = "vision" | "visionFast" | "text";
 
 /** Per-task env override. Set one to pin a model without a deploy of new code. */
 const ENV_KEYS: Record<ModelTask, string> = {
   vision: "GEMINI_MODEL_VISION",
   visionFast: "GEMINI_MODEL_VISION_FAST",
+  text: "GEMINI_MODEL_TEXT",
 };
 
 /**
@@ -34,15 +35,43 @@ const ENV_KEYS: Record<ModelTask, string> = {
  * the highest-volume AI path in the product. Flash-Lite is built for exactly
  * this shape of work, and keeping it off the main model means a burst of photo
  * searches cannot crowd out dealers uploading inventory.
+ *
+ * `text` is listing translation between Arabic and English. No image, but the
+ * Arabic is published under the dealer's name, and the full Flash models are the
+ * ones verified to write natural Egyptian-register Arabic — so the same chain
+ * as `vision`, not Flash-Lite.
+ *
+ * **Gemma 4 closes every chain.** Same API key, free, reads images, and served
+ * from separate capacity to the Flash models — which on 2026-09-24 were all
+ * either answering 503 or queueing requests for 75–270 s before the first byte.
+ * It is weaker than Flash at identifying a car, so it is the fallback, never
+ * the first choice: reached only when every Flash model is busy or queued.
+ * 31B is the stronger; 26B-A4B (a mixture of experts) is the lighter backstop.
  */
+const GEMMA_FALLBACK = ["gemma-4-31b-it", "gemma-4-26b-a4b-it"];
+
 const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
-  vision: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"],
+  vision: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", ...GEMMA_FALLBACK],
   visionFast: [
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
     "gemini-3.5-flash",
+    // Lighter first here: the public search wants an answer, not the best one.
+    "gemma-4-26b-a4b-it",
+    "gemma-4-31b-it",
   ],
+  text: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", ...GEMMA_FALLBACK],
 };
+
+/**
+ * Whether a model accepts `thinkingConfig`. Gemma is an open model served
+ * through the same API but without Gemini's thinking controls, so the setting
+ * is left off for it rather than risking a 400 on the one model meant to rescue
+ * the call.
+ */
+export function supportsThinkingConfig(model: string): boolean {
+  return !model.startsWith("gemma-");
+}
 
 /**
  * Models to try for a task, best first. An env override takes the lead but does

@@ -2,9 +2,18 @@
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidatePath } from "next/cache";
 import * as carService from "@/lib/services/car";
-import { extractCarListing } from "@/lib/services/ai";
+import { translateListing, type ListingText } from "@/lib/services/ai";
+import { aiCallerFor } from "@/lib/ai/caller";
+import {
+  applyTranslation,
+  sourceText,
+  translationSource,
+  type BilingualListing,
+} from "@/lib/services/car/bilingual";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { NotFoundError, AuthorizationError } from "@/lib/utils/errors";
+import { NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
+import type { TenantContext } from "@/lib/auth/context";
+import type { Locale } from "@/i18n/routing";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
@@ -12,35 +21,12 @@ import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 
 
-/**
- * Extract a car listing from a dealer's photo.
- *
- * Gated before it spends: the plan must enable AI, the quota must have room,
- * and only then is the request rate-limited and sent. Prompt, schema, metering
- * and caching live in lib/services/ai, so this stays what an action should be —
- * guards plus a delegation.
- *
- * There is deliberately no ungated export beside it. The previous
- * `processCarImageWithAI` was exported from this "use server" module, which
- * makes it a callable RPC endpoint in its own right: a client could invoke it
- * directly and skip withOrgAuth, withPlanGate and withUsageLimit entirely.
+/*
+ * Photo extraction moved to the streaming route app/api/ai/car-listing, which
+ * reports real progress. The server action it replaces is gone rather than kept
+ * beside it: every export of a "use server" module is a callable endpoint, and a
+ * second, unstreamed path to the same gated call is one more to keep guarded.
  */
-export const processCarImageGated = withOrgAuth(
-  withPlanGate(
-    "aiProcessing",
-    withUsageLimit("aiProcessing", async (ctx, file: File) => {
-      await enforceRateLimit();
-
-      const draft = await extractCarListing(file, {
-        organizationId: ctx.organization.id,
-        userId: ctx.userId,
-      });
-
-      return createSuccessResponse(draft);
-    })
-  )
-);
-
 
 export const getCarPlanLimits = withOrgAuth(async (ctx) => {
   const plan = ctx.organization.subscription?.plan;
@@ -62,15 +48,80 @@ export async function getMaxImagesPerCar() {
   return getCarPlanLimits();
 }
 
-export const addCar = withOrgAuth(
-  withUsageLimit("cars", async (ctx, payload: { data?: unknown } & Record<string, unknown>) => {
-    const rawData = payload.data || payload;
-    const carData = validateAction(carSchema, rawData);
-    const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
+/**
+ * The same gates as the photo extraction: AI on the plan, quota left, rate
+ * limit. Deliberately NOT exported — every export of a "use server" module is a
+ * callable endpoint, and this one must only run inside a save.
+ */
+const translateGated = withPlanGate(
+  "aiProcessing",
+  withUsageLimit(
+    "aiProcessing",
+    async (ctx: TenantContext, source: ListingText, from: Locale) => {
+      await enforceRateLimit();
+      return translateListing(source, from, aiCallerFor(ctx));
+    }
+  )
+);
 
-    revalidatePath(`/org/${ctx.organization.slug}/cars`);
-    return createSuccessResponse(car, "Car added successfully");
-  })
+/** Whether the save wrote the other language, for the client to say so. */
+type TranslationOutcome = "none" | "done" | "skipped";
+
+/**
+ * Write the language the dealer did not, before the car is saved.
+ *
+ * Best effort by design: a plan without AI, a used-up allowance, a rate limit
+ * or a failed call all save the car as the dealer wrote it. The listing then
+ * shows its one language to both audiences, with the "not translated" note —
+ * which beats refusing to save a car over a translation.
+ */
+async function fillOtherLanguage<T extends BilingualListing>(
+  ctx: TenantContext,
+  car: T,
+  editedLocale: Locale | null
+): Promise<{ car: T; translation: TranslationOutcome }> {
+  const from = translationSource(car, editedLocale);
+  if (!from) return { car, translation: "none" };
+
+  try {
+    const translated = await translateGated(ctx, sourceText(car, from), from);
+    const to: Locale = from === "en" ? "ar" : "en";
+    return {
+      car: applyTranslation(car, to, translated, editedLocale === from),
+      translation: "done",
+    };
+  } catch (error) {
+    logError("Listing translation skipped; saving the car without it", error);
+    return { car, translation: "skipped" };
+  }
+}
+
+/** Client input: only the two known locales mean anything. */
+function toEditedLocale(value: unknown): Locale | null {
+  return value === "en" || value === "ar" ? value : null;
+}
+
+export const addCar = withOrgAuth(
+  withUsageLimit(
+    "cars",
+    async (
+      ctx,
+      payload: { data?: unknown } & Record<string, unknown>,
+      options?: { editedLocale?: unknown }
+    ) => {
+      const rawData = payload.data || payload;
+      const validated = validateAction(carSchema, rawData);
+      const { car: carData, translation } = await fillOtherLanguage(
+        ctx,
+        validated,
+        toEditedLocale(options?.editedLocale)
+      );
+      const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
+
+      revalidatePath(`/org/${ctx.organization.slug}/cars`);
+      return createSuccessResponse({ ...car, translation }, "Car added successfully");
+    }
+  )
 );
 
 export const getCars = withOrgAuth(
@@ -139,10 +190,16 @@ export const updateCarFull = withOrgAuth(
   async (
     ctx,
     carId: string,
-    payload: { data?: unknown } & Record<string, unknown>
+    payload: { data?: unknown } & Record<string, unknown>,
+    options?: { editedLocale?: unknown }
   ) => {
   const rawData = payload.data || payload;
-  const carData = validateAction(updateCarFullSchema, rawData);
+  const validated = validateAction(updateCarFullSchema, rawData);
+  const { car: carData, translation } = await fillOtherLanguage(
+    ctx,
+    validated,
+    toEditedLocale(options?.editedLocale)
+  );
 
   const updatedCar = await carService.updateCarFull(
     carId,
@@ -152,5 +209,5 @@ export const updateCarFull = withOrgAuth(
   );
 
   revalidatePath(`/org/${ctx.organization.slug}/cars`);
-  return createSuccessResponse(updatedCar, "Car updated successfully");
+  return createSuccessResponse({ ...updatedCar, translation }, "Car updated successfully");
 });

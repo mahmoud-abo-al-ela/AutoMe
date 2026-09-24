@@ -269,6 +269,9 @@
       "subtitleEdit": "Update the details for this vehicle listing",
       "subtitleAi": "Review and edit the AI-extracted details before submitting",
       "uploadedAlt": "Uploaded car",
+      "uploadedImage": "Uploaded image",
+      "startOver": "Start over",
+      "aiConfidence": "AI confidence:",
       "submitAdd": "Add Car",
       "submitEdit": "Update Car",
       "submittingAdd": "Adding car…",
@@ -281,7 +284,8 @@
       "updateFailed": "Couldn’t update the car",
       "previous": "Previous",
       "next": "Next",
-      "step": "{name} ({current}/{total})"
+      "step": "{name} ({current}/{total})",
+      "translationSkipped": "Saved without the {other, select, ar {Arabic} other {English}} version — AI couldn’t write it (not on your plan, this month’s allowance is used, or a temporary error). Those visitors see your text with a “not translated” note."
     },
     "fields": {
       "makeHint": "The manufacturer of the vehicle",
@@ -306,7 +310,7 @@
       "seatsCount": "{count, plural, one {{value} seat} other {{value} seats}}",
       "seatsMore": "More than {count} seats",
       "colorHint": "The exterior colour of the vehicle",
-      "colorPlaceholder": "e.g. Silver, Black, Red",
+      "colorPlaceholder": "Select a colour",
       "locationHint": "Where the vehicle is currently located",
       "locationPlaceholder": "New Cairo, Cairo",
       "descriptionLabel": "Description",
@@ -321,18 +325,11 @@
       "statusPlaceholder": "Select a status",
       "featuredLabel": "Feature this car on the homepage",
       "featuredHint": "Featured cars appear in the spotlight section",
-      "featuredCurrent": "Currently: {value}",
-      "yes": "Yes",
-      "no": "No",
       "readyTitle": "Ready to submit",
       "readyBody": "All the required information is there. You can add this vehicle to your inventory.",
       "titleArLabel": "Arabic title",
       "titleArHint": "The headline Arabic-speaking buyers see. Leave blank to show the English one.",
-      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨",
-      "descriptionArLabel": "Arabic description",
-      "descriptionArHint": "Written by AI when you upload a photo. Edit it — you are the one who can tell whether it reads right.",
-      "descriptionArPlaceholder": "سيارة بحالة ممتازة...",
-      "descriptionArOptional": "Optional. Left blank, Arabic visitors see the English description with a note that it is untranslated."
+      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨"
     },
     "images": {
       "label": "Images",
@@ -349,7 +346,6 @@
     "ai": {
       "processingTitle": "AI is reading the image",
       "processingBody": "Our AI is analysing your image and extracting the car’s details…",
-      "processingWait": "This usually takes 30–60 seconds",
       "uploadTitle": "Upload a car image",
       "uploadPrompt": "Drop a car image here, or click to browse. Our AI will extract the details automatically.",
       "uploadDropping": "Drop your car image here…",
@@ -364,7 +360,12 @@
       "tooLarge": "That file is larger than {size} MB.",
       "extracted": "Car details extracted",
       "processFailed": "Couldn’t read that image.",
-      "unexpected": "Something went wrong while processing the image."
+      "unexpected": "Something went wrong while processing the image.",
+      "stageUploading": "Uploading the photo — {percent}",
+      "stageWaiting": "Waiting for the AI to start…",
+      "stageWaitingNote": "The AI service queues requests when it is busy. This can take a minute or two; the details appear as soon as it starts writing.",
+      "stageWriting": "Writing the details — {done} of {total}",
+      "stageDone": "Done"
     },
     "validation": {
       "titleRequired": "A listing title is required",

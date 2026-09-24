@@ -12,7 +12,30 @@ const bilingualCarText = {
   titleAr: z.string().max(200).optional().nullable(),
   descriptionEn: z.string().max(2000).optional().nullable(),
   descriptionAr: z.string().max(2000).optional().nullable(),
+  featuresAr: z.array(z.string()).optional(),
 };
+
+const MIN_DESCRIPTION = 10;
+
+/**
+ * A listing needs a description in at least one language, not specifically in
+ * English. A dealer on the Arabic dashboard only sees the Arabic field; the
+ * English one is filled by translation when the plan allows it, and when it
+ * does not, English readers get the Arabic with a "not translated" note.
+ */
+function requireOneDescription(
+  car: { description?: string | null; descriptionAr?: string | null },
+  ctx: z.RefinementCtx
+) {
+  const long = (text?: string | null) => (text?.trim().length ?? 0) >= MIN_DESCRIPTION;
+  if (!long(car.description) && !long(car.descriptionAr)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["description"],
+      message: `Description must be at least ${MIN_DESCRIPTION} characters`,
+    });
+  }
+}
 
 export const carSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
@@ -26,7 +49,8 @@ export const carSchema = z.object({
   transmission: z.string().min(1, "Transmission is required"),
   color: z.string().min(1, "Color is required"),
   seats: z.coerce.number().int().min(1).max(12),
-  description: z.string().min(10, "Description must be at least 10 characters").max(2000),
+  // Either language may carry the description — see requireOneDescription.
+  description: z.string().max(2000).optional().nullable(),
   // Bilingual copy. Optional because a manually entered listing has none, and
   // because Zod strips unknown keys — without these the AI-written Arabic is
   // silently discarded on the way to the database.
@@ -36,7 +60,7 @@ export const carSchema = z.object({
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
   images: z.array(z.string()).min(1, "At least one image is required").max(20),
-});
+}).superRefine(requireOneDescription);
 
 export const updateCarSchema = z.object({
   status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
@@ -55,14 +79,15 @@ export const updateCarFullSchema = z.object({
   transmission: z.string().min(1, "Transmission is required"),
   color: z.string().min(1, "Color is required"),
   seats: z.coerce.number().int().min(1).max(12),
-  description: z.string().min(10, "Description must be at least 10 characters").max(2000),
+  // Either language may carry the description — see requireOneDescription.
+  description: z.string().max(2000).optional().nullable(),
   ...bilingualCarText,
   location: z.string().min(1, "Location is required"),
   status: z.enum(["Available", "Sold", "Unavailable", "AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
   images: z.array(z.any()),
-});
+}).superRefine(requireOneDescription);
 
 export const organizationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),

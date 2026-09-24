@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { processCarImageGated } from "@/actions/cars";
+import {
+  useCarListingStream,
+  CarListingStreamError,
+} from "@/hooks/use-car-listing-stream";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -22,6 +25,7 @@ const AICarForm = () => {
   const t = useTranslations("org.carForm.ai");
   const { number } = useFormatters();
   const actionError = useActionError();
+  const { progress, extract, reset } = useCarListingStream();
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -42,21 +46,24 @@ const AICarForm = () => {
         }
 
         setUploadedImage(file);
-        const result = await processCarImageGated(file);
-        if (!result.success) {
-          throw new Error(actionError(result.error, t("processFailed")));
-        }
+        const draft = await extract(file);
 
-        setCarData(result.data);
+        setCarData(draft);
         setShowForm(true);
         toast.success(t("extracted"));
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("unexpected"));
+        setError(
+          err instanceof CarListingStreamError
+            ? actionError(err.error, t("processFailed"))
+            : err instanceof Error
+              ? err.message
+              : t("unexpected")
+        );
       } finally {
         setIsProcessing(false);
       }
     },
-    [t, number, actionError],
+    [t, number, actionError, extract],
   );
 
   const { isDragActive } = useDropzone({
@@ -71,6 +78,7 @@ const AICarForm = () => {
   });
 
   const handleStartOver = () => {
+    reset();
     setShowForm(false);
     setCarData(null);
     setUploadedImage(null);
@@ -96,7 +104,7 @@ const AICarForm = () => {
         seats: carData.seats,
         features: carData.features,
         description: carData.description,
-        // The Arabic half of what the model wrote. Without these two the
+        // The Arabic half of what the model wrote. Without these the
         // extraction is discarded on the way into the form, and the bilingual
         // listing silently becomes an English-only one.
         //
@@ -107,6 +115,7 @@ const AICarForm = () => {
         // is a product call about the auto-generation, not this feature's.
         titleAr: carData.titleAr,
         descriptionAr: carData.descriptionAr,
+        featuresAr: carData.featuresAr,
         images: uploadedImage ? [uploadedImage] : [],
       }
     : {};
@@ -119,6 +128,7 @@ const AICarForm = () => {
           isProcessing={isProcessing}
           error={error}
           isDragActive={isDragActive}
+          progress={progress}
         />
       ) : (
         <CarFormShared

@@ -67,7 +67,6 @@ describe("org messages", () => {
       // which language the dealer runs the dashboard in — identical in both
       // files is the correct state, not a missing translation.
       "carForm.fields.titleArPlaceholder",
-      "carForm.fields.descriptionArPlaceholder",
     ]);
 
     const untranslated = flatten(enOrg)
@@ -276,13 +275,22 @@ describe("billing reads the shared plan source", () => {
       features: { chat: false, aiProcessing: { enabled: false }, prioritySupport: false },
     },
     {
+      name: "Pro",
+      monthlyPrice: 4900,
+      maxCars: 100,
+      maxMembers: 10,
+      maxImagesPerCar: 15,
+      auditLogRetentionDays: 365,
+      features: { chat: true, aiProcessing: { enabled: true, limit: 100 }, prioritySupport: true },
+    },
+    {
       name: "Enterprise",
       monthlyPrice: null,
       maxCars: -1,
       maxMembers: -1,
       maxImagesPerCar: 20,
       auditLogRetentionDays: null,
-      features: { chat: true, aiProcessing: { enabled: true }, prioritySupport: true },
+      features: { chat: true, aiProcessing: { enabled: true, limit: -1 }, prioritySupport: true },
     },
   ];
 
@@ -298,6 +306,23 @@ describe("billing reads the shared plan source", () => {
     for (const key of keys) {
       expect(at(messages, `features.${key}`), `missing features.${key}`).toBeTruthy();
     }
+  });
+
+  it("states the AI allowance the gate will actually enforce", () => {
+    const ai = (aiProcessing: object) =>
+      planFeatureKeys({ ...PLANS[0], features: { aiProcessing } }).find((f) =>
+        f.key.startsWith("aiProcessing")
+      );
+
+    expect(ai({ enabled: true, limit: 5 })).toEqual({
+      key: "aiProcessingMonthly",
+      params: { count: 5 },
+      included: true,
+    });
+    expect(ai({ enabled: true, limit: -1 })).toMatchObject({ key: "aiProcessingUnlimited" });
+    // withUsageLimit enforces a missing limit as 0, so advertising it would
+    // sell a feature that refuses every call.
+    expect(ai({ enabled: true })).toEqual({ key: "aiProcessing", included: false });
   });
 
   it("gives the comparison table one row per feature key", () => {

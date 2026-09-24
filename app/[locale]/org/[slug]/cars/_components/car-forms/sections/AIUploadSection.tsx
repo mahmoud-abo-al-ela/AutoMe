@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileImage, Upload, Brain } from "lucide-react";
 import React from "react";
 import { useDropzone, type DropzoneOptions } from "react-dropzone";
+import { useFormatters } from "@/hooks/use-formatters";
+import type { CarListingProgress } from "@/hooks/use-car-listing-stream";
 
 interface AIUploadSectionProps {
   onDrop: NonNullable<DropzoneOptions["onDrop"]>;
@@ -13,15 +15,49 @@ interface AIUploadSectionProps {
   error?: string | null;
   /** Drag state is owned by the parent's own dropzone, not this one. */
   isDragActive?: boolean;
+  /** Real progress from the extraction stream; null before it starts. */
+  progress?: CarListingProgress | null;
 }
+
+/**
+ * The bar, from real events only. The first 10% is the upload (bytes sent);
+ * the rest is fields the model has written. Google's queue sits between the
+ * two with no signal at all, so the bar holds at 10% there and pulses — an
+ * honest "waiting", not an invented percentage.
+ */
+function percentOf(progress: CarListingProgress): number {
+  if (progress.phase === "done") return 1;
+  if (progress.phase === "writing" && progress.fieldsTotal > 0) {
+    return 0.1 + 0.9 * (progress.fieldsDone / progress.fieldsTotal);
+  }
+  return 0.1 * progress.uploaded;
+}
+
 
 const AIUploadSection = ({
   onDrop,
   isProcessing,
   error,
   isDragActive,
+  progress = null,
 }: AIUploadSectionProps) => {
   const t = useTranslations("org.carForm.ai");
+  const { number } = useFormatters();
+  const fraction = progress ? percentOf(progress) : 0;
+  const waiting = progress?.phase === "waiting";
+
+  const stage = !progress
+    ? t("stageUploading", { percent: number(0, { style: "percent" }) })
+    : progress.phase === "uploading"
+      ? t("stageUploading", { percent: number(progress.uploaded, { style: "percent" }) })
+      : progress.phase === "writing"
+        ? t("stageWriting", {
+            done: number(progress.fieldsDone),
+            total: number(progress.fieldsTotal),
+          })
+        : progress.phase === "done"
+          ? t("stageDone")
+          : t("stageWaiting");
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
@@ -48,15 +84,27 @@ const AIUploadSection = ({
               <p className="text-gray-600 mb-6">
                 {t("processingBody")}
               </p>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div
+                className="w-full bg-gray-200 rounded-full h-2 mb-4 overflow-hidden"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(fraction * 100)}
+                aria-valuetext={stage}
+              >
                 <div
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 h-2 rounded-full animate-pulse"
-                  style={{ width: "70%" }}
-                ></div>
+                  className={`bg-gradient-to-r from-purple-600 to-indigo-600 h-2 rounded-full transition-[width] duration-300 ease-out ${
+                    waiting ? "animate-pulse" : ""
+                  }`}
+                  style={{ width: `${fraction * 100}%` }}
+                />
               </div>
-              <p className="text-sm text-gray-500">
-                {t("processingWait")}
+              <p className="text-sm font-medium text-gray-700" aria-live="polite">
+                {stage}
               </p>
+              {waiting && (
+                <p className="text-xs text-gray-500 mt-2">{t("stageWaitingNote")}</p>
+              )}
             </div>
           ) : (
             <>

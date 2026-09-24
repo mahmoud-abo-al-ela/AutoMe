@@ -164,7 +164,7 @@ export const CarFormPresenter = ({
                             {isAIMode && aiConfidence && (
                                 <div className="mt-2">
                                     <span className="text-xs text-gray-600">
-                                        AI Confidence:
+                                        {t("aiConfidence")}
                                         <span
                                             className={`ms-1 font-medium ${aiConfidence > 0.8
                                                     ? "text-green-600"
@@ -173,7 +173,7 @@ export const CarFormPresenter = ({
                                                         : "text-red-600"
                                                 }`}
                                         >
-                                            {Math.round(aiConfidence * 100)}%
+                                            {number(aiConfidence, { style: "percent" })}
                                         </span>
                                     </span>
                                 </div>
@@ -193,7 +193,7 @@ export const CarFormPresenter = ({
                                             className="w-12 h-12 object-cover rounded-md border"
                                         />
                                         <span className="text-xs text-gray-500">
-                                            Uploaded Image
+                                            {t("uploadedImage")}
                                         </span>
                                     </div>
                                 )}
@@ -204,7 +204,7 @@ export const CarFormPresenter = ({
                                         onClick={onStartOver}
                                         className="text-xs"
                                     >
-                                        Start Over
+                                        {t("startOver")}
                                     </Button>
                                 )}
                             </div>

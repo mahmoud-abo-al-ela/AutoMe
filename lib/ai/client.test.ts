@@ -27,6 +27,7 @@ vi.mock("@/lib/repositories/ai-usage", () => ({
 }));
 
 import { generateStructured } from "@/lib/ai/client";
+import { modelsFor } from "@/lib/ai/models";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { textPart } from "@/lib/ai/provider/gemini";
 import * as cache from "@/lib/ai/cache";
@@ -241,6 +242,22 @@ describe("generateStructured — platform breaker", () => {
     // The entire point is to not spend the request.
     expect(generate).not.toHaveBeenCalled();
     expect(createAiUsage).not.toHaveBeenCalled();
+  });
+
+  it("keeps the top of the daily cap for standard callers", async () => {
+    // 350 of the default 500/day: past the low-priority 60% share, under the
+    // full cap. The per-minute window stays quiet so only the daily cap decides.
+    countPlatformCallsSince.mockImplementation(async (since: Date) =>
+      Date.now() - since.getTime() <= 60_000 ? 0 : 350
+    );
+    generate.mockResolvedValue(ok('{"make":"Kia","year":2021}'));
+
+    await expect(
+      call({ ctx: { organizationId: "org-free", userId: "u", priority: "low" } })
+    ).rejects.toBeInstanceOf(ServiceUnavailableError);
+    expect(generate).not.toHaveBeenCalled();
+
+    await expect(call()).resolves.toEqual({ make: "Kia", year: 2021 });
   });
 
   it("allows the call when the ledger cannot be read", async () => {
@@ -478,3 +495,141 @@ describe("generateStructured — the wall-clock budget", () => {
     expect(createAiUsage.mock.calls[0][0]).toMatchObject({ success: false });
   });
 });
+
+describe("generateStructured — progress", () => {
+  it("does not stream when nobody listens", async () => {
+    generate.mockResolvedValue(ok('{"make":"Fiat","year":2019}'));
+    await call();
+    expect(generate.mock.calls[0][0].onText).toBeUndefined();
+  });
+
+  it("reports each attempt and the streamed text, in order", async () => {
+    const events: unknown[] = [];
+    generate
+      .mockRejectedValueOnce(httpError(503))
+      .mockImplementationOnce(async (req: { onText?: (t: string) => void }) => {
+        req.onText?.('{"make":"Fiat"');
+        req.onText?.('{"make":"Fiat","year":2019}');
+        return ok('{"make":"Fiat","year":2019}');
+      });
+
+    await call({ onProgress: (e: unknown) => events.push(e) });
+
+    expect(events).toEqual([
+      expect.objectContaining({ type: "attempt", modelIndex: 0, retry: false }),
+      // The first model was busy: the fallback is its own, real, attempt.
+      expect.objectContaining({ type: "attempt", modelIndex: 1, retry: false }),
+      { type: "text", text: '{"make":"Fiat"' },
+      { type: "text", text: '{"make":"Fiat","year":2019}' },
+    ]);
+  });
+
+  it("reports a cache hit instead of an attempt", async () => {
+    generate.mockResolvedValue(ok('{"make":"Fiat","year":2019}'));
+    const bytes = Buffer.from("same photo");
+    await call({ cacheBytes: bytes });
+
+    const events: unknown[] = [];
+    await call({ cacheBytes: bytes, onProgress: (e: unknown) => events.push(e) });
+    expect(events).toEqual([{ type: "cached" }]);
+  });
+
+  it("never lets a throwing listener cost the call", async () => {
+    generate.mockResolvedValue(ok('{"make":"Fiat","year":2019}'));
+    await expect(
+      call({
+        onProgress: () => {
+          throw new Error("UI gone");
+        },
+      })
+    ).resolves.toEqual({ make: "Fiat", year: 2019 });
+  });
+
+  it("passes the thinking level to the provider", async () => {
+    generate.mockResolvedValue(ok('{"make":"Fiat","year":2019}'));
+    await call({ thinking: "low" });
+    expect(generate.mock.calls[0][0].thinking).toBe("low");
+  });
+});
+
+describe("generateStructured — queued models", () => {
+  /** A model that accepts the request and never starts answering. */
+  const queuedForever = (req: { signal?: AbortSignal }) =>
+    new Promise((_, reject) => {
+      req.signal?.addEventListener("abort", () =>
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" }))
+      );
+    });
+
+  it("hands a queued model over to the next one", async () => {
+    generate
+      .mockImplementationOnce(queuedForever)
+      .mockResolvedValueOnce(ok('{"make":"Opel","year":2018}'));
+
+    await expect(call({ firstTokenTimeoutMs: 20 })).resolves.toEqual({ make: "Opel", year: 2018 });
+
+    const [first, second] = generate.mock.calls.map((c) => c[0].model);
+    expect(second).not.toBe(first);
+    // Recorded, so the ledger shows the queue rather than a silent gap.
+    expect(createAiUsage.mock.calls[0][0]).toMatchObject({ success: false, errorCode: "QUEUE_TIMEOUT" });
+  });
+
+  it("does not retry a queued model on itself", async () => {
+    generate
+      .mockImplementationOnce(queuedForever)
+      .mockResolvedValueOnce(ok('{"make":"Opel","year":2018}'));
+
+    await call({ firstTokenTimeoutMs: 20 });
+
+    const models = generate.mock.calls.map((c) => c[0].model);
+    expect(new Set(models).size).toBe(models.length);
+  });
+
+  it("gives the last model the rest of the budget instead of the first-token limit", async () => {
+    // Every model queues; only the last one is allowed to wait it out.
+    generate.mockImplementation(async (req: { model: string; onText?: (t: string) => void }) => {
+      const last = generate.mock.calls.length === chainLength();
+      if (!last) return queuedForever(req as { signal?: AbortSignal });
+      await new Promise((r) => setTimeout(r, 60));
+      req.onText?.('{"make":"Opel","year":2018}');
+      return ok('{"make":"Opel","year":2018}');
+    });
+
+    await expect(call({ firstTokenTimeoutMs: 20, budgetMs: 5_000 })).resolves.toEqual({
+      make: "Opel",
+      year: 2018,
+    });
+  });
+
+  it("keeps a model that has started writing, however long it takes", async () => {
+    generate.mockImplementationOnce(async (req: { onText?: (t: string) => void }) => {
+      req.onText?.('{"make"');
+      await new Promise((r) => setTimeout(r, 60));
+      return ok('{"make":"Opel","year":2018}');
+    });
+
+    await expect(call({ firstTokenTimeoutMs: 20 })).resolves.toEqual({ make: "Opel", year: 2018 });
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("never sends the thinking control to a Gemma model", async () => {
+    generate.mockImplementation(async (req: { model: string }) =>
+      req.model.startsWith("gemma-")
+        ? ok('{"make":"Opel","year":2018}')
+        : Promise.reject(httpError(503))
+    );
+
+    await call({ thinking: "low" });
+
+    const gemma = generate.mock.calls.map((c) => c[0]).find((r) => r.model.startsWith("gemma-"));
+    expect(gemma).toBeDefined();
+    expect(gemma.thinking).toBeUndefined();
+    // Flash models still got it.
+    expect(generate.mock.calls[0][0].thinking).toBe("low");
+  });
+});
+
+/** Models in the vision chain, which call() uses. */
+function chainLength() {
+  return modelsFor("vision").length;
+}

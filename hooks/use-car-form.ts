@@ -9,7 +9,8 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { addCar, updateCarFull } from "@/actions/cars";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
 import { useFormatters } from "@/hooks/use-formatters";
 import { VALIDATION_RULES } from "@/lib/constants/validation";
 
@@ -32,20 +33,43 @@ type Translate = (
 ) => string;
 type FormatNumber = (value: number) => string;
 
+/**
+ * The form shows the listing text of the dashboard's language only; the other
+ * language is written by translation when the car is saved. So the description
+ * required is the one on screen — unless the car already carries one in the
+ * other language (an older listing opened in edit mode), which is enough to
+ * save and gets translated across.
+ */
+const describedIn = (
+    t: Translate,
+    n: FormatNumber,
+    required: boolean
+) => {
+    const text = z.string().max(2000);
+    return required
+        ? text.min(
+              VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH,
+              t("descriptionTooShort", {
+                  min: n(VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH),
+              })
+          )
+        : text.optional();
+};
+
 const createCarFormSchema = (
     t: Translate,
     n: FormatNumber,
+    locale: Locale,
+    otherLanguageDescribed: boolean,
     maxImages = VALIDATION_RULES.CAR.MAX_IMAGES,
     isEditMode = false
 ) =>
     z.object({
+        // English, generated from make/model/year below; never typed.
         title: z.string().min(1, t("titleRequired")),
-        // Only the Arabic half is a form field. The English title and
-        // description already have inputs — `title` is auto-generated below and
-        // `description` is the existing textarea — so duplicating them as
-        // "English" fields would give the dealer two boxes for one value.
         titleAr: z.string().max(200).optional(),
-        descriptionAr: z.string().max(2000).optional(),
+        description: describedIn(t, n, locale === "en" && !otherLanguageDescribed),
+        descriptionAr: describedIn(t, n, locale === "ar" && !otherLanguageDescribed),
         make: z.string().min(1, t("makeRequired")),
         model: z.string().min(1, t("modelRequired")),
         year: z
@@ -87,14 +111,13 @@ const createCarFormSchema = (
             z.array(z.string()),
             z.string().transform(val => val.split(',').map(f => f.trim()).filter(Boolean))
         ]).optional(),
-        description: z
-            .string()
-            .min(
-                VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH,
-                t("descriptionTooShort", {
-                    min: n(VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH),
-                })
-            ),
+        // The Arabic list splits on the Arabic comma too: it is what an Arabic
+        // keyboard types, and splitting on "," alone would keep the whole list
+        // as one feature.
+        featuresAr: z.union([
+            z.array(z.string()),
+            z.string().transform(val => val.split(/[,،]/).map(f => f.trim()).filter(Boolean))
+        ]).optional(),
         status: z.enum(["Available", "Sold", "Unavailable"]),
         featured: z.boolean().default(false),
         images: z
@@ -136,10 +159,27 @@ export const useCarForm = (
     const t = useTranslations("org.carForm.validation");
     const tForm = useTranslations("org.carForm.form");
     const { number } = useFormatters();
+    const locale = useLocale() as Locale;
+
+    // Read once: whether the car arrived with a description in the language
+    // the form is NOT showing. Only an edit of an older listing does.
+    const hiddenDescription =
+        locale === "ar" ? initialData.description : initialData.descriptionAr;
+    const otherLanguageDescribed =
+        typeof hiddenDescription === "string" &&
+        hiddenDescription.trim().length >= VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH;
 
     const carFormSchema = useMemo(
-        () => createCarFormSchema(t, number, maxImages, isEditMode),
-        [t, number, maxImages, isEditMode]
+        () =>
+            createCarFormSchema(
+                t,
+                number,
+                locale,
+                otherLanguageDescribed,
+                maxImages,
+                isEditMode
+            ),
+        [t, number, locale, otherLanguageDescribed, maxImages, isEditMode]
     );
     const resolver = useMemo(() => zodResolver(carFormSchema), [carFormSchema]);
 
@@ -164,6 +204,7 @@ export const useCarForm = (
             seats: initialData.seats || "",
             location: initialData.location || "",
             features: initialData.features || [],
+            featuresAr: initialData.featuresAr || [],
             description: initialData.description || "",
             titleAr: initialData.titleAr || "",
             descriptionAr: initialData.descriptionAr || "",
@@ -177,7 +218,8 @@ export const useCarForm = (
     const queryClient = useQueryClient();
     
     const { isPending: adding, mutateAsync: addCarFn } = useMutation({
-        mutationFn: (payload: { data: CarFormValues }) => addCar(payload.data),
+        mutationFn: (payload: { data: CarFormValues; editedLocale: Locale | null }) =>
+            addCar(payload.data, { editedLocale: payload.editedLocale }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
         },
@@ -185,8 +227,8 @@ export const useCarForm = (
 
     const { isPending: updating, mutateAsync: updateCarFn } = useMutation({
         // Only mounted in edit mode, where carId is always supplied.
-        mutationFn: (payload: { data: CarFormValues }) =>
-            updateCarFull(carId!, payload.data),
+        mutationFn: (payload: { data: CarFormValues; editedLocale: Locale | null }) =>
+            updateCarFull(carId!, payload.data, { editedLocale: payload.editedLocale }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
             queryClient.invalidateQueries({ queryKey: [...queryKeys.cars.all, carId] });
@@ -259,7 +301,12 @@ export const useCarForm = (
                 "seats",
             ]);
         } else if (sectionId === "details") {
-            isValid = await form.trigger(["description", "location", "images"]);
+            // The description on screen is the dashboard language's one.
+            isValid = await form.trigger([
+                locale === "ar" ? "descriptionAr" : "description",
+                "location",
+                "images",
+            ]);
         }
 
         return isValid;
@@ -307,10 +354,23 @@ export const useCarForm = (
             descriptionEn: data.description,
         } as CarFormValues;
 
+        // Which language the dealer changed in this save. The server rewrites
+        // the other one from it; untouched fields (an AI draft that already
+        // carries both languages) are left alone rather than re-translated.
+        const dirty = form.formState.dirtyFields;
+        const editedHere =
+            locale === "ar"
+                ? dirty.titleAr || dirty.descriptionAr || dirty.featuresAr
+                : dirty.description || dirty.features;
+        const editedLocale = editedHere ? locale : null;
+
         const fn = isEditMode ? updateCarFn : addCarFn;
-        const response = await fn({ data: payload });
+        const response = await fn({ data: payload, editedLocale });
         if (response?.success) {
             toast.success(isEditMode ? tForm("updatedToast") : tForm("addedToast"));
+            if (response.data.translation === "skipped") {
+                toast.info(tForm("translationSkipped", { other: locale === "ar" ? "en" : "ar" }));
+            }
             const slug = window.location.pathname.split('/')[2];
             router.push(`/org/${slug}/cars`);
         } else {

@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { carListingSchema } from "@/lib/ai/schemas/car-listing";
 import { imageSearchSchema } from "@/lib/ai/schemas/image-search";
-import { BODY_TYPES } from "@/lib/constants/car-options";
+import { BODY_TYPES, CAR_COLOR_HEX, CAR_COLORS } from "@/lib/constants/car-options";
+import arCarAttributes from "@/messages/ar/carAttributes.json";
 
 const valid = {
   make: "Toyota",
@@ -19,7 +20,8 @@ const valid = {
   titleAr: "تويوتا كورولا ٢٠٢٠",
   descriptionEn: "Well kept, single owner.",
   descriptionAr: "بحالة ممتازة، مالك واحد.",
-  features: ["Bluetooth", "Cruise control"],
+  featuresEn: ["Bluetooth", "Cruise control"],
+  featuresAr: ["بلوتوث", "مثبت سرعة"],
   confidence: 0.82,
 };
 
@@ -47,9 +49,16 @@ describe("carListingSchema", () => {
     });
   });
 
-  it("accepts features as a single string as well as a list", () => {
-    const parsed = carListingSchema.parse({ ...valid, features: "Bluetooth, ABS" });
-    expect(parsed.features).toBe("Bluetooth, ABS");
+  it("rejects a colour outside the allowlist", () => {
+    // A free-text colour has no Arabic name, so an Arabic reader would see it
+    // in English. The allowlist makes that unrepresentable.
+    expect(carListingSchema.safeParse({ ...valid, color: "Cognac Pearl" }).success).toBe(false);
+  });
+
+  it.each(CAR_COLORS)("gives the allowed colour %s a swatch and an Arabic name", (color) => {
+    const key = color.toLowerCase();
+    expect(CAR_COLOR_HEX).toHaveProperty([key]);
+    expect(arCarAttributes.color).toHaveProperty([key]);
   });
 
   it("rejects the verbose body type that used to need a hand-patch", () => {
@@ -132,7 +141,7 @@ describe("the schema sent to the provider", () => {
 });
 
 describe("bilingual listing copy", () => {
-  it.each(["titleEn", "titleAr", "descriptionEn", "descriptionAr"])(
+  it.each(["titleEn", "titleAr", "descriptionEn", "descriptionAr", "featuresEn", "featuresAr"])(
     "requires %s",
     (field) => {
       const { [field]: _dropped, ...without } = valid as Record<string, unknown>;
@@ -164,13 +173,20 @@ describe("bilingual listing copy", () => {
     expect(parsed.descriptionAr).toBe("بحالة ممتازة، مالك واحد.");
   });
 
-  it("sends all four language fields to the provider as required", () => {
+  it("sends every language field to the provider as required", () => {
     const json = zodToJsonSchema(carListingSchema, { $refStrategy: "none" }) as {
       required: string[];
     };
 
     expect(json.required).toEqual(
-      expect.arrayContaining(["titleEn", "titleAr", "descriptionEn", "descriptionAr"])
+      expect.arrayContaining([
+        "titleEn",
+        "titleAr",
+        "descriptionEn",
+        "descriptionAr",
+        "featuresEn",
+        "featuresAr",
+      ])
     );
   });
 });

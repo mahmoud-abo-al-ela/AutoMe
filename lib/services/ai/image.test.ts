@@ -9,12 +9,14 @@ import { ValidationError } from "@/lib/utils/errors";
  * enforced again here against a caller that never touched the UI.
  */
 
+const JPEG = [0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0];
+
 /** A File-like with the fields the guard reads, so a size case costs no memory. */
-function fakeFile(type: string, size: number): File {
+function fakeFile(type: string, size: number, bytes: number[] = JPEG): File {
   return {
     type,
     size,
-    arrayBuffer: async () => new ArrayBuffer(8),
+    arrayBuffer: async () => new Uint8Array(bytes).buffer,
   } as unknown as File;
 }
 
@@ -39,6 +41,21 @@ describe("prepareImage", () => {
     await expect(
       prepareImage(fakeFile("image/png", 11 * 1024 * 1024))
     ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("rejects content that is not an image, whatever type it claims", async () => {
+    // An HTML page labelled image/jpeg: the claim is the caller's, the bytes
+    // are the truth.
+    const html = [...Buffer.from("<html><body>")];
+    await expect(prepareImage(fakeFile("image/jpeg", 12, html))).rejects.toMatchObject({
+      messageKey: "errors.ai.unsupportedImage",
+    });
+  });
+
+  it("labels the image by its real format, not the claimed one", async () => {
+    const png = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    const prepared = await prepareImage(fakeFile("image/jpeg", 8, png));
+    expect(prepared.part).toHaveProperty("inlineData.mimeType", "image/png");
   });
 
   it("rejects a caller that sent no file at all", async () => {

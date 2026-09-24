@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { resolveCarTitle, resolveCarDescription } from "@/lib/utils/car-text";
+import {
+  resolveCarTitle,
+  resolveCarDescription,
+  resolveCarFeatures,
+} from "@/lib/utils/car-text";
 
 const bilingual = {
   title: "Legacy title",
@@ -121,5 +125,45 @@ describe("the language the text is actually in", () => {
   it("marks legacy text as English whichever locale asked", () => {
     expect(resolveCarDescription({ description: "Legacy" }, "ar")?.locale).toBe("en");
     expect(resolveCarDescription({ description: "Legacy" }, "en")?.locale).toBe("en");
+  });
+});
+
+describe("resolveCarFeatures", () => {
+  const car = { features: ["Leather Seats", "Sunroof"], featuresAr: ["فرش جلد", "فتحة سقف"] };
+
+  it("gives each locale its own list", () => {
+    expect(resolveCarFeatures(car, "ar")).toEqual({
+      features: ["فرش جلد", "فتحة سقف"],
+      locale: "ar",
+      fellBack: false,
+    });
+    expect(resolveCarFeatures(car, "en").features).toEqual(["Leather Seats", "Sunroof"]);
+  });
+
+  it("falls back to the English list for a car written before featuresAr", () => {
+    // Every existing listing: the column is new and nothing was backfilled.
+    expect(resolveCarFeatures({ features: ["Sunroof"], featuresAr: null }, "ar")).toEqual({
+      features: ["Sunroof"],
+      locale: "en",
+      fellBack: true,
+    });
+  });
+
+  it("falls back to the Arabic list when there is no English one", () => {
+    expect(resolveCarFeatures({ features: [], featuresAr: ["فتحة سقف"] }, "en")).toMatchObject({
+      locale: "ar",
+      fellBack: true,
+    });
+  });
+
+  it("returns an empty list, not a fallback, when neither language has one", () => {
+    expect(resolveCarFeatures({}, "ar")).toEqual({ features: [], locale: "ar", fellBack: false });
+  });
+
+  it("treats blank entries as absent", () => {
+    // The model and the comma-split form can both leave "" behind.
+    expect(resolveCarFeatures({ features: ["Sunroof"], featuresAr: [" ", ""] }, "ar").fellBack).toBe(
+      true
+    );
   });
 });

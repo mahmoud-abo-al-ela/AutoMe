@@ -69,6 +69,32 @@ export const SORT_LABELS = {
     [SORT_OPTIONS.MILEAGE_ASC]: "Mileage: Lowest",
 };
 
+/**
+ * The colours the vision model may answer with: one spelling per colour, each
+ * a key of CAR_COLOR_HEX (lower-cased) and of `carAttributes.color`. Constraining
+ * the model to these is what lets the site show the colour in the reader's
+ * language — a free-text "Cognac Pearl" has no Arabic name to fall back on.
+ */
+export const CAR_COLORS = [
+    "Black",
+    "White",
+    "Silver",
+    "Grey",
+    "Metallic Grey",
+    "Red",
+    "Blue",
+    "Navy Blue",
+    "Green",
+    "Yellow",
+    "Orange",
+    "Brown",
+    "Beige",
+    "Gold",
+    "Bronze",
+    "Purple",
+    "Maroon",
+];
+
 // Maps human colour names to CSS hex so the card swatch renders correctly.
 // "Metallic Grey".toLowerCase().replace(/\s+/g,"") would otherwise be an
 // invalid CSS colour and render transparent.

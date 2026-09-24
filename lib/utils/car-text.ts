@@ -80,6 +80,40 @@ export function resolveCarTitle(
     : resolve(locale, [[car.titleEn, "en"], [car.title, "en"]], [[car.titleAr, "ar"]]);
 }
 
+/** Only the feature columns; loose for the same reason as BilingualCarText. */
+export interface BilingualCarFeatures {
+  features?: string[] | null;
+  featuresAr?: string[] | null;
+}
+
+export interface ResolvedCarFeatures {
+  features: string[];
+  /** The language the list is actually in, for `dir`. */
+  locale: Locale;
+  fellBack: boolean;
+}
+
+/**
+ * Same rule as the text: the reader's language when there is a list in it,
+ * otherwise the other one — an English list beats no list. `features` is the
+ * English source of record. Never null: an empty list is a normal state.
+ */
+export function resolveCarFeatures(
+  car: BilingualCarFeatures,
+  locale: Locale
+): ResolvedCarFeatures {
+  const lists: Record<Locale, string[]> = {
+    en: (car.features ?? []).filter((f) => f.trim()),
+    ar: (car.featuresAr ?? []).filter((f) => f.trim()),
+  };
+  const other: Locale = locale === "ar" ? "en" : "ar";
+
+  if (lists[locale].length > 0 || lists[other].length === 0) {
+    return { features: lists[locale], locale, fellBack: false };
+  }
+  return { features: lists[other], locale: other, fellBack: true };
+}
+
 export function resolveCarDescription(
   car: BilingualCarText,
   locale: Locale

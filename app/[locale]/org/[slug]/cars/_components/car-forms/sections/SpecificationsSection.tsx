@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CAR_COLORS } from "@/lib/constants/car-options";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "../shared/FieldInfo";
 import type { CarFormSectionProps } from "../shared/section-props";
@@ -40,18 +41,35 @@ const SpecificationsSection = ({
   const tFuel = useTranslations("carAttributes.fuel");
   const tTransmission = useTranslations("carAttributes.transmission");
   const { number } = useFormatters();
+  const attr = useCarAttributes();
+
+  // A fixed list, not free text: colour is stored in English because filters
+  // and swatches match on it, and a listed colour always has a name in the
+  // reader's language. An older car's unlisted colour is kept as an option so
+  // editing it does not silently change it.
+  const color = watch("color");
+  const colorOptions =
+    color && !CAR_COLORS.some((c) => c.toLowerCase() === color.toLowerCase())
+      ? [...CAR_COLORS, color]
+      : CAR_COLORS;
 
   // The Zod schema's output type for `features` is string[], but the textarea
   // is registered directly, so react-hook-form holds the raw comma-separated
   // string until the transform runs at validation time. Both shapes are real
   // at runtime, hence the widening.
-  const featuresValue = watch("features") as unknown as
+  //
+  // One list on screen, the dashboard language's; the other is translated on
+  // save. The Arabic list also splits on the Arabic comma, as the schema does.
+  const isArabic = useLocale() === "ar";
+  const featuresField = isArabic ? "featuresAr" : "features";
+  const featuresValue = watch(featuresField) as unknown as
     | string
     | string[]
     | undefined;
   const featureList = Array.isArray(featuresValue)
     ? featuresValue
-    : (featuresValue?.split(",") ?? []);
+    : (featuresValue?.split(isArabic ? /[,،]/ : ",") ?? []);
+
 
   return (
     <FormSection title={t("sections.specs")}>
@@ -193,33 +211,46 @@ const SpecificationsSection = ({
         <Label htmlFor="color" className="flex items-center">
           {tField("color")} <FieldInfo text={t("fields.colorHint")} />
         </Label>
-        <Input
-          type="text"
-          id="color"
-          placeholder={t("fields.colorPlaceholder")}
-          {...register("color")}
-          className={errors.color ? "border-red-500" : ""}
-        />
+        <Select
+          value={colorOptions.find((c) => c.toLowerCase() === color?.toLowerCase()) ?? ""}
+          onValueChange={(value) => {
+            setValue("color", value, { shouldValidate: true, shouldDirty: true });
+          }}
+        >
+          <SelectTrigger id="color" className={errors.color ? "border-red-500" : ""}>
+            <SelectValue placeholder={t("fields.colorPlaceholder")} />
+          </SelectTrigger>
+          <SelectContent>
+            {colorOptions.map((option) => (
+              <SelectItem key={option} value={option}>
+                {attr.color(option)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {errors.color && (
           <p className="text-red-500 text-sm mt-1">{errors.color.message}</p>
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="features" className="flex items-center">
+        <Label htmlFor={featuresField} className="flex items-center">
           {t("fields.featuresLabel")}{" "}
           <FieldInfo text={t("fields.featuresHint")} />
         </Label>
         <Textarea
-          id="features"
+          key={featuresField}
+          id={featuresField}
+          dir={isArabic ? "rtl" : "ltr"}
+          lang={isArabic ? "ar" : "en"}
           placeholder={t("fields.featuresPlaceholder")}
-          className={`min-h-[80px] ${errors.features ? "border-red-500" : ""}`}
-          {...register("features")}
+          className={`min-h-[80px] ${errors[featuresField] ? "border-red-500" : ""}`}
+          {...register(featuresField)}
         />
-        {errors.features && (
-          <p className="text-red-500 text-sm mt-1">{errors.features.message}</p>
+        {errors[featuresField] && (
+          <p className="text-red-500 text-sm mt-1">{errors[featuresField]?.message}</p>
         )}
         {featureList.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div dir={isArabic ? "rtl" : "ltr"} className="flex flex-wrap gap-1 mt-2">
             {featureList.map((feature, idx) =>
               feature.trim() ? (
                 <Badge key={idx} variant="secondary" className="bg-blue-50">
