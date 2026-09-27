@@ -228,6 +228,8 @@ export const useCarForm = (
             addCar(payload.data, { editedLocale: payload.editedLocale }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
+            // A save can spend an AI use on translating the other language.
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("aiProcessing") });
         },
     });
 
@@ -238,6 +240,7 @@ export const useCarForm = (
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
             queryClient.invalidateQueries({ queryKey: [...queryKeys.cars.all, carId] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("aiProcessing") });
         },
     });
 

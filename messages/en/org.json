@@ -239,7 +239,10 @@
         "point3": "Feature recognition",
         "cta": "Upload with AI",
         "badge": "Pro plan",
-        "locked": "Upgrade to Pro to unlock"
+        "locked": "Upgrade to Pro to unlock",
+        "remaining": "{remaining} of {limit} AI uses left this month",
+        "exhaustedBadge": "Used up",
+        "exhausted": "This month’s AI uses are used up — they renew on the 1st"
       }
     },
     "modePage": {
