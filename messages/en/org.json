@@ -4,6 +4,7 @@
     "cars": "Cars",
     "testDrives": "Test Drives",
     "messages": "Messages",
+    "buyerQuestions": "Buyer Questions",
     "billing": "Billing",
     "auditLogs": "Audit Logs",
     "settings": "Settings",
@@ -469,6 +470,62 @@
       "cancelled": "Test drive cancelled",
       "updateFailed": "Couldn’t update the test drive",
       "unexpected": "Something went wrong while updating the test drive."
+    }
+  },
+  "buyerQuestions": {
+    "title": "Buyer Questions",
+    "subtitle": "Questions buyers asked the AI assistant that your listings don't answer. Answer once, and the assistant tells every later buyer.",
+    "tabs": {
+      "OPEN": "Unanswered",
+      "ANSWERED": "Answered",
+      "DISMISSED": "Dismissed"
+    },
+    "tabHints": {
+      "OPEN": "Most-asked first. These are the gaps buyers keep running into.",
+      "ANSWERED": "The assistant quotes these to buyers as your answer.",
+      "DISMISSED": "Hidden from this list. Restore one to answer it."
+    },
+    "empty": {
+      "OPEN": {
+        "title": "No unanswered questions",
+        "description": "When the assistant can't answer a buyer from your listing, the question lands here."
+      },
+      "ANSWERED": {
+        "title": "Nothing answered yet",
+        "description": "Your answers will appear here."
+      },
+      "DISMISSED": {
+        "title": "Nothing dismissed",
+        "description": "Questions you dismiss appear here."
+      }
+    },
+    "askedTimes": "{count, plural, one {Asked once} other {Asked {value} times}}",
+    "lastAsked": "Last asked {when}",
+    "askedIn": {
+      "en": "Asked in English",
+      "ar": "Asked in Arabic"
+    },
+    "yourAnswer": "Your answer",
+    "allCarsBadge": "All cars",
+    "answerLabel": "Your answer to this question",
+    "answerPlaceholder": "Answer as you would to a buyer. Stick to facts you're sure of.",
+    "allCarsLabel": "This is true for all my cars",
+    "allCarsHint": "For dealership policies like financing, trade-ins or inspections.",
+    "loadFailed": "Couldn't load questions. Please refresh.",
+    "actions": {
+      "answer": "Answer",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "dismiss": "Dismiss",
+      "removeAnswer": "Remove answer",
+      "restore": "Restore"
+    },
+    "toasts": {
+      "answered": "Saved. The assistant will use your answer from now on.",
+      "dismissed": "Question dismissed.",
+      "reopened": "Question moved back to unanswered.",
+      "failed": "Couldn't save that. Please try again."
     }
   },
   "settings": {

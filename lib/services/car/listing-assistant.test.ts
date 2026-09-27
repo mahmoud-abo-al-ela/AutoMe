@@ -133,6 +133,15 @@ describe("askAboutListing", () => {
     ]);
   });
 
+  it("answers from the listing alone if the dealer's answers cannot be read", async () => {
+    findAnswersForCar.mockRejectedValue(new Error('relation "BuyerQuestion" does not exist'));
+    expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({
+      status: "answered",
+      answer: "White.",
+    });
+    expect(answerListingQuestion.mock.calls[0][1]).not.toHaveProperty("dealerAnswers");
+  });
+
   it("does not spend when the plan does not offer it", async () => {
     findActiveSubscription.mockResolvedValue(plan(undefined));
     expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "unavailable" });

@@ -17,6 +17,7 @@ import {
   Menu,
   CreditCard,
   ScrollText,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -35,6 +36,7 @@ const iconMap = {
   Calendar,
   CreditCard,
   ScrollText,
+  MessageCircleQuestion,
 };
 
 export default function MobileSidebar({

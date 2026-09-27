@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   CreditCard,
   ScrollText,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sidebarItems } from "@/lib/SidebarConfig";
@@ -34,6 +35,7 @@ const iconMap = {
   Calendar,
   CreditCard,
   ScrollText,
+  MessageCircleQuestion,
 };
 
 export default function DesktopSidebar({

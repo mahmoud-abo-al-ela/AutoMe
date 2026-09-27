@@ -32,6 +32,12 @@ export const sidebarItems = [
     showUnreadBadge: true,
   },
   {
+    name: "questions",
+    labelKey: "buyerQuestions",
+    icon: "MessageCircleQuestion",
+    path: "/questions",
+  },
+  {
     name: "billing",
     labelKey: "billing",
     icon: "CreditCard",

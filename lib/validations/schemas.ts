@@ -279,3 +279,26 @@ export const listingQuestionSchema = z.object({
 });
 
 export type ListingQuestionInput = z.infer<typeof listingQuestionSchema>;
+
+
+// ============ BUYER QUESTIONS (dealer inbox) ============
+
+export const buyerQuestionListSchema = z.object({
+  status: z.enum(["OPEN", "ANSWERED", "DISMISSED"]),
+  page: z.coerce.number().int().min(1).max(1000).default(1),
+});
+
+/**
+ * A dealer's answer. Bounded because every answer on a car, and every answer
+ * marked for all cars, is sent to the model with each buyer question.
+ */
+export const answerBuyerQuestionSchema = z.object({
+  id: z.string().uuid(),
+  answer: z.string().trim().min(1).max(500),
+  appliesToAllCars: z.boolean(),
+});
+
+export const buyerQuestionStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(["OPEN", "DISMISSED"]),
+});

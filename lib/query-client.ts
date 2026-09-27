@@ -46,6 +46,10 @@ export const queryKeys = {
     check: (carId: string) => ["testDrives", "check", carId],
     workingHours: (carId: string) => ["testDrives", "workingHours", carId],
   },
+  buyerQuestions: {
+    all: ["buyerQuestions"],
+    list: (params: unknown) => ["buyerQuestions", "list", params],
+  },
   wishlist: {
     all: ["wishlist"],
     list: (params: unknown) => ["wishlist", "list", params],

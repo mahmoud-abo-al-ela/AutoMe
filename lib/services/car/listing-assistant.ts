@@ -83,7 +83,7 @@ export async function askAboutListing(
 
   const [allowance, dealerAnswers] = await Promise.all([
     allowanceFor(car.organizationId),
-    buyerQuestionRepository.findAnswersForCar(car.id, car.organizationId),
+    dealerAnswersFor(car.id, car.organizationId),
   ]);
   if (!allowance.offered) return { status: "unavailable" };
 
@@ -119,6 +119,20 @@ export async function askAboutListing(
     locale,
   });
   return { status: "notInListing" };
+}
+
+/**
+ * The dealer's answers, or none. They improve an answer but are not needed
+ * for one, so a failed read — or a deploy that reached production before its
+ * migration did — answers from the listing alone instead of failing.
+ */
+async function dealerAnswersFor(carId: string, organizationId: string) {
+  try {
+    return await buyerQuestionRepository.findAnswersForCar(carId, organizationId);
+  } catch (error) {
+    logError("Loading dealer answers failed; answering from the listing alone", error);
+    return [];
+  }
 }
 
 /**
