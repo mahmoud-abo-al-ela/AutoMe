@@ -87,7 +87,10 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
           <ol className="space-y-3" aria-live="polite">
             {exchanges.map((exchange) => (
               <li key={exchange.id} className="space-y-2">
-                <p className="ms-auto w-fit max-w-[85%] rounded-2xl rounded-ee-sm bg-blue-600 px-3 py-2 text-sm text-white">
+                {/* The buyer on the reading-start side — right in Arabic, left in
+                    English — and the answer on the far side; logical classes
+                    mirror it with the page direction. */}
+                <p className="w-fit max-w-[85%] rounded-2xl rounded-es-sm bg-blue-600 px-3 py-2 text-sm text-white">
                   <span className="sr-only">{t("you")}: </span>
                   {exchange.question}
                 </p>
@@ -143,7 +146,8 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
 
 function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: string }) {
   const t = useTranslations("carDetail.assistant");
-  const bubble = "w-fit max-w-[85%] rounded-2xl rounded-es-sm px-3 py-2 text-sm";
+  // The far side from the buyer, with its tail on the corner nearest that edge.
+  const bubble = "ms-auto w-fit max-w-[85%] rounded-2xl rounded-ee-sm px-3 py-2 text-sm";
 
   if (!exchange.reply && !exchange.error) {
     return (
