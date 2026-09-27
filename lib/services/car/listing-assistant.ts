@@ -9,6 +9,7 @@ import { dealershipPlaceName } from "@/lib/locations/names";
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { questionKey } from "@/lib/utils/question-key";
 import { NotFoundError, logError } from "@/lib/utils/errors";
+import { licenseMonth, statedDisclosures, statedTerms } from "@/lib/utils/car-disclosures";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -99,6 +100,11 @@ export async function askAboutListing(
       phone: organization.phone,
     },
     workingHours: organization.workingHours,
+    history: statedDisclosures({
+      ...car,
+      licenseValidUntil: licenseMonth(car.licenseValidUntil),
+    }),
+    terms: statedTerms(organization),
     dealerAnswers,
   });
 

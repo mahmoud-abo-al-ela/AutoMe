@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCarForEdit } from "@/actions/cars";
+import { disclosuresToForm } from "@/lib/utils/car-disclosures";
 import CarFormShared from "../../_components/car-forms/shared/CarFormShared";
 import { STATUS_DB_TO_FORM } from "@/lib/constants/car-options";
 import { ArrowLeft } from "lucide-react";
@@ -79,6 +80,9 @@ export default function EditCarPage() {
     price: car.price ? Number(car.price) : "",
     mileage: car.mileage ? Number(car.mileage) : "",
     seats: car.seats ? Number(car.seats) : "",
+    // The form holds these as select strings; the pre-fill effect writes what
+    // it is given, so it must be given that shape, not the stored booleans.
+    ...disclosuresToForm(car),
   };
 
   return (

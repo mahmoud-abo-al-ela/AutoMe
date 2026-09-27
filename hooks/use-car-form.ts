@@ -14,6 +14,15 @@ import { useTranslations, useLocale } from "next-intl";
 import type { Locale } from "@/i18n/routing";
 import { useFormatters } from "@/hooks/use-formatters";
 import { VALIDATION_RULES } from "@/lib/constants/validation";
+import {
+    SERVICE_HISTORY,
+    UNSET,
+    disclosuresFromForm,
+    disclosuresToForm,
+} from "@/lib/utils/car-disclosures";
+
+/** A yes / no / not-stated select, as the form holds it. */
+const triState = z.enum([UNSET, "yes", "no"]).default(UNSET);
 
 /**
  * A translator scoped to `org.carForm.validation`, plus the number formatter
@@ -121,6 +130,14 @@ const createCarFormSchema = (
             z.array(z.string()),
             z.string().transform(val => val.split(/[,،]/).map(f => f.trim()).filter(Boolean))
         ]).optional(),
+        // History and condition: all optional, and "not stated" is a real
+        // answer — see lib/utils/car-disclosures.
+        originalPaint: triState,
+        accidentFree: triState,
+        ownerCount: z.string().default(UNSET),
+        serviceHistory: z.enum([UNSET, ...SERVICE_HISTORY]).default(UNSET),
+        priceNegotiable: triState,
+        licenseValidUntil: z.string().regex(/^(\d{4}-\d{2})?$/).default(""),
         status: z.enum(["Available", "Sold", "Unavailable"]),
         featured: z.boolean().default(false),
         images: z
@@ -214,6 +231,7 @@ export const useCarForm = (
             description: initialData.description || "",
             titleAr: initialData.titleAr || "",
             descriptionAr: initialData.descriptionAr || "",
+            ...disclosuresToForm(initialData as Parameters<typeof disclosuresToForm>[0]),
             status: initialData.status || "Available",
             featured: initialData.featured || false,
             images: initialData.images || [],
@@ -360,7 +378,10 @@ export const useCarForm = (
             ...data,
             titleEn: data.title,
             descriptionEn: data.description,
-        } as CarFormValues;
+            // Strings on screen, booleans and nulls on the wire: null is
+            // "not stated", and sending every field lets a dealer clear one.
+            ...disclosuresFromForm(data),
+        } as unknown as CarFormValues;
 
         // Which language the dealer changed in this save. The server rewrites
         // the other one from it; untouched fields (an AI draft that already

@@ -6,6 +6,7 @@ import {
   CarDetailsTabs,
   MobileStickyBar,
   ListingAssistant,
+  CarHistoryCard,
 } from "./";
 import { notFound } from "next/navigation";
 import type { CarDetail } from "../_lib/car-detail-types";
@@ -78,6 +79,8 @@ const CarContent = async ({ id }: { id: string }) => {
 
             {/* Tabbed Content: Description, Features, Specifications */}
             <CarDetailsTabs car={car} />
+
+            <CarHistoryCard car={car} terms={car.organization?.terms} />
 
             {showAssistant && <ListingAssistant carId={car.id} />}
           </div>

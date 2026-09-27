@@ -148,6 +148,14 @@ model Organization {
   settings Json? // Feature flags, preferences
 
   // Rating & Reviews (denormalized for efficient querying)
+  // Dealership-wide terms a buyer asks about, set once in settings and true of
+  // every car it sells. Null means "not stated", as on the car's own fields.
+  offersFinancing  Boolean?
+  financingNote    String? // banks, years, down payment — the dealer's words
+  acceptsTradeIn   Boolean?
+  allowsInspection Boolean? // an independent mechanic may look at the car
+  offersDelivery   Boolean?
+
   averageRating Float @default(0)
   totalReviews  Int   @default(0)
 
@@ -422,6 +430,17 @@ model Car {
   // photos, and matching "rear view" in search would be noise.
   imageAlts     Json?
 
+  // What a buyer asks before anything else, stated by the dealer. Every one is
+  // nullable on purpose, and null means "not stated" — never "no". A listing
+  // saying nothing about accidents is not a listing claiming there were none,
+  // and the buyer assistant declines rather than guessing either way.
+  originalPaint     Boolean? // "فابريكا": no panel repainted
+  accidentFree      Boolean?
+  ownerCount        Int? // owners the car has had, 1 = first owner
+  serviceHistory    ServiceHistory?
+  priceNegotiable   Boolean?
+  licenseValidUntil DateTime? @db.Date // the month the licence runs to
+
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -600,6 +619,12 @@ model AiUsage {
   @@index([organizationId, feature, createdAt]) // monthly per-org quota count
   @@index([feature, createdAt]) // per-feature reporting
   @@index([createdAt]) // platform-wide RPD/RPM breaker, all features
+}
+
+enum ServiceHistory {
+  FULL // every service documented
+  PARTIAL
+  NONE
 }
 
 enum BuyerQuestionStatus {

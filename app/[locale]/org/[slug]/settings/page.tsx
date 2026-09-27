@@ -1,4 +1,4 @@
-import { Building2, Clock, Users } from "lucide-react";
+import { Building2, Clock, Handshake, Users } from "lucide-react";
 import React from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -42,6 +42,14 @@ const SettingsPage = async ({
       icon: Clock,
       path: `/org/${slug}/settings/working-hours`,
       color: "bg-blue-50 text-blue-600",
+    },
+    {
+      key: "terms",
+      title: t("cards.terms.title"),
+      description: t("cards.terms.description"),
+      icon: Handshake,
+      path: `/org/${slug}/settings/terms`,
+      color: "bg-emerald-50 text-emerald-600",
     },
     {
       key: "team",

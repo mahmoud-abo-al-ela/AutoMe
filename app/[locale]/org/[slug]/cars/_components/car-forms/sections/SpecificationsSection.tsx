@@ -17,6 +17,7 @@ import { CAR_COLORS } from "@/lib/constants/car-options";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "../shared/FieldInfo";
+import ConditionFields from "./ConditionFields";
 import type { CarFormSectionProps } from "../shared/section-props";
 
 type SpecificationsSectionProps = CarFormSectionProps & {
@@ -261,6 +262,7 @@ const SpecificationsSection = ({
           </div>
         )}
       </div>
+      <ConditionFields watch={watch} setValue={setValue} />
     </FormSection>
   );
 };

@@ -7,11 +7,29 @@ import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/ut
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
 import type { CarStatus } from "@/lib/generated/prisma";
+import { licenseMonthToDate } from "@/lib/utils/car-disclosures";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
 
 /** Either status spelling to the DB enum; a missing status is AVAILABLE. */
 function toCarStatus(status: string | null | undefined): CarStatus {
   return normalizeCarStatus(status) ?? "AVAILABLE";
+}
+
+/**
+ * The disclosure columns from validated input. `undefined` leaves a column
+ * untouched (a caller that does not send them, like the AI draft path); `null`
+ * clears it, which is how the form says "not stated".
+ */
+function disclosureColumns(data: CarInput | UpdateCarFullInput) {
+  return {
+    originalPaint: data.originalPaint,
+    accidentFree: data.accidentFree,
+    ownerCount: data.ownerCount,
+    serviceHistory: data.serviceHistory,
+    priceNegotiable: data.priceNegotiable,
+    licenseValidUntil:
+      data.licenseValidUntil === undefined ? undefined : licenseMonthToDate(data.licenseValidUntil),
+  };
 }
 
 /**
@@ -75,6 +93,7 @@ export async function createCar(
     location: carData.location,
     features: carData.features,
     featuresAr: carData.featuresAr,
+    ...disclosureColumns(carData),
     seats: carData.seats,
     status,
     featured: carData.featured,
@@ -243,6 +262,7 @@ export async function updateCarFull(
     location: carData.location,
     features: carData.features,
     featuresAr: carData.featuresAr,
+    ...disclosureColumns(carData),
     seats: carData.seats,
     status,
     featured: carData.featured,

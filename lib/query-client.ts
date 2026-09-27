@@ -63,5 +63,6 @@ export const queryKeys = {
   dashboard: {
     planUsage: (resource: string) => ["dashboard", "planUsage", resource],
     dealership: () => ["dashboard", "dealership"],
+    dealershipTerms: () => ["dashboard", "dealershipTerms"],
   },
 };

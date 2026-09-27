@@ -106,5 +106,41 @@
     "notFoundDescription": "This listing is no longer available. Browse our other cars for sale in Egypt.",
     "generatedTitle": "{year} {make} {model} for sale",
     "generatedDescription": "{year} {make} {model} for sale in Egypt. See photos, specifications, price and dealership details on AutoMe."
+  },
+  "history": {
+    "title": "History & terms",
+    "originalPaint": "Original paint",
+    "repainted": "Has repainted panels",
+    "accidentFree": "No accidents",
+    "hadAccident": "Has been in an accident",
+    "owners": "{count, plural, one {First owner} other {{value} owners so far}}",
+    "service": {
+      "FULL": "Full service history",
+      "PARTIAL": "Partial service history",
+      "NONE": "No service records"
+    },
+    "negotiable": "Price negotiable",
+    "fixedPrice": "Fixed price",
+    "licensedUntil": "Licensed until {month}",
+    "dealershipTerms": "From this dealership",
+    "terms": {
+      "offersFinancing": {
+        "yes": "Instalments available",
+        "no": "No instalments"
+      },
+      "acceptsTradeIn": {
+        "yes": "Trade-ins accepted",
+        "no": "No trade-ins"
+      },
+      "allowsInspection": {
+        "yes": "Independent inspection welcome",
+        "no": "No outside inspection"
+      },
+      "offersDelivery": {
+        "yes": "Delivery available",
+        "no": "No delivery"
+      }
+    },
+    "statedByDealer": "As stated by the dealer. Confirm before you buy."
   }
 }

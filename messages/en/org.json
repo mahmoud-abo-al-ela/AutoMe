@@ -404,6 +404,33 @@
         "fewFeatures": "List more of the car’s features",
         "zeroMileage": "Mileage is 0 km — enter the real odometer reading"
       }
+    },
+    "condition": {
+      "title": "History & condition",
+      "hint": "Optional. Buyers ask about these first. Leave “Not stated” if you're not sure — it's shown as nothing, never as “no”.",
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No",
+      "fields": {
+        "originalPaint": "Original paint (no repainted panels)",
+        "accidentFree": "Accident-free",
+        "priceNegotiable": "Price negotiable",
+        "ownerCount": "Owners so far",
+        "serviceHistory": "Service history",
+        "licenseValidUntil": "Licence valid until"
+      },
+      "owners": "{count, plural, one {First owner} other {{value} owners}}",
+      "ownersOrMore": "{value} or more owners",
+      "service": {
+        "FULL": "Full, documented",
+        "PARTIAL": "Partial",
+        "NONE": "None"
+      },
+      "monthPicker": {
+        "clear": "Clear — not stated",
+        "previousYear": "Previous year",
+        "nextYear": "Next year"
+      }
     }
   },
   "testDrives": {
@@ -549,6 +576,10 @@
       "team": {
         "title": "Team Members",
         "description": "Manage your team members and their roles"
+      },
+      "terms": {
+        "title": "Terms for buyers",
+        "description": "Financing, trade-ins, inspections and delivery, shown on every listing"
       }
     },
     "profile": {
@@ -628,6 +659,26 @@
         "failed": "Couldn’t update that role",
         "unexpected": "Something went wrong while updating the role."
       }
+    },
+    "terms": {
+      "title": "Terms for buyers",
+      "subtitle": "Shown on every one of your listings",
+      "cardTitle": "What you offer buyers",
+      "cardDescription": "True of every car you sell. Buyers see these on each listing, and the AI assistant answers from them. Leave “Not stated” for anything you'd rather discuss in person.",
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No",
+      "fields": {
+        "offersFinancing": "Instalments / financing",
+        "acceptsTradeIn": "Trade-ins accepted",
+        "allowsInspection": "Independent inspection allowed",
+        "offersDelivery": "Delivery available",
+        "financingNote": "Financing details"
+      },
+      "financingNotePlaceholder": "e.g. Through NBE and Banque Misr, up to 5 years, 30% down payment",
+      "save": "Save terms",
+      "saved": "Saved. Your listings show the new terms.",
+      "saveFailed": "Couldn't save your terms. Please try again."
     }
   },
   "billing": {

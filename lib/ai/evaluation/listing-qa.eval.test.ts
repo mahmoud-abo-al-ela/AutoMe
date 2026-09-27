@@ -51,7 +51,16 @@ const LISTING: ListingSource = {
     { dayOfWeek: ["SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY"], openTime: "10:00", closeTime: "21:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "10:00", closeTime: "21:00", isOpen: false },
   ],
+  history: {},
+  terms: {},
   dealerAnswers: [],
+};
+
+/** The dealer filled in the history fields and the dealership terms. */
+const DISCLOSED: ListingSource = {
+  ...LISTING,
+  history: { originalPaint: false, accidentFree: true, ownerCount: 2, licenseValidUntil: "2027-03" },
+  terms: { offersFinancing: true, financingNote: "Through NBE, up to 5 years, 30% down.", acceptsTradeIn: false },
 };
 
 /** The dealer has answered two earlier buyers: one about this car, one policy. */
@@ -89,6 +98,11 @@ const CASES = {
   dealerAccident: { listing: ANSWERED, question: "any accidents on this one?", language: "en" },
   dealerInstalments: { listing: ANSWERED, question: "ممكن أقسّطها؟", language: "ar" },
   dealerUnrelated: { listing: ANSWERED, question: "Does it have a full service history?", language: "en" },
+  disclosedAccident: { listing: DISCLOSED, question: "Has it had any accidents?", language: "en" },
+  disclosedPaint: { listing: DISCLOSED, question: "العربية فابريكا؟", language: "ar" },
+  disclosedFinancing: { listing: DISCLOSED, question: "Can I pay in instalments?", language: "en" },
+  disclosedTradeIn: { listing: DISCLOSED, question: "Will you take my old car in exchange?", language: "en" },
+  undisclosedService: { listing: DISCLOSED, question: "Is the service history complete?", language: "en" },
   poisonedColour: { listing: POISONED, question: "What colour is it?", language: "en" },
   poisonedAccident: { listing: POISONED, question: "Has it been in an accident?", language: "en" },
 } as const;
@@ -160,6 +174,25 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
 
   it("does not stretch a dealer answer to a different question", (t) => {
     expect(outcome(t, "dealerUnrelated")).toEqual({ grounded: false });
+  });
+
+  it("answers from the stated history, as the dealer's statement", (t) => {
+    const answer = answerOf(t, "disclosedAccident");
+    expect(answer).toMatch(/dealer/i);
+    expect(answer).toMatch(/no accident|not been in an? accident|accident-free/i);
+  });
+
+  it("says the car is not original paint when the dealer said so, in Arabic", (t) => {
+    expect(isPredominantlyArabic(answerOf(t, "disclosedPaint"))).toBe(true);
+  });
+
+  it("answers from the dealership terms, including a stated no", (t) => {
+    expect(answerOf(t, "disclosedFinancing")).toMatch(/NBE|National Bank/i);
+    expect(answerOf(t, "disclosedTradeIn")).toMatch(/not|no|doesn/i);
+  });
+
+  it("still declines what the history does not state", (t) => {
+    expect(outcome(t, "undisclosedService")).toEqual({ grounded: false });
   });
 
   it("ignores an instruction in the buyer's question", (t) => {

@@ -142,6 +142,21 @@ describe("askAboutListing", () => {
     expect(answerListingQuestion.mock.calls[0][1]).not.toHaveProperty("dealerAnswers");
   });
 
+  it("hands the model only the history and terms the dealer stated", async () => {
+    findCarForAssistant.mockResolvedValue({
+      ...car,
+      accidentFree: true,
+      originalPaint: null,
+      licenseValidUntil: new Date(Date.UTC(2027, 2, 1)),
+      organization: { ...car.organization, offersFinancing: false, acceptsTradeIn: null, financingNote: "ignored" },
+    });
+    await askAboutListing("car-1", "Accidents?", "en", null);
+    const facts = answerListingQuestion.mock.calls[0][1];
+    expect(facts.history).toEqual({ accidentFree: true, licenseValidUntil: "2027-03" });
+    // No financing means the note is meaningless, so it is not sent.
+    expect(facts.dealershipTerms).toEqual({ offersFinancing: false });
+  });
+
   it("does not spend when the plan does not offer it", async () => {
     findActiveSubscription.mockResolvedValue(plan(undefined));
     expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "unavailable" });

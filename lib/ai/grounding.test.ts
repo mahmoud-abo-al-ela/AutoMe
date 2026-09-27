@@ -27,6 +27,8 @@ const source: ListingSource = {
     { dayOfWeek: ["SATURDAY", "SUNDAY"], openTime: "10:00", closeTime: "20:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "09:00", closeTime: "18:00", isOpen: false },
   ],
+  history: {},
+  terms: {},
   dealerAnswers: [],
 };
 
@@ -65,6 +67,24 @@ describe("buildListingFacts", () => {
   it("bounds free text so a long description cannot inflate every call", () => {
     const facts = buildListingFacts({ ...source, descriptionEn: "x".repeat(5000) });
     expect((facts.description as { en: string }).en.length).toBeLessThanOrEqual(1501);
+  });
+});
+
+describe("history and terms", () => {
+  it("carries only what the dealer stated", () => {
+    const facts = buildListingFacts({
+      ...source,
+      history: { accidentFree: true, ownerCount: 1 },
+      terms: { offersFinancing: true, financingNote: "NBE, 5 years" },
+    });
+    expect(facts.history).toEqual({ accidentFree: true, ownerCount: 1 });
+    expect(facts.dealershipTerms).toEqual({ offersFinancing: true, financingNote: "NBE, 5 years" });
+  });
+
+  it("leaves both out when nothing was stated, so a question about them is declined", () => {
+    const facts = buildListingFacts(source);
+    expect(facts).not.toHaveProperty("history");
+    expect(facts).not.toHaveProperty("dealershipTerms");
   });
 });
 

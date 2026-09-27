@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { organizationProfileSchema } from "@/lib/validations/schemas";
+import { dealershipTermsSchema, organizationProfileSchema } from "@/lib/validations/schemas";
 import type { UserRole } from "@/lib/generated/prisma";
 import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
 
@@ -28,6 +28,27 @@ export const updateOrganizationProfile = withOrgAuth(async (ctx, payload: unknow
   revalidatePath("/");
 
   return createSuccessResponse(updatedProfile, "Organization profile updated successfully");
+});
+
+export const getDealershipTerms = withOrgAuth(async (ctx) => {
+  const terms = await dealershipService.getDealershipTerms(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(terms);
+});
+
+export const updateDealershipTerms = withOrgAuth(async (ctx, payload: unknown) => {
+  const terms = validateAction(dealershipTermsSchema, payload);
+  const updated = await dealershipService.updateDealershipTerms(
+    terms,
+    ctx.userId,
+    ctx.organization.id
+  );
+
+  // Shown on every one of the dealership's listings, and cited by the assistant.
+  revalidatePath(`/org/${ctx.organization.slug}/settings/terms`);
+  revalidatePath(`/dealerships/${ctx.organization.slug}`);
+  revalidatePath("/cars", "layout");
+
+  return createSuccessResponse(updated, "Dealership terms updated");
 });
 
 export const getDealershipInfo = withOrgAuth(async (ctx) => {

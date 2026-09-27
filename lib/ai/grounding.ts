@@ -29,10 +29,14 @@ export const LISTING_FACT_KEYS = [
   "description",
   "dealership",
   "workingHours",
+  "history",
+  "dealershipTerms",
   "dealerAnswers",
 ] as const;
 
 export type ListingFactKey = (typeof LISTING_FACT_KEYS)[number];
+
+import type { CarDisclosures, DealershipTerms } from "@/lib/utils/car-disclosures";
 
 /** The row a listing context is built from, as the service loads it. */
 export interface ListingSource {
@@ -70,6 +74,10 @@ export interface ListingSource {
     closeTime: string;
     isOpen: boolean;
   }[];
+  /** What the dealer stated about the car's history; stated keys only. */
+  history: Partial<CarDisclosures>;
+  /** The dealership's standing terms; stated keys only. */
+  terms: Partial<DealershipTerms>;
   /**
    * The dealer's own answers to earlier buyers' questions — on this car, or
    * marked by the dealer as true of every car they sell.
@@ -160,6 +168,9 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
               : { open: false }),
           }))
         : undefined,
+    // Stated keys only, so a missing key reads as "not stated", never "no".
+    history: Object.keys(source.history).length > 0 ? source.history : undefined,
+    dealershipTerms: Object.keys(source.terms).length > 0 ? source.terms : undefined,
     dealerAnswers: dealerAnswers(source.dealerAnswers),
   };
 

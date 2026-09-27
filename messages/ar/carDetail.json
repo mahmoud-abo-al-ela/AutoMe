@@ -106,5 +106,41 @@
     "notFoundDescription": "هذا الإعلان لم يعد متاحًا. تصفّح باقي السيارات المعروضة للبيع في مصر.",
     "generatedTitle": "{make} {model} {year} للبيع",
     "generatedDescription": "{make} {model} موديل {year} للبيع في مصر. شاهد الصور والمواصفات والسعر وبيانات المعرض على أوتومي."
+  },
+  "history": {
+    "title": "تاريخ العربية والشروط",
+    "originalPaint": "فابريكا",
+    "repainted": "فيها رش",
+    "accidentFree": "من غير حوادث",
+    "hadAccident": "عملت حادثة قبل كده",
+    "owners": "{count, plural, one {أول مالك} two {مالكين لحد دلوقتي} few {{value} ملاك لحد دلوقتي} other {{value} مالك لحد دلوقتي}}",
+    "service": {
+      "FULL": "سجل صيانة كامل",
+      "PARTIAL": "سجل صيانة جزئي",
+      "NONE": "مفيش سجل صيانة"
+    },
+    "negotiable": "السعر قابل للتفاوض",
+    "fixedPrice": "السعر نهائي",
+    "licensedUntil": "الرخصة سارية لحد {month}",
+    "dealershipTerms": "من المعرض",
+    "terms": {
+      "offersFinancing": {
+        "yes": "في تقسيط",
+        "no": "مفيش تقسيط"
+      },
+      "acceptsTradeIn": {
+        "yes": "بنقبل البدل",
+        "no": "مفيش بدل"
+      },
+      "allowsInspection": {
+        "yes": "مسموح بالفحص عند ميكانيكي من برا",
+        "no": "مفيش فحص من برا"
+      },
+      "offersDelivery": {
+        "yes": "في توصيل",
+        "no": "مفيش توصيل"
+      }
+    },
+    "statedByDealer": "حسب كلام التاجر. اتأكد قبل ما تشتري."
   }
 }

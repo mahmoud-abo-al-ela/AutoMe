@@ -16,6 +16,24 @@ const bilingualCarText = {
   featuresAr: z.array(z.string()).optional(),
 };
 
+/**
+ * What the dealer states about the car's history — see lib/utils/car-disclosures.
+ * Nullable because null is "not stated", which the form sends to clear one.
+ */
+const carDisclosureFields = {
+  originalPaint: z.boolean().nullable().optional(),
+  accidentFree: z.boolean().nullable().optional(),
+  ownerCount: z.number().int().min(1).max(20).nullable().optional(),
+  serviceHistory: z.enum(["FULL", "PARTIAL", "NONE"]).nullable().optional(),
+  priceNegotiable: z.boolean().nullable().optional(),
+  // The month the licence runs to, as the form's month input holds it.
+  licenseValidUntil: z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Use YYYY-MM")
+    .nullable()
+    .optional(),
+};
+
 const MIN_DESCRIPTION = 10;
 
 /**
@@ -67,6 +85,7 @@ export const carSchema = z.object({
   // because Zod strips unknown keys — without these the AI-written Arabic is
   // silently discarded on the way to the database.
   ...bilingualCarText,
+  ...carDisclosureFields,
   // A car is where its dealership is; kept only for cars saved with it.
   location: z.string().max(200).optional().nullable(),
   status: carStatus,
@@ -100,6 +119,7 @@ export const updateCarFullSchema = z.object({
   // Either language may carry the description — see requireOneDescription.
   description: z.string().max(2000).optional().nullable(),
   ...bilingualCarText,
+  ...carDisclosureFields,
   // A car is where its dealership is; kept only for cars saved with it.
   location: z.string().max(200).optional().nullable(),
   status: carStatus,
@@ -155,6 +175,21 @@ export const organizationProfileSchema = z.object({
   region: optionalText(80),
   country: z.string().trim().length(2, "Country must be a 2-letter ISO code").toUpperCase(),
 });
+
+/**
+ * A dealership's standing terms for buyers — see lib/utils/car-disclosures.
+ * The financing note is short because the buyer assistant sends it with every
+ * question asked on the dealer's listings.
+ */
+export const dealershipTermsSchema = z.object({
+  offersFinancing: z.boolean().nullable(),
+  financingNote: z.string().trim().max(200).nullable(),
+  acceptsTradeIn: z.boolean().nullable(),
+  allowsInspection: z.boolean().nullable(),
+  offersDelivery: z.boolean().nullable(),
+});
+
+export type DealershipTermsInput = z.infer<typeof dealershipTermsSchema>;
 
 // ============ TEAM ============
 
