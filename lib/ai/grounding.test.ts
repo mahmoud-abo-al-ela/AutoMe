@@ -27,6 +27,7 @@ const source: ListingSource = {
     { dayOfWeek: ["SATURDAY", "SUNDAY"], openTime: "10:00", closeTime: "20:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "09:00", closeTime: "18:00", isOpen: false },
   ],
+  dealerAnswers: [],
 };
 
 describe("buildListingFacts", () => {
@@ -64,6 +65,30 @@ describe("buildListingFacts", () => {
   it("bounds free text so a long description cannot inflate every call", () => {
     const facts = buildListingFacts({ ...source, descriptionEn: "x".repeat(5000) });
     expect((facts.description as { en: string }).en.length).toBeLessThanOrEqual(1501);
+  });
+});
+
+describe("dealer answers", () => {
+  it("carries answered questions, marking dealership-wide ones", () => {
+    const facts = buildListingFacts({
+      ...source,
+      dealerAnswers: [
+        { question: "Any accidents?", answer: "None.", appliesToAllCars: false },
+        { question: "Instalments?", answer: "Yes, with NBE.", appliesToAllCars: true },
+      ],
+    });
+    expect(facts.dealerAnswers).toEqual([
+      { question: "Any accidents?", answer: "None.", about: "thisCar" },
+      { question: "Instalments?", answer: "Yes, with NBE.", about: "allCars" },
+    ]);
+  });
+
+  it("leaves the fact out when no answer has text", () => {
+    const facts = buildListingFacts({
+      ...source,
+      dealerAnswers: [{ question: "Any accidents?", answer: "  ", appliesToAllCars: false }],
+    });
+    expect(facts).not.toHaveProperty("dealerAnswers");
   });
 });
 

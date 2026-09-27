@@ -4,20 +4,12 @@ import { citationsHold, type ListingFacts, type ListingFactKey } from "@/lib/ai/
 import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
 import { listingQaSchema } from "@/lib/ai/schemas/listing-qa";
 import { textPart } from "@/lib/ai/provider/gemini";
+import { questionKey } from "@/lib/utils/question-key";
 
 /** What a buyer is shown: an answer the listing backs, or nothing. */
 export type ListingAnswer =
   | { grounded: true; answer: string; fieldsUsed: ListingFactKey[] }
   | { grounded: false };
-
-/**
- * The cache key's view of a question: case, spacing and Unicode form do not
- * change what is being asked, and a buyer re-asking should cost the dealer
- * nothing. Only the key — the model still sees what the buyer typed.
- */
-function questionKey(question: string): string {
-  return question.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
-}
 
 /**
  * Answer a buyer's question from one listing's facts, or decline.
@@ -47,7 +39,8 @@ export async function answerListingQuestion(
     promptVersion: `${listingQaPrompt.version}.${language}`,
     ctx,
     // The record is in the key, so an edited listing is never answered from
-    // its old self, and two listings never share an answer.
+    // its old self, and two listings never share an answer. A re-asked
+    // question costs the dealer nothing; the model still sees what was typed.
     cacheBytes: `${record}\0${questionKey(question)}`,
     thinking: "low",
     temperature: 0,

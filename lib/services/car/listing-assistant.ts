@@ -6,7 +6,9 @@ import { buildListingFacts } from "@/lib/ai/grounding";
 import type { CapacityPriority } from "@/lib/ai/breaker";
 import { answerListingQuestion } from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
-import { NotFoundError } from "@/lib/utils/errors";
+import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
+import { questionKey } from "@/lib/utils/question-key";
+import { NotFoundError, logError } from "@/lib/utils/errors";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -79,7 +81,10 @@ export async function askAboutListing(
     throw new NotFoundError("Car");
   }
 
-  const allowance = await allowanceFor(car.organizationId);
+  const [allowance, dealerAnswers] = await Promise.all([
+    allowanceFor(car.organizationId),
+    buyerQuestionRepository.findAnswersForCar(car.id, car.organizationId),
+  ]);
   if (!allowance.offered) return { status: "unavailable" };
 
   const { organization } = car;
@@ -94,6 +99,7 @@ export async function askAboutListing(
       phone: organization.phone,
     },
     workingHours: organization.workingHours,
+    dealerAnswers,
   });
 
   const reply = await answerListingQuestion(question, facts, locale, {
@@ -103,7 +109,27 @@ export async function askAboutListing(
     priority: allowance.priority,
   });
 
-  return reply.grounded
-    ? { status: "answered", answer: reply.answer }
-    : { status: "notInListing" };
+  if (reply.grounded) return { status: "answered", answer: reply.answer };
+
+  await recordForDealer({
+    organizationId: car.organizationId,
+    carId: car.id,
+    question,
+    questionKey: questionKey(question),
+    locale,
+  });
+  return { status: "notInListing" };
+}
+
+/**
+ * Put a declined question in the dealer's inbox. Awaited — a detached write
+ * can be killed when the function returns — but never allowed to fail the
+ * buyer's request: they still get "ask the dealer" either way.
+ */
+async function recordForDealer(input: buyerQuestionRepository.DeclinedQuestion) {
+  try {
+    await buyerQuestionRepository.recordDeclinedQuestion(input);
+  } catch (error) {
+    logError("Recording a declined buyer question failed", error);
+  }
 }

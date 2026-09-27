@@ -29,6 +29,7 @@ export const LISTING_FACT_KEYS = [
   "description",
   "dealership",
   "workingHours",
+  "dealerAnswers",
 ] as const;
 
 export type ListingFactKey = (typeof LISTING_FACT_KEYS)[number];
@@ -69,6 +70,15 @@ export interface ListingSource {
     closeTime: string;
     isOpen: boolean;
   }[];
+  /**
+   * The dealer's own answers to earlier buyers' questions — on this car, or
+   * marked by the dealer as true of every car they sell.
+   */
+  dealerAnswers: {
+    question: string;
+    answer: string | null;
+    appliesToAllCars: boolean;
+  }[];
 }
 
 export type ListingFacts = Partial<Record<ListingFactKey, unknown>>;
@@ -92,6 +102,16 @@ function bilingual(en: string | null, ar: string | null, legacy: string | null) 
 
 function nonEmpty(list: string[]): string[] | undefined {
   const kept = list.map((item) => item.trim()).filter(Boolean).slice(0, MAX_FEATURES);
+  return kept.length > 0 ? kept : undefined;
+}
+
+function dealerAnswers(answers: ListingSource["dealerAnswers"]) {
+  const kept = answers.flatMap((entry) => {
+    const answer = clip(entry.answer);
+    const question = clip(entry.question);
+    if (!answer || !question) return [];
+    return [{ question, answer, about: entry.appliesToAllCars ? "allCars" : "thisCar" }];
+  });
   return kept.length > 0 ? kept : undefined;
 }
 
@@ -140,6 +160,7 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
               : { open: false }),
           }))
         : undefined,
+    dealerAnswers: dealerAnswers(source.dealerAnswers),
   };
 
   for (const key of LISTING_FACT_KEYS) {

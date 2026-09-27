@@ -1,17 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { findCarForAssistant, findActiveSubscription, countOrgAiCallsThisMonth, answerListingQuestion } =
-  vi.hoisted(() => ({
-    findCarForAssistant: vi.fn(),
-    findActiveSubscription: vi.fn(),
-    countOrgAiCallsThisMonth: vi.fn(),
-    answerListingQuestion: vi.fn(),
-  }));
+const {
+  findCarForAssistant,
+  findActiveSubscription,
+  countOrgAiCallsThisMonth,
+  answerListingQuestion,
+  findAnswersForCar,
+  recordDeclinedQuestion,
+} = vi.hoisted(() => ({
+  findCarForAssistant: vi.fn(),
+  findActiveSubscription: vi.fn(),
+  countOrgAiCallsThisMonth: vi.fn(),
+  answerListingQuestion: vi.fn(),
+  findAnswersForCar: vi.fn(),
+  recordDeclinedQuestion: vi.fn(),
+}));
 
 vi.mock("@/lib/repositories/car", () => ({ findCarForAssistant }));
 vi.mock("@/lib/repositories/billing", () => ({ findActiveSubscription }));
 vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCallsThisMonth }));
 vi.mock("@/lib/services/ai/answerListingQuestion", () => ({ answerListingQuestion }));
+vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion }));
 
 import { askAboutListing, isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
 import { NotFoundError } from "@/lib/utils/errors";
@@ -54,7 +63,8 @@ function plan(aiAssistant: unknown, monthlyPrice = 4900) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
+  findAnswersForCar.mockResolvedValue([]);
   findCarForAssistant.mockResolvedValue(car);
   findActiveSubscription.mockResolvedValue(plan({ enabled: true, limit: 300 }));
   countOrgAiCallsThisMonth.mockResolvedValue(0);
@@ -85,6 +95,42 @@ describe("askAboutListing", () => {
     expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({
       status: "notInListing",
     });
+  });
+
+  it("puts a declined question in the dealer's inbox, keyed for repeats", async () => {
+    answerListingQuestion.mockResolvedValue({ grounded: false });
+    await askAboutListing("car-1", "  Any ACCIDENTS? ", "en", null);
+    expect(recordDeclinedQuestion).toHaveBeenCalledWith({
+      organizationId: "org-dealer",
+      carId: "car-1",
+      question: "  Any ACCIDENTS? ",
+      questionKey: "any accidents",
+      locale: "en",
+    });
+  });
+
+  it("still tells the buyer to ask the dealer if recording fails", async () => {
+    answerListingQuestion.mockResolvedValue({ grounded: false });
+    recordDeclinedQuestion.mockRejectedValue(new Error("db down"));
+    expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({
+      status: "notInListing",
+    });
+  });
+
+  it("does not record a question the listing answered", async () => {
+    await askAboutListing("car-1", "Colour?", "en", null);
+    expect(recordDeclinedQuestion).not.toHaveBeenCalled();
+  });
+
+  it("hands the model the dealer's answers for this car", async () => {
+    findAnswersForCar.mockResolvedValue([
+      { question: "Instalments?", answer: "Yes.", appliesToAllCars: true },
+    ]);
+    await askAboutListing("car-1", "Can I pay monthly?", "en", null);
+    expect(findAnswersForCar).toHaveBeenCalledWith("car-1", "org-dealer");
+    expect(answerListingQuestion.mock.calls[0][1].dealerAnswers).toEqual([
+      { question: "Instalments?", answer: "Yes.", about: "allCars" },
+    ]);
   });
 
   it("does not spend when the plan does not offer it", async () => {

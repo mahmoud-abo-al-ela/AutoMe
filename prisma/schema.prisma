@@ -161,6 +161,7 @@ model Organization {
   impersonationSessions ImpersonationSession[]
   dealershipReviews     DealershipReview[]
   aiUsage               AiUsage[]
+  buyerQuestions        BuyerQuestion[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -360,6 +361,9 @@ model User {
 
   // AI usage
   aiUsage AiUsage[]
+
+  // Buyer questions this user answered as a dealership member.
+  answeredBuyerQuestions BuyerQuestion[]
 }
 
 // ============ CAR MODEL ============
@@ -428,6 +432,7 @@ model Car {
 
   savedBy       SavedCar[]
   testDrive     TestDrive[]
+  buyerQuestions BuyerQuestion[]
 
   @@index([organizationId])
   @@index([make, model])
@@ -595,4 +600,47 @@ model AiUsage {
   @@index([organizationId, feature, createdAt]) // monthly per-org quota count
   @@index([feature, createdAt]) // per-feature reporting
   @@index([createdAt]) // platform-wide RPD/RPM breaker, all features
+}
+
+enum BuyerQuestionStatus {
+  OPEN
+  ANSWERED
+  DISMISSED
+}
+
+// A question a buyer asked the listing assistant that the listing could not
+// answer. The dealer sees it in their inbox; their answer becomes a fact the
+// assistant cites for every later buyer ("the dealer says…").
+//
+// No buyer identity is stored — no user, no IP. Repeats of the same question
+// on the same car fold into one row (questionKey) and raise askCount, which is
+// what tells the dealer which gaps matter.
+model BuyerQuestion {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // The car it was asked on. An answer marked appliesToAllCars is still
+  // anchored here, but is cited on every car of the dealership.
+  carId          String
+  car            Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  question    String // as first asked, trimmed, at most 300 characters
+  questionKey String // folded form, for recognising a repeat
+  locale      String // the page language it was asked in
+  askCount    Int      @default(1)
+  lastAskedAt DateTime @default(now())
+
+  status           BuyerQuestionStatus @default(OPEN)
+  answer           String?
+  appliesToAllCars Boolean             @default(false)
+  answeredById     String?
+  answeredBy       User?               @relation(fields: [answeredById], references: [id], onDelete: SetNull)
+  answeredAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([carId, questionKey])
+  @@index([organizationId, status, lastAskedAt]) // the dealer's inbox
+  @@index([organizationId, status, appliesToAllCars]) // dealership-wide answers
 }
