@@ -7,9 +7,10 @@ import {
   isCapacityError,
   isModelUnavailableError,
   isProviderUnavailableError,
+  isRateLimitError,
   isRetryableError,
 } from "@/lib/ai/provider/errors";
-import { PROVIDERS, type ProviderId } from "@/lib/ai/providers";
+import { PROVIDERS, keysFor, ledgerId, type ProviderId } from "@/lib/ai/providers";
 import type { AiFeature } from "@/lib/ai/features";
 import {
   entryLabel,
@@ -203,6 +204,7 @@ function timeoutError(): Error {
  */
 async function callWithTimeout(
   provider: AiProvider,
+  apiKey: string,
   req: Omit<ProviderRequest, "signal">,
   timeoutMs: number,
   firstTokenMs?: number
@@ -246,7 +248,7 @@ async function callWithTimeout(
       }
     : req.onText;
 
-  const call = provider.generate({ ...req, onText, signal: controller.signal });
+  const call = provider.generate({ ...req, onText, signal: controller.signal }, apiKey);
   // When the timeout wins the race, the call's own rejection still arrives and
   // would otherwise surface as an unhandled rejection.
   call.catch(() => {});
@@ -263,6 +265,8 @@ interface MeterInput {
   ctx: AiCallerContext | null | undefined;
   feature: AiFeature;
   provider: ProviderId;
+  /** Which key: what AiUsage.provider records and the per-key caps count. */
+  ledger: string;
   model: string;
   usage: TokenUsage;
   latencyMs: number;
@@ -281,7 +285,7 @@ async function meter(input: MeterInput): Promise<void> {
       organizationId: input.ctx?.organizationId ?? null,
       userId: input.ctx?.userId ?? null,
       feature: input.feature,
-      provider: input.provider,
+      provider: input.ledger,
       model: input.model,
       inputTokens: input.usage.inputTokens,
       outputTokens: input.usage.outputTokens,
@@ -314,6 +318,8 @@ function toPublicError(error: unknown): Error {
 
 interface AttemptInput<T> {
   entry: ChainEntry;
+  apiKey: string;
+  ledger: string;
   feature: AiFeature;
   parts: AiPart[];
   schema: ZodType<T>;
@@ -376,6 +382,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
     try {
       const result = await callWithTimeout(
         provider,
+        input.apiKey,
         {
           model,
           parts: input.parts,
@@ -452,6 +459,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
         ctx: input.ctx,
         feature: input.feature,
         provider: providerId,
+        ledger: input.ledger,
         model,
         usage,
         latencyMs,
@@ -482,10 +490,14 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
 export async function generateStructured<T>(
   input: GenerateStructuredInput<T>
 ): Promise<T> {
-  // Only providers with a key: an entry can ship before its key does.
-  const configured = modelsFor(input.task).filter((entry) =>
-    PROVIDERS[entry.provider].provider.isConfigured()
-  );
+  // Only providers with at least one key: an entry can ship before its key does.
+  const keyring = new Map<ProviderId, string[]>();
+  const keysOf = (provider: ProviderId) => {
+    let keys = keyring.get(provider);
+    if (!keys) keyring.set(provider, (keys = keysFor(provider)));
+    return keys;
+  };
+  const configured = modelsFor(input.task).filter((entry) => keysOf(entry.provider).length > 0);
   if (configured.length === 0) {
     // A config fault, not a user fault — and it must not look like a rate limit.
     throw new ServiceUnavailableError("No AI provider is configured for this task", {
@@ -530,30 +542,46 @@ export async function generateStructured<T>(
     }
   }
 
-  // Each provider has its own caps; one at its limit is skipped, not fatal.
+  // Keys out of play for this request, per provider: at their cap before we
+  // start, or refused along the way (rejected, allowance spent). Each key has
+  // its own caps; one at its limit is skipped, not fatal.
+  const deadKeys = new Map<ProviderId, Set<number>>();
   const providers = [...new Set(configured.map((entry) => entry.provider))];
-  const blocks = await Promise.all(
-    providers.map((provider) => capacityBlock(provider, input.ctx?.priority))
+  const blocks: string[] = [];
+  await Promise.all(
+    providers.map(async (provider) => {
+      const dead = new Set<number>();
+      const checks = await Promise.all(
+        keysOf(provider).map((_, index) => capacityBlock(provider, index, input.ctx?.priority))
+      );
+      checks.forEach((block, index) => {
+        if (block) {
+          dead.add(index);
+          blocks.push(block);
+        }
+      });
+      deadKeys.set(provider, dead);
+    })
   );
-  const capped = new Set(providers.filter((_, i) => blocks[i] !== null));
-  const models = configured.filter((entry) => !capped.has(entry.provider));
+  const liveKeys = (provider: ProviderId) =>
+    keysOf(provider)
+      .map((_, index) => index)
+      .filter((index) => !deadKeys.get(provider)!.has(index));
+
+  const models = configured.filter((entry) => liveKeys(entry.provider).length > 0);
   if (models.length === 0) {
     // The message is developer-facing; the client renders `messageKey`.
-    throw new ServiceUnavailableError(
-      `AI capacity reached (${blocks.filter(Boolean).join("; ")})`,
-      { key: "errors.ai.busy" }
-    );
+    throw new ServiceUnavailableError(`AI capacity reached (${blocks.join("; ")})`, {
+      key: "errors.ai.busy",
+    });
   }
 
   const responseJsonSchema = jsonSchemaFor(input.schema);
-  // Providers that refused us outright — rejected key, spent allowance. Every
-  // other model behind the same key would refuse the same way.
-  const deadProviders = new Set<ProviderId>();
   /** The next entry to try after `after`, optionally only on another provider. */
   const nextUsable = (after: number, otherThan?: ProviderId) => {
     for (let i = after + 1; i < models.length; i++) {
       const { provider } = models[i];
-      if (!deadProviders.has(provider) && provider !== otherThan) return i;
+      if (liveKeys(provider).length > 0 && provider !== otherThan) return i;
     }
     return -1;
   };
@@ -562,71 +590,84 @@ export async function generateStructured<T>(
   for (let index = 0; index >= 0; ) {
     const entry = models[index];
     const isLast = nextUsable(index) < 0;
+    const { attemptTimeoutMs, streamsIncrementally } = PROVIDERS[entry.provider];
 
-    try {
-      const result = await attemptModel({
-        entry,
-        feature: input.feature,
-        parts: input.parts,
-        schema: input.schema,
-        responseJsonSchema,
-        ctx: input.ctx,
-        timeoutMs:
-          input.timeoutMs ?? PROVIDERS[entry.provider].attemptTimeoutMs ?? DEFAULT_TIMEOUT_MS,
-        deadline,
-        temperature: input.temperature,
-        maxAttempts,
-        thinking: input.thinking,
-        // The last model keeps the rest of the budget: there is nowhere left
-        // to hand over to, so cutting it short only guarantees a failure. A
-        // provider that does not stream has no "first token" to wait for.
-        firstTokenMs:
-          isLast || !PROVIDERS[entry.provider].streamsIncrementally
-            ? undefined
-            : input.firstTokenTimeoutMs,
-        modelIndex: index,
-        modelCount: models.length,
-        emit,
-        streaming: Boolean(input.onProgress),
-      });
+    let error: unknown = null;
+    // The same model on each of the provider's keys, in order, until one
+    // answers. Only a key-shaped refusal moves to the next key: a rejected key
+    // or a spent allowance (dead for the rest of this request), or a rate
+    // limit (that key's own). Anything else is about the model or the
+    // request, and another key would meet it too.
+    for (const keyIndex of liveKeys(entry.provider)) {
+      try {
+        const result = await attemptModel({
+          entry,
+          apiKey: keysOf(entry.provider)[keyIndex],
+          ledger: ledgerId(entry.provider, keyIndex),
+          feature: input.feature,
+          parts: input.parts,
+          schema: input.schema,
+          responseJsonSchema,
+          ctx: input.ctx,
+          timeoutMs: input.timeoutMs ?? attemptTimeoutMs ?? DEFAULT_TIMEOUT_MS,
+          deadline,
+          temperature: input.temperature,
+          maxAttempts,
+          thinking: input.thinking,
+          // The last model keeps the rest of the budget: there is nowhere left
+          // to hand over to, so cutting it short only guarantees a failure. A
+          // provider that does not stream has no "first token" to wait for.
+          firstTokenMs:
+            isLast || !streamsIncrementally ? undefined : input.firstTokenTimeoutMs,
+          modelIndex: index,
+          modelCount: models.length,
+          emit,
+          streaming: Boolean(input.onProgress),
+        });
 
-      const key = keyFor(entry);
-      if (key) cache.set(key, result);
-      return result;
-    } catch (error) {
-      lastError = error;
-
-      if (isProviderUnavailableError(error)) deadProviders.add(entry.provider);
-
-      // What earns the next link in the chain: a retired model, a saturated
-      // one, or a provider that refused us — each a statement about *this*
-      // model or key that another may not share. A malformed request or an
-      // unusable response fails identically everywhere, and walking the chain
-      // would spend the quota again to learn that.
-      const anotherModelMightWork =
-        isModelUnavailableError(error) ||
-        isCapacityError(error) ||
-        isProviderUnavailableError(error) ||
-        error instanceof QueueTimeoutError;
-      // A timeout is not retried, nor walked to the same provider's next
-      // model — the provider still bills the abandoned work, and is plainly
-      // slow right now. It says nothing about a *different* provider, though.
-      const next = anotherModelMightWork
-        ? nextUsable(index)
-        : isAbortError(error)
-          ? nextUsable(index, entry.provider)
-          : -1;
-      // Falling back is only worth it if there is time to hear the answer.
-      const timeLeft = deadline - Date.now() > 0;
-
-      if (next < 0 || !timeLeft) throw toPublicError(error);
-
-      logError(
-        `AI model ${entryLabel(entry)} unusable (${errorCodeOf(error)}); falling back to ${entryLabel(models[next])}`,
-        error
-      );
-      index = next;
+        const key = keyFor(entry);
+        if (key) cache.set(key, result);
+        return result;
+      } catch (caught) {
+        error = caught;
+        lastError = caught;
+        if (isProviderUnavailableError(caught)) {
+          deadKeys.get(entry.provider)!.add(keyIndex);
+          continue;
+        }
+        if (isRateLimitError(caught) && deadline - Date.now() > 0) continue;
+        break;
+      }
     }
+
+    // What earns the next link in the chain: a retired model, a saturated
+    // one, or a provider whose keys all refused us — each a statement about
+    // *this* model or provider that another may not share. A malformed request
+    // or an unusable response fails identically everywhere, and walking the
+    // chain would spend the quota again to learn that.
+    const anotherModelMightWork =
+      isModelUnavailableError(error) ||
+      isCapacityError(error) ||
+      isProviderUnavailableError(error) ||
+      error instanceof QueueTimeoutError;
+    // A timeout is not retried, nor walked to the same provider's next
+    // model — the provider still bills the abandoned work, and is plainly
+    // slow right now. It says nothing about a *different* provider, though.
+    const next = anotherModelMightWork
+      ? nextUsable(index)
+      : isAbortError(error)
+        ? nextUsable(index, entry.provider)
+        : -1;
+    // Falling back is only worth it if there is time to hear the answer.
+    const timeLeft = deadline - Date.now() > 0;
+
+    if (next < 0 || !timeLeft) throw toPublicError(error);
+
+    logError(
+      `AI model ${entryLabel(entry)} unusable (${errorCodeOf(error)}); falling back to ${entryLabel(models[next])}`,
+      error
+    );
+    index = next;
   }
 
   throw toPublicError(lastError);

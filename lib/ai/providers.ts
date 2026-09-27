@@ -5,10 +5,14 @@ import type { AiProvider } from "@/lib/ai/provider/types";
 /**
  * Every AI API the platform can call. **Adding one is three steps:**
  *
- *   1. An entry below — for any OpenAI-compatible API, `kind:
- *      "openai-compatible"`, its base URL and the env var for its key.
+ *   1. An entry below — for any OpenAI-compatible API, a
+ *      `createOpenAiCompatibleProvider` with its base URL, and the env var
+ *      for its key.
  *   2. The key in `.env` locally and in Vercel. A provider whose key is unset
- *      is skipped, so an entry can ship before its key does.
+ *      is skipped, so an entry can ship before its key does. **More than one
+ *      key:** `<VAR>_2`, `<VAR>_3`, … (or commas in `<VAR>` itself). Keys
+ *      are spent in order; one that runs out, is rejected or is rate-limited
+ *      hands the same request to the next.
  *   3. `"<id>/<model>"` entries in the task chains in lib/ai/models.ts, or in
  *      an `AI_MODELS_<TASK>` env var to reorder without a deploy.
  *
@@ -31,6 +35,8 @@ export interface ProviderCaps {
 interface ProviderEntry {
   /** Stored in AiUsage.provider — never rename one that has ledger rows. */
   id: ProviderId;
+  /** Env var holding the key; further keys in `<VAR>_2`, `<VAR>_3`, … */
+  apiKeyEnv: string;
   caps: ProviderCaps;
   /** Env prefix for cap overrides: <PREFIX>_MAX_RPM, _MAX_RPD, _MAX_MONTHLY_TOKENS. */
   envPrefix: string;
@@ -57,6 +63,7 @@ export const PROVIDERS: Record<ProviderId, ProviderEntry> = {
    */
   codecraft: {
     id: "codecraft",
+    apiKeyEnv: "CODECRAFT_API_KEY",
     caps: { rpm: 50, monthlyTokens: 950_000 },
     envPrefix: "AI_CODECRAFT",
     // Measured 2026-09-27: the whole reply arrives in ~3 chunks at the very
@@ -68,7 +75,6 @@ export const PROVIDERS: Record<ProviderId, ProviderEntry> = {
     attemptTimeoutMs: 30_000,
     provider: createOpenAiCompatibleProvider({
       baseUrl: "https://codecraftapi.com/v1",
-      apiKeyEnv: "CODECRAFT_API_KEY",
       lowReasoningEffort: "minimal",
     }),
   },
@@ -80,17 +86,46 @@ export const PROVIDERS: Record<ProviderId, ProviderEntry> = {
    */
   google: {
     id: "google",
+    apiKeyEnv: "GEMINI_API_KEY",
     caps: { rpm: 10, rpd: 500 },
     // The names these caps have always had, before there was a second provider.
     envPrefix: "AI_GOOGLE",
     streamsIncrementally: true,
     provider: {
       // Resolved per call, so a test mocking the module intercepts it.
-      isConfigured: () => gemini.isConfigured(),
-      generate: (req) => gemini.generate(req),
+      generate: (req, apiKey) => gemini.generate(req, apiKey),
     },
   },
 };
+
+/**
+ * A provider's keys, in the order they are spent: `<VAR>` (which may hold
+ * several, comma-separated), then `<VAR>_2`, `<VAR>_3`, … up to the first gap.
+ * Read per call, so a key added to the environment is picked up without a
+ * restart where the platform allows it.
+ */
+export function keysFor(provider: ProviderId): string[] {
+  const env = PROVIDERS[provider].apiKeyEnv;
+  const keys = (process.env[env] ?? "").split(",").map((key) => key.trim()).filter(Boolean);
+  for (let n = 2; ; n++) {
+    const key = process.env[`${env}_${n}`]?.trim();
+    if (!key) break;
+    keys.push(key);
+  }
+  return [...new Set(keys)];
+}
+
+/**
+ * How one key appears in AiUsage.provider, which is what its caps are counted
+ * from: the provider id for the first key — so rows written before there were
+ * several keys still count against it — and `id#2`, `id#3`, … after.
+ *
+ * ⚠️ Identity is position. Reordering keys mid-month swaps their counts; add
+ * new keys at the end instead.
+ */
+export function ledgerId(provider: ProviderId, keyIndex: number): string {
+  return keyIndex === 0 ? provider : `${provider}#${keyIndex + 1}`;
+}
 
 export function isProviderId(value: string): value is ProviderId {
   return Object.prototype.hasOwnProperty.call(PROVIDERS, value);

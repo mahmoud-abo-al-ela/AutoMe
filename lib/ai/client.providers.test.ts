@@ -27,6 +27,7 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import { imagePart, textPart } from "@/lib/ai/provider/types";
 import * as cache from "@/lib/ai/cache";
 import { ServiceUnavailableError } from "@/lib/utils/errors";
+import { keysFor, ledgerId } from "@/lib/ai/providers";
 
 const schema = z.object({ make: z.string(), year: z.coerce.number() });
 const fetchMock = vi.fn();
@@ -71,6 +72,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   cache.clear();
   process.env.CODECRAFT_API_KEY = "test-key";
+  process.env.GEMINI_API_KEY = "test-gemini-key";
   vi.stubGlobal("fetch", fetchMock);
   countPlatformCallsSince.mockResolvedValue(0);
   sumProviderTokensSince.mockResolvedValue(0);
@@ -79,6 +81,92 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   delete process.env.CODECRAFT_API_KEY;
+  delete process.env.CODECRAFT_API_KEY_2;
+});
+
+describe("several keys for one provider", () => {
+  const authOf = (i: number) => fetchMock.mock.calls[i][1].headers.Authorization;
+
+  beforeEach(() => {
+    process.env.CODECRAFT_API_KEY = "key-one";
+    process.env.CODECRAFT_API_KEY_2 = "key-two";
+  });
+
+  it("hands the same model to the next key when one's allowance is spent", async () => {
+    fetchMock
+      .mockResolvedValueOnce(chatError(402))
+      .mockResolvedValueOnce(chatReply('{"make":"Toyota","year":2020}'));
+
+    await expect(call()).resolves.toEqual({ make: "Toyota", year: 2020 });
+
+    expect([authOf(0), authOf(1)]).toEqual(["Bearer key-one", "Bearer key-two"]);
+    // Same model on both keys, and each key counted under its own name.
+    expect(rows().map((r) => [r.provider, r.model, r.success])).toEqual([
+      ["codecraft", "gemini-3.7-flash", false],
+      ["codecraft#2", "gemini-3.7-flash", true],
+    ]);
+  });
+
+  it("does not call a key that is already over its monthly cap", async () => {
+    sumProviderTokensSince.mockImplementation(async (ledger: string) =>
+      ledger === "codecraft" ? 1_000_000 : 0
+    );
+    fetchMock.mockResolvedValue(chatReply('{"make":"Toyota","year":2020}'));
+
+    await call();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(authOf(0)).toBe("Bearer key-two");
+    expect(rows()[0].provider).toBe("codecraft#2");
+  });
+
+  it("moves a rate-limited key's request to the next key", async () => {
+    fetchMock
+      .mockResolvedValueOnce(chatError(429))
+      .mockResolvedValueOnce(chatReply('{"make":"Toyota","year":2020}'));
+
+    await call();
+
+    expect([authOf(0), authOf(1)]).toEqual(["Bearer key-one", "Bearer key-two"]);
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("keeps a spent key out of the rest of the request, and falls back once all are", async () => {
+    fetchMock.mockResolvedValue(chatError(402));
+    generate.mockResolvedValue(googleOk());
+
+    await expect(call()).resolves.toEqual({ make: "Kia", year: 2019 });
+
+    // Two keys, each tried once; the second CodeCraft model is never sent to
+    // keys already known to be spent.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(rows().at(-1)).toMatchObject({ provider: "google", success: true });
+  });
+
+  it("does not try another key for a fault every key would share", async () => {
+    fetchMock.mockResolvedValue(chatError(400));
+
+    await expect(call()).rejects.toBeInstanceOf(ServiceUnavailableError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("keysFor", () => {
+  it("reads comma-separated keys and numbered extras, in order, without repeats", () => {
+    process.env.CODECRAFT_API_KEY = "a, b";
+    process.env.CODECRAFT_API_KEY_2 = "c";
+    process.env.CODECRAFT_API_KEY_3 = "a";
+    try {
+      expect(keysFor("codecraft")).toEqual(["a", "b", "c"]);
+    } finally {
+      delete process.env.CODECRAFT_API_KEY_3;
+    }
+  });
+
+  it("names the first key as the provider, so earlier ledger rows still count", () => {
+    expect(ledgerId("codecraft", 0)).toBe("codecraft");
+    expect(ledgerId("codecraft", 2)).toBe("codecraft#3");
+  });
 });
 
 describe("provider order", () => {

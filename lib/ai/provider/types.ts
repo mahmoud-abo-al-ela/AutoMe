@@ -48,13 +48,16 @@ export interface ProviderResult {
   usage: TokenUsage;
 }
 
-/** One provider: whether it can be called, and one call. No retry, no metering. */
+/**
+ * One provider: one call, made with the key the client chose. No retry, no
+ * metering, no key selection — a provider may have several keys, and which one
+ * to spend is the client's decision (see keysFor in lib/ai/providers).
+ */
 export interface AiProvider {
-  isConfigured(): boolean;
   /**
    * Must throw errors carrying a numeric `status` for HTTP failures, so the
    * shared classification in ./errors decides retry and fallback identically
    * for every provider.
    */
-  generate(req: ProviderRequest): Promise<ProviderResult>;
+  generate(req: ProviderRequest, apiKey: string): Promise<ProviderResult>;
 }

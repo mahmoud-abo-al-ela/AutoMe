@@ -1,14 +1,16 @@
 import { countPlatformCallsSince, sumProviderTokensSince } from "@/lib/repositories/ai-usage";
-import { PROVIDERS, type ProviderCaps, type ProviderId } from "@/lib/ai/providers";
+import { PROVIDERS, ledgerId, type ProviderCaps, type ProviderId } from "@/lib/ai/providers";
 import { logError } from "@/lib/utils/errors";
 
 /**
  * Our own limits in front of each provider's, read from the usage ledger.
  *
- * Per provider, because each API has its own key and its own allowance: one
- * running out says nothing about the next. A provider at its cap is skipped
- * and the chain carries on; only when every provider in a chain is capped is
- * the request refused as "AI busy".
+ * Per key, because each key has its own allowance: one running out says
+ * nothing about the next. The caps are the provider's (every key of a
+ * provider is on the same kind of plan); the counts are the key's own, read
+ * from AiUsage.provider = ledgerId(provider, keyIndex). A key at its cap is
+ * skipped; only when every key of every provider in a chain is capped is the
+ * request refused as "AI busy".
  */
 
 /**
@@ -74,33 +76,35 @@ function startOfMonthUtc(now: number): Date {
 }
 
 /**
- * Why a provider cannot take another call right now, or null if it can.
- * Developer-facing; the client turns an all-capped chain into "AI busy".
+ * Why one key of a provider cannot take another call right now, or null if it
+ * can. Developer-facing; the client turns an all-capped chain into "AI busy".
  */
 export async function capacityBlock(
   provider: ProviderId,
+  keyIndex = 0,
   priority: CapacityPriority = "standard"
 ): Promise<string | null> {
   const caps = currentCaps(provider, priority);
+  const ledger = ledgerId(provider, keyIndex);
   const now = Date.now();
 
   try {
     const [minute, day, tokens] = await Promise.all([
-      countPlatformCallsSince(new Date(now - 60_000), provider),
+      countPlatformCallsSince(new Date(now - 60_000), ledger),
       caps.rpd === undefined
         ? Promise.resolve(0)
-        : countPlatformCallsSince(new Date(now - 24 * 60 * 60_000), provider),
+        : countPlatformCallsSince(new Date(now - 24 * 60 * 60_000), ledger),
       caps.monthlyTokens === undefined
         ? Promise.resolve(0)
-        : sumProviderTokensSince(provider, startOfMonthUtc(now)),
+        : sumProviderTokensSince(ledger, startOfMonthUtc(now)),
     ]);
 
-    if (minute >= caps.rpm) return `${provider}: ${minute}/${caps.rpm} requests this minute`;
+    if (minute >= caps.rpm) return `${ledger}: ${minute}/${caps.rpm} requests this minute`;
     if (caps.rpd !== undefined && day >= caps.rpd) {
-      return `${provider}: ${day}/${caps.rpd} requests today`;
+      return `${ledger}: ${day}/${caps.rpd} requests today`;
     }
     if (caps.monthlyTokens !== undefined && tokens >= caps.monthlyTokens) {
-      return `${provider}: ${tokens}/${caps.monthlyTokens} tokens this month`;
+      return `${ledger}: ${tokens}/${caps.monthlyTokens} tokens this month`;
     }
     return null;
   } catch (error) {

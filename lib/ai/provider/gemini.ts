@@ -11,7 +11,8 @@ import type { ProviderRequest, ProviderResult } from "@/lib/ai/provider/types";
  * numeric `status`, which is what the shared classification in ./errors reads.
  */
 
-let client: GoogleGenAI | null = null;
+/** One SDK client per key: a provider may have several. */
+const clients = new Map<string, GoogleGenAI>();
 
 /**
  * Whether a key is present at all.
@@ -25,15 +26,20 @@ export function isConfigured(): boolean {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
-function getClient(): GoogleGenAI {
+function getClient(apiKey: string): GoogleGenAI {
+  let client = clients.get(apiKey);
   if (!client) {
-    client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    client = new GoogleGenAI({ apiKey });
+    clients.set(apiKey, client);
   }
   return client;
 }
 
 /** One provider call. No retry, no timeout, no metering — those belong to the client. */
-export async function generate(req: ProviderRequest): Promise<ProviderResult> {
+export async function generate(
+  req: ProviderRequest,
+  apiKey: string = process.env.GEMINI_API_KEY ?? ""
+): Promise<ProviderResult> {
   const params = {
     model: req.model,
     contents: [{ role: "user", parts: req.parts }],
@@ -53,11 +59,11 @@ export async function generate(req: ProviderRequest): Promise<ProviderResult> {
   };
 
   if (!req.onText) {
-    const response = await getClient().models.generateContent(params);
+    const response = await getClient(apiKey).models.generateContent(params);
     return { text: response.text, usage: usageOf(response) };
   }
 
-  const stream = await getClient().models.generateContentStream(params);
+  const stream = await getClient(apiKey).models.generateContentStream(params);
   let text = "";
   let last: GenerateContentResponse | undefined;
   for await (const chunk of stream) {

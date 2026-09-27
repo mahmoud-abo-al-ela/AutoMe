@@ -58,6 +58,14 @@ export function isCapacityError(error: unknown): boolean {
 }
 
 /**
+ * The key is being rate-limited or its quota is spent. With several keys for
+ * one provider, the next key may well be under its own limit.
+ */
+export function isRateLimitError(error: unknown): boolean {
+  return statusOf(error) === 429;
+}
+
+/**
  * The provider as a whole cannot serve us: the key is rejected (401/403) or the
  * account's allowance is spent (402). Every model behind the same key fails the
  * same way, so the client skips the rest of that provider — but another

@@ -9,7 +9,7 @@ import type {
 /**
  * Any API speaking OpenAI's Chat Completions format — which most gateways and
  * vendors do. One implementation, configured per provider in lib/ai/providers:
- * a base URL, the env var holding its key, and how it spells "think less".
+ * a base URL and how it spells "think less". The key arrives per call.
  *
  * Plain `fetch`, no SDK: the surface used is one endpoint, and an SDK per
  * vendor is exactly the coupling this layer exists to avoid.
@@ -17,7 +17,6 @@ import type {
 
 export interface OpenAiCompatibleConfig {
   baseUrl: string;
-  apiKeyEnv: string;
   /**
    * The `reasoning_effort` sent for `thinking: "low"`, or undefined to send
    * nothing. Measured on CodeCraft: "low" changed nothing on Gemini 3.7 Flash,
@@ -125,19 +124,15 @@ async function readStream(
 }
 
 export function createOpenAiCompatibleProvider(config: OpenAiCompatibleConfig): AiProvider {
-  const apiKey = () => process.env[config.apiKeyEnv];
-
   return {
-    isConfigured: () => Boolean(apiKey()),
-
-    async generate(req: ProviderRequest): Promise<ProviderResult> {
+    async generate(req: ProviderRequest, apiKey: string): Promise<ProviderResult> {
       const streaming = Boolean(req.onText);
       const effort = req.thinking === "low" ? config.lowReasoningEffort : undefined;
 
       const response = await fetch(`${config.baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey()}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

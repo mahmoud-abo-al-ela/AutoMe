@@ -75,6 +75,7 @@ beforeEach(() => {
   cache.clear();
   // These cases pin the Google path; the multi-provider cases set it themselves.
   delete process.env.CODECRAFT_API_KEY;
+  process.env.GEMINI_API_KEY = "test-gemini-key";
   countPlatformCallsSince.mockResolvedValue(0);
 });
 
