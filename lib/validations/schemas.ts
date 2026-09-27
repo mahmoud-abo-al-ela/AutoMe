@@ -243,3 +243,22 @@ export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
 export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
 export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
+
+// ============ LISTING QUALITY COACH ============
+
+/**
+ * The listing as the dealer's form currently holds it, for the quality coach.
+ * Bounded like the car schema so a crafted request cannot send the model an
+ * arbitrarily large prompt.
+ */
+export const listingReviewSchema = z.object({
+  year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
+  make: z.string().max(50),
+  model: z.string().max(50),
+  mileage: z.coerce.number().min(0).max(10_000_000),
+  bodyType: z.string().max(50),
+  description: z.string().max(2000),
+  features: z.array(z.string().max(80)).max(50),
+  imageCount: z.coerce.number().int().min(0).max(50),
+  language: z.enum(["en", "ar"]),
+});

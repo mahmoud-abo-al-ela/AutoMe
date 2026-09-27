@@ -1,5 +1,6 @@
 // Data serialization utilities
 import type { User, Car, TestDrive } from "@/lib/generated/prisma";
+import { parseImageAlts } from "@/lib/utils/image-alts";
 
 /** Organization summary as the car/dealership queries select it. */
 interface OrgSummary {
@@ -143,12 +144,17 @@ export function serializePartialCar(car: PartialCarInput | null) {
 /** The non-null body of `serializeCarWithImages`. See `serializeCarInner`. */
 function serializeCarWithImagesInner(car: CarInput) {
   const serialized = serializeCarInner(car);
+  const alts = parseImageAlts(car.imageAlts);
 
   return {
     ...serialized,
     images: serialized.images.map((url) => ({
       url,
       alt: `${car.make} ${car.model}`,
+      // Model-written alt text in both languages, keyed by URL so it follows
+      // the image through reorders. Null until the car has been described;
+      // the gallery then uses `alt`.
+      description: alts[url] ?? null,
     })),
   };
 }

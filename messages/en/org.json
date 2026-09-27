@@ -380,6 +380,26 @@
       "descriptionTooShort": "Description must be at least {min} characters",
       "imagesRequired": "Add at least one image",
       "imagesTooMany": "You can add at most {max} images"
+    },
+    "coach": {
+      "title": "Listing quality",
+      "body": "See what would make this listing stronger before you publish. Tailored advice uses one AI use.",
+      "check": "Check listing quality",
+      "checking": "Checking…",
+      "again": "Check again",
+      "score": "Score: {score} / {max}",
+      "perfect": "Nothing to improve — this listing is complete.",
+      "failed": "Couldn’t check the listing",
+      "adviceSkipped": "Tailored AI advice isn’t available right now (not on your plan, this month’s AI uses are used up, or a temporary error). The checks above still apply.",
+      "issues": {
+        "fewPhotos": "Add at least {min} photos",
+        "morePhotos": "Add more photos — {good} or more works best",
+        "shortDescription": "The description is too short to help a buyer",
+        "briefDescription": "Say more in the description — condition, service history, owners",
+        "noFeatures": "List the car’s features",
+        "fewFeatures": "List more of the car’s features",
+        "zeroMileage": "Mileage is 0 km — enter the real odometer reading"
+      }
     }
   },
   "testDrives": {

@@ -1,9 +1,12 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import * as carService from "@/lib/services/car";
-import { translateListing, type ListingText } from "@/lib/services/ai";
+import { coachListing, translateListing, type ListingText, type ListingToCoach } from "@/lib/services/ai";
+import { reviewListing, type ListingIssueCode } from "@/lib/services/car/listing-quality";
 import { aiCallerFor } from "@/lib/ai/caller";
+import { refreshImageAlts } from "@/lib/services/car/image-alts";
 import {
   applyTranslation,
   sourceText,
@@ -15,7 +18,12 @@ import { NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors"
 import type { TenantContext } from "@/lib/auth/context";
 import type { Locale } from "@/i18n/routing";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
+import {
+  carSchema,
+  listingReviewSchema,
+  updateCarSchema,
+  updateCarFullSchema,
+} from "@/lib/validations/schemas";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
@@ -96,6 +104,17 @@ async function fillOtherLanguage<T extends BilingualListing>(
   }
 }
 
+/**
+ * Describe the car's photos once the save has answered. Platform-initiated,
+ * so it is metered but never billed to the dealer (carImageAltText is not in
+ * DEALER_METERED_FEATURES), and runs at low priority so it cannot take shared
+ * capacity from a dealer waiting on the AI. refreshImageAlts never throws.
+ */
+function describePhotosAfterSave(ctx: TenantContext, carId: string) {
+  const caller = { ...aiCallerFor(ctx), priority: "low" as const };
+  after(() => refreshImageAlts(carId, ctx.organization.id, caller));
+}
+
 /** Client input: only the two known locales mean anything. */
 function toEditedLocale(value: unknown): Locale | null {
   return value === "en" || value === "ar" ? value : null;
@@ -117,6 +136,7 @@ export const addCar = withOrgAuth(
         toEditedLocale(options?.editedLocale)
       );
       const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
+      if (car?.id) describePhotosAfterSave(ctx, car.id);
 
       revalidatePath(`/org/${ctx.organization.slug}/cars`);
       return createSuccessResponse({ ...car, translation }, "Car added successfully");
@@ -207,7 +227,66 @@ export const updateCarFull = withOrgAuth(
     ctx.userId,
     ctx.organization.id
   );
+  // Also after an edit: new photos need describing, removed ones pruning.
+  describePhotosAfterSave(ctx, carId);
 
   revalidatePath(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse({ ...updatedCar, translation }, "Car updated successfully");
+});
+
+/**
+ * Same gates as every dealer AI call. Not exported: it only runs inside
+ * reviewListingQuality, never as its own endpoint.
+ */
+const coachGated = withPlanGate(
+  "aiProcessing",
+  withUsageLimit(
+    "aiProcessing",
+    async (
+      ctx: TenantContext,
+      listing: ListingToCoach,
+      codes: ListingIssueCode[],
+      language: Locale
+    ) => {
+      await enforceRateLimit();
+      return coachListing(listing, codes, language, aiCallerFor(ctx));
+    }
+  )
+);
+
+/**
+ * Review a listing before it is published: the rule-based score and issues
+ * always, plus AI advice for each issue when the plan, allowance and rate
+ * limit allow. Advice is best effort — without it the dealer still gets the
+ * review, and `advice` says why there is none.
+ */
+export const reviewListingQuality = withOrgAuth(async (ctx, input: unknown) => {
+  const { language, ...listing } = validateAction(listingReviewSchema, input);
+  const review = reviewListing(listing);
+
+  let adviceByCode: Partial<Record<ListingIssueCode, string>> = {};
+  let advice: "none" | "done" | "skipped" = "none";
+  if (review.issues.length > 0) {
+    try {
+      adviceByCode = await coachGated(
+        ctx,
+        listing,
+        review.issues.map((issue) => issue.code),
+        language
+      );
+      advice = "done";
+    } catch (error) {
+      logError("Listing coach advice skipped; returning the rule-based review", error);
+      advice = "skipped";
+    }
+  }
+
+  return createSuccessResponse({
+    score: review.score,
+    advice,
+    issues: review.issues.map((issue) => ({
+      ...issue,
+      advice: adviceByCode[issue.code] ?? null,
+    })),
+  });
 });

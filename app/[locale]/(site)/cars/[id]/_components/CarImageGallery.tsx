@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCarImageGallery } from "./useCarImageGallery";
 import type { CarDetailImage } from "../_lib/car-detail-types";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 
 const CarImageGallery = ({
@@ -27,6 +27,7 @@ const CarImageGallery = ({
 }) => {
   const t = useTranslations("carDetail.gallery");
   const fmt = useFormatters();
+  const locale = useLocale();
   const {
     currentImageIndex,
     setCurrentImageIndex,
@@ -42,6 +43,25 @@ const CarImageGallery = ({
     thumbnailContainerRef,
     modalThumbnailRef,
   } = useCarImageGallery(images);
+
+  /**
+   * What the current photo shows, in the reader's language, when the model has
+   * described it — otherwise the make and model. The position stays either
+   * way: a screen reader moving through a carousel needs "2 of 5".
+   */
+  const currentAlt = (short: boolean) => {
+    const image = images?.[currentImageIndex];
+    const description = image?.description?.[locale === "ar" ? "ar" : "en"];
+    const index = fmt.number(currentImageIndex + 1);
+    if (description) {
+      return short
+        ? t("describedAltShort", { description, index })
+        : t("describedAlt", { description, index, total: fmt.number(images?.length ?? 0) });
+    }
+    return short
+      ? t("imageAltShort", { make, model, index })
+      : t("imageAlt", { make, model, index, total: fmt.number(images?.length ?? 0) });
+  };
 
   if (!images || images.length === 0) {
     return (
@@ -73,12 +93,7 @@ const CarImageGallery = ({
           >
             <Image
               src={images[currentImageIndex].url}
-              alt={t("imageAlt", {
-                make,
-                model,
-                index: fmt.number(currentImageIndex + 1),
-                total: fmt.number(images.length),
-              })}
+              alt={currentAlt(false)}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               width={1000}
               height={625}
@@ -175,11 +190,7 @@ const CarImageGallery = ({
           >
             <Image
               src={images[currentImageIndex].url}
-              alt={t("imageAltShort", {
-                make,
-                model,
-                index: fmt.number(currentImageIndex + 1),
-              })}
+              alt={currentAlt(true)}
               className="w-full h-full object-contain"
               width={1200}
               height={750}

@@ -19,7 +19,9 @@
     "next": "Next image",
     "viewImage": "View image {index}",
     "thumbnail": "Thumbnail {index}",
-    "galleryTitle": "{title} — Gallery"
+    "galleryTitle": "{title} — Gallery",
+    "describedAlt": "{description} — image {index} of {total}",
+    "describedAltShort": "{description} — image {index}"
   },
   "tabs": {
     "description": "Description",

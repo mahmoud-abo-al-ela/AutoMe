@@ -19,7 +19,9 @@
     "next": "الصورة التالية",
     "viewImage": "عرض الصورة {index}",
     "thumbnail": "صورة مصغّرة {index}",
-    "galleryTitle": "{title} — معرض الصور"
+    "galleryTitle": "{title} — معرض الصور",
+    "describedAlt": "{description} — صورة {index} من {total}",
+    "describedAltShort": "{description} — صورة {index}"
   },
   "tabs": {
     "description": "الوصف",

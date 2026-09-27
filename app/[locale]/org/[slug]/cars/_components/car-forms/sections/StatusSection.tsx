@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "../shared/FieldInfo";
+import ListingQualityPanel from "../shared/ListingQualityPanel";
 import { STATUS_FORM_TO_DB } from "@/lib/constants/car-options";
 import type { CarFormSectionProps } from "../shared/section-props";
 import type { CarFormValues } from "@/hooks/use-car-form";
@@ -108,6 +109,8 @@ const StatusSection = ({
           {t("fields.readyBody")}
         </p>
       </div>
+
+      <ListingQualityPanel watch={watch} />
     </FormSection>
   );
 };

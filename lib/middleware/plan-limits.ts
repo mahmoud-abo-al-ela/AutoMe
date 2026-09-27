@@ -5,7 +5,12 @@ import * as teamRepository from "@/lib/repositories/team";
 // Only dealer-side, entitlement-bound features consume the org's plan quota.
 // Public marketplace search (searchFiltersFrom*) is metered but never billed to a
 // tenant, so it is excluded here.
-const DEALER_METERED_FEATURES = ["carListingFromImage", "listingTranslation"];
+// carImageAltText is metered but deliberately absent: the platform pays for it.
+const DEALER_METERED_FEATURES = [
+  "carListingFromImage",
+  "listingTranslation",
+  "listingQualityCoach",
+];
 
 /**
  * One gateable resource. `planField` names the Plan column holding the limit,
