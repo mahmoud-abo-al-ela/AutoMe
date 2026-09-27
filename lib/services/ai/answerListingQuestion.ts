@@ -13,7 +13,8 @@ import { questionKey } from "@/lib/utils/question-key";
  */
 export type ListingAnswer =
   | { grounded: true; answer: string; fieldsUsed: ListingFactKey[] }
-  | { grounded: false; message?: string };
+  /** `offTopic`: not a question about this car at all — nothing for the dealer. */
+  | { grounded: false; message?: string; offTopic?: true };
 
 const MAX_DECLINE_CHARS = 240;
 
@@ -89,6 +90,12 @@ export async function answerListingQuestion(
   });
 
   const answer = reply.answer.trim();
+  // Not a question about this car: whatever else the model claims, no fact is
+  // shown — "test" once came back answered with an unrelated one.
+  if (!reply.relevant) {
+    const message = declineText(answer);
+    return message ? { grounded: false, offTopic: true, message } : { grounded: false, offTopic: true };
+  }
   if (!reply.grounded) {
     const message = declineText(answer);
     return message ? { grounded: false, message } : { grounded: false };

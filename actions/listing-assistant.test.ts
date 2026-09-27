@@ -29,6 +29,18 @@ describe("askListingAssistant", () => {
     expect(askAboutListing).toHaveBeenCalledWith(CAR_ID, "Colour?", "en", null);
   });
 
+  it.each([
+    ["greeting", "السلام عليكم"],
+    ["thanks", "شكراً!"],
+    ["noise", "test"],
+    ["noise", "؟؟؟"],
+  ])("answers %s instantly, with no rate limit and no model", async (kind, question) => {
+    const response = await askListingAssistant({ carId: CAR_ID, question, locale: "ar" });
+    expect(response).toMatchObject({ success: true, data: { status: "smallTalk", kind } });
+    expect(enforceListingQuestionLimit).not.toHaveBeenCalled();
+    expect(askAboutListing).not.toHaveBeenCalled();
+  });
+
   it("never lets a malformed id reach the rate limiter as a key", async () => {
     const response = await askListingAssistant({ carId: "../anything", question: "Colour?", locale: "en" });
     expect(response).toMatchObject({ success: false });

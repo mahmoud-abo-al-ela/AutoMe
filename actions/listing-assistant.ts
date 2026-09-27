@@ -6,6 +6,8 @@ import { listingQuestionSchema } from "@/lib/validations/schemas";
 import { askAboutListing } from "@/lib/services/car/listing-assistant";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { classifyBuyerMessage } from "@/lib/utils/buyer-message";
+import type { AssistantReply } from "@/lib/services/car/listing-assistant";
 
 /**
  * A buyer asks about a car on its public page.
@@ -21,6 +23,15 @@ import { createSuccessResponse } from "@/lib/utils/response";
  */
 export const askListingAssistant = withErrorHandling(async (input: unknown) => {
   const { carId, question, locale } = validateAction(listingQuestionSchema, input);
+
+  // A greeting, a thank-you or a keyboard mash is answered here, before the
+  // rate limit and the model: it costs the dealer nothing and the buyer no wait.
+  const kind = classifyBuyerMessage(question);
+  if (kind !== "question") {
+    const reply: AssistantReply = { status: "smallTalk", kind };
+    return createSuccessResponse(reply);
+  }
+
   await enforceListingQuestionLimit(carId);
 
   const organization = await getCurrentOrganization();

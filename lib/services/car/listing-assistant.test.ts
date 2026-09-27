@@ -131,6 +131,15 @@ describe("askAboutListing", () => {
     });
   });
 
+  it("does not file an off-topic message for the dealer", async () => {
+    answerListingQuestion.mockResolvedValue({ grounded: false, offTopic: true, message: "Only this car, sorry." });
+    expect(await askAboutListing("car-1", "Weather?", "en", null)).toEqual({
+      status: "offTopic",
+      message: "Only this car, sorry.",
+    });
+    expect(recordDeclinedQuestion).not.toHaveBeenCalled();
+  });
+
   it("still tells the buyer to ask the dealer if recording fails", async () => {
     answerListingQuestion.mockResolvedValue({ grounded: false });
     recordDeclinedQuestion.mockRejectedValue(new Error("db down"));

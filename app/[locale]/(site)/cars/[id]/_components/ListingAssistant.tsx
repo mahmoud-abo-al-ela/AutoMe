@@ -167,16 +167,38 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
   const bubble = "ms-auto w-fit max-w-[85%] rounded-2xl rounded-ee-sm px-3 py-2 text-sm";
 
   if (!exchange.reply && !exchange.error) {
+    // A typing indicator, not a sentence; the label is for screen readers.
     return (
-      <p className={`${bubble} flex items-center gap-2 bg-gray-100 text-gray-500`}>
-        <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden />
-        {t("asking")}
+      <p className={`${bubble} flex items-center gap-1 bg-gray-100 py-3`}>
+        <span className="sr-only">{t("asking")}</span>
+        {[0, 150, 300].map((delay) => (
+          <span
+            key={delay}
+            aria-hidden
+            className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+            style={{ animationDelay: `${delay}ms` }}
+          />
+        ))}
       </p>
     );
   }
 
   if (exchange.error) {
     return <p className={`${bubble} bg-red-50 text-red-700`}>{exchange.error}</p>;
+  }
+
+  // Small talk and off-topic messages get a plain reply and no "ask the
+  // dealer": there is nothing the dealer would answer.
+  if (exchange.reply?.status === "smallTalk" || exchange.reply?.status === "offTopic") {
+    const text =
+      exchange.reply.status === "smallTalk"
+        ? t(`smallTalk.${exchange.reply.kind}`)
+        : exchange.reply.message || t("offTopic");
+    return (
+      <p className={`${bubble} bg-gray-100 text-gray-800`}>
+        <span dir="auto">{text}</span>
+      </p>
+    );
   }
 
   if (exchange.reply?.status === "answered") {

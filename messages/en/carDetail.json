@@ -43,7 +43,7 @@
     "placeholder": "e.g. Is it automatic?",
     "inputLabel": "Your question about this car",
     "ask": "Ask",
-    "asking": "Checking the listing…",
+    "asking": "Typing…",
     "suggestions": {
       "features": "What features does it have?",
       "hours": "When is the dealership open?",
@@ -54,7 +54,13 @@
     "notInListing": "We don't have that information. The dealer can tell you.",
     "unavailable": "The assistant can't answer right now. You can still ask the dealer.",
     "askDealer": "Ask the dealer",
-    "failed": "Couldn't get an answer. Please try again."
+    "failed": "Couldn't get an answer. Please try again.",
+    "offTopic": "I can only help with questions about this car.",
+    "smallTalk": {
+      "greeting": "Hi! Ask me anything about this car.",
+      "thanks": "You're welcome! Ask if anything else comes up.",
+      "noise": "I didn't catch that — try asking about the price, condition or specs."
+    }
   },
   "specs": {
     "title": "Technical Specifications",

@@ -26,6 +26,10 @@ import type { Locale } from "@/i18n/routing";
 export type AssistantReply =
   | { status: "answered"; answer: string }
   | { status: "notInListing"; message?: string }
+  /** Not a question about this car; not filed for the dealer. */
+  | { status: "offTopic"; message?: string }
+  /** Answered without the model — see classifyBuyerMessage. */
+  | { status: "smallTalk"; kind: "greeting" | "thanks" | "noise" }
   | { status: "unavailable" };
 
 interface Allowance {
@@ -133,6 +137,10 @@ export async function askAboutListing(
   });
 
   if (reply.grounded) return { status: "answered", answer: reply.answer };
+  // Not a question about the car: the dealer has nothing to answer.
+  if (reply.offTopic) {
+    return reply.message ? { status: "offTopic", message: reply.message } : { status: "offTopic" };
+  }
 
   await recordForDealer({
     organizationId: car.organizationId,
