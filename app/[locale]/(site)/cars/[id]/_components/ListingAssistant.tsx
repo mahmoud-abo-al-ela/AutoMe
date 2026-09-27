@@ -90,7 +90,9 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
                 {/* The buyer on the reading-start side — right in Arabic, left in
                     English — and the answer on the far side; logical classes
                     mirror it with the page direction. */}
-                <p className="w-fit max-w-[85%] rounded-2xl rounded-es-sm bg-blue-600 px-3 py-2 text-sm text-white">
+                {/* dir="auto": a question typed in the other language keeps its own
+                    direction inside the bubble; the bubble's side is unchanged. */}
+                <p dir="auto" className="w-fit max-w-[85%] rounded-2xl rounded-es-sm bg-blue-600 px-3 py-2 text-sm text-white">
                   <span className="sr-only">{t("you")}: </span>
                   {exchange.question}
                 </p>
@@ -164,7 +166,9 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
 
   if (exchange.reply?.status === "answered") {
     return (
-      <p className={`${bubble} bg-gray-100 text-gray-800`}>{exchange.reply.answer}</p>
+      <p dir="auto" className={`${bubble} bg-gray-100 text-gray-800`}>
+        {exchange.reply.answer}
+      </p>
     );
   }
 
