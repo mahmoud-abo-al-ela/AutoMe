@@ -39,7 +39,7 @@
   },
   "assistant": {
     "title": "Ask about this car",
-    "subtitle": "Answers come from this listing, the dealer and AutoMe — nothing is guessed.",
+    "subtitle": "Quick answers about this car.",
     "placeholder": "e.g. Is it automatic?",
     "inputLabel": "Your question about this car",
     "ask": "Ask",
@@ -51,7 +51,7 @@
     },
     "you": "You",
     "fromListing": "AI answer",
-    "disclaimer": "AI answers from the listing, the dealer's details and AutoMe data. Confirm with the dealer before you buy.",
+    "disclaimer": "Confirm with the dealer before you buy.",
     "notInListing": "We don't have that information. The dealer can tell you.",
     "unavailable": "The assistant can't answer right now. You can still ask the dealer.",
     "askDealer": "Ask the dealer",
