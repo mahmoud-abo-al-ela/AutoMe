@@ -9,7 +9,7 @@ import {
   carListingSchema,
   type CarListingExtraction,
 } from "@/lib/ai/schemas/car-listing";
-import { textPart } from "@/lib/ai/provider/gemini";
+import { textPart } from "@/lib/ai/provider/types";
 import type { PreparedImage } from "@/lib/services/ai/image";
 
 /** Every field the model writes, in schema order — the denominator of progress. */

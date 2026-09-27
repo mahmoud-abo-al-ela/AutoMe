@@ -3,7 +3,7 @@ import { generateStructured, type AiCallerContext } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { imageAltsPrompt } from "@/lib/ai/prompts/image-alts";
 import { imageAltsSchema } from "@/lib/ai/schemas/image-alts";
-import { imagePart, textPart, type AiPart } from "@/lib/ai/provider/gemini";
+import { imagePart, textPart, type AiPart } from "@/lib/ai/provider/types";
 import type { ImageAlt } from "@/lib/utils/image-alts";
 
 export interface PhotoToDescribe {

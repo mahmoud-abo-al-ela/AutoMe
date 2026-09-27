@@ -105,8 +105,8 @@ describe("POST /api/ai/car-listing — stream", () => {
   it("streams real progress in order and ends with the result", async () => {
     extractCarListing.mockImplementation(
       async (_image: unknown, _ctx: unknown, options: { onProgress: (e: AiProgressEvent) => void }) => {
-        options.onProgress({ type: "attempt", model: "m1", modelIndex: 0, modelCount: 3, retry: false });
-        options.onProgress({ type: "attempt", model: "m2", modelIndex: 1, modelCount: 3, retry: false });
+        options.onProgress({ type: "attempt", provider: "google", model: "m1", modelIndex: 0, modelCount: 3, retry: false });
+        options.onProgress({ type: "attempt", provider: "google", model: "m2", modelIndex: 1, modelCount: 3, retry: false });
         options.onProgress({ type: "text", text: '{"make":"Kia"' });
         // Same count again: not re-sent.
         options.onProgress({ type: "text", text: '{"make":"Kia","mo' });

@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { modelsFor, modelFor, estimateCostMicroUsd } from "@/lib/ai/models";
+import { modelsFor, modelFor, estimateCostMicroUsd, parseChainEntry } from "@/lib/ai/models";
 
 const ENV_KEYS = [
+  "AI_MODELS_VISION",
   "GEMINI_MODEL_VISION",
   "GEMINI_MODEL_VISION_FAST",
   "AI_BILLING_MODE",
@@ -27,33 +28,56 @@ describe("modelsFor", () => {
   it("gives each task its own chain", () => {
     // The public hero search must not share the dealer extraction's model: a
     // burst of photo searches would otherwise crowd out inventory uploads.
-    expect(modelsFor("vision")[0]).not.toBe(modelsFor("visionFast")[0]);
+    expect(modelsFor("vision")[0]).not.toEqual(modelsFor("visionFast")[0]);
   });
 
-  it("offers a fallback behind every task", () => {
-    expect(modelsFor("vision").length).toBeGreaterThan(1);
-    expect(modelsFor("visionFast").length).toBeGreaterThan(1);
+  it("leads dealer work with CodeCraft and keeps Google behind it", () => {
+    for (const task of ["vision", "text"] as const) {
+      const chain = modelsFor(task);
+      expect(chain[0].provider).toBe("codecraft");
+      expect(chain.some((entry) => entry.provider === "google")).toBe(true);
+    }
   });
 
-  it("puts an env override in front without discarding the fallbacks", () => {
+  it("keeps the high-volume public path off CodeCraft's monthly allowance first", () => {
+    expect(modelsFor("visionFast")[0].provider).toBe("google");
+    expect(modelsFor("visionFast").some((entry) => entry.provider === "codecraft")).toBe(true);
+  });
+
+  it("replaces a whole chain from AI_MODELS_<TASK>, skipping unknown providers", () => {
+    process.env.AI_MODELS_VISION = "google/gemini-3.6-flash, nope/x ,codecraft/gpt-5.6-luna";
+    expect(modelsFor("vision")).toEqual([
+      { provider: "google", model: "gemini-3.6-flash" },
+      { provider: "codecraft", model: "gpt-5.6-luna" },
+    ]);
+  });
+
+  it("puts a legacy Gemini pin first among Google's entries, not ahead of CodeCraft", () => {
     process.env.GEMINI_MODEL_VISION = "gemini-3.8-flash";
 
     const chain = modelsFor("vision");
+    const firstGoogle = chain.find((entry) => entry.provider === "google");
 
-    expect(chain[0]).toBe("gemini-3.8-flash");
-    // Pinning a model should not also remove the safety net that keeps the
-    // feature working when the pin turns out to be wrong for this key.
-    expect(chain.length).toBeGreaterThan(1);
-    expect(modelFor("vision")).toBe("gemini-3.8-flash");
+    expect(chain[0].provider).toBe("codecraft");
+    expect(firstGoogle).toEqual({ provider: "google", model: "gemini-3.8-flash" });
+    expect(modelFor("vision").provider).toBe("codecraft");
   });
 
-  it("does not list an overridden model twice", () => {
-    const [first] = modelsFor("vision");
-    process.env.GEMINI_MODEL_VISION = first;
+  it("does not list a pinned model twice", () => {
+    process.env.GEMINI_MODEL_VISION = "gemini-3.6-flash";
+    const labels = modelsFor("vision").map((e) => `${e.provider}/${e.model}`);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+});
 
-    const chain = modelsFor("vision");
-
-    expect(new Set(chain).size).toBe(chain.length);
+describe("parseChainEntry", () => {
+  it("reads provider/model, and a bare id as Google's", () => {
+    expect(parseChainEntry("codecraft/gemini-3.7-flash")).toEqual({
+      provider: "codecraft",
+      model: "gemini-3.7-flash",
+    });
+    expect(parseChainEntry("gemini-3.6-flash")).toEqual({ provider: "google", model: "gemini-3.6-flash" });
+    expect(parseChainEntry("unknown/model")).toBeNull();
   });
 });
 
@@ -104,6 +128,11 @@ describe("estimateCostMicroUsd", () => {
     // cachedContentTokenCount is a subset of promptTokenCount, so it is
     // discounted, not added on top: 1M at $0.075 rather than $0.75.
     expect(cached).toBe(75_000);
+  });
+
+  it("charges nothing through a provider sold in tokens rather than dollars", () => {
+    process.env.AI_BILLING_MODE = "paid";
+    expect(estimateCostMicroUsd("gemini-3.7-flash", usage, "codecraft")).toBe(0);
   });
 
   it("charges nothing for a model it has no price for", () => {

@@ -2,7 +2,7 @@ import { generateStructured, type AiCallerContext } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { imageSearchPrompt } from "@/lib/ai/prompts/image-search";
 import { imageSearchSchema } from "@/lib/ai/schemas/image-search";
-import { textPart } from "@/lib/ai/provider/gemini";
+import { textPart } from "@/lib/ai/provider/types";
 import { prepareImage } from "@/lib/services/ai/image";
 
 /**

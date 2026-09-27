@@ -6,7 +6,7 @@ import {
   listingTranslationSchema,
   type ListingTranslation,
 } from "@/lib/ai/schemas/listing-translation";
-import { textPart } from "@/lib/ai/provider/gemini";
+import { textPart } from "@/lib/ai/provider/types";
 
 export type ListingText = ListingTranslation;
 

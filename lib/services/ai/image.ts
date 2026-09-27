@@ -1,4 +1,4 @@
-import { imagePart, type AiPart } from "@/lib/ai/provider/gemini";
+import { imagePart, type AiPart } from "@/lib/ai/provider/types";
 import { ValidationError } from "@/lib/utils/errors";
 import { sniffImageType } from "@/lib/utils/image-type";
 

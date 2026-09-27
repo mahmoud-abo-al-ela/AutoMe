@@ -1,93 +1,129 @@
 /**
  * Model registry and cost table.
  *
- * Call sites ask for a *task*, never a model id. Two reasons, both learned here:
- * Google retires a model for a key without notice (the repo already carries a
- * comment that `gemini-2.5-flash` 404s for newer keys), and the id used to be
- * duplicated across two action files under a note asking the next editor to
- * keep them in sync.
- *
- * Each task resolves to an ordered chain, not a single id. The client walks it
- * when a model turns out to be unavailable, so a retirement degrades to the
- * next model instead of a failed upload.
+ * Call sites ask for a *task*, never a model. Each task resolves to an ordered
+ * chain of provider/model pairs, and the client walks it when a model is busy,
+ * retired, or its provider is out of allowance — so any one failure degrades
+ * to the next entry instead of a failed upload.
  */
+
+import { isProviderId, type ProviderId } from "@/lib/ai/providers";
 
 export type ModelTask = "vision" | "visionFast" | "text";
 
-/** Per-task env override. Set one to pin a model without a deploy of new code. */
-const ENV_KEYS: Record<ModelTask, string> = {
+/** One link in a chain: which API, and which of its models. */
+export interface ChainEntry {
+  provider: ProviderId;
+  model: string;
+}
+
+/**
+ * Chains, best first, written "provider/model".
+ *
+ * **CodeCraft leads `vision` and `text`** — the dealer-facing work — because
+ * Google's free tier mostly refuses: over the 7 days to 2026-09-27 the ledger
+ * shows gemini-3.7-flash succeeding 24% of the time and 3.6-flash 45%, nearly
+ * all failures 503 "high demand". Its first model is the same Gemini 3.7 Flash
+ * the prompts and evaluations were written against, so behaviour carries over;
+ * its second is GPT-5.6 Luna, a different vendor behind the gateway, so one
+ * upstream outage does not take both.
+ *
+ * **`visionFast` leads with Google** on purpose. It is the public hero search
+ * and the per-photo alt text — the highest-volume, lowest-stakes calls — and
+ * an image costs ~4,400 CodeCraft tokens against a 1M monthly allowance. Spent
+ * there, the allowance would be gone before a dealer uploads a car. CodeCraft
+ * still backs it when Google is busy.
+ *
+ * Google's own entries are ordered by that same ledger: the models that
+ * actually answer first. Gemma 4 closes every chain — separate capacity on the
+ * same key, weaker at identifying a car, reached only when all else is busy.
+ */
+const GEMMA_FALLBACK = ["google/gemma-4-26b-a4b-it", "google/gemma-4-31b-it"];
+
+const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
+  vision: [
+    "codecraft/gemini-3.7-flash",
+    "codecraft/gpt-5.6-luna",
+    "google/gemini-3.6-flash",
+    "google/gemini-3.5-flash-lite",
+    "google/gemini-3.7-flash",
+    ...GEMMA_FALLBACK,
+  ],
+  visionFast: [
+    "google/gemini-3.5-flash-lite",
+    "google/gemini-3.6-flash",
+    "codecraft/gemini-3.7-flash",
+    ...GEMMA_FALLBACK,
+  ],
+  text: [
+    "codecraft/gemini-3.7-flash",
+    "codecraft/gpt-5.6-luna",
+    "google/gemini-3.6-flash",
+    "google/gemini-3.5-flash-lite",
+    "google/gemini-3.7-flash",
+    ...GEMMA_FALLBACK,
+  ],
+};
+
+/** Replace a task's whole chain without a deploy: comma-separated "provider/model". */
+const CHAIN_ENV_KEYS: Record<ModelTask, string> = {
+  vision: "AI_MODELS_VISION",
+  visionFast: "AI_MODELS_VISION_FAST",
+  text: "AI_MODELS_TEXT",
+};
+
+/**
+ * The older single-model pins, from when Google was the only provider. Still
+ * honoured, as the first *Google* entry — never ahead of the providers before
+ * it, which a pin written for a one-provider world did not know existed.
+ */
+const LEGACY_GOOGLE_PIN_KEYS: Record<ModelTask, string> = {
   vision: "GEMINI_MODEL_VISION",
   visionFast: "GEMINI_MODEL_VISION_FAST",
   text: "GEMINI_MODEL_TEXT",
 };
 
-/**
- * Chains are ordered best-match first, then strictly downward in capability.
- * Every entry is available on the free tier.
- *
- * `vision` is the dealer-facing extraction: thirteen fields off one photo,
- * where a wrong year or price ends up in a public listing. Worth the better
- * model. Not the very newest — the top-end Flash is tuned for long-horizon
- * agentic work this task has no use for, and its extra thinking tokens are
- * billed at the output rate and counted against the same free-tier quota.
- *
- * `visionFast` is the public hero search: three fields, unauthenticated, and
- * the highest-volume AI path in the product. Flash-Lite is built for exactly
- * this shape of work, and keeping it off the main model means a burst of photo
- * searches cannot crowd out dealers uploading inventory.
- *
- * `text` is listing translation between Arabic and English. No image, but the
- * Arabic is published under the dealer's name, and the full Flash models are the
- * ones verified to write natural Egyptian-register Arabic — so the same chain
- * as `vision`, not Flash-Lite.
- *
- * **Gemma 4 closes every chain.** Same API key, free, reads images, and served
- * from separate capacity to the Flash models — which on 2026-09-24 were all
- * either answering 503 or queueing requests for 75–270 s before the first byte.
- * It is weaker than Flash at identifying a car, so it is the fallback, never
- * the first choice: reached only when every Flash model is busy or queued.
- * 31B is the stronger; 26B-A4B (a mixture of experts) is the lighter backstop.
- */
-const GEMMA_FALLBACK = ["gemma-4-31b-it", "gemma-4-26b-a4b-it"];
+/** "provider/model" to an entry. A bare model id is taken to be Google's. */
+export function parseChainEntry(value: string): ChainEntry | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const slash = trimmed.indexOf("/");
+  if (slash < 0) return { provider: "google", model: trimmed };
+  const provider = trimmed.slice(0, slash);
+  const model = trimmed.slice(slash + 1);
+  return isProviderId(provider) && model ? { provider, model } : null;
+}
 
-const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
-  vision: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", ...GEMMA_FALLBACK],
-  visionFast: [
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
-    "gemini-3.5-flash",
-    // Lighter first here: the public search wants an answer, not the best one.
-    "gemma-4-26b-a4b-it",
-    "gemma-4-31b-it",
-  ],
-  text: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", ...GEMMA_FALLBACK],
-};
+const same = (a: ChainEntry, b: ChainEntry) => a.provider === b.provider && a.model === b.model;
 
-/**
- * Whether a model accepts `thinkingConfig`. Gemma is an open model served
- * through the same API but without Gemini's thinking controls, so the setting
- * is left off for it rather than risking a 400 on the one model meant to rescue
- * the call.
- */
-export function supportsThinkingConfig(model: string): boolean {
-  return !model.startsWith("gemma-");
+/** "provider/model", for logs and cache keys. */
+export function entryLabel(entry: ChainEntry): string {
+  return `${entry.provider}/${entry.model}`;
 }
 
 /**
- * Models to try for a task, best first. An env override takes the lead but does
- * not remove the chain behind it — pinning a model should not also remove the
- * fallback that keeps the feature working when the pin is wrong.
+ * The chain for a task, best first. Providers without a key are NOT removed
+ * here — the client does that, so this stays a pure function of config.
  */
-export function modelsFor(task: ModelTask): string[] {
-  const chain = DEFAULT_CHAINS[task];
-  const override = process.env[ENV_KEYS[task]];
-  if (!override) return chain;
+export function modelsFor(task: ModelTask): ChainEntry[] {
+  const override = process.env[CHAIN_ENV_KEYS[task]];
+  const source = override ? override.split(",") : DEFAULT_CHAINS[task];
+  const chain = source
+    .map(parseChainEntry)
+    .filter((entry): entry is ChainEntry => entry !== null);
 
-  return [override, ...chain.filter((model) => model !== override)];
+  const pin = process.env[LEGACY_GOOGLE_PIN_KEYS[task]];
+  if (!pin) return chain;
+
+  const pinned: ChainEntry = { provider: "google", model: pin };
+  const rest = chain.filter((entry) => !same(entry, pinned));
+  const firstGoogle = rest.findIndex((entry) => entry.provider === "google");
+  const at = firstGoogle < 0 ? rest.length : firstGoogle;
+  return [...rest.slice(0, at), pinned, ...rest.slice(at)];
 }
 
-/** The model a task prefers. */
-export function modelFor(task: ModelTask): string {
+/** The entry a task prefers. */
+export function modelFor(task: ModelTask): ChainEntry {
   return modelsFor(task)[0];
 }
 
@@ -108,7 +144,7 @@ interface ModelPrice {
 }
 
 /**
- * Published paid-tier rates, in micro-USD per million tokens.
+ * Google's published paid-tier rates, in micro-USD per million tokens.
  *
  * Recorded even though this project runs free, because the table is the seam:
  * switching to a billed key is setting AI_BILLING_MODE, not threading a new
@@ -146,8 +182,14 @@ function isBilled(): boolean {
  * rate and removed from the input count rather than added on top. An unpriced
  * model costs 0 instead of throwing: a missing price must never fail a request.
  */
-export function estimateCostMicroUsd(model: string, usage: TokenUsage): number {
-  if (!isBilled()) return 0;
+export function estimateCostMicroUsd(
+  model: string,
+  usage: TokenUsage,
+  provider: ProviderId = "google"
+): number {
+  // Only Google is priced. CodeCraft's plan is sold in tokens, not dollars —
+  // the ledger's token counts are what its monthly cap reads.
+  if (!isBilled() || provider !== "google") return 0;
 
   const price = PRICES[model];
   if (!price) return 0;

@@ -3,7 +3,7 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import { citationsHold, type ListingFacts, type ListingFactKey } from "@/lib/ai/grounding";
 import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
 import { listingQaSchema } from "@/lib/ai/schemas/listing-qa";
-import { textPart } from "@/lib/ai/provider/gemini";
+import { textPart } from "@/lib/ai/provider/types";
 import { questionKey } from "@/lib/utils/question-key";
 
 /** What a buyer is shown: an answer the listing backs, or nothing. */

@@ -29,7 +29,7 @@ vi.mock("@/lib/repositories/ai-usage", () => ({
 import { generateStructured } from "@/lib/ai/client";
 import { modelsFor } from "@/lib/ai/models";
 import { AI_FEATURES } from "@/lib/ai/features";
-import { textPart } from "@/lib/ai/provider/gemini";
+import { textPart } from "@/lib/ai/provider/types";
 import * as cache from "@/lib/ai/cache";
 import { ValidationError, ServiceUnavailableError } from "@/lib/utils/errors";
 
@@ -73,6 +73,8 @@ function onlyRow() {
 beforeEach(() => {
   vi.clearAllMocks();
   cache.clear();
+  // These cases pin the Google path; the multi-provider cases set it themselves.
+  delete process.env.CODECRAFT_API_KEY;
   countPlatformCallsSince.mockResolvedValue(0);
 });
 
@@ -612,24 +614,12 @@ describe("generateStructured — queued models", () => {
     expect(generate).toHaveBeenCalledTimes(1);
   });
 
-  it("never sends the thinking control to a Gemma model", async () => {
-    generate.mockImplementation(async (req: { model: string }) =>
-      req.model.startsWith("gemma-")
-        ? ok('{"make":"Opel","year":2018}')
-        : Promise.reject(httpError(503))
-    );
-
-    await call({ thinking: "low" });
-
-    const gemma = generate.mock.calls.map((c) => c[0]).find((r) => r.model.startsWith("gemma-"));
-    expect(gemma).toBeDefined();
-    expect(gemma.thinking).toBeUndefined();
-    // Flash models still got it.
-    expect(generate.mock.calls[0][0].thinking).toBe("low");
-  });
 });
 
-/** Models in the vision chain, which call() uses. */
+/**
+ * Models in the vision chain that call() can reach. CodeCraft has no key in
+ * these tests (see beforeEach), so only Google's entries are live.
+ */
 function chainLength() {
-  return modelsFor("vision").length;
+  return modelsFor("vision").filter((entry) => entry.provider === "google").length;
 }

@@ -12,7 +12,7 @@ vi.hoisted(() => {
 import { extractCarListing, prepareImage } from "@/lib/services/ai";
 import type { CarListingDraft } from "@/lib/services/ai";
 import * as cache from "@/lib/ai/cache";
-import { asFile, isCapacityFailure } from "@/lib/ai/evaluation/harness";
+import { asFile, isCapacityFailure, PRODUCTION_LIMITS } from "@/lib/ai/evaluation/harness";
 import { carPhoto, notACar } from "@/lib/ai/evaluation/fixtures";
 import {
   isPredominantlyArabic,
@@ -59,7 +59,8 @@ describe.skipIf(!enabled)("car listing extraction (real model)", () => {
   beforeAll(async () => {
     cache.clear();
     try {
-      draft = await extractCarListing(await prepareImage(asFile(carPhoto())), ctx);
+      // The limits the dealer route runs with: this is the path dealers get.
+      draft = await extractCarListing(await prepareImage(asFile(carPhoto())), ctx, PRODUCTION_LIMITS);
     } catch (error) {
       if (!isCapacityFailure(error)) throw error;
       unavailable = true;

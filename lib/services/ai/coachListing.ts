@@ -2,7 +2,7 @@ import { generateStructured, type AiCallerContext } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { listingCoachPrompt } from "@/lib/ai/prompts/listing-coach";
 import { listingCoachSchema } from "@/lib/ai/schemas/listing-coach";
-import { textPart } from "@/lib/ai/provider/gemini";
+import { textPart } from "@/lib/ai/provider/types";
 import type { ListingIssueCode } from "@/lib/services/car/listing-quality";
 
 /** The listing the advice is about, in the dashboard's language. */

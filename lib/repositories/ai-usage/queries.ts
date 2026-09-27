@@ -31,17 +31,35 @@ export async function countOrgAiCallsThisMonth(organizationId: string, features:
 }
 
 /**
- * Count platform-wide AI calls since a timestamp, across every feature and tenant.
- * Backs the free-tier request-count circuit breaker (RPD / RPM): the provider cap
- * is per project key regardless of feature, so this counts every recorded attempt
- * (success or failure) since each represents a request sent to the provider.
+ * Count AI calls to one provider since a timestamp, across every feature and
+ * tenant. Backs the per-provider request-count breaker (RPM / RPD): a provider's
+ * cap is per key regardless of feature, so this counts every recorded attempt
+ * (success or failure), since each one was a request the provider received.
  */
-export async function countPlatformCallsSince(since: Date) {
+export async function countPlatformCallsSince(since: Date, provider: string) {
     return db.aiUsage.count({
         where: {
+            provider,
             createdAt: { gte: since },
         },
     });
+}
+
+/**
+ * Tokens one provider has been sent and has returned since a timestamp —
+ * input, output and thinking — for a plan sold as a monthly token allowance.
+ * Failed calls count too: the provider metered them all the same.
+ */
+export async function sumProviderTokensSince(provider: string, since: Date) {
+    const totals = await db.aiUsage.aggregate({
+        where: { provider, createdAt: { gte: since } },
+        _sum: { inputTokens: true, outputTokens: true, thinkingTokens: true },
+    });
+    return (
+        (totals._sum.inputTokens ?? 0) +
+        (totals._sum.outputTokens ?? 0) +
+        (totals._sum.thinkingTokens ?? 0)
+    );
 }
 
 /**
@@ -126,14 +144,14 @@ export async function getUsageByModel(since: Date): Promise<ModelUsage[]> {
         }[]
     >`
         SELECT
-            "model",
+            "provider" || '/' || "model"                                      AS model,
             COUNT(*)                                                         AS calls,
             COUNT(*) FILTER (WHERE NOT "success")                            AS failures,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY "latencyMs")         AS p50,
             percentile_cont(0.95) WITHIN GROUP (ORDER BY "latencyMs")        AS p95
         FROM "AiUsage"
         WHERE "createdAt" >= ${since}
-        GROUP BY "model"
+        GROUP BY "provider", "model"
         ORDER BY calls DESC
     `;
 
