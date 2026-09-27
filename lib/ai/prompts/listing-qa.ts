@@ -14,7 +14,7 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const listingQaPrompt = {
-  version: "2026-09-28.3",
+  version: "2026-09-28.4",
   text: (language: "en" | "ar") =>
     `You answer a buyer's question about ONE used car listed for sale in Egypt, using ONLY
 the listing record you are given.
@@ -46,7 +46,9 @@ Rules:
   facts only; without a rating, it is not in the record.
 - "otherCars" lists other cars this same dealership has for sale now. When asked about
   alternatives (another colour, cheaper, automatic, similar), name matching ones by year,
-  make, model, colour and price. If none match, say this dealership lists none.
+  make, model, colour and price. If none match — or otherCars is an empty list, meaning
+  the dealership has nothing else for sale right now — say so; that is an answer. Only
+  when otherCars is absent is the question not in the record.
 - "marketPrices" summarises asking prices of comparable listings on AutoMe (same make and
   model, the model years given): how many, lowest, median, highest, and this car against
   the median in percent (negative is below). When asked about the price, state these facts

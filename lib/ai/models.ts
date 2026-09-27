@@ -9,7 +9,7 @@
 
 import { isProviderId, type ProviderId } from "@/lib/ai/providers";
 
-export type ModelTask = "vision" | "visionFast" | "text";
+export type ModelTask = "vision" | "visionFast" | "text" | "textFast";
 
 /** One link in a chain: which API, and which of its models. */
 export interface ChainEntry {
@@ -55,6 +55,21 @@ const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
     "codecraft/gemini-3.7-flash",
     ...GEMMA_FALLBACK,
   ],
+  /**
+   * Buyer-facing text: the listing assistant, with a buyer waiting on the page.
+   * Leads with Google for the same reasons as visionFast — public and high
+   * volume — and because the wait is the product: measured 2026-09-28 on the
+   * grown Q&A prompt, CodeCraft took 7.8-27.7 s and timed out at 30 s on 5 of
+   * 13 questions (one failed outright once the budget ran out), while
+   * 3.5-flash-lite answered in ~1 s and passes the same evaluation.
+   */
+  textFast: [
+    "google/gemini-3.5-flash-lite",
+    "google/gemini-3.6-flash",
+    "codecraft/gemini-3.7-flash",
+    "codecraft/gpt-5.6-luna",
+    ...GEMMA_FALLBACK,
+  ],
   text: [
     "codecraft/gemini-3.7-flash",
     "codecraft/gpt-5.6-luna",
@@ -69,6 +84,7 @@ const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
 const CHAIN_ENV_KEYS: Record<ModelTask, string> = {
   vision: "AI_MODELS_VISION",
   visionFast: "AI_MODELS_VISION_FAST",
+  textFast: "AI_MODELS_TEXT_FAST",
   text: "AI_MODELS_TEXT",
 };
 
@@ -77,7 +93,7 @@ const CHAIN_ENV_KEYS: Record<ModelTask, string> = {
  * honoured, as the first *Google* entry — never ahead of the providers before
  * it, which a pin written for a one-provider world did not know existed.
  */
-const LEGACY_GOOGLE_PIN_KEYS: Record<ModelTask, string> = {
+const LEGACY_GOOGLE_PIN_KEYS: Partial<Record<ModelTask, string>> = {
   vision: "GEMINI_MODEL_VISION",
   visionFast: "GEMINI_MODEL_VISION_FAST",
   text: "GEMINI_MODEL_TEXT",
@@ -112,7 +128,8 @@ export function modelsFor(task: ModelTask): ChainEntry[] {
     .map(parseChainEntry)
     .filter((entry): entry is ChainEntry => entry !== null);
 
-  const pin = process.env[LEGACY_GOOGLE_PIN_KEYS[task]];
+  const pinKey = LEGACY_GOOGLE_PIN_KEYS[task];
+  const pin = pinKey ? process.env[pinKey] : undefined;
   if (!pin) return chain;
 
   const pinned: ChainEntry = { provider: "google", model: pin };

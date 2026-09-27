@@ -663,9 +663,10 @@ export async function generateStructured<T>(
 
     if (next < 0 || !timeLeft) throw toPublicError(error);
 
-    logError(
-      `AI model ${entryLabel(entry)} unusable (${errorCodeOf(error)}); falling back to ${entryLabel(models[next])}`,
-      error
+    // Expected operation, not a fault: one line, no stack. Every attempt is
+    // already in the AiUsage ledger with its error code and latency.
+    console.warn(
+      `[ai] ${entryLabel(entry)} ${errorCodeOf(error)} → trying ${entryLabel(models[next])}`
     );
     index = next;
   }

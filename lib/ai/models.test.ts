@@ -39,6 +39,12 @@ describe("modelsFor", () => {
     }
   });
 
+  it("answers buyers from the fast chain, with CodeCraft behind it", () => {
+    const chain = modelsFor("textFast");
+    expect(chain[0]).toEqual({ provider: "google", model: "gemini-3.5-flash-lite" });
+    expect(chain.some((entry) => entry.provider === "codecraft")).toBe(true);
+  });
+
   it("keeps the high-volume public path off CodeCraft's monthly allowance first", () => {
     expect(modelsFor("visionFast")[0].provider).toBe("google");
     expect(modelsFor("visionFast").some((entry) => entry.provider === "codecraft")).toBe(true);

@@ -84,7 +84,10 @@ describe("buildListingFacts", () => {
 describe("what AutoMe already knows", () => {
   it("carries photos, alternatives, prices and the rating only when there are any", () => {
     const empty = buildListingFacts(source);
-    for (const key of ["photos", "otherCars", "marketPrices"]) expect(empty).not.toHaveProperty(key);
+    for (const key of ["photos", "marketPrices"]) expect(empty).not.toHaveProperty(key);
+    // Read and empty is a fact; unknown is not.
+    expect(empty.otherCars).toEqual([]);
+    expect(buildListingFacts({ ...source, otherCars: null })).not.toHaveProperty("otherCars");
     expect(empty.dealership).not.toHaveProperty("rating");
     expect(empty.listedOn).toBe("2026-09-01");
 

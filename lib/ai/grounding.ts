@@ -95,8 +95,11 @@ export interface ListingSource {
   history: Partial<CarDisclosures>;
   /** The dealership's standing terms; stated keys only. */
   terms: Partial<DealershipTerms>;
-  /** The dealership's other cars on sale — closestByPrice picks which. */
-  otherCars: OtherCar[];
+  /**
+   * The dealership's other cars on sale — closestByPrice picks which. An
+   * empty list is a fact ("none for sale"); null means it could not be read.
+   */
+  otherCars: OtherCar[] | null;
   /** How this price sits among comparable listings — summarizeMarketPrices. */
   marketPrices: MarketPrices | null;
   /**
@@ -266,8 +269,10 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     // Stated keys only, so a missing key reads as "not stated", never "no".
     history: Object.keys(source.history).length > 0 ? source.history : undefined,
     dealershipTerms: Object.keys(source.terms).length > 0 ? source.terms : undefined,
+    // Empty is kept: "this dealership has no other cars for sale" is an
+    // answer. Only an unknown (null) is left out.
     otherCars:
-      source.otherCars.length > 0
+      source.otherCars !== null
         ? source.otherCars.map((car) => ({
             ...car,
             price: { amount: car.price, currency: source.priceCurrency },

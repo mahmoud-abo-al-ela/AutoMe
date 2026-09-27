@@ -39,7 +39,7 @@
   },
   "assistant": {
     "title": "Ask about this car",
-    "subtitle": "Answers come only from this listing's details.",
+    "subtitle": "Answers come from this listing, the dealer and AutoMe — nothing is guessed.",
     "placeholder": "e.g. Is it automatic?",
     "inputLabel": "Your question about this car",
     "ask": "Ask",
@@ -50,9 +50,9 @@
       "mileage": "How many kilometres has it done?"
     },
     "you": "You",
-    "fromListing": "From the listing",
-    "disclaimer": "AI answer based on the listing. Confirm with the dealer before you buy.",
-    "notInListing": "The listing doesn't say. The dealer can tell you.",
+    "fromListing": "AI answer",
+    "disclaimer": "AI answers from the listing, the dealer's details and AutoMe data. Confirm with the dealer before you buy.",
+    "notInListing": "We don't have that information. The dealer can tell you.",
     "unavailable": "The assistant can't answer right now. You can still ask the dealer.",
     "askDealer": "Ask the dealer",
     "failed": "Couldn't get an answer. Please try again."

@@ -210,6 +210,7 @@ describe("askAboutListing", () => {
     findComparablePrices.mockRejectedValue(new Error("db"));
     expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "answered", answer: "White." });
     const facts = answerListingQuestion.mock.calls[0][1];
+    // A failed read is unknown, not "none for sale".
     expect(facts).not.toHaveProperty("otherCars");
     expect(facts).not.toHaveProperty("marketPrices");
   });

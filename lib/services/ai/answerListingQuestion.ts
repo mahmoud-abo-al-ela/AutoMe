@@ -29,7 +29,8 @@ export async function answerListingQuestion(
   const record = JSON.stringify(facts);
   const reply = await generateStructured({
     feature: AI_FEATURES.listingQA,
-    task: "text",
+    // A buyer is waiting on the page: the fast chain, not the dealer one.
+    task: "textFast",
     parts: [
       textPart(listingQaPrompt.text(language)),
       textPart(record),

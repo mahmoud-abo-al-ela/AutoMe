@@ -169,8 +169,12 @@ function photoDescriptions(images: string[], stored: unknown, locale: Locale): s
   });
 }
 
-/** The dealership's other cars closest in price, or none if the read fails. */
-async function otherCarsFor(organizationId: string, carId: string, price: number): Promise<OtherCar[]> {
+/**
+ * The dealership's other cars closest in price. Null — not an empty list —
+ * when the read fails: "none for sale" is a claim, and only a successful read
+ * can make it.
+ */
+async function otherCarsFor(organizationId: string, carId: string, price: number): Promise<OtherCar[] | null> {
   try {
     const cars = await carRepository.findOtherAvailableCars(organizationId, carId);
     return closestByPrice(
@@ -179,7 +183,7 @@ async function otherCarsFor(organizationId: string, carId: string, price: number
     );
   } catch (error) {
     logError("Loading the dealership's other cars failed; answering without them", error);
-    return [];
+    return null;
   }
 }
 
