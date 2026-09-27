@@ -8,6 +8,8 @@ interface OrgSummary {
   slug: string;
   phone?: string | null;
   address?: string | null;
+  city?: string | null;
+  region?: string | null;
 }
 
 /**
@@ -70,6 +72,8 @@ function serializeCarInner(car: CarInput) {
         slug: car.organization.slug,
         ...(car.organization.phone && { phone: car.organization.phone }),
         ...(car.organization.address && { address: car.organization.address }),
+        ...(car.organization.city && { city: car.organization.city }),
+        ...(car.organization.region && { region: car.organization.region }),
       },
     }),
   };

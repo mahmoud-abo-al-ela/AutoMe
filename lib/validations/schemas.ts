@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeCarStatus } from "@/lib/constants/car-options";
 
 /**
  * The per-language title and description columns, shared by the create and
@@ -16,6 +17,17 @@ const bilingualCarText = {
 };
 
 const MIN_DESCRIPTION = 10;
+
+/**
+ * Either spelling in, the database enum out — see normalizeCarStatus. An
+ * unknown value is left as-is so the enum rejects it with a real error.
+ */
+const carStatus = z
+  .preprocess(
+    (value) => normalizeCarStatus(value) ?? value,
+    z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"])
+  )
+  .optional();
 
 /**
  * A listing needs a description in at least one language, not specifically in
@@ -55,15 +67,21 @@ export const carSchema = z.object({
   // because Zod strips unknown keys — without these the AI-written Arabic is
   // silently discarded on the way to the database.
   ...bilingualCarText,
-  location: z.string().min(1, "Location is required"),
-  status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
+  // A car is where its dealership is; kept only for cars saved with it.
+  location: z.string().max(200).optional().nullable(),
+  status: carStatus,
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
-  images: z.array(z.string()).min(1, "At least one image is required").max(20),
+  // Files from the dealer form, or data: URLs. What they contain is checked
+  // at upload (lib/services/storage/upload.ts), not trusted from the claim.
+  images: z
+    .array(z.union([z.string().min(1), z.instanceof(File)]))
+    .min(1, "At least one image is required")
+    .max(20),
 }).superRefine(requireOneDescription);
 
 export const updateCarSchema = z.object({
-  status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
+  status: carStatus,
   featured: z.boolean().optional(),
 });
 
@@ -82,8 +100,9 @@ export const updateCarFullSchema = z.object({
   // Either language may carry the description — see requireOneDescription.
   description: z.string().max(2000).optional().nullable(),
   ...bilingualCarText,
-  location: z.string().min(1, "Location is required"),
-  status: z.enum(["Available", "Sold", "Unavailable", "AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
+  // A car is where its dealership is; kept only for cars saved with it.
+  location: z.string().max(200).optional().nullable(),
+  status: carStatus,
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
   images: z.array(z.any()),

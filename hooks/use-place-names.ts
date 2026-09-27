@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import {
   cityName,
   countryName,
+  dealershipPlaceName,
   governorateName,
   locationName,
   placeName,
@@ -28,6 +29,17 @@ export function usePlaceNames() {
       country: (value?: string | null) => countryName(value, locale),
       place: (value?: string | null) => placeName(value, locale),
       location: (value?: string | null) => locationName(value, locale),
+      /**
+       * Where a car is: its dealership's place. A car keeps the free text it
+       * was saved with, from before the form stopped asking for it.
+       */
+      car: (car: {
+        location?: string | null;
+        organization?: { city?: string | null; region?: string | null } | null;
+      }) =>
+        car.location?.trim()
+          ? locationName(car.location, locale)
+          : dealershipPlaceName(car.organization, locale),
     }),
     [locale]
   );

@@ -311,8 +311,6 @@
       "seatsMore": "أكثر من {count} مقاعد",
       "colorHint": "اللون الخارجي للسيارة",
       "colorPlaceholder": "اختر اللون",
-      "locationHint": "مكان وجود السيارة حاليًا",
-      "locationPlaceholder": "القاهرة الجديدة، القاهرة",
       "descriptionLabel": "الوصف",
       "descriptionHint": "وصف تفصيلي للسيارة",
       "descriptionPlaceholder": "اكتب وصفًا تفصيليًا للسيارة…",
@@ -379,7 +377,6 @@
       "transmissionRequired": "ناقل الحركة مطلوب",
       "colorRequired": "اللون مطلوب",
       "seatsInvalid": "يجب أن يكون عدد المقاعد بين {min} و{max}",
-      "locationRequired": "الموقع مطلوب",
       "descriptionTooShort": "يجب ألا يقل الوصف عن {min} حرفًا",
       "imagesRequired": "أضف صورة واحدة على الأقل",
       "imagesTooMany": "يمكنك إضافة {max} صور كحد أقصى"

@@ -43,7 +43,6 @@ const DetailsSection = ({
   maxImages = 5,
 }: DetailsSectionProps) => {
   const t = useTranslations("org.carForm");
-  const tField = useTranslations("carAttributes.fields");
   const { number } = useFormatters();
   // One language of listing text on screen: the dashboard's. The other is
   // written by translation on save (see fillOtherLanguage in actions/cars).
@@ -126,22 +125,8 @@ const DetailsSection = ({
 
   return (
     <FormSection title={t("sections.details")}>
-      <div className="space-y-2">
-        <Label htmlFor="location" className="flex items-center">
-          {tField("location")} <FieldInfo text={t("fields.locationHint")} />
-        </Label>
-        <Input
-          type="text"
-          id="location"
-          dir="auto"
-          placeholder={t("fields.locationPlaceholder")}
-          {...register("location")}
-          className={`${errors.location ? "border-red-500" : ""}`}
-        />
-        {errors.location && (
-          <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
-        )}
-      </div>
+      {/* No location field: a car is where its dealership is, and the
+          dealership's structured place is what search and display use. */}
 
       {isArabic && (
         <div className="space-y-2">

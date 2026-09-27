@@ -157,13 +157,13 @@ const CarCard = ({
                 <span className="truncate font-medium text-foreground">{attr.fuel(car.fuelType)}</span>
               </div>
             )}
-            {car.location && (
+            {place.car(car) && (
               <div className="flex items-center">
                 <div className="me-1.5 rounded-full bg-muted p-1">
                   <MapPin className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
                 </div>
                 <span className="truncate font-medium text-foreground">
-                  {place.location(car.location)}
+                  {place.car(car)}
                 </span>
               </div>
             )}

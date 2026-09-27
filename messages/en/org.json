@@ -311,8 +311,6 @@
       "seatsMore": "More than {count} seats",
       "colorHint": "The exterior colour of the vehicle",
       "colorPlaceholder": "Select a colour",
-      "locationHint": "Where the vehicle is currently located",
-      "locationPlaceholder": "New Cairo, Cairo",
       "descriptionLabel": "Description",
       "descriptionHint": "A detailed description of the vehicle",
       "descriptionPlaceholder": "Describe the vehicle in detail…",
@@ -379,7 +377,6 @@
       "transmissionRequired": "Transmission is required",
       "colorRequired": "Colour is required",
       "seatsInvalid": "Seats must be between {min} and {max}",
-      "locationRequired": "Location is required",
       "descriptionTooShort": "Description must be at least {min} characters",
       "imagesRequired": "Add at least one image",
       "imagesTooMany": "You can add at most {max} images"

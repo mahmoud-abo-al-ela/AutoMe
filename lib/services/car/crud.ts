@@ -4,20 +4,14 @@ import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import * as storageService from "@/lib/services/storage";
 import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
-import { STATUS_FORM_TO_DB } from "@/lib/constants/car-options";
+import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
 import type { CarStatus } from "@/lib/generated/prisma";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
 
-/**
- * Map a form status label to its DB enum, defaulting to AVAILABLE. The form
- * value is a free string at this boundary, so the lookup is indexed loosely.
- */
-function toCarStatus(formStatus: string | null | undefined): CarStatus {
-  return (
-    (STATUS_FORM_TO_DB as Record<string, CarStatus>)[formStatus ?? ""] ||
-    "AVAILABLE"
-  );
+/** Either status spelling to the DB enum; a missing status is AVAILABLE. */
+function toCarStatus(status: string | null | undefined): CarStatus {
+  return normalizeCarStatus(status) ?? "AVAILABLE";
 }
 
 /**
@@ -114,14 +108,9 @@ export async function updateCar(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  // Unlike the create/full-update paths this keeps an unmapped status as-is
-  // rather than falling back to AVAILABLE, so it does not use toCarStatus.
-  const dataToUpdate: UpdateCarInput & { status?: string } = { ...updateData };
-  if (updateData.status) {
-    dataToUpdate.status =
-      (STATUS_FORM_TO_DB as Record<string, CarStatus>)[updateData.status] ||
-      updateData.status;
-  }
+  // The schema has already normalised status to the DB enum; an absent one
+  // stays absent (this is a partial update), rather than becoming AVAILABLE.
+  const dataToUpdate: UpdateCarInput = { ...updateData };
 
   return await carRepository.updateCar(carId, dataToUpdate);
 }

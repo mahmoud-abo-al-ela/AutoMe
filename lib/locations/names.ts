@@ -126,6 +126,24 @@ export function placeName(value: string | null | undefined, locale: Locale) {
 }
 
 /**
+ * A dealership's place as "city، governorate" in the reader's language, from
+ * the structured columns (governorate code, city slug). The governorate is
+ * dropped when the city already names it, so Cairo reads "القاهرة", not
+ * "القاهرة، القاهرة".
+ */
+export function dealershipPlaceName(
+  org: { city?: string | null; region?: string | null } | null | undefined,
+  locale: Locale
+) {
+  if (!org) return "";
+  const city = cityName(org.city, locale);
+  const region = governorateName(org.region, locale);
+  const parts = [city, region].filter(Boolean);
+  const unique = parts.filter((part, i) => parts.indexOf(part) === i);
+  return unique.join(locale === "ar" ? "، " : ", ");
+}
+
+/**
  * `Car.location` is one free-text field holding a composed place — "Cairo,
  * Egypt". Each part is resolved on its own and rejoined with the locale's
  * comma, so an unmapped part still shows as typed.

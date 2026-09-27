@@ -18,6 +18,23 @@ export const STATUS_FORM_TO_DB = {
     Unavailable: CAR_STATUS.UNAVAILABLE,
 };
 
+/**
+ * A car status in either spelling — the form's "Sold" or the database's
+ * "SOLD" — as the database enum, or null for anything else.
+ *
+ * Both reach the server: the dealer form sends the form token, other callers
+ * the enum. Each place used to accept only one of them, so adding a car from
+ * the form was refused outright ("received 'Available'"), and a "SOLD" that
+ * did get through was silently saved as AVAILABLE.
+ */
+export function normalizeCarStatus(value: unknown): "AVAILABLE" | "UNAVAILABLE" | "SOLD" | null {
+    if (value === "AVAILABLE" || value === "UNAVAILABLE" || value === "SOLD") return value;
+    if (typeof value === "string" && value in STATUS_FORM_TO_DB) {
+        return STATUS_FORM_TO_DB[value as keyof typeof STATUS_FORM_TO_DB] as "AVAILABLE" | "UNAVAILABLE" | "SOLD";
+    }
+    return null;
+}
+
 export const STATUS_DB_TO_FORM = {
     [CAR_STATUS.AVAILABLE]: "Available",
     [CAR_STATUS.SOLD]: "Sold",

@@ -5,6 +5,7 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
@@ -106,7 +107,9 @@ const createCarFormSchema = (
                     max: n(VALIDATION_RULES.CAR.SEATS_MAX),
                 })
             ),
-        location: z.string().min(1, t("locationRequired")),
+        // Not asked for: a car is where its dealership is. Carried through
+        // unchanged so an older car keeps the text it was saved with.
+        location: z.string().optional(),
         features: z.union([
             z.array(z.string()),
             z.string().transform(val => val.split(',').map(f => f.trim()).filter(Boolean))
@@ -155,6 +158,9 @@ export const useCarForm = (
 ) => {
     const [currentSection, setCurrentSection] = useState("basic");
     const router = useRouter();
+    // From the route, not by position in the URL: the path now starts with a
+    // locale (/ar/org/<slug>/...), and splitting it took "org" as the slug.
+    const { slug } = useParams<{ slug: string }>();
 
     const t = useTranslations("org.carForm.validation");
     const tForm = useTranslations("org.carForm.form");
@@ -304,7 +310,6 @@ export const useCarForm = (
             // The description on screen is the dashboard language's one.
             isValid = await form.trigger([
                 locale === "ar" ? "descriptionAr" : "description",
-                "location",
                 "images",
             ]);
         }
@@ -371,7 +376,6 @@ export const useCarForm = (
             if (response.data.translation === "skipped") {
                 toast.info(tForm("translationSkipped", { other: locale === "ar" ? "en" : "ar" }));
             }
-            const slug = window.location.pathname.split('/')[2];
             router.push(`/org/${slug}/cars`);
         } else {
             // The action's own message wins when it sent one; otherwise the
