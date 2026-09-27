@@ -995,6 +995,9 @@ async function main() {
       features: {
         // A taste, not a meal: enough to feel AI listing, not to live on it.
         aiProcessing: { enabled: true, limit: 5 },
+        // Answers to buyers' questions on this dealer's listings. Its own pool,
+        // so buyers asking cannot spend the listing allowance above.
+        aiAssistant: { enabled: true, limit: 20 },
         analytics: "basic",
         chat: false,
         apiAccess: false,
@@ -1017,6 +1020,7 @@ async function main() {
       auditLogRetentionDays: 365,
       features: {
         aiProcessing: { enabled: true, limit: 100 },
+        aiAssistant: { enabled: true, limit: 300 },
         analytics: "advanced",
         chat: true,
         apiAccess: false,
@@ -1039,6 +1043,7 @@ async function main() {
       auditLogRetentionDays: null, // Unlimited retention
       features: {
         aiProcessing: { enabled: true, limit: -1 },
+        aiAssistant: { enabled: true, limit: -1 },
         analytics: "advanced",
         chat: true,
         apiAccess: true,

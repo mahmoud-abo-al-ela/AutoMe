@@ -6,6 +6,8 @@ import * as teamRepository from "@/lib/repositories/team";
 // Public marketplace search (searchFiltersFrom*) is metered but never billed to a
 // tenant, so it is excluded here.
 // carImageAltText is metered but deliberately absent: the platform pays for it.
+// listingQA is absent too, but for the opposite reason: it bills the dealer
+// from its own pool, `aiAssistant` below, so buyers cannot drain this one.
 const DEALER_METERED_FEATURES = [
   "carListingFromImage",
   "listingTranslation",
@@ -46,5 +48,15 @@ export const RESOURCE_CONFIG: Record<string, ResourceConfig> = {
       aiUsageRepository.countOrgAiCallsThisMonth(orgId, DEALER_METERED_FEATURES),
     label: "AI processing requests",
     upgradeMessage: "Upgrade your plan for more AI-powered image processing.",
+  },
+  aiAssistant: {
+    planField: null, // uses features.aiAssistant.limit
+    featureKey: "aiAssistant",
+    // Answers buyers got on this dealer's listings this month. Cached repeats
+    // write no row, so a question asked twice is billed once.
+    countQuery: (orgId: string) =>
+      aiUsageRepository.countOrgAiCallsThisMonth(orgId, ["listingQA"]),
+    label: "AI assistant answers",
+    upgradeMessage: "Upgrade your plan for more AI answers to buyers' questions.",
   },
 };

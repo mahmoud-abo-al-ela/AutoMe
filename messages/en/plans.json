@@ -36,6 +36,9 @@
     "aiProcessing": "AI Processing",
     "aiProcessingMonthly": "{value} AI listings per month",
     "aiProcessingUnlimited": "Unlimited AI listings",
+    "aiAssistant": "AI answers to buyers",
+    "aiAssistantMonthly": "{value} AI answers to buyers per month",
+    "aiAssistantUnlimited": "Unlimited AI answers to buyers",
     "prioritySupport": "Priority Support"
   }
 }

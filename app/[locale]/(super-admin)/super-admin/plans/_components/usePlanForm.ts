@@ -11,6 +11,11 @@ export type PlanFeatures = {
    * missing limit as 0, so `enabled` without one blocks every call.
    */
   aiProcessing: { enabled: boolean; limit?: number };
+  /**
+   * Answers to buyers' questions per month, a separate pool from
+   * aiProcessing. Optional: plans saved before it existed do not have it.
+   */
+  aiAssistant?: { enabled: boolean; limit?: number };
   chat: boolean;
   prioritySupport: boolean;
   apiAccess: boolean;
@@ -58,10 +63,12 @@ export type PlanFormInputValues = {
   auditLogRetentionDays: string;
   trialDays: string;
   aiProcessingLimit: string;
+  aiAssistantLimit: string;
 };
 
 export const DEFAULT_FEATURES: PlanFeatures = {
   aiProcessing: { enabled: false, limit: 0 },
+  aiAssistant: { enabled: false, limit: 0 },
   chat: false,
   prioritySupport: false,
   apiAccess: false,
@@ -87,6 +94,7 @@ const EMPTY_INPUTS: PlanFormInputValues = {
   auditLogRetentionDays: "",
   trialDays: "",
   aiProcessingLimit: "",
+  aiAssistantLimit: "",
 };
 
 const EMPTY_FORM: PlanFormState = {
@@ -146,6 +154,7 @@ export function usePlanForm({
         auditLogRetentionDays: plan.auditLogRetentionDays === null ? "" : plan.auditLogRetentionDays.toString(),
         trialDays: !plan.trialDays ? "" : plan.trialDays.toString(),
         aiProcessingLimit: (plan.features as PlanFeatures | null)?.aiProcessing?.limit?.toString() ?? "",
+        aiAssistantLimit: (plan.features as PlanFeatures | null)?.aiAssistant?.limit?.toString() ?? "",
       });
     } else if (mode === "create") {
       setFormData(EMPTY_FORM);
@@ -174,6 +183,10 @@ export function usePlanForm({
       aiProcessing: {
         ...formData.features.aiProcessing,
         limit: parseAiLimit(inputValues.aiProcessingLimit),
+      },
+      aiAssistant: {
+        enabled: formData.features.aiAssistant?.enabled ?? false,
+        limit: parseAiLimit(inputValues.aiAssistantLimit),
       },
     },
     monthlyPrice: Math.round(parseFloat(inputValues.monthlyPrice) * 100) || 0,

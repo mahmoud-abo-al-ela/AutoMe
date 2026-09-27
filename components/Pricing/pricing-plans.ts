@@ -71,6 +71,7 @@ export type DbPlan = {
 type PlanFeatureFlags = {
   chat?: boolean;
   aiProcessing?: { enabled?: boolean; limit?: number };
+  aiAssistant?: { enabled?: boolean; limit?: number };
   prioritySupport?: boolean;
 };
 
@@ -84,6 +85,14 @@ function aiProcessingFeature(ai: PlanFeatureFlags["aiProcessing"]): PlanFeature 
   if (!ai?.enabled || limit === 0) return { key: "aiProcessing", included: false };
   if (limit === -1) return { key: "aiProcessingUnlimited", included: true };
   return { key: "aiProcessingMonthly", params: { count: limit }, included: true };
+}
+
+/** The same rule for the buyer assistant's own allowance. */
+function aiAssistantFeature(ai: PlanFeatureFlags["aiAssistant"]): PlanFeature {
+  const limit = ai?.limit ?? 0;
+  if (!ai?.enabled || limit === 0) return { key: "aiAssistant", included: false };
+  if (limit === -1) return { key: "aiAssistantUnlimited", included: true };
+  return { key: "aiAssistantMonthly", params: { count: limit }, included: true };
 }
 
 /**
@@ -111,6 +120,7 @@ export const defaultPlans: UiPlan[] = [
       { key: "auditLogs", params: { count: 30 }, included: true },
       { key: "liveChat", included: false },
       { key: "aiProcessingMonthly", params: { count: 5 }, included: true },
+      { key: "aiAssistantMonthly", params: { count: 20 }, included: true },
       { key: "prioritySupport", included: false },
     ],
     ctaLink: "/onboarding",
@@ -130,6 +140,7 @@ export const defaultPlans: UiPlan[] = [
       { key: "auditLogs", params: { count: 90 }, included: true },
       { key: "liveChat", included: true },
       { key: "aiProcessingMonthly", params: { count: 100 }, included: true },
+      { key: "aiAssistantMonthly", params: { count: 300 }, included: true },
       { key: "prioritySupport", included: true },
     ],
     ctaLink: "/onboarding",
@@ -149,6 +160,7 @@ export const defaultPlans: UiPlan[] = [
       { key: "auditLogsUnlimited", included: true },
       { key: "liveChat", included: true },
       { key: "aiProcessingUnlimited", included: true },
+      { key: "aiAssistantUnlimited", included: true },
       { key: "prioritySupport", included: true },
     ],
     ctaLink: "/onboarding",
@@ -185,6 +197,7 @@ export function planFeatureKeys(plan: DbPlan): PlanFeature[] {
       : { key: "auditLogsUnlimited", included: true },
     { key: "liveChat", included: !!f.chat },
     aiProcessingFeature(f.aiProcessing),
+    aiAssistantFeature(f.aiAssistant),
     { key: "prioritySupport", included: !!f.prioritySupport },
   ];
 }

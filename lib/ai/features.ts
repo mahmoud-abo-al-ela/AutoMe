@@ -16,6 +16,13 @@ export const AI_FEATURES = {
   carImageAltText: "carImageAltText",
   /** On-demand advice for what the listing-quality rules flagged. Billed. */
   listingQualityCoach: "listingQualityCoach",
+  /**
+   * A buyer asks a question on a public listing; the model answers from that
+   * car's record or says the listing does not say. Billed to the dealer, but
+   * from its own `aiAssistant` allowance — buyers asking questions must never
+   * use up the allowance the dealer lists cars with.
+   */
+  listingQA: "listingQA",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];
