@@ -5,10 +5,27 @@ import {
   Breadcrumbs,
   CarDetailsTabs,
   MobileStickyBar,
+  ListingAssistant,
 } from "./";
 import { notFound } from "next/navigation";
 import type { CarDetail } from "../_lib/car-detail-types";
 import { getTranslations } from "next-intl/server";
+import { isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
+import { logError } from "@/lib/utils/errors";
+
+/**
+ * Whether this dealer's plan offers buyers the assistant, with answers left
+ * this month. A failed check hides it rather than taking the page down: the
+ * listing matters more than the assistant on it.
+ */
+async function assistantOffered(organizationId: string): Promise<boolean> {
+  try {
+    return await isListingAssistantOffered(organizationId);
+  } catch (error) {
+    logError("Listing assistant availability check failed; hiding it", error);
+    return false;
+  }
+}
 
 const CarContent = async ({ id }: { id: string }) => {
   // Server component: getTranslations, not the useTranslations hook.
@@ -35,6 +52,8 @@ const CarContent = async ({ id }: { id: string }) => {
 
   if (!car) return notFound();
 
+  const showAssistant = await assistantOffered(car.organizationId);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-15 md:py-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -59,6 +78,8 @@ const CarContent = async ({ id }: { id: string }) => {
 
             {/* Tabbed Content: Description, Features, Specifications */}
             <CarDetailsTabs car={car} />
+
+            {showAssistant && <ListingAssistant carId={car.id} />}
           </div>
 
           {/* Sidebar - sticky on desktop, hidden on mobile (shown inline above) */}

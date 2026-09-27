@@ -37,6 +37,26 @@
     "title": "Features & Equipment",
     "notTranslated": "Not available in English — showing the original list."
   },
+  "assistant": {
+    "title": "Ask about this car",
+    "subtitle": "Answers come only from this listing's details.",
+    "placeholder": "e.g. Is it automatic?",
+    "inputLabel": "Your question about this car",
+    "ask": "Ask",
+    "asking": "Checking the listing…",
+    "suggestions": {
+      "features": "What features does it have?",
+      "hours": "When is the dealership open?",
+      "mileage": "How many kilometres has it done?"
+    },
+    "you": "You",
+    "fromListing": "From the listing",
+    "disclaimer": "AI answer based on the listing. Confirm with the dealer before you buy.",
+    "notInListing": "The listing doesn't say. The dealer can tell you.",
+    "unavailable": "The assistant can't answer right now. You can still ask the dealer.",
+    "askDealer": "Ask the dealer",
+    "failed": "Couldn't get an answer. Please try again."
+  },
   "specs": {
     "title": "Technical Specifications",
     "subtitle": "Detailed information about this vehicle’s build and configuration.",

@@ -10,6 +10,7 @@ export { default as Breadcrumbs } from "./Breadcrumbs";
 export { default as DealershipInfoCard } from "./DealershipInfoCard";
 export { default as CarDetailsTabs } from "./CarDetailsTabs";
 export { default as MobileStickyBar } from "./MobileStickyBar";
+export { default as ListingAssistant } from "./ListingAssistant";
 
 // Split CarInfoCard components
 export { default as CarHeader } from "./CarHeader";
