@@ -11,6 +11,8 @@
  * dealer pasting a novel into the description cannot inflate every call.
  */
 
+import type { CarDisclosures, DealershipTerms } from "@/lib/utils/car-disclosures";
+
 /** Every fact a listing answer may rest on. Order is the order the model sees. */
 export const LISTING_FACT_KEYS = [
   "make",
@@ -24,19 +26,21 @@ export const LISTING_FACT_KEYS = [
   "mileage",
   "price",
   "status",
+  "listedOn",
   "features",
+  "photos",
   "title",
   "description",
   "dealership",
   "workingHours",
   "history",
   "dealershipTerms",
+  "otherCars",
+  "marketPrices",
   "dealerAnswers",
 ] as const;
 
 export type ListingFactKey = (typeof LISTING_FACT_KEYS)[number];
-
-import type { CarDisclosures, DealershipTerms } from "@/lib/utils/car-disclosures";
 
 /** The row a listing context is built from, as the service loads it. */
 export interface ListingSource {
@@ -61,12 +65,25 @@ export interface ListingSource {
   descriptionAr: string | null;
   features: string[];
   featuresAr: string[];
+  /** The date it was first listed, "YYYY-MM-DD". */
+  listedOn: string | null;
+  /**
+   * What its photos show, one line per photo in display order, in the
+   * reader's language. Written by a model from the photos, so evidence of
+   * what is visible, not a verified fact about condition.
+   */
+  photos: string[];
   dealership: {
     name: string;
     /** City and governorate, already in the reader's language — never the stored codes. */
     place: string | null;
     address: string | null;
     phone: string | null;
+    website: string | null;
+    /** The dealer's own "about" text. */
+    about: string | null;
+    /** AutoMe's aggregate of approved buyer reviews; null with none. */
+    rating: { average: number; reviews: number } | null;
   };
   workingHours: {
     dayOfWeek: string[];
@@ -78,6 +95,10 @@ export interface ListingSource {
   history: Partial<CarDisclosures>;
   /** The dealership's standing terms; stated keys only. */
   terms: Partial<DealershipTerms>;
+  /** The dealership's other cars on sale — closestByPrice picks which. */
+  otherCars: OtherCar[];
+  /** How this price sits among comparable listings — summarizeMarketPrices. */
+  marketPrices: MarketPrices | null;
   /**
    * The dealer's own answers to earlier buyers' questions — on this car, or
    * marked by the dealer as true of every car they sell.
@@ -90,6 +111,75 @@ export interface ListingSource {
 }
 
 export type ListingFacts = Partial<Record<ListingFactKey, unknown>>;
+
+/** Another car the same dealership has on sale, as its listing shows it. */
+export interface OtherCar {
+  year: number;
+  make: string;
+  model: string;
+  color: string;
+  /** Whole EGP. */
+  price: number;
+  mileage: number;
+  bodyType: string;
+  transmission: string;
+  fuelType: string;
+}
+
+/**
+ * Asking prices of comparable listings on AutoMe, reduced to what a buyer
+ * can use. The comparison is computed here, not left to the model: "8%
+ * below the median" is arithmetic, and a model doing it is a model that can
+ * get it wrong in public.
+ */
+export interface MarketPrices {
+  listings: number;
+  min: number;
+  median: number;
+  max: number;
+  currency: string;
+  /** This car against the median, as a whole percentage: -8 is 8% below. */
+  thisCarVsMedianPercent: number;
+  /** Which model years were compared. */
+  years: [number, number];
+}
+
+/** Fewer comparable listings than this is an anecdote, not a range. */
+export const MIN_COMPARABLE_LISTINGS = 3;
+const MAX_OTHER_CARS = 8;
+const MAX_PHOTOS = 10;
+
+export function summarizeMarketPrices(
+  prices: number[],
+  car: { price: number; year: number; currency: string }
+): MarketPrices | null {
+  const sorted = prices.filter((p) => Number.isFinite(p) && p > 0).sort((a, b) => a - b);
+  if (sorted.length < MIN_COMPARABLE_LISTINGS || car.price <= 0) return null;
+
+  const mid = Math.floor(sorted.length / 2);
+  const median =
+    sorted.length % 2 === 0 ? Math.round((sorted[mid - 1] + sorted[mid]) / 2) : sorted[mid];
+  return {
+    listings: sorted.length,
+    min: sorted[0],
+    median,
+    max: sorted[sorted.length - 1],
+    currency: car.currency,
+    thisCarVsMedianPercent: Math.round(((car.price - median) / median) * 100),
+    years: [car.year - 1, car.year + 1],
+  };
+}
+
+/**
+ * The alternatives worth offering: the dealership's other cars closest in
+ * price to this one, since "anything cheaper?" and "got it in black?" are
+ * both asked by a buyer with this budget.
+ */
+export function closestByPrice(cars: OtherCar[], price: number, limit = MAX_OTHER_CARS): OtherCar[] {
+  return [...cars]
+    .sort((a, b) => Math.abs(a.price - price) - Math.abs(b.price - price))
+    .slice(0, limit);
+}
 
 const MAX_TEXT_CHARS = 1500;
 const MAX_FEATURES = 50;
@@ -153,8 +243,13 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
         : undefined,
     title: bilingual(source.titleEn, source.titleAr, source.title),
     description: bilingual(source.descriptionEn, source.descriptionAr, source.description),
+    listedOn: source.listedOn ?? undefined,
+    photos: nonEmpty(source.photos.slice(0, MAX_PHOTOS)),
     dealership: {
       name: source.dealership.name,
+      ...(clip(source.dealership.about) && { about: clip(source.dealership.about) }),
+      ...(source.dealership.rating && { rating: source.dealership.rating }),
+      ...(source.dealership.website && { website: source.dealership.website }),
       ...(source.dealership.place && { place: source.dealership.place }),
       ...(source.dealership.address && { address: source.dealership.address }),
       ...(source.dealership.phone && { phone: source.dealership.phone }),
@@ -171,6 +266,15 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     // Stated keys only, so a missing key reads as "not stated", never "no".
     history: Object.keys(source.history).length > 0 ? source.history : undefined,
     dealershipTerms: Object.keys(source.terms).length > 0 ? source.terms : undefined,
+    otherCars:
+      source.otherCars.length > 0
+        ? source.otherCars.map((car) => ({
+            ...car,
+            price: { amount: car.price, currency: source.priceCurrency },
+            mileage: { value: car.mileage, unit: "km" },
+          }))
+        : undefined,
+    marketPrices: source.marketPrices ?? undefined,
     dealerAnswers: dealerAnswers(source.dealerAnswers),
   };
 

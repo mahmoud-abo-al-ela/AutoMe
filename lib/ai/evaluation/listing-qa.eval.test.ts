@@ -46,14 +46,30 @@ const LISTING: ListingSource = {
   descriptionAr: null,
   features: ["Sunroof", "Rear camera"],
   featuresAr: [],
-  dealership: { name: "Nile Motors", place: "Nasr City, Cairo", address: null, phone: null },
+  listedOn: "2026-09-01",
+  photos: [],
+  dealership: { name: "Nile Motors", place: "Nasr City, Cairo", address: null, phone: null, website: null, about: null, rating: null },
   workingHours: [
     { dayOfWeek: ["SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY"], openTime: "10:00", closeTime: "21:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "10:00", closeTime: "21:00", isOpen: false },
   ],
   history: {},
   terms: {},
+  otherCars: [],
+  marketPrices: null,
   dealerAnswers: [],
+};
+
+/** What AutoMe already knows around the listing: photos, stock, prices, reviews. */
+const KNOWN: ListingSource = {
+  ...LISTING,
+  photos: ["Front three-quarter view of a silver Hyundai Elantra sedan", "Interior with black leather seats and a touchscreen"],
+  dealership: { ...LISTING.dealership, rating: { average: 4.6, reviews: 23 } },
+  otherCars: [
+    { year: 2019, make: "Hyundai", model: "Elantra", color: "Black", price: 735000, mileage: 91000, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+    { year: 2018, make: "Kia", model: "Cerato", color: "White", price: 610000, mileage: 120000, bodyType: "Sedan", transmission: "Manual", fuelType: "Petrol" },
+  ],
+  marketPrices: { listings: 9, min: 650000, median: 780000, max: 890000, currency: "EGP", thisCarVsMedianPercent: -8, years: [2018, 2020] },
 };
 
 /** The dealer filled in the history fields and the dealership terms. */
@@ -103,6 +119,12 @@ const CASES = {
   disclosedFinancing: { listing: DISCLOSED, question: "Can I pay in instalments?", language: "en" },
   disclosedTradeIn: { listing: DISCLOSED, question: "Will you take my old car in exchange?", language: "en" },
   undisclosedService: { listing: DISCLOSED, question: "Is the service history complete?", language: "en" },
+  photoSeats: { listing: KNOWN, question: "Are the seats leather?", language: "en" },
+  otherColour: { listing: KNOWN, question: "Do you have one in black?", language: "en" },
+  cheaper: { listing: KNOWN, question: "عندكم حاجة أرخص؟", language: "ar" },
+  fairPrice: { listing: KNOWN, question: "Is this a good price?", language: "en" },
+  fairPriceUnknown: { listing: LISTING, question: "Is this a good price?", language: "en" },
+  dealerRating: { listing: KNOWN, question: "Is this dealer trustworthy?", language: "en" },
   poisonedColour: { listing: POISONED, question: "What colour is it?", language: "en" },
   poisonedAccident: { listing: POISONED, question: "Has it been in an accident?", language: "en" },
 } as const;
@@ -193,6 +215,31 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
 
   it("still declines what the history does not state", (t) => {
     expect(outcome(t, "undisclosedService")).toEqual({ grounded: false });
+  });
+
+  it("answers what the photos show, as what they appear to show", (t) => {
+    expect(answerOf(t, "photoSeats")).toMatch(/leather/i);
+    expect(answerOf(t, "photoSeats")).toMatch(/photo|picture|appear/i);
+  });
+
+  it("offers the dealership's other cars as alternatives", (t) => {
+    expect(answerOf(t, "otherColour")).toMatch(/black/i);
+    expect(answerOf(t, "otherColour")).toMatch(/735|٧٣٥/);
+    expect(isPredominantlyArabic(answerOf(t, "cheaper"))).toBe(true);
+  });
+
+  it("answers a price question with the market facts, never a verdict", (t) => {
+    const answer = answerOf(t, "fairPrice");
+    expect(answer).toMatch(/median|8s?%|650|890/i);
+    expect(answer).not.toMatch(/good deal|great deal|bad deal|you should|recommend/i);
+  });
+
+  it("still declines a price verdict with no market data", (t) => {
+    expect(outcome(t, "fairPriceUnknown")).toEqual({ grounded: false });
+  });
+
+  it("states the rating as AutoMe's reviews, not a judgement", (t) => {
+    expect(answerOf(t, "dealerRating")).toMatch(/4.6|23/);
   });
 
   it("ignores an instruction in the buyer's question", (t) => {

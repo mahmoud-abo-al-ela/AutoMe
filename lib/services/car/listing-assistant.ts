@@ -2,7 +2,7 @@ import * as carRepository from "@/lib/repositories/car";
 import * as billingRepository from "@/lib/repositories/billing";
 import * as aiUsageRepository from "@/lib/repositories/ai-usage";
 import { AI_FEATURES } from "@/lib/ai/features";
-import { buildListingFacts } from "@/lib/ai/grounding";
+import { buildListingFacts, closestByPrice, summarizeMarketPrices, type MarketPrices, type OtherCar } from "@/lib/ai/grounding";
 import type { CapacityPriority } from "@/lib/ai/breaker";
 import { answerListingQuestion } from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
@@ -10,6 +10,7 @@ import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { questionKey } from "@/lib/utils/question-key";
 import { NotFoundError, logError } from "@/lib/utils/errors";
 import { licenseMonth, statedDisclosures, statedTerms } from "@/lib/utils/car-disclosures";
+import { parseImageAlts } from "@/lib/utils/image-alts";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -82,9 +83,12 @@ export async function askAboutListing(
     throw new NotFoundError("Car");
   }
 
-  const [allowance, dealerAnswers] = await Promise.all([
+  const price = Number(car.price);
+  const [allowance, dealerAnswers, otherCars, marketPrices] = await Promise.all([
     allowanceFor(car.organizationId),
     dealerAnswersFor(car.id, car.organizationId),
+    otherCarsFor(car.organizationId, car.id, price),
+    marketPricesFor({ ...car, price }),
   ]);
   if (!allowance.offered) return { status: "unavailable" };
 
@@ -92,12 +96,20 @@ export async function askAboutListing(
   const facts = buildListingFacts({
     ...car,
     // Decimal to number: whole EGP, well inside the safe-integer range.
-    price: Number(car.price),
+    price,
+    listedOn: car.createdAt.toISOString().slice(0, 10),
+    photos: photoDescriptions(car.images, car.imageAlts, locale),
     dealership: {
       name: organization.name,
       place: dealershipPlaceName(organization, locale) || null,
       address: organization.address,
       phone: organization.phone,
+      website: organization.website,
+      about: organization.description,
+      rating:
+        organization.totalReviews > 0
+          ? { average: Math.round(organization.averageRating * 10) / 10, reviews: organization.totalReviews }
+          : null,
     },
     workingHours: organization.workingHours,
     history: statedDisclosures({
@@ -105,6 +117,8 @@ export async function askAboutListing(
       licenseValidUntil: licenseMonth(car.licenseValidUntil),
     }),
     terms: statedTerms(organization),
+    otherCars,
+    marketPrices,
     dealerAnswers,
   });
 
@@ -138,6 +152,58 @@ async function dealerAnswersFor(carId: string, organizationId: string) {
   } catch (error) {
     logError("Loading dealer answers failed; answering from the listing alone", error);
     return [];
+  }
+}
+
+/**
+ * What the photos show, in display order and the reader's language, falling
+ * back to the other language rather than leaving a photo out.
+ */
+function photoDescriptions(images: string[], stored: unknown, locale: Locale): string[] {
+  const alts = parseImageAlts(stored);
+  return images.flatMap((url) => {
+    const alt = alts[url];
+    if (!alt) return [];
+    const text = (locale === "ar" ? alt.ar || alt.en : alt.en || alt.ar).trim();
+    return text ? [text] : [];
+  });
+}
+
+/** The dealership's other cars closest in price, or none if the read fails. */
+async function otherCarsFor(organizationId: string, carId: string, price: number): Promise<OtherCar[]> {
+  try {
+    const cars = await carRepository.findOtherAvailableCars(organizationId, carId);
+    return closestByPrice(
+      cars.map((c) => ({ ...c, price: Number(c.price) })),
+      price
+    );
+  } catch (error) {
+    logError("Loading the dealership's other cars failed; answering without them", error);
+    return [];
+  }
+}
+
+/** How comparable listings are priced, or null with too few or a failed read. */
+async function marketPricesFor(car: {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  priceCurrency: string;
+}): Promise<MarketPrices | null> {
+  try {
+    const prices = await carRepository.findComparablePrices({
+      make: car.make,
+      model: car.model,
+      year: car.year,
+      excludeCarId: car.id,
+      currency: car.priceCurrency,
+    });
+    return summarizeMarketPrices(prices, { price: car.price, year: car.year, currency: car.priceCurrency });
+  } catch (error) {
+    logError("Loading comparable prices failed; answering without them", error);
+    return null;
   }
 }
 

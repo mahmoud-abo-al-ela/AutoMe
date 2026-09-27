@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { buildListingFacts, citationsHold, type ListingSource } from "@/lib/ai/grounding";
+import {
+  buildListingFacts,
+  citationsHold,
+  closestByPrice,
+  summarizeMarketPrices,
+  type ListingSource,
+  type OtherCar,
+} from "@/lib/ai/grounding";
 
 const source: ListingSource = {
   make: "Toyota",
@@ -22,13 +29,17 @@ const source: ListingSource = {
   descriptionAr: "مالك واحد.",
   features: ["Sunroof"],
   featuresAr: [],
-  dealership: { name: "Nile Motors", place: "Cairo", address: null, phone: null },
+  listedOn: "2026-09-01",
+  photos: [],
+  dealership: { name: "Nile Motors", place: "Cairo", address: null, phone: null, website: null, about: null, rating: null },
   workingHours: [
     { dayOfWeek: ["SATURDAY", "SUNDAY"], openTime: "10:00", closeTime: "20:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "09:00", closeTime: "18:00", isOpen: false },
   ],
   history: {},
   terms: {},
+  otherCars: [],
+  marketPrices: null,
   dealerAnswers: [],
 };
 
@@ -67,6 +78,53 @@ describe("buildListingFacts", () => {
   it("bounds free text so a long description cannot inflate every call", () => {
     const facts = buildListingFacts({ ...source, descriptionEn: "x".repeat(5000) });
     expect((facts.description as { en: string }).en.length).toBeLessThanOrEqual(1501);
+  });
+});
+
+describe("what AutoMe already knows", () => {
+  it("carries photos, alternatives, prices and the rating only when there are any", () => {
+    const empty = buildListingFacts(source);
+    for (const key of ["photos", "otherCars", "marketPrices"]) expect(empty).not.toHaveProperty(key);
+    expect(empty.dealership).not.toHaveProperty("rating");
+    expect(empty.listedOn).toBe("2026-09-01");
+
+    const facts = buildListingFacts({
+      ...source,
+      photos: ["Black leather seats", " "],
+      dealership: { ...source.dealership, rating: { average: 4.6, reviews: 12 } },
+      otherCars: [{ year: 2020, make: "Toyota", model: "Corolla", color: "Black", price: 900000, mileage: 50000, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" }],
+    });
+    expect(facts.photos).toEqual(["Black leather seats"]);
+    expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, reviews: 12 });
+    expect((facts.otherCars as { price: unknown }[])[0].price).toEqual({ amount: 900000, currency: "EGP" });
+  });
+});
+
+describe("summarizeMarketPrices", () => {
+  const car = { price: 720000, year: 2019, currency: "EGP" };
+
+  it("computes the range, the median and where this car sits, so the model does no arithmetic", () => {
+    expect(summarizeMarketPrices([800000, 700000, 750000, 850000], car)).toEqual({
+      listings: 4,
+      min: 700000,
+      median: 775000,
+      max: 850000,
+      currency: "EGP",
+      thisCarVsMedianPercent: -7,
+      years: [2018, 2020],
+    });
+  });
+
+  it("says nothing from fewer than three listings", () => {
+    expect(summarizeMarketPrices([700000, 800000], car)).toBeNull();
+  });
+});
+
+describe("closestByPrice", () => {
+  it("offers the alternatives nearest this car's price", () => {
+    const at = (price: number) => ({ price }) as OtherCar;
+    const picked = closestByPrice([at(2_000_000), at(700_000), at(760_000), at(100_000)], 720_000, 2);
+    expect(picked.map((c) => c.price)).toEqual([700_000, 760_000]);
   });
 });
 
