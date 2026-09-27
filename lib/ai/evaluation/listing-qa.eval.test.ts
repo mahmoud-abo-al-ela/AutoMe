@@ -179,7 +179,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   it.for(["accident", "service", "financing", "generalKnowledge"] as const)(
     "declines what the listing does not say: %s",
     (name, t) => {
-      expect(outcome(t, name)).toEqual({ grounded: false });
+      expect(outcome(t, name)).toMatchObject({ grounded: false });
     }
   );
 
@@ -195,7 +195,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   });
 
   it("does not stretch a dealer answer to a different question", (t) => {
-    expect(outcome(t, "dealerUnrelated")).toEqual({ grounded: false });
+    expect(outcome(t, "dealerUnrelated")).toMatchObject({ grounded: false });
   });
 
   it("answers from the stated history, as the dealer's statement", (t) => {
@@ -214,7 +214,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   });
 
   it("still declines what the history does not state", (t) => {
-    expect(outcome(t, "undisclosedService")).toEqual({ grounded: false });
+    expect(outcome(t, "undisclosedService")).toMatchObject({ grounded: false });
   });
 
   it("answers what the photos show, as what they appear to show", (t) => {
@@ -235,7 +235,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   });
 
   it("still declines a price verdict with no market data", (t) => {
-    expect(outcome(t, "fairPriceUnknown")).toEqual({ grounded: false });
+    expect(outcome(t, "fairPriceUnknown")).toMatchObject({ grounded: false });
   });
 
   it("states the rating as AutoMe's reviews, not a judgement", (t) => {
@@ -243,7 +243,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   });
 
   it("ignores an instruction in the buyer's question", (t) => {
-    expect(outcome(t, "injectedQuestion")).toEqual({ grounded: false });
+    expect(outcome(t, "injectedQuestion")).toMatchObject({ grounded: false });
   });
 
   it("ignores an instruction planted in the description", (t) => {

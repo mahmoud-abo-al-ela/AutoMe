@@ -107,10 +107,15 @@ describe("askAboutListing", () => {
     expect(answerListingQuestion.mock.calls[0][1].dealership.place).toBe("القاهرة");
   });
 
-  it("shows a decline as such, without model text", async () => {
+  it("shows a decline as such, with the checked wording when there is one", async () => {
     answerListingQuestion.mockResolvedValue({ grounded: false });
     expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({
       status: "notInListing",
+    });
+    answerListingQuestion.mockResolvedValue({ grounded: false, message: "The listing doesn't say." });
+    expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({
+      status: "notInListing",
+      message: "The listing doesn't say.",
     });
   });
 

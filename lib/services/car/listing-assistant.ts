@@ -19,10 +19,13 @@ import type { Locale } from "@/i18n/routing";
  * the car — so the dealer's plan decides, never anything the buyer sends.
  */
 
-/** What a buyer is shown. Only `answered` carries model text. */
+/**
+ * What a buyer is shown. A decline may carry the model's own wording for it,
+ * already checked by declineText; without one the page shows fixed copy.
+ */
 export type AssistantReply =
   | { status: "answered"; answer: string }
-  | { status: "notInListing" }
+  | { status: "notInListing"; message?: string }
   | { status: "unavailable" };
 
 interface Allowance {
@@ -138,7 +141,7 @@ export async function askAboutListing(
     questionKey: questionKey(question),
     locale,
   });
-  return { status: "notInListing" };
+  return reply.message ? { status: "notInListing", message: reply.message } : { status: "notInListing" };
 }
 
 /**

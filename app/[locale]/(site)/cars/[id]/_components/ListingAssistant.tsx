@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
@@ -15,8 +15,8 @@ import type { ActionError } from "@/lib/utils/error-messages";
 import type { AssistantReply } from "@/lib/services/car/listing-assistant";
 
 const MAX_QUESTION = 300;
-/** Older exchanges scroll off: this is a quick answer, not a chat history. */
-const MAX_EXCHANGES = 4;
+/** Kept in the scrolling pane; older ones drop off beyond this. */
+const MAX_EXCHANGES = 20;
 
 interface Exchange {
   id: number;
@@ -28,11 +28,12 @@ interface Exchange {
 const SUGGESTIONS = ["features", "hours", "mileage"] as const;
 
 /**
- * Buyer questions answered from this listing only.
+ * Buyer questions answered from what AutoMe knows about this car.
  *
- * Only an `answered` reply shows model text. A decline and an unavailable
- * assistant show fixed copy with the way out — the dealer chat — because the
- * point of declining is to send the buyer to someone who knows.
+ * A decline shows the model's own wording when the server passed it (see
+ * declineText), otherwise fixed copy — and always the way out, the dealer
+ * chat, because the point of declining is to send the buyer to someone who
+ * knows.
  */
 const ListingAssistant = ({ carId }: { carId: string }) => {
   const t = useTranslations("carDetail.assistant");
@@ -41,6 +42,13 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
   const [question, setQuestion] = useState("");
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const nextId = useRef(0);
+  const paneRef = useRef<HTMLOListElement>(null);
+
+  // Keep the newest exchange in view as questions and answers arrive.
+  useEffect(() => {
+    const pane = paneRef.current;
+    if (pane) pane.scrollTo({ top: pane.scrollHeight, behavior: "smooth" });
+  }, [exchanges]);
 
   const settle = (id: number, patch: Partial<Exchange>) =>
     setExchanges((all) => all.map((e) => (e.id === id ? { ...e, ...patch } : e)));
@@ -84,17 +92,24 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
         </div>
 
         {exchanges.length > 0 && (
-          <ol className="space-y-3" aria-live="polite">
+          // Fixed height, scrolling: the page below the card does not jump as
+          // the conversation grows.
+          <ol
+            ref={paneRef}
+            className="h-72 sm:h-80 space-y-3 overflow-y-auto overscroll-contain rounded-lg bg-gray-50/60 p-3"
+            aria-live="polite"
+          >
             {exchanges.map((exchange) => (
               <li key={exchange.id} className="space-y-2">
                 {/* The buyer on the reading-start side — right in Arabic, left in
                     English — and the answer on the far side; logical classes
                     mirror it with the page direction. */}
-                {/* dir="auto": a question typed in the other language keeps its own
-                    direction inside the bubble; the bubble's side is unchanged. */}
-                <p dir="auto" className="w-fit max-w-[85%] rounded-2xl rounded-es-sm bg-blue-600 px-3 py-2 text-sm text-white">
+                <p className="w-fit max-w-[85%] rounded-2xl rounded-es-sm bg-blue-600 px-3 py-2 text-sm text-white">
                   <span className="sr-only">{t("you")}: </span>
-                  {exchange.question}
+                  {/* dir="auto" on the text, not the bubble: a question typed in
+                      the other language keeps its own direction, while the
+                      bubble's side and tail still follow the page. */}
+                  <span dir="auto">{exchange.question}</span>
                 </p>
                 <AssistantBubble exchange={exchange} carId={carId} />
               </li>
@@ -166,15 +181,22 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
 
   if (exchange.reply?.status === "answered") {
     return (
-      <p dir="auto" className={`${bubble} bg-gray-100 text-gray-800`}>
-        {exchange.reply.answer}
+      <p className={`${bubble} bg-gray-100 text-gray-800`}>
+        <span dir="auto">{exchange.reply.answer}</span>
       </p>
     );
   }
 
   return (
     <div className={`${bubble} space-y-2 bg-amber-50 text-amber-900`}>
-      <p>{exchange.reply?.status === "unavailable" ? t("unavailable") : t("notInListing")}</p>
+      <p>
+        <span dir="auto">
+          {exchange.reply?.status === "unavailable"
+            ? t("unavailable")
+            : (exchange.reply?.status === "notInListing" && exchange.reply.message) ||
+              t("notInListing")}
+        </span>
+      </p>
       {/* Middleware sends a signed-out buyer through sign-in and back. */}
       <Link
         href={`/messages?carId=${carId}`}

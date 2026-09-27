@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const generateStructured = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/ai/client", () => ({ generateStructured }));
 
-import { answerListingQuestion } from "@/lib/services/ai/answerListingQuestion";
+import { answerListingQuestion, declineText } from "@/lib/services/ai/answerListingQuestion";
 import { AI_FEATURES } from "@/lib/ai/features";
 import type { ListingFacts } from "@/lib/ai/grounding";
 
@@ -32,7 +32,19 @@ describe("answerListingQuestion", () => {
     });
   });
 
-  it("declines when the model declines, and drops its text", async () => {
+  it("keeps the model's own wording for a decline, so it reads as a reply", async () => {
+    generateStructured.mockResolvedValue({
+      fieldsUsed: [],
+      grounded: false,
+      answer: " The listing doesn't say whether it's been in an accident — the dealer can tell you. ",
+    });
+    expect(await answerListingQuestion("Any accidents?", facts, "en", ctx)).toEqual({
+      grounded: false,
+      message: "The listing doesn't say whether it's been in an accident — the dealer can tell you.",
+    });
+  });
+
+  it("drops a decline that points the buyer somewhere else", async () => {
     generateStructured.mockResolvedValue({
       fieldsUsed: [],
       grounded: false,
@@ -41,6 +53,11 @@ describe("answerListingQuestion", () => {
     expect(await answerListingQuestion("Any accidents?", facts, "en", ctx)).toEqual({
       grounded: false,
     });
+  });
+
+  it("never shows a failed 'grounded' answer as a decline — it may state a fact", async () => {
+    generateStructured.mockResolvedValue({ fieldsUsed: ["features"], grounded: true, answer: "Full service history." });
+    expect(await answerListingQuestion("Service?", facts, "en", ctx)).toEqual({ grounded: false });
   });
 
   it("declines a 'grounded' answer that cites a fact this listing does not have", async () => {
@@ -87,5 +104,27 @@ describe("answerListingQuestion", () => {
     const [a, b, c] = generateStructured.mock.calls.map((call) => call[0].cacheBytes);
     expect(a).toBe(b);
     expect(c).not.toBe(a);
+  });
+});
+
+describe("declineText", () => {
+  it("passes a plain decline in either language", () => {
+    expect(declineText("الإعلان مش مكتوب فيه لو العربية عملت حادثة — التاجر يقدر يقولك.")).toBeDefined();
+    expect(declineText("I can only help with questions about this car.")).toBeDefined();
+  });
+
+  it.each([
+    ["a link", "See https://x.test for more"],
+    ["a bare domain", "Ask at cheapcars.example"],
+    ["an email", "Mail sales@dealer"],
+    ["a phone number", "Call 010 1234 5678"],
+    ["an Arabic-Indic phone number", "كلمنا على ٠١٠١٢٣٤٥٦٧٨"],
+    ["something too long", "x".repeat(241)],
+  ])("drops %s", (_, text) => {
+    expect(declineText(text)).toBeUndefined();
+  });
+
+  it("keeps a year, which is not a phone number", () => {
+    expect(declineText("The listing doesn't say if it was serviced in 2024.")).toBeDefined();
   });
 });
