@@ -12,7 +12,7 @@ vi.hoisted(() => {
 import { extractCarListing, prepareImage } from "@/lib/services/ai";
 import type { CarListingDraft } from "@/lib/services/ai";
 import * as cache from "@/lib/ai/cache";
-import { ServiceUnavailableError } from "@/lib/utils/errors";
+import { asFile, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 import { carPhoto, notACar } from "@/lib/ai/evaluation/fixtures";
 import {
   isPredominantlyArabic,
@@ -51,21 +51,6 @@ const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_K
 const CALL_TIMEOUT = 180_000;
 
 const ctx = { organizationId: null, userId: null };
-
-/** The File shape `prepareImage` reads, without needing a DOM File. */
-function asFile({ bytes, mimeType }: { bytes: Buffer; mimeType: string }): File {
-  return {
-    type: mimeType,
-    size: bytes.byteLength,
-    arrayBuffer: async () =>
-      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-  } as unknown as File;
-}
-
-/** Every model in the chain was busy or unreachable — inconclusive, not wrong. */
-function isCapacityFailure(error: unknown): boolean {
-  return error instanceof ServiceUnavailableError;
-}
 
 describe.skipIf(!enabled)("car listing extraction (real model)", () => {
   let draft: CarListingDraft | null = null;

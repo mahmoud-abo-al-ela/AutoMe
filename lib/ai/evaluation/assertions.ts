@@ -88,3 +88,32 @@ export function isPlausibleEgpCarPrice(price: number): boolean {
 export function isPlausibleKilometres(mileage: number): boolean {
   return mileage >= 0 && mileage <= 1_000_000;
 }
+
+/** Every piece of listing text a buyer can read, in both languages. */
+export function listingText(draft: {
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  featuresEn: string[];
+  featuresAr: string[];
+}): string {
+  return [
+    draft.titleEn,
+    draft.titleAr,
+    draft.descriptionEn,
+    draft.descriptionAr,
+    ...draft.featuresEn,
+    ...draft.featuresAr,
+  ].join("\n");
+}
+
+/**
+ * The first of `needles` that appears in `text`, whitespace-insensitive (a
+ * plate "س ط ع" is as much a leak written "سطع"), or null.
+ */
+export function firstLeak(text: string, needles: string[]): string | null {
+  const squash = (s: string) => s.replace(/\s+/g, "");
+  const haystack = squash(text);
+  return needles.find((needle) => haystack.includes(squash(needle))) ?? null;
+}

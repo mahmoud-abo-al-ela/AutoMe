@@ -7,6 +7,8 @@ import {
   isAllowlisted,
   isPlausibleEgpCarPrice,
   isPlausibleKilometres,
+  firstLeak,
+  listingText,
 } from "@/lib/ai/evaluation/assertions";
 
 /**
@@ -104,5 +106,30 @@ describe("isPlausibleKilometres", () => {
 
   it("rejects a price that arrived in the mileage field", () => {
     expect(isPlausibleKilometres(8_500_000)).toBe(false);
+  });
+});
+
+describe("firstLeak", () => {
+  it("finds plate text however it is spaced", () => {
+    expect(firstLeak("لوحة سطع ١٢٣٤", ["س ط ع"])).toBe("س ط ع");
+    expect(firstLeak("plate CVC 911", ["CVC"])).toBe("CVC");
+  });
+
+  it("returns null when nothing leaked", () => {
+    expect(firstLeak("Porsche Panamera Turbo 2018", ["CVC", "١٢٣٤"])).toBeNull();
+  });
+});
+
+describe("listingText", () => {
+  it("covers every field a buyer reads, in both languages", () => {
+    const text = listingText({
+      titleEn: "a",
+      titleAr: "b",
+      descriptionEn: "c",
+      descriptionAr: "d",
+      featuresEn: ["e"],
+      featuresAr: ["f"],
+    });
+    for (const part of ["a", "b", "c", "d", "e", "f"]) expect(text).toContain(part);
   });
 });

@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { carPhoto, notACar, gradientNotACar } from "@/lib/ai/evaluation/fixtures";
+import {
+  carPhoto,
+  notACar,
+  gradientNotACar,
+  photoWithInstructions,
+  photoWithArabicPlate,
+  blurredCarPhoto,
+} from "@/lib/ai/evaluation/fixtures";
+import { prepareImage } from "@/lib/services/ai/image";
 
 // The PNG encoder is hand-written, so a malformed header would send the
 // evaluation suite a file the API rejects — and the suite would report a
@@ -38,5 +46,30 @@ describe("generated fixtures", () => {
     expect(bytes.length).toBeGreaterThan(1000);
     // JPEG SOI marker.
     expect(bytes.subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
+  });
+});
+
+describe("drawn fixtures", () => {
+  it.each([
+    ["instructions", photoWithInstructions],
+    ["Arabic plate", photoWithArabicPlate],
+    ["blurred", blurredCarPhoto],
+  ])("renders the %s photo as a JPEG the upload guard accepts", async (_label, make) => {
+    const { bytes, mimeType } = await make();
+    expect(mimeType).toBe("image/jpeg");
+    // The guard checks the bytes, not the claim — the fixture has to pass it
+    // or the evaluation never reaches the model.
+    const file = {
+      type: mimeType,
+      size: bytes.length,
+      arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.length),
+    } as unknown as File;
+    await expect(prepareImage(file)).resolves.toHaveProperty("part.inlineData.mimeType", "image/jpeg");
+  });
+
+  it("actually draws on the photo", async () => {
+    // An overlay that silently failed would test the plain photo and pass.
+    const plain = carPhoto().bytes;
+    expect((await photoWithInstructions()).bytes.equals(plain)).toBe(false);
   });
 });
