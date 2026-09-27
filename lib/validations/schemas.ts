@@ -262,3 +262,20 @@ export const listingReviewSchema = z.object({
   imageCount: z.coerce.number().int().min(0).max(50),
   language: z.enum(["en", "ar"]),
 });
+
+
+// ============ LISTING ASSISTANT ============
+
+/**
+ * A buyer's question about one listing. The id is a uuid because it keys the
+ * per-car rate limit: free text there would let a caller open a fresh bucket
+ * per request. The question is short because it is billed to the dealer and
+ * sent to the model verbatim.
+ */
+export const listingQuestionSchema = z.object({
+  carId: z.string().uuid(),
+  question: z.string().trim().min(2).max(300),
+  locale: z.enum(["en", "ar"]),
+});
+
+export type ListingQuestionInput = z.infer<typeof listingQuestionSchema>;

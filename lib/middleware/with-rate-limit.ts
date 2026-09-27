@@ -1,4 +1,4 @@
-import aj, { arcjetConfigured, arcjetRequired } from "@/lib/arcjet";
+import aj, { ajListingQuestions, arcjetConfigured, arcjetRequired } from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import {
   RateLimitError,
@@ -86,4 +86,19 @@ async function enforce(instance: typeof aj, requested: number) {
  */
 export async function enforceRateLimit(requested = 1) {
   return enforce(aj, requested);
+}
+
+/**
+ * Enforce the buyer-question buckets: per IP and per car. `carId` must be the
+ * validated id — it is the rate-limit key, so an unvalidated one would let a
+ * caller mint a fresh bucket per request.
+ */
+export async function enforceListingQuestionLimit(carId: string) {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajListingQuestions.protect(req, { requested: 1, carId });
+
+  assertArcjetAllowed(decision, "Too many questions. Please try again later.");
 }

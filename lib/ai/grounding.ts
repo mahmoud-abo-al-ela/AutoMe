@@ -58,8 +58,8 @@ export interface ListingSource {
   featuresAr: string[];
   dealership: {
     name: string;
-    city: string | null;
-    region: string | null;
+    /** City and governorate, already in the reader's language — never the stored codes. */
+    place: string | null;
     address: string | null;
     phone: string | null;
   };
@@ -127,8 +127,7 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     description: bilingual(source.descriptionEn, source.descriptionAr, source.description),
     dealership: {
       name: source.dealership.name,
-      ...(source.dealership.city && { city: source.dealership.city }),
-      ...(source.dealership.region && { region: source.dealership.region }),
+      ...(source.dealership.place && { place: source.dealership.place }),
       ...(source.dealership.address && { address: source.dealership.address }),
       ...(source.dealership.phone && { phone: source.dealership.phone }),
     },

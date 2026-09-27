@@ -22,7 +22,7 @@ const source: ListingSource = {
   descriptionAr: "مالك واحد.",
   features: ["Sunroof"],
   featuresAr: [],
-  dealership: { name: "Nile Motors", city: "Cairo", region: null, address: null, phone: null },
+  dealership: { name: "Nile Motors", place: "Cairo", address: null, phone: null },
   workingHours: [
     { dayOfWeek: ["SATURDAY", "SUNDAY"], openTime: "10:00", closeTime: "20:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "09:00", closeTime: "18:00", isOpen: false },

@@ -30,3 +30,35 @@ const aj = arcjet({
 });
 
 export default aj;
+
+/**
+ * Buyer questions on a listing. Its own client rather than `aj.withRule`,
+ * because that would also spend the shared bucket above: ten questions would
+ * lock a buyer out of the photo search for an hour.
+ *
+ * Two buckets, because an answer is billed to the dealer. Per IP stops one
+ * buyer asking all day; per car stops a crowd (or one buyer rotating IPs)
+ * from emptying a dealer's monthly allowance through one listing.
+ */
+export const ajListingQuestions = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["ip.src"],
+  rules: [
+    shield({ mode: arcjetMode }),
+    detectBot({ mode: arcjetMode, allow: [] }),
+    tokenBucket({
+      mode: "LIVE",
+      characteristics: ["ip.src"],
+      refillRate: 20,
+      interval: 3600,
+      capacity: 20,
+    }),
+    tokenBucket({
+      mode: "LIVE",
+      characteristics: ["carId"],
+      refillRate: 30,
+      interval: 3600,
+      capacity: 30,
+    }),
+  ],
+});

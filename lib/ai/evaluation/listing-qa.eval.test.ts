@@ -46,7 +46,7 @@ const LISTING: ListingSource = {
   descriptionAr: null,
   features: ["Sunroof", "Rear camera"],
   featuresAr: [],
-  dealership: { name: "Nile Motors", city: "Cairo", region: "Nasr City", address: null, phone: null },
+  dealership: { name: "Nile Motors", place: "Nasr City, Cairo", address: null, phone: null },
   workingHours: [
     { dayOfWeek: ["SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY"], openTime: "10:00", closeTime: "21:00", isOpen: true },
     { dayOfWeek: ["FRIDAY"], openTime: "10:00", closeTime: "21:00", isOpen: false },
