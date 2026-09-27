@@ -15,7 +15,10 @@ export const listingQaSchema = z.object({
   // First, so the model decides whether this is a question at all before it
   // reaches for a fact — "test" once came back with an unrelated answer.
   relevant: z.boolean(),
-  fieldsUsed: z.array(z.enum(LISTING_FACT_KEYS)).max(LISTING_FACT_KEYS.length),
+  // No .max(): Gemma rejects an array carrying both a long enum and maxItems
+  // (400 "invalid argument" at 24 keys, fine at 19), and the service dedupes
+  // the citations anyway — see schemas.test.ts.
+  fieldsUsed: z.array(z.enum(LISTING_FACT_KEYS)),
   grounded: z.boolean(),
   answer: z.string().max(600),
 });
