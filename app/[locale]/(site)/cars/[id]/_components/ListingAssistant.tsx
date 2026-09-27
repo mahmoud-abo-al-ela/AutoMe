@@ -164,12 +164,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
 
   if (exchange.reply?.status === "answered") {
     return (
-      <div className={`${bubble} bg-gray-100 text-gray-800`}>
-        <span className="mb-0.5 block text-micro font-semibold uppercase tracking-wide text-violet-600">
-          {t("fromListing")}
-        </span>
-        {exchange.reply.answer}
-      </div>
+      <p className={`${bubble} bg-gray-100 text-gray-800`}>{exchange.reply.answer}</p>
     );
   }
 
