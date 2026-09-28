@@ -10,7 +10,7 @@
  * stale answer from the previous wording can never be served.
  */
 export const carListingPrompt = {
-  version: "2026-09-29.1",
+  version: "2026-09-29.2",
   text: `You are cataloguing a car — new or used — for an Egyptian dealership listing.
 
 The photos (one to three) all show the SAME car from different angles. Use all
@@ -21,7 +21,7 @@ Identify the car the way an expert does, in this order:
    name, trim or engine lettering on the body, boot lid, grille, wheels or
    steering wheel, exactly as written. Then the design details that date it:
    grille, headlight and tail-light shape, bumpers, body shape, dashboard and
-   screen. Nothing else.
+   screen. Nothing else, and briefly: two or three short sentences.
 2. Name the make and model from that. Lettering you can read outranks your
    impression of the shape: a boot lid that says "X4" is an X4. Name the model
    the way it is sold, without the trim ("Elantra", not "Elantra GLS").

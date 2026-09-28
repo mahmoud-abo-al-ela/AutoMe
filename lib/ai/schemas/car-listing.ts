@@ -30,9 +30,10 @@ export const carListingSchema = z.object({
    * First, because the model writes fields in schema order: it states what it
    * can read and see — badges, lettering, grille, lights — before it commits
    * to a make and model, instead of naming a car and justifying it after.
-   * Never shown to the dealer.
+   * Never shown to the dealer, so a long one is cut, not rejected: failing a
+   * whole read over the length of its working notes would be absurd.
    */
-  identification: z.string().max(500),
+  identification: z.string().transform((text) => text.slice(0, 600)),
   make: z.string().min(1).max(50),
   model: z.string().min(1).max(50),
   /**

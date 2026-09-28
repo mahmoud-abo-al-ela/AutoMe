@@ -94,6 +94,9 @@ export async function extractCarListing(
     // The schema does the constraining; measured ~2000 default thinking tokens
     // against ~270 at "low", with the same fields back.
     thinking: "low",
+    // Two languages of copy plus what it read: 2,000–3,400 tokens measured,
+    // and a reply cut off at the default 4,096 is unreadable JSON.
+    maxOutputTokens: 8192,
     onProgress: options.onProgress,
     timeoutMs: options.timeoutMs,
     budgetMs: options.budgetMs,

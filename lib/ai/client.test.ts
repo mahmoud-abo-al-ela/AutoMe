@@ -176,15 +176,14 @@ describe("generateStructured — provider failures", () => {
 });
 
 describe("generateStructured — unusable responses", () => {
-  it("rejects output that is not JSON and records INVALID_JSON", async () => {
+  it("rejects output that is not JSON from every model, each recorded INVALID_JSON", async () => {
     generate.mockResolvedValue(ok("I'm afraid I can't do that"));
 
     await expect(call()).rejects.toBeInstanceOf(ValidationError);
 
-    expect(onlyRow()).toMatchObject({
-      success: false,
-      errorCode: "INVALID_JSON",
-    });
+    const rows = createAiUsage.mock.calls.map((c) => c[0]);
+    expect(rows).toHaveLength(chainLength());
+    expect(rows.every((row) => row.success === false && row.errorCode === "INVALID_JSON")).toBe(true);
   });
 
   it("rejects an empty body", async () => {
@@ -194,7 +193,7 @@ describe("generateStructured — unusable responses", () => {
     });
 
     await expect(call()).rejects.toBeInstanceOf(ValidationError);
-    expect(onlyRow().errorCode).toBe("INVALID_JSON");
+    expect(createAiUsage.mock.calls[0][0].errorCode).toBe("INVALID_JSON");
   });
 
   it("tolerates a fenced response with trailing junk", async () => {
@@ -216,14 +215,15 @@ describe("generateStructured — unusable responses", () => {
     });
   });
 
-  it("does not retry an unusable response", async () => {
+  it("never asks the same model again after an unreadable reply", async () => {
     generate.mockResolvedValue(ok("not json at all"));
 
     await expect(call()).rejects.toThrow();
 
-    // The provider already accepted and billed the request; a second attempt
-    // would spend another one on identical instructions.
-    expect(generate).toHaveBeenCalledTimes(1);
+    // The provider already accepted and billed the request; asking the same
+    // model again spends another on identical instructions. Other models may.
+    const models = generate.mock.calls.map((c) => c[0].model);
+    expect(new Set(models).size).toBe(models.length);
   });
 
   it("records a schema rejection as a failure so it cannot burn a customer's quota", async () => {
@@ -392,8 +392,19 @@ describe("generateStructured — model fallback", () => {
     expect(generate).toHaveBeenCalledTimes(1);
   });
 
-  it("does not walk the chain when the response is unusable", async () => {
-    generate.mockResolvedValue(ok("not json"));
+  it("walks to the next model when a reply is not JSON — cut off or garbled", async () => {
+    generate
+      .mockResolvedValueOnce(ok('{"make":"Dongfeng","year":20'))
+      .mockResolvedValueOnce(ok('{"make":"Dongfeng","year":2024}'));
+
+    await expect(call()).resolves.toEqual({ make: "Dongfeng", year: 2024 });
+
+    const [first, second] = generate.mock.calls.map((c) => c[0].model);
+    expect(second).not.toBe(first);
+  });
+
+  it("does not walk the chain when the schema rejects a reply — it would fail everywhere", async () => {
+    generate.mockResolvedValue(ok('{"make":123,"year":"nope"}'));
 
     await expect(call()).rejects.toBeInstanceOf(ValidationError);
 
@@ -633,3 +644,15 @@ describe("generateStructured — queued models", () => {
 function chainLength() {
   return modelsFor("vision").filter((entry) => entry.provider === "google").length;
 }
+
+describe("generateStructured — reply length", () => {
+  it("caps a reply at 4,096 tokens unless the feature asks for more", async () => {
+    generate.mockResolvedValue(ok('{"make":"Kia","year":2020}'));
+    await call();
+    expect(generate.mock.calls[0][0].maxOutputTokens).toBe(4096);
+
+    generate.mockClear();
+    await call({ maxOutputTokens: 8192, cacheBytes: undefined });
+    expect(generate.mock.calls[0][0].maxOutputTokens).toBe(8192);
+  });
+});

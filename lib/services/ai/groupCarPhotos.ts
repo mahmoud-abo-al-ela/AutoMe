@@ -21,8 +21,9 @@ const MAX_LABEL = 80;
  * The model's grouping, made sound: every photo in exactly one group, in the
  * order first claimed; indexes it invented dropped; photos it left out given
  * a group each (a dealer can merge two groups, but cannot find a lost photo);
- * `readWith` only ever from the group's own photos. The label is shown only to
- * the dealer who took the photos and is never stored, so it is trimmed, not
+ * `readWith` only ever from the group's own photos, and as full as the car
+ * allows. The label is shown only to the dealer who took the photos and is
+ * never stored, so it is trimmed, not
  * scrubbed: stripping digits would turn "K5" and "3008" into nonsense.
  */
 export function normalizeGrouping(reply: PhotoGroupingReply, count: number): PhotoGroup[] {
@@ -35,8 +36,11 @@ export function normalizeGrouping(reply: PhotoGroupingReply, count: number): Pho
     if (photos.length === 0) continue;
     photos.forEach((i) => claimed.add(i));
 
+    // The model's picks first, then the car's other photos until the read is
+    // full: a pick of two from a car of three once left out the boot lid
+    // reading "C 200", and the car was drafted as a GLC.
     const chosen = [...new Set(car.readWith)].filter((i) => own.has(i));
-    const readWith = (chosen.length > 0 ? chosen : photos).slice(0, MAX_AI_LISTING_PHOTOS);
+    const readWith = [...chosen, ...photos.filter((i) => !chosen.includes(i))].slice(0, MAX_AI_LISTING_PHOTOS);
     const label = car.label.trim().slice(0, MAX_LABEL);
     groups.push({ label, photos, readWith });
   }

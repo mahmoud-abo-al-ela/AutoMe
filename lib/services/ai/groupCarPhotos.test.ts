@@ -14,7 +14,7 @@ const car = (photos: number[], readWith: number[] = [], label = "white Elantra")
 describe("normalizeGrouping", () => {
   it("keeps a sound grouping as it is", () => {
     expect(normalizeGrouping({ cars: [car([0, 1], [1]), car([2], [2], "red K5")] }, 3)).toEqual([
-      { label: "white Elantra", photos: [0, 1], readWith: [1] },
+      { label: "white Elantra", photos: [0, 1], readWith: [1, 0] },
       { label: "red K5", photos: [2], readWith: [2] },
     ]);
   });
@@ -34,9 +34,11 @@ describe("normalizeGrouping", () => {
     expect(groups.map((g) => g.photos)).toEqual([[1], [0], [2]]);
   });
 
-  it("reads with the car's own photos only, at most three, falling back to its first", () => {
+  it("reads with the car's own photos only, its picks first, filled to three", () => {
     expect(normalizeGrouping({ cars: [car([0, 1, 2, 3, 4], [4, 9, 3, 2, 1])] }, 5)[0].readWith).toEqual([4, 3, 2]);
     expect(normalizeGrouping({ cars: [car([0, 1, 2, 3], [8])] }, 4)[0].readWith).toEqual([0, 1, 2]);
+    // A pick of two from three once left out the boot lid that named the car.
+    expect(normalizeGrouping({ cars: [car([0, 1, 2], [0, 2])] }, 3)[0].readWith).toEqual([0, 2, 1]);
   });
 
   it("keeps model numbers in a label, trimmed and capped", () => {

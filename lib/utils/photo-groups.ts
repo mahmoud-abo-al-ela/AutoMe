@@ -13,10 +13,18 @@ export interface ImportGroup {
 }
 
 /**
+ * The photos a car is read with: its chosen ones first, then its others until
+ * the read is full — a photo held back may be the badge that names the car.
+ */
+function fullRead(chosen: number[], photos: number[]): number[] {
+  return [...chosen, ...photos.filter((p) => !chosen.includes(p))].slice(0, MAX_AI_LISTING_PHOTOS);
+}
+
+/**
  * Place one photo: at position `at` of car `to` (its end when no position),
  * or in a car of its own (`to` null, with the id `newId` gives). Within its
  * own car this reorders. A car left with no photos is dropped, and one that
- * lost an identifying photo falls back to its first ones.
+ * lost an identifying photo reads with its others instead.
  */
 export function placePhoto(
   groups: ImportGroup[],
@@ -39,8 +47,7 @@ export function placePhoto(
     .map((g) => {
       if (g.id !== from.id) return g;
       const photos = g.photos.filter((p) => p !== photo);
-      const readWith = g.readWith.filter((p) => p !== photo);
-      return { ...g, photos, readWith: readWith.length > 0 ? readWith : photos.slice(0, MAX_AI_LISTING_PHOTOS) };
+      return { ...g, photos, readWith: fullRead(g.readWith.filter((p) => p !== photo), photos) };
     })
     .filter((g) => g.photos.length > 0);
 

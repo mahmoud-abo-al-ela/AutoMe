@@ -81,6 +81,8 @@ export interface GenerateStructuredInput<T> {
   maxAttempts?: number;
   /** See ProviderRequest.thinking. Skipped for models without the control. */
   thinking?: "low";
+  /** Reply-length cap; DEFAULT_MAX_OUTPUT_TOKENS unless a feature writes more. */
+  maxOutputTokens?: number;
   /**
    * How long a model may take to START answering before it is treated as
    * queued and the next model in the chain is tried. Applies to every model
@@ -142,10 +144,11 @@ function budgetFromEnv(): number {
 const DEFAULT_MAX_ATTEMPTS = 2;
 
 /**
- * Every reply this client asks for is a small JSON object — the car listing is
- * ~400 output tokens plus ~270 of thinking. The ceiling exists for the model
- * that loops: gemma-4-26b-a4b ran 11.6 minutes and wrote 176 KB of unterminated
- * JSON when measured on 2026-09-24. Capped, the same failure costs seconds.
+ * Most replies this client asks for are small JSON objects. The ceiling exists
+ * for the model that loops: gemma-4-26b-a4b ran 11.6 minutes and wrote 176 KB
+ * of unterminated JSON when measured on 2026-09-24. Capped, the same failure
+ * costs seconds. A feature that writes more passes its own `maxOutputTokens`
+ * — the photo read, at 2,000–3,400 tokens by 2026-09-29, was being cut off.
  */
 const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
 
@@ -331,6 +334,7 @@ interface AttemptInput<T> {
   temperature: number | undefined;
   maxAttempts: number;
   thinking: "low" | undefined;
+  maxOutputTokens: number;
   firstTokenMs: number | undefined;
   modelIndex: number;
   modelCount: number;
@@ -339,6 +343,11 @@ interface AttemptInput<T> {
 }
 
 /** How long an attempt may take: its own ceiling, or whatever budget is left. */
+/** A reply that was not JSON at all — see attemptModel's INVALID_JSON. */
+function isUnreadableReply(error: unknown): boolean {
+  return error instanceof ValidationError && error.messageKey === "errors.ai.unreadable";
+}
+
 function remainingFor(input: { timeoutMs: number; deadline: number }): number {
   return Math.min(input.timeoutMs, input.deadline - Date.now());
 }
@@ -391,7 +400,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
           temperature: input.temperature,
           // Each provider maps this to its own control, or leaves it off.
           thinking: input.thinking,
-          maxOutputTokens: DEFAULT_MAX_OUTPUT_TOKENS,
+          maxOutputTokens: input.maxOutputTokens,
           onText: input.streaming
             ? (text) => input.emit({ type: "text", text })
             : undefined,
@@ -625,6 +634,7 @@ export async function generateStructured<T>(
           temperature: input.temperature,
           maxAttempts,
           thinking: input.thinking,
+          maxOutputTokens: input.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
           // The last model keeps the rest of the budget: there is nowhere left
           // to hand over to, so cutting it short only guarantees a failure. A
           // provider that does not stream has no "first token" to wait for.
@@ -655,14 +665,16 @@ export async function generateStructured<T>(
     }
 
     // What earns the next link in the chain: a retired model, a saturated
-    // one, or a provider whose keys all refused us — each a statement about
-    // *this* model or provider that another may not share. A malformed request
-    // or an unusable response fails identically everywhere, and walking the
-    // chain would spend the quota again to learn that.
+    // one, a provider whose keys all refused us, or a reply that is not JSON
+    // at all (cut off or garbled) — each a statement about *this* model that
+    // another may not share. A malformed request fails identically
+    // everywhere, and so does a well-formed reply the schema rejects (a photo
+    // that is not a car): walking the chain would only spend the quota again.
     const anotherModelMightWork =
       isModelUnavailableError(error) ||
       isCapacityError(error) ||
       isProviderUnavailableError(error) ||
+      isUnreadableReply(error) ||
       error instanceof QueueTimeoutError;
     // A timeout is never retried on the same model — the provider still bills
     // the abandoned work — but it walks on to the next model, even one behind
