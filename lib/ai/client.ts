@@ -16,7 +16,6 @@ import {
   entryLabel,
   estimateCostMicroUsd,
   modelsFor,
-  withLead,
   type ChainEntry,
   type ModelTask,
   type TokenUsage,
@@ -90,12 +89,6 @@ export interface GenerateStructuredInput<T> {
    * into cars, where Gemma merged two different Mercedes twice (2026-09-29).
    */
   skipGemma?: boolean;
-  /**
-   * Models tried before the task's chain, which still backs them up — for a
-   * caller that needs a stronger model than the task's default (the bulk
-   * import; see importLeadModels).
-   */
-  leadWith?: ChainEntry[];
   /**
    * How long a model may take to START answering before it is treated as
    * queued and the next model in the chain is tried. Applies to every model
@@ -529,7 +522,7 @@ export async function generateStructured<T>(
     if (!keys) keyring.set(provider, (keys = keysFor(provider)));
     return keys;
   };
-  const configured = withLead(modelsFor(input.task), input.leadWith ?? [])
+  const configured = modelsFor(input.task)
     .filter((entry) => keysOf(entry.provider).length > 0)
     // Gemma is the last resort for every task that can take a rougher
     // answer; a task that cannot opts out (see skipGemma).

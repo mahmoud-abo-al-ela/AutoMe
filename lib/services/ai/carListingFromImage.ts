@@ -10,7 +10,6 @@ import {
   type CarListingExtraction,
 } from "@/lib/ai/schemas/car-listing";
 import { textPart } from "@/lib/ai/provider/types";
-import type { ChainEntry } from "@/lib/ai/models";
 import type { PreparedImage } from "@/lib/services/ai/image";
 import { MAX_AI_LISTING_PHOTOS } from "@/lib/constants/car-options";
 
@@ -55,8 +54,6 @@ export interface ExtractOptions {
   budgetMs?: number;
   /** See GenerateStructuredInput.firstTokenTimeoutMs. */
   firstTokenTimeoutMs?: number;
-  /** Models tried first — the bulk import's stronger reader; see importLeadModels. */
-  leadWith?: ChainEntry[];
 }
 
 /** Photos of one car read together; see extractCarListing. */
@@ -104,7 +101,6 @@ export async function extractCarListing(
     timeoutMs: options.timeoutMs,
     budgetMs: options.budgetMs,
     firstTokenTimeoutMs: options.firstTokenTimeoutMs,
-    leadWith: options.leadWith,
   });
 
   const featuresEn = cleanFeatures(extraction.featuresEn);

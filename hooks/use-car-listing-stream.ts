@@ -54,7 +54,7 @@ export function useCarListingStream() {
   const [progress, setProgress] = useState<CarListingProgress | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
-  const extract = useCallback(async (files: File[], purpose?: "import"): Promise<CarListingDraft> => {
+  const extract = useCallback(async (files: File[]): Promise<CarListingDraft> => {
     xhrRef.current?.abort();
     setProgress(INITIAL);
     // Shrunk for the upload limit; the listing keeps the originals.
@@ -161,8 +161,6 @@ export function useCarListingStream() {
 
       const body = new FormData();
       for (const file of upload) body.append("file", file);
-      // The import reads with a stronger model first; see importLeadModels.
-      if (purpose) body.append("purpose", purpose);
       xhr.open("POST", ENDPOINT);
       xhr.send(body);
     });

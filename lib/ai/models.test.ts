@@ -1,5 +1,5 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
-import { modelsFor, modelFor, estimateCostMicroUsd, parseChainEntry, importLeadModels, withLead } from "@/lib/ai/models";
+import { describe, it, expect, afterEach } from "vitest";
+import { modelsFor, modelFor, estimateCostMicroUsd, parseChainEntry } from "@/lib/ai/models";
 
 const ENV_KEYS = [
   "AI_MODELS_VISION",
@@ -146,33 +146,5 @@ describe("estimateCostMicroUsd", () => {
 
     // A missing price must never fail or inflate a request.
     expect(estimateCostMicroUsd("gemini-99-imaginary", usage)).toBe(0);
-  });
-});
-
-describe("the bulk import's lead models", () => {
-  afterEach(() => vi.unstubAllEnvs());
-
-  it("tries Claude Sonnet 5 via CodeCraft first, the task's chain behind it, never twice", () => {
-    const lead = importLeadModels();
-    expect(lead).toEqual([{ provider: "codecraft", model: "claude-sonnet-5" }]);
-    const chain = withLead(modelsFor("vision"), lead);
-    expect(chain[0]).toEqual({ provider: "codecraft", model: "claude-sonnet-5" });
-    expect(chain.filter((e) => e.model === "claude-sonnet-5")).toHaveLength(1);
-    expect(chain.length).toBe(modelsFor("vision").length + 1);
-  });
-
-  it("moves a lead model already in the chain to the front instead of repeating it", () => {
-    const [second] = modelsFor("vision").slice(1);
-    const chain = withLead(modelsFor("vision"), [second]);
-    expect(chain[0]).toEqual(second);
-    expect(chain).toHaveLength(modelsFor("vision").length);
-  });
-
-  it("takes AI_MODELS_IMPORT instead, when set", () => {
-    vi.stubEnv("AI_MODELS_IMPORT", "codecraft/claude-opus-5, google/gemini-3.6-flash");
-    expect(importLeadModels()).toEqual([
-      { provider: "codecraft", model: "claude-opus-5" },
-      { provider: "google", model: "gemini-3.6-flash" },
-    ]);
   });
 });

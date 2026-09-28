@@ -75,7 +75,5 @@ describe("groupCarPhotos", () => {
     expect(input.timeoutMs).toBeGreaterThanOrEqual(90_000);
     // Gemma merged two different Mercedes: a wrong sort is worse than "busy".
     expect(input.skipGemma).toBe(true);
-    // Claude Sonnet 5 sorts first; the fast chain backs it up.
-    expect(input.leadWith).toEqual([{ provider: "codecraft", model: "claude-sonnet-5" }]);
   });
 });

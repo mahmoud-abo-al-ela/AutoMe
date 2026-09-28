@@ -4,7 +4,6 @@ import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 import { aiCallerFor } from "@/lib/ai/caller";
-import { importLeadModels } from "@/lib/ai/models";
 import { assertUnsavedReadsLeft } from "@/lib/services/car/ai-allowance";
 import type { AiProgressEvent } from "@/lib/ai/client";
 import {
@@ -78,7 +77,6 @@ function errorStatus(error: unknown): number {
 export async function POST(request: Request) {
   let ctx;
   let images;
-  let fromImport = false;
   try {
     ctx = await resolveTenantContext();
     await assertAiAllowed(ctx);
@@ -88,9 +86,6 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const files = formData.getAll("file");
-    // The bulk import reads with a stronger model first (importLeadModels).
-    // Only the model order changes — every gate above still applies.
-    fromImport = formData.get("purpose") === "import";
     if (files.length > MAX_LISTING_PHOTOS) {
       throw new ValidationError(`At most ${MAX_LISTING_PHOTOS} photos`, "file", {
         key: "errors.ai.tooManyImages",
@@ -157,7 +152,6 @@ export async function POST(request: Request) {
           timeoutMs: AI_BUDGET_MS,
           budgetMs: AI_BUDGET_MS,
           firstTokenTimeoutMs: FIRST_TOKEN_MS,
-          leadWith: fromImport ? importLeadModels() : undefined,
         });
         send({ type: "result", data: draft });
       } catch (error) {
