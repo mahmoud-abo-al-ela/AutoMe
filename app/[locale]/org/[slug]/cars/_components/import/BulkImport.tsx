@@ -66,7 +66,11 @@ export default function BulkImport() {
   useEffect(() => () => previews.forEach((url) => URL.revokeObjectURL(url)), [previews]);
 
   // Cars the AI can still draft: the fewer of AI listings and car slots left.
-  const room = Math.min(left(aiUsage), left(carUsage));
+  // Unknown until both usage reads answer — never read as "none left", which
+  // flashed "no AI listings left" and disabled the button on every load.
+  const known = Boolean(aiUsage && carUsage);
+  const room = known ? Math.min(left(aiUsage), left(carUsage)) : Infinity;
+  const noRoom = known && room === 0;
 
   const onDrop = async (accepted: File[]) => {
     setError(null);
@@ -125,7 +129,7 @@ export default function BulkImport() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
-      <ImportHeader stage={stage} room={room} known={Boolean(aiUsage && carUsage)} />
+      <ImportHeader stage={stage} room={room} known={known} />
 
       {stage === "pick" && (
         <Card className="py-0">
@@ -142,7 +146,7 @@ export default function BulkImport() {
               </div>
               <p className="mb-1 font-semibold text-gray-900">{isDragActive ? t("dropping") : t("dropPrompt")}</p>
               <p className="mb-5 text-sm text-gray-500">{t("formats", { max: number(MAX_IMPORT_PHOTOS) })}</p>
-              <Button type="button" className="bg-purple-600 hover:bg-purple-700" disabled={room === 0}>
+              <Button type="button" className="bg-purple-600 hover:bg-purple-700" disabled={noRoom}>
                 <Upload className="me-2 h-4 w-4" aria-hidden />
                 {t("choose")}
               </Button>
@@ -155,7 +159,7 @@ export default function BulkImport() {
                 </li>
               ))}
             </ul>
-            {room === 0 && <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">{t("noRoom")}</p>}
+            {noRoom && <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">{t("noRoom")}</p>}
             {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           </CardContent>
         </Card>
