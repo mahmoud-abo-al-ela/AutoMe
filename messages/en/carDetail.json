@@ -54,6 +54,10 @@
     "notInListing": "We don't have that information. The dealer can tell you.",
     "unavailable": "The assistant can't answer right now. You can still ask the dealer.",
     "askDealer": "Ask the dealer",
+    "actions": {
+      "directions": "Directions",
+      "call": "Call"
+    },
     "failed": "Couldn't get an answer. Please try again.",
     "offTopic": "I can only help with questions about this car.",
     "smallTalk": {

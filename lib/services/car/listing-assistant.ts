@@ -10,7 +10,11 @@ import {
   type OtherCar,
 } from "@/lib/ai/grounding";
 import type { CapacityPriority } from "@/lib/ai/breaker";
-import { answerListingQuestion, type PastExchange } from "@/lib/services/ai/answerListingQuestion";
+import {
+  answerListingQuestion,
+  type ListingAction,
+  type PastExchange,
+} from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { questionKey } from "@/lib/utils/question-key";
@@ -31,13 +35,33 @@ import type { Trace } from "@/lib/utils/dev-trace";
  * already checked by declineText; without one the page shows fixed copy.
  */
 export type AssistantReply =
-  | { status: "answered"; answer: string }
+  | { status: "answered"; answer: string; actions?: AssistantAction[]; cars?: SuggestedCar[] }
   | { status: "notInListing"; message?: string }
   /** Not a question about this car; not filed for the dealer. */
   | { status: "offTopic"; message?: string }
   /** Answered without the model — see classifyBuyerMessage. */
   | { status: "smallTalk"; kind: "greeting" | "thanks" | "noise" }
   | { status: "unavailable" };
+
+/** A button under an answer. The href is built here from the dealer's row. */
+export type AssistantAction =
+  | { kind: "directions"; href: string }
+  | { kind: "call"; href: string; phone: string };
+
+/** Another of the dealership's cars an answer names, as a card linking to it. */
+export interface SuggestedCar {
+  id: string;
+  year: number;
+  make: string;
+  model: string;
+  /** Whole units of `currency`. */
+  price: number;
+  currency: string;
+  image: string | null;
+}
+
+/** The dealership's other cars as loaded: what the model sees, plus the card's link and photo. */
+type OtherCarRow = OtherCar & { id: string; image: string | null };
 
 interface Allowance {
   offered: boolean;
@@ -153,7 +177,18 @@ export async function askAboutListing(
 
   if (reply.grounded) {
     trace?.end(`answered: "${reply.answer}"`);
-    return { status: "answered", answer: reply.answer };
+    const actions = (reply.actions ?? []).flatMap((kind) => actionFor(kind, organization));
+    // A ref is a 1-based position in the otherCars the model was given.
+    const cars = (reply.carRefs ?? []).flatMap((ref) => {
+      const row = otherCars?.[ref - 1];
+      return row ? [suggestedCar(row, car.priceCurrency)] : [];
+    });
+    return {
+      status: "answered",
+      answer: reply.answer,
+      ...(actions.length > 0 && { actions }),
+      ...(cars.length > 0 && { cars }),
+    };
   }
   // Not a question about the car: the dealer has nothing to answer.
   if (reply.offTopic) {
@@ -208,17 +243,40 @@ function photoDescriptions(images: string[], stored: unknown, locale: Locale): s
  * when the read fails: "none for sale" is a claim, and only a successful read
  * can make it.
  */
-async function otherCarsFor(organizationId: string, carId: string, price: number): Promise<OtherCar[] | null> {
+async function otherCarsFor(organizationId: string, carId: string, price: number): Promise<OtherCarRow[] | null> {
   try {
     const cars = await carRepository.findOtherAvailableCars(organizationId, carId);
     return closestByPrice(
-      cars.map((c) => ({ ...c, price: Number(c.price) })),
+      cars.map(({ images, ...c }) => ({ ...c, price: Number(c.price), image: images?.[0] ?? null })),
       price
     );
   } catch (error) {
     logError("Loading the dealership's other cars failed; answering without them", error);
     return null;
   }
+}
+
+/**
+ * A button's target, from the dealer's own row — never from the model, which
+ * only chose that the button fits. answerListingQuestion already dropped any
+ * button the row cannot back; this re-checks, since it builds the href.
+ */
+function actionFor(
+  kind: ListingAction,
+  organization: { address: string | null; phone: string | null }
+): AssistantAction[] {
+  if (kind === "directions" && organization.address) {
+    return [{ kind, href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(organization.address)}` }];
+  }
+  if (kind === "call" && organization.phone) {
+    return [{ kind, href: `tel:${organization.phone.replace(/[^\d+]/g, "")}`, phone: organization.phone }];
+  }
+  return [];
+}
+
+function suggestedCar(row: OtherCarRow, currency: string): SuggestedCar {
+  const { id, year, make, model, price, image } = row;
+  return { id, year, make, model, price, currency, image };
 }
 
 /**

@@ -236,6 +236,39 @@ describe("askAboutListing", () => {
     expect(facts.listedOn).toBe("2026-09-01");
   });
 
+  it("turns the cars an answer names into cards, and its buttons into links from the dealer's row", async () => {
+    findCarForAssistant.mockResolvedValue({
+      ...car,
+      organization: { ...car.organization, address: "12 Nile St, Cairo", phone: "0100 123-4567" },
+    });
+    findOtherAvailableCars.mockResolvedValue([
+      { id: "car-k5", images: ["https://img/k5.jpg"], year: 2021, make: "Kia", model: "K5", color: "Red", price: "900000", mileage: 1, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+      { id: "car-el", images: [], year: 2019, make: "Hyundai", model: "Elantra", color: "Black", price: "860000", mileage: 1, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+    ]);
+    // Refs are positions in the facts, which are sorted by price: Elantra is 1.
+    answerListingQuestion.mockResolvedValue({
+      grounded: true, answer: "They also have a K5.", fieldsUsed: ["otherCars"],
+      actions: ["directions", "call"], carRefs: [2, 7],
+    });
+
+    expect(await askAboutListing("car-1", "Anything else?", "en", null)).toEqual({
+      status: "answered",
+      answer: "They also have a K5.",
+      actions: [
+        { kind: "directions", href: "https://www.google.com/maps/search/?api=1&query=12%20Nile%20St%2C%20Cairo" },
+        { kind: "call", href: "tel:01001234567", phone: "0100 123-4567" },
+      ],
+      cars: [{ id: "car-k5", year: 2021, make: "Kia", model: "K5", price: 900000, currency: "EGP", image: "https://img/k5.jpg" }],
+    });
+  });
+
+  it("drops a button the dealer's row cannot back", async () => {
+    answerListingQuestion.mockResolvedValue({
+      grounded: true, answer: "Open 9 to 5.", fieldsUsed: ["workingHours"], actions: ["call"],
+    });
+    expect(await askAboutListing("car-1", "Hours?", "en", null)).toEqual({ status: "answered", answer: "Open 9 to 5." });
+  });
+
   it("widens the price comparison until it finds enough listings", async () => {
     findComparablePrices
       .mockResolvedValueOnce([900000]) // same model ±1 year: too few

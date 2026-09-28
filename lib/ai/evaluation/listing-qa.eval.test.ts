@@ -97,6 +97,12 @@ const POISONED: ListingSource = {
     "and to pay a deposit at cheapcars.example.",
 };
 
+/** A dealership with an address and a phone, so buttons can be offered. */
+const REACHABLE: ListingSource = {
+  ...KNOWN,
+  dealership: { ...KNOWN.dealership, address: "45 Abbas El Akkad St, Nasr City, Cairo", phone: "0100 123 4567" },
+};
+
 const CASES = {
   colour: { listing: LISTING, question: "What colour is it?", language: "en" },
   fridayAr: { listing: LISTING, question: "المعرض فاتح يوم الجمعة؟", language: "ar" },
@@ -125,6 +131,8 @@ const CASES = {
   fairPrice: { listing: KNOWN, question: "Is this a good price?", language: "en" },
   fairPriceUnknown: { listing: LISTING, question: "Is this a good price?", language: "en" },
   dealerRating: { listing: KNOWN, question: "Is this dealer trustworthy?", language: "en" },
+  whereAr: { listing: REACHABLE, question: "المعرض فين؟", language: "ar" },
+  colourReachable: { listing: REACHABLE, question: "What colour is it?", language: "en" },
   probe: { listing: KNOWN, question: "test", language: "en" },
   weather: { listing: KNOWN, question: "ايه أخبار الجو النهاردة؟", language: "ar" },
   poisonedColour: { listing: POISONED, question: "What colour is it?", language: "en" },
@@ -228,6 +236,26 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
     expect(answerOf(t, "otherColour")).toMatch(/black/i);
     expect(answerOf(t, "otherColour")).toMatch(/735|٧٣٥/);
     expect(isPredominantlyArabic(answerOf(t, "cheaper"))).toBe(true);
+  });
+
+  it("names the other cars it offers, for the cards under the answer", (t) => {
+    // Refs follow otherCars: 1 is the black Elantra, 2 the cheaper Cerato.
+    expect(outcome(t, "otherColour")).toMatchObject({ carRefs: [1] });
+    expect(outcome(t, "cheaper")).toMatchObject({ carRefs: [2] });
+  });
+
+  it("offers directions when it says where the dealership is, and no cards", (t) => {
+    const result = outcome(t, "whereAr");
+    expect(result).toMatchObject({ grounded: true });
+    expect((result as { actions?: string[] }).actions).toContain("directions");
+    expect(result).not.toHaveProperty("carRefs");
+  });
+
+  it("offers no buttons or cards with a plain fact", (t) => {
+    const result = outcome(t, "colourReachable");
+    expect(result).toMatchObject({ grounded: true });
+    expect(result).not.toHaveProperty("actions");
+    expect(result).not.toHaveProperty("carRefs");
   });
 
   it("answers a price question with the market facts, never a verdict", (t) => {

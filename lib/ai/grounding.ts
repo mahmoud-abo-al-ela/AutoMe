@@ -212,7 +212,7 @@ export function summarizeMarketPrices(
  * price to this one, since "anything cheaper?" and "got it in black?" are
  * both asked by a buyer with this budget.
  */
-export function closestByPrice(cars: OtherCar[], price: number, limit = MAX_OTHER_CARS): OtherCar[] {
+export function closestByPrice<T extends OtherCar>(cars: T[], price: number, limit = MAX_OTHER_CARS): T[] {
   return [...cars]
     .sort((a, b) => Math.abs(a.price - price) - Math.abs(b.price - price))
     .slice(0, limit);
@@ -304,13 +304,22 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     history: Object.keys(source.history).length > 0 ? source.history : undefined,
     dealershipTerms: Object.keys(source.terms).length > 0 ? source.terms : undefined,
     // Empty is kept: "this dealership has no other cars for sale" is an
-    // answer. Only an unknown (null) is left out.
+    // answer. Only an unknown (null) is left out. Field by field, not spread:
+    // the caller's rows carry ids and photo URLs the model has no use for.
+    // `ref` is how an answer names a car for the cards under it.
     otherCars:
       source.otherCars !== null
-        ? source.otherCars.map((car) => ({
-            ...car,
+        ? source.otherCars.map((car, index) => ({
+            ref: index + 1,
+            year: car.year,
+            make: car.make,
+            model: car.model,
+            color: car.color,
             price: { amount: car.price, currency: source.priceCurrency },
             mileage: { value: car.mileage, unit: "km" },
+            bodyType: car.bodyType,
+            transmission: car.transmission,
+            fuelType: car.fuelType,
           }))
         : undefined,
     marketPrices: source.marketPrices ?? undefined,

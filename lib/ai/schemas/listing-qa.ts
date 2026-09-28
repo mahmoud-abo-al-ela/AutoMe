@@ -24,6 +24,12 @@ export const listingQaSchema = z.object({
   fieldsUsed: z.array(z.enum(LISTING_FACT_KEYS)),
   grounded: z.boolean(),
   answer: z.string().max(600),
+  // After the answer, because they follow from it: buttons shown under it,
+  // and the `ref` of each other car it names, shown as cards. The service
+  // keeps only what the record backs — a phone for "call", an address for
+  // "directions", a ref that exists.
+  actions: z.array(z.enum(["directions", "call"])),
+  carsNamed: z.array(z.number().int()),
 });
 
 export type ListingQaReply = z.infer<typeof listingQaSchema>;

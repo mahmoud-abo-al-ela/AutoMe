@@ -125,6 +125,53 @@ describe("answerListingQuestion", () => {
   });
 });
 
+describe("buttons and car cards", () => {
+  const withDealer: ListingFacts = {
+    ...facts,
+    dealership: { name: "Nile Motors", phone: "0100 123 4567" },
+    otherCars: [1, 2, 3, 4, 5].map((ref) => ({ ref, make: "Kia", model: "K5" })),
+  };
+  const reply = (extra: object) => ({
+    relevant: true,
+    standalone: "",
+    fieldsUsed: ["otherCars"],
+    grounded: true,
+    answer: "They also have a K5.",
+    actions: [],
+    carsNamed: [],
+    ...extra,
+  });
+
+  it("keeps only the buttons the dealership's details can back", async () => {
+    generateStructured.mockResolvedValue(reply({ actions: ["call", "directions", "call"] }));
+    // A phone but no address: "call" holds, "directions" has nowhere to go.
+    expect(await answerListingQuestion("Can I visit?", withDealer, "en", ctx)).toMatchObject({
+      actions: ["call"],
+    });
+  });
+
+  it("keeps the named cars that exist, in order, at most three", async () => {
+    generateStructured.mockResolvedValue(reply({ carsNamed: [9, 4, 2, 4, 1, 3] }));
+    expect(await answerListingQuestion("Anything similar?", withDealer, "en", ctx)).toMatchObject({
+      carRefs: [4, 2, 1],
+    });
+  });
+
+  it("shows no cards beside an answer that is not about the other cars", async () => {
+    generateStructured.mockResolvedValue(reply({ fieldsUsed: ["color"], carsNamed: [1] }));
+    const answer = await answerListingQuestion("Colour?", withDealer, "en", ctx);
+    expect(answer).not.toHaveProperty("carRefs");
+    expect(answer).not.toHaveProperty("actions");
+  });
+
+  it("offers nothing with a decline", async () => {
+    generateStructured.mockResolvedValue(reply({ grounded: false, fieldsUsed: [], actions: ["call"], carsNamed: [1] }));
+    const answer = await answerListingQuestion("Accidents?", withDealer, "en", ctx);
+    expect(answer).not.toHaveProperty("actions");
+    expect(answer).not.toHaveProperty("carRefs");
+  });
+});
+
 describe("conversation memory", () => {
   const history = [{ question: "What colour is it?", answer: "It is white." }];
 

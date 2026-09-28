@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { Car as CarIcon, ChevronRight, Loader2, MapPin, MessageCircle, Phone, Send, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,8 @@ import type { Locale } from "@/i18n/routing";
 import { askListingAssistant } from "@/actions/listing-assistant";
 import { useActionError } from "@/hooks/use-action-error";
 import type { ActionError } from "@/lib/utils/error-messages";
-import type { AssistantReply } from "@/lib/services/car/listing-assistant";
+import { useFormatters } from "@/hooks/use-formatters";
+import type { AssistantReply, SuggestedCar } from "@/lib/services/car/listing-assistant";
 
 const MAX_QUESTION = 300;
 /** Kept in the scrolling pane; older ones drop off beyond this. */
@@ -226,10 +228,43 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
   }
 
   if (exchange.reply?.status === "answered") {
+    const { answer, actions = [], cars = [] } = exchange.reply;
     return (
-      <p className={`${bubble} bg-gray-100 text-gray-800`}>
-        <span dir="auto">{exchange.reply.answer}</span>
-      </p>
+      <div className="space-y-2">
+        <p className={`${bubble} bg-gray-100 text-gray-800`}>
+          <span dir="auto">{answer}</span>
+        </p>
+        {cars.length > 0 && (
+          <ul className="ms-auto flex w-fit max-w-[85%] flex-col gap-1.5">
+            {cars.map((car) => (
+              <li key={car.id}>
+                <SuggestedCarLink car={car} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {actions.length > 0 && (
+          <div className="ms-auto flex w-fit max-w-[85%] flex-wrap justify-end gap-2">
+            {actions.map((action) => (
+              <a
+                key={action.kind}
+                href={action.href}
+                {...(action.kind === "directions" && { target: "_blank", rel: "noopener noreferrer" })}
+                className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs sm:text-sm font-medium text-violet-700 hover:bg-violet-50 transition-colors"
+              >
+                {action.kind === "directions" ? (
+                  <MapPin className="w-3.5 h-3.5" aria-hidden />
+                ) : (
+                  <Phone className="w-3.5 h-3.5" aria-hidden />
+                )}
+                {action.kind === "directions" ? t("actions.directions") : t("actions.call")}
+                {/* The number itself stays left-to-right inside an Arabic label. */}
+                {action.kind === "call" && <bdi dir="ltr">{action.phone}</bdi>}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -252,6 +287,32 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
         {t("askDealer")}
       </Link>
     </div>
+  );
+}
+
+/** One of the dealership's other cars an answer named, linking to its listing. */
+function SuggestedCarLink({ car }: { car: SuggestedCar }) {
+  const fmt = useFormatters();
+  // A year is a label, not a quantity: no grouping ("2,020").
+  const title = `${fmt.number(car.year, { useGrouping: false })} ${car.make} ${car.model}`;
+  return (
+    <Link
+      href={`/cars/${car.id}`}
+      className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-2 pe-3 hover:border-violet-300 hover:bg-violet-50/40 transition-colors"
+    >
+      <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+        {car.image ? (
+          <Image src={car.image} alt="" fill sizes="64px" className="object-cover" />
+        ) : (
+          <CarIcon className="absolute inset-0 m-auto h-5 w-5 text-gray-300" aria-hidden />
+        )}
+      </div>
+      <div className="min-w-0 text-sm">
+        <p className="truncate font-semibold text-gray-900">{title}</p>
+        <p className="text-gray-600">{fmt.price(car.price, car.currency)}</p>
+      </div>
+      <ChevronRight className="ms-auto h-4 w-4 shrink-0 text-gray-400 rtl:-scale-x-100" aria-hidden />
+    </Link>
   );
 }
 

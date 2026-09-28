@@ -2,7 +2,7 @@ import { generateStructured, type AiCallerContext } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { citationsHold, type ListingFacts, type ListingFactKey } from "@/lib/ai/grounding";
 import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
-import { listingQaSchema } from "@/lib/ai/schemas/listing-qa";
+import { listingQaSchema, type ListingQaReply } from "@/lib/ai/schemas/listing-qa";
 import { textPart } from "@/lib/ai/provider/types";
 import { questionKey } from "@/lib/utils/question-key";
 import type { Trace } from "@/lib/utils/dev-trace";
@@ -13,7 +13,15 @@ import type { Trace } from "@/lib/utils/dev-trace";
  * caller's fixed wording when it does not.
  */
 export type ListingAnswer =
-  | { grounded: true; answer: string; fieldsUsed: ListingFactKey[] }
+  | {
+      grounded: true;
+      answer: string;
+      fieldsUsed: ListingFactKey[];
+      /** Buttons for the answer; each one backed by the record — see backedActions. */
+      actions?: ListingAction[];
+      /** The `ref` of each other car the answer names, each one in the record. */
+      carRefs?: number[];
+    }
   /** `offTopic`: not a question about this car at all — nothing for the dealer. */
   | { grounded: false; message?: string; offTopic?: true; standalone?: string };
 
@@ -23,7 +31,34 @@ export interface PastExchange {
   answer: string;
 }
 
+export type ListingAction = ListingQaReply["actions"][number];
+
 const MAX_DECLINE_CHARS = 240;
+/** Cards under one answer; more is a list, and the answer already named them. */
+const MAX_CAR_CARDS = 3;
+
+/**
+ * The buttons the model asked for that this listing can back: directions
+ * need the dealership's address, a call its phone. The model only chooses
+ * whether a button fits the answer; what it opens comes from the dealer's row.
+ */
+function backedActions(facts: ListingFacts, requested: readonly ListingAction[]): ListingAction[] {
+  const dealership = (facts.dealership ?? {}) as { address?: string; phone?: string };
+  return [...new Set(requested)].filter((action) =>
+    action === "directions" ? Boolean(dealership.address) : Boolean(dealership.phone)
+  );
+}
+
+/**
+ * The other cars the answer names, as refs this record has — and only when
+ * the answer cites otherCars, so a card never appears beside an answer that
+ * is not about alternatives.
+ */
+function backedCarRefs(facts: ListingFacts, cited: readonly ListingFactKey[], named: readonly number[]): number[] {
+  if (!cited.includes("otherCars") || !Array.isArray(facts.otherCars)) return [];
+  const known = new Set((facts.otherCars as { ref: number }[]).map((car) => car.ref));
+  return [...new Set(named)].filter((ref) => known.has(ref)).slice(0, MAX_CAR_CARDS);
+}
 
 /**
  * Things a decline has no business containing, because they are what an
@@ -126,5 +161,17 @@ export async function answerListingQuestion(
   if (!answer || !holds) {
     return { grounded: false, ...(standalone && { standalone }) };
   }
-  return { grounded: true, answer, fieldsUsed: [...new Set(reply.fieldsUsed)] };
+  const fieldsUsed = [...new Set(reply.fieldsUsed)];
+  const actions = backedActions(facts, reply.actions ?? []);
+  const carRefs = backedCarRefs(facts, fieldsUsed, reply.carsNamed ?? []);
+  if (actions.length > 0 || carRefs.length > 0) {
+    trace?.step(`buttons: [${actions.join(", ")}] · cars named: [${carRefs.join(", ")}]`);
+  }
+  return {
+    grounded: true,
+    answer,
+    fieldsUsed,
+    ...(actions.length > 0 && { actions }),
+    ...(carRefs.length > 0 && { carRefs }),
+  };
 }

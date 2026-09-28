@@ -103,6 +103,17 @@ describe("what AutoMe already knows", () => {
     expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, reviews: 12 });
     expect((facts.otherCars as { price: unknown }[])[0].price).toEqual({ amount: 900000, currency: "EGP" });
   });
+
+  it("numbers the other cars for an answer to name, and keeps their ids and photos from the model", () => {
+    const other = { year: 2020, make: "Kia", model: "K5", color: "Red", price: 1, mileage: 1, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" };
+    const rows = [
+      { ...other, id: "car-a", image: "https://img/a.jpg" },
+      { ...other, id: "car-b", image: null },
+    ];
+    const cars = buildListingFacts({ ...source, otherCars: rows }).otherCars as Record<string, unknown>[];
+    expect(cars.map((car) => car.ref)).toEqual([1, 2]);
+    expect(JSON.stringify(cars)).not.toMatch(/car-a|img\/a|"id"|"image"/);
+  });
 });
 
 describe("summarizeMarketPrices", () => {
