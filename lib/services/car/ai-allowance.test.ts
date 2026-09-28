@@ -36,7 +36,10 @@ describe("claimAiUsageForCar", () => {
       carId: "car-1",
       features: ["carListingFromImage", "listingTranslation", "listingQualityCoach"],
     });
-    expect(before - claim.since.getTime()).toBeGreaterThanOrEqual(24 * 60 * 60 * 1000);
+    // A day before the claim, which ran a moment after `before`.
+    const window = before - claim.since.getTime();
+    expect(window).toBeLessThanOrEqual(24 * 60 * 60 * 1000);
+    expect(window).toBeGreaterThan(24 * 60 * 60 * 1000 - 5_000);
   });
 
   it("never fails the save it follows", async () => {
