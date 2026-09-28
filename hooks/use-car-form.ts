@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { asModelYear, replaceYear } from "@/lib/utils/replace-year";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -277,6 +278,26 @@ export const useCarForm = (
             form.setValue("title", "");
         }
     }, [watchMake, watchModel, watchYear, form]);
+
+    // A corrected year follows into the text that states it — the AI writes
+    // "كيا سيراتو ٢٠٢٠" into the title and description. Keyed on the last
+    // complete year, so typing through "202" rewrites nothing, and the first
+    // one seen (a pre-fill) is only recorded. Not marked dirty: both languages
+    // change together, so there is nothing for the server to re-translate.
+    const lastYear = useRef<number | null>(null);
+    useEffect(() => {
+        const year = asModelYear(watchYear);
+        if (year === null) return;
+        const previous = lastYear.current;
+        lastYear.current = year;
+        if (previous === null || previous === year) return;
+        for (const field of ["titleAr", "description", "descriptionAr"] as const) {
+            const text = form.getValues(field);
+            if (typeof text !== "string") continue;
+            const updated = replaceYear(text, previous, year);
+            if (updated !== text) form.setValue(field, updated);
+        }
+    }, [watchYear, form]);
 
     // Update form when initialData changes (for AI mode or edit mode pre-fill)
     useEffect(() => {
