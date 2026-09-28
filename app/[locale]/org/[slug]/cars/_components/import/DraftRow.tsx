@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle2, CircleSlash, ExternalLink, Globe, Loader2, P
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { useFormatters } from "@/hooks/use-formatters";
-import { useActionError } from "@/hooks/use-action-error";
+import { ActionErrorText } from "@/components/ActionErrorText";
 import type { DraftResult } from "@/hooks/use-bulk-import";
 
 /** "green Aeolus Mage" → "Green Aeolus Mage"; Arabic has no case and is left alone. */
@@ -50,7 +50,6 @@ export function DraftRow({
 }) {
   const t = useTranslations("org.carForm.import");
   const { number } = useFormatters();
-  const actionError = useActionError();
   const status = result?.status ?? "waiting";
   const busy = status === "reading" || status === "saving";
 
@@ -89,7 +88,9 @@ export function DraftRow({
             <span className="text-xs text-gray-500">{t("photoCount", { count: photoCount, n: number(photoCount) })}</span>
           </div>
           {status === "failed" && (
-            <p className="text-xs text-red-700">{actionError(result?.error, t("saveFailed"))}</p>
+            <p className="text-xs text-red-700">
+              <ActionErrorText error={result?.error} fallback={t("saveFailed")} />
+            </p>
           )}
         </div>
       </div>

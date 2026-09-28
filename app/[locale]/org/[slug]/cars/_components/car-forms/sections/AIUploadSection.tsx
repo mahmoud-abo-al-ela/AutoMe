@@ -12,7 +12,8 @@ import type { CarListingProgress } from "@/hooks/use-car-listing-stream";
 interface AIUploadSectionProps {
   onDrop: NonNullable<DropzoneOptions["onDrop"]>;
   isProcessing: boolean;
-  error?: string | null;
+  /** Already worded — a rate limit arrives as a live countdown. */
+  error?: React.ReactNode;
   /** Drag state is owned by the parent's own dropzone, not this one. */
   isDragActive?: boolean;
   /** Real progress from the extraction stream; null before it starts. */

@@ -37,12 +37,15 @@ export function assertArcjetAllowed(
 
   if (decision.isDenied()) {
     if (decision.reason.isRateLimit()) {
-      const { remaining, reset } = decision.reason;
-      throw new RateLimitError(
-        `${deniedMessage} ${remaining} requests remaining until ${new Date(
-          reset
-        ).toLocaleString()}`
-      );
+      // `reset` is seconds until a request is allowed again — it was being
+      // read as a date, so the user only ever heard "wait a moment". The page
+      // now counts it down.
+      const { reset, resetTime } = decision.reason;
+      const seconds = resetTime
+        ? Math.ceil((resetTime.getTime() - Date.now()) / 1000)
+        : reset;
+      const retryAfter = Math.max(1, Math.round(seconds));
+      throw new RateLimitError(`${deniedMessage} Try again in ${retryAfter}s.`, {}, retryAfter);
     }
     // Shield and bot detection reach this branch. They run on the action path
     // now rather than in middleware, and the public photo search is the one

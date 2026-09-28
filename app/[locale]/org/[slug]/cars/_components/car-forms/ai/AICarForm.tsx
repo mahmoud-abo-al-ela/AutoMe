@@ -7,7 +7,8 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
-import { useActionError } from "@/hooks/use-action-error";
+import { ActionErrorText } from "@/components/ActionErrorText";
+import type { ActionError } from "@/lib/utils/error-messages";
 import type { CarListingDraft } from "@/lib/services/ai";
 import CarFormShared from "../shared/CarFormShared";
 import AIUploadSection from "../sections/AIUploadSection";
@@ -19,13 +20,13 @@ const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 
 const AICarForm = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // The server's error keeps its shape, so a rate limit can count down.
+  const [error, setError] = useState<{ action?: ActionError; text?: string } | null>(null);
   const [carData, setCarData] = useState<CarListingDraft | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const t = useTranslations("org.carForm.ai");
   const { number } = useFormatters();
-  const actionError = useActionError();
   const { progress, extract, reset } = useCarListingStream();
 
   const onDrop = useCallback(
@@ -63,16 +64,14 @@ const AICarForm = () => {
       } catch (err) {
         setError(
           err instanceof CarListingStreamError
-            ? actionError(err.error, t("processFailed"))
-            : err instanceof Error
-              ? err.message
-              : t("unexpected")
+            ? { action: err.error, text: t("processFailed") }
+            : { text: err instanceof Error ? err.message : t("unexpected") }
         );
       } finally {
         setIsProcessing(false);
       }
     },
-    [t, number, actionError, extract],
+    [t, number, extract],
   );
 
   const { isDragActive } = useDropzone({
@@ -138,7 +137,7 @@ const AICarForm = () => {
         <AIUploadSection
           onDrop={onDrop}
           isProcessing={isProcessing}
-          error={error}
+          error={error && <ActionErrorText error={error.action} fallback={error.text} />}
           isDragActive={isDragActive}
           progress={progress}
         />

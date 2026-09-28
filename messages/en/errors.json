@@ -5,6 +5,8 @@
   "notFound": "{resource} could not be found.",
   "conflict": "That already exists.",
   "rateLimit": "Too many requests. Please wait a moment and try again.",
+  "rateLimitIn": "Too many requests. Try again in {time}.",
+  "rateLimitReady": "You can try again now.",
   "serviceUnavailable": "The service is temporarily unavailable. Please try again.",
   "planLimit": "You have reached your plan's limit for {resource}.",
   "resources": {

@@ -96,11 +96,15 @@ export class ConflictError extends AppError {
 }
 
 export class RateLimitError extends AppError {
-    constructor(message = "Too many requests", i18n: ErrorI18n = {}) {
+    /** Seconds until a request is allowed again, when the limiter said. */
+    retryAfter?: number;
+
+    constructor(message = "Too many requests", i18n: ErrorI18n = {}, retryAfter?: number) {
         super(message, 429, "RATE_LIMIT_EXCEEDED", {
             key: "errors.rateLimit",
             ...i18n,
         });
+        this.retryAfter = retryAfter;
     }
 }
 

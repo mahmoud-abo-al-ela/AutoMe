@@ -19,6 +19,8 @@ export interface ErrorResponse {
         limit?: number;
         currentUsage?: number;
         upgradeUrl?: string;
+        /** Seconds until a rate-limited request may be retried; the page counts it down. */
+        retryAfter?: number;
         stack?: string;
         field?: string | null;
         statusCode?: number;
@@ -43,6 +45,7 @@ interface ErrorLike {
     limit?: number;
     currentUsage?: number;
     upgradeUrl?: string;
+    retryAfter?: number;
     stack?: string;
     field?: string | null;
     statusCode?: number;
@@ -92,6 +95,10 @@ export function createErrorResponse(error: unknown): ErrorResponse {
         response.error.limit = err.limit;
         response.error.currentUsage = err.currentUsage;
         response.error.upgradeUrl = err.upgradeUrl;
+    }
+
+    if (err.code === "RATE_LIMIT_EXCEEDED" && typeof err.retryAfter === "number") {
+        response.error.retryAfter = err.retryAfter;
     }
 
     // Include additional error details in development

@@ -12,7 +12,8 @@ import { getCarPlanLimits } from "@/actions/cars";
 import { useBulkImport, ImportError, type ImportGroup } from "@/hooks/use-bulk-import";
 import { usePlanUsage } from "@/hooks/use-plan-usage";
 import { useFormatters } from "@/hooks/use-formatters";
-import { useActionError } from "@/hooks/use-action-error";
+import { ActionErrorText } from "@/components/ActionErrorText";
+import type { ActionError } from "@/lib/utils/error-messages";
 import { MAX_IMPORT_PHOTOS } from "@/lib/constants/car-options";
 import { shrinkForAi } from "@/lib/utils/shrink-image";
 import CarFormShared from "../car-forms/shared/CarFormShared";
@@ -44,11 +45,12 @@ function left(usage: { current: number; limit: number } | null | undefined): num
 export default function BulkImport() {
   const t = useTranslations("org.carForm.import");
   const { number } = useFormatters();
-  const actionError = useActionError();
   const { slug } = useParams<{ slug: string }>();
   const importer = useBulkImport();
   const { files, stage, groups, results, selected } = importer;
-  const [error, setError] = useState<string | null>(null);
+  // A server error keeps its shape so a rate limit can count down; a check
+  // made here is just text.
+  const [error, setError] = useState<{ action?: ActionError; text?: string } | null>(null);
   const [maxImages, setMaxImages] = useState(5);
   /** A car being filled in by hand, with its photos ready for the form. */
   const [manual, setManual] = useState<{ groupId: number; images: File[] } | null>(null);
@@ -76,17 +78,17 @@ export default function BulkImport() {
     setError(null);
     if (accepted.length === 0) return;
     if (accepted.length > MAX_IMPORT_PHOTOS) {
-      setError(t("tooMany", { max: number(MAX_IMPORT_PHOTOS) }));
+      setError({ text: t("tooMany", { max: number(MAX_IMPORT_PHOTOS) }) });
       return;
     }
     if (accepted.some((f) => !ACCEPTED.includes(f.type) || f.size > MAX_UPLOAD_BYTES)) {
-      setError(t("badFile"));
+      setError({ text: t("badFile") });
       return;
     }
     try {
       await importer.group(accepted, room);
     } catch (err) {
-      setError(actionError((err as ImportError).error, t("groupFailed")));
+      setError({ action: (err as ImportError).error });
     }
   };
 
@@ -160,7 +162,11 @@ export default function BulkImport() {
               ))}
             </ul>
             {noRoom && <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">{t("noRoom")}</p>}
-            {error && <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+            {error && (
+              <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+                <ActionErrorText error={error.action} fallback={error.text ?? t("groupFailed")} />
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

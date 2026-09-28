@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { askListingAssistant, rateListingAssistantAnswer } from "@/actions/listing-assistant";
-import { useActionError } from "@/hooks/use-action-error";
+import { ActionErrorText } from "@/components/ActionErrorText";
 import type { ActionError } from "@/lib/utils/error-messages";
 import { useFormatters } from "@/hooks/use-formatters";
 import type { AssistantReply, SuggestedCar } from "@/lib/services/car/listing-assistant";
@@ -36,7 +36,8 @@ interface Exchange {
   id: number;
   question: string;
   reply?: AssistantReply;
-  error?: string;
+  /** The server's error, kept whole so a rate limit can count down. */
+  error?: { action?: ActionError };
 }
 
 const SUGGESTIONS = ["features", "hours", "mileage"] as const;
@@ -55,7 +56,6 @@ const HISTORY_SENT = 4;
 const ListingAssistant = ({ carId }: { carId: string }) => {
   const t = useTranslations("carDetail.assistant");
   const locale = useLocale() as Locale;
-  const actionError = useActionError();
   const [question, setQuestion] = useState("");
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const nextId = useRef(0);
@@ -98,7 +98,7 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
     },
     onSuccess: (reply, { id }) => settle(id, { reply }),
     onError: (error, { id }) =>
-      settle(id, { error: actionError(error as unknown as ActionError, t("failed")) }),
+      settle(id, { error: { action: error as unknown as ActionError } }),
   });
 
   const submit = (text: string) => {
@@ -222,7 +222,11 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
   }
 
   if (exchange.error) {
-    return <p className={`${bubble} bg-red-50 text-red-700`}>{exchange.error}</p>;
+    return (
+      <p className={`${bubble} bg-red-50 text-red-700`}>
+        <ActionErrorText error={exchange.error.action} fallback={t("failed")} />
+      </p>
+    );
   }
 
   // Small talk and off-topic messages get a plain reply and no "ask the
