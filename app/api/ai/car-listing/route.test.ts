@@ -9,13 +9,13 @@ import type { AiProgressEvent } from "@/lib/ai/client";
  */
 
 const resolveTenantContext = vi.hoisted(() => vi.fn());
-const enforceRateLimit = vi.hoisted(() => vi.fn());
+const enforceDealerAiLimit = vi.hoisted(() => vi.fn());
 const extractCarListing = vi.hoisted(() => vi.fn());
 const countOrgAiCarsThisMonth = vi.hoisted(() => vi.fn());
 const countOrgUnsavedAiCallsThisMonth = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/auth", () => ({ resolveTenantContext }));
-vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceRateLimit }));
+vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceDealerAiLimit }));
 vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCarsThisMonth, countOrgUnsavedAiCallsThisMonth }));
 vi.mock("@/lib/services/ai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/services/ai")>();
@@ -57,7 +57,7 @@ async function lines(res: Response) {
 beforeEach(() => {
   vi.clearAllMocks();
   resolveTenantContext.mockResolvedValue(ctxWithAi({ enabled: true, limit: 5 }));
-  enforceRateLimit.mockResolvedValue(undefined);
+  enforceDealerAiLimit.mockResolvedValue(undefined);
   countOrgAiCarsThisMonth.mockResolvedValue(0);
   countOrgUnsavedAiCallsThisMonth.mockResolvedValue(0);
 });
@@ -102,7 +102,7 @@ describe("POST /api/ai/car-listing — refusals", () => {
   });
 
   it("429s when rate limited", async () => {
-    enforceRateLimit.mockRejectedValue(new RateLimitError());
+    enforceDealerAiLimit.mockRejectedValue(new RateLimitError());
     const res = await POST(request());
     expect(res.status).toBe(429);
   });

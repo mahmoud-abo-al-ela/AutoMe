@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveTenantContext } from "@/lib/auth";
-import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { enforceDealerAiLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 import { aiCallerFor } from "@/lib/ai/caller";
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     await assertAiAllowed(ctx);
     // A read never saved costs no listing, so it has its own cap.
     await assertUnsavedReadsLeft(ctx);
-    await enforceRateLimit();
+    await enforceDealerAiLimit();
 
     const formData = await request.formData();
     const files = formData.getAll("file");

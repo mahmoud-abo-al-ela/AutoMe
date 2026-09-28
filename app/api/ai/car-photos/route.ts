@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveTenantContext } from "@/lib/auth";
-import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { enforceDealerAiLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 import { aiCallerFor } from "@/lib/ai/caller";
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   try {
     const ctx = await resolveTenantContext();
     await assertAiAllowed(ctx);
-    await enforceRateLimit();
+    await enforceDealerAiLimit();
 
     const files = (await request.formData()).getAll("file");
     if (files.length > MAX_IMPORT_PHOTOS) {

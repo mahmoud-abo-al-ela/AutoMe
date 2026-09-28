@@ -25,7 +25,7 @@ import {
   updateCarSchema,
   updateCarFullSchema,
 } from "@/lib/validations/schemas";
-import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { enforceDealerAiLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 
@@ -67,7 +67,7 @@ const translateGated = withPlanGate(
   withUsageLimit(
     "aiProcessing",
     async (ctx: TenantContext, source: ListingText, from: Locale) => {
-      await enforceRateLimit();
+      await enforceDealerAiLimit();
       return translateListing(source, from, aiCallerFor(ctx));
     }
   )
@@ -256,7 +256,7 @@ const coachGated = withPlanGate(
       codes: ListingIssueCode[],
       language: Locale
     ) => {
-      await enforceRateLimit();
+      await enforceDealerAiLimit();
       return coachListing(listing, codes, language, aiCallerFor(ctx));
     }
   )

@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { RateLimitError } from "@/lib/utils/errors";
 
-const { resolveTenantContext, enforceRateLimit, groupCarPhotos, countOrgAiCarsThisMonth } = vi.hoisted(() => ({
+const { resolveTenantContext, enforceDealerAiLimit, groupCarPhotos, countOrgAiCarsThisMonth } = vi.hoisted(() => ({
   resolveTenantContext: vi.fn(),
-  enforceRateLimit: vi.fn(),
+  enforceDealerAiLimit: vi.fn(),
   groupCarPhotos: vi.fn(),
   countOrgAiCarsThisMonth: vi.fn(),
 }));
 
 vi.mock("@/lib/auth", () => ({ resolveTenantContext }));
-vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceRateLimit }));
+vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceDealerAiLimit }));
 vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCarsThisMonth }));
 vi.mock("@/lib/services/ai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/services/ai")>();
@@ -69,7 +69,7 @@ describe("POST /api/ai/car-photos", () => {
   });
 
   it("429s when rate limited", async () => {
-    enforceRateLimit.mockRejectedValue(new RateLimitError());
+    enforceDealerAiLimit.mockRejectedValue(new RateLimitError());
     expect((await POST(request([photo("a.jpg")]))).status).toBe(429);
   });
 

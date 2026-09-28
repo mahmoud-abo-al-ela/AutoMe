@@ -1,4 +1,4 @@
-import aj, { ajListingQuestions, arcjetConfigured, arcjetRequired } from "@/lib/arcjet";
+import aj, { ajDealerAi, ajListingQuestions, arcjetConfigured, arcjetRequired } from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import {
   RateLimitError,
@@ -83,12 +83,22 @@ async function enforce(instance: typeof aj, requested: number) {
 }
 
 /**
- * Enforce the shared Arcjet bucket (dealer flows: car creation, image search).
+ * Enforce the shared Arcjet bucket (uploads, the public photo search, payments,
+ * team and other dealer actions — dealer AI has its own, enforceDealerAiLimit).
  * Call at the top of an abuse-prone or costly server action, before doing any
  * work. `requested` is the number of tokens to consume (default 1).
  */
 export async function enforceRateLimit(requested = 1) {
   return enforce(aj, requested);
+}
+
+/**
+ * Enforce the dealer-AI bucket (see ajDealerAi): photo reads, the bulk
+ * import, translation and the listing coach. Separate from the shared bucket
+ * so an import cannot lock a dealer out of everything else for an hour.
+ */
+export async function enforceDealerAiLimit(requested = 1) {
+  return enforce(ajDealerAi, requested);
 }
 
 /**
