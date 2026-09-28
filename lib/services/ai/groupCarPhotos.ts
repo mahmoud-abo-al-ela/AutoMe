@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { generateStructured, type AiCallerContext } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { photoGroupingPrompt } from "@/lib/ai/prompts/photo-grouping";
@@ -62,9 +61,6 @@ export function normalizeGrouping(reply: PhotoGroupingReply, count: number): Pho
 export async function groupCarPhotos(images: PreparedImage[], ctx: AiCallerContext): Promise<PhotoGroup[]> {
   if (images.length === 1) return [{ label: "", photos: [0], readWith: [0] }];
 
-  const key = createHash("sha256");
-  for (const image of images) key.update(image.bytes);
-
   const reply = await generateStructured({
     feature: AI_FEATURES.carPhotoGrouping,
     task: "visionFast",
@@ -72,10 +68,21 @@ export async function groupCarPhotos(images: PreparedImage[], ctx: AiCallerConte
     schema: photoGroupingSchema,
     promptVersion: photoGroupingPrompt.version,
     ctx,
-    cacheBytes: key.digest("hex"),
+    // Not cached: a dealer who uploads the same batch again is asking for a
+    // better sort, and a cached answer — possibly the last-resort model's —
+    // would hand back the same mistake for ten minutes.
     thinking: "low",
-    budgetMs: 120_000,
+    // A batch is many images. At CodeCraft's usual 30 s an attempt, it timed
+    // out on ten photos and the sort fell to Gemma, which merged two
+    // different Mercedes (2026-09-29). Google busy-refuses in seconds, so the
+    // long wait only ever goes to a model that is actually working.
+    timeoutMs: 90_000,
+    budgetMs: 150_000,
     firstTokenTimeoutMs: 30_000,
+    // Measured on the same five photos of two Mercedes: Gemini 3.7 Flash
+    // sorted them right; Gemma put four in one car, prompt fix or not. A
+    // "busy, try again" is better than a confident wrong sort.
+    skipGemma: true,
   });
 
   return normalizeGrouping(reply, images.length);

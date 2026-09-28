@@ -84,6 +84,12 @@ export interface GenerateStructuredInput<T> {
   /** Reply-length cap; DEFAULT_MAX_OUTPUT_TOKENS unless a feature writes more. */
   maxOutputTokens?: number;
   /**
+   * Leave Gemma, the last resort, out of the chain. For a task where a wrong
+   * answer that looks right is worse than "busy, try again": sorting photos
+   * into cars, where Gemma merged two different Mercedes twice (2026-09-29).
+   */
+  skipGemma?: boolean;
+  /**
    * How long a model may take to START answering before it is treated as
    * queued and the next model in the chain is tried. Applies to every model
    * but the last, which keeps whatever budget is left.
@@ -516,7 +522,11 @@ export async function generateStructured<T>(
     if (!keys) keyring.set(provider, (keys = keysFor(provider)));
     return keys;
   };
-  const configured = modelsFor(input.task).filter((entry) => keysOf(entry.provider).length > 0);
+  const configured = modelsFor(input.task)
+    .filter((entry) => keysOf(entry.provider).length > 0)
+    // Gemma is the last resort for every task that can take a rougher
+    // answer; a task that cannot opts out (see skipGemma).
+    .filter((entry) => !(input.skipGemma && entry.model.startsWith("gemma-")));
   if (configured.length === 0) {
     // A config fault, not a user fault — and it must not look like a rate limit.
     throw new ServiceUnavailableError("No AI provider is configured for this task", {

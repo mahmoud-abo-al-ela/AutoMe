@@ -656,3 +656,13 @@ describe("generateStructured — reply length", () => {
     expect(generate.mock.calls[0][0].maxOutputTokens).toBe(8192);
   });
 });
+
+describe("generateStructured — skipGemma", () => {
+  it("leaves Gemma out of the chain when a task asks it to", async () => {
+    generate.mockRejectedValue(httpError(503));
+    await expect(call({ skipGemma: true })).rejects.toThrow();
+    const models = generate.mock.calls.map((c) => c[0].model as string);
+    expect(models.length).toBeGreaterThan(0);
+    expect(models.some((m) => m.startsWith("gemma-"))).toBe(false);
+  });
+});

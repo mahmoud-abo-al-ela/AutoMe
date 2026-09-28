@@ -4,12 +4,16 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const photoGroupingPrompt = {
-  version: "2026-09-29.1",
-  text: (count: number) => `These ${count} photos were taken at an Egyptian car dealership, numbered 0 to ${count - 1}
-in the order given. Several cars were photographed, each from several angles — outside,
-inside, the dashboard, the badges. Sort the photos into cars.
+  version: "2026-09-29.2",
+  text: (count: number) => `These ${count} photos are of cars an Egyptian dealership is listing, numbered 0 to
+${count - 1} in the order given. Several cars were photographed, each from several angles —
+outside, inside, the dashboard, the badges — and not always in the same place. Sort the
+photos into cars.
 
 - Every photo belongs to exactly one car. Put each photo number in exactly one group.
+- Photos taken in different places are different cars: a different showroom, sign,
+  logo, watermark, wall or floor means a different car, even when two black
+  Mercedes look alike. Check the surroundings of every photo before you group it.
 - Two cars of the same make, model and colour are still two cars. Tell them apart by
   anything that differs: licence plate, wheels, trim, badges, damage, dirt, the
   background, the light. An interior or dashboard photo goes with the car whose

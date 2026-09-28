@@ -65,4 +65,15 @@ describe("groupCarPhotos", () => {
     expect(input.task).toBe("visionFast");
     expect(input.parts).toHaveLength(3);
   });
+
+  it("never serves a cached sort, and gives a working model time for a whole batch", async () => {
+    generateStructured.mockResolvedValue({ cars: [car([0, 1], [0])] });
+    await groupCarPhotos([image(0), image(1)], { organizationId: "o", userId: "u" });
+    const input = generateStructured.mock.calls[0][0];
+    // Uploading the same batch again is asking for a better sort.
+    expect(input.cacheBytes).toBeUndefined();
+    expect(input.timeoutMs).toBeGreaterThanOrEqual(90_000);
+    // Gemma merged two different Mercedes: a wrong sort is worse than "busy".
+    expect(input.skipGemma).toBe(true);
+  });
 });
