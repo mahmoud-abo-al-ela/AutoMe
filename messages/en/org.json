@@ -443,7 +443,6 @@
       "noRoom": "No AI listings or car slots left on your plan this month.",
       "dropPrompt": "Drop photos of your cars here, or click to choose them.",
       "choose": "Choose photos",
-      "tips": "For each car, include the back (where the model name is) and the dashboard — they help the AI name the exact model.",
       "tooMany": "Choose at most {max} photos at a time.",
       "badFile": "Use JPG, PNG or WEBP photos under 10 MB each.",
       "groupFailed": "Couldn't sort the photos. Please try again.",
@@ -467,12 +466,11 @@
         "saving": "Saving the draft…",
         "done": "Saved as a hidden draft",
         "failed": "Not saved",
-        "skipped": "Not drafted with AI"
+        "skipped": "Not drafted with AI",
+        "published": "Published"
       },
       "saveFailed": "Something went wrong",
       "review": "Review",
-      "summary": "{count, plural, =0 {No drafts were saved.} one {One draft saved, hidden from buyers.} other {{n} drafts saved, hidden from buyers.}}",
-      "publishAll": "Publish all",
       "published": "{count, plural, one {One car published} other {{n} cars published}}",
       "publishPartial": "Published {done} of {total}. Open the others to see what's missing.",
       "another": "Import more",
@@ -492,7 +490,32 @@
         "overPlace": "Over place {place} of {car}.",
         "droppedPlace": "Photo moved to place {place} of {car}."
       },
-      "cover": "Cover"
+      "cover": "Cover",
+      "steps": {
+        "label": "Import steps",
+        "upload": "Upload photos",
+        "review": "Check the cars",
+        "drafts": "Drafts"
+      },
+      "dropping": "Drop them here…",
+      "formats": "Up to {max} photos · JPG, PNG or WEBP · 10 MB each",
+      "tipsList": {
+        "many": "Several cars in one go — the AI sorts the photos into cars.",
+        "badge": "Include the back and the dashboard: the badge names the exact model.",
+        "hidden": "Nothing is published until you review it."
+      },
+      "reviewSummary": "{cars} cars · {ai} drafted with AI · {byHand} by hand",
+      "progress": "Drafting car {done} of {total}…",
+      "progressNote": "Each car takes about half a minute. You can leave this tab open and come back.",
+      "stats": {
+        "saved": "{n} saved, hidden",
+        "published": "{n} published",
+        "failed": "{n} not saved",
+        "skipped": "{n} to fill in"
+      },
+      "view": "View listing",
+      "publishAllCount": "Publish {n}",
+      "hiddenNote": "Drafts are hidden from buyers. Review them, or publish them now."
     }
   },
   "testDrives": {

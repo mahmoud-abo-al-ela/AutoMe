@@ -20,6 +20,8 @@ export interface DraftResult {
   title?: string;
   /** The server's error, for useActionError; absent for a skip. */
   error?: ActionError;
+  /** Made visible to buyers from the import (publishAll). */
+  published?: boolean;
 }
 
 export type ImportStage = "pick" | "grouping" | "review" | "creating" | "done";
@@ -205,10 +207,18 @@ export function useBulkImport() {
 
   /** Make every draft this import saved visible in the marketplace. */
   const publishAll = useCallback(async () => {
-    const ids = Object.values(results).flatMap((r) => (r.status === "done" && r.carId ? [r.carId] : []));
-    const outcomes = await Promise.all(ids.map((id) => updateCar(id, { status: "AVAILABLE" })));
+    const drafts = Object.entries(results).filter(([, r]) => r.status === "done" && r.carId && !r.published);
+    const outcomes = await Promise.all(drafts.map(([, r]) => updateCar(r.carId!, { status: "AVAILABLE" })));
+    // Each row shows what happened to it, not just a count in a toast.
+    setResults((all) => {
+      const next = { ...all };
+      drafts.forEach(([id], i) => {
+        if (outcomes[i]?.success) next[Number(id)] = { ...next[Number(id)], published: true };
+      });
+      return next;
+    });
     queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
-    return { published: outcomes.filter((o) => o?.success).length, total: ids.length };
+    return { published: outcomes.filter((o) => o?.success).length, total: drafts.length };
   }, [results, queryClient]);
 
   const reset = useCallback(() => {
