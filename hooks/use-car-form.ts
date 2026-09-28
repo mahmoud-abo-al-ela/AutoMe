@@ -172,7 +172,9 @@ export const useCarForm = (
     initialData: CarFormInitialData = {},
     maxImages: number = VALIDATION_RULES.CAR.MAX_IMAGES,
     isEditMode = false,
-    carId: string | null = null
+    carId: string | null = null,
+    /** Called with the saved car instead of going to the car list — for a form embedded in another flow (bulk import). */
+    onSaved?: (car: { id: string }) => void
 ) => {
     const [currentSection, setCurrentSection] = useState("basic");
     const router = useRouter();
@@ -421,7 +423,8 @@ export const useCarForm = (
             if (response.data.translation === "skipped") {
                 toast.info(tForm("translationSkipped", { other: locale === "ar" ? "en" : "ar" }));
             }
-            router.push(`/org/${slug}/cars`);
+            if (onSaved) onSaved(response.data);
+            else router.push(`/org/${slug}/cars`);
         } else {
             // The action's own message wins when it sent one; otherwise the
             // translated fallback. Same order as resolveActionError.

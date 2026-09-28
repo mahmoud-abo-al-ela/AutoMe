@@ -5,17 +5,19 @@ import { useDropzone } from "react-dropzone";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle2, CircleSlash, FileImage, Loader2, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, FileImage, Loader2, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "@/i18n/navigation";
 import { getCarPlanLimits } from "@/actions/cars";
-import { useBulkImport, ImportError, type DraftResult } from "@/hooks/use-bulk-import";
+import { useBulkImport, ImportError, type ImportGroup } from "@/hooks/use-bulk-import";
 import { usePlanUsage } from "@/hooks/use-plan-usage";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useActionError } from "@/hooks/use-action-error";
 import { MAX_IMPORT_PHOTOS } from "@/lib/constants/car-options";
-import { GroupCard } from "./GroupCard";
+import { shrinkForAi } from "@/lib/utils/shrink-image";
+import CarFormShared from "../car-forms/shared/CarFormShared";
+import { ReviewGroups } from "./ReviewGroups";
+import { DraftRow } from "./DraftRow";
 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
@@ -28,8 +30,8 @@ function left(usage: { current: number; limit: number } | null | undefined): num
 
 /**
  * Bulk import: drop the photos of many cars at once, let the AI sort them
- * into cars, fix the sorting, and get a hidden draft for each car to review
- * and publish.
+ * into cars, fix the sorting, choose which cars the AI drafts, and fill in
+ * the rest by hand — each saved hidden, to review and publish.
  */
 export default function BulkImport() {
   const t = useTranslations("org.carForm.import");
@@ -37,9 +39,11 @@ export default function BulkImport() {
   const actionError = useActionError();
   const { slug } = useParams<{ slug: string }>();
   const importer = useBulkImport();
-  const { files, stage, groups, results } = importer;
+  const { files, stage, groups, results, selected } = importer;
   const [error, setError] = useState<string | null>(null);
   const [maxImages, setMaxImages] = useState(5);
+  /** A car being filled in by hand, with its photos ready for the form. */
+  const [manual, setManual] = useState<{ groupId: number; images: File[] } | null>(null);
   const { usage: aiUsage } = usePlanUsage("aiProcessing");
   const { usage: carUsage } = usePlanUsage("cars");
 
@@ -53,6 +57,7 @@ export default function BulkImport() {
   const previews = useMemo(() => files.map((file) => URL.createObjectURL(file)), [files]);
   useEffect(() => () => previews.forEach((url) => URL.revokeObjectURL(url)), [previews]);
 
+  // Cars the AI can still draft: the fewer of AI listings and car slots left.
   const room = Math.min(left(aiUsage), left(carUsage));
 
   const onDrop = async (accepted: File[]) => {
@@ -67,7 +72,7 @@ export default function BulkImport() {
       return;
     }
     try {
-      await importer.group(accepted);
+      await importer.group(accepted, room);
     } catch (err) {
       setError(actionError((err as ImportError).error, t("groupFailed")));
     }
@@ -80,6 +85,13 @@ export default function BulkImport() {
     disabled: stage !== "pick",
   });
 
+  /** Open the car form with this car's photos, shrunk to fit the upload limit. */
+  const fillIn = async (group: ImportGroup) => {
+    const order = [...group.readWith, ...group.photos.filter((p) => !group.readWith.includes(p))];
+    const images = await Promise.all(order.slice(0, maxImages).map((i) => shrinkForAi(files[i])));
+    setManual({ groupId: group.id, images });
+  };
+
   const publishAll = async () => {
     const { published, total } = await importer.publishAll();
     if (published === total) toast.success(t("published", { count: published, n: number(published) }));
@@ -87,6 +99,24 @@ export default function BulkImport() {
   };
 
   const doneCount = Object.values(results).filter((r) => r.status === "done").length;
+
+  if (manual) {
+    return (
+      <div className="mx-auto w-full max-w-5xl space-y-4">
+        <Button type="button" variant="ghost" onClick={() => setManual(null)}>
+          <ArrowLeft className="me-2 h-4 w-4 rtl:rotate-180" aria-hidden />
+          {t("backToImport")}
+        </Button>
+        <CarFormShared
+          initialData={{ images: manual.images }}
+          onSaved={(car) => {
+            importer.markSaved(manual.groupId, car.id);
+            setManual(null);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -140,32 +170,30 @@ export default function BulkImport() {
       {stage === "review" && (
         <>
           <p className="text-sm text-gray-600">{t("reviewIntro", { count: groups.length, n: number(groups.length) })}</p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {groups.map((group, index) => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                index={index}
-                groups={groups}
-                previews={previews}
-                onMove={importer.movePhoto}
-                onRemove={() => importer.removeGroup(group.id)}
-              />
-            ))}
-          </div>
           {groups.length > room && (
             <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
               {t("overRoom", { room: number(room), total: number(groups.length) })}
             </p>
           )}
+          <ReviewGroups
+            groups={groups}
+            previews={previews}
+            selected={selected}
+            room={room}
+            onToggle={importer.toggleSelected}
+            onMove={importer.movePhoto}
+            onRemove={importer.removeGroup}
+          />
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
               className="bg-purple-600 hover:bg-purple-700"
-              disabled={groups.length === 0 || room === 0}
-              onClick={() => importer.createDrafts(room, maxImages)}
+              disabled={groups.length === 0}
+              onClick={() => importer.createDrafts(maxImages)}
             >
-              {t("create", { count: Math.min(groups.length, room), n: number(Math.min(groups.length, room)) })}
+              {selected.size > 0
+                ? t("create", { count: selected.size, n: number(selected.size) })
+                : t("continueByHand")}
             </Button>
             <Button type="button" variant="outline" onClick={importer.reset}>
               {t("startOver")}
@@ -185,7 +213,9 @@ export default function BulkImport() {
                 result={results[group.id]}
                 preview={previews[group.readWith[0] ?? group.photos[0]]}
                 slug={slug}
-                reading={stage === "creating" && results[group.id]?.status === "reading" ? importer.progress?.phase : undefined}
+                queued={importer.progress?.phase === "waiting"}
+                canFillIn={stage === "done"}
+                onFillIn={() => fillIn(group)}
               />
             ))}
           </ol>
@@ -211,52 +241,5 @@ export default function BulkImport() {
         </>
       )}
     </div>
-  );
-}
-
-/** One car's progress through read → save, then a link to review it. */
-function DraftRow({
-  index,
-  label,
-  result,
-  preview,
-  slug,
-  reading,
-}: {
-  index: number;
-  label: string;
-  result: DraftResult | undefined;
-  preview: string;
-  slug: string;
-  reading?: string;
-}) {
-  const t = useTranslations("org.carForm.import");
-  const { number } = useFormatters();
-  const actionError = useActionError();
-  const status = result?.status ?? "waiting";
-
-  return (
-    <li className="flex items-center gap-3 p-3">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={preview} alt="" className="h-12 w-16 shrink-0 rounded object-cover" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-gray-900">
-          {result?.title ?? (label || t("carNumber", { n: number(index + 1) }))}
-        </p>
-        <p className="text-xs text-gray-500">
-          {status === "reading" && reading === "waiting" ? t("status.queued") : t(`status.${status}`)}
-          {status === "failed" && `: ${actionError(result?.error, t("saveFailed"))}`}
-        </p>
-      </div>
-      {status === "done" && result?.carId && (
-        <Link href={`/org/${slug}/cars/${result.carId}/edit`} className="text-sm font-medium text-purple-700 hover:underline">
-          {t("review")}
-        </Link>
-      )}
-      {(status === "reading" || status === "saving") && <Loader2 className="h-4 w-4 animate-spin text-purple-600" aria-hidden />}
-      {status === "done" && <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden />}
-      {status === "failed" && <AlertCircle className="h-4 w-4 text-red-600" aria-hidden />}
-      {status === "skipped" && <CircleSlash className="h-4 w-4 text-gray-400" aria-hidden />}
-    </li>
   );
 }

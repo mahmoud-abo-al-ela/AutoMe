@@ -15,6 +15,8 @@ interface CarFormSharedProps {
   uploadedImage?: File | null;
   /** The generation's model years the AI saw, for the dealer to confirm the year. */
   aiYears?: { from: number; to: number } | null;
+  /** Hand the saved car back instead of going to the car list (bulk import). */
+  onSaved?: (car: { id: string }) => void;
   isEditMode?: boolean;
   carId?: string | null;
 }
@@ -26,6 +28,7 @@ const CarFormShared = ({
   aiConfidence = null,
   uploadedImage = null,
   aiYears = null,
+  onSaved,
   isEditMode = false,
   carId = null,
 }: CarFormSharedProps) => {
@@ -49,7 +52,8 @@ const CarFormShared = ({
     initialData,
     maxImages,
     isEditMode,
-    carId
+    carId,
+    onSaved
   );
 
   return (

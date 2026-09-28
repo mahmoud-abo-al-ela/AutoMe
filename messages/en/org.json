@@ -449,14 +449,14 @@
       "groupFailed": "Couldn't sort the photos. Please try again.",
       "grouping": "Sorting {n} photos into cars…",
       "groupingNote": "This can take a minute when the AI service is busy.",
-      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Check each one — move a photo if it is in the wrong car. Photos marked with a star are used to identify the car.",
+      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Drag a photo to the right car if it is in the wrong one. Photos marked with a star are used to identify the car.",
       "carNumber": "Car {n}",
       "photoCount": "{count, plural, one {{n} photo} other {{n} photos}}",
       "identifies": "Used to identify the car",
       "moveTo": "Move this photo to",
       "newCar": "A new car",
       "removeCar": "Leave this car out",
-      "overRoom": "Your plan has room for {room} of these {total} cars this month; the rest will be skipped.",
+      "overRoom": "Your plan has room for {room} AI drafts this month, and the AI found {total} cars. Tick the cars the AI should draft — you can fill in the others by hand, with their photos kept.",
       "create": "{count, plural, one {Create one draft} other {Create {n} drafts}}",
       "startOver": "Start over",
       "stop": "Stop after this car",
@@ -467,7 +467,7 @@
         "saving": "Saving the draft…",
         "done": "Saved as a hidden draft",
         "failed": "Not saved",
-        "skipped": "Skipped"
+        "skipped": "Not drafted with AI"
       },
       "saveFailed": "Something went wrong",
       "review": "Review",
@@ -475,7 +475,21 @@
       "publishAll": "Publish all",
       "published": "{count, plural, one {One car published} other {{n} cars published}}",
       "publishPartial": "Published {done} of {total}. Open the others to see what's missing.",
-      "another": "Import more"
+      "another": "Import more",
+      "draftWithAi": "Draft with AI",
+      "dragPhoto": "Photo — drag to move it to another car",
+      "dropNewCar": "Drop a photo here to make it a car of its own",
+      "continueByHand": "Continue — I'll fill them in by hand",
+      "fillIn": "Fill in by hand",
+      "backToImport": "Back to the import",
+      "a11y": {
+        "instructions": "To move a photo to another car, press space or enter, use the arrow keys to reach the car, and press space or enter again. Press escape to cancel.",
+        "picked": "Photo picked up.",
+        "over": "Over {car}.",
+        "nowhere": "Not over a car.",
+        "dropped": "Photo moved to {car}.",
+        "cancelled": "Move cancelled. The photo stays where it was."
+      }
     }
   },
   "testDrives": {

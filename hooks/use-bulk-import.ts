@@ -80,13 +80,18 @@ export function useBulkImport() {
   const [stage, setStage] = useState<ImportStage>("pick");
   const [groups, setGroups] = useState<ImportGroup[]>([]);
   const [results, setResults] = useState<Record<number, DraftResult>>({});
+  /** The cars the dealer chose to draft with AI; the rest are filled in by hand. */
+  const [selected, setSelected] = useState<Set<number>>(new Set());
   const nextId = useRef(0);
   const stopped = useRef(false);
 
   const withIds = (found: PhotoGroup[]) => found.map((g) => ({ ...g, id: nextId.current++ }));
 
-  /** Sort the photos into cars. Throws ImportError for the page to show. */
-  const group = useCallback(async (picked: File[]) => {
+  /**
+   * Sort the photos into cars, and choose the first `room` of them to draft
+   * with AI — the dealer can change which. Throws ImportError for the page.
+   */
+  const group = useCallback(async (picked: File[], room: number) => {
     setFiles(picked);
     setResults({});
     setStage("grouping");
@@ -98,7 +103,9 @@ export function useBulkImport() {
       const response = await fetch(GROUP_ENDPOINT, { method: "POST", body });
       const json = await response.json().catch(() => null);
       if (!response.ok || !json?.success) throw new ImportError(json?.error);
-      setGroups(withIds(json.data.groups));
+      const found = withIds(json.data.groups);
+      setGroups(found);
+      setSelected(new Set(found.slice(0, room).map((g) => g.id)));
       setStage("review");
     } catch (error) {
       setStage("pick");
@@ -135,23 +142,38 @@ export function useBulkImport() {
   /** Leave a car out of the import. */
   const removeGroup = useCallback((id: number) => {
     setGroups((all) => all.filter((g) => g.id !== id));
+    setSelected((all) => {
+      const next = new Set(all);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  /** Draft this car with AI, or not. The page keeps the count within the plan. */
+  const toggleSelected = useCallback((id: number) => {
+    setSelected((all) => {
+      const next = new Set(all);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }, []);
 
   const settle = (id: number, patch: DraftResult) => setResults((all) => ({ ...all, [id]: patch }));
 
   /**
-   * Read and save each car, up to `room` of them — the fewer of the cars and
-   * the AI listings the plan has left. The rest are skipped, not attempted:
-   * the server would refuse them anyway, after a wasted read.
+   * Read and save each car the dealer chose to draft with AI. The others are
+   * "skipped" — not attempted, and left for the dealer to fill in by hand
+   * (see markSaved) with their photos still here.
    */
   const createDrafts = useCallback(
-    async (room: number, maxImages: number) => {
+    async (maxImages: number) => {
       stopped.current = false;
       setStage("creating");
-      setResults(Object.fromEntries(groups.map((g, i) => [g.id, { status: i < room ? "waiting" : "skipped" }])));
+      setResults(Object.fromEntries(groups.map((g) => [g.id, { status: selected.has(g.id) ? "waiting" : "skipped" }])));
 
-      for (const [index, g] of groups.entries()) {
-        if (index >= room || stopped.current) {
+      for (const g of groups) {
+        if (!selected.has(g.id) || stopped.current) {
           settle(g.id, { status: "skipped" });
           continue;
         }
@@ -184,7 +206,17 @@ export function useBulkImport() {
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("cars") });
       setStage("done");
     },
-    [groups, files, extract, queryClient]
+    [groups, selected, files, extract, queryClient]
+  );
+
+  /** A car the dealer filled in by hand from the import, now saved. */
+  const markSaved = useCallback(
+    (id: number, carId: string) => {
+      setResults((all) => ({ ...all, [id]: { status: "done", carId } }));
+      queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("cars") });
+    },
+    [queryClient]
   );
 
   /** Stop after the car being read now. */
@@ -204,8 +236,25 @@ export function useBulkImport() {
     setFiles([]);
     setGroups([]);
     setResults({});
+    setSelected(new Set());
     setStage("pick");
   }, []);
 
-  return { files, stage, groups, results, progress, group, movePhoto, removeGroup, createDrafts, stop, publishAll, reset };
+  return {
+    files,
+    stage,
+    groups,
+    results,
+    selected,
+    progress,
+    group,
+    movePhoto,
+    removeGroup,
+    toggleSelected,
+    createDrafts,
+    markSaved,
+    stop,
+    publishAll,
+    reset,
+  };
 }
