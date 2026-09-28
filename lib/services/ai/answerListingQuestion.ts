@@ -15,7 +15,13 @@ import type { Trace } from "@/lib/utils/dev-trace";
 export type ListingAnswer =
   | { grounded: true; answer: string; fieldsUsed: ListingFactKey[] }
   /** `offTopic`: not a question about this car at all — nothing for the dealer. */
-  | { grounded: false; message?: string; offTopic?: true };
+  | { grounded: false; message?: string; offTopic?: true; standalone?: string };
+
+/** An earlier exchange, as the page sends it back. Context, never facts. */
+export interface PastExchange {
+  question: string;
+  answer: string;
+}
 
 const MAX_DECLINE_CHARS = 240;
 
@@ -64,8 +70,9 @@ export async function answerListingQuestion(
   facts: ListingFacts,
   language: "en" | "ar",
   ctx: AiCallerContext,
-  trace?: Trace
+  options: { trace?: Trace; history?: PastExchange[] } = {}
 ): Promise<ListingAnswer> {
+  const { trace, history = [] } = options;
   const record = JSON.stringify(facts);
   const reply = await generateStructured({
     feature: AI_FEATURES.listingQA,
@@ -74,6 +81,7 @@ export async function answerListingQuestion(
     parts: [
       textPart(listingQaPrompt.text(language)),
       textPart(record),
+      ...(history.length > 0 ? [textPart(JSON.stringify(history))] : []),
       textPart(JSON.stringify(question)),
     ],
     schema: listingQaSchema,
@@ -82,7 +90,9 @@ export async function answerListingQuestion(
     // The record is in the key, so an edited listing is never answered from
     // its old self, and two listings never share an answer. A re-asked
     // question costs the dealer nothing; the model still sees what was typed.
-    cacheBytes: `${record}\0${questionKey(question)}`,
+    // The conversation is in the key too: "and the price?" means something
+    // different after each question it can follow.
+    cacheBytes: `${record}\0${JSON.stringify(history)}\0${questionKey(question)}`,
     thinking: "low",
     temperature: 0,
     // The fast chain's Google models answer in ~1 s when they are serving;
@@ -92,7 +102,9 @@ export async function answerListingQuestion(
   });
 
   const answer = reply.answer.trim();
+  const standalone = (reply.standalone ?? "").trim() || undefined;
   const holds = citationsHold(facts, reply.fieldsUsed);
+  if (history.length > 0) trace?.step(`follow-up read as: "${standalone ?? question}"`);
   trace?.step(
     `model: relevant ${reply.relevant ? "✓" : "✗"} · grounded ${reply.grounded ? "✓" : "✗"} · ` +
       `cites [${reply.fieldsUsed.join(", ")}]` +
@@ -109,10 +121,10 @@ export async function answerListingQuestion(
   }
   if (!reply.grounded) {
     const message = declineText(answer);
-    return message ? { grounded: false, message } : { grounded: false };
+    return { grounded: false, ...(message && { message }), ...(standalone && { standalone }) };
   }
   if (!answer || !holds) {
-    return { grounded: false };
+    return { grounded: false, ...(standalone && { standalone }) };
   }
   return { grounded: true, answer, fieldsUsed: [...new Set(reply.fieldsUsed)] };
 }

@@ -140,6 +140,20 @@ describe("askAboutListing", () => {
     expect(recordDeclinedQuestion).not.toHaveBeenCalled();
   });
 
+  it("files a follow-up for the dealer as the question on its own", async () => {
+    answerListingQuestion.mockResolvedValue({ grounded: false, standalone: "العربية دي بكام؟" });
+    await askAboutListing("car-1", "وبكام؟", "ar", null, {
+      history: [{ question: "لونها ايه؟", answer: "أبيض." }],
+    });
+    expect(recordDeclinedQuestion).toHaveBeenCalledWith(
+      expect.objectContaining({ question: "العربية دي بكام؟" })
+    );
+    // The conversation reached the model call.
+    expect(answerListingQuestion.mock.calls[0][4]).toMatchObject({
+      history: [{ question: "لونها ايه؟", answer: "أبيض." }],
+    });
+  });
+
   it("still tells the buyer to ask the dealer if recording fails", async () => {
     answerListingQuestion.mockResolvedValue({ grounded: false });
     recordDeclinedQuestion.mockRejectedValue(new Error("db down"));

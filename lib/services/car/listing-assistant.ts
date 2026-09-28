@@ -10,7 +10,7 @@ import {
   type OtherCar,
 } from "@/lib/ai/grounding";
 import type { CapacityPriority } from "@/lib/ai/breaker";
-import { answerListingQuestion } from "@/lib/services/ai/answerListingQuestion";
+import { answerListingQuestion, type PastExchange } from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { questionKey } from "@/lib/utils/question-key";
@@ -85,8 +85,9 @@ export async function askAboutListing(
   question: string,
   locale: Locale,
   currentOrganizationId: string | null,
-  trace?: Trace
+  options: { trace?: Trace; history?: PastExchange[] } = {}
 ): Promise<AssistantReply> {
+  const { trace, history = [] } = options;
   const car = await carRepository.findCarForAssistant(carId);
   if (!car || (currentOrganizationId && car.organizationId !== currentOrganizationId)) {
     throw new NotFoundError("Car");
@@ -148,7 +149,7 @@ export async function askAboutListing(
     // A buyer, not a member of the dealership: attribution stops at the org.
     userId: null,
     priority: allowance.priority,
-  }, trace);
+  }, { trace, history });
 
   if (reply.grounded) {
     trace?.end(`answered: "${reply.answer}"`);
@@ -161,11 +162,13 @@ export async function askAboutListing(
   }
 
   trace?.step("declined → filing the question in the dealer's Buyer Questions inbox");
+  // The question as it stands alone: a dealer cannot answer "وبكام؟".
+  const asked = reply.standalone ?? question;
   await recordForDealer({
     organizationId: car.organizationId,
     carId: car.id,
-    question,
-    questionKey: questionKey(question),
+    question: asked,
+    questionKey: questionKey(asked),
     locale,
   });
   trace?.end(`declined + "ask the dealer": "${reply.message ?? "(fixed copy)"}"`);

@@ -125,6 +125,43 @@ describe("answerListingQuestion", () => {
   });
 });
 
+describe("conversation memory", () => {
+  const history = [{ question: "What colour is it?", answer: "It is white." }];
+
+  it("sends earlier exchanges as their own data part, between the record and the question", async () => {
+    generateStructured.mockResolvedValue({ relevant: true, standalone: "How much is it?", fieldsUsed: [], grounded: false, answer: "" });
+    await answerListingQuestion("and the price?", facts, "en", ctx, { history });
+    const parts = generateStructured.mock.calls[0][0].parts;
+    expect(parts).toHaveLength(4);
+    expect(JSON.parse(parts[2].text)).toEqual(history);
+    expect(JSON.parse(parts[3].text)).toBe("and the price?");
+  });
+
+  it("sends no conversation part for a first question", async () => {
+    generateStructured.mockResolvedValue({ relevant: true, standalone: "", fieldsUsed: [], grounded: false, answer: "" });
+    await answerListingQuestion("Colour?", facts, "en", ctx);
+    expect(generateStructured.mock.calls[0][0].parts).toHaveLength(3);
+  });
+
+  it("keys the cache on the conversation, since a follow-up depends on it", async () => {
+    generateStructured.mockResolvedValue({ relevant: true, standalone: "", fieldsUsed: [], grounded: false, answer: "" });
+    await answerListingQuestion("and the price?", facts, "en", ctx, { history });
+    await answerListingQuestion("and the price?", facts, "en", ctx, {
+      history: [{ question: "Is it automatic?", answer: "Yes." }],
+    });
+    const [a, b] = generateStructured.mock.calls.map((call) => call[0].cacheBytes);
+    expect(a).not.toBe(b);
+  });
+
+  it("returns the question restated on its own, for the dealer's inbox", async () => {
+    generateStructured.mockResolvedValue({ relevant: true, standalone: " How much is this car? ", fieldsUsed: [], grounded: false, answer: "" });
+    expect(await answerListingQuestion("and the price?", facts, "en", ctx, { history })).toMatchObject({
+      grounded: false,
+      standalone: "How much is this car?",
+    });
+  });
+});
+
 describe("declineText", () => {
   it("passes a plain decline in either language", () => {
     expect(declineText("الإعلان مش مكتوب فيه لو العربية عملت حادثة — التاجر يقدر يقولك.")).toBeDefined();

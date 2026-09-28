@@ -23,7 +23,7 @@ import { startTrace } from "@/lib/utils/dev-trace";
  * per-car bucket is keyed on the car id and must only ever see a real one.
  */
 export const askListingAssistant = withErrorHandling(async (input: unknown) => {
-  const { carId, question, locale } = validateAction(listingQuestionSchema, input);
+  const { carId, question, locale, history } = validateAction(listingQuestionSchema, input);
   // Dev-only: every step of this question, in the dev server's terminal.
   const trace = startTrace("assistant", `"${question}" (${locale}) · car ${carId.slice(0, 8)}`);
 
@@ -42,7 +42,11 @@ export const askListingAssistant = withErrorHandling(async (input: unknown) => {
     trace.step("rate limit ✓ (per visitor and per car)");
 
     const organization = await getCurrentOrganization();
-    const reply = await askAboutListing(carId, question, locale, organization?.id ?? null, trace);
+    if (history.length > 0) trace.step(`conversation so far: ${history.length} earlier exchange(s)`);
+    const reply = await askAboutListing(carId, question, locale, organization?.id ?? null, {
+      trace,
+      history,
+    });
     return createSuccessResponse(reply);
   } catch (error) {
     trace.end(`failed: ${error instanceof Error ? error.message : String(error)}`);

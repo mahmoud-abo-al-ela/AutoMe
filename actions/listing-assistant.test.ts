@@ -41,6 +41,16 @@ describe("askListingAssistant", () => {
     expect(askAboutListing).not.toHaveBeenCalled();
   });
 
+  it("passes the conversation so far to the service, bounded", async () => {
+    const history = [{ question: "Colour?", answer: "White." }];
+    await askListingAssistant({ carId: CAR_ID, question: "and the price?", locale: "en", history });
+    expect(askAboutListing.mock.calls[0][4]).toMatchObject({ history });
+
+    const tooLong = Array.from({ length: 5 }, () => ({ question: "q", answer: "a" }));
+    const response = await askListingAssistant({ carId: CAR_ID, question: "and?", locale: "en", history: tooLong });
+    expect(response).toMatchObject({ success: false });
+  });
+
   it("never lets a malformed id reach the rate limiter as a key", async () => {
     const response = await askListingAssistant({ carId: "../anything", question: "Colour?", locale: "en" });
     expect(response).toMatchObject({ success: false });
