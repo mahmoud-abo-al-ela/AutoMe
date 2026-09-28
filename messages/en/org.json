@@ -241,7 +241,7 @@
         "cta": "Upload with AI",
         "badge": "Pro plan",
         "locked": "Upgrade to Pro to unlock",
-        "remaining": "{remaining} of {limit} AI listings left this month — a car counts once, when you save it",
+        "remaining": "{remaining} of {limit} AI listings left this month",
         "exhaustedBadge": "Used up",
         "exhausted": "This month’s AI listings are used up — they renew on the 1st"
       },
