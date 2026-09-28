@@ -10,14 +10,16 @@ import {
   CAR_LISTING_FIELDS,
   countWrittenFields,
   extractCarListing,
+  MAX_LISTING_PHOTOS,
   prepareImage,
 } from "@/lib/services/ai";
 import { createErrorResponse } from "@/lib/utils/response";
-import { AppError, logError } from "@/lib/utils/errors";
+import { AppError, ValidationError, logError } from "@/lib/utils/errors";
 import type { CarListingStreamEvent } from "./events";
 
 /**
- * Extract a car listing from a dealer's photo, streaming real progress.
+ * Extract a car listing from up to three photos of one car, streaming real
+ * progress.
  *
  * Replaces the `processCarImageGated` server action, which could only answer
  * once — so the upload screen showed a fixed bar for however long Google took.
@@ -74,7 +76,7 @@ function errorStatus(error: unknown): number {
 
 export async function POST(request: Request) {
   let ctx;
-  let image;
+  let images;
   try {
     ctx = await resolveTenantContext();
     await assertAiAllowed(ctx);
@@ -83,16 +85,26 @@ export async function POST(request: Request) {
     await enforceRateLimit();
 
     const formData = await request.formData();
-    // File | string | null. prepareImage refuses anything that is not a File,
-    // caps the size, and checks the type AND the bytes' real signature.
-    image = await prepareImage(formData.get("file") as File);
+    const files = formData.getAll("file");
+    if (files.length > MAX_LISTING_PHOTOS) {
+      throw new ValidationError(`At most ${MAX_LISTING_PHOTOS} photos`, "file", {
+        key: "errors.ai.tooManyImages",
+        params: { max: MAX_LISTING_PHOTOS },
+      });
+    }
+    // File | string entries. prepareImage refuses anything that is not a File,
+    // caps the size, and checks the type AND the bytes' real signature — and
+    // none at all is refused as no image.
+    images = await Promise.all(
+      (files.length > 0 ? files : [null]).map((file) => prepareImage(file as File))
+    );
   } catch (error) {
     if (!(error instanceof AppError)) logError("AI car listing refused", error);
     return NextResponse.json(createErrorResponse(error), { status: errorStatus(error) });
   }
 
   const caller = aiCallerFor(ctx);
-  const preparedImage = image;
+  const preparedImages = images;
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -135,7 +147,7 @@ export async function POST(request: Request) {
       };
 
       try {
-        const draft = await extractCarListing(preparedImage, caller, {
+        const draft = await extractCarListing(preparedImages, caller, {
           onProgress,
           timeoutMs: AI_BUDGET_MS,
           budgetMs: AI_BUDGET_MS,

@@ -38,9 +38,11 @@ function ctxWithAi(ai: { enabled: boolean; limit?: number }) {
   };
 }
 
-function request(file: Blob | string = new File([JPEG], "car.jpg", { type: "image/jpeg" })) {
+const photo = (name = "car.jpg") => new File([JPEG], name, { type: "image/jpeg" });
+
+function request(file: Blob | string | (Blob | string)[] = photo()) {
   const form = new FormData();
-  form.append("file", file);
+  for (const f of Array.isArray(file) ? file : [file]) form.append("file", f);
   return new Request("http://localhost/api/ai/car-listing", { method: "POST", body: form });
 }
 
@@ -116,6 +118,21 @@ describe("POST /api/ai/car-listing — refusals", () => {
   it("400s a request with no file", async () => {
     const res = await POST(request("not a file"));
     expect(res.status).toBe(400);
+    expect((await POST(request([]))).status).toBe(400);
+  });
+
+  it("400s more than three photos, before any model call", async () => {
+    const res = await POST(request([photo("1.jpg"), photo("2.jpg"), photo("3.jpg"), photo("4.jpg")]));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.messageKey).toBe("errors.ai.tooManyImages");
+    expect(extractCarListing).not.toHaveBeenCalled();
+  });
+
+  it("refuses the whole read when one of several photos is not an image", async () => {
+    const html = new File([Buffer.from("<html></html>")], "2.jpg", { type: "image/jpeg" });
+    const res = await POST(request([photo("1.jpg"), html]));
+    expect(res.status).toBe(400);
+    expect(extractCarListing).not.toHaveBeenCalled();
   });
 });
 
@@ -143,6 +160,13 @@ describe("POST /api/ai/car-listing — stream", () => {
     expect(events[2]).toMatchObject({ done: 1 });
     expect(events[3]).toMatchObject({ done: 2 });
     expect(events[4].data).toEqual({ make: "Kia", model: "Rio" });
+  });
+
+  it("reads up to three photos of the car together, in one call", async () => {
+    extractCarListing.mockResolvedValue({ make: "BMW" });
+    await lines(await POST(request([photo("front.jpg"), photo("back.jpg"), photo("dash.jpg")])));
+    expect(extractCarListing).toHaveBeenCalledTimes(1);
+    expect(extractCarListing.mock.calls[0][0]).toHaveLength(3);
   });
 
   it("bills the database user, not the Clerk id, at free-plan priority", async () => {

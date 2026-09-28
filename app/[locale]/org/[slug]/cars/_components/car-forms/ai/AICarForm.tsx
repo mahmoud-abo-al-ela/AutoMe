@@ -11,6 +11,7 @@ import { useActionError } from "@/hooks/use-action-error";
 import type { CarListingDraft } from "@/lib/services/ai";
 import CarFormShared from "../shared/CarFormShared";
 import AIUploadSection from "../sections/AIUploadSection";
+import { MAX_AI_LISTING_PHOTOS } from "@/lib/constants/car-options";
 
 /** The upload cap the copy quotes, stated once so the two cannot disagree. */
 const MAX_UPLOAD_MB = 10;
@@ -21,7 +22,7 @@ const AICarForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [carData, setCarData] = useState<CarListingDraft | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const t = useTranslations("org.carForm.ai");
   const { number } = useFormatters();
   const actionError = useActionError();
@@ -36,18 +37,25 @@ const AICarForm = () => {
       setCarData(null);
 
       try {
-        const file = acceptedFiles[0];
-        const validTypes = ["image/jpeg", "image/png", "image/webp"];
-        if (!validTypes.includes(file.type)) {
-          throw new Error(t("invalidType"));
+        // Several angles of one car, read together: a rear badge names the
+        // model where a front view only shows the shape.
+        const files = acceptedFiles.slice(0, MAX_AI_LISTING_PHOTOS);
+        if (acceptedFiles.length > files.length) {
+          toast.info(t("firstPhotosOnly", { count: number(MAX_AI_LISTING_PHOTOS) }));
         }
-        if (file.size > MAX_UPLOAD_BYTES) {
-          throw new Error(t("tooLarge", { size: number(MAX_UPLOAD_MB) }));
+        const validTypes = ["image/jpeg", "image/png", "image/webp"];
+        for (const file of files) {
+          if (!validTypes.includes(file.type)) {
+            throw new Error(t("invalidType"));
+          }
+          if (file.size > MAX_UPLOAD_BYTES) {
+            throw new Error(t("tooLarge", { size: number(MAX_UPLOAD_MB) }));
+          }
         }
 
-        setUploadedImage(file);
+        setUploadedImages(files);
         // No allowance is spent yet: a car counts when it is saved.
-        const draft = await extract(file);
+        const draft = await extract(files);
 
         setCarData(draft);
         setShowForm(true);
@@ -74,7 +82,9 @@ const AICarForm = () => {
       "image/png": [".png"],
       "image/webp": [".webp"],
     },
-    maxFiles: 1,
+    // No maxFiles: over it, react-dropzone rejects every file. onDrop keeps
+    // the first MAX_AI_LISTING_PHOTOS and says so.
+    multiple: true,
     disabled: isProcessing,
   });
 
@@ -82,7 +92,7 @@ const AICarForm = () => {
     reset();
     setShowForm(false);
     setCarData(null);
-    setUploadedImage(null);
+    setUploadedImages([]);
     setError(null);
   };
 
@@ -117,7 +127,8 @@ const AICarForm = () => {
         titleAr: carData.titleAr,
         descriptionAr: carData.descriptionAr,
         featuresAr: carData.featuresAr,
-        images: uploadedImage ? [uploadedImage] : [],
+        // Every photo the AI read goes into the listing, in the order dropped.
+        images: uploadedImages,
       }
     : {};
 
@@ -137,7 +148,8 @@ const AICarForm = () => {
           isAIMode={true}
           onStartOver={handleStartOver}
           aiConfidence={carData?.confidence}
-          uploadedImage={uploadedImage}
+          uploadedImage={uploadedImages[0] ?? null}
+          aiYears={carData ? { from: carData.yearFrom, to: carData.yearTo } : null}
         />
       )}
     </div>

@@ -6,8 +6,11 @@ import { BODY_TYPES, CAR_COLOR_HEX, CAR_COLORS } from "@/lib/constants/car-optio
 import arCarAttributes from "@/messages/ar/carAttributes.json";
 
 const valid = {
+  identification: 'Boot lid reads "COROLLA"; E210 headlights and grille.',
   make: "Toyota",
   model: "Corolla",
+  yearFrom: 2019,
+  yearTo: 2023,
   year: 2020,
   color: "Silver",
   price: 850000,

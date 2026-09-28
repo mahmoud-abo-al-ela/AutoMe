@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { CarListingDraft } from "@/lib/services/ai";
+import { shrinkForAi } from "@/lib/utils/shrink-image";
 import type { ErrorResponse } from "@/lib/utils/response";
 import type { CarListingStreamEvent } from "@/app/api/ai/car-listing/events";
 
@@ -53,9 +54,11 @@ export function useCarListingStream() {
   const [progress, setProgress] = useState<CarListingProgress | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
-  const extract = useCallback((file: File): Promise<CarListingDraft> => {
+  const extract = useCallback(async (files: File[]): Promise<CarListingDraft> => {
     xhrRef.current?.abort();
     setProgress(INITIAL);
+    // Shrunk for the upload limit; the listing keeps the originals.
+    const upload = await Promise.all(files.map(shrinkForAi));
 
     return new Promise<CarListingDraft>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -157,7 +160,7 @@ export function useCarListingStream() {
       xhr.onabort = () => finish(() => reject(new CarListingStreamError(undefined)));
 
       const body = new FormData();
-      body.append("file", file);
+      for (const file of upload) body.append("file", file);
       xhr.open("POST", ENDPOINT);
       xhr.send(body);
     });

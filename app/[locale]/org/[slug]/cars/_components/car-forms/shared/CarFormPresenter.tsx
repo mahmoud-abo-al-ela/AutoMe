@@ -31,6 +31,7 @@ type CarFormPresenterProps = Pick<
     onStartOver?: (() => void) | null;
     aiConfidence?: number | null;
     uploadedImage?: File | null;
+    aiYears?: { from: number; to: number } | null;
     maxImages?: number;
     isEditMode?: boolean;
 };
@@ -68,6 +69,7 @@ export const CarFormPresenter = ({
     onStartOver = null,
     aiConfidence = null,
     uploadedImage = null,
+    aiYears = null,
     handlers,
     maxImages = 5,
     isEditMode = false,
@@ -177,6 +179,16 @@ export const CarFormPresenter = ({
                                         </span>
                                     </span>
                                 </div>
+                            )}
+                            {/* A photo shows the generation, rarely the exact
+                                year: say so, so the dealer checks it. */}
+                            {isAIMode && aiYears && aiYears.from !== aiYears.to && (
+                                <p className="mt-1 text-xs text-amber-700">
+                                    {t("aiYears", {
+                                        from: number(aiYears.from, { useGrouping: false }),
+                                        to: number(aiYears.to, { useGrouping: false }),
+                                    })}
+                                </p>
                             )}
                         </div>
 

@@ -60,7 +60,7 @@ describe.skipIf(!enabled)("car listing extraction (real model)", () => {
     cache.clear();
     try {
       // The limits the dealer route runs with: this is the path dealers get.
-      draft = await extractCarListing(await prepareImage(asFile(carPhoto())), ctx, PRODUCTION_LIMITS);
+      draft = await extractCarListing([await prepareImage(asFile(carPhoto()))], ctx, PRODUCTION_LIMITS);
     } catch (error) {
       if (!isCapacityFailure(error)) throw error;
       unavailable = true;
@@ -156,7 +156,7 @@ describe.skipIf(!enabled)("an image with no car in it", () => {
 
       let answer: CarListingDraft | null = null;
       try {
-        answer = await extractCarListing(await prepareImage(asFile(notACar())), ctx);
+        answer = await extractCarListing([await prepareImage(asFile(notACar()))], ctx);
       } catch (error) {
         // A capacity failure says nothing about the model's judgement, and
         // counting it as "correctly refused" would be a false pass — the

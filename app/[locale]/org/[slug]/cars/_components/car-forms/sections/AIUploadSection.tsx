@@ -65,7 +65,8 @@ const AIUploadSection = ({
       "image/png": [".png"],
       "image/webp": [".webp"],
     },
-    maxFiles: 1,
+    // No maxFiles: the parent keeps the first few and says so.
+    multiple: true,
     disabled: isProcessing,
   });
 

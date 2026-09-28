@@ -3,6 +3,7 @@ export {
   countWrittenFields,
   CAR_LISTING_FIELDS,
   type CarListingDraft,
+  MAX_LISTING_PHOTOS,
 } from "./carListingFromImage";
 export { extractSearchFilters, type ImageSearchFilters } from "./imageSearchFilters";
 export { prepareImage, type PreparedImage } from "./image";

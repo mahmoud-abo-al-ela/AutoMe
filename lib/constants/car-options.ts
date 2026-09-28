@@ -147,3 +147,6 @@ export const getCarColorHex = (color?: string | null): string => {
     const key = color.toLowerCase().trim() as keyof typeof CAR_COLOR_HEX;
     return CAR_COLOR_HEX[key] || "#94a3b8";
 };
+
+/** Photos of one car the AI reads together to identify it. */
+export const MAX_AI_LISTING_PHOTOS = 3;

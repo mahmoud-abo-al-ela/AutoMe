@@ -11,6 +11,7 @@ import {
 } from "@/lib/ai/schemas/car-listing";
 import { textPart } from "@/lib/ai/provider/types";
 import type { PreparedImage } from "@/lib/services/ai/image";
+import { MAX_AI_LISTING_PHOTOS } from "@/lib/constants/car-options";
 
 /** Every field the model writes, in schema order — the denominator of progress. */
 export const CAR_LISTING_FIELDS = Object.keys(carListingSchema.shape);
@@ -55,23 +56,41 @@ export interface ExtractOptions {
   firstTokenTimeoutMs?: number;
 }
 
+/** Photos of one car read together; see extractCarListing. */
+export const MAX_LISTING_PHOTOS = MAX_AI_LISTING_PHOTOS;
+
 /**
- * The image is prepared (validated, sniffed) by the caller, so an unusable
+ * The year inside the generation the model named, whichever way round it
+ * wrote the range. The prompt asks for that; this makes it so.
+ */
+export function yearWithinGeneration<T extends { year: number; yearFrom: number; yearTo: number }>(car: T): T {
+  const from = Math.min(car.yearFrom, car.yearTo);
+  const to = Math.max(car.yearFrom, car.yearTo);
+  return { ...car, yearFrom: from, yearTo: to, year: Math.min(Math.max(car.year, from), to) };
+}
+
+/**
+ * Up to MAX_LISTING_PHOTOS photos of the same car, in one call: a rear badge
+ * or a dashboard names the model where a front view only shows the shape.
+ * One call, so one ledger row — the dealer is charged per car either way.
+ *
+ * The images are prepared (validated, sniffed) by the caller, so an unusable
  * upload is refused before anything is streamed or spent.
  */
 export async function extractCarListing(
-  image: PreparedImage,
+  images: PreparedImage[],
   ctx: AiCallerContext,
   options: ExtractOptions = {}
 ): Promise<CarListingDraft> {
   const extraction = await generateStructured({
     feature: AI_FEATURES.carListingFromImage,
     task: "vision",
-    parts: [image.part, textPart(carListingPrompt.text)],
+    parts: [...images.map((image) => image.part), textPart(carListingPrompt.text)],
     schema: carListingSchema,
     promptVersion: carListingPrompt.version,
     ctx,
-    cacheBytes: image.bytes,
+    // In order: the same photos in another order are another request.
+    cacheBytes: Buffer.concat(images.map((image) => image.bytes)),
     // The schema does the constraining; measured ~2000 default thinking tokens
     // against ~270 at "low", with the same fields back.
     thinking: "low",
@@ -83,7 +102,7 @@ export async function extractCarListing(
 
   const featuresEn = cleanFeatures(extraction.featuresEn);
   return {
-    ...extraction,
+    ...yearWithinGeneration(extraction),
     featuresEn,
     featuresAr: cleanFeatures(extraction.featuresAr),
     features: featuresEn,

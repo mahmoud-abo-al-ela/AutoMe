@@ -50,7 +50,7 @@ type Outcome = CarListingDraft | "unavailable";
 async function extract(fixture: { bytes: Buffer; mimeType: string }): Promise<Outcome> {
   try {
     return await extractCarListing(
-      await prepareImage(asFile(fixture)),
+      [await prepareImage(asFile(fixture))],
       EVAL_CALLER,
       PRODUCTION_LIMITS
     );

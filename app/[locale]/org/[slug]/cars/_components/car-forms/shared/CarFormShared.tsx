@@ -13,6 +13,8 @@ interface CarFormSharedProps {
   onStartOver?: (() => void) | null;
   aiConfidence?: number | null;
   uploadedImage?: File | null;
+  /** The generation's model years the AI saw, for the dealer to confirm the year. */
+  aiYears?: { from: number; to: number } | null;
   isEditMode?: boolean;
   carId?: string | null;
 }
@@ -23,6 +25,7 @@ const CarFormShared = ({
   onStartOver = null,
   aiConfidence = null,
   uploadedImage = null,
+  aiYears = null,
   isEditMode = false,
   carId = null,
 }: CarFormSharedProps) => {
@@ -59,6 +62,7 @@ const CarFormShared = ({
       onStartOver={onStartOver}
       aiConfidence={aiConfidence}
       uploadedImage={uploadedImage}
+      aiYears={aiYears}
       handlers={handlers}
       maxImages={maxImages}
       isEditMode={isEditMode}

@@ -23,10 +23,26 @@ const tuple = (values: string[]) => values as [string, ...string[]];
 
 const currentYear = new Date().getFullYear();
 
+const modelYear = z.coerce.number().int().min(1900).max(currentYear + 1);
+
 export const carListingSchema = z.object({
+  /**
+   * First, because the model writes fields in schema order: it states what it
+   * can read and see — badges, lettering, grille, lights — before it commits
+   * to a make and model, instead of naming a car and justifying it after.
+   * Never shown to the dealer.
+   */
+  identification: z.string().max(500),
   make: z.string().min(1).max(50),
   model: z.string().min(1).max(50),
-  year: z.coerce.number().int().min(1900).max(currentYear + 1),
+  /**
+   * The model years this generation was built — what a photo can actually
+   * show. `year` is the likeliest one inside it; the form asks the dealer to
+   * confirm it whenever the range is wider than one year.
+   */
+  yearFrom: modelYear,
+  yearTo: modelYear,
+  year: modelYear,
   /**
    * An allowlist, like bodyType, and stored in English. The site translates it
    * per reader through `carAttributes.color`, which only works for colours that
