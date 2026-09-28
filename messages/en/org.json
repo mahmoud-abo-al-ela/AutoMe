@@ -448,10 +448,9 @@
       "groupFailed": "Couldn't sort the photos. Please try again.",
       "grouping": "Sorting {n} photos into cars…",
       "groupingNote": "This can take a minute when the AI service is busy.",
-      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Drag a photo to the right car if it is in the wrong one, or within a car to change the order — the first photo is the cover. Photos marked with a star are used to identify the car.",
+      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Drag a photo to the right car if it is in the wrong one, or within a car to change the order.",
       "carNumber": "Car {n}",
       "photoCount": "{count, plural, one {{n} photo} other {{n} photos}}",
-      "identifies": "Used to identify the car",
       "moveTo": "Move this photo to",
       "newCar": "A new car",
       "removeCar": "Leave this car out",
@@ -504,7 +503,6 @@
         "badge": "Include the back and the dashboard: the badge names the exact model.",
         "hidden": "Nothing is published until you review it."
       },
-      "reviewSummary": "{cars} cars · {ai} drafted with AI · {byHand} by hand",
       "progress": "Drafting car {done} of {total}…",
       "progressNote": "Each car takes about half a minute. You can leave this tab open and come back.",
       "stats": {

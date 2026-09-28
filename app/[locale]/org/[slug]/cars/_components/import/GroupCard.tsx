@@ -4,7 +4,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslations } from "next-intl";
-import { GripVertical, Star, Trash2 } from "lucide-react";
+import { GripVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFormatters } from "@/hooks/use-formatters";
 import type { ImportGroup } from "@/hooks/use-bulk-import";
@@ -90,7 +90,6 @@ export function GroupCard({
               <SortablePhoto
                 photo={photo}
                 src={previews[photo]}
-                identifies={group.readWith.includes(photo)}
                 cover={position === 0}
               />
               <select
@@ -127,12 +126,10 @@ export const photoId = (photo: number) => `photo-${photo}`;
 function SortablePhoto({
   photo,
   src,
-  identifies,
   cover,
 }: {
   photo: number;
   src: string;
-  identifies: boolean;
   cover: boolean;
 }) {
   const t = useTranslations("org.carForm.import");
@@ -152,13 +149,13 @@ function SortablePhoto({
         isDragging ? "opacity-30" : ""
       }`}
     >
-      <PhotoThumb src={src} identifies={identifies} cover={cover} />
+      <PhotoThumb src={src} cover={cover} />
     </div>
   );
 }
 
 /** The thumbnail itself, shared by the card and the drag overlay. */
-export function PhotoThumb({ src, identifies, cover = false }: { src: string; identifies: boolean; cover?: boolean }) {
+export function PhotoThumb({ src, cover = false }: { src: string; cover?: boolean }) {
   const t = useTranslations("org.carForm.import");
   return (
     <>
@@ -167,12 +164,6 @@ export function PhotoThumb({ src, identifies, cover = false }: { src: string; id
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
       <GripVertical className="absolute bottom-1 end-1 h-4 w-4 rounded bg-white/80 text-gray-600" aria-hidden />
-      {identifies && (
-        <span className="absolute top-1 start-1 rounded-full bg-purple-600 p-1 text-white" title={t("identifies")}>
-          <Star className="h-3 w-3" aria-hidden />
-          <span className="sr-only">{t("identifies")}</span>
-        </span>
-      )}
       {cover && (
         <span className="absolute bottom-1 start-1 rounded bg-gray-900/75 px-1.5 py-0.5 text-[10px] font-medium text-white">
           {t("cover")}

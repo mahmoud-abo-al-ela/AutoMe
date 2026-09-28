@@ -194,30 +194,23 @@ export default function BulkImport() {
           />
           {/* Stays in reach at the bottom of the screen while the dealer
               scrolls a long batch of cars. */}
-          <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white/95 p-3 shadow-lg backdrop-blur sm:p-4">
-            <p className="text-sm text-gray-700">
-              {t("reviewSummary", {
-                cars: number(groups.length),
-                ai: number(selected.size),
-                byHand: number(groups.length - selected.size),
-              })}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={importer.reset}>
-                {t("startOver")}
-              </Button>
-              <Button
-                type="button"
-                className="bg-purple-600 hover:bg-purple-700"
-                disabled={groups.length === 0}
-                onClick={() => importer.createDrafts(maxImages)}
-              >
-                <Sparkles className="me-1.5 h-4 w-4" aria-hidden />
-                {selected.size > 0
-                  ? t("create", { count: selected.size, n: number(selected.size) })
-                  : t("continueByHand")}
-              </Button>
-            </div>
+          {/* Start over at the reading start, create at the far end — right
+              and left in Arabic, mirrored in English by the flex direction. */}
+          <div className="sticky bottom-4 z-10 flex items-center justify-between gap-3 rounded-xl border bg-white/95 p-3 shadow-lg backdrop-blur sm:p-4">
+            <Button type="button" variant="outline" onClick={importer.reset}>
+              {t("startOver")}
+            </Button>
+            <Button
+              type="button"
+              className="bg-purple-600 hover:bg-purple-700"
+              disabled={groups.length === 0}
+              onClick={() => importer.createDrafts(maxImages)}
+            >
+              <Sparkles className="me-1.5 h-4 w-4" aria-hidden />
+              {selected.size > 0
+                ? t("create", { count: selected.size, n: number(selected.size) })
+                : t("continueByHand")}
+            </Button>
           </div>
         </>
       )}

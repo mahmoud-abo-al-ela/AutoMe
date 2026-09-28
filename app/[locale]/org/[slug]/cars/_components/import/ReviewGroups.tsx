@@ -120,8 +120,6 @@ export function ReviewGroups({
     onMove(photo, groupId, at);
   };
 
-  const draggingFrom = dragging === null ? undefined : groups.find((g) => g.photos.includes(dragging));
-
   return (
     <DndContext
       sensors={sensors}
@@ -151,7 +149,7 @@ export function ReviewGroups({
       <DragOverlay>
         {dragging !== null && (
           <div className="relative aspect-square w-24 overflow-hidden rounded-md shadow-xl ring-2 ring-purple-400">
-            <PhotoThumb src={previews[dragging]} identifies={Boolean(draggingFrom?.readWith.includes(dragging))} />
+            <PhotoThumb src={previews[dragging]} />
           </div>
         )}
       </DragOverlay>
