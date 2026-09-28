@@ -9,6 +9,8 @@ const {
   recordDeclinedQuestion,
   findOtherAvailableCars,
   findComparablePrices,
+  recordAssistantAnswer,
+  rateAssistantAnswer,
 } = vi.hoisted(() => ({
   findCarForAssistant: vi.fn(),
   findActiveSubscription: vi.fn(),
@@ -18,6 +20,8 @@ const {
   recordDeclinedQuestion: vi.fn(),
   findOtherAvailableCars: vi.fn(),
   findComparablePrices: vi.fn(),
+  recordAssistantAnswer: vi.fn(),
+  rateAssistantAnswer: vi.fn(),
 }));
 
 vi.mock("@/lib/repositories/car", () => ({
@@ -29,8 +33,9 @@ vi.mock("@/lib/repositories/billing", () => ({ findActiveSubscription }));
 vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCarsThisMonth }));
 vi.mock("@/lib/services/ai/answerListingQuestion", () => ({ answerListingQuestion }));
 vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion }));
+vi.mock("@/lib/repositories/assistant-answer", () => ({ recordAssistantAnswer, rateAssistantAnswer }));
 
-import { askAboutListing, isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
+import { askAboutListing, isListingAssistantOffered, rateListingAnswer } from "@/lib/services/car/listing-assistant";
 import { NotFoundError } from "@/lib/utils/errors";
 
 const car = {
@@ -330,5 +335,56 @@ describe("isListingAssistantOffered", () => {
     expect(await isListingAssistantOffered("org-dealer")).toBe(true);
     findActiveSubscription.mockResolvedValue(null);
     expect(await isListingAssistantOffered("org-dealer")).toBe(false);
+  });
+});
+
+describe("buttons for a car on sale", () => {
+  it("offers a test drive on the listing's own test-drive page, only while it is for sale", async () => {
+    answerListingQuestion.mockResolvedValue({
+      grounded: true, answer: "You can book a test drive.", fieldsUsed: ["status"], actions: ["testDrive"],
+    });
+    expect(await askAboutListing("car-1", "Can I try it?", "en", null)).toMatchObject({
+      actions: [{ kind: "testDrive", href: "/test-drive?carId=car-1" }],
+    });
+
+    findCarForAssistant.mockResolvedValue({ ...car, status: "SOLD" });
+    expect(await askAboutListing("car-1", "Can I try it?", "en", null)).not.toHaveProperty("actions");
+  });
+});
+
+describe("rating answers", () => {
+  it("keeps each answer with the question as it stands alone, and hands back its id", async () => {
+    recordAssistantAnswer.mockResolvedValue("answer-1");
+    answerListingQuestion.mockResolvedValue({
+      grounded: true, answer: "White.", fieldsUsed: ["color"], standalone: "What colour is the car?",
+    });
+    expect(await askAboutListing("car-1", "colour?", "en", null)).toMatchObject({ answerId: "answer-1" });
+    expect(recordAssistantAnswer).toHaveBeenCalledWith({
+      organizationId: "org-dealer", carId: "car-1", question: "What colour is the car?", answer: "White.", locale: "en",
+    });
+  });
+
+  it("still answers when the answer cannot be kept, just without a rating", async () => {
+    recordAssistantAnswer.mockRejectedValue(new Error("db down"));
+    expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "answered", answer: "White." });
+  });
+
+  it("files a 👎 answer's question for the dealer to answer", async () => {
+    rateAssistantAnswer.mockResolvedValue({
+      organizationId: "org-dealer", carId: "car-1", question: "Is it automatic?", locale: "en",
+    });
+    await rateListingAnswer("answer-1", false);
+    expect(rateAssistantAnswer).toHaveBeenCalledWith("answer-1", false);
+    expect(recordDeclinedQuestion).toHaveBeenCalledWith({
+      organizationId: "org-dealer", carId: "car-1", question: "Is it automatic?", questionKey: "is it automatic", locale: "en",
+    });
+  });
+
+  it("files nothing for a 👍, or for an answer already rated", async () => {
+    rateAssistantAnswer.mockResolvedValue({ organizationId: "o", carId: "c", question: "q", locale: "en" });
+    await rateListingAnswer("answer-1", true);
+    rateAssistantAnswer.mockResolvedValue(null);
+    await rateListingAnswer("answer-1", false);
+    expect(recordDeclinedQuestion).not.toHaveBeenCalled();
   });
 });

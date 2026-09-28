@@ -28,7 +28,7 @@ export const listingQaSchema = z.object({
   // and the `ref` of each other car it names, shown as cards. The service
   // keeps only what the record backs — a phone for "call", an address for
   // "directions", a ref that exists.
-  actions: z.array(z.enum(["directions", "call"])),
+  actions: z.array(z.enum(["directions", "call", "testDrive"])),
   carsNamed: z.array(z.number().int()),
 });
 

@@ -4,13 +4,25 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { Car as CarIcon, ChevronRight, Loader2, MapPin, MessageCircle, Phone, Send, Sparkles } from "lucide-react";
+import {
+  CalendarDays,
+  Car as CarIcon,
+  ChevronRight,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Send,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { askListingAssistant } from "@/actions/listing-assistant";
+import { askListingAssistant, rateListingAssistantAnswer } from "@/actions/listing-assistant";
 import { useActionError } from "@/hooks/use-action-error";
 import type { ActionError } from "@/lib/utils/error-messages";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -228,12 +240,13 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
   }
 
   if (exchange.reply?.status === "answered") {
-    const { answer, actions = [], cars = [] } = exchange.reply;
+    const { answer, answerId, actions = [], cars = [] } = exchange.reply;
     return (
       <div className="space-y-2">
         <p className={`${bubble} bg-gray-100 text-gray-800`}>
           <span dir="auto">{answer}</span>
         </p>
+        {answerId && <AnswerRating answerId={answerId} />}
         {cars.length > 0 && (
           <ul className="ms-auto flex w-fit max-w-[85%] flex-col gap-1.5">
             {cars.map((car) => (
@@ -245,23 +258,36 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
         )}
         {actions.length > 0 && (
           <div className="ms-auto flex w-fit max-w-[85%] flex-wrap justify-end gap-2">
-            {actions.map((action) => (
-              <a
-                key={action.kind}
-                href={action.href}
-                {...(action.kind === "directions" && { target: "_blank", rel: "noopener noreferrer" })}
-                className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs sm:text-sm font-medium text-violet-700 hover:bg-violet-50 transition-colors"
-              >
-                {action.kind === "directions" ? (
-                  <MapPin className="w-3.5 h-3.5" aria-hidden />
-                ) : (
-                  <Phone className="w-3.5 h-3.5" aria-hidden />
-                )}
-                {action.kind === "directions" ? t("actions.directions") : t("actions.call")}
-                {/* The number itself stays left-to-right inside an Arabic label. */}
-                {action.kind === "call" && <bdi dir="ltr">{action.phone}</bdi>}
-              </a>
-            ))}
+            {actions.map((action) => {
+              const chip =
+                "inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs sm:text-sm font-medium text-violet-700 hover:bg-violet-50 transition-colors";
+              if (action.kind === "testDrive") {
+                // In-app: the locale-aware Link keeps the buyer's language.
+                return (
+                  <Link key={action.kind} href={action.href} className={chip}>
+                    <CalendarDays className="w-3.5 h-3.5" aria-hidden />
+                    {t("actions.testDrive")}
+                  </Link>
+                );
+              }
+              return (
+                <a
+                  key={action.kind}
+                  href={action.href}
+                  {...(action.kind === "directions" && { target: "_blank", rel: "noopener noreferrer" })}
+                  className={chip}
+                >
+                  {action.kind === "directions" ? (
+                    <MapPin className="w-3.5 h-3.5" aria-hidden />
+                  ) : (
+                    <Phone className="w-3.5 h-3.5" aria-hidden />
+                  )}
+                  {action.kind === "directions" ? t("actions.directions") : t("actions.call")}
+                  {/* The number itself stays left-to-right inside an Arabic label. */}
+                  {action.kind === "call" && <bdi dir="ltr">{action.phone}</bdi>}
+                </a>
+              );
+            })}
           </div>
         )}
       </div>
@@ -286,6 +312,42 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
         <MessageCircle className="w-3.5 h-3.5" aria-hidden />
         {t("askDealer")}
       </Link>
+    </div>
+  );
+}
+
+/**
+ * 👍 / 👎 under an answer, once. A 👎 sends the question to the dealer, who
+ * can answer it properly — so the buyer is told that, not just thanked.
+ * Shown as rated at once; a failed request only loses the rating.
+ */
+function AnswerRating({ answerId }: { answerId: string }) {
+  const t = useTranslations("carDetail.assistant.rating");
+  const [rated, setRated] = useState<"up" | "down" | null>(null);
+
+  const rate = (helpful: boolean) => {
+    setRated(helpful ? "up" : "down");
+    void rateListingAssistantAnswer({ answerId, helpful }).catch(() => undefined);
+  };
+
+  if (rated) {
+    return (
+      <p className="ms-auto w-fit max-w-[85%] text-xs text-gray-500" role="status">
+        {rated === "up" ? t("thanks") : t("sentToDealer")}
+      </p>
+    );
+  }
+
+  const button =
+    "cursor-pointer rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors";
+  return (
+    <div className="ms-auto flex w-fit items-center gap-1">
+      <button type="button" onClick={() => rate(true)} className={button} aria-label={t("helpful")} title={t("helpful")}>
+        <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
+      </button>
+      <button type="button" onClick={() => rate(false)} className={button} aria-label={t("notHelpful")} title={t("notHelpful")}>
+        <ThumbsDown className="h-3.5 w-3.5" aria-hidden />
+      </button>
     </div>
   );
 }

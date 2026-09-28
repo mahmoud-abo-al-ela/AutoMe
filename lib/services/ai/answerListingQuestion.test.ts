@@ -230,3 +230,14 @@ describe("declineText", () => {
     expect(declineText("The listing doesn't say if it was serviced in 2024.")).toBeDefined();
   });
 });
+
+describe("the test-drive button", () => {
+  const reply = { relevant: true, standalone: "", fieldsUsed: ["status"], grounded: true, answer: "Yes.", actions: ["testDrive"], carsNamed: [] };
+
+  it("is offered only for a car still for sale", async () => {
+    generateStructured.mockResolvedValue(reply);
+    expect(await answerListingQuestion("Can I try it?", facts, "en", ctx)).toMatchObject({ actions: ["testDrive"] });
+    generateStructured.mockResolvedValue(reply);
+    expect(await answerListingQuestion("Can I try it?", { ...facts, status: "SOLD" }, "en", ctx)).not.toHaveProperty("actions");
+  });
+});

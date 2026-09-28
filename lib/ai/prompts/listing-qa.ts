@@ -14,7 +14,7 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const listingQaPrompt = {
-  version: "2026-09-28.9",
+  version: "2026-09-29.1",
   text: (language: "en" | "ar") =>
     `You answer a buyer's question about ONE used car listed for sale in Egypt, using ONLY
 the listing record you are given.
@@ -95,9 +95,10 @@ Rules:
 - fieldsUsed lists the record keys your answer relies on. If grounded is true it must
   name at least one. If grounded is false, leave fieldsUsed empty.
 - "actions" are buttons shown under a grounded answer. Add "directions" when the answer
-  tells the buyer where the dealership is, and "call" when the buyer would next want to
-  phone the dealer — opening hours, visiting, a test drive. Otherwise leave it empty, and
-  always leave it empty when grounded is false.
+  tells the buyer where the dealership is, "call" when the buyer would next want to
+  phone the dealer — opening hours, visiting — and "testDrive" when the buyer wants to
+  see, try or drive the car. Otherwise leave it empty, and always leave it empty when
+  grounded is false.
 - "carsNamed" lists the ref of each car from otherCars that your answer names, in the
   order you name them; the buyer sees each as a link. Leave it empty otherwise.
 - When grounded is false, still write the answer: one short, friendly sentence that says

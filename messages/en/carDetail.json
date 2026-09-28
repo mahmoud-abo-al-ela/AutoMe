@@ -56,7 +56,14 @@
     "askDealer": "Ask the dealer",
     "actions": {
       "directions": "Directions",
-      "call": "Call"
+      "call": "Call",
+      "testDrive": "Book a test drive"
+    },
+    "rating": {
+      "helpful": "Helpful",
+      "notHelpful": "Not helpful",
+      "thanks": "Thanks for the feedback.",
+      "sentToDealer": "Thanks — we have sent your question to the dealer to answer."
     },
     "failed": "Couldn't get an answer. Please try again.",
     "offTopic": "I can only help with questions about this car.",

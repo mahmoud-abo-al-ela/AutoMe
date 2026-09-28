@@ -21,6 +21,8 @@ export type ListingAnswer =
       actions?: ListingAction[];
       /** The `ref` of each other car the answer names, each one in the record. */
       carRefs?: number[];
+      /** The question restated to stand alone, when the model gave one. */
+      standalone?: string;
     }
   /** `offTopic`: not a question about this car at all — nothing for the dealer. */
   | { grounded: false; message?: string; offTopic?: true; standalone?: string };
@@ -39,14 +41,18 @@ const MAX_CAR_CARDS = 3;
 
 /**
  * The buttons the model asked for that this listing can back: directions
- * need the dealership's address, a call its phone. The model only chooses
- * whether a button fits the answer; what it opens comes from the dealer's row.
+ * need the dealership's address, a call its phone, a test drive a car still
+ * for sale. The model only chooses whether a button fits the answer; what it
+ * opens comes from the dealer's row.
  */
 function backedActions(facts: ListingFacts, requested: readonly ListingAction[]): ListingAction[] {
   const dealership = (facts.dealership ?? {}) as { address?: string; phone?: string };
-  return [...new Set(requested)].filter((action) =>
-    action === "directions" ? Boolean(dealership.address) : Boolean(dealership.phone)
-  );
+  const backed: Record<ListingAction, boolean> = {
+    directions: Boolean(dealership.address),
+    call: Boolean(dealership.phone),
+    testDrive: facts.status === "AVAILABLE",
+  };
+  return [...new Set(requested)].filter((action) => backed[action]);
 }
 
 /**
@@ -173,5 +179,6 @@ export async function answerListingQuestion(
     fieldsUsed,
     ...(actions.length > 0 && { actions }),
     ...(carRefs.length > 0 && { carRefs }),
+    ...(standalone && { standalone }),
   };
 }

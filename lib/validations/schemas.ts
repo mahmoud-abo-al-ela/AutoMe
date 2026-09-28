@@ -329,6 +329,12 @@ export const listingQuestionSchema = z.object({
 
 export type ListingQuestionInput = z.infer<typeof listingQuestionSchema>;
 
+/** A buyer rates one answer the listing assistant gave. */
+export const listingAnswerRatingSchema = z.object({
+  answerId: z.string().uuid(),
+  helpful: z.boolean(),
+});
+
 
 // ============ BUYER QUESTIONS (dealer inbox) ============
 

@@ -1,16 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { enforceListingQuestionLimit, askAboutListing, getCurrentOrganization } = vi.hoisted(() => ({
+const { enforceListingQuestionLimit, askAboutListing, getCurrentOrganization, rateListingAnswer } = vi.hoisted(() => ({
+  rateListingAnswer: vi.fn(),
   enforceListingQuestionLimit: vi.fn(),
   askAboutListing: vi.fn(),
   getCurrentOrganization: vi.fn(),
 }));
 
 vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceListingQuestionLimit }));
-vi.mock("@/lib/services/car/listing-assistant", () => ({ askAboutListing }));
+vi.mock("@/lib/services/car/listing-assistant", () => ({ askAboutListing, rateListingAnswer }));
 vi.mock("@/lib/getOrganization", () => ({ getCurrentOrganization }));
 
-import { askListingAssistant } from "@/actions/listing-assistant";
+import { askListingAssistant, rateListingAssistantAnswer } from "@/actions/listing-assistant";
 import { RateLimitError } from "@/lib/utils/errors";
 
 const CAR_ID = "3f1c2a52-6f0e-4d9b-9a3e-2f6a8f0c1d11";
@@ -75,5 +76,23 @@ describe("askListingAssistant", () => {
     getCurrentOrganization.mockResolvedValue({ id: "org-sub" });
     await askListingAssistant({ carId: CAR_ID, question: "Colour?", locale: "ar" });
     expect(askAboutListing).toHaveBeenCalledWith(CAR_ID, "Colour?", "ar", "org-sub", expect.anything());
+  });
+});
+
+describe("rateListingAssistantAnswer", () => {
+  const ANSWER_ID = "8d3b1c0e-2f4a-4c1d-9b7e-5a6f7e8d9c01";
+
+  it("rates a real answer id, without spending the buyer's question budget", async () => {
+    const response = await rateListingAssistantAnswer({ answerId: ANSWER_ID, helpful: false });
+    expect(response).toMatchObject({ success: true });
+    expect(rateListingAnswer).toHaveBeenCalledWith(ANSWER_ID, false);
+    expect(enforceListingQuestionLimit).not.toHaveBeenCalled();
+  });
+
+  it("refuses anything that is not an answer id and a yes or no", async () => {
+    for (const input of [{ answerId: "../x", helpful: true }, { answerId: ANSWER_ID, helpful: "no" }, {}]) {
+      expect(await rateListingAssistantAnswer(input)).toMatchObject({ success: false });
+    }
+    expect(rateListingAnswer).not.toHaveBeenCalled();
   });
 });

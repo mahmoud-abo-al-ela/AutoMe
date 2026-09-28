@@ -17,6 +17,7 @@ import {
 } from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
+import * as assistantAnswerRepository from "@/lib/repositories/assistant-answer";
 import { questionKey } from "@/lib/utils/question-key";
 import { NotFoundError, logError } from "@/lib/utils/errors";
 import { licenseMonth, statedDisclosures, statedTerms } from "@/lib/utils/car-disclosures";
@@ -35,7 +36,14 @@ import type { Trace } from "@/lib/utils/dev-trace";
  * already checked by declineText; without one the page shows fixed copy.
  */
 export type AssistantReply =
-  | { status: "answered"; answer: string; actions?: AssistantAction[]; cars?: SuggestedCar[] }
+  | {
+      status: "answered";
+      answer: string;
+      /** For rating it; absent when it could not be kept. */
+      answerId?: string;
+      actions?: AssistantAction[];
+      cars?: SuggestedCar[];
+    }
   | { status: "notInListing"; message?: string }
   /** Not a question about this car; not filed for the dealer. */
   | { status: "offTopic"; message?: string }
@@ -46,7 +54,9 @@ export type AssistantReply =
 /** A button under an answer. The href is built here from the dealer's row. */
 export type AssistantAction =
   | { kind: "directions"; href: string }
-  | { kind: "call"; href: string; phone: string };
+  | { kind: "call"; href: string; phone: string }
+  /** An in-app path, without the locale — rendered with the locale-aware Link. */
+  | { kind: "testDrive"; href: string };
 
 /** Another of the dealership's cars an answer names, as a card linking to it. */
 export interface SuggestedCar {
@@ -177,15 +187,23 @@ export async function askAboutListing(
 
   if (reply.grounded) {
     trace?.end(`answered: "${reply.answer}"`);
-    const actions = (reply.actions ?? []).flatMap((kind) => actionFor(kind, organization));
+    const actions = (reply.actions ?? []).flatMap((kind) => actionFor(kind, car, organization));
     // A ref is a 1-based position in the otherCars the model was given.
     const cars = (reply.carRefs ?? []).flatMap((ref) => {
       const row = otherCars?.[ref - 1];
       return row ? [suggestedCar(row, car.priceCurrency)] : [];
     });
+    const answerId = await keepAnswer({
+      organizationId: car.organizationId,
+      carId: car.id,
+      question: (reply.standalone ?? question).slice(0, 300),
+      answer: reply.answer.slice(0, 600),
+      locale,
+    });
     return {
       status: "answered",
       answer: reply.answer,
+      ...(answerId && { answerId }),
       ...(actions.length > 0 && { actions }),
       ...(cars.length > 0 && { cars }),
     };
@@ -263,8 +281,14 @@ async function otherCarsFor(organizationId: string, carId: string, price: number
  */
 function actionFor(
   kind: ListingAction,
+  car: { id: string; status: string },
   organization: { address: string | null; phone: string | null }
 ): AssistantAction[] {
+  if (kind === "testDrive" && car.status === "AVAILABLE") {
+    // The same page the listing's own test-drive button opens; middleware
+    // sends a signed-out buyer through sign-in and back.
+    return [{ kind, href: `/test-drive?carId=${car.id}` }];
+  }
   if (kind === "directions" && organization.address) {
     return [{ kind, href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(organization.address)}` }];
   }
@@ -319,6 +343,37 @@ async function marketPricesFor(car: {
  * can be killed when the function returns — but never allowed to fail the
  * buyer's request: they still get "ask the dealer" either way.
  */
+/**
+ * Keep the answer so the buyer can rate it. Best effort: without an id the
+ * answer is still shown, just without 👍/👎.
+ */
+async function keepAnswer(input: assistantAnswerRepository.AnswerToKeep): Promise<string | null> {
+  try {
+    return await assistantAnswerRepository.recordAssistantAnswer(input);
+  } catch (error) {
+    logError("Keeping an assistant answer failed; shown without a rating", error);
+    return null;
+  }
+}
+
+/**
+ * A buyer rates an answer. Rated once: a repeat, or an id that does not
+ * exist, changes nothing. A 👎 files the question in the dealer's inbox, as a
+ * declined one would be — the dealer's answer then becomes a fact the
+ * assistant cites instead.
+ */
+export async function rateListingAnswer(answerId: string, helpful: boolean): Promise<void> {
+  const rated = await assistantAnswerRepository.rateAssistantAnswer(answerId, helpful);
+  if (!rated || helpful) return;
+  await recordForDealer({
+    organizationId: rated.organizationId,
+    carId: rated.carId,
+    question: rated.question,
+    questionKey: questionKey(rated.question),
+    locale: rated.locale,
+  });
+}
+
 async function recordForDealer(input: buyerQuestionRepository.DeclinedQuestion) {
   try {
     await buyerQuestionRepository.recordDeclinedQuestion(input);

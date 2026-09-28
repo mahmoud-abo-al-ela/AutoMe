@@ -170,6 +170,7 @@ model Organization {
   dealershipReviews     DealershipReview[]
   aiUsage               AiUsage[]
   buyerQuestions        BuyerQuestion[]
+  assistantAnswers      AssistantAnswer[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -452,6 +453,7 @@ model Car {
   savedBy       SavedCar[]
   testDrive     TestDrive[]
   buyerQuestions BuyerQuestion[]
+  assistantAnswers AssistantAnswer[]
 
   @@index([organizationId])
   @@index([make, model])
@@ -674,4 +676,29 @@ model BuyerQuestion {
   @@unique([carId, questionKey])
   @@index([organizationId, status, lastAskedAt]) // the dealer's inbox
   @@index([organizationId, status, appliesToAllCars]) // dealership-wide answers
+}
+
+// An answer the listing assistant gave a buyer, kept so the buyer can rate it.
+// A 👎 also files the question in the dealer's Buyer Questions inbox, where
+// the dealer's answer becomes a fact the assistant cites next time. No buyer
+// identity is stored; rows older than 90 days are pruned on the next answer
+// for the same car.
+model AssistantAnswer {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  carId          String
+  car            Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  question String // the question as it stands alone, at most 300 characters
+  answer   String // what the buyer was shown, at most 600 characters
+  locale   String
+
+  helpful Boolean? // null until rated; rated once
+  ratedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, helpful, createdAt]) // what buyers found unhelpful
+  @@index([carId, createdAt]) // pruning per car
 }

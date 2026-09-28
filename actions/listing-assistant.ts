@@ -2,8 +2,8 @@
 import { withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceListingQuestionLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { listingQuestionSchema } from "@/lib/validations/schemas";
-import { askAboutListing } from "@/lib/services/car/listing-assistant";
+import { listingAnswerRatingSchema, listingQuestionSchema } from "@/lib/validations/schemas";
+import { askAboutListing, rateListingAnswer } from "@/lib/services/car/listing-assistant";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { classifyBuyerMessage } from "@/lib/utils/buyer-message";
@@ -52,4 +52,18 @@ export const askListingAssistant = withErrorHandling(async (input: unknown) => {
     trace.end(`failed: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
+});
+
+/**
+ * A buyer rates an answer 👍 or 👎.
+ *
+ * Unauthenticated, like asking. Not rate-limited on its own: a rating needs
+ * the id of an answer not yet rated, only a rate-limited question creates
+ * one, and each is rated once — so ratings can never outnumber questions.
+ * Spending the question bucket here would cost the buyer questions instead.
+ */
+export const rateListingAssistantAnswer = withErrorHandling(async (input: unknown) => {
+  const { answerId, helpful } = validateAction(listingAnswerRatingSchema, input);
+  await rateListingAnswer(answerId, helpful);
+  return createSuccessResponse({ rated: true });
 });
