@@ -7,6 +7,7 @@ import { imageSearchSchema } from "@/lib/ai/schemas/image-search";
 import { listingCoachSchema } from "@/lib/ai/schemas/listing-coach";
 import { listingQaSchema } from "@/lib/ai/schemas/listing-qa";
 import { listingTranslationSchema } from "@/lib/ai/schemas/listing-translation";
+import { photoGroupingSchema } from "@/lib/ai/schemas/photo-grouping";
 
 /**
  * Every schema is sent to every model in its chain, Gemma included — and Gemma
@@ -24,6 +25,7 @@ const SCHEMAS: Record<string, ZodType<unknown>> = {
   listingCoachSchema,
   listingQaSchema,
   listingTranslationSchema,
+  photoGroupingSchema,
 };
 
 function hasEnum(node: unknown): boolean {

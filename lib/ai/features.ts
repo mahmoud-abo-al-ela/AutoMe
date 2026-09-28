@@ -23,6 +23,12 @@ export const AI_FEATURES = {
    * on answers — the plan's `aiAssistant.enabled` is the only gate.
    */
   listingQA: "listingQA",
+  /**
+   * A dealer imports a batch of photos; the model sorts them into cars. Not a
+   * listing — each car it finds is read and billed as one when it is saved —
+   * so it is metered but not counted against the AI listing allowance.
+   */
+  carPhotoGrouping: "carPhotoGrouping",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

@@ -150,3 +150,6 @@ export const getCarColorHex = (color?: string | null): string => {
 
 /** Photos of one car the AI reads together to identify it. */
 export const MAX_AI_LISTING_PHOTOS = 3;
+
+/** Photos one bulk import can sort into cars in a single call. */
+export const MAX_IMPORT_PHOTOS = 40;

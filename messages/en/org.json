@@ -244,7 +244,8 @@
         "remaining": "{remaining} of {limit} AI listings left this month — a car counts once, when you save it",
         "exhaustedBadge": "Used up",
         "exhausted": "This month’s AI listings are used up — they renew on the 1st"
-      }
+      },
+      "importLink": "Adding many cars? Import them from photos"
     },
     "modePage": {
       "manualTitle": "Manual Car Entry",
@@ -433,6 +434,48 @@
         "previousYear": "Previous year",
         "nextYear": "Next year"
       }
+    },
+    "import": {
+      "title": "Import cars from photos",
+      "subtitle": "Drop the photos of several cars at once — up to {max}. The AI sorts them into cars and drafts a listing for each, saved hidden until you publish it.",
+      "room": "{count, plural, one {Room for {n} more AI listing this month} other {Room for {n} more AI listings this month}}",
+      "roomUnlimited": "Unlimited AI listings on your plan",
+      "noRoom": "No AI listings or car slots left on your plan this month.",
+      "dropPrompt": "Drop photos of your cars here, or click to choose them.",
+      "choose": "Choose photos",
+      "tips": "For each car, include the back (where the model name is) and the dashboard — they help the AI name the exact model.",
+      "tooMany": "Choose at most {max} photos at a time.",
+      "badFile": "Use JPG, PNG or WEBP photos under 10 MB each.",
+      "groupFailed": "Couldn't sort the photos. Please try again.",
+      "grouping": "Sorting {n} photos into cars…",
+      "groupingNote": "This can take a minute when the AI service is busy.",
+      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Check each one — move a photo if it is in the wrong car. Photos marked with a star are used to identify the car.",
+      "carNumber": "Car {n}",
+      "photoCount": "{count, plural, one {{n} photo} other {{n} photos}}",
+      "identifies": "Used to identify the car",
+      "moveTo": "Move this photo to",
+      "newCar": "A new car",
+      "removeCar": "Leave this car out",
+      "overRoom": "Your plan has room for {room} of these {total} cars this month; the rest will be skipped.",
+      "create": "{count, plural, one {Create one draft} other {Create {n} drafts}}",
+      "startOver": "Start over",
+      "stop": "Stop after this car",
+      "status": {
+        "waiting": "Waiting",
+        "reading": "Reading the photos…",
+        "queued": "Waiting for the AI to start…",
+        "saving": "Saving the draft…",
+        "done": "Saved as a hidden draft",
+        "failed": "Not saved",
+        "skipped": "Skipped"
+      },
+      "saveFailed": "Something went wrong",
+      "review": "Review",
+      "summary": "{count, plural, =0 {No drafts were saved.} one {One draft saved, hidden from buyers.} other {{n} drafts saved, hidden from buyers.}}",
+      "publishAll": "Publish all",
+      "published": "{count, plural, one {One car published} other {{n} cars published}}",
+      "publishPartial": "Published {done} of {total}. Open the others to see what's missing.",
+      "another": "Import more"
     }
   },
   "testDrives": {
