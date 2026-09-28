@@ -6,6 +6,7 @@
 
 Dealerships subscribe, showcase their new and used cars on a branded storefront, run the business from one back office, and let AI do the slow parts of selling: writing listings from photos, translating them, and answering buyers around the clock — in Arabic and English.
 
+[![CI](https://github.com/mahmoud-abo-al-ela/AutoMe/actions/workflows/ci.yml/badge.svg)](https://github.com/mahmoud-abo-al-ela/AutoMe/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Prisma_7-4169e1?logo=postgresql&logoColor=white)](https://www.prisma.io)
@@ -13,7 +14,7 @@ Dealerships subscribe, showcase their new and used cars on a branded storefront,
 [![Stripe](https://img.shields.io/badge/Billing-Stripe-635bff?logo=stripe&logoColor=white)](https://stripe.com)
 [![Vitest](https://img.shields.io/badge/tests-Vitest_%2B_live_AI_evals-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev)
 
-[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [Deployment](#deployment)
+[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd) • [Deployment](#deployment)
 
 </div>
 
@@ -218,6 +219,30 @@ AI_EVAL=1 pnpm vitest run lib/ai/evaluation    # live evaluations against real m
 ```
 
 The unit suite covers the guard stack, tenancy, billing, metering and every AI feature with the providers mocked. The live evaluations check what mocks cannot: that the assistant declines what a listing does not say, that instructions planted in a photo, a description or a question are ignored, that a licence plate in a photo never reaches the public listing, and that Arabic output is Arabic. They spend provider quota, so they only run with `AI_EVAL=1`, and a provider at capacity skips a case rather than failing it.
+
+## CI/CD
+
+Every pull request and push to `main` runs the [CI workflow](.github/workflows/ci.yml) on GitHub Actions. A newer push cancels the run it supersedes.
+
+```mermaid
+flowchart LR
+    PR[Pull request / push to main] --> Build & Test
+    subgraph Build["build job"]
+        B1[Install<br/>frozen lockfile] --> B2[Lint] --> B3[Type-check] --> B4[Production build]
+    end
+    subgraph Test["test job · Postgres 16 service"]
+        T1[Install<br/>frozen lockfile] --> T2[Apply every<br/>migration] --> T3[Full test suite]
+    end
+    Build & Test --> Merge{Merge}
+    Merge --> Deploy[Deploy to Vercel]
+```
+
+- **Reproducible installs.** `--frozen-lockfile` fails the run if `package.json` changed without the lockfile.
+- **The migrations are tested, not just the code.** The test job applies every migration to a fresh PostgreSQL 16 — including the full-text search column, the `pg_trgm` extension and the GIN indexes — then runs the database-backed suites against it: the Stripe webhook idempotency race and Arabic/English search ranking.
+- **A real production build.** `next build` prerenders pages and runs module-level code, which catches failures a type-check cannot.
+- **No real secrets.** Both jobs run on placeholder credentials that cannot reach a real service; the only secret is a Clerk *development* key the build needs to validate its format.
+
+Delivery is to Vercel. Database migrations are applied to production as a deliberate step before the code that needs them ships — never implicitly during a build.
 
 ## Deployment
 
