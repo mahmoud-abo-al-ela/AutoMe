@@ -449,7 +449,7 @@
       "groupFailed": "Couldn't sort the photos. Please try again.",
       "grouping": "Sorting {n} photos into cars…",
       "groupingNote": "This can take a minute when the AI service is busy.",
-      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Drag a photo to the right car if it is in the wrong one. Photos marked with a star are used to identify the car.",
+      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Drag a photo to the right car if it is in the wrong one, or within a car to change the order — the first photo is the cover. Photos marked with a star are used to identify the car.",
       "carNumber": "Car {n}",
       "photoCount": "{count, plural, one {{n} photo} other {{n} photos}}",
       "identifies": "Used to identify the car",
@@ -477,19 +477,22 @@
       "publishPartial": "Published {done} of {total}. Open the others to see what's missing.",
       "another": "Import more",
       "draftWithAi": "Draft with AI",
-      "dragPhoto": "Photo — drag to move it to another car",
+      "dragPhoto": "Photo — drag to reorder, or to move it to another car",
       "dropNewCar": "Drop a photo here to make it a car of its own",
       "continueByHand": "Continue — I'll fill them in by hand",
       "fillIn": "Fill in by hand",
       "backToImport": "Back to the import",
       "a11y": {
-        "instructions": "To move a photo to another car, press space or enter, use the arrow keys to reach the car, and press space or enter again. Press escape to cancel.",
+        "instructions": "To move a photo, press space or enter, use the arrow keys to reach its new place — in this car or another — and press space or enter again. Press escape to cancel.",
         "picked": "Photo picked up.",
         "over": "Over {car}.",
         "nowhere": "Not over a car.",
         "dropped": "Photo moved to {car}.",
-        "cancelled": "Move cancelled. The photo stays where it was."
-      }
+        "cancelled": "Move cancelled. The photo stays where it was.",
+        "overPlace": "Over place {place} of {car}.",
+        "droppedPlace": "Photo moved to place {place} of {car}."
+      },
+      "cover": "Cover"
     }
   },
   "testDrives": {

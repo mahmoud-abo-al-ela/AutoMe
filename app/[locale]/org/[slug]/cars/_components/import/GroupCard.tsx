@@ -1,6 +1,8 @@
 "use client";
 
-import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useTranslations } from "next-intl";
 import { GripVertical, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,8 +16,9 @@ export type CarDrop = { groupId: number | null };
 /**
  * One car the AI found in the batch. Photos are dragged between cars when the
  * sorting is wrong — two white Elantras are the case it gets wrong — with
- * mouse, touch or keyboard (dnd-kit). The menu under each photo does the same
- * for anyone who would rather not drag.
+ * mouse, touch or keyboard (dnd-kit), and reordered within a car — the first
+ * photo is the cover. The menu under each photo moves it between cars
+ * without dragging.
  */
 export function GroupCard({
   group,
@@ -80,38 +83,61 @@ export function GroupCard({
         </Button>
       </div>
 
-      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-        {group.photos.map((photo) => (
-          <li key={photo} className="space-y-1">
-            <DraggablePhoto photo={photo} src={previews[photo]} identifies={group.readWith.includes(photo)} />
-            <select
-              aria-label={t("moveTo")}
-              value={group.id}
-              onChange={(event) => {
-                const value = event.target.value;
-                onMove(photo, value === "new" ? null : Number(value));
-              }}
-              className="w-full rounded border border-gray-200 bg-white px-1 py-0.5 text-xs text-gray-700"
-            >
-              {groups.map((other, i) => (
-                <option key={other.id} value={other.id}>
-                  {t("carNumber", { n: number(i + 1) })}
-                </option>
-              ))}
-              <option value="new">{t("newCar")}</option>
-            </select>
-          </li>
-        ))}
-      </ul>
+      <SortableContext items={group.photos.map(photoId)} strategy={rectSortingStrategy}>
+        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {group.photos.map((photo, position) => (
+            <li key={photo} className="space-y-1">
+              <SortablePhoto
+                photo={photo}
+                src={previews[photo]}
+                identifies={group.readWith.includes(photo)}
+                cover={position === 0}
+              />
+              <select
+                aria-label={t("moveTo")}
+                value={group.id}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  onMove(photo, value === "new" ? null : Number(value));
+                }}
+                className="w-full rounded border border-gray-200 bg-white px-1 py-0.5 text-xs text-gray-700"
+              >
+                {groups.map((other, i) => (
+                  <option key={other.id} value={other.id}>
+                    {t("carNumber", { n: number(i + 1) })}
+                  </option>
+                ))}
+                <option value="new">{t("newCar")}</option>
+              </select>
+            </li>
+          ))}
+        </ul>
+      </SortableContext>
     </div>
   );
 }
 
-/** A photo that can be dragged to another car. Hidden in place while dragging: the overlay carries it. */
-function DraggablePhoto({ photo, src, identifies }: { photo: number; src: string; identifies: boolean }) {
+/** A photo's dnd-kit id. Photo numbers are unique across the batch. */
+export const photoId = (photo: number) => `photo-${photo}`;
+
+/**
+ * A photo that can be dragged within its car, to change the listing's order,
+ * or to another car. Hidden in place while dragging: the overlay carries it.
+ */
+function SortablePhoto({
+  photo,
+  src,
+  identifies,
+  cover,
+}: {
+  photo: number;
+  src: string;
+  identifies: boolean;
+  cover: boolean;
+}) {
   const t = useTranslations("org.carForm.import");
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `photo-${photo}`,
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: photoId(photo),
     data: { photo } satisfies PhotoDrag,
   });
 
@@ -121,17 +147,18 @@ function DraggablePhoto({ photo, src, identifies }: { photo: number; src: string
       {...attributes}
       {...listeners}
       aria-label={t("dragPhoto")}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       className={`relative aspect-square cursor-grab touch-none overflow-hidden rounded-md bg-gray-100 outline-offset-2 focus-visible:outline-2 focus-visible:outline-purple-500 active:cursor-grabbing ${
         isDragging ? "opacity-30" : ""
       }`}
     >
-      <PhotoThumb src={src} identifies={identifies} />
+      <PhotoThumb src={src} identifies={identifies} cover={cover} />
     </div>
   );
 }
 
 /** The thumbnail itself, shared by the card and the drag overlay. */
-export function PhotoThumb({ src, identifies }: { src: string; identifies: boolean }) {
+export function PhotoThumb({ src, identifies, cover = false }: { src: string; identifies: boolean; cover?: boolean }) {
   const t = useTranslations("org.carForm.import");
   return (
     <>
@@ -144,6 +171,11 @@ export function PhotoThumb({ src, identifies }: { src: string; identifies: boole
         <span className="absolute top-1 start-1 rounded-full bg-purple-600 p-1 text-white" title={t("identifies")}>
           <Star className="h-3 w-3" aria-hidden />
           <span className="sr-only">{t("identifies")}</span>
+        </span>
+      )}
+      {cover && (
+        <span className="absolute bottom-1 start-1 rounded bg-gray-900/75 px-1.5 py-0.5 text-[10px] font-medium text-white">
+          {t("cover")}
         </span>
       )}
     </>

@@ -6,14 +6,11 @@ import { addCar, updateCar } from "@/actions/cars";
 import { useCarListingStream } from "@/hooks/use-car-listing-stream";
 import { queryKeys } from "@/lib/query-client";
 import { shrinkForAi, THUMBNAIL_EDGE } from "@/lib/utils/shrink-image";
-import { MAX_AI_LISTING_PHOTOS } from "@/lib/constants/car-options";
+import { placePhoto, type ImportGroup } from "@/lib/utils/photo-groups";
 import type { ActionError } from "@/lib/utils/error-messages";
 import type { CarListingDraft, PhotoGroup } from "@/lib/services/ai";
 
-/** A car in the batch, as the dealer arranges it. Photos index `files`. */
-export interface ImportGroup extends PhotoGroup {
-  id: number;
-}
+export type { ImportGroup };
 
 export type DraftStatus = "waiting" | "reading" | "saving" | "done" | "failed" | "skipped";
 
@@ -113,30 +110,13 @@ export function useBulkImport() {
     }
   }, []);
 
-  /** Move one photo to another car, or to a car of its own (`to` null). */
-  const movePhoto = useCallback((photo: number, to: number | null) => {
-    setGroups((all) => {
-      const without = all
-        .map((g) => {
-          if (!g.photos.includes(photo)) return g;
-          const photos = g.photos.filter((p) => p !== photo);
-          const readWith = g.readWith.filter((p) => p !== photo);
-          return { ...g, photos, readWith: readWith.length > 0 ? readWith : photos.slice(0, MAX_AI_LISTING_PHOTOS) };
-        })
-        .filter((g) => g.photos.length > 0);
-      if (to === null) {
-        return [...without, { id: nextId.current++, label: "", photos: [photo], readWith: [photo] }];
-      }
-      return without.map((g) =>
-        g.id === to
-          ? {
-              ...g,
-              photos: [...g.photos, photo],
-              readWith: g.readWith.length < MAX_AI_LISTING_PHOTOS ? [...g.readWith, photo] : g.readWith,
-            }
-          : g
-      );
-    });
+  /**
+   * Move one photo: to position `at` in car `to` (the end if no position), or
+   * to a car of its own (`to` null). Within its own car this reorders — and
+   * a car's order is its listing's order, the first photo its cover.
+   */
+  const movePhoto = useCallback((photo: number, to: number | null, at?: number) => {
+    setGroups((all) => placePhoto(all, photo, to, at, () => nextId.current++));
   }, []);
 
   /** Leave a car out of the import. */
@@ -182,10 +162,9 @@ export function useBulkImport() {
           const draft = await extract(g.readWith.map((i) => files[i]));
 
           settle(g.id, { status: "saving" });
-          // The identifying photos first — the front shot usually among
-          // them — then the rest, up to the plan's photos per car.
-          const order = [...g.readWith, ...g.photos.filter((p) => !g.readWith.includes(p))];
-          const images = await Promise.all(order.slice(0, maxImages).map((i) => shrinkForAi(files[i])));
+          // In the dealer's order — the first is the cover — up to the
+          // plan's photos per car.
+          const images = await Promise.all(g.photos.slice(0, maxImages).map((i) => shrinkForAi(files[i])));
           const response = await addCar(carFromDraft(draft, images), { editedLocale: null });
           if (!response.success) throw new ImportError(response.error as ActionError);
 

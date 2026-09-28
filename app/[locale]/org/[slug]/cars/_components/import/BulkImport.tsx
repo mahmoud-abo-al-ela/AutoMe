@@ -87,8 +87,7 @@ export default function BulkImport() {
 
   /** Open the car form with this car's photos, shrunk to fit the upload limit. */
   const fillIn = async (group: ImportGroup) => {
-    const order = [...group.readWith, ...group.photos.filter((p) => !group.readWith.includes(p))];
-    const images = await Promise.all(order.slice(0, maxImages).map((i) => shrinkForAi(files[i])));
+    const images = await Promise.all(group.photos.slice(0, maxImages).map((i) => shrinkForAi(files[i])));
     setManual({ groupId: group.id, images });
   };
 
@@ -211,7 +210,7 @@ export default function BulkImport() {
                 index={index}
                 label={group.label}
                 result={results[group.id]}
-                preview={previews[group.readWith[0] ?? group.photos[0]]}
+                preview={previews[group.photos[0]]}
                 slug={slug}
                 queued={importer.progress?.phase === "waiting"}
                 canFillIn={stage === "done"}
