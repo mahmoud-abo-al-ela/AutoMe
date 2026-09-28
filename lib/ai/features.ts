@@ -18,9 +18,9 @@ export const AI_FEATURES = {
   listingQualityCoach: "listingQualityCoach",
   /**
    * A buyer asks a question on a public listing; the model answers from that
-   * car's record or says the listing does not say. Billed to the dealer, but
-   * from its own `aiAssistant` allowance — buyers asking questions must never
-   * use up the allowance the dealer lists cars with.
+   * car's record or says the listing does not say. Metered, and never
+   * counted against the dealer's AI listing allowance; there is no monthly cap
+   * on answers — the plan's `aiAssistant.enabled` is the only gate.
    */
   listingQA: "listingQA",
 } as const;

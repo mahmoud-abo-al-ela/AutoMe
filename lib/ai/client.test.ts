@@ -251,7 +251,9 @@ describe("generateStructured — platform breaker", () => {
     // 350 of the default 500/day: past the low-priority 60% share, under the
     // full cap. The per-minute window stays quiet so only the daily cap decides.
     countPlatformCallsSince.mockImplementation(async (since: Date) =>
-      Date.now() - since.getTime() <= 60_000 ? 0 : 350
+      // An hour, not 60 000 ms: the breaker computed "since" a moment before
+      // this runs, and an exact bound made the test flaky by a millisecond.
+      Date.now() - since.getTime() < 60 * 60_000 ? 0 : 350
     );
     generate.mockResolvedValue(ok('{"make":"Kia","year":2021}'));
 
@@ -274,23 +276,30 @@ describe("generateStructured — platform breaker", () => {
 });
 
 describe("generateStructured — timeout", () => {
-  it("gives up on a hung call and records it", async () => {
+  it("gives up once every model has hung, recording each one", async () => {
     generate.mockImplementation(() => new Promise(() => {}));
 
     await expect(call({ timeoutMs: 20 })).rejects.toBeInstanceOf(
       ServiceUnavailableError
     );
 
-    expect(onlyRow()).toMatchObject({ success: false, errorCode: "TIMEOUT" });
+    const rows = createAiUsage.mock.calls.map((c) => c[0]);
+    expect(rows).toHaveLength(chainLength());
+    expect(rows.every((row) => row.success === false && row.errorCode === "TIMEOUT")).toBe(true);
   });
 
-  it("does not retry a timeout", async () => {
-    generate.mockImplementation(() => new Promise(() => {}));
+  it("moves a timed-out call to the next model, never retrying the same one", async () => {
+    generate
+      .mockImplementationOnce(() => new Promise(() => {}))
+      .mockResolvedValueOnce(ok('{"make":"Opel","year":2018}'));
 
-    await expect(call({ timeoutMs: 20 })).rejects.toThrow();
+    await expect(call({ timeoutMs: 20 })).resolves.toEqual({ make: "Opel", year: 2018 });
 
-    // Aborting is client-side only: Google still billed the first attempt.
-    expect(generate).toHaveBeenCalledTimes(1);
+    // Aborting is client-side only: the provider still billed the first
+    // attempt, so that model is not asked again.
+    const models = generate.mock.calls.map((c) => c[0].model);
+    expect(models).toHaveLength(2);
+    expect(models[0]).not.toBe(models[1]);
   });
 });
 

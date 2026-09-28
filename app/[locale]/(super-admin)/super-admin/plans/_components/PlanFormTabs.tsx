@@ -241,26 +241,8 @@ export default function PlanFormTabs({
                 handleFeatureChange("aiAssistant", { ...features.aiAssistant, enabled: checked as boolean })
               }
             />
-            <Label htmlFor="aiAssistant" className="cursor-pointer">AI Answers to Buyers&apos; Questions</Label>
+            <Label htmlFor="aiAssistant" className="cursor-pointer">AI Answers to Buyers&apos; Questions (unlimited)</Label>
           </div>
-          {features.aiAssistant?.enabled && (
-            <div className="grid gap-2 ps-6">
-              <Label htmlFor="aiAssistantLimit">Answers per month (-1 = unlimited)</Label>
-              <Input
-                id="aiAssistantLimit"
-                type="number"
-                min={-1}
-                placeholder="0"
-                value={inputValues.aiAssistantLimit}
-                onChange={(e) => setInputValues({ ...inputValues, aiAssistantLimit: e.target.value })}
-              />
-              {parseAiLimit(inputValues.aiAssistantLimit) === 0 && (
-                <p className="text-xs text-destructive">
-                  A limit of 0 hides the assistant on every listing, so the feature is on but unusable.
-                </p>
-              )}
-            </div>
-          )}
           <div className="flex items-center gap-2">
             <Checkbox
               id="chat"

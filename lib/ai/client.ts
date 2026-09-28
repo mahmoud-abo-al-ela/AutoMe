@@ -365,6 +365,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
     // can never receive — the function is killed before the reply arrives.
     if (allowance <= 0) throw budgetExhausted();
 
+    devLog(`→ ${entryLabel(input.entry)}${attempt > 1 ? ` (retry ${attempt})` : ""}`);
     input.emit({
       type: "attempt",
       provider: providerId,
@@ -487,6 +488,15 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
   });
 }
 
+/**
+ * Which model answered, in the dev server's terminal — so a developer trying
+ * a feature can see it. Never in production: the AiUsage ledger records every
+ * attempt there, and a line per call would only be noise.
+ */
+function devLog(message: string) {
+  if (process.env.NODE_ENV === "development") console.info(`[ai] ${message}`);
+}
+
 export async function generateStructured<T>(
   input: GenerateStructuredInput<T>
 ): Promise<T> {
@@ -537,6 +547,7 @@ export async function generateStructured<T>(
 
     const hit = cache.get<T>(key);
     if (hit !== undefined) {
+      devLog(`${input.feature} ← cache`);
       emit({ type: "cached" });
       return hit;
     }
@@ -577,11 +588,10 @@ export async function generateStructured<T>(
   }
 
   const responseJsonSchema = jsonSchemaFor(input.schema);
-  /** The next entry to try after `after`, optionally only on another provider. */
-  const nextUsable = (after: number, otherThan?: ProviderId) => {
+  /** The next entry to try after `after`, skipping providers with no usable key. */
+  const nextUsable = (after: number) => {
     for (let i = after + 1; i < models.length; i++) {
-      const { provider } = models[i];
-      if (liveKeys(provider).length > 0 && provider !== otherThan) return i;
+      if (liveKeys(models[i].provider).length > 0) return i;
     }
     return -1;
   };
@@ -599,6 +609,7 @@ export async function generateStructured<T>(
     // limit (that key's own). Anything else is about the model or the
     // request, and another key would meet it too.
     for (const keyIndex of liveKeys(entry.provider)) {
+      const attemptStarted = Date.now();
       try {
         const result = await attemptModel({
           entry,
@@ -627,6 +638,9 @@ export async function generateStructured<T>(
 
         const key = keyFor(entry);
         if (key) cache.set(key, result);
+        devLog(
+          `${input.feature} ← ${entryLabel(entry)} (${((Date.now() - attemptStarted) / 1000).toFixed(1)} s)`
+        );
         return result;
       } catch (caught) {
         error = caught;
@@ -650,14 +664,12 @@ export async function generateStructured<T>(
       isCapacityError(error) ||
       isProviderUnavailableError(error) ||
       error instanceof QueueTimeoutError;
-    // A timeout is not retried, nor walked to the same provider's next
-    // model — the provider still bills the abandoned work, and is plainly
-    // slow right now. It says nothing about a *different* provider, though.
-    const next = anotherModelMightWork
-      ? nextUsable(index)
-      : isAbortError(error)
-        ? nextUsable(index, entry.provider)
-        : -1;
+    // A timeout is never retried on the same model — the provider still bills
+    // the abandoned work — but it walks on to the next model, even one behind
+    // the same gateway: CodeCraft sends each model to a different upstream
+    // vendor, and one slow model says nothing about the next (measured: GPT-5.6
+    // Luna starts answering ~3 s sooner than Gemini 3.7 Flash).
+    const next = anotherModelMightWork || isAbortError(error) ? nextUsable(index) : -1;
     // Falling back is only worth it if there is time to hear the answer.
     const timeLeft = deadline - Date.now() > 0;
 

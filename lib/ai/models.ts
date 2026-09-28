@@ -42,8 +42,11 @@ const GEMMA_FALLBACK = ["google/gemma-4-26b-a4b-it", "google/gemma-4-31b-it"];
 
 const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
   vision: [
+    // The model the photo evaluation passed on (14/14), then others behind
+    // the gateway: a timeout now walks on to the next model.
     "codecraft/gemini-3.7-flash",
     "codecraft/gpt-5.6-luna",
+    "codecraft/gpt-5.5",
     "google/gemini-3.6-flash",
     "google/gemini-3.5-flash-lite",
     "google/gemini-3.7-flash",
@@ -66,13 +69,24 @@ const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
   textFast: [
     "google/gemini-3.5-flash-lite",
     "google/gemini-3.6-flash",
+    "codecraft/gpt-5.5",
+    "codecraft/gemini-3.6-flash",
     "codecraft/gemini-3.7-flash",
-    "codecraft/gpt-5.6-luna",
     ...GEMMA_FALLBACK,
   ],
+  /**
+   * Dealer text: translation and the coach. CodeCraft first (user's choice),
+   * ordered by a benchmark on 2026-09-28 of eleven CodeCraft models on the
+   * buyer-question prompt: gpt-5.5 averaged ~15 s, gemini-3.6-flash ~17 s,
+   * gemini-3.7-flash ~27 s; all were correct and wrote Egyptian Arabic.
+   * Their replies were near word-for-word identical across vendors, which with
+   * the identical token counts suggests one backend behind the names — so
+   * the spread is likely queue noise, and more names add retries, not speed.
+   */
   text: [
+    "codecraft/gpt-5.5",
+    "codecraft/gemini-3.6-flash",
     "codecraft/gemini-3.7-flash",
-    "codecraft/gpt-5.6-luna",
     "google/gemini-3.6-flash",
     "google/gemini-3.5-flash-lite",
     "google/gemini-3.7-flash",

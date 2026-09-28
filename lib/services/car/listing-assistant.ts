@@ -1,7 +1,5 @@
 import * as carRepository from "@/lib/repositories/car";
 import * as billingRepository from "@/lib/repositories/billing";
-import * as aiUsageRepository from "@/lib/repositories/ai-usage";
-import { AI_FEATURES } from "@/lib/ai/features";
 import { buildListingFacts, closestByPrice, summarizeMarketPrices, type MarketPrices, type OtherCar } from "@/lib/ai/grounding";
 import type { CapacityPriority } from "@/lib/ai/breaker";
 import { answerListingQuestion } from "@/lib/services/ai/answerListingQuestion";
@@ -12,6 +10,7 @@ import { NotFoundError, logError } from "@/lib/utils/errors";
 import { licenseMonth, statedDisclosures, statedTerms } from "@/lib/utils/car-disclosures";
 import { parseImageAlts } from "@/lib/utils/image-alts";
 import type { Locale } from "@/i18n/routing";
+import type { Trace } from "@/lib/utils/dev-trace";
 
 /**
  * The buyer assistant on a public listing: whether a listing offers it, and
@@ -38,10 +37,11 @@ interface Allowance {
 }
 
 /**
- * Whether this dealer's plan offers the assistant right now: enabled, and
- * answers left this month. Same limit semantics as withUsageLimit — -1 is
- * unlimited, a missing limit is 0 — but a boolean, because a buyer is not the
- * one to be shown "upgrade your plan".
+ * Whether this dealer's plan offers the assistant. There is no monthly cap on
+ * answers (the owner's decision, 2026-09-28): a buyer asking questions is the
+ * point, and the dealer should never find the assistant switched off halfway
+ * through a month. Abuse and cost are bounded elsewhere — Arcjet per IP and per
+ * car, the no-model replies for greetings and noise, and each provider's caps.
  */
 async function allowanceFor(organizationId: string): Promise<Allowance> {
   const subscription = await billingRepository.findActiveSubscription(organizationId);
@@ -51,17 +51,10 @@ async function allowanceFor(organizationId: string): Promise<Allowance> {
   const priority: CapacityPriority = plan?.monthlyPrice ? "standard" : "low";
 
   const features = (plan?.features ?? {}) as Record<string, unknown>;
-  const config = features.aiAssistant as { enabled?: boolean; limit?: number } | undefined;
-  if (!config?.enabled) return { offered: false, priority };
-
-  const limit = config.limit ?? 0;
-  if (limit === -1) return { offered: true, priority };
-  if (limit <= 0) return { offered: false, priority };
-
-  const used = await aiUsageRepository.countOrgAiCallsThisMonth(organizationId, [
-    AI_FEATURES.listingQA,
-  ]);
-  return { offered: used < limit, priority };
+  // Any stored `limit` is ignored: plans saved before the cap was removed
+  // still carry one.
+  const config = features.aiAssistant as { enabled?: boolean } | undefined;
+  return { offered: Boolean(config?.enabled), priority };
 }
 
 /** Whether the listing page should show the assistant at all. */
@@ -76,19 +69,21 @@ export async function isListingAssistantOffered(organizationId: string): Promise
  * from getCurrentOrganization — never client input. On a subdomain a car of
  * another dealer is not found, exactly as the detail page treats it.
  *
- * The allowance is re-checked here rather than trusted from page render: the
- * page may have been open for an hour, and this is what the dealer pays for.
+ * The plan is re-checked here rather than trusted from page render: the page
+ * may have been open for an hour.
  */
 export async function askAboutListing(
   carId: string,
   question: string,
   locale: Locale,
-  currentOrganizationId: string | null
+  currentOrganizationId: string | null,
+  trace?: Trace
 ): Promise<AssistantReply> {
   const car = await carRepository.findCarForAssistant(carId);
   if (!car || (currentOrganizationId && car.organizationId !== currentOrganizationId)) {
     throw new NotFoundError("Car");
   }
+  trace?.step(`car ✓ ${car.year} ${car.make} ${car.model} · dealership ${car.organization.name}`);
 
   const price = Number(car.price);
   const [allowance, dealerAnswers, otherCars, marketPrices] = await Promise.all([
@@ -97,7 +92,16 @@ export async function askAboutListing(
     otherCarsFor(car.organizationId, car.id, price),
     marketPricesFor({ ...car, price }),
   ]);
-  if (!allowance.offered) return { status: "unavailable" };
+  if (!allowance.offered) {
+    trace?.end("the dealership's plan does not include the assistant — no AI call");
+    return { status: "unavailable" };
+  }
+  trace?.step(
+    `plan ✓ assistant enabled (${allowance.priority} priority) · data: ` +
+      `${otherCars === null ? "other cars ✗ (read failed)" : `${otherCars.length} other cars`} · ` +
+      `${marketPrices ? `price range ✓ (${marketPrices.listings} similar)` : "price range ✗ (under 3 similar)"} · ` +
+      `${dealerAnswers.length} dealer answers`
+  );
 
   const { organization } = car;
   const facts = buildListingFacts({
@@ -129,19 +133,26 @@ export async function askAboutListing(
     dealerAnswers,
   });
 
+  trace?.step(`record: ${Object.keys(facts).length} facts [${Object.keys(facts).join(", ")}]`);
+
   const reply = await answerListingQuestion(question, facts, locale, {
     organizationId: car.organizationId,
     // A buyer, not a member of the dealership: attribution stops at the org.
     userId: null,
     priority: allowance.priority,
-  });
+  }, trace);
 
-  if (reply.grounded) return { status: "answered", answer: reply.answer };
+  if (reply.grounded) {
+    trace?.end(`answered: "${reply.answer}"`);
+    return { status: "answered", answer: reply.answer };
+  }
   // Not a question about the car: the dealer has nothing to answer.
   if (reply.offTopic) {
+    trace?.end(`off-topic — not filed for the dealer: "${reply.message ?? "(fixed copy)"}"`);
     return reply.message ? { status: "offTopic", message: reply.message } : { status: "offTopic" };
   }
 
+  trace?.step("declined → filing the question in the dealer's Buyer Questions inbox");
   await recordForDealer({
     organizationId: car.organizationId,
     carId: car.id,
@@ -149,6 +160,7 @@ export async function askAboutListing(
     questionKey: questionKey(question),
     locale,
   });
+  trace?.end(`declined + "ask the dealer": "${reply.message ?? "(fixed copy)"}"`);
   return reply.message ? { status: "notInListing", message: reply.message } : { status: "notInListing" };
 }
 

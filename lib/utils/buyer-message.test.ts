@@ -6,6 +6,8 @@ describe("classifyBuyerMessage", () => {
     ["السلام عليكم", "greeting"],
     ["ازيك؟", "greeting"],
     ["Hi!", "greeting"],
+    ["how are u", "greeting"],
+    ["عامل ايه؟", "greeting"],
     ["شكراً", "thanks"],
     ["thank you 🙏", "thanks"],
     ["test", "noise"],

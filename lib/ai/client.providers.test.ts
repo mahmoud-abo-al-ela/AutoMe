@@ -102,8 +102,8 @@ describe("several keys for one provider", () => {
     expect([authOf(0), authOf(1)]).toEqual(["Bearer key-one", "Bearer key-two"]);
     // Same model on both keys, and each key counted under its own name.
     expect(rows().map((r) => [r.provider, r.model, r.success])).toEqual([
-      ["codecraft", "gemini-3.7-flash", false],
-      ["codecraft#2", "gemini-3.7-flash", true],
+      ["codecraft", "gpt-5.5", false],
+      ["codecraft#2", "gpt-5.5", true],
     ]);
   });
 
@@ -179,7 +179,7 @@ describe("provider order", () => {
     expect(rows()).toHaveLength(1);
     expect(rows()[0]).toMatchObject({
       provider: "codecraft",
-      model: "gemini-3.7-flash",
+      model: "gpt-5.5",
       success: true,
       inputTokens: 300,
       outputTokens: 500,
@@ -195,8 +195,9 @@ describe("provider order", () => {
     await expect(call()).resolves.toEqual({ make: "Kia", year: 2019 });
 
     expect(rows().map((r) => [r.provider, r.model, r.success])).toEqual([
+      ["codecraft", "gpt-5.5", false],
+      ["codecraft", "gemini-3.6-flash", false],
       ["codecraft", "gemini-3.7-flash", false],
-      ["codecraft", "gpt-5.6-luna", false],
       ["google", "gemini-3.6-flash", true],
     ]);
   });
@@ -253,7 +254,7 @@ describe("provider order", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 
-  it("asks the next provider when one is too slow, but not the same provider again", async () => {
+  it("moves past a slow model to the next, even behind the same gateway", async () => {
     // Never answers; aborts when the per-attempt timeout fires.
     fetchMock.mockImplementation(
       (_url: string, init: { signal: AbortSignal }) =>
@@ -267,11 +268,13 @@ describe("provider order", () => {
 
     await expect(call({ timeoutMs: 30, budgetMs: 5_000 })).resolves.toEqual({ make: "Kia", year: 2019 });
 
-    // CodeCraft's second model is skipped: the provider is slow right now,
-    // and a timeout is not retried. Google, a different provider, is asked.
-    expect(rows().map((r) => [r.provider, r.errorCode])).toEqual([
-      ["codecraft", "TIMEOUT"],
-      ["google", null],
+    // Each CodeCraft model goes to a different upstream vendor, so a slow one
+    // says nothing about the next; each is asked once, then Google.
+    expect(rows().map((r) => [r.provider, r.model, r.errorCode])).toEqual([
+      ["codecraft", "gpt-5.5", "TIMEOUT"],
+      ["codecraft", "gemini-3.6-flash", "TIMEOUT"],
+      ["codecraft", "gemini-3.7-flash", "TIMEOUT"],
+      ["google", "gemini-3.6-flash", null],
     ]);
   });
 

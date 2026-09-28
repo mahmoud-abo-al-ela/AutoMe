@@ -235,22 +235,10 @@ describe("askAboutListing", () => {
     expect(answerListingQuestion).not.toHaveBeenCalled();
   });
 
-  it("does not spend once this month's answers are used up", async () => {
+  it("has no monthly cap: a limit left on an older plan is ignored", async () => {
     findActiveSubscription.mockResolvedValue(plan({ enabled: true, limit: 20 }));
-    countOrgAiCallsThisMonth.mockResolvedValue(20);
-    expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "unavailable" });
-    expect(answerListingQuestion).not.toHaveBeenCalled();
-    expect(countOrgAiCallsThisMonth).toHaveBeenCalledWith("org-dealer", ["listingQA"]);
-  });
-
-  it("treats a missing limit as none, like withUsageLimit", async () => {
-    findActiveSubscription.mockResolvedValue(plan({ enabled: true }));
-    expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "unavailable" });
-  });
-
-  it("does not count usage on an unlimited plan", async () => {
-    findActiveSubscription.mockResolvedValue(plan({ enabled: true, limit: -1 }));
-    await askAboutListing("car-1", "Colour?", "en", null);
+    countOrgAiCallsThisMonth.mockResolvedValue(500);
+    expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "answered", answer: "White." });
     expect(countOrgAiCallsThisMonth).not.toHaveBeenCalled();
   });
 

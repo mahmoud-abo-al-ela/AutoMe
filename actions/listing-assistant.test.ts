@@ -26,7 +26,7 @@ describe("askListingAssistant", () => {
     const response = await askListingAssistant({ carId: CAR_ID, question: "  Colour? ", locale: "en" });
     expect(response).toMatchObject({ success: true, data: { status: "answered" } });
     expect(enforceListingQuestionLimit).toHaveBeenCalledWith(CAR_ID);
-    expect(askAboutListing).toHaveBeenCalledWith(CAR_ID, "Colour?", "en", null);
+    expect(askAboutListing).toHaveBeenCalledWith(CAR_ID, "Colour?", "en", null, expect.anything());
   });
 
   it.each([
@@ -64,6 +64,6 @@ describe("askListingAssistant", () => {
   it("scopes to the dealership subdomain from middleware", async () => {
     getCurrentOrganization.mockResolvedValue({ id: "org-sub" });
     await askListingAssistant({ carId: CAR_ID, question: "Colour?", locale: "ar" });
-    expect(askAboutListing).toHaveBeenCalledWith(CAR_ID, "Colour?", "ar", "org-sub");
+    expect(askAboutListing).toHaveBeenCalledWith(CAR_ID, "Colour?", "ar", "org-sub", expect.anything());
   });
 });

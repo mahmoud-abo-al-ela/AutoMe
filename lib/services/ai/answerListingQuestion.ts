@@ -5,6 +5,7 @@ import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
 import { listingQaSchema } from "@/lib/ai/schemas/listing-qa";
 import { textPart } from "@/lib/ai/provider/types";
 import { questionKey } from "@/lib/utils/question-key";
+import type { Trace } from "@/lib/utils/dev-trace";
 
 /**
  * What a buyer is shown: an answer the record backs, or a decline — with the
@@ -62,7 +63,8 @@ export async function answerListingQuestion(
   question: string,
   facts: ListingFacts,
   language: "en" | "ar",
-  ctx: AiCallerContext
+  ctx: AiCallerContext,
+  trace?: Trace
 ): Promise<ListingAnswer> {
   const record = JSON.stringify(facts);
   const reply = await generateStructured({
@@ -90,6 +92,15 @@ export async function answerListingQuestion(
   });
 
   const answer = reply.answer.trim();
+  const holds = citationsHold(facts, reply.fieldsUsed);
+  trace?.step(
+    `model: relevant ${reply.relevant ? "✓" : "✗"} · grounded ${reply.grounded ? "✓" : "✗"} · ` +
+      `cites [${reply.fieldsUsed.join(", ")}]` +
+      (reply.relevant && reply.grounded ? ` · citations hold ${holds ? "✓" : "✗ (rejected)"}` : "")
+  );
+  if ((!reply.relevant || !reply.grounded) && answer && !declineText(answer)) {
+    trace?.step("model's wording rejected (link / contact / too long) → fixed copy");
+  }
   // Not a question about this car: whatever else the model claims, no fact is
   // shown — "test" once came back answered with an unrelated one.
   if (!reply.relevant) {
@@ -100,7 +111,7 @@ export async function answerListingQuestion(
     const message = declineText(answer);
     return message ? { grounded: false, message } : { grounded: false };
   }
-  if (!answer || !citationsHold(facts, reply.fieldsUsed)) {
+  if (!answer || !holds) {
     return { grounded: false };
   }
   return { grounded: true, answer, fieldsUsed: [...new Set(reply.fieldsUsed)] };

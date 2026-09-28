@@ -16,6 +16,8 @@ const GREETINGS = new Set(
     "hi", "hello", "hey", "hey there", "hi there", "good morning", "good evening", "yo",
     "السلام عليكم", "سلام عليكم", "السلام", "سلام", "اهلا", "اهلين", "مرحبا", "ازيك", "ازيكم",
     "صباح الخير", "مساء الخير", "هاي", "هالو", "يا هلا",
+    "how are you", "how are u", "how r u", "how is it going", "whats up", "what is up",
+    "عامل ايه", "عاملين ايه", "ازيك عامل ايه", "اخبارك ايه", "ايه الاخبار", "كيف حالك", "كيفك",
   ].map(fold)
 );
 

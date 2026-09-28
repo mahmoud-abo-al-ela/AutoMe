@@ -325,19 +325,16 @@ describe("billing reads the shared plan source", () => {
     expect(ai({ enabled: true })).toEqual({ key: "aiProcessing", included: false });
   });
 
-  it("states the buyer-assistant allowance as its own bullet", () => {
+  it("states the buyer assistant as unlimited when included", () => {
     const assistant = (aiAssistant: object) =>
       planFeatureKeys({ ...PLANS[0], features: { aiAssistant } }).find((f) =>
         f.key.startsWith("aiAssistant")
       );
 
-    expect(assistant({ enabled: true, limit: 20 })).toEqual({
-      key: "aiAssistantMonthly",
-      params: { count: 20 },
-      included: true,
-    });
-    expect(assistant({ enabled: true, limit: -1 })).toMatchObject({ key: "aiAssistantUnlimited" });
-    expect(assistant({ enabled: true })).toEqual({ key: "aiAssistant", included: false });
+    // No monthly cap: a limit stored on an older plan changes nothing.
+    expect(assistant({ enabled: true, limit: 20 })).toEqual({ key: "aiAssistantUnlimited", included: true });
+    expect(assistant({ enabled: true })).toEqual({ key: "aiAssistantUnlimited", included: true });
+    expect(assistant({ enabled: false })).toEqual({ key: "aiAssistant", included: false });
   });
 
   it("gives the comparison table one row per feature key", () => {
