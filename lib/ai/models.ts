@@ -153,6 +153,34 @@ export function modelsFor(task: ModelTask): ChainEntry[] {
   return [...rest.slice(0, at), pinned, ...rest.slice(at)];
 }
 
+/**
+ * Models tried first for a bulk import — sorting photos into cars and reading
+ * each car — ahead of the task's own chain, which still backs them up.
+ *
+ * Claude Sonnet 5 through CodeCraft, measured 2026-09-29 on the photos that
+ * had gone wrong: it sorted two black Mercedes from two showrooms correctly,
+ * and read a C 200 as C-Class (W206) at 0.95 from its boot-lid badge. An
+ * import is the dealer's most AI-dependent moment and worth the stronger
+ * model; the single-car form keeps its chain. `AI_MODELS_IMPORT`
+ * (comma-separated "provider/model") replaces the default.
+ */
+const DEFAULT_IMPORT_LEAD = ["codecraft/claude-sonnet-5"];
+
+export function importLeadModels(): ChainEntry[] {
+  const override = process.env.AI_MODELS_IMPORT;
+  return (override ? override.split(",") : DEFAULT_IMPORT_LEAD)
+    .map(parseChainEntry)
+    .filter((entry): entry is ChainEntry => entry !== null);
+}
+
+/**
+ * A task's chain with `lead` tried first. An entry already in the chain moves
+ * to the front rather than being tried twice.
+ */
+export function withLead(chain: ChainEntry[], lead: ChainEntry[]): ChainEntry[] {
+  return [...lead, ...chain.filter((entry) => !lead.some((first) => same(first, entry)))];
+}
+
 /** The entry a task prefers. */
 export function modelFor(task: ModelTask): ChainEntry {
   return modelsFor(task)[0];

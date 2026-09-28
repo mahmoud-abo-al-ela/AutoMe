@@ -161,7 +161,7 @@ export function useBulkImport() {
         }
         try {
           settle(g.id, { status: "reading" });
-          const draft = await extract(g.readWith.map((i) => files[i]));
+          const draft = await extract(g.readWith.map((i) => files[i]), "import");
 
           settle(g.id, { status: "saving" });
           // In the dealer's order — the first is the cover — up to the

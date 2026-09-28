@@ -3,6 +3,7 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import { photoGroupingPrompt } from "@/lib/ai/prompts/photo-grouping";
 import { photoGroupingSchema, type PhotoGroupingReply } from "@/lib/ai/schemas/photo-grouping";
 import { textPart } from "@/lib/ai/provider/types";
+import { importLeadModels } from "@/lib/ai/models";
 import { MAX_AI_LISTING_PHOTOS } from "@/lib/constants/car-options";
 import type { PreparedImage } from "@/lib/services/ai/image";
 
@@ -55,8 +56,9 @@ export function normalizeGrouping(reply: PhotoGroupingReply, count: number): Pho
  *
  * The images are small copies (the caller's job): sorting needs to tell cars
  * apart, not read their badges, and a batch of full photos would cost far more
- * tokens for no better answer. On the fast vision chain — Google first — for
- * the same reason: CodeCraft charges a fixed ~4.4k tokens an image.
+ * tokens for no better answer. Claude Sonnet 5 sorts first — it separates
+ * look-alike cars the fast models merged — with the fast vision chain behind
+ * it for when it is busy.
  */
 export async function groupCarPhotos(images: PreparedImage[], ctx: AiCallerContext): Promise<PhotoGroup[]> {
   if (images.length === 1) return [{ label: "", photos: [0], readWith: [0] }];
@@ -83,6 +85,8 @@ export async function groupCarPhotos(images: PreparedImage[], ctx: AiCallerConte
     // sorted them right; Gemma put four in one car, prompt fix or not. A
     // "busy, try again" is better than a confident wrong sort.
     skipGemma: true,
+    // Claude Sonnet 5 first (see importLeadModels), the fast chain behind it.
+    leadWith: importLeadModels(),
   });
 
   return normalizeGrouping(reply, images.length);

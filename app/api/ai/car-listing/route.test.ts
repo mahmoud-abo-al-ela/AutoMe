@@ -169,6 +169,18 @@ describe("POST /api/ai/car-listing — stream", () => {
     expect(extractCarListing.mock.calls[0][0]).toHaveLength(3);
   });
 
+  it("reads with the import's lead model only when the read comes from the import", async () => {
+    extractCarListing.mockResolvedValue({ make: "BMW" });
+    await lines(await POST(request([photo("front.jpg")])));
+    expect(extractCarListing.mock.calls[0][2].leadWith).toBeUndefined();
+
+    const form = new FormData();
+    form.append("file", photo("front.jpg"));
+    form.append("purpose", "import");
+    await lines(await POST(new Request("http://localhost/api/ai/car-listing", { method: "POST", body: form })));
+    expect(extractCarListing.mock.calls[1][2].leadWith).toEqual([{ provider: "codecraft", model: "claude-sonnet-5" }]);
+  });
+
   it("bills the database user, not the Clerk id, at free-plan priority", async () => {
     extractCarListing.mockResolvedValue({ make: "Kia" });
     await lines(await POST(request()));
