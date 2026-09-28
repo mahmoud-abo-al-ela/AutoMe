@@ -616,6 +616,12 @@ model AiUsage {
   errorCode String?
   createdAt DateTime @default(now())
 
+  // The car this call helped save, set when the dealer saves it. A plan's AI
+  // allowance counts distinct cars, not calls: the photo read, translation and
+  // coach advice for one car are one use. No relation on purpose — deleting
+  // the car must not hand the use back.
+  carId String?
+
   @@index([organizationId, feature, createdAt]) // monthly per-org quota count
   @@index([feature, createdAt]) // per-feature reporting
   @@index([createdAt]) // platform-wide RPD/RPM breaker, all features

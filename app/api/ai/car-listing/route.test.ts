@@ -11,11 +11,12 @@ import type { AiProgressEvent } from "@/lib/ai/client";
 const resolveTenantContext = vi.hoisted(() => vi.fn());
 const enforceRateLimit = vi.hoisted(() => vi.fn());
 const extractCarListing = vi.hoisted(() => vi.fn());
-const countOrgAiCallsThisMonth = vi.hoisted(() => vi.fn());
+const countOrgAiCarsThisMonth = vi.hoisted(() => vi.fn());
+const countOrgUnsavedAiCallsThisMonth = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/auth", () => ({ resolveTenantContext }));
 vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceRateLimit }));
-vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCallsThisMonth }));
+vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCarsThisMonth, countOrgUnsavedAiCallsThisMonth }));
 vi.mock("@/lib/services/ai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/services/ai")>();
   return { ...actual, extractCarListing };
@@ -55,7 +56,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   resolveTenantContext.mockResolvedValue(ctxWithAi({ enabled: true, limit: 5 }));
   enforceRateLimit.mockResolvedValue(undefined);
-  countOrgAiCallsThisMonth.mockResolvedValue(0);
+  countOrgAiCarsThisMonth.mockResolvedValue(0);
+  countOrgUnsavedAiCallsThisMonth.mockResolvedValue(0);
 });
 
 describe("POST /api/ai/car-listing — refusals", () => {
@@ -74,11 +76,27 @@ describe("POST /api/ai/car-listing — refusals", () => {
     expect(extractCarListing).not.toHaveBeenCalled();
   });
 
-  it("refuses the 6th call on a limit of 5", async () => {
-    countOrgAiCallsThisMonth.mockResolvedValue(5);
+  it("refuses a photo read once 5 of 5 AI listings are saved", async () => {
+    countOrgAiCarsThisMonth.mockResolvedValue(5);
     const res = await POST(request());
     expect((await res.json()).error.code).toBe("PLAN_LIMIT_EXCEEDED");
     expect(extractCarListing).not.toHaveBeenCalled();
+  });
+
+  it("refuses a photo read once unsaved reads reach three per listing in the plan", async () => {
+    countOrgUnsavedAiCallsThisMonth.mockResolvedValue(15); // limit 5 × 3
+    const res = await POST(request());
+    const body = await res.json();
+    expect(body.error.code).toBe("PLAN_LIMIT_EXCEEDED");
+    expect(body.error.messageKey).toBe("errors.ai.unsavedReads");
+    expect(extractCarListing).not.toHaveBeenCalled();
+  });
+
+  it("does not cap unsaved reads on an unlimited plan", async () => {
+    resolveTenantContext.mockResolvedValue(ctxWithAi({ enabled: true, limit: -1 }));
+    countOrgUnsavedAiCallsThisMonth.mockResolvedValue(1000);
+    await POST(request());
+    expect(countOrgUnsavedAiCallsThisMonth).not.toHaveBeenCalled();
   });
 
   it("429s when rate limited", async () => {

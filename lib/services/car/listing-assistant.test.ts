@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const {
   findCarForAssistant,
   findActiveSubscription,
-  countOrgAiCallsThisMonth,
+  countOrgAiCarsThisMonth,
   answerListingQuestion,
   findAnswersForCar,
   recordDeclinedQuestion,
@@ -12,7 +12,7 @@ const {
 } = vi.hoisted(() => ({
   findCarForAssistant: vi.fn(),
   findActiveSubscription: vi.fn(),
-  countOrgAiCallsThisMonth: vi.fn(),
+  countOrgAiCarsThisMonth: vi.fn(),
   answerListingQuestion: vi.fn(),
   findAnswersForCar: vi.fn(),
   recordDeclinedQuestion: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock("@/lib/repositories/car", () => ({
   findComparablePrices,
 }));
 vi.mock("@/lib/repositories/billing", () => ({ findActiveSubscription }));
-vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCallsThisMonth }));
+vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCarsThisMonth }));
 vi.mock("@/lib/services/ai/answerListingQuestion", () => ({ answerListingQuestion }));
 vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion }));
 
@@ -84,7 +84,7 @@ beforeEach(() => {
   findComparablePrices.mockResolvedValue([]);
   findCarForAssistant.mockResolvedValue(car);
   findActiveSubscription.mockResolvedValue(plan({ enabled: true, limit: 300 }));
-  countOrgAiCallsThisMonth.mockResolvedValue(0);
+  countOrgAiCarsThisMonth.mockResolvedValue(0);
   answerListingQuestion.mockResolvedValue({ grounded: true, answer: "White.", fieldsUsed: ["color"] });
 });
 
@@ -301,9 +301,9 @@ describe("askAboutListing", () => {
 
   it("has no monthly cap: a limit left on an older plan is ignored", async () => {
     findActiveSubscription.mockResolvedValue(plan({ enabled: true, limit: 20 }));
-    countOrgAiCallsThisMonth.mockResolvedValue(500);
+    countOrgAiCarsThisMonth.mockResolvedValue(500);
     expect(await askAboutListing("car-1", "Colour?", "en", null)).toEqual({ status: "answered", answer: "White." });
-    expect(countOrgAiCallsThisMonth).not.toHaveBeenCalled();
+    expect(countOrgAiCarsThisMonth).not.toHaveBeenCalled();
   });
 
   it("runs a free-plan dealer's buyers at low priority", async () => {

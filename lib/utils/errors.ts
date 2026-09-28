@@ -129,6 +129,8 @@ export interface PlanLimitErrorInput {
     currentUsage?: number;
     upgradeUrl?: string;
     message?: string;
+    /** A more specific message than "you have reached your plan's limit". */
+    i18n?: ErrorI18n;
 }
 
 export class PlanLimitError extends AppError {
@@ -138,10 +140,11 @@ export class PlanLimitError extends AppError {
     currentUsage?: number;
     upgradeUrl?: string;
 
-    constructor({ resource, planType, limit, currentUsage, upgradeUrl, message }: PlanLimitErrorInput) {
+    constructor({ resource, planType, limit, currentUsage, upgradeUrl, message, i18n }: PlanLimitErrorInput) {
         super(message || `Plan limit exceeded for ${resource}`, 403, "PLAN_LIMIT_EXCEEDED", {
             key: "errors.planLimit",
             params: { resource: resource ?? "" },
+            ...i18n,
         });
         this.resource = resource;
         this.planType = planType;

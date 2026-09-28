@@ -34,7 +34,8 @@
     "invalidResponse": "The analysis came back in an unexpected form. Please try again.",
     "noImage": "No image was provided.",
     "unsupportedImage": "That image type is not supported. Use JPG, PNG or WebP.",
-    "imageTooLarge": "The image must be under {max}MB."
+    "imageTooLarge": "The image must be under {max}MB.",
+    "unsavedReads": "You've read photos for {cap} cars this month without saving them. Save a car, or fill in the form yourself, to keep going."
   },
   "requestDenied": "That request was blocked. If you think this is a mistake, please try again."
 }

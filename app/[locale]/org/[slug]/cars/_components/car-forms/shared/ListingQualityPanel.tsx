@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
 import { Gauge, Lightbulb, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { reviewListingQuality } from "@/actions/cars";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useActionError } from "@/hooks/use-action-error";
-import { queryKeys } from "@/lib/query-client";
 import { GOOD_PHOTOS, MIN_PHOTOS } from "@/lib/services/car/listing-quality";
 import type { CarFormSectionProps } from "./section-props";
 
@@ -39,7 +37,6 @@ export default function ListingQualityPanel({ watch }: Pick<CarFormSectionProps,
   const t = useTranslations("org.carForm.coach");
   const { number } = useFormatters();
   const actionError = useActionError();
-  const queryClient = useQueryClient();
   const isArabic = useLocale() === "ar";
   const [review, setReview] = useState<Review | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -65,11 +62,8 @@ export default function ListingQualityPanel({ watch }: Pick<CarFormSectionProps,
       setError(actionError(result.error, t("failed")));
       return;
     }
+    // Advice spends no allowance of its own: it counts with the car, on save.
     setReview(result.data);
-    if (result.data.advice === "done") {
-      // Advice spent an AI use; the allowance count elsewhere must not go stale.
-      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("aiProcessing") });
-    }
   };
 
   const issueParams = { min: number(MIN_PHOTOS), good: number(GOOD_PHOTOS) };

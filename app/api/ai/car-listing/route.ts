@@ -4,6 +4,7 @@ import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
 import { aiCallerFor } from "@/lib/ai/caller";
+import { assertUnsavedReadsLeft } from "@/lib/services/car/ai-allowance";
 import type { AiProgressEvent } from "@/lib/ai/client";
 import {
   CAR_LISTING_FIELDS,
@@ -77,6 +78,8 @@ export async function POST(request: Request) {
   try {
     ctx = await resolveTenantContext();
     await assertAiAllowed(ctx);
+    // A read never saved costs no listing, so it has its own cap.
+    await assertUnsavedReadsLeft(ctx);
     await enforceRateLimit();
 
     const formData = await request.formData();

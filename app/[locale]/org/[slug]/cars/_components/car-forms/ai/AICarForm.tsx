@@ -5,8 +5,6 @@ import {
   CarListingStreamError,
 } from "@/hooks/use-car-listing-stream";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/query-client";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useActionError } from "@/hooks/use-action-error";
@@ -28,7 +26,6 @@ const AICarForm = () => {
   const { number } = useFormatters();
   const actionError = useActionError();
   const { progress, extract, reset } = useCarListingStream();
-  const queryClient = useQueryClient();
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -49,9 +46,8 @@ const AICarForm = () => {
         }
 
         setUploadedImage(file);
+        // No allowance is spent yet: a car counts when it is saved.
         const draft = await extract(file);
-        // One allowance use is spent; the "N left" count must not go stale.
-        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("aiProcessing") });
 
         setCarData(draft);
         setShowForm(true);
@@ -68,7 +64,7 @@ const AICarForm = () => {
         setIsProcessing(false);
       }
     },
-    [t, number, actionError, extract, queryClient],
+    [t, number, actionError, extract],
   );
 
   const { isDragActive } = useDropzone({

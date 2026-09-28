@@ -241,9 +241,9 @@
         "cta": "Upload with AI",
         "badge": "Pro plan",
         "locked": "Upgrade to Pro to unlock",
-        "remaining": "{remaining} of {limit} AI uses left this month",
+        "remaining": "{remaining} of {limit} AI listings left this month — a car counts once, when you save it",
         "exhaustedBadge": "Used up",
-        "exhausted": "This month’s AI uses are used up — they renew on the 1st"
+        "exhausted": "This month’s AI listings are used up — they renew on the 1st"
       }
     },
     "modePage": {
@@ -394,7 +394,7 @@
       "score": "Score: {score} / {max}",
       "perfect": "Nothing to improve — this listing is complete.",
       "failed": "Couldn’t check the listing",
-      "adviceSkipped": "Tailored AI advice isn’t available right now (not on your plan, this month’s AI uses are used up, or a temporary error). The checks above still apply.",
+      "adviceSkipped": "Tailored AI advice isn’t available right now (not on your plan, this month’s AI listings are used up, or a temporary error). The checks above still apply.",
       "issues": {
         "fewPhotos": "Add at least {min} photos",
         "morePhotos": "Add more photos — {good} or more works best",

@@ -11,24 +11,48 @@ function startOfCurrentMonthUtc() {
 }
 
 /**
- * Count an organization's *successful* AI calls in the current calendar month,
- * restricted to the given billable features. Drives RESOURCE_CONFIG.aiProcessing
- * in plan-limits (replaces the old CAR_CREATED audit-row proxy).
+ * Count the distinct cars an organization saved with AI's help this calendar
+ * month: cars that successful calls of the given billable features were
+ * stamped with on save (attributeAiUsageToCar). Drives
+ * RESOURCE_CONFIG.aiProcessing — plans sell "AI listings", so the photo read,
+ * translation and coach advice behind one car are one use, however many calls.
  *
  * `organizationId` is required and must be server-sourced from ctx /
  * getCurrentOrganization() — never a client argument (see tenant-isolation skill).
  * Failed calls are excluded so a provider error never burns a customer's quota.
  */
-export async function countOrgAiCallsThisMonth(organizationId: string, features: string[]) {
-    return db.aiUsage.count({
+export async function countOrgAiCarsThisMonth(organizationId: string, features: string[]) {
+    const cars = await db.aiUsage.findMany({
         where: {
             organizationId,
             success: true,
             feature: { in: features },
+            carId: { not: null },
+            createdAt: { gte: startOfCurrentMonthUtc() },
+        },
+        distinct: ["carId"],
+        select: { carId: true },
+    });
+    return cars.length;
+}
+
+/**
+ * Successful calls of one feature this month that no saved car claimed — photo
+ * reads the dealer walked away from. Free under the per-car allowance, so they
+ * get their own cap (see UNSAVED_READS_PER_LISTING).
+ */
+export async function countOrgUnsavedAiCallsThisMonth(organizationId: string, feature: string) {
+    return db.aiUsage.count({
+        where: {
+            organizationId,
+            success: true,
+            feature,
+            carId: null,
             createdAt: { gte: startOfCurrentMonthUtc() },
         },
     });
 }
+
 
 /**
  * Count AI calls to one provider since a timestamp, across every feature and

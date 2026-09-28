@@ -7,6 +7,7 @@ import { coachListing, translateListing, type ListingText, type ListingToCoach }
 import { reviewListing, type ListingIssueCode } from "@/lib/services/car/listing-quality";
 import { aiCallerFor } from "@/lib/ai/caller";
 import { refreshImageAlts } from "@/lib/services/car/image-alts";
+import { claimAiUsageForCar } from "@/lib/services/car/ai-allowance";
 import {
   applyTranslation,
   sourceText,
@@ -136,7 +137,11 @@ export const addCar = withOrgAuth(
         toEditedLocale(options?.editedLocale)
       );
       const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
-      if (car?.id) describePhotosAfterSave(ctx, car.id);
+      if (car?.id) {
+        // The photo read, translation and advice behind this car: one use.
+        await claimAiUsageForCar(ctx, car.id);
+        describePhotosAfterSave(ctx, car.id);
+      }
 
       revalidatePath(`/org/${ctx.organization.slug}/cars`);
       return createSuccessResponse({ ...car, translation }, "Car added successfully");
@@ -227,6 +232,9 @@ export const updateCarFull = withOrgAuth(
     ctx.userId,
     ctx.organization.id
   );
+  // After the update, which proved the car is this dealership's. A car
+  // already counted this month is claimed again, and still counts once.
+  await claimAiUsageForCar(ctx, carId);
   // Also after an edit: new photos need describing, removed ones pruning.
   describePhotosAfterSave(ctx, carId);
 
