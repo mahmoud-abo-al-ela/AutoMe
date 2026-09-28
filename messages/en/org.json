@@ -258,7 +258,8 @@
     "edit": {
       "title": "Edit Vehicle Details",
       "errorTitle": "Couldn’t load this car",
-      "errorBody": "The car was not found, or you do not have access to it."
+      "errorBody": "The car was not found, or you do not have access to it.",
+      "backToCars": "Back to cars"
     },
     "sections": {
       "basic": "Basic Info",

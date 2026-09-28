@@ -103,9 +103,10 @@ export function DraftRow({
             </Link>
           </Button>
         )}
+        {/* Review opens in a new tab: leaving this page would lose the import. */}
         {status === "done" && result?.carId && (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/org/${slug}/cars/${result.carId}/edit`}>
+            <Link href={`/org/${slug}/cars/${result.carId}/edit`} target="_blank">
               <SquarePen className="me-1.5 h-4 w-4" aria-hidden />
               {t("review")}
             </Link>

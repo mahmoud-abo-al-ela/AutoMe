@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCarForEdit } from "@/actions/cars";
@@ -18,8 +18,11 @@ export default function EditCarPage() {
   const t = useTranslations("org.carForm.edit");
   const tPage = useTranslations("org.carForm.modePage");
   const params = useParams();
-  const router = useRouter();
   const carId = Array.isArray(params.carId) ? params.carId[0] : params.carId;
+  const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  // The car list, not the browser's previous page: arriving from a bulk
+  // import, "back" re-opened the import at its first step, results gone.
+  const carsHref = `/org/${slug}/cars`;
 
   const { data: car, isLoading, error } = useQuery({
     queryKey: queryKeys.cars.detail(carId ?? ""),
@@ -34,21 +37,14 @@ export default function EditCarPage() {
     enabled: !!carId,
   });
 
-  const goBack = () => {
-    router.back();
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-6 p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={goBack}
-            className="hover:bg-slate-100"
-          >
-            <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
+          <Button variant="ghost" size="icon" asChild className="hover:bg-slate-100">
+            <Link href={carsHref} aria-label={t("backToCars")}>
+              <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
+            </Link>
           </Button>
           <Skeleton className="h-8 w-48" />
         </div>
@@ -66,7 +62,9 @@ export default function EditCarPage() {
       <div className="p-6 text-center">
         <h2 className="text-xl font-bold text-red-600 mb-2">{t("errorTitle")}</h2>
         <p className="text-gray-600 mb-4">{error?.message || t("errorBody")}</p>
-        <Button onClick={goBack}>{tPage("goBack")}</Button>
+        <Button asChild>
+          <Link href={carsHref}>{tPage("goBack")}</Link>
+        </Button>
       </div>
     );
   }
@@ -88,13 +86,10 @@ export default function EditCarPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={goBack}
-          className="hover:bg-slate-100"
-        >
-          <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
+        <Button variant="ghost" size="icon" asChild className="hover:bg-slate-100">
+          <Link href={carsHref} aria-label={t("backToCars")}>
+            <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
+          </Link>
         </Button>
         <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
