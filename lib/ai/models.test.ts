@@ -69,6 +69,10 @@ describe("modelsFor", () => {
     expect(modelFor("vision").provider).toBe("codecraft");
   });
 
+  it("reads car photos with Qwen 3.8 Max first, via CodeCraft", () => {
+    expect(modelFor("vision")).toEqual({ provider: "codecraft", model: "qwen3.8-max" });
+  });
+
   it("does not list a pinned model twice", () => {
     process.env.GEMINI_MODEL_VISION = "gemini-3.6-flash";
     const labels = modelsFor("vision").map((e) => `${e.provider}/${e.model}`);

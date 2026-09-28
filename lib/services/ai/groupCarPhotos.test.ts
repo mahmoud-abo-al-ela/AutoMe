@@ -57,12 +57,12 @@ describe("groupCarPhotos", () => {
     expect(generateStructured).not.toHaveBeenCalled();
   });
 
-  it("sorts a batch in one fast-vision call, metered as grouping, never as a listing", async () => {
+  it("sorts a batch in one call on the dealer vision chain, metered as grouping, never as a listing", async () => {
     generateStructured.mockResolvedValue({ cars: [car([0, 1], [0])] });
     await groupCarPhotos([image(0), image(1)], { organizationId: "o", userId: "u" });
     const input = generateStructured.mock.calls[0][0];
     expect(input.feature).toBe(AI_FEATURES.carPhotoGrouping);
-    expect(input.task).toBe("visionFast");
+    expect(input.task).toBe("vision");
     expect(input.parts).toHaveLength(3);
   });
 

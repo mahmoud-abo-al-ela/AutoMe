@@ -55,15 +55,16 @@ export function normalizeGrouping(reply: PhotoGroupingReply, count: number): Pho
  *
  * The images are small copies (the caller's job): sorting needs to tell cars
  * apart, not read their badges, and a batch of full photos would cost far more
- * tokens for no better answer. On the fast vision chain — Google first — for
- * the same reason: CodeCraft charges a fixed ~4.4k tokens an image.
+ * tokens for no better answer.
  */
 export async function groupCarPhotos(images: PreparedImage[], ctx: AiCallerContext): Promise<PhotoGroup[]> {
   if (images.length === 1) return [{ label: "", photos: [0], readWith: [0] }];
 
   const reply = await generateStructured({
     feature: AI_FEATURES.carPhotoGrouping,
-    task: "visionFast",
+    // The dealer vision chain (Qwen 3.8 Max first), not the fast one: telling
+    // look-alike cars apart is the hard part of an import.
+    task: "vision",
     parts: [...images.map((image) => image.part), textPart(photoGroupingPrompt.text(images.length))],
     schema: photoGroupingSchema,
     promptVersion: photoGroupingPrompt.version,
