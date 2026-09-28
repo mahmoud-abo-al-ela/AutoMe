@@ -265,9 +265,14 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     seats: source.seats ?? undefined,
     fuelType: source.fuelType,
     transmission: source.transmission,
-    // A zero odometer on a used listing is the dealer not filling it in, and
+    // A zero odometer on an older listing is the dealer not filling it in, and
     // "0 km" stated as fact is exactly the invented answer this must not give.
-    mileage: source.mileage > 0 ? { value: source.mileage, unit: "km" } : undefined,
+    // On this year's or last year's model it is a new car, and 0 km is true —
+    // the same line the listing-quality rules draw (zeroMileage).
+    mileage:
+      source.mileage > 0 || source.year >= new Date().getFullYear() - 1
+        ? { value: source.mileage, unit: "km" }
+        : undefined,
     price:
       source.price > 0 ? { amount: source.price, currency: source.priceCurrency } : undefined,
     status: source.status,

@@ -61,6 +61,13 @@ describe("buildListingFacts", () => {
     }
   });
 
+  it("states 0 km for this year's or last year's model — a new car — and nothing older", () => {
+    const thisYear = new Date().getFullYear();
+    expect(buildListingFacts({ ...source, year: thisYear, mileage: 0 }).mileage).toEqual({ value: 0, unit: "km" });
+    expect(buildListingFacts({ ...source, year: thisYear - 1, mileage: 0 }).mileage).toEqual({ value: 0, unit: "km" });
+    expect(buildListingFacts({ ...source, year: thisYear - 2, mileage: 0 })).not.toHaveProperty("mileage");
+  });
+
   it("keeps the price in its own currency, unconverted", () => {
     expect(buildListingFacts(source).price).toEqual({ amount: 850000, currency: "EGP" });
   });

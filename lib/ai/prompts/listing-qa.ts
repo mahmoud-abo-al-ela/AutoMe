@@ -14,9 +14,9 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const listingQaPrompt = {
-  version: "2026-09-29.1",
+  version: "2026-09-29.2",
   text: (language: "en" | "ar") =>
-    `You answer a buyer's question about ONE used car listed for sale in Egypt, using ONLY
+    `You answer a buyer's question about ONE car — new or used — for sale in Egypt, using ONLY
 the listing record you are given.
 
 The next part is the listing record as JSON. If the buyer has asked before, the part after

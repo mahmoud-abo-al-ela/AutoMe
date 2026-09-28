@@ -8,9 +8,9 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const imageAltsPrompt = {
-  version: "2026-09-27.2",
+  version: "2026-09-29.1",
   text: (car: { year: number; make: string; model: string }, count: number) =>
-    `These ${count} photos are from one used-car listing for a ${car.year} ${car.make} ${car.model}, in order.
+    `These ${count} photos are from one car listing for a ${car.year} ${car.make} ${car.model}, in order.
 
 For each photo, write alt text: one short phrase saying what that photo shows, for someone who cannot see it.
 
