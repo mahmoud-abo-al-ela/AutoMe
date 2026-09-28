@@ -222,11 +222,11 @@ The unit suite covers the guard stack, tenancy, billing, metering and every AI f
 
 ## CI/CD
 
-Every pull request and push to `main` runs the [CI workflow](.github/workflows/ci.yml) on GitHub Actions. A newer push cancels the run it supersedes.
+Every pull request — whatever branch it targets — and every push to `main` runs the [CI workflow](.github/workflows/ci.yml) on GitHub Actions; it can also be started by hand. A newer push cancels the run it supersedes.
 
 ```mermaid
 flowchart LR
-    PR[Pull request / push to main] --> Build & Test
+    PR[Any pull request / push to main] --> Build & Test
     subgraph Build["build job"]
         B1[Install<br/>frozen lockfile] --> B2[Lint] --> B3[Type-check] --> B4[Production build]
     end
