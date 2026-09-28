@@ -211,12 +211,29 @@ describe("askAboutListing", () => {
 
     expect(findOtherAvailableCars).toHaveBeenCalledWith("org-dealer", "car-1");
     expect(findComparablePrices).toHaveBeenCalledWith({
-      make: "Toyota", model: "Corolla", year: 2019, excludeCarId: "car-1", currency: "EGP",
+      make: "Toyota", model: "Corolla", bodyType: undefined, year: 2019, yearSpan: 1,
+      excludeCarId: "car-1", currency: "EGP",
     });
+    // Found enough at the first level, so it looked no wider.
+    expect(findComparablePrices).toHaveBeenCalledTimes(1);
     const facts = answerListingQuestion.mock.calls[0][1];
     expect(facts.otherCars.map((c: { model: string }) => c.model)).toEqual(["Corolla", "K5"]);
     expect(facts.marketPrices).toMatchObject({ listings: 3, median: 850000, thisCarVsMedianPercent: 0 });
     expect(facts.listedOn).toBe("2026-09-01");
+  });
+
+  it("widens the price comparison until it finds enough listings", async () => {
+    findComparablePrices
+      .mockResolvedValueOnce([900000]) // same model ±1 year: too few
+      .mockResolvedValueOnce([880000, 910000]) // same model ±3 years: too few
+      .mockResolvedValueOnce([700000, 850000, 950000]); // same make and body type
+    await askAboutListing("car-1", "Fair price?", "en", null);
+
+    expect(findComparablePrices).toHaveBeenCalledTimes(3);
+    expect(findComparablePrices.mock.calls[2][0]).toMatchObject({ model: undefined, bodyType: "Sedan", yearSpan: 2 });
+    expect(answerListingQuestion.mock.calls[0][1].marketPrices.compared).toEqual({
+      make: "Toyota", bodyType: "Sedan", years: [2017, 2021],
+    });
   });
 
   it("answers without alternatives or prices when those reads fail", async () => {

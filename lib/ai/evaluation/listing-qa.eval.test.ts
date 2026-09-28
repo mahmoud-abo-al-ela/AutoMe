@@ -69,7 +69,7 @@ const KNOWN: ListingSource = {
     { year: 2019, make: "Hyundai", model: "Elantra", color: "Black", price: 735000, mileage: 91000, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
     { year: 2018, make: "Kia", model: "Cerato", color: "White", price: 610000, mileage: 120000, bodyType: "Sedan", transmission: "Manual", fuelType: "Petrol" },
   ],
-  marketPrices: { listings: 9, min: 650000, median: 780000, max: 890000, currency: "EGP", thisCarVsMedianPercent: -8, years: [2018, 2020] },
+  marketPrices: { listings: 9, min: 650000, median: 780000, max: 890000, currency: "EGP", thisCarVsMedianPercent: -8, compared: { make: "Hyundai", model: "Elantra", years: [2018, 2020] } },
 };
 
 /** The dealer filled in the history fields and the dealership terms. */

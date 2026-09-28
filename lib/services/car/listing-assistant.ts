@@ -1,6 +1,14 @@
 import * as carRepository from "@/lib/repositories/car";
 import * as billingRepository from "@/lib/repositories/billing";
-import { buildListingFacts, closestByPrice, summarizeMarketPrices, type MarketPrices, type OtherCar } from "@/lib/ai/grounding";
+import {
+  COMPARISONS,
+  buildListingFacts,
+  closestByPrice,
+  comparisonFor,
+  summarizeMarketPrices,
+  type MarketPrices,
+  type OtherCar,
+} from "@/lib/ai/grounding";
 import type { CapacityPriority } from "@/lib/ai/breaker";
 import { answerListingQuestion } from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
@@ -99,7 +107,7 @@ export async function askAboutListing(
   trace?.step(
     `plan ✓ assistant enabled (${allowance.priority} priority) · data: ` +
       `${otherCars === null ? "other cars ✗ (read failed)" : `${otherCars.length} other cars`} · ` +
-      `${marketPrices ? `price range ✓ (${marketPrices.listings} similar)` : "price range ✗ (under 3 similar)"} · ` +
+      `${marketPrices ? `price range ✓ (${marketPrices.listings} × ${marketPrices.compared.model ?? marketPrices.compared.bodyType})` : "price range ✗ (under 3 comparable)"} · ` +
       `${dealerAnswers.length} dealer answers`
   );
 
@@ -210,24 +218,35 @@ async function otherCarsFor(organizationId: string, carId: string, price: number
   }
 }
 
-/** How comparable listings are priced, or null with too few or a failed read. */
+/**
+ * How comparable listings are priced, trying each of COMPARISONS in turn
+ * until one finds enough; null if none does, or a read fails.
+ */
 async function marketPricesFor(car: {
   id: string;
   make: string;
   model: string;
+  bodyType: string;
   year: number;
   price: number;
   priceCurrency: string;
 }): Promise<MarketPrices | null> {
   try {
-    const prices = await carRepository.findComparablePrices({
-      make: car.make,
-      model: car.model,
-      year: car.year,
-      excludeCarId: car.id,
-      currency: car.priceCurrency,
-    });
-    return summarizeMarketPrices(prices, { price: car.price, year: car.year, currency: car.priceCurrency });
+    for (const level of COMPARISONS) {
+      const compared = comparisonFor(car, level);
+      const prices = await carRepository.findComparablePrices({
+        make: car.make,
+        model: compared.model,
+        bodyType: compared.bodyType,
+        year: car.year,
+        yearSpan: level.yearSpan,
+        excludeCarId: car.id,
+        currency: car.priceCurrency,
+      });
+      const summary = summarizeMarketPrices(prices, { price: car.price, currency: car.priceCurrency }, compared);
+      if (summary) return summary;
+    }
+    return null;
   } catch (error) {
     logError("Loading comparable prices failed; answering without them", error);
     return null;

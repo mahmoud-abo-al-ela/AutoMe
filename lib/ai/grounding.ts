@@ -143,8 +143,41 @@ export interface MarketPrices {
   currency: string;
   /** This car against the median, as a whole percentage: -8 is 8% below. */
   thisCarVsMedianPercent: number;
-  /** Which model years were compared. */
+  /** What was compared — the answer must say it. */
+  compared: Comparison;
+}
+
+/** One way of finding comparable listings; see COMPARISONS. */
+export interface Comparison {
+  make: string;
+  /** Present when the same model was compared. */
+  model?: string;
+  /** Present when the same make and body type was compared instead. */
+  bodyType?: string;
   years: [number, number];
+}
+
+/**
+ * Tried in order until one finds enough listings: the same model close in
+ * age, then the same model across more years, then the same make and body
+ * type. Never wider — "SUVs from 2021 to 2025" spans prices too far apart to
+ * say anything about one car.
+ */
+export const COMPARISONS = [
+  { by: "model", yearSpan: 1 },
+  { by: "model", yearSpan: 3 },
+  { by: "bodyType", yearSpan: 2 },
+] as const;
+
+export function comparisonFor(
+  car: { make: string; model: string; bodyType: string; year: number },
+  level: (typeof COMPARISONS)[number]
+): Comparison {
+  return {
+    make: car.make,
+    ...(level.by === "model" ? { model: car.model } : { bodyType: car.bodyType }),
+    years: [car.year - level.yearSpan, car.year + level.yearSpan],
+  };
 }
 
 /** Fewer comparable listings than this is an anecdote, not a range. */
@@ -154,7 +187,8 @@ const MAX_PHOTOS = 10;
 
 export function summarizeMarketPrices(
   prices: number[],
-  car: { price: number; year: number; currency: string }
+  car: { price: number; currency: string },
+  compared: Comparison
 ): MarketPrices | null {
   const sorted = prices.filter((p) => Number.isFinite(p) && p > 0).sort((a, b) => a - b);
   if (sorted.length < MIN_COMPARABLE_LISTINGS || car.price <= 0) return null;
@@ -169,7 +203,7 @@ export function summarizeMarketPrices(
     max: sorted[sorted.length - 1],
     currency: car.currency,
     thisCarVsMedianPercent: Math.round(((car.price - median) / median) * 100),
-    years: [car.year - 1, car.year + 1],
+    compared,
   };
 }
 

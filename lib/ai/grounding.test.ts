@@ -3,6 +3,8 @@ import {
   buildListingFacts,
   citationsHold,
   closestByPrice,
+  COMPARISONS,
+  comparisonFor,
   summarizeMarketPrices,
   type ListingSource,
   type OtherCar,
@@ -104,22 +106,35 @@ describe("what AutoMe already knows", () => {
 });
 
 describe("summarizeMarketPrices", () => {
-  const car = { price: 720000, year: 2019, currency: "EGP" };
+  const car = { price: 720000, currency: "EGP" };
+  const compared = { make: "Hyundai", model: "Elantra", years: [2018, 2020] as [number, number] };
 
   it("computes the range, the median and where this car sits, so the model does no arithmetic", () => {
-    expect(summarizeMarketPrices([800000, 700000, 750000, 850000], car)).toEqual({
+    expect(summarizeMarketPrices([800000, 700000, 750000, 850000], car, compared)).toEqual({
       listings: 4,
       min: 700000,
       median: 775000,
       max: 850000,
       currency: "EGP",
       thisCarVsMedianPercent: -7,
-      years: [2018, 2020],
+      compared,
     });
   });
 
   it("says nothing from fewer than three listings", () => {
-    expect(summarizeMarketPrices([700000, 800000], car)).toBeNull();
+    expect(summarizeMarketPrices([700000, 800000], car, compared)).toBeNull();
+  });
+});
+
+describe("comparisons", () => {
+  const car = { make: "BMW", model: "X4", bodyType: "SUV", year: 2023 };
+
+  it("widens from the same model to the same make and body type, never further", () => {
+    expect(COMPARISONS.map((level) => comparisonFor(car, level))).toEqual([
+      { make: "BMW", model: "X4", years: [2022, 2024] },
+      { make: "BMW", model: "X4", years: [2020, 2026] },
+      { make: "BMW", bodyType: "SUV", years: [2021, 2025] },
+    ]);
   });
 });
 
