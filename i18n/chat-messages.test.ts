@@ -9,7 +9,7 @@ import arStream from "@/i18n/stream-chat-ar.json";
  * Chat is two translation problems in one file.
  *
  * The app's own copy around the chat — page headers, the channel previews, the
- * enquiry sidebar — lives in `messages/{en,ar}/chat.json` like every other
+ * enquiry chat — lives in `messages/{en,ar}/chat.json` like every other
  * namespace. Stream Chat's UI copy does not: the library ships its own bundle
  * in eleven languages, none of them Arabic, keyed by the English sentence.
  * `stream-chat-ar.json` fills that in, and the risk there is the opposite of a

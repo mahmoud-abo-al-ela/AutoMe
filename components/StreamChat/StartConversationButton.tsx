@@ -19,7 +19,7 @@ export function StartConversationButton({
     className?: string;
     onChatOpen?: (carId: string) => void;
 }) {
-    const t = useTranslations("chat.sidebar");
+    const t = useTranslations("chat.dock");
 
     const handleClick = () => {
         // Just open the chat sidebar, don't create channel yet

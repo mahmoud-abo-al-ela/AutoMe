@@ -30,26 +30,6 @@
     "attachment": "Sent an attachment",
     "unknownUser": "Unknown User"
   },
-  "sidebar": {
-    "label": "Chat sidebar",
-    "fallbackTitle": "Chat",
-    "loadingTitle": "Loading conversation…",
-    "loadingBody": "Checking for existing messages",
-    "startTitle": "Start a conversation",
-    "startBody": "Send a message to inquire about this vehicle. The dealer will be notified and respond shortly.",
-    "askingAbout": "Asking about:",
-    "inputPlaceholder": "Type your message…",
-    "inputLabel": "Message input",
-    "clear": "Clear message",
-    "send": "Send message",
-    "messageDealer": "Message Dealer",
-    "toasts": {
-      "carFailed": "Failed to load car information",
-      "startFailed": "Failed to start conversation",
-      "sent": "Message sent!",
-      "sendFailed": "Failed to send message"
-    }
-  },
   "badge": {
     "overflow": "{max}+"
   },
@@ -60,5 +40,35 @@
     "translated": "Translated",
     "failed": "Couldn't translate this message. Please try again.",
     "translatedByAi": "Translated by AI"
+  },
+  "dock": {
+    "title": "Chat with the dealer",
+    "messageDealer": "Message Dealer",
+    "startTitle": "Ask {dealer} about this car",
+    "startBody": "Tap a question or write your own. The dealer gets your message and replies here.",
+    "theDealer": "the dealer",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "minimize": "Minimise chat",
+    "expand": "Open chat",
+    "close": "Close chat",
+    "loading": "Loading conversation…",
+    "carFailed": "We couldn't load this car. Close the chat and try again.",
+    "sendFailed": "Your message wasn't sent. Please try again.",
+    "sold": "Sold",
+    "unavailable": "Unavailable",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "testDrive": "Test drive",
+    "viewCar": "View car",
+    "whatsappText": "Hi, I'm interested in the {car} I saw on AutoMe.",
+    "quick": {
+      "label": "Suggested questions",
+      "available": "Is it still available?",
+      "price": "What's your best price?",
+      "visit": "Can I come and see it?",
+      "installments": "Do you offer installments?",
+      "tradeIn": "Can I trade in my car?"
+    }
   }
 }

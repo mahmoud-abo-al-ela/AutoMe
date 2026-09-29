@@ -169,3 +169,28 @@ export function toLocalEgyptPhone(input: string): string {
 export function isEgyptPhone(value: string): boolean {
   return isEgyptNationalPhone(toNationalEgyptPhone(value));
 }
+
+/**
+ * An Egyptian mobile's national number: 10, 11, 12 or 15, then eight digits.
+ * Only these can be on WhatsApp; a landline cannot.
+ */
+const MOBILE_NATIONAL_PATTERN = /^1[0125]\d{8}$/;
+
+/** A `tel:` link in international form, or null for a number Egypt cannot route. */
+export function telHref(phone: string | null | undefined): string | null {
+  const national = toNationalEgyptPhone(phone ?? "");
+  return isEgyptNationalPhone(national) ? `tel:+${EGYPT_DIALING_CODE}${national}` : null;
+}
+
+/**
+ * A WhatsApp chat link for an Egyptian mobile, with an optional first message,
+ * or null for a landline or a number that is not one. Egyptian buyers expect
+ * to be able to move a conversation to WhatsApp; a link that opens WhatsApp on
+ * a landline only shows an error.
+ */
+export function whatsappHref(phone: string | null | undefined, text?: string): string | null {
+  const national = toNationalEgyptPhone(phone ?? "");
+  if (!MOBILE_NATIONAL_PATTERN.test(national)) return null;
+  const query = text ? `?text=${encodeURIComponent(text)}` : "";
+  return `https://wa.me/${EGYPT_DIALING_CODE}${national}${query}`;
+}

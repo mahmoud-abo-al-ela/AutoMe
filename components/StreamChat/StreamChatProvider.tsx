@@ -9,6 +9,9 @@ import { getStreamToken } from "@/actions/stream-chat";
 import { createStreamI18n } from "@/i18n/stream-chat-i18n";
 import type { Locale } from "@/i18n/routing";
 import { logError } from "@/lib/utils/errors";
+import { ChatDockProvider } from "./dock/ChatDockContext";
+import { ChatDock } from "./dock/ChatDock";
+import { disableAttachmentUploads } from "./no-attachments";
 
 import "stream-chat-react/dist/css/v2/index.css";
 
@@ -58,6 +61,7 @@ export function StreamChatProvider({ children }: { children: React.ReactNode }) 
                 // Create or reuse client
                 if (!chatClient) {
                     chatClient = StreamChat.getInstance(apiKey);
+                    disableAttachmentUploads(chatClient);
                 }
 
                 // Connect user
@@ -94,21 +98,26 @@ export function StreamChatProvider({ children }: { children: React.ReactNode }) 
         };
     }, [clerkUser, isLoaded]);
 
-    if (isConnecting) {
-        return <div>{children}</div>;
-    }
-
-    if (!client) {
-        return <div>{children}</div>;
+    // The dock's state sits outside the connection switch, so a chat opened
+    // before the client finished connecting is not lost when it does.
+    if (isConnecting || !client) {
+        return (
+            <ChatDockProvider>
+                <div>{children}</div>
+            </ChatDockProvider>
+        );
     }
 
     return (
-        <Chat
-            client={client}
-            theme="str-chat__theme-light"
-            i18nInstance={i18nInstance}
-        >
-            {children}
-        </Chat>
+        <ChatDockProvider>
+            <Chat
+                client={client}
+                theme="str-chat__theme-light"
+                i18nInstance={i18nInstance}
+            >
+                {children}
+                <ChatDock />
+            </Chat>
+        </ChatDockProvider>
     );
 }

@@ -30,6 +30,8 @@ export const queryKeys = {
     all: ["cars"],
     list: (filters: unknown) => ["cars", "list", filters],
     detail: (id: string) => ["cars", "detail", id],
+    /** The car as the floating chat shows it (getCarById); under "cars" so a car update refreshes it. */
+    chat: (id: string) => ["cars", "chat", id],
     filters: (filters: unknown = {}) => ["cars", "filters", filters],
     featured: () => ["cars", "featured"],
   },

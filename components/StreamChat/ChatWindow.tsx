@@ -18,6 +18,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "../ui/button";
 import { formatCarPrice } from "@/lib/utils/currency";
 import { TranslatableMessage } from "./TranslatableMessage";
+import { NoAttachmentSelector } from "./no-attachments";
 
 function DMChannelHeader({ channel }: { channel: StreamChannel }) {
     const t = useTranslations("chat.window");
@@ -164,7 +165,12 @@ export function ChatWindow() {
     }
 
     return (
-        <Channel channel={channel} markReadOnMount={false} Message={TranslatableMessage}>
+        <Channel
+            channel={channel}
+            markReadOnMount={false}
+            Message={TranslatableMessage}
+            AttachmentSelector={NoAttachmentSelector}
+        >
             <Window>
                 <DMChannelHeader channel={channel} />
                 <MessageList />

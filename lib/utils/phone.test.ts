@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   isEgyptNationalPhone,
+  telHref,
+  whatsappHref,
   isEgyptPhone,
   LOCAL_MAX_LENGTH,
   LOCAL_MIN_LENGTH,
@@ -188,5 +190,33 @@ describe("isEgyptPhone", () => {
     ["not a number at all", "call me"],
   ])("rejects %s", (_case, value) => {
     expect(isEgyptPhone(value)).toBe(false);
+  });
+});
+
+describe("telHref", () => {
+  it("dials in international form, from however the number was typed", () => {
+    expect(telHref("01001234567")).toBe("tel:+201001234567");
+    expect(telHref("+20 100 123 4567")).toBe("tel:+201001234567");
+    expect(telHref("0223456789")).toBe("tel:+20223456789");
+  });
+
+  it("offers no link for a missing or unroutable number", () => {
+    expect(telHref(null)).toBeNull();
+    expect(telHref("123")).toBeNull();
+  });
+});
+
+describe("whatsappHref", () => {
+  it("opens WhatsApp for a mobile, with the first message encoded", () => {
+    expect(whatsappHref("01001234567")).toBe("https://wa.me/201001234567");
+    expect(whatsappHref("٠١١٢٣٤٥٦٧٨٩", "Hi & hello")).toBe(
+      "https://wa.me/201123456789?text=Hi%20%26%20hello"
+    );
+  });
+
+  it("offers no WhatsApp for a landline or a non-number", () => {
+    expect(whatsappHref("0223456789")).toBeNull();
+    expect(whatsappHref("01301234567")).toBeNull();
+    expect(whatsappHref(undefined)).toBeNull();
   });
 });

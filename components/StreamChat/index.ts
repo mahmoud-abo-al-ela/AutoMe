@@ -4,7 +4,7 @@ export { OrganizationChannelList } from "./OrganizationChannelList";
 export { ChatWindow } from "./ChatWindow";
 export { StartConversationButton } from "./StartConversationButton";
 export { UnreadBadge } from "./UnreadBadge";
-export { ChatSidebar } from "./ChatSidebar";
+export { useChatDock } from "./dock/ChatDockContext";
 export { DMChannelPreview } from "./DMChannelPreview";
 export { OrgUnreadBadge } from "./OrgUnreadBadge";
 export { UserChannelPreview } from "./UserChannelPreview";
