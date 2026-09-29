@@ -1,4 +1,10 @@
-import aj, { ajDealerAi, ajListingQuestions, arcjetConfigured, arcjetRequired } from "@/lib/arcjet";
+import aj, {
+  ajChatTranslation,
+  ajDealerAi,
+  ajListingQuestions,
+  arcjetConfigured,
+  arcjetRequired,
+} from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import {
   RateLimitError,
@@ -114,4 +120,19 @@ export async function enforceListingQuestionLimit(carId: string) {
   const decision = await ajListingQuestions.protect(req, { requested: 1, carId });
 
   assertArcjetAllowed(decision, "Too many questions. Please try again later.");
+}
+
+/**
+ * Enforce the chat-translation bucket (see ajChatTranslation). `userId` is the
+ * signed-in user's database id — the bucket key, so it must never come from
+ * the request.
+ */
+export async function enforceChatTranslationLimit(userId: string) {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajChatTranslation.protect(req, { requested: 1, userId });
+
+  assertArcjetAllowed(decision, "Too many translations. Please try again later.");
 }

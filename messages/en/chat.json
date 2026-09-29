@@ -52,5 +52,13 @@
   },
   "badge": {
     "overflow": "{max}+"
+  },
+  "translation": {
+    "translate": "Translate",
+    "translating": "Translating…",
+    "showOriginal": "Show original",
+    "translated": "Translated",
+    "failed": "Couldn't translate this message. Please try again.",
+    "translatedByAi": "Translated by AI"
   }
 }

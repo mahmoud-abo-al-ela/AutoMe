@@ -40,5 +40,8 @@
     "unsavedReads": "You've read photos for {cap} cars this month without saving them. Save a car, or fill in the form yourself, to keep going.",
     "tooManyImages": "Send at most {max} photos at a time."
   },
-  "requestDenied": "That request was blocked. If you think this is a mistake, please try again."
+  "requestDenied": "That request was blocked. If you think this is a mistake, please try again.",
+  "chat": {
+    "cannotTranslate": "This message can't be translated."
+  }
 }

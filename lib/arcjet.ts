@@ -86,3 +86,24 @@ export const ajDealerAi = arcjet({
     }),
   ],
 });
+
+/**
+ * Chat translations: a member taps "Translate" on a message. Free to everyone
+ * (owner's decision, 2026-09-29), so this bucket and the provider caps are the
+ * only limits on it. Keyed on the signed-in user, not the IP, so a showroom's
+ * shared Wi-Fi does not share one allowance. Sized for reading back through a
+ * long conversation, refilled one a minute.
+ */
+export const ajChatTranslation = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["userId"],
+  rules: [
+    shield({ mode: arcjetMode }),
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 1,
+      interval: 60,
+      capacity: 40,
+    }),
+  ],
+});

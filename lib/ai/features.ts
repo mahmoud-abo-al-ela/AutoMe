@@ -23,6 +23,13 @@ export const AI_FEATURES = {
    * on answers — the plan's `aiAssistant.enabled` is the only gate.
    */
   listingQA: "listingQA",
+  /**
+   * A buyer or a dealer taps "Translate" on a chat message in the other
+   * language. Metered, and deliberately billed to no one (owner's decision,
+   * 2026-09-29): bounded by a per-user rate limit and the provider caps, and
+   * run at low priority so it cannot crowd out the paid features.
+   */
+  chatTranslation: "chatTranslation",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

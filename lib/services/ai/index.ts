@@ -10,3 +10,4 @@ export { prepareImage, type PreparedImage } from "./image";
 export { translateListing, type ListingText } from "./translateListing";
 export { coachListing, type ListingToCoach } from "./coachListing";
 export { answerListingQuestion, type ListingAnswer } from "./answerListingQuestion";
+export { translateChatMessage, type ChatSender } from "./translateChatMessage";

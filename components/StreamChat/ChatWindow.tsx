@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "@/i18n/navigation";
 import { Button } from "../ui/button";
 import { formatCarPrice } from "@/lib/utils/currency";
+import { TranslatableMessage } from "./TranslatableMessage";
 
 function DMChannelHeader({ channel }: { channel: StreamChannel }) {
     const t = useTranslations("chat.window");
@@ -163,7 +164,7 @@ export function ChatWindow() {
     }
 
     return (
-        <Channel channel={channel} markReadOnMount={false}>
+        <Channel channel={channel} markReadOnMount={false} Message={TranslatableMessage}>
             <Window>
                 <DMChannelHeader channel={channel} />
                 <MessageList />

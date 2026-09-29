@@ -20,6 +20,15 @@ declare module "stream-chat" {
     user_role?: string | null;
   }
 
+  /**
+   * Translations of a message, written by the server when a member taps
+   * "Translate" (lib/services/chat/translation). Each keeps the text it was
+   * made from, so an edited message is never shown an old translation.
+   */
+  interface CustomMessageData {
+    translations?: Partial<Record<"ar" | "en", { text: string; source: string }>>;
+  }
+
   interface CustomChannelData {
     organization_id?: string;
     car_id?: string;

@@ -335,6 +335,13 @@ export const listingAnswerRatingSchema = z.object({
   helpful: z.boolean(),
 });
 
+/** A chat member asks for one message in their language. */
+export const chatTranslationRequestSchema = z.object({
+  // A Stream message id: client-generated UUIDs, or Stream's own ids.
+  messageId: z.string().trim().min(1).max(255),
+  target: z.enum(["en", "ar"]),
+});
+
 
 // ============ BUYER QUESTIONS (dealer inbox) ============
 

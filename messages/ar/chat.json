@@ -52,5 +52,13 @@
   },
   "badge": {
     "overflow": "{max}+"
+  },
+  "translation": {
+    "translate": "ترجمة",
+    "translating": "جارٍ الترجمة…",
+    "showOriginal": "عرض الأصل",
+    "translated": "مترجمة",
+    "failed": "تعذّرت ترجمة هذه الرسالة. حاول مرة أخرى.",
+    "translatedByAi": "ترجمة بالذكاء الاصطناعي"
   }
 }
