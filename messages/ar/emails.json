@@ -1,0 +1,29 @@
+{
+  "weeklyDigest": {
+    "subject": "أسبوعك على AutoMe — {dealership}",
+    "heading": "أسبوعك في {dealership}",
+    "range": "{start} – {end}",
+    "tipLabel": "هذا الأسبوع",
+    "sections": {
+      "buyers": "المشترون",
+      "stock": "سياراتك",
+      "ai": "إعلانات الذكاء الاصطناعي"
+    },
+    "rows": {
+      "testDriveRequests": "طلبات تجربة القيادة",
+      "testDrivesPending": "بانتظار تأكيدك",
+      "assistantAnswers": "أسئلة أجاب عنها المساعد",
+      "ratings": "مفيدة / غير مفيدة",
+      "questionsNew": "أسئلة وصلتك",
+      "questionsOpen": "لم يُرد عليها بعد",
+      "carsListed": "سيارات أضفتها",
+      "carsAvailable": "متاحة الآن",
+      "aiListings": "المستخدم هذا الشهر"
+    },
+    "ratingsValue": "{helpful} / {unhelpful}",
+    "aiOf": "{used} من {limit}",
+    "aiUnlimited": "{used} (غير محدود)",
+    "cta": "افتح لوحة التحكم",
+    "footer": "يصلك هذا الملخص كل سبت. يمكنك إيقافه أو تغيير لغته من الإعدادات ← الملخص الأسبوعي."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "weeklyDigest": {
+    "subject": "Your week on AutoMe — {dealership}",
+    "heading": "Your week at {dealership}",
+    "range": "{start} – {end}",
+    "tipLabel": "This week",
+    "sections": {
+      "buyers": "Buyers",
+      "stock": "Your cars",
+      "ai": "AI listings"
+    },
+    "rows": {
+      "testDriveRequests": "Test-drive requests",
+      "testDrivesPending": "Waiting for you to confirm",
+      "assistantAnswers": "Questions the assistant answered",
+      "ratings": "Rated helpful / not helpful",
+      "questionsNew": "Questions sent to you",
+      "questionsOpen": "Still unanswered",
+      "carsListed": "Cars listed",
+      "carsAvailable": "Available now",
+      "aiListings": "Used this month"
+    },
+    "ratingsValue": "{helpful} / {unhelpful}",
+    "aiOf": "{used} of {limit}",
+    "aiUnlimited": "{used} (unlimited)",
+    "cta": "Open your dashboard",
+    "footer": "You get this summary every Saturday. You can turn it off or change its language in Settings → Weekly summary."
+  }
+}

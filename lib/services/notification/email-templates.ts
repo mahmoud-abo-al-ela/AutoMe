@@ -4,7 +4,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 // Generic so a required string stays a string for callers that chain onto it,
 // while a nullable field passes through unchanged, exactly as before.
-const escapeHtml = <T extends string | null | undefined>(unsafe: T): T => {
+export const escapeHtml = <T extends string | null | undefined>(unsafe: T): T => {
   if (typeof unsafe !== 'string') return unsafe;
   return unsafe
     .replace(/&/g, "&amp;")

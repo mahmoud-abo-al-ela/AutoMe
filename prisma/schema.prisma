@@ -171,6 +171,13 @@ model Organization {
   aiUsage               AiUsage[]
   buyerQuestions        BuyerQuestion[]
   assistantAnswers      AssistantAnswer[]
+  digestSends           DigestSend[]
+
+  // Emails to the dealership (the weekly summary) are written in this
+  // language: "ar" or "en". Arabic by default — the market is Egypt.
+  emailLocale         String  @default("ar")
+  // The owners get a weekly summary email unless the dealership turns it off.
+  weeklyDigestEnabled Boolean @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -701,4 +708,21 @@ model AssistantAnswer {
 
   @@index([organizationId, helpful, createdAt]) // what buyers found unhelpful
   @@index([carId, createdAt]) // pruning per car
+}
+
+// One weekly summary email per dealership per week. The row is claimed
+// (inserted) before anything is sent, and the unique pair is what makes a
+// cron that fires twice — or retries — send one email, not two. A send that
+// fails outright deletes its row so the next run can try again.
+model DigestSend {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // The Saturday (Cairo) the summarised week starts on.
+  weekStart      DateTime     @db.Date
+  // How many owners it reached; 0 until sent.
+  recipients     Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, weekStart])
 }

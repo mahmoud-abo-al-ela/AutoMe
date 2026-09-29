@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { dealershipTermsSchema, organizationProfileSchema } from "@/lib/validations/schemas";
+import {
+  dealershipTermsSchema,
+  emailPreferencesSchema,
+  organizationProfileSchema,
+} from "@/lib/validations/schemas";
 import type { UserRole } from "@/lib/generated/prisma";
 import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
 
@@ -49,6 +53,22 @@ export const updateDealershipTerms = withOrgAuth(async (ctx, payload: unknown) =
   revalidatePath("/cars", "layout");
 
   return createSuccessResponse(updated, "Dealership terms updated");
+});
+
+export const getEmailPreferences = withOrgAuth(async (ctx) => {
+  const preferences = await dealershipService.getEmailPreferences(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(preferences);
+});
+
+export const updateEmailPreferences = withOrgAuth(async (ctx, payload: unknown) => {
+  const preferences = validateAction(emailPreferencesSchema, payload);
+  const updated = await dealershipService.updateEmailPreferences(
+    preferences,
+    ctx.userId,
+    ctx.organization.id
+  );
+  revalidatePath(`/org/${ctx.organization.slug}/settings/weekly-summary`);
+  return createSuccessResponse(updated, "Email settings updated");
 });
 
 export const getDealershipInfo = withOrgAuth(async (ctx) => {

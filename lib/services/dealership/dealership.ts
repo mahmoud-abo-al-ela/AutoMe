@@ -3,7 +3,11 @@ import * as workingHoursRepository from "@/lib/repositories/dealership/working-h
 import * as dealershipRepository from "@/lib/repositories/dealership";
 import * as userRepository from "@/lib/repositories/user";
 import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
-import type { DealershipTermsInput, OrganizationProfileInput } from "@/lib/validations/schemas";
+import type {
+  DealershipTermsInput,
+  EmailPreferencesInput,
+  OrganizationProfileInput,
+} from "@/lib/validations/schemas";
 import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
 
 async function getAuthorizedUser(
@@ -60,6 +64,22 @@ export async function updateOrganizationProfile(
 export async function getDealershipTerms(userId: string, organizationId: string) {
   await getAuthorizedUser(userId, organizationId);
   return dealershipRepository.findDealershipTerms(organizationId);
+}
+
+/** Any member may see what the dealership receives by email. */
+export async function getEmailPreferences(userId: string, organizationId: string) {
+  await getAuthorizedUser(userId, organizationId);
+  return dealershipRepository.findEmailPreferences(organizationId);
+}
+
+/** Only an owner changes it — the weekly summary goes to the owners. */
+export async function updateEmailPreferences(
+  preferences: EmailPreferencesInput,
+  userId: string,
+  organizationId: string
+) {
+  await getAuthorizedUser(userId, organizationId, true);
+  return dealershipRepository.updateEmailPreferences(organizationId, preferences);
 }
 
 export async function updateDealershipTerms(

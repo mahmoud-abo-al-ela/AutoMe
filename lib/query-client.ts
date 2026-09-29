@@ -66,5 +66,6 @@ export const queryKeys = {
     planUsage: (resource: string) => ["dashboard", "planUsage", resource],
     dealership: () => ["dashboard", "dealership"],
     dealershipTerms: () => ["dashboard", "dealershipTerms"],
+    emailPreferences: () => ["dashboard", "emailPreferences"],
   },
 };

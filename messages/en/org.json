@@ -583,6 +583,10 @@
       "terms": {
         "title": "Terms for buyers",
         "description": "Financing, trade-ins, inspections and delivery, shown on every listing"
+      },
+      "weeklySummary": {
+        "title": "Weekly summary",
+        "description": "A Saturday email with your week's numbers, and the language of your emails"
       }
     },
     "profile": {
@@ -682,6 +686,19 @@
       "save": "Save terms",
       "saved": "Saved. Your listings show the new terms.",
       "saveFailed": "Couldn't save your terms. Please try again."
+    },
+    "weeklySummary": {
+      "title": "Weekly summary",
+      "subtitle": "Your week on AutoMe, by email every Saturday",
+      "cardTitle": "Email settings",
+      "cardDescription": "The owners of the dealership receive a short summary every Saturday morning: test-drive requests, buyer questions, your cars and your AI listings.",
+      "enabledLabel": "Send the weekly summary",
+      "enabledHelp": "Sent to the dealership's owners every Saturday at 9:00 (Cairo).",
+      "languageLabel": "Email language",
+      "languageHelp": "The weekly summary is written in this language.",
+      "save": "Save",
+      "saved": "Email settings saved",
+      "saveFailed": "Couldn't save your email settings. Please try again."
     }
   },
   "billing": {

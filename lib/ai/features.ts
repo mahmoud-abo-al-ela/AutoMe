@@ -36,6 +36,11 @@ export const AI_FEATURES = {
    * billed to no one, at low priority like translation.
    */
   chatModeration: "chatModeration",
+  /**
+   * The paragraph atop a dealership's weekly summary email. Platform-initiated
+   * — the dealer did not ask for it — so metered and billed to no one.
+   */
+  weeklyDigest: "weeklyDigest",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

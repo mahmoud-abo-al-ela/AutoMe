@@ -12,3 +12,4 @@ export { coachListing, type ListingToCoach } from "./coachListing";
 export { answerListingQuestion, type ListingAnswer } from "./answerListingQuestion";
 export { translateChatMessage, type ChatSender } from "./translateChatMessage";
 export { moderateChatMessage } from "./moderateChatMessage";
+export { writeWeeklySummary } from "./writeWeeklySummary";

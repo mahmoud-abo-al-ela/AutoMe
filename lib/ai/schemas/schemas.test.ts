@@ -9,6 +9,7 @@ import { listingQaSchema } from "@/lib/ai/schemas/listing-qa";
 import { listingTranslationSchema } from "@/lib/ai/schemas/listing-translation";
 import { chatTranslationSchema } from "@/lib/ai/schemas/chat-translation";
 import { chatModerationSchema } from "@/lib/ai/schemas/chat-moderation";
+import { weeklySummarySchema } from "@/lib/ai/schemas/weekly-summary";
 
 /**
  * Every schema is sent to every model in its chain, Gemma included — and Gemma
@@ -28,6 +29,7 @@ const SCHEMAS: Record<string, ZodType<unknown>> = {
   listingTranslationSchema,
   chatTranslationSchema,
   chatModerationSchema,
+  weeklySummarySchema,
 };
 
 function hasEnum(node: unknown): boolean {

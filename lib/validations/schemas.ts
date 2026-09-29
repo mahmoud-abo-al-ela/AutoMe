@@ -181,6 +181,14 @@ export const organizationProfileSchema = z.object({
  * The financing note is short because the buyer assistant sends it with every
  * question asked on the dealer's listings.
  */
+/** The dealership's email settings: the weekly summary, and the language of its emails. */
+export const emailPreferencesSchema = z.object({
+  emailLocale: z.enum(["ar", "en"]),
+  weeklyDigestEnabled: z.boolean(),
+});
+
+export type EmailPreferencesInput = z.infer<typeof emailPreferencesSchema>;
+
 export const dealershipTermsSchema = z.object({
   offersFinancing: z.boolean().nullable(),
   financingNote: z.string().trim().max(200).nullable(),
