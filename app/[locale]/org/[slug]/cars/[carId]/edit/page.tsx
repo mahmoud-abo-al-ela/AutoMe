@@ -20,8 +20,7 @@ export default function EditCarPage() {
   const params = useParams();
   const carId = Array.isArray(params.carId) ? params.carId[0] : params.carId;
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  // The car list, not the browser's previous page: arriving from a bulk
-  // import, "back" re-opened the import at its first step, results gone.
+  // The car list, not the browser's previous page, which may be anywhere.
   const carsHref = `/org/${slug}/cars`;
 
   const { data: car, isLoading, error } = useQuery({

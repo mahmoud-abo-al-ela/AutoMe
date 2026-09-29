@@ -20,7 +20,7 @@ const nextConfig = {
     serverActions: {
       // Saving a car sends its photos through a server action, and the 1 MB
       // default refused all but the smallest. Kept under the 4.5 MB request
-      // body Vercel allows a function; the import shrinks photos to fit.
+      // body Vercel allows a function.
       bodySizeLimit: "4mb",
     },
   },

@@ -10,10 +10,9 @@ import {
   Edit3,
   ArrowRight,
   Lock,
-  Images,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useState, useEffect } from "react";
 import { getCarPlanLimits } from "@/actions/cars";
 import { useTranslations } from "next-intl";
@@ -217,18 +216,6 @@ const CreateCarForm = () => {
           </Card>
         </div>
       </div>
-
-      {aiAvailable && aiEnabled === true && (
-        <p className="mt-6 text-center text-sm">
-          <Link
-            href={`/org/${slug}/cars/import`}
-            className="inline-flex items-center gap-1.5 font-medium text-purple-700 hover:underline"
-          >
-            <Images className="h-4 w-4" aria-hidden />
-            {t("importLink")}
-          </Link>
-        </p>
-      )}
     </div>
   );
 };

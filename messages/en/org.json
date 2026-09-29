@@ -244,8 +244,7 @@
         "remaining": "{remaining} of {limit} AI listings left this month",
         "exhaustedBadge": "Used up",
         "exhausted": "This month’s AI listings are used up — they renew on the 1st"
-      },
-      "importLink": "Adding many cars? Import them from photos"
+      }
     },
     "modePage": {
       "manualTitle": "Manual Car Entry",
@@ -435,86 +434,6 @@
         "previousYear": "Previous year",
         "nextYear": "Next year"
       }
-    },
-    "import": {
-      "title": "Import cars from photos",
-      "subtitle": "Drop the photos of several cars at once — up to {max}. The AI sorts them into cars and drafts a listing for each, saved hidden until you publish it.",
-      "room": "{count, plural, one {Room for {n} more AI listing this month} other {Room for {n} more AI listings this month}}",
-      "roomUnlimited": "Unlimited AI listings on your plan",
-      "noRoom": "No AI listings or car slots left on your plan this month.",
-      "dropPrompt": "Drop photos of your cars here, or click to choose them.",
-      "choose": "Choose photos",
-      "tooMany": "Choose at most {max} photos at a time.",
-      "badFile": "Use JPG, PNG or WEBP photos under 10 MB each.",
-      "groupFailed": "Couldn't sort the photos. Please try again.",
-      "grouping": "Sorting {n} photos into cars…",
-      "groupingNote": "This can take a minute when the AI service is busy.",
-      "reviewIntro": "{count, plural, one {The AI found one car.} other {The AI found {n} cars.}} Drag a photo to the right car if it is in the wrong one, or within a car to change the order.",
-      "carNumber": "Car {n}",
-      "photoCount": "{count, plural, one {{n} photo} other {{n} photos}}",
-      "moveTo": "Move this photo to",
-      "newCar": "A new car",
-      "removeCar": "Leave this car out",
-      "overRoom": "Your plan has room for {room} AI drafts this month, and the AI found {total} cars. Tick the cars the AI should draft — you can fill in the others by hand, with their photos kept.",
-      "create": "{count, plural, one {Create one draft} other {Create {n} drafts}}",
-      "startOver": "Start over",
-      "stop": "Stop after this car",
-      "status": {
-        "waiting": "Waiting",
-        "reading": "Reading the photos…",
-        "queued": "Waiting for the AI to start…",
-        "saving": "Saving the draft…",
-        "done": "Saved as a hidden draft",
-        "failed": "Not saved",
-        "skipped": "Not drafted with AI",
-        "published": "Published"
-      },
-      "saveFailed": "Something went wrong",
-      "review": "Review",
-      "published": "{count, plural, one {One car published} other {{n} cars published}}",
-      "publishPartial": "Published {done} of {total}. Open the others to see what's missing.",
-      "another": "Import more",
-      "draftWithAi": "Draft with AI",
-      "dragPhoto": "Photo — drag to reorder, or to move it to another car",
-      "dropNewCar": "Drop a photo here to make it a car of its own",
-      "continueByHand": "Continue — I'll fill them in by hand",
-      "fillIn": "Fill in by hand",
-      "backToImport": "Back to the import",
-      "a11y": {
-        "instructions": "To move a photo, press space or enter, use the arrow keys to reach its new place — in this car or another — and press space or enter again. Press escape to cancel.",
-        "picked": "Photo picked up.",
-        "over": "Over {car}.",
-        "nowhere": "Not over a car.",
-        "dropped": "Photo moved to {car}.",
-        "cancelled": "Move cancelled. The photo stays where it was.",
-        "overPlace": "Over place {place} of {car}.",
-        "droppedPlace": "Photo moved to place {place} of {car}."
-      },
-      "cover": "Cover",
-      "steps": {
-        "label": "Import steps",
-        "upload": "Upload photos",
-        "review": "Check the cars",
-        "drafts": "Drafts"
-      },
-      "dropping": "Drop them here…",
-      "formats": "Up to {max} photos · JPG, PNG or WEBP · 10 MB each",
-      "tipsList": {
-        "many": "Several cars in one go — the AI sorts the photos into cars.",
-        "badge": "Include the back and the dashboard: the badge names the exact model.",
-        "hidden": "Nothing is published until you review it."
-      },
-      "progress": "Drafting car {done} of {total}…",
-      "progressNote": "Each car takes about half a minute. You can leave this tab open and come back.",
-      "stats": {
-        "saved": "{n} saved, hidden",
-        "published": "{n} published",
-        "failed": "{n} not saved",
-        "skipped": "{n} to fill in"
-      },
-      "view": "View listing",
-      "publishAllCount": "Publish {n}",
-      "hiddenNote": "Drafts are hidden from buyers. Review them, or publish them now."
     }
   },
   "testDrives": {

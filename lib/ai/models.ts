@@ -43,9 +43,8 @@ const GEMMA_FALLBACK = ["google/gemma-4-26b-a4b-it", "google/gemma-4-31b-it"];
 const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
   vision: [
     // Qwen 3.8 Max first — on trial from 2026-09-29, the owner's choice after
-    // Claude Sonnet 5 failed the photo sort with invalid JSON. It reads each
-    // car (the add-car form and the bulk import) and sorts import batches.
-    // Then the model the photo evaluation passed on (14/14), and others behind
+    // Claude Sonnet 5 returned invalid JSON. It reads each car's photos on
+    // the add-car form. Then the model the photo evaluation passed on (14/14), and others behind
     // the gateway: a timeout walks on to the next model.
     "codecraft/qwen3.8-max",
     "codecraft/gemini-3.7-flash",

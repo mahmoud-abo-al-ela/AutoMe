@@ -64,14 +64,12 @@ export const ajListingQuestions = arcjet({
 });
 
 /**
- * A dealer's AI work: the add-car photo read, a bulk import's sort and each
- * car it reads, the translation and the listing coach. Its own client, like
- * the buyer questions, because the shared bucket above — 10 an hour, refilled
- * all at once on the hour — let one 5-car import (six requests) and a second
- * one lock a dealer out for up to an hour (2026-09-29).
+ * A dealer's AI work: the add-car photo read, the translation and the listing
+ * coach. Its own client, like the buyer questions, because the shared bucket
+ * above — 10 an hour, refilled all at once on the hour — could lock a dealer
+ * adding several cars out for up to an hour (2026-09-29).
  *
- * Sized for a full 40-photo import (a sort plus a read per car), and refilled
- * one at a time, a minute apart, so a wait is at most a minute. Real AI spend
+ * Refilled one at a time, a minute apart, so a wait is at most a minute. Real AI spend
  * is capped elsewhere — the plan's AI listings per month and the unsaved-read
  * cap — so this bucket only has to stop bursts and runaway clients.
  */

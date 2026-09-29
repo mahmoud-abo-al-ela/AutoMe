@@ -58,7 +58,7 @@ export function useCarListingStream() {
     xhrRef.current?.abort();
     setProgress(INITIAL);
     // Shrunk for the upload limit; the listing keeps the originals.
-    const upload = await Promise.all(files.map((file) => shrinkForAi(file)));
+    const upload = await Promise.all(files.map(shrinkForAi));
 
     return new Promise<CarListingDraft>((resolve, reject) => {
       const xhr = new XMLHttpRequest();

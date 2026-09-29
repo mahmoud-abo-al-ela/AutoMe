@@ -93,9 +93,9 @@ export async function enforceRateLimit(requested = 1) {
 }
 
 /**
- * Enforce the dealer-AI bucket (see ajDealerAi): photo reads, the bulk
- * import, translation and the listing coach. Separate from the shared bucket
- * so an import cannot lock a dealer out of everything else for an hour.
+ * Enforce the dealer-AI bucket (see ajDealerAi): photo reads, translation
+ * and the listing coach. Separate from the shared bucket so a run of AI work
+ * cannot lock a dealer out of everything else for an hour.
  */
 export async function enforceDealerAiLimit(requested = 1) {
   return enforce(ajDealerAi, requested);
