@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
 import { cn } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
+import { currentFlag } from "@/lib/utils/chat-moderation";
 import { useCarTitle } from "@/hooks/use-car-title";
 import type { Channel as StreamChannel } from "stream-chat";
 import { useConversationSide } from "./ConversationHeader";
@@ -47,6 +48,11 @@ export function DMChannelPreview({
     const getMessagePreview = () => {
         if (!lastMessage) return t("preview.noMessages");
 
+        // An abusive message stays hidden in the list too (MessageSafety).
+        const mine = lastMessage.user?.id === client.userID;
+        if (!mine && currentFlag(lastMessage.safety_flag, lastMessage.text?.trim() ?? "") === "abuse") {
+            return t("safety.hiddenPreview");
+        }
         const text = lastMessage.text || t("preview.attachment");
         // The prefix is part of the message rather than concatenated: in
         // Arabic it is a different word in a different place.

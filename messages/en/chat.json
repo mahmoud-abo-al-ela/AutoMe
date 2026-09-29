@@ -83,5 +83,12 @@
   },
   "status": {
     "seen": "Seen"
+  },
+  "safety": {
+    "scamWarning": "Be careful: never send money before you've seen the car and met the dealer in person.",
+    "spamWarning": "This looks like spam. Don't open links you don't recognise.",
+    "hidden": "Hidden: this message may be offensive.",
+    "show": "Show message",
+    "hiddenPreview": "Hidden message"
   }
 }

@@ -18,7 +18,9 @@ import { translateChatMessageAction } from "@/actions/chat-translation";
 import { ActionErrorText } from "@/components/ActionErrorText";
 import { currentTranslation, isTranslatable } from "@/lib/utils/chat-translation";
 import type { ActionError } from "@/lib/utils/error-messages";
+import { currentFlag } from "@/lib/utils/chat-moderation";
 import { useDealershipSender } from "./useDealershipSender";
+import { FlagNotice, FlagProvider, FlaggedText, useFlagHidesText, useFlagState } from "./MessageSafety";
 
 interface ToggleState {
   showing: boolean;
@@ -38,7 +40,8 @@ const ToggleContext = createContext<ToggleState | null>(null);
 function TranslateToggle() {
   const t = useTranslations("chat.translation");
   const state = useContext(ToggleContext);
-  if (!state) return null;
+  const hidden = useFlagHidesText();
+  if (!state || hidden) return null;
 
   const label = state.pending ? t("translating") : state.showing ? t("showOriginal") : t("translate");
   // One short line: a label that wraps widens the bubble past its text.
@@ -68,11 +71,19 @@ function TranslateToggle() {
   );
 }
 
-/** Text in its own direction: an English message in an Arabic page, and the reverse. */
-function withToggle(text?: string, mentioned?: UserResponse[], options?: RenderTextOptions): ReactNode {
+/**
+ * The inside of the other person's bubble: a safety warning if the message is
+ * flagged, the text in its own direction (English in an Arabic page, and the
+ * reverse) or hidden if abusive, and the translate toggle. Each part reads
+ * its state from context — see ToggleContext.
+ */
+function withChrome(text?: string, mentioned?: UserResponse[], options?: RenderTextOptions): ReactNode {
   return (
     <>
-      <div dir="auto">{defaultRenderText(text, mentioned, options)}</div>
+      <FlagNotice />
+      <FlaggedText>
+        <div dir="auto">{defaultRenderText(text, mentioned, options)}</div>
+      </FlaggedText>
       <TranslateToggle />
     </>
   );
@@ -88,6 +99,9 @@ function withToggle(text?: string, mentioned?: UserResponse[], options?: RenderT
  *   either member, is instant. The original is always one tap away.
  * - A dealership's replies shown to the buyer under the dealership's name and
  *   logo, not the staff member's (useDealershipSender).
+ * - A message moderation flagged: a warning over a scam or spam message, an
+ *   abusive one hidden behind "Show message" (MessageSafety). Only for the
+ *   reader — the sender sees their own message as sent.
  */
 export function ChatMessage(props: MessageUIComponentProps) {
   const { message, isMyMessage } = useMessageContext("ChatMessage");
@@ -98,7 +112,9 @@ export function ChatMessage(props: MessageUIComponentProps) {
   const [fetched, setFetched] = useState<{ source: string; text: string } | null>(null);
 
   const text = message.text?.trim() ?? "";
-  const offered = !isMyMessage() && message.type === "regular" && isTranslatable(text, locale);
+  const theirs = !isMyMessage() && message.type === "regular" && text.length > 0;
+  const offered = theirs && isTranslatable(text, locale);
+  const flag = useFlagState(theirs ? currentFlag(message.safety_flag, text) : null);
   const translation =
     currentTranslation(message.translations, text, locale) ??
     (fetched?.source === text ? fetched.text : null);
@@ -151,10 +167,12 @@ export function ChatMessage(props: MessageUIComponentProps) {
     [asSeen, toggle.showing, translation, message, userLanguage]
   );
 
-  if (!offered) return <MessageSimple {...props} message={shown} />;
+  if (!theirs) return <MessageSimple {...props} message={shown} />;
   return (
-    <ToggleContext.Provider value={toggle}>
-      <MessageSimple {...props} message={shown} renderText={withToggle} />
-    </ToggleContext.Provider>
+    <FlagProvider value={flag}>
+      <ToggleContext.Provider value={offered ? toggle : null}>
+        <MessageSimple {...props} message={shown} renderText={withChrome} />
+      </ToggleContext.Provider>
+    </FlagProvider>
   );
 }

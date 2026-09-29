@@ -30,6 +30,12 @@ export const AI_FEATURES = {
    * run at low priority so it cannot crowd out the paid features.
    */
   chatTranslation: "chatTranslation",
+  /**
+   * A chat message the free screen (lib/utils/chat-screen) could not clear is
+   * judged scam / spam / abuse / fine. Platform-initiated, so metered and
+   * billed to no one, at low priority like translation.
+   */
+  chatModeration: "chatModeration",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];
