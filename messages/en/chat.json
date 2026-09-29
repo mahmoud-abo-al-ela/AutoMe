@@ -22,7 +22,10 @@
     "emptyTitle": "Select a conversation",
     "emptyBody": "Choose a conversation from the list to start messaging",
     "untitled": "Conversation",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "back": "Back to conversations",
+    "buyer": "Buyer",
+    "withBuyer": "Buyer: {name}"
   },
   "preview": {
     "noMessages": "No messages yet",
@@ -70,5 +73,15 @@
       "installments": "Do you offer installments?",
       "tradeIn": "Can I trade in my car?"
     }
+  },
+  "tabs": {
+    "label": "Filter conversations",
+    "all": "All",
+    "unread": "Unread",
+    "empty": "No conversations yet.",
+    "emptyUnread": "You're all caught up — no unread messages."
+  },
+  "status": {
+    "seen": "Seen"
   }
 }

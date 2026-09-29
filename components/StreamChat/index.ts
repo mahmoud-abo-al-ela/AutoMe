@@ -8,3 +8,4 @@ export { useChatDock } from "./dock/ChatDockContext";
 export { DMChannelPreview } from "./DMChannelPreview";
 export { OrgUnreadBadge } from "./OrgUnreadBadge";
 export { UserChannelPreview } from "./UserChannelPreview";
+export { ChatInbox } from "./ChatInbox";

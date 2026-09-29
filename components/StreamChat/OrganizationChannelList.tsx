@@ -8,6 +8,7 @@ import { useChatContext } from "stream-chat-react";
 import { getOrganizationMemberIds } from "@/actions/stream-chat";
 import { Loader2, MessageSquare } from "lucide-react";
 import { DMChannelPreview } from "./DMChannelPreview";
+import { useInboxTabs } from "./useInboxTabs";
 import type { ChannelFilters, ChannelSort } from "stream-chat";
 
 export function OrganizationChannelList({
@@ -19,6 +20,7 @@ export function OrganizationChannelList({
     const { client } = useChatContext();
     const [filters, setFilters] = useState<ChannelFilters | null>(null);
     const [loading, setLoading] = useState(true);
+    const { tabs, channelRenderFilterFn, EmptyStateIndicator } = useInboxTabs();
 
     useEffect(() => {
         const loadFilters = async () => {
@@ -78,6 +80,8 @@ export function OrganizationChannelList({
                 </div>
             </div>
 
+            {tabs}
+
             {/* Channel List */}
             <div className="flex-1 overflow-hidden">
                 <ChannelList
@@ -92,6 +96,8 @@ export function OrganizationChannelList({
                         />
                     )}
                     setActiveChannelOnMount={false}
+                    channelRenderFilterFn={channelRenderFilterFn}
+                    EmptyStateIndicator={EmptyStateIndicator}
                 />
             </div>
         </div>

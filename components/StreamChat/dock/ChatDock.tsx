@@ -3,20 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useQuery } from "@tanstack/react-query";
 import { Channel, MessageInput, MessageList, Window } from "stream-chat-react";
 import type { Channel as StreamChannel } from "stream-chat";
 import { Car, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { getCarById } from "@/actions/cars-listing";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCarConversation } from "@/hooks/use-car-conversation";
+import { useChatCar } from "@/hooks/use-chat-car";
 import { useFormatters } from "@/hooks/use-formatters";
-import { queryKeys } from "@/lib/query-client";
 import { logError } from "@/lib/utils/errors";
 import { cn } from "@/lib/utils";
-import { TranslatableMessage } from "../TranslatableMessage";
+import { ChatMessage } from "../ChatMessage";
 import { NoAttachmentSelector } from "../no-attachments";
+import { ChatMessageStatus } from "../ChatMessageStatus";
 import { useChatDock } from "./ChatDockContext";
 import { DockHeader } from "./DockHeader";
 import { DockStarter } from "./DockStarter";
@@ -133,15 +132,7 @@ function DockWindow({ carId, onCarPage }: { carId: string; onCarPage: boolean })
   const minimize = () => exit(() => setMinimized(true));
   const dismiss = () => exit(close);
 
-  const car = useQuery({
-    queryKey: queryKeys.cars.chat(carId),
-    queryFn: async () => {
-      const response = await getCarById(carId);
-      if (!response.success) throw response.error;
-      return response.data;
-    },
-    staleTime: 30_000,
-  });
+  const car = useChatCar(carId);
 
   const trySend = async (text: string) => {
     try {
@@ -240,7 +231,7 @@ function DockWindow({ carId, onCarPage }: { carId: string; onCarPage: boolean })
         </div>
       ) : channel ? (
         <div className="flex min-h-0 flex-1 flex-col [&_.str-chat]:h-full">
-          <Channel channel={channel} Message={TranslatableMessage} AttachmentSelector={NoAttachmentSelector}>
+          <Channel channel={channel} Message={ChatMessage} AttachmentSelector={NoAttachmentSelector} MessageStatus={ChatMessageStatus}>
             <Window>
               <MessageList />
               {channel.state.messages.length === 0 && (

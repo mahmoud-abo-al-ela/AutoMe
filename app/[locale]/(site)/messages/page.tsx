@@ -1,7 +1,7 @@
 import { redirect } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@clerk/nextjs/server";
-import { UserChannelList, ChatWindow } from "@/components/StreamChat";
+import { UserChannelList, ChatInbox } from "@/components/StreamChat";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import type { Metadata } from "next";
 import type { Locale } from "@/i18n/routing";
@@ -45,17 +45,7 @@ export default async function MessagesPage({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-0 h-[calc(100vh-220px)] md:h-[calc(100vh-200px)] border rounded-lg overflow-hidden bg-card shadow-sm">
-        {/* Channel List - scoped to current organization on subdomains */}
-        <div className="border-e flex flex-col overflow-hidden bg-background">
-          <UserChannelList organizationId={organization?.id} />
-        </div>
-
-        {/* Chat Window */}
-        <div className="flex flex-col overflow-hidden bg-background">
-          <ChatWindow />
-        </div>
-      </div>
+      <ChatInbox list={<UserChannelList organizationId={organization?.id} />} />
     </div>
   );
 }

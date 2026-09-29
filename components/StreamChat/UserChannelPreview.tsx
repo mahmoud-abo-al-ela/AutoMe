@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
 import { cn } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useCarTitle } from "@/hooks/use-car-title";
 import type { Channel as StreamChannel } from "stream-chat";
 
 /** Above this the dot shows "9+" — it is 20px across. */
@@ -29,9 +30,14 @@ export function UserChannelPreview({
     const carData = channel.data?.car_data;
     const organizationData = channel.data?.organization_data;
 
-    // Determine display info - prefer car data, fallback to organization
-    const displayTitle =
-        carData?.title || organizationData?.name || t("window.untitled");
+    // Determine display info - prefer car data, fallback to organization. The
+    // car's title is read live in the reader's language: the channel's saved
+    // copy is English only.
+    const carTitle = useCarTitle(
+        carData?.id ?? channel.data?.car_id,
+        carData?.title || organizationData?.name || t("window.untitled")
+    );
+    const displayTitle = carTitle.title;
     const displayImage = carData?.images?.[0] || carData?.image;
     const isCar = !!carData;
 
@@ -96,8 +102,12 @@ export function UserChannelPreview({
                     <h4 className={cn(
                         "font-semibold text-sm truncate",
                         unreadCount > 0 && "text-foreground"
-                    )}>
-                        {displayTitle}
+                    )} dir={carTitle.dir}>
+                        {carTitle.loading ? (
+                            <span className="block h-4 w-36 max-w-full animate-pulse rounded bg-muted" aria-hidden />
+                        ) : (
+                            displayTitle
+                        )}
                     </h4>
                     <span className="text-xs text-muted-foreground shrink-0">
                         {formatTime(lastMessageTime)}

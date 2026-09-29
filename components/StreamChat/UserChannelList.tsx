@@ -3,6 +3,7 @@
 import { ChannelList } from "stream-chat-react";
 import { useChatContext } from "stream-chat-react";
 import { UserChannelPreview } from "./UserChannelPreview";
+import { useInboxTabs } from "./useInboxTabs";
 import type { ChannelFilters, ChannelSort } from "stream-chat";
 
 const buildFilters = (userId: string, organizationId?: string | null) => {
@@ -30,6 +31,7 @@ export function UserChannelList({
     organizationId?: string | null;
 }) {
     const { client } = useChatContext();
+    const { tabs, channelRenderFilterFn, EmptyStateIndicator } = useInboxTabs();
 
     if (!client?.userID) {
         return null;
@@ -38,12 +40,16 @@ export function UserChannelList({
     const filters = buildFilters(client.userID, organizationId);
 
     return (
-        <div className="h-full">
+        <div className="flex h-full flex-col">
+            {tabs}
+            <div className="min-h-0 flex-1">
             <ChannelList
                 filters={filters}
                 sort={sort}
                 options={options}
                 Preview={UserChannelPreview}
+                channelRenderFilterFn={channelRenderFilterFn}
+                EmptyStateIndicator={EmptyStateIndicator}
                 setActiveChannelOnMount={false}
                 showChannelSearch
                 additionalChannelSearchProps={{
@@ -55,6 +61,7 @@ export function UserChannelList({
                     },
                 }}
             />
+            </div>
         </div>
     );
 }

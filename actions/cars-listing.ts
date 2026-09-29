@@ -10,6 +10,8 @@ import { ValidationError, NotFoundError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { serializeCarWithImages, type SerializedCar } from "@/lib/utils/serializers";
 import type { CarFilters } from "@/lib/services/car/listing";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { carTitlesRequestSchema } from "@/lib/validations/schemas";
 
 /** The listing filters plus the page/limit the client sends alongside them. */
 type CarListingInput = CarFilters & { page?: number; limit?: number };
@@ -97,6 +99,18 @@ export const getWishlist = withAuth(
   const result = await wishlistService.getUserWishlist(ctx.userId, { page, limit }, organization?.id || null);
 
   return createSuccessResponse(result);
+});
+
+/**
+ * Titles for the cars in a chat conversation list, in both languages, keyed
+ * by id — one request for the whole list instead of one per conversation
+ * (server actions from one tab run one at a time). Public listing fields
+ * only; unknown ids are simply absent.
+ */
+export const getCarTitles = withErrorHandling(async (input: unknown) => {
+  const carIds = validateAction(carTitlesRequestSchema, input);
+  const rows = await carRepository.findCarTitlesByIds(carIds);
+  return createSuccessResponse(Object.fromEntries(rows.map((row) => [row.id, row])));
 });
 
 export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {

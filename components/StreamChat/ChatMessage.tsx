@@ -18,6 +18,7 @@ import { translateChatMessageAction } from "@/actions/chat-translation";
 import { ActionErrorText } from "@/components/ActionErrorText";
 import { currentTranslation, isTranslatable } from "@/lib/utils/chat-translation";
 import type { ActionError } from "@/lib/utils/error-messages";
+import { useDealershipSender } from "./useDealershipSender";
 
 interface ToggleState {
   showing: boolean;
@@ -78,15 +79,20 @@ function withToggle(text?: string, mentioned?: UserResponse[], options?: RenderT
 }
 
 /**
- * A chat message with "Translate" under it when it is written in the other
- * language — Egyptian Arabic for a reader browsing in English, English for one
- * browsing in Arabic. Nothing is translated until someone taps (owner's
- * decision); the translation is saved on the message by the server, so the
- * next tap, by either member, is instant. The original is always one tap away.
+ * Every chat message, as this app draws it on top of Stream's own:
+ *
+ * - "Translate" under a message written in the other language — Egyptian
+ *   Arabic for a reader browsing in English, English for one browsing in
+ *   Arabic. Nothing is translated until someone taps (owner's decision); the
+ *   translation is saved on the message by the server, so the next tap, by
+ *   either member, is instant. The original is always one tap away.
+ * - A dealership's replies shown to the buyer under the dealership's name and
+ *   logo, not the staff member's (useDealershipSender).
  */
-export function TranslatableMessage(props: MessageUIComponentProps) {
-  const { message, isMyMessage } = useMessageContext("TranslatableMessage");
-  const { userLanguage } = useTranslationContext("TranslatableMessage");
+export function ChatMessage(props: MessageUIComponentProps) {
+  const { message, isMyMessage } = useMessageContext("ChatMessage");
+  const { userLanguage } = useTranslationContext("ChatMessage");
+  const asSeen = useDealershipSender();
   const locale = useLocale() as Locale;
   const [showing, setShowing] = useState(false);
   const [fetched, setFetched] = useState<{ source: string; text: string } | null>(null);
@@ -129,21 +135,23 @@ export function TranslatableMessage(props: MessageUIComponentProps) {
   // what is drawn; the message itself is untouched.
   const shown = useMemo(
     () =>
-      toggle.showing && translation
-        ? {
-            ...message,
-            text: translation,
-            i18n: {
-              ...message.i18n,
-              [`${userLanguage}_text`]: translation,
-              language: message.i18n?.language ?? userLanguage,
-            },
-          }
-        : message,
-    [toggle.showing, translation, message, userLanguage]
+      asSeen(
+        toggle.showing && translation
+          ? {
+              ...message,
+              text: translation,
+              i18n: {
+                ...message.i18n,
+                [`${userLanguage}_text`]: translation,
+                language: message.i18n?.language ?? userLanguage,
+              },
+            }
+          : message
+      ),
+    [asSeen, toggle.showing, translation, message, userLanguage]
   );
 
-  if (!offered) return <MessageSimple {...props} />;
+  if (!offered) return <MessageSimple {...props} message={shown} />;
   return (
     <ToggleContext.Provider value={toggle}>
       <MessageSimple {...props} message={shown} renderText={withToggle} />

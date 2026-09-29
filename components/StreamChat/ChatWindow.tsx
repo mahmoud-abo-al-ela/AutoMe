@@ -11,127 +11,11 @@ import {
     Window,
     useChatContext,
 } from "stream-chat-react";
-import type { Channel as StreamChannel } from "stream-chat";
-import { MessageSquare, Car, Building2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "@/i18n/navigation";
-import { Button } from "../ui/button";
-import { formatCarPrice } from "@/lib/utils/currency";
-import { TranslatableMessage } from "./TranslatableMessage";
+import { MessageSquare } from "lucide-react";
+import { ChatMessage } from "./ChatMessage";
 import { NoAttachmentSelector } from "./no-attachments";
-
-function DMChannelHeader({ channel }: { channel: StreamChannel }) {
-    const t = useTranslations("chat.window");
-    const { client } = useChatContext();
-
-    // Get the other user in the conversation
-    const members = Object.values(channel.state.members ?? {});
-    const otherMember = members.find((member) => member.user?.id !== client.userID);
-    const otherUser = otherMember?.user;
-
-    // Get car and organization data from channel data
-    const carData = channel.data?.car_data;
-    const organizationData = channel.data?.organization_data;
-
-    // Determine if current user is organization member.
-    // `user_role` is stored flat on the Stream user (see upsertStreamUser), not
-    // under a `custom` key — reading it nested made this permanently false, so
-    // the dealer-side inbox rendered the buyer-facing branch.
-    const isOrgMember =
-        Boolean(channel.data?.organization_id) &&
-        members.some(
-            (m) => m.user?.id === client.userID && Boolean(m.user?.user_role)
-        );
-
-    // For regular users, show car info in header
-    // For org members, show customer info
-    const showCarInHeader = !isOrgMember && carData;
-    const showOrgInHeader = !isOrgMember && !carData && organizationData;
-
-    // The title block used to read carData.title unconditionally, so every
-    // channel without car_data — the entire dealer-side inbox, and any
-    // organization-level conversation — crashed the panel on render.
-    const title = showCarInHeader
-        ? carData.title
-        : showOrgInHeader
-          ? organizationData.name
-          : otherUser?.name;
-
-    const price =
-        showCarInHeader && carData.price != null
-            ? Number(carData.price)
-            : null;
-
-    return (
-        <div className="border-b bg-background">
-            <div className="px-4 py-3 flex items-center gap-3 bg-gradient-to-r from-background via-muted/10 to-background">
-                {/* Avatar - Car Image for users, User Avatar for org members */}
-                {showCarInHeader ? (
-                    <Avatar className="h-11 w-11 ring-2 ring-primary/20 shadow-sm rounded-lg">
-                        {carData.images?.[0] ? (
-                            <AvatarImage
-                                src={carData.images[0]}
-                                alt={carData.title ?? ""}
-                                className="object-cover"
-                            />
-                        ) : null}
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg">
-                            <Car className="h-5 w-5 text-primary" />
-                        </AvatarFallback>
-                    </Avatar>
-                ) : showOrgInHeader ? (
-                    <Avatar className="h-11 w-11 ring-2 ring-primary/20 shadow-sm">
-                        {organizationData.logo ? (
-                            <AvatarImage
-                                src={organizationData.logo}
-                                alt={organizationData.name ?? ""}
-                            />
-                        ) : null}
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
-                            <Building2 className="h-5 w-5 text-primary" />
-                        </AvatarFallback>
-                    </Avatar>
-                ) : (
-                    <Avatar className="h-11 w-11 ring-2 ring-primary/20 shadow-sm">
-                        {otherUser?.image ? (
-                            <AvatarImage src={otherUser.image} alt={otherUser.name} />
-                        ) : null}
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
-                            <Building2 className="h-5 w-5 text-primary" />
-                        </AvatarFallback>
-                    </Avatar>
-                )}
-
-                {/* Info */}
-                <div className="flex justify-between items-center w-full gap-3">
-                    <div className="min-w-0">
-                        <h3 className="font-semibold text-base truncate">
-                            {title || t("untitled")}
-                        </h3>
-                        {price !== null && Number.isFinite(price) && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                                <span className="font-medium text-primary">
-                                    {formatCarPrice(price)}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                    {showCarInHeader && carData.id && (
-                        <Link href={`/cars/${carData.id}`} className="shrink-0">
-                            <Button
-                                size="sm"
-                                className="h-7 px-2 text-xs bg-primary hover:bg-primary/80 cursor-pointer"
-                            >
-                                {t("viewDetails")}
-                            </Button>
-                        </Link>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-}
-
+import { ChatMessageStatus } from "./ChatMessageStatus";
+import { ConversationHeader } from "./ConversationHeader";
 export function ChatWindow() {
     const t = useTranslations("chat.window");
     const { channel } = useChatContext();
@@ -168,11 +52,12 @@ export function ChatWindow() {
         <Channel
             channel={channel}
             markReadOnMount={false}
-            Message={TranslatableMessage}
+            Message={ChatMessage}
             AttachmentSelector={NoAttachmentSelector}
+            MessageStatus={ChatMessageStatus}
         >
             <Window>
-                <DMChannelHeader channel={channel} />
+                <ConversationHeader channel={channel} />
                 <MessageList />
                 <MessageInput />
             </Window>

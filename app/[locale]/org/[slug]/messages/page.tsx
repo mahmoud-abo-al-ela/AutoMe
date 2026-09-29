@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import type { Locale } from "@/i18n/routing";
 import { auth } from "@clerk/nextjs/server";
 import { getOrganization } from "@/lib/getOrganization";
-import { OrganizationChannelList, ChatWindow } from "@/components/StreamChat";
+import { OrganizationChannelList, ChatInbox } from "@/components/StreamChat";
 
 export async function generateMetadata({
   params,
@@ -46,17 +46,7 @@ export default async function OrganizationMessagesPage({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-0 h-[calc(100vh-220px)] md:h-[calc(100vh-200px)] border rounded-lg overflow-hidden bg-card shadow-sm">
-        {/* Channel List */}
-        <div className="border-e flex flex-col overflow-hidden bg-background">
-          <OrganizationChannelList organizationSlug={slug} />
-        </div>
-
-        {/* Chat Window */}
-        <div className="flex flex-col overflow-hidden bg-background">
-          <ChatWindow />
-        </div>
-      </div>
+      <ChatInbox list={<OrganizationChannelList organizationSlug={slug} />} />
     </div>
   );
 }

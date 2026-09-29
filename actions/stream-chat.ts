@@ -104,6 +104,7 @@ export const startCarConversation = withAuth(async (ctx, carId: string) => {
             id: car.organization.id,
             name: car.organization.name,
             slug: car.organization.slug,
+            logo: car.organization.logo,
         },
     });
 
@@ -160,6 +161,7 @@ export const startOrganizationConversation = withAuth(
             id: organization.id,
             name: organization.name,
             slug: organization.slug,
+            logo: organization.logo,
         },
     });
 
