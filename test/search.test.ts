@@ -251,6 +251,19 @@ describe.skipIf(!hasTestDb)("bilingual listing text (real Postgres)", () => {
     expect(cars.map((c) => c?.model)).toContain("Sportage");
   });
 
+  it("builds a search vector for a car with no Arabic features (NULL featuresAr)", async () => {
+    // These fixtures leave featuresAr unset, as every car saved before Arabic
+    // features existed does. array_to_string(NULL) turned the whole generated
+    // tsvector NULL until 20260930120000 — every search above failed with "no
+    // match" while the real cause was an empty column. This names it.
+    const rows = await db.$queryRaw<{ model: string; hasVector: boolean }[]>`
+      SELECT "model", "searchVector" IS NOT NULL AND "searchVector" <> ''::tsvector AS "hasVector"
+      FROM "Car" WHERE "organizationId" = ${BILINGUAL_ORG}
+    `;
+    expect(rows).toHaveLength(2);
+    expect(rows.every((row) => row.hasVector)).toBe(true);
+  });
+
   it("finds a car by its English bilingual title", async () => {
     const { cars } = await searchCarsRanked({
       search: "Turbo",

@@ -60,6 +60,9 @@ describe.skipIf(!hasTestDb)("AI usage reporting (real Postgres)", () => {
         row({ success: false, errorCode: "TIMEOUT", latencyMs: 20_000 }),
         // A second feature and a second model.
         row({ feature: "searchFiltersFromImage", model: "gemini-3.5-flash-lite" }),
+        // The main model's name again, through another provider: a separate
+        // row in the model report. Its own feature keeps the counts above.
+        row({ feature: "listingTranslation", provider: "codecraft", latencyMs: 9000 }),
         // Outside the window: must not appear anywhere.
         row({ createdAt: LONG_AGO, feature: "carListingFromImage" }),
       ],
@@ -100,21 +103,32 @@ describe.skipIf(!hasTestDb)("AI usage reporting (real Postgres)", () => {
       const rows = await getUsageByFeature(since());
       const total = rows.reduce((sum, r) => sum + r.calls, 0);
 
-      // Nine rows were written; one is from 2020.
-      expect(total).toBe(8);
+      // Ten rows were written; one is from 2020.
+      expect(total).toBe(9);
     });
   });
 
+  // Models are reported as provider/model (since f25cb5e): the same model name
+  // reached through CodeCraft and through Google is two different services,
+  // with different latency and failure profiles, and must not be merged.
   describe("getUsageByModel", () => {
     it("separates the models", async () => {
       const rows = await getUsageByModel(since());
-      expect(rows.map((r) => r.model)).toContain("gemini-3.5-flash-lite");
-      expect(rows.map((r) => r.model)).toContain("gemini-3.7-flash");
+      expect(rows.map((r) => r.model)).toContain("google/gemini-3.5-flash-lite");
+      expect(rows.map((r) => r.model)).toContain("google/gemini-3.7-flash");
+    });
+
+    it("keeps one model name reached through two providers apart", async () => {
+      const rows = await getUsageByModel(since());
+      const viaCodecraft = rows.find((r) => r.model === "codecraft/gemini-3.7-flash");
+      expect(viaCodecraft?.calls).toBe(1);
+      expect(viaCodecraft?.p50LatencyMs).toBe(9000);
+      expect(rows.find((r) => r.model === "google/gemini-3.7-flash")?.calls).toBe(7);
     });
 
     it("computes percentiles that a mean would hide", async () => {
       const rows = await getUsageByModel(since());
-      const main = rows.find((r) => r.model === "gemini-3.7-flash");
+      const main = rows.find((r) => r.model === "google/gemini-3.7-flash");
 
       // Latencies are 500, 1000, 2000, 3000, 4000, 20000, 50000. The mean is
       // over 11s — a duration that never actually happened — while the median
@@ -125,7 +139,7 @@ describe.skipIf(!hasTestDb)("AI usage reporting (real Postgres)", () => {
 
     it("counts failures per model", async () => {
       const rows = await getUsageByModel(since());
-      expect(rows.find((r) => r.model === "gemini-3.7-flash")?.failures).toBe(2);
+      expect(rows.find((r) => r.model === "google/gemini-3.7-flash")?.failures).toBe(2);
     });
   });
 
