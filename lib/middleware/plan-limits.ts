@@ -5,7 +5,14 @@ import * as teamRepository from "@/lib/repositories/team";
 // Only dealer-side, entitlement-bound features consume the org's plan quota.
 // Public marketplace search (searchFiltersFrom*) is metered but never billed to a
 // tenant, so it is excluded here.
-const DEALER_METERED_FEATURES = ["carListingFromImage"];
+// carImageAltText is metered but deliberately absent: the platform pays for it.
+// listingQA is absent too: answers to buyers have no monthly cap. They are
+// metered for reporting, and gated only by the plan's `aiAssistant.enabled`.
+export const DEALER_METERED_FEATURES = [
+  "carListingFromImage",
+  "listingTranslation",
+  "listingQualityCoach",
+];
 
 /**
  * One gateable resource. `planField` names the Plan column holding the limit,
@@ -35,11 +42,12 @@ export const RESOURCE_CONFIG: Record<string, ResourceConfig> = {
   aiProcessing: {
     planField: null, // uses features.aiProcessing.limit
     featureKey: "aiProcessing",
-    // Real usage: successful dealer-metered AI calls this month. Replaces the old
-    // proxy that counted AuditLog(action="CAR_CREATED") rows.
+    // Cars saved with AI's help this month — plans sell "AI listings", so one
+    // car's photo read, translation and coach advice are one use together.
+    // Calls are tied to a car on save; see lib/services/car/ai-allowance.ts.
     countQuery: (orgId: string) =>
-      aiUsageRepository.countOrgAiCallsThisMonth(orgId, DEALER_METERED_FEATURES),
-    label: "AI processing requests",
+      aiUsageRepository.countOrgAiCarsThisMonth(orgId, DEALER_METERED_FEATURES),
+    label: "AI listings",
     upgradeMessage: "Upgrade your plan for more AI-powered image processing.",
   },
 };

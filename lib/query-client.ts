@@ -30,6 +30,8 @@ export const queryKeys = {
     all: ["cars"],
     list: (filters: unknown) => ["cars", "list", filters],
     detail: (id: string) => ["cars", "detail", id],
+    /** The car as the floating chat shows it (getCarById); under "cars" so a car update refreshes it. */
+    chat: (id: string) => ["cars", "chat", id],
     filters: (filters: unknown = {}) => ["cars", "filters", filters],
     featured: () => ["cars", "featured"],
   },
@@ -46,6 +48,10 @@ export const queryKeys = {
     check: (carId: string) => ["testDrives", "check", carId],
     workingHours: (carId: string) => ["testDrives", "workingHours", carId],
   },
+  buyerQuestions: {
+    all: ["buyerQuestions"],
+    list: (params: unknown) => ["buyerQuestions", "list", params],
+  },
   wishlist: {
     all: ["wishlist"],
     list: (params: unknown) => ["wishlist", "list", params],
@@ -59,5 +65,7 @@ export const queryKeys = {
   dashboard: {
     planUsage: (resource: string) => ["dashboard", "planUsage", resource],
     dealership: () => ["dashboard", "dealership"],
+    dealershipTerms: () => ["dashboard", "dealershipTerms"],
+    emailPreferences: () => ["dashboard", "emailPreferences"],
   },
 };

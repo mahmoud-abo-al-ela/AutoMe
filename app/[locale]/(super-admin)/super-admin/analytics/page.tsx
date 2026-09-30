@@ -6,6 +6,7 @@ import AnalyticsHeader from "./_components/AnalyticsHeader";
 import AnalyticsCharts from "./_components/AnalyticsCharts";
 import TopOrganizations from "./_components/TopOrganizations";
 import GrowthMetrics from "./_components/GrowthMetrics";
+import AiUsagePanel from "./_components/AiUsagePanel";
 
 async function getAnalyticsData() {
   // Resolved once rather than inside the per-month map, which would re-enter
@@ -138,6 +139,7 @@ export default async function AnalyticsPage() {
       <AnalyticsHeader />
       <GrowthMetrics growth={growth} />
       <AnalyticsCharts monthlyData={monthlyData} />
+      <AiUsagePanel />
       <div className="grid gap-6 lg:grid-cols-2">
         <TopOrganizations
           title="Top by Listings"

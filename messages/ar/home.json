@@ -28,7 +28,9 @@
     "invalidImageType": "من فضلك اختر ملف صورة",
     "imageTooLarge": "يجب ألا يتجاوز حجم الصورة {max} ميجابايت",
     "noImageSelected": "من فضلك اختر صورة",
-    "detected": "تم التعرف على {attributes}"
+    "detected": "تم التعرف على {attributes}",
+    "searchFailed": "تعذّر البحث بهذه الصورة. برجاء المحاولة مرة أخرى.",
+    "notRecognized": "لم نتعرّف على سيارة في هذه الصورة. جرّب صورة أوضح."
   },
   "stats": {
     "customersLabel": "عميل سعيد",

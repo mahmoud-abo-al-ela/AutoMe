@@ -96,11 +96,15 @@ export class ConflictError extends AppError {
 }
 
 export class RateLimitError extends AppError {
-    constructor(message = "Too many requests", i18n: ErrorI18n = {}) {
+    /** Seconds until a request is allowed again, when the limiter said. */
+    retryAfter?: number;
+
+    constructor(message = "Too many requests", i18n: ErrorI18n = {}, retryAfter?: number) {
         super(message, 429, "RATE_LIMIT_EXCEEDED", {
             key: "errors.rateLimit",
             ...i18n,
         });
+        this.retryAfter = retryAfter;
     }
 }
 
@@ -129,6 +133,8 @@ export interface PlanLimitErrorInput {
     currentUsage?: number;
     upgradeUrl?: string;
     message?: string;
+    /** A more specific message than "you have reached your plan's limit". */
+    i18n?: ErrorI18n;
 }
 
 export class PlanLimitError extends AppError {
@@ -138,10 +144,11 @@ export class PlanLimitError extends AppError {
     currentUsage?: number;
     upgradeUrl?: string;
 
-    constructor({ resource, planType, limit, currentUsage, upgradeUrl, message }: PlanLimitErrorInput) {
+    constructor({ resource, planType, limit, currentUsage, upgradeUrl, message, i18n }: PlanLimitErrorInput) {
         super(message || `Plan limit exceeded for ${resource}`, 403, "PLAN_LIMIT_EXCEEDED", {
             key: "errors.planLimit",
             params: { resource: resource ?? "" },
+            ...i18n,
         });
         this.resource = resource;
         this.planType = planType;

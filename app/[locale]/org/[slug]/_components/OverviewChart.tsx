@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import {
   Card,
@@ -41,6 +42,7 @@ export type OverviewPoint = {
 };
 
 const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
+  const t = useTranslations("org.dashboard");
   const [timeRange, setTimeRange] = useState("7d");
 
   // Filter data based on selected time range
@@ -71,7 +73,7 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
   // than kept as a value that could silently diverge from the theme.
   // Chart axis and tooltip labels follow the reader's locale; the axis
   // *orientation* stays physical (see the i18n skill).
-  const { date: formatDateFor } = useFormatters();
+  const { date: formatDateFor, number } = useFormatters();
   const chartDate = (value: string | number | Date) =>
     formatDateFor(value, { day: "numeric", month: "short", year: undefined });
 
@@ -81,21 +83,21 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
         light: "#3b82f6",
         dark: "#3b82f6",
       },
-      label: "Users",
+      label: t("overview.series.users"),
     },
     cars: {
       theme: {
         light: "#10b981",
         dark: "#10b981",
       },
-      label: "Cars",
+      label: t("overview.series.cars"),
     },
     testDrives: {
       theme: {
         light: "#9333ea",
         dark: "#9333ea",
       },
-      label: "Test Drives",
+      label: t("overview.series.testDrives"),
     },
   };
 
@@ -103,11 +105,11 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Overview</CardTitle>
-          <CardDescription>No data available</CardDescription>
+          <CardTitle>{t("overview.title")}</CardTitle>
+          <CardDescription>{t("overview.emptyDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-gray-500">No chart data available</p>
+          <p className="text-gray-500">{t("overview.emptyBody")}</p>
         </CardContent>
       </Card>
     );
@@ -118,28 +120,26 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
-            <CardTitle>Overview</CardTitle>
-            <CardDescription>
-              Users, cars, and test drives over time
-            </CardDescription>
+            <CardTitle>{t("overview.title")}</CardTitle>
+            <CardDescription>{t("overview.description")}</CardDescription>
           </div>
 
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
               className="hidden w-[160px] rounded-lg sm:ms-auto sm:flex"
-              aria-label="Select a value"
+              aria-label={t("ranges.label")}
             >
-              <SelectValue placeholder="Last 7 days" />
+              <SelectValue placeholder={t("ranges.last7")} />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="90d" className="rounded-lg">
-                Last 3 months
+                {t("ranges.last90")}
               </SelectItem>
               <SelectItem value="30d" className="rounded-lg">
-                Last 30 days
+                {t("ranges.last30")}
               </SelectItem>
               <SelectItem value="7d" className="rounded-lg">
-                Last 7 days
+                {t("ranges.last7")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -204,7 +204,7 @@ const OverviewChart = ({ data }: { data: OverviewPoint[] }) => {
                 axisLine={false}
                 tickMargin={8}
                 width={40}
-                tickFormatter={(value) => value}
+                tickFormatter={(value: number) => number(value)}
               />
               <ChartTooltip
                 cursor={false}

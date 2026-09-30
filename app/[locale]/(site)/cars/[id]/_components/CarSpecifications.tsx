@@ -78,7 +78,7 @@ const CarSpecifications = ({
     },
     {
       label: tFields("location"),
-      value: place.location(car.location) || t("notSpecified"),
+      value: place.car(car) || t("notSpecified"),
       icon: MapPin,
       color: "text-red-500 bg-red-50 dark:bg-red-950/20",
     },

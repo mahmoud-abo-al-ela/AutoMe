@@ -1,197 +1,41 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidatePath } from "next/cache";
-import { GoogleGenAI } from '@google/genai';
+import { after } from "next/server";
 import * as carService from "@/lib/services/car";
-import { createSuccessResponse } from "@/lib/utils/response";
-import { parseFirstJsonObject } from "@/lib/utils/ai-json";
-import { ValidationError, NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
-import { createAiUsage } from "@/lib/repositories/ai-usage";
-import { validateAction } from "@/lib/middleware/with-validation";
-import { carSchema, updateCarSchema, updateCarFullSchema } from "@/lib/validations/schemas";
-import aj from "@/lib/arcjet";
+import { coachListing, translateListing, type ListingText, type ListingToCoach } from "@/lib/services/ai";
+import { reviewListing, type ListingIssueCode } from "@/lib/services/car/listing-quality";
+import { aiCallerFor } from "@/lib/ai/caller";
+import { refreshImageAlts } from "@/lib/services/car/image-alts";
+import { claimAiUsageForCar } from "@/lib/services/car/ai-allowance";
 import {
-  assertArcjetAllowed,
-  assertArcjetConfigured,
-} from "@/lib/middleware/with-rate-limit";
-import { request } from "@arcjet/next";
+  applyTranslation,
+  sourceText,
+  translationSource,
+  type BilingualListing,
+} from "@/lib/services/car/bilingual";
+import { createSuccessResponse } from "@/lib/utils/response";
+import { NotFoundError, AuthorizationError, logError } from "@/lib/utils/errors";
+import type { TenantContext } from "@/lib/auth/context";
+import type { Locale } from "@/i18n/routing";
+import { validateAction } from "@/lib/middleware/with-validation";
+import {
+  carSchema,
+  listingReviewSchema,
+  updateCarSchema,
+  updateCarFullSchema,
+} from "@/lib/validations/schemas";
+import { enforceDealerAiLimit } from "@/lib/middleware/with-rate-limit";
 import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
-import { z } from "zod";
-import type { TenantContext } from "@/lib/auth/context";
 
 
-export async function fileToBase64(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
-  return Buffer.from(buffer).toString("base64");
-}
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
-// Vision model for image extraction. Overridable via env because the default
-// can be retired for an API key without notice (gemini-2.5-flash already 404s
-// for new users). gemini-3.5-flash is the current stable flash for this key.
-const VISION_MODEL = process.env.GEMINI_MODEL_VISION || "gemini-3.5-flash";
-
-export async function processCarImageWithAI(
-  file: File,
-  ctx?: TenantContext | null
-) {
-    const req = await request();
-    assertArcjetConfigured();
-    const decision = await aj.protect(req, { requested: 1 });
-    assertArcjetAllowed(decision);
-
-    if (!process.env.GEMINI_API_KEY) {
-      throw new ValidationError("GEMINI_API_KEY is not defined");
-    }
-
-    if (!file || !file.type?.startsWith("image/")) {
-      throw new ValidationError("Invalid file type; must be an image", "file");
-    }
-
-    const base64Image = await fileToBase64(file);
-
-    const prompt = `
-Analyze the car image and return ONLY a valid JSON object.
-
-Rules:
-- No markdown
-- No explanations
-- All fields must exist
-- If unsure, make a reasonable estimate
-- Price MUST be the listing price in Egyptian pounds (EGP). Do NOT convert it to
-  any other currency. If the image shows a price in another currency, report the
-  number exactly as shown without converting it.
-- Price format: just the number without currency symbol (e.g., "850000" not "850000 EGP")
-
-Schema:
-{
-  "make": "string",
-  "model": "string",
-  "year": number,
-  "color": "string",
-  "price": "string (EGP amount without symbol, not converted)",
-  "mileage": "string",
-  "bodyType": "string",
-  "fuelType": "string",
-  "transmission": "string",
-  "description": "string",
-  "seats": number,
-  "features": "string",
-  "confidence": number
-}
-`;
-
-    // Meter the provider call: exactly one AiUsage row per call, on success and
-    // on failure. Without this the plan quota never enforces and the platform
-    // rate-limit breaker reads an empty table (see ai-metering skill).
-    const started = Date.now();
-    let usageMeta = null;
-    let success = true;
-    let errorCode = null;
-    let responseText;
-
-    try {
-      const response = await ai.models.generateContent({
-        model: VISION_MODEL,
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                inlineData: {
-                  data: base64Image,
-                  mimeType: file.type,
-                },
-              },
-              { text: prompt },
-            ],
-          },
-        ],
-        config: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-        },
-      });
-      usageMeta = response.usageMetadata ?? null;
-      responseText = response.text;
-    } catch (error) {
-      success = false;
-      errorCode =
-        (error as { code?: string })?.code ??
-        (error as Error)?.name ??
-        "UNKNOWN";
-      throw error;
-    } finally {
-      // Metering must never take down the request it is measuring. `await` it
-      // (a detached promise dies when the serverless function returns) but
-      // swallow its own failure.
-      try {
-        await createAiUsage({
-          organizationId: ctx?.organization?.id ?? null,
-          userId: ctx?.userId ?? null,
-          feature: "carListingFromImage",
-          model: VISION_MODEL,
-          inputTokens: usageMeta?.promptTokenCount ?? 0,
-          outputTokens: usageMeta?.candidatesTokenCount ?? 0,
-          thinkingTokens: usageMeta?.thoughtsTokenCount ?? 0,
-          cachedTokens: usageMeta?.cachedContentTokenCount ?? 0,
-          latencyMs: Date.now() - started,
-          success,
-          errorCode,
-        });
-      } catch (meteringError) {
-        logError("AiUsage write failed", meteringError);
-      }
-    }
-
-    let parsed;
-    try {
-      parsed = parseFirstJsonObject(responseText);
-    } catch {
-      throw new ValidationError("AI response is not valid JSON", "ai_response");
-    }
-
-    const requiredFields = [
-      "make",
-      "model",
-      "year",
-      "color",
-      "price",
-      "mileage",
-      "bodyType",
-      "fuelType",
-      "transmission",
-      "description",
-      "seats",
-      "features",
-      "confidence",
-    ];
-
-    const missing = requiredFields.filter(
-      (key) => parsed[key] === undefined
-    );
-
-    if (missing.length > 0) {
-      throw new ValidationError(`Missing required fields: ${missing.join(", ")}`, "ai_response");
-    }
-
-    return parsed;
-}
-
-export const processCarImageGated = withOrgAuth(
-  withPlanGate(
-    "aiProcessing",
-    withUsageLimit("aiProcessing", async (ctx, file: File) => {
-      const parsed = await processCarImageWithAI(file, ctx);
-      return createSuccessResponse(parsed);
-    })
-  )
-);
-
+/*
+ * Photo extraction moved to the streaming route app/api/ai/car-listing, which
+ * reports real progress. The server action it replaces is gone rather than kept
+ * beside it: every export of a "use server" module is a callable endpoint, and a
+ * second, unstreamed path to the same gated call is one more to keep guarded.
+ */
 
 export const getCarPlanLimits = withOrgAuth(async (ctx) => {
   const plan = ctx.organization.subscription?.plan;
@@ -213,15 +57,96 @@ export async function getMaxImagesPerCar() {
   return getCarPlanLimits();
 }
 
-export const addCar = withOrgAuth(
-  withUsageLimit("cars", async (ctx, payload: { data?: unknown } & Record<string, unknown>) => {
-    const rawData = payload.data || payload;
-    const carData = validateAction(carSchema, rawData);
-    const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
+/**
+ * The same gates as the photo extraction: AI on the plan, quota left, rate
+ * limit. Deliberately NOT exported — every export of a "use server" module is a
+ * callable endpoint, and this one must only run inside a save.
+ */
+const translateGated = withPlanGate(
+  "aiProcessing",
+  withUsageLimit(
+    "aiProcessing",
+    async (ctx: TenantContext, source: ListingText, from: Locale) => {
+      await enforceDealerAiLimit();
+      return translateListing(source, from, aiCallerFor(ctx));
+    }
+  )
+);
 
-    revalidatePath(`/org/${ctx.organization.slug}/cars`);
-    return createSuccessResponse(car, "Car added successfully");
-  })
+/** Whether the save wrote the other language, for the client to say so. */
+type TranslationOutcome = "none" | "done" | "skipped";
+
+/**
+ * Write the language the dealer did not, before the car is saved.
+ *
+ * Best effort by design: a plan without AI, a used-up allowance, a rate limit
+ * or a failed call all save the car as the dealer wrote it. The listing then
+ * shows its one language to both audiences, with the "not translated" note —
+ * which beats refusing to save a car over a translation.
+ */
+async function fillOtherLanguage<T extends BilingualListing>(
+  ctx: TenantContext,
+  car: T,
+  editedLocale: Locale | null
+): Promise<{ car: T; translation: TranslationOutcome }> {
+  const from = translationSource(car, editedLocale);
+  if (!from) return { car, translation: "none" };
+
+  try {
+    const translated = await translateGated(ctx, sourceText(car, from), from);
+    const to: Locale = from === "en" ? "ar" : "en";
+    return {
+      car: applyTranslation(car, to, translated, editedLocale === from),
+      translation: "done",
+    };
+  } catch (error) {
+    logError("Listing translation skipped; saving the car without it", error);
+    return { car, translation: "skipped" };
+  }
+}
+
+/**
+ * Describe the car's photos once the save has answered. Platform-initiated,
+ * so it is metered but never billed to the dealer (carImageAltText is not in
+ * DEALER_METERED_FEATURES), and runs at low priority so it cannot take shared
+ * capacity from a dealer waiting on the AI. refreshImageAlts never throws.
+ */
+function describePhotosAfterSave(ctx: TenantContext, carId: string) {
+  const caller = { ...aiCallerFor(ctx), priority: "low" as const };
+  after(() => refreshImageAlts(carId, ctx.organization.id, caller));
+}
+
+/** Client input: only the two known locales mean anything. */
+function toEditedLocale(value: unknown): Locale | null {
+  return value === "en" || value === "ar" ? value : null;
+}
+
+export const addCar = withOrgAuth(
+  withUsageLimit(
+    "cars",
+    async (
+      ctx,
+      payload: { data?: unknown } & Record<string, unknown>,
+      options?: { editedLocale?: unknown }
+    ) => {
+      const rawData = payload.data || payload;
+      const validated = validateAction(carSchema, rawData);
+      const { car: carData, translation } = await fillOtherLanguage(
+        ctx,
+        validated,
+        toEditedLocale(options?.editedLocale)
+      );
+      const car = await carService.createCar(carData, ctx.userId, ctx.organization.id);
+      if (car?.id) {
+        // The photo read, translation and advice behind this car: one use.
+        await claimAiUsageForCar(ctx, car.id);
+        describePhotosAfterSave(ctx, car.id);
+      }
+
+      revalidatePath(`/org/${ctx.organization.slug}/cars`);
+      return createSuccessResponse({ ...car, translation }, "Car added successfully");
+    }
+  )
 );
 
 export const getCars = withOrgAuth(
@@ -290,10 +215,16 @@ export const updateCarFull = withOrgAuth(
   async (
     ctx,
     carId: string,
-    payload: { data?: unknown } & Record<string, unknown>
+    payload: { data?: unknown } & Record<string, unknown>,
+    options?: { editedLocale?: unknown }
   ) => {
   const rawData = payload.data || payload;
-  const carData = validateAction(updateCarFullSchema, rawData);
+  const validated = validateAction(updateCarFullSchema, rawData);
+  const { car: carData, translation } = await fillOtherLanguage(
+    ctx,
+    validated,
+    toEditedLocale(options?.editedLocale)
+  );
 
   const updatedCar = await carService.updateCarFull(
     carId,
@@ -301,7 +232,69 @@ export const updateCarFull = withOrgAuth(
     ctx.userId,
     ctx.organization.id
   );
+  // After the update, which proved the car is this dealership's. A car
+  // already counted this month is claimed again, and still counts once.
+  await claimAiUsageForCar(ctx, carId);
+  // Also after an edit: new photos need describing, removed ones pruning.
+  describePhotosAfterSave(ctx, carId);
 
   revalidatePath(`/org/${ctx.organization.slug}/cars`);
-  return createSuccessResponse(updatedCar, "Car updated successfully");
+  return createSuccessResponse({ ...updatedCar, translation }, "Car updated successfully");
+});
+
+/**
+ * Same gates as every dealer AI call. Not exported: it only runs inside
+ * reviewListingQuality, never as its own endpoint.
+ */
+const coachGated = withPlanGate(
+  "aiProcessing",
+  withUsageLimit(
+    "aiProcessing",
+    async (
+      ctx: TenantContext,
+      listing: ListingToCoach,
+      codes: ListingIssueCode[],
+      language: Locale
+    ) => {
+      await enforceDealerAiLimit();
+      return coachListing(listing, codes, language, aiCallerFor(ctx));
+    }
+  )
+);
+
+/**
+ * Review a listing before it is published: the rule-based score and issues
+ * always, plus AI advice for each issue when the plan, allowance and rate
+ * limit allow. Advice is best effort — without it the dealer still gets the
+ * review, and `advice` says why there is none.
+ */
+export const reviewListingQuality = withOrgAuth(async (ctx, input: unknown) => {
+  const { language, ...listing } = validateAction(listingReviewSchema, input);
+  const review = reviewListing(listing);
+
+  let adviceByCode: Partial<Record<ListingIssueCode, string>> = {};
+  let advice: "none" | "done" | "skipped" = "none";
+  if (review.issues.length > 0) {
+    try {
+      adviceByCode = await coachGated(
+        ctx,
+        listing,
+        review.issues.map((issue) => issue.code),
+        language
+      );
+      advice = "done";
+    } catch (error) {
+      logError("Listing coach advice skipped; returning the rule-based review", error);
+      advice = "skipped";
+    }
+  }
+
+  return createSuccessResponse({
+    score: review.score,
+    advice,
+    issues: review.issues.map((issue) => ({
+      ...issue,
+      advice: adviceByCode[issue.code] ?? null,
+    })),
+  });
 });

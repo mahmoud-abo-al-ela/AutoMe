@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -5,10 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatActionLabel, formatDate } from "./utils";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useAuditLabels } from "../../_lib/use-audit-labels";
 import {
   Activity,
-  Calendar,
   Code,
   Globe,
   Hash,
@@ -58,7 +59,9 @@ const JsonViewer = ({ data, title }: { data: unknown; title: string }) => {
         </span>
       </div>
       <div className="relative rounded-md border bg-muted/30 p-4">
-        <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap">
+        {/* The payload is machine data, so it reads left-to-right whichever
+            way the page runs. */}
+        <pre dir="ltr" className="text-xs font-mono overflow-x-auto whitespace-pre-wrap text-start">
           {JSON.stringify(data, null, 2)}
         </pre>
       </div>
@@ -77,6 +80,10 @@ export default function AuditLogDetailsDialog({
   open,
   onOpenChange,
 }: AuditLogDetailsDialogProps) {
+  const t = useTranslations("org.auditLogs");
+  const { dateTime } = useFormatters();
+  const label = useAuditLabels();
+
   if (!log) return null;
 
   // `metadata` is a Prisma Json column, so it can be any JSON value; only a
@@ -94,10 +101,10 @@ export default function AuditLogDetailsDialog({
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-xl flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
-            Audit Log Details
+            {t("details.title")}
           </DialogTitle>
           <DialogDescription>
-            Recorded on {formatDate(log.createdAt)}
+            {t("details.recordedOn", { date: dateTime(log.createdAt) })}
           </DialogDescription>
         </DialogHeader>
 
@@ -106,24 +113,24 @@ export default function AuditLogDetailsDialog({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-muted/20 rounded-lg border">
             <DetailItem
               icon={Activity}
-              label="Action"
-              value={formatActionLabel(log.action)}
+              label={t("details.action")}
+              value={label.action(log.action)}
             />
             <DetailItem
               icon={Hash}
-              label="Entity Type"
-              value={log.entityType}
+              label={t("details.entityType")}
+              value={label.entity(log.entityType)}
             />
             <DetailItem
               icon={Code}
-              label="Entity ID"
+              label={t("details.entityId")}
               value={log.entityId}
               mono
             />
             {ipAddress && (
               <DetailItem
                 icon={Globe}
-                label="IP Address"
+                label={t("details.ipAddress")}
                 value={ipAddress}
                 mono
               />
@@ -136,16 +143,16 @@ export default function AuditLogDetailsDialog({
               <User className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-medium">Executed by</h4>
+              <h4 className="text-sm font-medium">{t("details.executedBy")}</h4>
               <p className="text-sm text-foreground">
-                {log.user?.name || log.userEmail || "Unknown User"}
+                {log.user?.name || log.userEmail || t("unknownUser")}
               </p>
               <p className="text-xs text-muted-foreground">{log.userEmail}</p>
             </div>
             {log.impersonatedBy && (
               <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded-full text-xs font-medium">
                 <Shield className="h-3 w-3" />
-                Impersonated Action
+                {t("details.impersonatedAction")}
               </div>
             )}
           </div>
@@ -153,8 +160,8 @@ export default function AuditLogDetailsDialog({
           {/* Changes */}
           {(log.oldValue || log.newValue) && (
             <div className="grid md:grid-cols-2 gap-4">
-              <JsonViewer data={log.oldValue} title="Previous State" />
-              <JsonViewer data={log.newValue} title="New State" />
+              <JsonViewer data={log.oldValue} title={t("details.previousState")} />
+              <JsonViewer data={log.newValue} title={t("details.newState")} />
             </div>
           )}
         </div>

@@ -34,6 +34,10 @@
     "auditLogsUnlimited": "سجلات تدقيق بلا حدود",
     "liveChat": "محادثة مباشرة",
     "aiProcessing": "معالجة بالذكاء الاصطناعي",
+    "aiProcessingMonthly": "{value} إعلان بالذكاء الاصطناعي شهريًا",
+    "aiProcessingUnlimited": "إعلانات بالذكاء الاصطناعي بلا حدود",
+    "aiAssistant": "ردود ذكية على أسئلة المشترين",
+    "aiAssistantUnlimited": "ردود ذكية على أسئلة المشترين بلا حدود",
     "prioritySupport": "دعم ذو أولوية"
   }
 }

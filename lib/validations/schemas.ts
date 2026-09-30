@@ -1,4 +1,71 @@
 import { z } from "zod";
+import { normalizeCarStatus } from "@/lib/constants/car-options";
+
+/**
+ * The per-language title and description columns, shared by the create and
+ * full-update schemas so the two cannot drift.
+ *
+ * Nullable as well as optional: clearing a field in the dealer form sends null,
+ * and that has to mean "remove it" rather than fail validation.
+ */
+const bilingualCarText = {
+  titleEn: z.string().max(200).optional().nullable(),
+  titleAr: z.string().max(200).optional().nullable(),
+  descriptionEn: z.string().max(2000).optional().nullable(),
+  descriptionAr: z.string().max(2000).optional().nullable(),
+  featuresAr: z.array(z.string()).optional(),
+};
+
+/**
+ * What the dealer states about the car's history — see lib/utils/car-disclosures.
+ * Nullable because null is "not stated", which the form sends to clear one.
+ */
+const carDisclosureFields = {
+  originalPaint: z.boolean().nullable().optional(),
+  accidentFree: z.boolean().nullable().optional(),
+  ownerCount: z.number().int().min(1).max(20).nullable().optional(),
+  serviceHistory: z.enum(["FULL", "PARTIAL", "NONE"]).nullable().optional(),
+  priceNegotiable: z.boolean().nullable().optional(),
+  // The month the licence runs to, as the form's month input holds it.
+  licenseValidUntil: z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Use YYYY-MM")
+    .nullable()
+    .optional(),
+};
+
+const MIN_DESCRIPTION = 10;
+
+/**
+ * Either spelling in, the database enum out — see normalizeCarStatus. An
+ * unknown value is left as-is so the enum rejects it with a real error.
+ */
+const carStatus = z
+  .preprocess(
+    (value) => normalizeCarStatus(value) ?? value,
+    z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"])
+  )
+  .optional();
+
+/**
+ * A listing needs a description in at least one language, not specifically in
+ * English. A dealer on the Arabic dashboard only sees the Arabic field; the
+ * English one is filled by translation when the plan allows it, and when it
+ * does not, English readers get the Arabic with a "not translated" note.
+ */
+function requireOneDescription(
+  car: { description?: string | null; descriptionAr?: string | null },
+  ctx: z.RefinementCtx
+) {
+  const long = (text?: string | null) => (text?.trim().length ?? 0) >= MIN_DESCRIPTION;
+  if (!long(car.description) && !long(car.descriptionAr)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["description"],
+      message: `Description must be at least ${MIN_DESCRIPTION} characters`,
+    });
+  }
+}
 
 export const carSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),
@@ -12,16 +79,28 @@ export const carSchema = z.object({
   transmission: z.string().min(1, "Transmission is required"),
   color: z.string().min(1, "Color is required"),
   seats: z.coerce.number().int().min(1).max(12),
-  description: z.string().min(10, "Description must be at least 10 characters").max(2000),
-  location: z.string().min(1, "Location is required"),
-  status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
+  // Either language may carry the description — see requireOneDescription.
+  description: z.string().max(2000).optional().nullable(),
+  // Bilingual copy. Optional because a manually entered listing has none, and
+  // because Zod strips unknown keys — without these the AI-written Arabic is
+  // silently discarded on the way to the database.
+  ...bilingualCarText,
+  ...carDisclosureFields,
+  // A car is where its dealership is; kept only for cars saved with it.
+  location: z.string().max(200).optional().nullable(),
+  status: carStatus,
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
-  images: z.array(z.string()).min(1, "At least one image is required").max(20),
-});
+  // Files from the dealer form, or data: URLs. What they contain is checked
+  // at upload (lib/services/storage/upload.ts), not trusted from the claim.
+  images: z
+    .array(z.union([z.string().min(1), z.instanceof(File)]))
+    .min(1, "At least one image is required")
+    .max(20),
+}).superRefine(requireOneDescription);
 
 export const updateCarSchema = z.object({
-  status: z.enum(["AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
+  status: carStatus,
   featured: z.boolean().optional(),
 });
 
@@ -37,13 +116,17 @@ export const updateCarFullSchema = z.object({
   transmission: z.string().min(1, "Transmission is required"),
   color: z.string().min(1, "Color is required"),
   seats: z.coerce.number().int().min(1).max(12),
-  description: z.string().min(10, "Description must be at least 10 characters").max(2000),
-  location: z.string().min(1, "Location is required"),
-  status: z.enum(["Available", "Sold", "Unavailable", "AVAILABLE", "UNAVAILABLE", "SOLD"]).optional(),
+  // Either language may carry the description — see requireOneDescription.
+  description: z.string().max(2000).optional().nullable(),
+  ...bilingualCarText,
+  ...carDisclosureFields,
+  // A car is where its dealership is; kept only for cars saved with it.
+  location: z.string().max(200).optional().nullable(),
+  status: carStatus,
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
   images: z.array(z.any()),
-});
+}).superRefine(requireOneDescription);
 
 export const organizationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -92,6 +175,29 @@ export const organizationProfileSchema = z.object({
   region: optionalText(80),
   country: z.string().trim().length(2, "Country must be a 2-letter ISO code").toUpperCase(),
 });
+
+/**
+ * A dealership's standing terms for buyers — see lib/utils/car-disclosures.
+ * The financing note is short because the buyer assistant sends it with every
+ * question asked on the dealer's listings.
+ */
+/** The dealership's email settings: the weekly summary, and the language of its emails. */
+export const emailPreferencesSchema = z.object({
+  emailLocale: z.enum(["ar", "en"]),
+  weeklyDigestEnabled: z.boolean(),
+});
+
+export type EmailPreferencesInput = z.infer<typeof emailPreferencesSchema>;
+
+export const dealershipTermsSchema = z.object({
+  offersFinancing: z.boolean().nullable(),
+  financingNote: z.string().trim().max(200).nullable(),
+  acceptsTradeIn: z.boolean().nullable(),
+  allowsInspection: z.boolean().nullable(),
+  offersDelivery: z.boolean().nullable(),
+});
+
+export type DealershipTermsInput = z.infer<typeof dealershipTermsSchema>;
 
 // ============ TEAM ============
 
@@ -180,3 +286,92 @@ export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
 export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
 export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
+
+// ============ LISTING QUALITY COACH ============
+
+/**
+ * The listing as the dealer's form currently holds it, for the quality coach.
+ * Bounded like the car schema so a crafted request cannot send the model an
+ * arbitrarily large prompt.
+ */
+export const listingReviewSchema = z.object({
+  year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
+  make: z.string().max(50),
+  model: z.string().max(50),
+  mileage: z.coerce.number().min(0).max(10_000_000),
+  bodyType: z.string().max(50),
+  description: z.string().max(2000),
+  features: z.array(z.string().max(80)).max(50),
+  imageCount: z.coerce.number().int().min(0).max(50),
+  language: z.enum(["en", "ar"]),
+});
+
+
+// ============ LISTING ASSISTANT ============
+
+/**
+ * A buyer's question about one listing. The id is a uuid because it keys the
+ * per-car rate limit: free text there would let a caller open a fresh bucket
+ * per request. The question is short because it is billed to the dealer and
+ * sent to the model verbatim.
+ */
+export const listingQuestionSchema = z.object({
+  carId: z.string().uuid(),
+  question: z.string().trim().min(2).max(300),
+  locale: z.enum(["en", "ar"]),
+  /**
+   * The last few exchanges, so a follow-up ("and the price?") can be read.
+   * Sent by the browser, so untrusted: context for the model, never facts.
+   * Bounded, because every character is sent with each question.
+   */
+  history: z
+    .array(
+      z.object({
+        question: z.string().max(300),
+        answer: z.string().max(600),
+      })
+    )
+    .max(4)
+    .default([]),
+});
+
+export type ListingQuestionInput = z.infer<typeof listingQuestionSchema>;
+
+/** A buyer rates one answer the listing assistant gave. */
+export const listingAnswerRatingSchema = z.object({
+  answerId: z.string().uuid(),
+  helpful: z.boolean(),
+});
+
+/** The cars of one chat conversation list, for their titles. */
+export const carTitlesRequestSchema = z.array(z.string().uuid()).min(1).max(50);
+
+/** A chat member asks for one message in their language. */
+export const chatTranslationRequestSchema = z.object({
+  // A Stream message id: client-generated UUIDs, or Stream's own ids.
+  messageId: z.string().trim().min(1).max(255),
+  target: z.enum(["en", "ar"]),
+});
+
+
+// ============ BUYER QUESTIONS (dealer inbox) ============
+
+export const buyerQuestionListSchema = z.object({
+  status: z.enum(["OPEN", "ANSWERED", "DISMISSED"]),
+  page: z.coerce.number().int().min(1).max(1000).default(1),
+});
+
+/**
+ * A dealer's answer. Bounded because every answer on a car, and every answer
+ * marked for all cars, is sent to the model with each buyer question.
+ */
+export const answerBuyerQuestionSchema = z.object({
+  id: z.string().uuid(),
+  answer: z.string().trim().min(1).max(500),
+  appliesToAllCars: z.boolean(),
+});
+
+export const buyerQuestionStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(["OPEN", "DISMISSED"]),
+});

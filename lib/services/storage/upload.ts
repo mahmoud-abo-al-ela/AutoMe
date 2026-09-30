@@ -2,6 +2,26 @@
 import { createClient } from "@/lib/supabase";
 import { ValidationError } from "@/lib/utils/errors";
 import { VALIDATION_RULES } from "@/lib/constants/validation";
+import { IMAGE_EXTENSION, sniffImageType } from "@/lib/utils/image-type";
+
+/** Matches the 5 MB the car form quotes and checks client-side. */
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Upload bytes only as the image format they actually are. The declared type
+ * and name are the sender's claim — a server action receives whatever a caller
+ * sends — so the stored content type and extension come from the bytes.
+ */
+function checkedImage(buffer: Buffer) {
+  if (buffer.length > MAX_IMAGE_BYTES) {
+    throw new ValidationError("Each image must be 5 MB or smaller", "images");
+  }
+  const contentType = sniffImageType(buffer);
+  if (!contentType) {
+    throw new ValidationError("Only JPEG, PNG and WebP images are allowed", "images");
+  }
+  return { buffer, extension: IMAGE_EXTENSION[contentType], contentType };
+}
 
 /**
  * Process image file (File object or base64 string)
@@ -22,27 +42,18 @@ export async function processImageFile(imageFile: File | string) {
  * Process File object
  */
 async function processFileObject(file: File) {
-  const arrayBuffer = await file.arrayBuffer();
-  return {
-    buffer: Buffer.from(arrayBuffer),
-    extension: file.type.split("/")[1] || "jpeg",
-    contentType: file.type,
-  };
+  // Refuse before reading an oversized body into memory.
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new ValidationError("Each image must be 5 MB or smaller", "images");
+  }
+  return checkedImage(Buffer.from(await file.arrayBuffer()));
 }
 
 /**
  * Process base64 string
  */
 function processBase64String(base64String: string) {
-  const base64 = base64String.split(",")[1];
-  const mimeMatch = base64String.match(/data:image\/([a-zA-Z0-9]+);/);
-  const extension = mimeMatch ? mimeMatch[1] : "jpeg";
-
-  return {
-    buffer: Buffer.from(base64, "base64"),
-    extension,
-    contentType: `image/${extension}`,
-  };
+  return checkedImage(Buffer.from(base64String.split(",")[1] ?? "", "base64"));
 }
 
 /**

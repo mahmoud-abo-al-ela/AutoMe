@@ -13,8 +13,10 @@ import WorkingHoursSkeleton from "../_components/Skeleton";
 import WorkingHoursHeader from "./_components/WorkingHoursHeader";
 import WorkingHoursForm from "./_components/WorkingHoursForm";
 import { useWorkingHours } from "./_components/useWorkingHours";
+import { useTranslations } from "next-intl";
 
 export default function AdminWorkingHours() {
+  const t = useTranslations("org.settings.workingHours");
   const {
     workingHours,
     loadingDealershipData,
@@ -34,10 +36,9 @@ export default function AdminWorkingHours() {
       ) : (
         <Card className="overflow-hidden pb-3">
           <CardHeader className="text-center sm:text-start py-0">
-            <CardTitle className="text-lg sm:text-xl">Business Hours</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t("cardTitle")}</CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              Set your operating hours for each day of the week. Customers will
-              see these hours on your website.
+              {t("cardDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
@@ -56,10 +57,10 @@ export default function AdminWorkingHours() {
                 {loadingUpdateWorkingHours ? (
                   <span className="flex items-center justify-center">
                     <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin me-1 sm:me-2" />
-                    <span className="text-xs sm:text-base">Saving...</span>
+                    <span className="text-xs sm:text-base">{t("saving")}</span>
                   </span>
                 ) : (
-                  "Save Working Hours"
+                  t("save")
                 )}
               </Button>
             </div>

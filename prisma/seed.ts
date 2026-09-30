@@ -993,7 +993,10 @@ async function main() {
       maxImagesPerCar: 5,
       auditLogRetentionDays: 90,
       features: {
-        aiProcessing: { enabled: false, limit: 0 },
+        // A taste, not a meal: enough to feel AI listing, not to live on it.
+        aiProcessing: { enabled: true, limit: 5 },
+        // Answers to buyers' questions on this dealer's listings: no monthly cap.
+        aiAssistant: { enabled: true },
         analytics: "basic",
         chat: false,
         apiAccess: false,
@@ -1016,6 +1019,7 @@ async function main() {
       auditLogRetentionDays: 365,
       features: {
         aiProcessing: { enabled: true, limit: 100 },
+        aiAssistant: { enabled: true },
         analytics: "advanced",
         chat: true,
         apiAccess: false,
@@ -1038,6 +1042,7 @@ async function main() {
       auditLogRetentionDays: null, // Unlimited retention
       features: {
         aiProcessing: { enabled: true, limit: -1 },
+        aiAssistant: { enabled: true },
         analytics: "advanced",
         chat: true,
         apiAccess: true,

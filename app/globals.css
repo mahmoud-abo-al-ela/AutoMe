@@ -469,3 +469,54 @@
     display: inline-flex;
   }
 }
+
+/*
+ * Stream Chat's message box sets no direction. `plaintext` lets an empty box
+ * follow the page (its Arabic placeholder sits on the right in Arabic) and
+ * lines each typed paragraph up with its own language — English typed on the
+ * Arabic site stays left-to-right, and the reverse.
+ */
+.str-chat__message-textarea {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+/*
+ * Chat sides (owner's choice, 2026-09-29): your own messages sit on the
+ * right on the Arabic site and on the left on the English site — the reverse
+ * of Stream's layout, which puts them at the reading end.
+ *
+ * Done by laying each message row out in the opposite direction, so Stream's
+ * own layout — the space kept for the options button, its hover states, the
+ * bubble's tail corner, reactions — mirrors as one piece instead of being
+ * restated rule by rule. What is read inside the row is set back to the
+ * page's direction.
+ */
+[dir="rtl"] .str-chat__li {
+  direction: ltr;
+}
+[dir="ltr"] .str-chat__li {
+  direction: rtl;
+}
+[dir="rtl"] .str-chat__li .str-chat__message-bubble,
+[dir="rtl"] .str-chat__li .str-chat__message-metadata,
+[dir="rtl"] .str-chat__li .str-chat__date-separator {
+  direction: rtl;
+}
+[dir="ltr"] .str-chat__li .str-chat__message-bubble,
+[dir="ltr"] .str-chat__li .str-chat__message-metadata,
+[dir="ltr"] .str-chat__li .str-chat__date-separator {
+  direction: ltr;
+}
+
+/*
+ * Each paragraph of a message reads in its own language's direction, whatever
+ * the page's: English inside the Arabic site keeps its question mark at the
+ * end ("Come Saturday?", not "?Come Saturday"), and Arabic inside the English
+ * site stays right-to-left.
+ */
+.str-chat__message-text-inner p,
+.str-chat__message-text-inner li {
+  unicode-bidi: plaintext;
+  text-align: start;
+}

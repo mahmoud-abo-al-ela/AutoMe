@@ -167,7 +167,7 @@ export default function MainHeader({
     (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
   const t = useTranslations("nav");
-  const { afterSignOut } = useAuthRedirects();
+  const { afterSignOut, signIn } = useAuthRedirects();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
@@ -262,7 +262,7 @@ export default function MainHeader({
                     className="cursor-pointer transition-all duration-300 hover:shadow-md"
                   >
                     <Link
-                      href="/sign-in"
+                      href={signIn}
                       className="w-full flex items-center justify-center"
                     >
                       {t("signIn")}

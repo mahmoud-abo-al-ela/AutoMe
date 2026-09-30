@@ -10,6 +10,9 @@ import {
     handleRemoveCar,
 } from "@/app/[locale]/(site)/compare/_components/utils";
 import { useQuery } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { resolveCarFeatures } from "@/lib/utils/car-text";
 import { queryKeys } from "@/lib/query-client";
 import type { SerializedCarWithImages } from "@/lib/utils/serializers";
 
@@ -49,7 +52,18 @@ export const useComparePage = () => {
         select: (res) => (res.success ? (res.data as SerializedCarWithImages[]) : []),
     });
     
-    const cars = compareList.length === 0 ? [] : (carsData || []);
+    // Features are resolved to the reader's language once, here, so every
+    // compare view (matrix, side-by-side, single) matches and lists them in
+    // one language instead of each re-deriving it.
+    const locale = useLocale() as Locale;
+    const cars = useMemo(
+        () =>
+            (compareList.length === 0 ? [] : (carsData || [])).map((car) => ({
+                ...car,
+                features: resolveCarFeatures(car, locale).features,
+            })),
+        [compareList.length, carsData, locale]
+    );
 
     // ─── Derived data (memoised) ────────────────────────────────────────────
 

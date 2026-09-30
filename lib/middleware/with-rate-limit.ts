@@ -1,4 +1,10 @@
-import aj, { arcjetConfigured, arcjetRequired } from "@/lib/arcjet";
+import aj, {
+  ajChatTranslation,
+  ajDealerAi,
+  ajListingQuestions,
+  arcjetConfigured,
+  arcjetRequired,
+} from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 import {
   RateLimitError,
@@ -37,14 +43,22 @@ export function assertArcjetAllowed(
 
   if (decision.isDenied()) {
     if (decision.reason.isRateLimit()) {
-      const { remaining, reset } = decision.reason;
-      throw new RateLimitError(
-        `${deniedMessage} ${remaining} requests remaining until ${new Date(
-          reset
-        ).toLocaleString()}`
-      );
+      // `reset` is seconds until a request is allowed again — it was being
+      // read as a date, so the user only ever heard "wait a moment". The page
+      // now counts it down.
+      const { reset, resetTime } = decision.reason;
+      const seconds = resetTime
+        ? Math.ceil((resetTime.getTime() - Date.now()) / 1000)
+        : reset;
+      const retryAfter = Math.max(1, Math.round(seconds));
+      throw new RateLimitError(`${deniedMessage} Try again in ${retryAfter}s.`, {}, retryAfter);
     }
-    throw new ValidationError("Request denied", "request");
+    // Shield and bot detection reach this branch. They run on the action path
+    // now rather than in middleware, and the public photo search is the one
+    // caller a real visitor can trip, so the reason has to be translatable.
+    throw new ValidationError("Request denied", "request", {
+      key: "errors.requestDenied",
+    });
   }
 }
 
@@ -75,10 +89,50 @@ async function enforce(instance: typeof aj, requested: number) {
 }
 
 /**
- * Enforce the shared Arcjet bucket (dealer flows: car creation, image search).
+ * Enforce the shared Arcjet bucket (uploads, the public photo search, payments,
+ * team and other dealer actions — dealer AI has its own, enforceDealerAiLimit).
  * Call at the top of an abuse-prone or costly server action, before doing any
  * work. `requested` is the number of tokens to consume (default 1).
  */
 export async function enforceRateLimit(requested = 1) {
   return enforce(aj, requested);
+}
+
+/**
+ * Enforce the dealer-AI bucket (see ajDealerAi): photo reads, translation
+ * and the listing coach. Separate from the shared bucket so a run of AI work
+ * cannot lock a dealer out of everything else for an hour.
+ */
+export async function enforceDealerAiLimit(requested = 1) {
+  return enforce(ajDealerAi, requested);
+}
+
+/**
+ * Enforce the buyer-question buckets: per IP and per car. `carId` must be the
+ * validated id — it is the rate-limit key, so an unvalidated one would let a
+ * caller mint a fresh bucket per request.
+ */
+export async function enforceListingQuestionLimit(carId: string) {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajListingQuestions.protect(req, { requested: 1, carId });
+
+  assertArcjetAllowed(decision, "Too many questions. Please try again later.");
+}
+
+/**
+ * Enforce the chat-translation bucket (see ajChatTranslation). `userId` is the
+ * signed-in user's database id — the bucket key, so it must never come from
+ * the request.
+ */
+export async function enforceChatTranslationLimit(userId: string) {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajChatTranslation.protect(req, { requested: 1, userId });
+
+  assertArcjetAllowed(decision, "Too many translations. Please try again later.");
 }

@@ -1,5 +1,6 @@
 import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { planKeyFor } from "@/components/Pricing/pricing-plans";
 import { checkUser } from "@/lib/checkUser";
 import {
     getOrganizationBySlug,
@@ -113,6 +114,11 @@ export default async function BillingSuccessPage({
         ? await db.plan.findUnique({ where: { id: metadata.planId } })
         : null;
 
+    const t = await getTranslations("org.billing.plans");
+    const tPlans = await getTranslations("plans");
+    // A plan whose type has no message key falls back to its DB name.
+    const planKey = planKeyFor(newPlan?.type);
+
     return (
         <div className="flex items-center justify-center min-h-[60vh]">
             <Card className="max-w-md w-full">
@@ -120,20 +126,24 @@ export default async function BillingSuccessPage({
                     <div className="flex justify-center mb-4">
                         <CheckCircle2 className="h-16 w-16 text-green-500" />
                     </div>
-                    <CardTitle className="text-2xl">Plan Updated Successfully!</CardTitle>
+                    <CardTitle className="text-2xl">{t("changedTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                     <p className="text-muted-foreground">
                         {newPlan
-                            ? `You've successfully switched to the ${newPlan.name} plan.`
-                            : "Your plan has been updated successfully."}
+                            ? t.rich("switchedTo", {
+                                  plan: planKey
+                                      ? tPlans(`plans.${planKey}.name`)
+                                      : newPlan.name,
+                                  b: (chunks) => <strong>{chunks}</strong>,
+                              })
+                            : t("changed")}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                        Your new plan features are now active. Any billing changes will be
-                        reflected in your next invoice.
+                        {t("featuresActive")}
                     </p>
                     <Button asChild className="w-full">
-                        <Link href={`/org/${slug}/billing`}>Back to Billing</Link>
+                        <Link href={`/org/${slug}/billing`}>{t("backToBilling")}</Link>
                     </Button>
                 </CardContent>
             </Card>

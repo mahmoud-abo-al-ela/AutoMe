@@ -1,3 +1,5 @@
+"use client";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -9,6 +11,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { TeamMember } from "../_lib/team-types";
 
 interface RemoveMemberDialogProps {
@@ -26,19 +29,27 @@ export default function RemoveMemberDialog({
     onConfirm,
     isLoading,
 }: RemoveMemberDialogProps) {
+    const t = useTranslations("org.settings.team.remove");
+    const tCommon = useTranslations("common.actions");
+
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+                    <AlertDialogTitle>{t("title")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to remove{" "}
-                        <span className="font-semibold">{member?.user?.name || member?.user?.email}</span>{" "}
-                        from the organization? This action cannot be undone.
+                        {t.rich("body", {
+                            name: member?.user?.name || member?.user?.email || "",
+                            b: (chunks) => (
+                                <span className="font-semibold">{chunks}</span>
+                            ),
+                        })}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isLoading}>
+                        {tCommon("cancel")}
+                    </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         disabled={isLoading}
@@ -47,10 +58,10 @@ export default function RemoveMemberDialog({
                         {isLoading ? (
                             <>
                                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                                Removing...
+                                {t("removing")}
                             </>
                         ) : (
-                            "Remove Member"
+                            t("confirm")
                         )}
                     </AlertDialogAction>
                 </AlertDialogFooter>

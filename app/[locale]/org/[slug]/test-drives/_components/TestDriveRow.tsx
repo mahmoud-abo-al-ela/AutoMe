@@ -7,33 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { TestDriveStatusBadge } from "./TestDriveStatusBadge";
 import { TestDriveDetailsModal } from "./TestDriveDetailsModal";
 import { useState } from "react";
-import { formatCarPrice } from "@/lib/utils/currency";
+import { useTranslations } from "next-intl";
 import type { TestDriveCar, TestDriveItemProps } from "./TestDrivesPresenter";
-
-const formatTime = (timeString: string | null | undefined) => {
-  if (!timeString) return "";
-
-  if (/^\d{2}:\d{2}$/.test(timeString)) {
-    return timeString;
-  }
-
-  try {
-    const [time, modifier] = timeString.split(" ");
-    let [hours, minutes] = time.split(":");
-
-    if (hours === "12") {
-      hours = "00";
-    }
-
-    if (modifier === "PM") {
-      hours = String(parseInt(hours, 10) + 12);
-    }
-
-    return `${hours.padStart(2, "0")}:${minutes}`;
-  } catch (error) {
-    return timeString;
-  }
-};
 
 export const TestDriveRow = ({
   testDrive,
@@ -42,7 +17,8 @@ export const TestDriveRow = ({
   isUpdating = false,
 }: TestDriveItemProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const { date: fmtDate } = useFormatters();
+  const t = useTranslations("org.testDrives");
+  const { date: fmtDate, clockTime, price } = useFormatters();
   const formatDate = (dateString: string | Date) => fmtDate(new Date(dateString));
 
   // Nullable by serializeTestDrive's signature only; carId is a required FK.
@@ -89,7 +65,7 @@ export const TestDriveRow = ({
                 {car.title}
               </Link>
               <p className="text-sm md:text-base text-green-600 font-semibold mt-1">
-                {formatCarPrice(Number(car.price))}
+                {price(Number(car.price))}
               </p>
             </div>
           </div>
@@ -112,10 +88,10 @@ export const TestDriveRow = ({
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-medium text-sm md:text-base truncate text-gray-900">
-                {testDrive.user?.name || "Unknown User"}
+                {testDrive.user?.name || t("customer.unknown")}
               </p>
               <p className="text-xs md:text-sm text-gray-500 truncate">
-                {testDrive.user?.email || "No email"}
+                {testDrive.user?.email || t("customer.noEmail")}
               </p>
             </div>
           </div>
@@ -131,8 +107,10 @@ export const TestDriveRow = ({
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
               <span className="text-xs sm:text-sm md:text-base text-gray-700">
-                {formatTime(testDrive.startTime)} -{" "}
-                {formatTime(testDrive.endTime)}
+                {t("table.timeRange", {
+                  start: clockTime(testDrive.startTime ?? ""),
+                  end: clockTime(testDrive.endTime ?? ""),
+                })}
               </span>
             </div>
           </div>
@@ -151,7 +129,7 @@ export const TestDriveRow = ({
             >
               <Eye className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
               <span className="hidden lg:inline text-xs sm:text-sm">
-                Details
+                {t("actions.details")}
               </span>
             </Button>
 
@@ -166,7 +144,7 @@ export const TestDriveRow = ({
                 >
                   <Check className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
                   <span className="hidden lg:inline text-xs sm:text-sm">
-                    Confirm
+                    {t("actions.confirm")}
                   </span>
                 </Button>
                 <Button
@@ -178,7 +156,7 @@ export const TestDriveRow = ({
                 >
                   <X className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
                   <span className="hidden lg:inline text-xs sm:text-sm">
-                    Cancel
+                    {t("actions.cancel")}
                   </span>
                 </Button>
               </>
@@ -193,7 +171,7 @@ export const TestDriveRow = ({
               >
                 <X className="h-3 w-3 sm:h-4 sm:w-4 lg:me-1" />
                 <span className="hidden lg:inline text-xs sm:text-sm">
-                  Cancel
+                  {t("actions.cancel")}
                 </span>
               </Button>
             )}

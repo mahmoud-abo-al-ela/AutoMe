@@ -3,6 +3,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldAlert, Mail, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /**
  * Notice displayed to non-owner members on the billing page.
@@ -16,23 +17,22 @@ export default function NonOwnerBillingNotice({
   ownerName: string | null | undefined;
   ownerEmail: string | null | undefined;
 }) {
+    const t = useTranslations("org.billing.nonOwner");
+
     return (
         <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800">
             <ShieldAlert className="h-4 w-4 text-blue-600" />
             <AlertTitle className="text-blue-800 dark:text-blue-400">
-                View-Only Access
+                {t("title")}
             </AlertTitle>
             <AlertDescription className="text-blue-700 dark:text-blue-300">
-                <p>
-                    You can view the current plan and usage, but only the organization
-                    owner can manage billing, change plans, or update payment methods.
-                </p>
+                <p>{t("body")}</p>
 
                 {(ownerName || ownerEmail) && (
                     <Card className="mt-3 bg-white/60 dark:bg-gray-900/40 border-blue-200 dark:border-blue-800">
                         <CardContent className="py-3 px-4">
                             <p className="text-xs font-medium text-blue-800 dark:text-blue-400 mb-2">
-                                Organization Owner
+                                {t("ownerLabel")}
                             </p>
                             <div className="flex flex-col gap-1">
                                 {ownerName && (

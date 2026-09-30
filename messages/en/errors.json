@@ -5,6 +5,8 @@
   "notFound": "{resource} could not be found.",
   "conflict": "That already exists.",
   "rateLimit": "Too many requests. Please wait a moment and try again.",
+  "rateLimitIn": "Too many requests. Try again in {time}.",
+  "rateLimitReady": "You can try again now.",
   "serviceUnavailable": "The service is temporarily unavailable. Please try again.",
   "planLimit": "You have reached your plan's limit for {resource}.",
   "resources": {
@@ -25,5 +27,21 @@
     "Image": "The image",
     "Membership": "The membership",
     "Working hours": "The working hours"
+  },
+  "ai": {
+    "busy": "Our AI is at capacity right now. Please try again in a few minutes.",
+    "timeout": "The analysis took too long. Please try again.",
+    "unavailable": "AI analysis is unavailable right now. Please try again later.",
+    "unreadable": "We could not read the analysis result. Please try again.",
+    "invalidResponse": "The analysis came back in an unexpected form. Please try again.",
+    "noImage": "No image was provided.",
+    "unsupportedImage": "That image type is not supported. Use JPG, PNG or WebP.",
+    "imageTooLarge": "The image must be under {max}MB.",
+    "unsavedReads": "You've read photos for {cap} cars this month without saving them. Save a car, or fill in the form yourself, to keep going.",
+    "tooManyImages": "Send at most {max} photos at a time."
+  },
+  "requestDenied": "That request was blocked. If you think this is a mistake, please try again.",
+  "chat": {
+    "cannotTranslate": "This message can't be translated."
   }
 }

@@ -1,11 +1,22 @@
-// Pure display helpers + config shared by the plan-comparison components.
+// Presentation config for the plan-comparison components.
+//
+// The feature bullets used to be built here, a second time: this module
+// derived names like "5 car listings" and "AI Processing" from the plan's
+// columns and a camelCase-to-Title-Case split of the Json column's keys. That
+// produces English by construction, and it produced *different* English from
+// the marketing pricing cards, which had already moved to message keys.
+//
+// So the bullets come from `planFeatureKeys` now — one source for the pricing
+// page, the onboarding wizard and this page — and what is left here is the
+// icon, the colours and the "most popular" flag, which are not copy.
 import { Sparkles, TrendingUp, Crown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Plan, PlanType } from "@/lib/generated/prisma";
+import type { PlanType } from "@/lib/generated/prisma";
+import { planFeatureKeys, type DbPlan, type PlanFeature } from "@/components/Pricing/pricing-plans";
 
 export const PLAN_CONFIG: Record<
   PlanType,
-  { icon: LucideIcon; color: string; border: string; badge?: string }
+  { icon: LucideIcon; color: string; border: string; badgeKey?: "mostPopular" }
 > = {
   STARTER: {
     icon: Sparkles,
@@ -16,7 +27,7 @@ export const PLAN_CONFIG: Record<
     icon: TrendingUp,
     color: "text-blue-600",
     border: "border-blue-500",
-    badge: "Most Popular",
+    badgeKey: "mostPopular",
   },
   ENTERPRISE: {
     icon: Crown,
@@ -26,105 +37,30 @@ export const PLAN_CONFIG: Record<
 };
 
 /**
- * Plan prices, in minor units.
+ * Every feature key any of these plans offers, in the order the first plan
+ * lists them — the row order of the comparison table.
  *
- * Deliberately USD, unlike car prices: Stripe charges subscriptions in USD
- * (lib/services/stripe/plan.ts), so this matches what the customer is actually
- * billed. Whether plan pricing should move to EGP is a business decision that
- * has to change Stripe and this together — see lib/utils/currency.ts.
+ * Keys, not names: the rows are identity, and identity cannot be a translated
+ * string. Keying the table by the rendered name meant the row set changed with
+ * the reader's language.
  */
-export function formatPrice(price: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-  }).format(price / 100);
-}
+export function getAllFeatureKeys(plans: DbPlan[]): PlanFeature[] {
+  const seen = new Map<string, PlanFeature>();
 
-export function formatFeatureName(key: string) {
-  const nameMap: Record<string, string> = {
-    aiProcessing: "AI Processing",
-    chat: "Live Chat",
-    prioritySupport: "Priority Support",
-  };
-  return (
-    nameMap[key] ||
-    key
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str: string) => str.toUpperCase())
-      .trim()
-  );
-}
-
-/** One row of a plan's feature list. */
-export type PlanFeature = { name: string; included: boolean };
-
-export function getFeatures(plan: Plan): PlanFeature[] {
-  // Plan.features is a Json column; the shape is written by the super-admin
-  // plan form, so it is read defensively rather than asserted here.
-  const f = (plan.features ?? {}) as Record<string, unknown>;
-  const features: PlanFeature[] = [];
-
-  features.push({
-    name:
-      plan.maxCars === -1
-        ? "Unlimited car listings"
-        : `${plan.maxCars} car listings`,
-    included: true,
-  });
-  features.push({
-    name:
-      plan.maxMembers === -1
-        ? "Unlimited team members"
-        : `${plan.maxMembers} team members`,
-    included: true,
-  });
-  features.push({
-    name: `${plan.maxImagesPerCar} images per car`,
-    included: true,
-  });
-  features.push({
-    name:
-      plan.auditLogRetentionDays === null
-        ? "Unlimited audit logs"
-        : `${plan.auditLogRetentionDays} days audit logs`,
-    included: true,
-  });
-
-  Object.entries(f).forEach(([key, value]) => {
-    if (key === "analytics" || key === "whiteLabel" || key === "webhooks")
-      return;
-    if (typeof value === "object" && value !== null && "enabled" in value) {
-      features.push({
-        name: formatFeatureName(key),
-        included: !!(value as { enabled?: unknown }).enabled,
-      });
-    } else if (typeof value === "boolean") {
-      features.push({ name: formatFeatureName(key), included: value });
+  for (const plan of plans) {
+    for (const feature of planFeatureKeys(plan)) {
+      if (!seen.has(feature.key)) seen.set(feature.key, feature);
     }
-  });
+  }
 
-  return features;
+  return Array.from(seen.values());
 }
 
-/**
- * Collect all unique feature names across all plans for the comparison table
- */
-export function getAllFeatureNames(plans: Plan[]): string[] {
-  const featureSet = new Set<string>();
-  plans.forEach((plan) => {
-    getFeatures(plan).forEach((f) => featureSet.add(f.name));
-  });
-  return Array.from(featureSet);
-}
-
-/**
- * Build a lookup: featureName -> boolean for a given plan
- */
-export function getFeatureLookup(plan: Plan): Record<string, boolean> {
+/** featureKey → included, for one plan. */
+export function getFeatureLookup(plan: DbPlan): Record<string, boolean> {
   const lookup: Record<string, boolean> = {};
-  getFeatures(plan).forEach((f) => {
-    lookup[f.name] = f.included;
-  });
+  for (const feature of planFeatureKeys(plan)) {
+    lookup[feature.key] = feature.included;
+  }
   return lookup;
 }

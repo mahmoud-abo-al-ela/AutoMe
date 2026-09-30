@@ -1,0 +1,89 @@
+import { z } from "zod";
+import {
+  BODY_TYPES,
+  CAR_COLORS,
+  FUEL_TYPES,
+  TRANSMISSIONS,
+} from "@/lib/constants/car-options";
+
+/**
+ * The car fields the vision model extracts from a photo.
+ *
+ * This schema does double duty: it is sent to Gemini as the response schema and
+ * it validates what comes back. One definition, so the two cannot drift.
+ *
+ * The enum fields matter most. Constraining them here means the API itself
+ * refuses anything outside the allowlist, which is why the old
+ * "Sport Utility Vehicle (SUV)" hand-patch in AICarForm is no longer needed —
+ * the model can no longer produce it.
+ */
+
+/** car-options exports plain string[]; z.enum needs a non-empty tuple. */
+const tuple = (values: string[]) => values as [string, ...string[]];
+
+const currentYear = new Date().getFullYear();
+
+const modelYear = z.coerce.number().int().min(1900).max(currentYear + 1);
+
+export const carListingSchema = z.object({
+  /**
+   * First, because the model writes fields in schema order: it states what it
+   * can read and see — badges, lettering, grille, lights — before it commits
+   * to a make and model, instead of naming a car and justifying it after.
+   * Never shown to the dealer, so a long one is cut, not rejected: failing a
+   * whole read over the length of its working notes would be absurd.
+   */
+  identification: z.string().transform((text) => text.slice(0, 600)),
+  make: z.string().min(1).max(50),
+  model: z.string().min(1).max(50),
+  /**
+   * The model years this generation was built — what a photo can actually
+   * show. `year` is the likeliest one inside it; the form asks the dealer to
+   * confirm it whenever the range is wider than one year.
+   */
+  yearFrom: modelYear,
+  yearTo: modelYear,
+  year: modelYear,
+  /**
+   * An allowlist, like bodyType, and stored in English. The site translates it
+   * per reader through `carAttributes.color`, which only works for colours that
+   * have an entry there.
+   */
+  color: z.enum(tuple(CAR_COLORS)),
+  /**
+   * EGP, never converted. Egypt is the only market, and a model that helpfully
+   * "converts to USD" silently divides every listing price by ~50.
+   */
+  price: z.coerce.number().nonnegative(),
+  mileage: z.coerce.number().nonnegative(),
+  bodyType: z.enum(tuple(BODY_TYPES)),
+  fuelType: z.enum(tuple(FUEL_TYPES)),
+  transmission: z.enum(tuple(TRANSMISSIONS)),
+  seats: z.coerce.number().int().min(1).max(12),
+
+  /**
+   * Bilingual listing copy. Both languages come out of the one call that was
+   * already being paid for, which is what makes this close to free: a dealer
+   * types nothing and gets a listing that reads correctly to either half of the
+   * market.
+   *
+   * The Arabic is asked for as Arabic rather than as a translation of the
+   * English — Arabic is the primary market language here, and copy translated
+   * word-for-word out of English reads like it.
+   */
+  titleEn: z.string().min(1).max(200),
+  titleAr: z.string().min(1).max(200),
+  descriptionEn: z.string().max(2000),
+  descriptionAr: z.string().max(2000),
+
+  /**
+   * Both languages, for the same reason as the copy above. Arrays only: the
+   * old string-or-array union was for free-form replies, and the response
+   * schema now makes the model answer with the declared shape.
+   */
+  featuresEn: z.array(z.string().max(80)).max(30),
+  featuresAr: z.array(z.string().max(80)).max(30),
+  confidence: z.coerce.number().min(0).max(1),
+});
+
+export type CarListingExtraction = z.infer<typeof carListingSchema>;

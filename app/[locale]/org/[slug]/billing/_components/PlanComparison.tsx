@@ -16,7 +16,14 @@ import { Check, Loader2, LayoutGrid, TableProperties } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPlanChangeSession } from "@/actions/billing";
-import { PLAN_CONFIG, formatPrice, getFeatures } from "./_lib/plan-display";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { PLAN_CONFIG } from "./_lib/plan-display";
+import {
+  planFeatureKeys,
+  planKeyFor,
+  formatPlanPrice,
+} from "@/components/Pricing/pricing-plans";
 import PlanCard from "./PlanCard";
 import FeatureComparisonTable from "./FeatureComparisonTable";
 import type { BillingPlan } from "./_lib/billing-types";
@@ -32,6 +39,10 @@ export default function PlanComparison({
   isOwner: boolean;
   organizationId: string;
 }) {
+  const t = useTranslations("org.billing.plans");
+  const tPlans = useTranslations("plans");
+  const tCommon = useTranslations("common.actions");
+  const { number, locale } = useFormatters();
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
@@ -41,6 +52,13 @@ export default function PlanComparison({
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const pathname = usePathname();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  // The dialog names the plan; a DB plan with an unrecognised type falls back
+  // to its untranslated name rather than rendering blank.
+  const selectedPlanKey = planKeyFor(selectedPlan?.type);
+  const selectedPlanName = selectedPlanKey
+    ? tPlans(`plans.${selectedPlanKey}.name`)
+    : (selectedPlan?.name ?? "");
 
   const getDisplayPrice = (plan: BillingPlan) =>
     billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
@@ -97,8 +115,7 @@ export default function PlanComparison({
     } catch (error) {
       console.error("Failed to change plan:", error);
       toast.error(
-        (error instanceof Error && error.message) ||
-          "Failed to change plan. Please try again."
+        (error instanceof Error && error.message) || t("changeFailed")
       );
       setIsChanging(false);
     }
@@ -110,10 +127,8 @@ export default function PlanComparison({
         {/* Header section */}
         <div className="text-center space-y-4">
           <div>
-            <h2 className="text-2xl font-bold">Choose Your Plan</h2>
-            <p className="text-muted-foreground mt-2">
-              Select the perfect plan for your dealership
-            </p>
+            <h2 className="text-2xl font-bold">{t("title")}</h2>
+            <p className="text-muted-foreground mt-2">{t("subtitle")}</p>
           </div>
 
           {/* Controls row: billing toggle + view mode */}
@@ -129,13 +144,13 @@ export default function PlanComparison({
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="monthly" className="cursor-pointer">
-                  Monthly
+                  {tPlans("monthly")}
                 </TabsTrigger>
                 <TabsTrigger value="yearly" className="cursor-pointer">
-                  Yearly
+                  {tPlans("yearly")}
                   {averageSavings > 0 && (
                     <Badge variant="secondary" className="ms-2 text-xs bg-green-100">
-                      Save {averageSavings}%
+                      {tPlans("save", { percentage: number(averageSavings) })}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -151,7 +166,7 @@ export default function PlanComparison({
                 onClick={() => setViewMode("cards")}
               >
                 <LayoutGrid className="h-4 w-4 me-1.5" />
-                <span className="hidden sm:inline">Cards</span>
+                <span className="hidden sm:inline">{t("cards")}</span>
               </Button>
               <Button
                 variant={viewMode === "table" ? "secondary" : "ghost"}
@@ -160,7 +175,7 @@ export default function PlanComparison({
                 onClick={() => setViewMode("table")}
               >
                 <TableProperties className="h-4 w-4 me-1.5" />
-                <span className="hidden sm:inline">Compare</span>
+                <span className="hidden sm:inline">{t("compare")}</span>
               </Button>
             </div>
           </div>
@@ -231,14 +246,16 @@ export default function PlanComparison({
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            All plans include secure data storage and email support.{" "}
-            <a
-              href="mailto:sales@autome.com"
-              className="text-primary hover:underline"
-            >
-              Contact sales
-            </a>{" "}
-            for custom solutions.
+            {t.rich("footerNote", {
+              link: (chunks) => (
+                <a
+                  href="mailto:sales@autome.com"
+                  className="text-primary hover:underline"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
         </div>
       </div>
@@ -247,33 +264,46 @@ export default function PlanComparison({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Change Plan</DialogTitle>
+            <DialogTitle>{t("changePlan")}</DialogTitle>
             <DialogDescription>
-              Switch to <strong>{selectedPlan?.name}</strong> plan
-              {selectedPlan && getDisplayPrice(selectedPlan) > 0 && (
-                <>
-                  {" "}
-                  for{" "}
-                  <strong>
-                    {formatPrice(getDisplayPrice(selectedPlan))}/
-                    {billingCycle === "yearly" ? "year" : "month"}
-                  </strong>
-                </>
-              )}
-              ?
+              {selectedPlan &&
+                (getDisplayPrice(selectedPlan) > 0
+                  ? t.rich("switchDialogWithPrice", {
+                      plan: selectedPlanName,
+                      price: t("priceWithPeriod", {
+                        price:
+                          formatPlanPrice(selectedPlan, billingCycle, locale) ??
+                          "",
+                        period: t(
+                          billingCycle === "yearly"
+                            ? "perYearShort"
+                            : "perMonthShort"
+                        ),
+                      }),
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    })
+                  : t.rich("switchDialogFree", {
+                      plan: selectedPlanName,
+                      b: (chunks) => <strong>{chunks}</strong>,
+                    }))}
             </DialogDescription>
           </DialogHeader>
 
           {selectedPlan && (
             <div className="rounded-lg bg-muted p-4">
-              <p className="text-sm font-medium mb-2">Included features:</p>
+              <p className="text-sm font-medium mb-2">
+                {t("includedFeatures")}
+              </p>
               <ul className="space-y-1 text-sm">
-                {getFeatures(selectedPlan)
+                {planFeatureKeys(selectedPlan)
                   .filter((f) => f.included)
-                  .map((f, i) => (
-                    <li key={i} className="flex items-center gap-2">
+                  .map((f) => (
+                    <li key={f.key} className="flex items-center gap-2">
                       <Check className="h-3 w-3 text-green-600" />
-                      {f.name}
+                      {tPlans(
+                        `features.${f.key}`,
+                        f.params ? { value: number(f.params.count) } : undefined
+                      )}
                     </li>
                   ))}
               </ul>
@@ -287,7 +317,7 @@ export default function PlanComparison({
               disabled={isChanging}
               className="cursor-pointer"
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button
               onClick={handlePlanChange}
@@ -297,10 +327,10 @@ export default function PlanComparison({
               {isChanging ? (
                 <>
                   <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                  Processing...
+                  {t("processing")}
                 </>
               ) : (
-                "Confirm"
+                t("confirm")
               )}
             </Button>
           </DialogFooter>

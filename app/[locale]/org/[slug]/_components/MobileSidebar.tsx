@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -16,11 +17,13 @@ import {
   Menu,
   CreditCard,
   ScrollText,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import { OrgUnreadBadge } from "@/components/StreamChat";
+import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import type { OrgSidebarProps } from "./AdminSidebar";
 
 const iconMap = {
@@ -33,6 +36,7 @@ const iconMap = {
   Calendar,
   CreditCard,
   ScrollText,
+  MessageCircleQuestion,
 };
 
 export default function MobileSidebar({
@@ -40,8 +44,9 @@ export default function MobileSidebar({
   organization,
   userRole,
 }: OrgSidebarProps & { pathname: string }) {
+  const t = useTranslations("org.nav");
   const [open, setOpen] = useState(false);
-  const orgName = organization?.name || "AutoMe Admin";
+  const orgName = organization?.name || t("fallbackOrgName");
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -50,7 +55,7 @@ export default function MobileSidebar({
           variant="ghost"
           size="sm"
           className="md:hidden h-10 w-10 p-0 hover:bg-sidebar-accent"
-          aria-label="Open sidebar menu"
+          aria-label={t("openSidebar")}
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -108,7 +113,7 @@ export default function MobileSidebar({
                       "flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-200 group",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground hover:translate-x-1"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground ltr:hover:translate-x-1 rtl:hover:-translate-x-1"
                     )}
                   >
                     {ItemIcon && (
@@ -121,7 +126,7 @@ export default function MobileSidebar({
                         )}
                       />
                     )}
-                    <span className="font-medium flex-1">{item.label}</span>
+                    <span className="font-medium flex-1">{t(item.labelKey)}</span>
                     {item.name === "messages" && item.showUnreadBadge && (
                       <OrgUnreadBadge
                         organizationId={organization.id}
@@ -134,15 +139,18 @@ export default function MobileSidebar({
 
           </nav>
 
-          <div className="p-4 border-t border-sidebar-border">
+          <div className="p-4 border-t border-sidebar-border space-y-1">
+            <LanguageSwitcher
+              onSwitch={() => setOpen(false)}
+              className="w-full h-auto justify-start px-4 py-3 gap-3 text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg" />
             <Link
               href="/"
               onClick={() => setOpen(false)}
               className="flex items-center px-4 py-3 text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg transition-all duration-200 group"
-              title="Back to Site"
+              title={t("backToSite")}
             >
-              <LogOut className="h-5 w-5 me-3 rotate-180 transition-colors group-hover:text-sidebar-accent-foreground" />
-              <span className="font-medium">Back to Site</span>
+              <LogOut className="h-5 w-5 me-3 rotate-180 rtl:rotate-0 transition-colors group-hover:text-sidebar-accent-foreground" />
+              <span className="font-medium">{t("backToSite")}</span>
             </Link>
           </div>
         </div>

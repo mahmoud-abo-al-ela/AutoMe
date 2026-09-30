@@ -1,9 +1,10 @@
 "use client";
 import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
 import { useSearchParams, useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
-import { Calendar as CalendarIcon, Filter, X, Search, User, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Filter, X, Search, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,40 +24,33 @@ import {
 import { useState, useEffect, useTransition } from "react";
 import type { DateRange } from "react-day-picker";
 import type { AuditLogFilters } from "../_lib/audit-types";
+import { useAuditLabels } from "../_lib/use-audit-labels";
 import type { AuditAction, EntityType } from "@/lib/generated/prisma";
 
 // Typed against the Prisma enums, so an option that no action can ever carry
-// fails to compile instead of quietly filtering to zero rows.
-const actionOptions: {
-  value: AuditAction | "all";
-  label: string;
-  type?: EntityType;
-}[] = [
-  { value: "all", label: "All Actions" },
-  { value: "CAR_CREATED", label: "Car Created", type: "CAR" },
-  { value: "CAR_UPDATED", label: "Car Updated", type: "CAR" },
-  { value: "CAR_DELETED", label: "Car Deleted", type: "CAR" },
-  { value: "CAR_STATUS_CHANGED", label: "Car Status Changed", type: "CAR" },
-  { value: "TEST_DRIVE_CREATED", label: "Test Drive Created", type: "TEST_DRIVE" },
-  { value: "TEST_DRIVE_CONFIRMED", label: "Test Drive Confirmed", type: "TEST_DRIVE" },
-  { value: "TEST_DRIVE_CANCELED", label: "Test Drive Canceled", type: "TEST_DRIVE" },
-  { value: "MEMBER_INVITED", label: "Member Invited", type: "MEMBERSHIP" },
-  { value: "MEMBER_ROLE_CHANGED", label: "Member Role Changed", type: "MEMBERSHIP" },
-  { value: "MEMBER_REMOVED", label: "Member Removed", type: "MEMBERSHIP" },
-  {
-    value: "ORG_SETTINGS_UPDATED",
-    label: "Settings Updated",
-    type: "ORGANIZATION",
-  },
-  { value: "ORG_UPDATED", label: "Org Updated", type: "ORGANIZATION" },
+// fails to compile instead of quietly filtering to zero rows. The label is
+// looked up by the enum member the database stores, so an option and the
+// badge the table renders for the same action cannot drift apart.
+const actionOptions: { value: AuditAction; type: EntityType }[] = [
+  { value: "CAR_CREATED", type: "CAR" },
+  { value: "CAR_UPDATED", type: "CAR" },
+  { value: "CAR_DELETED", type: "CAR" },
+  { value: "CAR_STATUS_CHANGED", type: "CAR" },
+  { value: "TEST_DRIVE_CREATED", type: "TEST_DRIVE" },
+  { value: "TEST_DRIVE_CONFIRMED", type: "TEST_DRIVE" },
+  { value: "TEST_DRIVE_CANCELED", type: "TEST_DRIVE" },
+  { value: "MEMBER_INVITED", type: "MEMBERSHIP" },
+  { value: "MEMBER_ROLE_CHANGED", type: "MEMBERSHIP" },
+  { value: "MEMBER_REMOVED", type: "MEMBERSHIP" },
+  { value: "ORG_SETTINGS_UPDATED", type: "ORGANIZATION" },
+  { value: "ORG_UPDATED", type: "ORGANIZATION" },
 ];
 
-const entityTypeOptions: { value: EntityType | "all"; label: string }[] = [
-  { value: "all", label: "All Types" },
-  { value: "CAR", label: "Car" },
-  { value: "TEST_DRIVE", label: "Test Drive" },
-  { value: "MEMBERSHIP", label: "Membership" },
-  { value: "ORGANIZATION", label: "Organization" },
+const entityTypeOptions: EntityType[] = [
+  "CAR",
+  "TEST_DRIVE",
+  "MEMBERSHIP",
+  "ORGANIZATION",
 ];
 
 export default function AuditLogsFilters({
@@ -64,6 +58,8 @@ export default function AuditLogsFilters({
 }: {
   currentFilters: AuditLogFilters;
 }) {
+  const t = useTranslations("org.auditLogs.filters");
+  const label = useAuditLabels();
   const { date: fmtDate } = useFormatters();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -98,7 +94,7 @@ export default function AuditLogsFilters({
     } else {
       params.delete(key);
     }
-    
+
     // If changing entity type, clear action if it doesn't match
     if (key === "entityType") {
       params.delete("action");
@@ -111,7 +107,6 @@ export default function AuditLogsFilters({
   };
 
   const filteredActionOptions = actionOptions.filter((option) => {
-    if (option.value === "all") return true;
     if (!currentFilters.entityType || currentFilters.entityType === "all")
       return true;
     return option.type === currentFilters.entityType;
@@ -164,7 +159,7 @@ export default function AuditLogsFilters({
           <div className="relative flex-1">
             <Search className="absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by User ID..."
+              placeholder={t("searchPlaceholder")}
               value={userIdInput}
               onChange={(e) => setUserIdInput(e.target.value)}
               className="ps-9 bg-background"
@@ -184,15 +179,15 @@ export default function AuditLogsFilters({
                   <CalendarIcon className="me-2 h-4 w-4" />
                   {date?.from ? (
                     date.to ? (
-                      <>
-                        {fmtDate(date.from)} -{" "}
-                        {fmtDate(date.to)}
-                      </>
+                      t("dateRange", {
+                        start: fmtDate(date.from),
+                        end: fmtDate(date.to),
+                      })
                     ) : (
                       fmtDate(date.from)
                     )
                   ) : (
-                    <span>Pick a date range</span>
+                    <span>{t("dateRangePlaceholder")}</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -215,19 +210,20 @@ export default function AuditLogsFilters({
           ) : (
             <Filter className="h-4 w-4" />
           )}
-          <span>Filters:</span>
+          <span>{t("label")}</span>
           <Select
             value={currentFilters.entityType || "all"}
             onValueChange={(value) => updateFilter("entityType", value)}
             disabled={isPending}
           >
             <SelectTrigger className="bg-background w-[180px]">
-              <SelectValue placeholder="Entity Type" />
+              <SelectValue placeholder={t("entityTypePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              {entityTypeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+              <SelectItem value="all">{t("allEntityTypes")}</SelectItem>
+              {entityTypeOptions.map((entityType) => (
+                <SelectItem key={entityType} value={entityType}>
+                  {label.entity(entityType)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -238,12 +234,13 @@ export default function AuditLogsFilters({
             disabled={isPending}
           >
             <SelectTrigger className="bg-background w-[180px]">
-              <SelectValue placeholder="Action" />
+              <SelectValue placeholder={t("actionPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">{t("allActions")}</SelectItem>
               {filteredActionOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {label.action(option.value)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -258,7 +255,7 @@ export default function AuditLogsFilters({
               className="hover:bg-destructive/10 hover:text-destructive h-10 px-4 cursor-pointer"
             >
               <X className="h-4 w-4 me-2" />
-              Reset
+              {t("reset")}
             </Button>
           )}
         </div>

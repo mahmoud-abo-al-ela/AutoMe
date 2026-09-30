@@ -62,7 +62,7 @@ export default function MobileMenu({
 
   const menuRef = useRef<HTMLDivElement>(null);
   const { signOut } = useClerk();
-  const { afterSignOut } = useAuthRedirects();
+  const { afterSignOut, signIn } = useAuthRedirects();
   const isOnAdminPath = pathname?.startsWith("/super-admin");
   const isOnOrgPath = pathname?.startsWith("/org/");
 
@@ -256,7 +256,7 @@ export default function MobileMenu({
                     transition={{ duration: 0.2, delay: 0.15 }}
                     className="mt-4"
                   >
-                    <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
+                    <Link href={signIn} onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
                         {t("signIn")}
                       </Button>

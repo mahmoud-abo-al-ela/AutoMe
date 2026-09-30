@@ -1,11 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock } from "lucide-react";
 import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
+import { resolveCarTitle } from "@/lib/utils/car-text";
+import { localeDirection, type Locale } from "@/i18n/routing";
 
 const CarHeader = ({
     car,
@@ -16,6 +18,8 @@ const CarHeader = ({
 }) => {
     const t = useTranslations("carDetail.header");
     const fmt = useFormatters();
+    const locale = useLocale() as Locale;
+    const resolvedTitle = resolveCarTitle(car, locale);
     const attr = useCarAttributes();
     // This was ~50 lines of hand-rolled date arithmetic that hardcoded
     // English words and English pluralisation ("1 week" / "2 weeks"), which
@@ -66,8 +70,11 @@ const CarHeader = ({
             </div>
 
             {/* Title */}
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
-                {car.title ||
+            <h1
+                dir={resolvedTitle ? localeDirection[resolvedTitle.locale] : undefined}
+                className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight"
+            >
+                {resolvedTitle?.text ??
                     `${fmt.number(car.year, { useGrouping: false })} ${car.make} ${car.model}`}
             </h1>
 

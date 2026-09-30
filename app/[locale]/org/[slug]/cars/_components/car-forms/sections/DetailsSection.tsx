@@ -1,4 +1,8 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +13,14 @@ import Image from "next/image";
 import { toast } from "sonner";
 import FormSection from "../shared/FormSection";
 import FieldInfo from "../shared/FieldInfo";
+import { VALIDATION_RULES } from "@/lib/constants/validation";
 import type { CarFormSectionProps } from "../shared/section-props";
+
+/** Read from the rules rather than restated, so the copy quoting these limits
+ * cannot drift from the validation that enforces them. */
+const MIN_DESCRIPTION = VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH;
+const MAX_IMAGE_MB = 5;
+const MAX_IMAGE_BYTES = MAX_IMAGE_MB * 1024 * 1024;
 
 /** A blob URL kept alive for one File in the form's `images` array. */
 interface ImagePreview {
@@ -31,6 +42,12 @@ const DetailsSection = ({
   setValue,
   maxImages = 5,
 }: DetailsSectionProps) => {
+  const t = useTranslations("org.carForm");
+  const { number } = useFormatters();
+  // One language of listing text on screen: the dashboard's. The other is
+  // written by translation on save (see fillOtherLanguage in actions/cars).
+  const isArabic = useLocale() === "ar";
+  const descriptionField = isArabic ? "descriptionAr" : "description";
   const watchImages = watch("images");
   const [imagePreviews, setImagePreviews] = useState<
     Record<number, ImagePreview>
@@ -41,7 +58,7 @@ const DetailsSection = ({
       "image/*": [".jpeg", ".jpg", ".png", ".webp"],
     },
     maxFiles: maxImages,
-    maxSize: 5242880, // 5MB
+    maxSize: MAX_IMAGE_BYTES,
     onDrop: (acceptedFiles) => {
       const currentImages = watchImages || [];
       const newImages = [...currentImages, ...acceptedFiles].slice(0, maxImages);
@@ -53,9 +70,9 @@ const DetailsSection = ({
           rejection.errors.some((error) => error.code === "too-many-files")
         )
       ) {
-        toast.error(`You can only upload up to ${maxImages} images.`);
+        toast.error(t("images.tooMany", { count: number(maxImages) }));
       } else {
-        toast.error("Failed to upload image. Please try again.");
+        toast.error(t("images.failed"));
       }
     },
   });
@@ -107,50 +124,65 @@ const DetailsSection = ({
   };
 
   return (
-    <FormSection title="Additional Details">
-      <div className="space-y-2">
-        <Label htmlFor="location" className="flex items-center">
-          Location <FieldInfo text="Where the vehicle is currently located" />
-        </Label>
-        <Input
-          type="text"
-          id="location"
-          placeholder="New Cairo, Cairo"
-          {...register("location")}
-          className={`${errors.location ? "border-red-500" : ""}`}
-        />
-        {errors.location && (
-          <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
-        )}
-      </div>
+    <FormSection title={t("sections.details")}>
+      {/* No location field: a car is where its dealership is, and the
+          dealership's structured place is what search and display use. */}
+
+      {isArabic && (
+        <div className="space-y-2">
+          <Label htmlFor="titleAr" className="flex items-center">
+            {t("fields.titleArLabel")}{" "}
+            <FieldInfo text={t("fields.titleArHint")} />
+          </Label>
+          <Input
+            type="text"
+            id="titleAr"
+            dir="rtl"
+            lang="ar"
+            placeholder={t("fields.titleArPlaceholder")}
+            {...register("titleAr")}
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
-        <Label htmlFor="description" className="flex items-center">
-          Description <FieldInfo text="Detailed description of the vehicle" />
+        <Label htmlFor={descriptionField} className="flex items-center">
+          {t("fields.descriptionLabel")}{" "}
+          <FieldInfo text={t("fields.descriptionHint")} />
         </Label>
+        {/* Keyed so switching fields remounts rather than reusing the
+            registered element. dir/lang follow the field's language. */}
         <Textarea
-          id="description"
-          placeholder="Detailed description of the vehicle..."
-          className={`min-h-[120px] sm:min-h-[150px] ${errors.description ? "border-red-500" : ""
+          key={descriptionField}
+          id={descriptionField}
+          dir={isArabic ? "rtl" : "ltr"}
+          lang={isArabic ? "ar" : "en"}
+          placeholder={t("fields.descriptionPlaceholder")}
+          className={`min-h-[120px] sm:min-h-[150px] ${errors[descriptionField] ? "border-red-500" : ""
             }`}
-          {...register("description")}
+          {...register(descriptionField)}
         />
-        {errors.description && (
+        {errors[descriptionField] && (
           <p className="text-red-500 text-sm mt-1">
-            {errors.description.message}
+            {errors[descriptionField]?.message}
           </p>
         )}
         <div className="flex justify-between mt-1 text-xs sm:text-base">
-          <p className="text-gray-500">Min 10 characters required</p>
           <p className="text-gray-500">
-            {watch("description")?.length || 0} characters
+            {t("fields.descriptionMin", { count: number(MIN_DESCRIPTION) })}
+          </p>
+          <p className="text-gray-500">
+            {t("fields.descriptionCount", {
+              count: number(watch(descriptionField)?.length || 0),
+            })}
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="images" className="flex items-center">
-          Images <FieldInfo text={`Add up to ${maxImages} images of the vehicle`} />
+          {t("images.label")}{" "}
+          <FieldInfo text={t("images.hint", { count: number(maxImages) })} />
         </Label>
         {watchImages?.length < maxImages ? (
           <div
@@ -166,17 +198,20 @@ const DetailsSection = ({
               <div className="flex flex-col items-center gap-2">
                 <Upload className="w-8 h-8 sm:w-12 sm:h-12" />
                 <p className="text-gray-600">
-                  {isDragActive
-                    ? "Drop the images here"
-                    : "Drag & drop images here, or click to select"}
+                  {isDragActive ? t("images.drop") : t("images.prompt")}
                 </p>
-                <p className="text-gray-500">Max {maxImages} images, up to 5MB each</p>
+                <p className="text-gray-500">
+                  {t("images.limits", {
+                    count: number(maxImages),
+                    size: number(MAX_IMAGE_MB),
+                  })}
+                </p>
               </div>
             </div>
           </div>
         ) : (
           <p className="text-gray-600 text-sm sm:text-base">
-            Maximum of {maxImages} images uploaded. Remove an image to add a new one.
+            {t("images.full", { count: number(maxImages) })}
           </p>
         )}
         {errors.images && (
@@ -193,7 +228,7 @@ const DetailsSection = ({
                   {imageSrc && (
                     <Image
                       src={imageSrc}
-                      alt={`Preview ${index + 1}`}
+                      alt={t("images.previewAlt", { index: number(index + 1) })}
                       className="w-full h-40 object-contain rounded-lg"
                       width={100}
                       height={100}
@@ -207,6 +242,7 @@ const DetailsSection = ({
                       e.stopPropagation();
                       removeImage(index);
                     }}
+                    aria-label={t("images.remove", { index: number(index + 1) })}
                     className="absolute cursor-pointer top-1 end-0 p-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
                   >
                     <X className="w-4 h-4" />

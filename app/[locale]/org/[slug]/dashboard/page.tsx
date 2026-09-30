@@ -1,4 +1,6 @@
 import React from "react";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
 import type { ActionResponse } from "@/lib/utils/response";
 import type { DashboardStats } from "../_components/StatsCards";
 import type { OverviewPoint } from "../_components/OverviewChart";
@@ -23,10 +25,16 @@ import {
   getPopularCarsData,
   getTestDriveTrendsData
 } from "@/actions/dashboard";
-export const metadata = {
-  title: "Dashboard",
-  description: "Dashboard for AutoMe",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "org.dashboard.meta" });
+
+  return { title: t("title"), description: t("description") };
+}
 
 /**
  * Pull `.data` out of a settled action result.
@@ -52,6 +60,7 @@ const DashboardPage = async ({
   params: Promise<{ slug: string }>;
 }) => {
   const { slug } = await params;
+  const t = await getTranslations("org.dashboard");
   // Fetch data in parallel
   const results = await Promise.allSettled([
     getDashboardStats(),
@@ -87,15 +96,19 @@ const DashboardPage = async ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                Admin Dashboard
+                {t("title")}
               </h1>
               <p className="text-gray-600 text-sm sm:text-base">
-                Welcome back, here&apos;s what&apos;s happening with your platform
+                {t("subtitle")}
               </p>
             </div>
             <TabsList>
-              <TabsTrigger value="overview" className="cursor-pointer">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" className="cursor-pointer">Analytics</TabsTrigger>
+              <TabsTrigger value="overview" className="cursor-pointer">
+                {t("tabs.overview")}
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="cursor-pointer">
+                {t("tabs.analytics")}
+              </TabsTrigger>
             </TabsList>
           </div>
         </div>

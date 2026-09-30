@@ -1,4 +1,8 @@
+"use client";
+
 import React from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -35,16 +39,22 @@ const Pagination = ({
    * there, which reads as false wherever it gates markup below. */
   isMobileView?: boolean;
 }) => {
+  const t = useTranslations("org.cars.pagination");
+  const { number } = useFormatters();
+
+  const start = Math.min((currentPage - 1) * pageSize + 1, totalCount);
+  const end = Math.min(currentPage * pageSize, totalCount);
+  const range = {
+    start: number(start),
+    end: number(end),
+    total: number(totalCount),
+  };
+
   return (
     <div className="w-full flex flex-col sm:flex-row justify-between items-center py-3 px-0 sm:px-4 border-t gap-4 sm:gap-0">
       <div className="text-sm text-gray-500 order-2 sm:order-1 text-center sm:text-start">
-        <span className="hidden sm:inline">
-          Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)} to{" "}
-          {Math.min(currentPage * pageSize, totalCount)} of {totalCount} cars
-        </span>
-        <span className="sm:hidden">
-          {Math.min((currentPage - 1) * pageSize + 1, totalCount)}-{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
-        </span>
+        <span className="hidden sm:inline">{t("showing", range)}</span>
+        <span className="sm:hidden">{t("showingShort", range)}</span>
       </div>
       <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto">
         {/* Radix's Select root renders no DOM node, so the className this was
@@ -56,20 +66,20 @@ const Pagination = ({
             disabled={isDisabled}
           >
             <SelectTrigger className="cursor-pointer h-8 text-xs">
-              <SelectValue placeholder="Items per page" />
+              <SelectValue placeholder={t("perPage")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="5" className="cursor-pointer">
-                5
+                {number(5)}
               </SelectItem>
               <SelectItem value="10" className="cursor-pointer">
-                10
+                {number(10)}
               </SelectItem>
               <SelectItem value="20" className="cursor-pointer">
-                20
+                {number(20)}
               </SelectItem>
               <SelectItem value="50" className="cursor-pointer">
-                50
+                {number(50)}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -87,8 +97,8 @@ const Pagination = ({
               disabled={currentPage === 1 || isDisabled}
               onClick={() => onPageChange(1)}
             >
-              <ChevronsLeft className="h-4 w-4" />
-              <span className="sr-only">First page</span>
+              <ChevronsLeft className="h-4 w-4 rtl:rotate-180" />
+              <span className="sr-only">{t("first")}</span>
             </Button>
           )}
 
@@ -99,8 +109,8 @@ const Pagination = ({
             disabled={currentPage === 1 || isDisabled}
             onClick={() => onPageChange(currentPage - 1)}
           >
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Previous page</span>
+            <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+            <span className="sr-only">{t("previous")}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-1">
@@ -112,7 +122,7 @@ const Pagination = ({
                 className="h-8 w-8 p-0 cursor-pointer"
                 onClick={() => onPageChange(1)}
               >
-                1
+                {number(1)}
               </Button>
             )}
 
@@ -157,7 +167,7 @@ const Pagination = ({
                     onClick={() => onPageChange(pageNum)}
                     disabled={isDisabled}
                   >
-                    {pageNum}
+                    {number(pageNum)}
                   </Button>
                 );
               }
@@ -179,7 +189,7 @@ const Pagination = ({
                   onClick={() => onPageChange(totalPages)}
                   disabled={isDisabled}
                 >
-                  {totalPages}
+                  {number(totalPages)}
                 </Button>
               )}
           </div>
@@ -191,8 +201,8 @@ const Pagination = ({
             disabled={currentPage === totalPages || isDisabled}
             onClick={() => onPageChange(currentPage + 1)}
           >
-            <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Next page</span>
+            <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+            <span className="sr-only">{t("next")}</span>
           </Button>
 
           {!isMobileView && (
@@ -203,8 +213,8 @@ const Pagination = ({
               disabled={currentPage === totalPages || isDisabled}
               onClick={() => onPageChange(totalPages)}
             >
-              <ChevronsRight className="h-4 w-4" />
-              <span className="sr-only">Last page</span>
+              <ChevronsRight className="h-4 w-4 rtl:rotate-180" />
+              <span className="sr-only">{t("last")}</span>
             </Button>
           )}
         </div>

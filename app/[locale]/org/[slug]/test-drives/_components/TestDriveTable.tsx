@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import {
     Table,
     TableBody,
@@ -21,10 +24,12 @@ export const TestDriveTable = ({
     isLoading?: boolean;
     isUpdating?: boolean;
 }) => {
+    const t = useTranslations("org.testDrives");
+
     if (testDrives.length === 0 && !isLoading) {
         return (
             <div className="w-full">
-                <EmptyState variant="inline" title="No test drive requests found" />
+                <EmptyState variant="inline" title={t("empty.title")} />
             </div>
         );
     }
@@ -36,19 +41,19 @@ export const TestDriveTable = ({
                 <TableHeader>
                     <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
                         <TableHead className="min-w-[200px] font-semibold text-gray-900 py-3">
-                            Car
+                            {t("table.car")}
                         </TableHead>
                         <TableHead className="min-w-[150px] font-semibold text-gray-900 py-3">
-                            Customer
+                            {t("table.customer")}
                         </TableHead>
                         <TableHead className="min-w-[140px] font-semibold text-gray-900 py-3">
-                            Date & Time
+                            {t("table.dateTime")}
                         </TableHead>
                         <TableHead className="min-w-[100px] font-semibold text-gray-900 py-3">
-                            Status
+                            {t("table.status")}
                         </TableHead>
                         <TableHead className="min-w-[120px] font-semibold text-gray-900 py-3">
-                            Actions
+                            {t("table.actions")}
                         </TableHead>
                     </TableRow>
                 </TableHeader>

@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
 import { checkUser } from "@/lib/checkUser";
 import {
   getOrganizationBySlug,
@@ -15,6 +18,17 @@ import type {
 } from "./_lib/audit-types";
 
 type SearchParams = Record<string, string | string[] | undefined>;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "org.auditLogs.meta" });
+
+  return { title: t("title"), description: t("description") };
+}
 
 /** Repeated query keys arrive as arrays; the filters only ever set one value. */
 function readParam(params: SearchParams, key: string): string {

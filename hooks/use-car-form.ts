@@ -1,46 +1,150 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { asModelYear, replaceYear } from "@/lib/utils/replace-year";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { addCar, updateCarFull } from "@/actions/cars";
-import { VALIDATION_RULES, ERROR_MESSAGES } from "@/lib/constants/validation";
+import { useTranslations, useLocale } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { useFormatters } from "@/hooks/use-formatters";
+import { VALIDATION_RULES } from "@/lib/constants/validation";
+import {
+    SERVICE_HISTORY,
+    UNSET,
+    disclosuresFromForm,
+    disclosuresToForm,
+} from "@/lib/utils/car-disclosures";
 
-const createCarFormSchema = (maxImages = VALIDATION_RULES.CAR.MAX_IMAGES, isEditMode = false) =>
+/** A yes / no / not-stated select, as the form holds it. */
+const triState = z.enum([UNSET, "yes", "no"]).default(UNSET);
+
+/**
+ * A translator scoped to `org.carForm.validation`, plus the number formatter
+ * for the limits its messages quote.
+ *
+ * The schema is a factory rather than a module constant because its messages
+ * are translated: a module-level schema would freeze whichever locale loaded
+ * the module first. Same arrangement as the onboarding schemas.
+ *
+ * `n` is passed rather than left to ICU because next-intl formats numeric
+ * arguments against the bare `ar` tag, whose numbering system is Western — a
+ * limit rendered that way would read "1900" beside Arabic digits everywhere
+ * else on the form.
+ */
+type Translate = (
+    key: string,
+    values?: Record<string, string | number | Date>
+) => string;
+type FormatNumber = (value: number) => string;
+
+/**
+ * The form shows the listing text of the dashboard's language only; the other
+ * language is written by translation when the car is saved. So the description
+ * required is the one on screen — unless the car already carries one in the
+ * other language (an older listing opened in edit mode), which is enough to
+ * save and gets translated across.
+ */
+const describedIn = (
+    t: Translate,
+    n: FormatNumber,
+    required: boolean
+) => {
+    const text = z.string().max(2000);
+    return required
+        ? text.min(
+              VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH,
+              t("descriptionTooShort", {
+                  min: n(VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH),
+              })
+          )
+        : text.optional();
+};
+
+const createCarFormSchema = (
+    t: Translate,
+    n: FormatNumber,
+    locale: Locale,
+    otherLanguageDescribed: boolean,
+    maxImages = VALIDATION_RULES.CAR.MAX_IMAGES,
+    isEditMode = false
+) =>
     z.object({
-        title: z.string().min(1, ERROR_MESSAGES.CAR.TITLE_REQUIRED),
-        make: z.string().min(1, ERROR_MESSAGES.CAR.MAKE_REQUIRED),
-        model: z.string().min(1, ERROR_MESSAGES.CAR.MODEL_REQUIRED),
+        // English, generated from make/model/year below; never typed.
+        title: z.string().min(1, t("titleRequired")),
+        titleAr: z.string().max(200).optional(),
+        description: describedIn(t, n, locale === "en" && !otherLanguageDescribed),
+        descriptionAr: describedIn(t, n, locale === "ar" && !otherLanguageDescribed),
+        make: z.string().min(1, t("makeRequired")),
+        model: z.string().min(1, t("modelRequired")),
         year: z
             .number()
             .refine(
                 (val) => val >= VALIDATION_RULES.CAR.YEAR_MIN && val <= VALIDATION_RULES.CAR.YEAR_MAX,
-                ERROR_MESSAGES.CAR.YEAR_INVALID
+                t("yearInvalid", {
+                    min: n(VALIDATION_RULES.CAR.YEAR_MIN),
+                    max: n(VALIDATION_RULES.CAR.YEAR_MAX),
+                })
             ),
-        price: z.number().min(VALIDATION_RULES.CAR.PRICE_MIN, ERROR_MESSAGES.CAR.PRICE_INVALID),
-        mileage: z.number().min(VALIDATION_RULES.CAR.MILEAGE_MIN, ERROR_MESSAGES.CAR.MILEAGE_INVALID),
-        bodyType: z.string().min(1, ERROR_MESSAGES.CAR.BODY_TYPE_REQUIRED),
-        fuelType: z.string().min(1, ERROR_MESSAGES.CAR.FUEL_TYPE_REQUIRED),
-        transmission: z.string().min(1, ERROR_MESSAGES.CAR.TRANSMISSION_REQUIRED),
-        color: z.string().min(1, ERROR_MESSAGES.CAR.COLOR_REQUIRED),
-        seats: z.number().min(VALIDATION_RULES.CAR.SEATS_MIN, ERROR_MESSAGES.CAR.SEATS_INVALID),
-        location: z.string().min(1, ERROR_MESSAGES.CAR.LOCATION_REQUIRED),
+        price: z
+            .number()
+            .min(
+                VALIDATION_RULES.CAR.PRICE_MIN,
+                t("priceInvalid", { min: n(VALIDATION_RULES.CAR.PRICE_MIN - 1) })
+            ),
+        mileage: z
+            .number()
+            .min(
+                VALIDATION_RULES.CAR.MILEAGE_MIN,
+                t("mileageInvalid", { min: n(VALIDATION_RULES.CAR.MILEAGE_MIN) })
+            ),
+        bodyType: z.string().min(1, t("bodyTypeRequired")),
+        fuelType: z.string().min(1, t("fuelTypeRequired")),
+        transmission: z.string().min(1, t("transmissionRequired")),
+        color: z.string().min(1, t("colorRequired")),
+        seats: z
+            .number()
+            .min(
+                VALIDATION_RULES.CAR.SEATS_MIN,
+                t("seatsInvalid", {
+                    min: n(VALIDATION_RULES.CAR.SEATS_MIN),
+                    max: n(VALIDATION_RULES.CAR.SEATS_MAX),
+                })
+            ),
+        // Not asked for: a car is where its dealership is. Carried through
+        // unchanged so an older car keeps the text it was saved with.
+        location: z.string().optional(),
         features: z.union([
             z.array(z.string()),
             z.string().transform(val => val.split(',').map(f => f.trim()).filter(Boolean))
         ]).optional(),
-        description: z.string().min(VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH, ERROR_MESSAGES.CAR.DESCRIPTION_TOO_SHORT),
+        // The Arabic list splits on the Arabic comma too: it is what an Arabic
+        // keyboard types, and splitting on "," alone would keep the whole list
+        // as one feature.
+        featuresAr: z.union([
+            z.array(z.string()),
+            z.string().transform(val => val.split(/[,،]/).map(f => f.trim()).filter(Boolean))
+        ]).optional(),
+        // History and condition: all optional, and "not stated" is a real
+        // answer — see lib/utils/car-disclosures.
+        originalPaint: triState,
+        accidentFree: triState,
+        ownerCount: z.string().default(UNSET),
+        serviceHistory: z.enum([UNSET, ...SERVICE_HISTORY]).default(UNSET),
+        priceNegotiable: triState,
+        licenseValidUntil: z.string().regex(/^(\d{4}-\d{2})?$/).default(""),
         status: z.enum(["Available", "Sold", "Unavailable"]),
         featured: z.boolean().default(false),
         images: z
             .array(isEditMode ? z.union([z.instanceof(File), z.string()]) : z.instanceof(File))
-            .min(VALIDATION_RULES.CAR.MIN_IMAGES, ERROR_MESSAGES.CAR.IMAGES_REQUIRED)
-            .max(maxImages, `Maximum of ${maxImages} images allowed`),
+            .min(VALIDATION_RULES.CAR.MIN_IMAGES, t("imagesRequired"))
+            .max(maxImages, t("imagesTooMany", { max: n(maxImages) })),
     });
 
 /** The form's validated shape, inferred from the schema factory. */
@@ -55,12 +159,14 @@ export type CarFormInitialData = Partial<
   Record<keyof CarFormValues, unknown>
 >;
 
+/** Section ids, in order. The labels live in `org.carForm.sections`, keyed by
+ * id, so the stepper and the section headings read one source. */
 const formSections = [
-    { id: "basic", label: "Basic Info" },
-    { id: "specs", label: "Specifications" },
-    { id: "details", label: "Additional Details" },
-    { id: "status", label: "Status & Visibility" },
-];
+    { id: "basic" },
+    { id: "specs" },
+    { id: "details" },
+    { id: "status" },
+] as const;
 
 export const useCarForm = (
     initialData: CarFormInitialData = {},
@@ -70,8 +176,35 @@ export const useCarForm = (
 ) => {
     const [currentSection, setCurrentSection] = useState("basic");
     const router = useRouter();
+    // From the route, not by position in the URL: the path now starts with a
+    // locale (/ar/org/<slug>/...), and splitting it took "org" as the slug.
+    const { slug } = useParams<{ slug: string }>();
 
-    const carFormSchema = useMemo(() => createCarFormSchema(maxImages, isEditMode), [maxImages, isEditMode]);
+    const t = useTranslations("org.carForm.validation");
+    const tForm = useTranslations("org.carForm.form");
+    const { number } = useFormatters();
+    const locale = useLocale() as Locale;
+
+    // Read once: whether the car arrived with a description in the language
+    // the form is NOT showing. Only an edit of an older listing does.
+    const hiddenDescription =
+        locale === "ar" ? initialData.description : initialData.descriptionAr;
+    const otherLanguageDescribed =
+        typeof hiddenDescription === "string" &&
+        hiddenDescription.trim().length >= VALIDATION_RULES.CAR.DESCRIPTION_MIN_LENGTH;
+
+    const carFormSchema = useMemo(
+        () =>
+            createCarFormSchema(
+                t,
+                number,
+                locale,
+                otherLanguageDescribed,
+                maxImages,
+                isEditMode
+            ),
+        [t, number, locale, otherLanguageDescribed, maxImages, isEditMode]
+    );
     const resolver = useMemo(() => zodResolver(carFormSchema), [carFormSchema]);
 
     const form = useForm<CarFormValues>({
@@ -95,7 +228,11 @@ export const useCarForm = (
             seats: initialData.seats || "",
             location: initialData.location || "",
             features: initialData.features || [],
+            featuresAr: initialData.featuresAr || [],
             description: initialData.description || "",
+            titleAr: initialData.titleAr || "",
+            descriptionAr: initialData.descriptionAr || "",
+            ...disclosuresToForm(initialData as Parameters<typeof disclosuresToForm>[0]),
             status: initialData.status || "Available",
             featured: initialData.featured || false,
             images: initialData.images || [],
@@ -106,19 +243,23 @@ export const useCarForm = (
     const queryClient = useQueryClient();
     
     const { isPending: adding, mutateAsync: addCarFn } = useMutation({
-        mutationFn: (payload: { data: CarFormValues }) => addCar(payload.data),
+        mutationFn: (payload: { data: CarFormValues; editedLocale: Locale | null }) =>
+            addCar(payload.data, { editedLocale: payload.editedLocale }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
+            // Saving a car made with AI counts it against the AI listings.
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("aiProcessing") });
         },
     });
 
     const { isPending: updating, mutateAsync: updateCarFn } = useMutation({
         // Only mounted in edit mode, where carId is always supplied.
-        mutationFn: (payload: { data: CarFormValues }) =>
-            updateCarFull(carId!, payload.data),
+        mutationFn: (payload: { data: CarFormValues; editedLocale: Locale | null }) =>
+            updateCarFull(carId!, payload.data, { editedLocale: payload.editedLocale }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.cars.all });
             queryClient.invalidateQueries({ queryKey: [...queryKeys.cars.all, carId] });
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.planUsage("aiProcessing") });
         },
     });
 
@@ -137,6 +278,26 @@ export const useCarForm = (
             form.setValue("title", "");
         }
     }, [watchMake, watchModel, watchYear, form]);
+
+    // A corrected year follows into the text that states it — the AI writes
+    // "كيا سيراتو ٢٠٢٠" into the title and description. Keyed on the last
+    // complete year, so typing through "202" rewrites nothing, and the first
+    // one seen (a pre-fill) is only recorded. Not marked dirty: both languages
+    // change together, so there is nothing for the server to re-translate.
+    const lastYear = useRef<number | null>(null);
+    useEffect(() => {
+        const year = asModelYear(watchYear);
+        if (year === null) return;
+        const previous = lastYear.current;
+        lastYear.current = year;
+        if (previous === null || previous === year) return;
+        for (const field of ["titleAr", "description", "descriptionAr"] as const) {
+            const text = form.getValues(field);
+            if (typeof text !== "string") continue;
+            const updated = replaceYear(text, previous, year);
+            if (updated !== text) form.setValue(field, updated);
+        }
+    }, [watchYear, form]);
 
     // Update form when initialData changes (for AI mode or edit mode pre-fill)
     useEffect(() => {
@@ -188,7 +349,11 @@ export const useCarForm = (
                 "seats",
             ]);
         } else if (sectionId === "details") {
-            isValid = await form.trigger(["description", "location", "images"]);
+            // The description on screen is the dashboard language's one.
+            isValid = await form.trigger([
+                locale === "ar" ? "descriptionAr" : "description",
+                "images",
+            ]);
         }
 
         return isValid;
@@ -202,8 +367,8 @@ export const useCarForm = (
                 setCurrentSection(formSections[currentIndex + 1].id);
             }
         } else {
-            toast.error("Please complete all required fields", {
-                description: "Fill in the highlighted fields to proceed",
+            toast.error(tForm("validationToastTitle"), {
+                description: tForm("validationToastBody"),
                 className: "text-sm",
             });
         }
@@ -227,16 +392,42 @@ export const useCarForm = (
                 .filter(Boolean);
         }
 
+        // The English columns mirror the single-language fields the dealer
+        // actually edits, so `titleEn`/`descriptionEn` never drift from what is
+        // on screen. The Arabic half comes straight from its own inputs.
+        const payload = {
+            ...data,
+            titleEn: data.title,
+            descriptionEn: data.description,
+            // Strings on screen, booleans and nulls on the wire: null is
+            // "not stated", and sending every field lets a dealer clear one.
+            ...disclosuresFromForm(data),
+        } as unknown as CarFormValues;
+
+        // Which language the dealer changed in this save. The server rewrites
+        // the other one from it; untouched fields (an AI draft that already
+        // carries both languages) are left alone rather than re-translated.
+        const dirty = form.formState.dirtyFields;
+        const editedHere =
+            locale === "ar"
+                ? dirty.titleAr || dirty.descriptionAr || dirty.featuresAr
+                : dirty.description || dirty.features;
+        const editedLocale = editedHere ? locale : null;
+
         const fn = isEditMode ? updateCarFn : addCarFn;
-        const response = await fn({ data });
+        const response = await fn({ data: payload, editedLocale });
         if (response?.success) {
-            toast.success(isEditMode ? "Car updated successfully" : "Car added successfully");
-            const slug = window.location.pathname.split('/')[2];
+            toast.success(isEditMode ? tForm("updatedToast") : tForm("addedToast"));
+            if (response.data.translation === "skipped") {
+                toast.info(tForm("translationSkipped", { other: locale === "ar" ? "en" : "ar" }));
+            }
             router.push(`/org/${slug}/cars`);
         } else {
+            // The action's own message wins when it sent one; otherwise the
+            // translated fallback. Same order as resolveActionError.
             const errorMessage =
                 response?.error?.message ||
-                (isEditMode ? "Failed to update car" : "Failed to add car");
+                (isEditMode ? tForm("updateFailed") : tForm("addFailed"));
             toast.error(errorMessage);
         }
     };

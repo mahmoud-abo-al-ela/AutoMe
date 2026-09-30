@@ -141,6 +141,10 @@ export default async function LocaleLayout({
       // the env vars, which is the only way to make them locale-aware.
       signInUrl={`/${locale}/sign-in`}
       signUpUrl={`/${locale}/sign-up`}
+      // Where any Clerk flow without its own redirect ends up. Clerk's default
+      // is "/", which next-intl resolves to /en — the same trap one level down.
+      signInFallbackRedirectUrl={`/${locale}`}
+      signUpFallbackRedirectUrl={`/${locale}`}
     >
       <html
         lang={locale}

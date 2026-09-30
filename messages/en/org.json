@@ -1,0 +1,957 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "cars": "Cars",
+    "testDrives": "Test Drives",
+    "messages": "Messages",
+    "buyerQuestions": "Buyer Questions",
+    "billing": "Billing",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings",
+    "fallbackOrgName": "AutoMe Admin",
+    "openSidebar": "Open sidebar menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "backToSite": "Back to site"
+  },
+  "meta": {
+    "notFoundTitle": "Organization not found",
+    "description": "Browse cars from {name}"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "We apologize for the inconvenience. An unexpected error has occurred.",
+    "retry": "Try again",
+    "home": "Go back home"
+  },
+  "impersonation": {
+    "viewingAs": "Viewing as <b>{name}</b>",
+    "viewingAsIn": "Viewing as <b>{name}</b> in <b>{org}</b>",
+    "unknownUser": "User",
+    "superAdmin": "(Super Admin: {name})",
+    "exit": "Exit impersonation",
+    "ending": "Ending…",
+    "ended": "Impersonation ended",
+    "endFailed": "Couldn’t end impersonation"
+  },
+  "upgradeBanner": {
+    "notIncluded": "The {plan} plan doesn’t include {resource}.",
+    "notIncludedBody": "Upgrade your plan to unlock it.",
+    "atLimit": "You’ve reached your {resource} limit on the {plan} plan.",
+    "nearLimit": "You’ve used {current} of {limit} {resource} on the {plan} plan.",
+    "body": "Upgrade your plan to unlock higher limits and premium features.",
+    "cta": "Upgrade Plan",
+    "dismiss": "Dismiss banner",
+    "resources": {
+      "cars": "cars",
+      "members": "team members",
+      "aiProcessing": "AI processing requests"
+    },
+    "noPlan": "You don’t have an active plan yet.",
+    "noPlanBody": "Choose a plan to unlock {resource}."
+  },
+  "dashboard": {
+    "meta": {
+      "title": "Dashboard",
+      "description": "Your dealership at a glance"
+    },
+    "title": "Dashboard",
+    "subtitle": "Welcome back — here’s what’s happening with your dealership.",
+    "tabs": {
+      "overview": "Overview",
+      "analytics": "Analytics"
+    },
+    "stats": {
+      "users": "Total Users",
+      "cars": "Cars Listed",
+      "testDrives": "Test Drives"
+    },
+    "ranges": {
+      "label": "Select a time range",
+      "last7": "Last 7 days",
+      "last14": "Last 14 days",
+      "last30": "Last 30 days",
+      "last90": "Last 3 months"
+    },
+    "overview": {
+      "title": "Overview",
+      "description": "Users, cars, and test drives over time",
+      "emptyDescription": "No data available",
+      "emptyBody": "No chart data available",
+      "series": {
+        "users": "Users",
+        "cars": "Cars",
+        "testDrives": "Test Drives"
+      }
+    },
+    "analytics": {
+      "totalValue": "Total Inventory Value",
+      "averagePrice": "Average Car Price",
+      "conversionRate": "Conversion Rate",
+      "conversionRateNote": "Requests to confirmed",
+      "addedThisMonth": "Cars Added (This Month)",
+      "overall": "Overall",
+      "vsLastMonth": "{percent} vs last month"
+    },
+    "funnel": {
+      "title": "Test Drive Funnel",
+      "description": "Conversion rates across the test drive pipeline",
+      "total": "Total Requests",
+      "confirmed": "Confirmed Test Drives",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "share": "({percent})",
+      "shareOfTotal": "({percent} of total)",
+      "shareOfConfirmed": "({percent} of confirmed)"
+    },
+    "popularCars": {
+      "title": "Popular Cars",
+      "description": "Most wishlisted inventory",
+      "descriptionTop": "Top {count} most wishlisted inventory",
+      "emptyTitle": "No wishlisted cars yet",
+      "emptyBody": "When users save cars to their wishlist, they will appear here.",
+      "saved": "Saved by {count}"
+    },
+    "inventory": {
+      "title": "Inventory Status",
+      "description": "Breakdown by availability",
+      "emptyTitle": "No inventory yet",
+      "emptyBody": "Add cars to see your inventory breakdown.",
+      "totalCars": "Total Cars",
+      "legend": "{value} ({percent})"
+    },
+    "trends": {
+      "title": "Test Drive Trends",
+      "description": "Booking volume by status over time",
+      "emptyDescription": "Volume over time",
+      "emptyTitle": "No test drive data",
+      "emptyBody": "Trends will appear once customers start booking test drives."
+    }
+  },
+  "cars": {
+    "meta": {
+      "title": "Cars",
+      "description": "Manage your car listings and inventory"
+    },
+    "title": "Car Management",
+    "subtitle": "Manage your car listings and inventory",
+    "filter": {
+      "searchPlaceholder": "Search by model or title…",
+      "searchLabel": "Search cars",
+      "clearSearch": "Clear search",
+      "statusPlaceholder": "Filter by status",
+      "allStatus": "All statuses",
+      "clear": "Clear",
+      "addCar": "Add Car"
+    },
+    "stats": {
+      "title": "Car Inventory",
+      "available": "{count} available",
+      "sold": "{count} sold",
+      "unavailable": "{count} unavailable",
+      "featured": "{count} featured",
+      "refresh": "Refresh"
+    },
+    "table": {
+      "vehicle": "Vehicle",
+      "pricing": "Pricing",
+      "status": "Status",
+      "featured": "Featured",
+      "actions": "Actions",
+      "added": "Added: {date}",
+      "notFeatured": "Not featured",
+      "unknownStatus": "Unknown"
+    },
+    "rowActions": {
+      "openMenu": "Open menu",
+      "label": "Actions",
+      "view": "View",
+      "viewDetails": "View details",
+      "edit": "Edit",
+      "feature": "Feature",
+      "unfeature": "Unfeature",
+      "makeFeatured": "Make featured",
+      "removeFeatured": "Remove featured",
+      "statusLabel": "Status",
+      "changeStatus": "Change status",
+      "markAvailable": "Mark available",
+      "markSold": "Mark as sold",
+      "markUnavailable": "Mark unavailable",
+      "delete": "Delete",
+      "deleteCar": "Delete car"
+    },
+    "empty": {
+      "title": "No cars found",
+      "filtered": "Try adjusting your search or filters to find what you’re looking for.",
+      "body": "Add your first car to start building your inventory."
+    },
+    "error": {
+      "title": "Couldn’t load cars",
+      "body": "Something went wrong while loading your inventory."
+    },
+    "deleteDialog": {
+      "title": "Delete car",
+      "body": "Are you sure you want to delete <b>“{title}”</b>? This cannot be undone, and the car is removed from your inventory permanently.",
+      "deleting": "Deleting…"
+    },
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} cars",
+      "showingShort": "{start}–{end} of {total}",
+      "perPage": "Items per page",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "toasts": {
+      "refreshed": "Inventory refreshed",
+      "refreshFailed": "Couldn’t refresh the inventory",
+      "deleted": "Car deleted",
+      "deletedBody": "The car has been removed from your inventory.",
+      "deleteFailed": "Couldn’t delete the car",
+      "deleteFailedBody": "Unable to delete the car. Please try again.",
+      "updated": "Car updated",
+      "updatedBody": "The car details have been saved.",
+      "updateFailed": "Couldn’t update the car",
+      "updateFailedBody": "Unable to update the car. Please try again."
+    }
+  },
+  "carForm": {
+    "meta": {
+      "title": "Add a car",
+      "description": "Add a car to your inventory"
+    },
+    "modePicker": {
+      "title": "Add a New Vehicle",
+      "subtitle": "Choose how you’d like to add your vehicle details",
+      "manual": {
+        "title": "Manual Entry",
+        "body": "Fill in all car details yourself using our full form. Best when you already have the information to hand.",
+        "point1": "Complete control over details",
+        "point2": "Custom pricing and features",
+        "point3": "Quick and straightforward",
+        "cta": "Start Manual Entry"
+      },
+      "ai": {
+        "title": "AI Upload",
+        "body": "Upload car images and let our AI extract the details. Smart, fast and accurate.",
+        "point1": "Automatic detail extraction",
+        "point2": "Market price estimation",
+        "point3": "Feature recognition",
+        "cta": "Upload with AI",
+        "badge": "Pro plan",
+        "locked": "Upgrade to Pro to unlock",
+        "remaining": "{remaining} of {limit} AI listings left this month",
+        "exhaustedBadge": "Used up",
+        "exhausted": "This month’s AI listings are used up — they renew on the 1st"
+      }
+    },
+    "modePage": {
+      "manualTitle": "Manual Car Entry",
+      "aiTitle": "AI-Powered Car Upload",
+      "lockedTitle": "AI upload requires a paid plan",
+      "lockedBody": "Upgrade to Pro or Enterprise to unlock AI-powered uploads with automatic detail extraction, market price estimation and feature recognition.",
+      "goBack": "Go back",
+      "upgrade": "Upgrade Plan"
+    },
+    "edit": {
+      "title": "Edit Vehicle Details",
+      "errorTitle": "Couldn’t load this car",
+      "errorBody": "The car was not found, or you do not have access to it.",
+      "backToCars": "Back to cars"
+    },
+    "sections": {
+      "basic": "Basic Info",
+      "specs": "Specifications",
+      "details": "Additional Details",
+      "status": "Status & Visibility"
+    },
+    "form": {
+      "titleAdd": "Car Information",
+      "titleEdit": "Edit Car Information",
+      "titleAi": "AI-Extracted Car Information",
+      "subtitleAdd": "Enter all the details about the car you want to list",
+      "subtitleEdit": "Update the details for this vehicle listing",
+      "subtitleAi": "Review and edit the AI-extracted details before submitting",
+      "uploadedAlt": "Uploaded car",
+      "uploadedImage": "Uploaded image",
+      "startOver": "Start over",
+      "aiConfidence": "AI confidence:",
+      "submitAdd": "Add Car",
+      "submitEdit": "Update Car",
+      "submittingAdd": "Adding car…",
+      "submittingEdit": "Updating car…",
+      "validationToastTitle": "Please complete all required fields",
+      "validationToastBody": "Fill in the highlighted fields to continue",
+      "addedToast": "Car added",
+      "updatedToast": "Car updated",
+      "addFailed": "Couldn’t add the car",
+      "updateFailed": "Couldn’t update the car",
+      "previous": "Previous",
+      "next": "Next",
+      "step": "{name} ({current}/{total})",
+      "translationSkipped": "Saved without the {other, select, ar {Arabic} other {English}} version — AI couldn’t write it (not on your plan, this month’s allowance is used, or a temporary error). Those visitors see your text with a “not translated” note.",
+      "aiYears": "The photos suggest a {from}–{to} model. Check the year before you save."
+    },
+    "fields": {
+      "makeHint": "The manufacturer of the vehicle",
+      "modelHint": "The model name of the vehicle",
+      "yearHint": "Vehicle production year",
+      "titleLabel": "Listing title",
+      "titleHint": "Generated from make, model and year",
+      "titlePlaceholder": "Generated once you enter make, model and year",
+      "titleReady": "Title generated",
+      "titlePending": "Fill in make, model and year to generate the title",
+      "priceLabel": "Price (EGP)",
+      "priceHint": "The listing price, in Egyptian pounds",
+      "mileageHint": "Distance the vehicle has travelled",
+      "bodyTypeHint": "The physical configuration of the vehicle",
+      "bodyTypePlaceholder": "Select a body type",
+      "fuelTypeHint": "The type of fuel the vehicle uses",
+      "fuelTypePlaceholder": "Select a fuel type",
+      "transmissionHint": "The type of transmission",
+      "transmissionPlaceholder": "Select a transmission",
+      "seatsHint": "Number of seats in the vehicle",
+      "seatsPlaceholder": "Select a number of seats",
+      "seatsCount": "{count, plural, one {{value} seat} other {{value} seats}}",
+      "seatsMore": "More than {count} seats",
+      "colorHint": "The exterior colour of the vehicle",
+      "colorPlaceholder": "Select a colour",
+      "descriptionLabel": "Description",
+      "descriptionHint": "A detailed description of the vehicle",
+      "descriptionPlaceholder": "Describe the vehicle in detail…",
+      "descriptionMin": "At least {count} characters",
+      "descriptionCount": "{count} characters",
+      "featuresLabel": "Features",
+      "featuresHint": "List the major features, separated by commas",
+      "featuresPlaceholder": "Electric, Autopilot, Long Range, Premium Interior",
+      "statusHint": "Current availability of the vehicle",
+      "statusPlaceholder": "Select a status",
+      "featuredLabel": "Feature this car on the homepage",
+      "featuredHint": "Featured cars appear in the spotlight section",
+      "readyTitle": "Ready to submit",
+      "readyBody": "All the required information is there. You can add this vehicle to your inventory.",
+      "titleArLabel": "Arabic title",
+      "titleArHint": "The headline Arabic-speaking buyers see. Leave blank to show the English one.",
+      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨"
+    },
+    "images": {
+      "label": "Images",
+      "hint": "Add up to {count} images of the vehicle",
+      "drop": "Drop the images here",
+      "prompt": "Drag and drop images here, or click to choose",
+      "limits": "Up to {count} images, {size} MB each",
+      "full": "You have added the maximum of {count} images. Remove one to add another.",
+      "previewAlt": "Preview {index}",
+      "remove": "Remove image {index}",
+      "tooMany": "You can only upload up to {count} images.",
+      "failed": "Couldn’t add that image. Please try again."
+    },
+    "ai": {
+      "processingTitle": "AI is reading the photos",
+      "processingBody": "Our AI is analysing your photos and extracting the car’s details…",
+      "uploadTitle": "Upload photos of the car",
+      "uploadPrompt": "Drop up to 3 photos of the same car here, or click to browse. A shot of the back badge or the dashboard helps the AI name the exact model.",
+      "uploadDropping": "Drop your car photos here…",
+      "choose": "Choose photos",
+      "formats": "JPG, PNG and WEBP, up to 10MB each",
+      "featuresTitle": "What the AI does",
+      "feature1": "Detects make, model and year",
+      "feature2": "Estimates a price from market data",
+      "feature3": "Extracts features from the image",
+      "feature4": "Assesses quality and condition",
+      "invalidType": "That file type isn’t supported. Upload a JPG, PNG or WEBP.",
+      "tooLarge": "That file is larger than {size} MB.",
+      "extracted": "Car details extracted",
+      "processFailed": "Couldn’t read those photos.",
+      "unexpected": "Something went wrong while processing the image.",
+      "stageUploading": "Uploading the photos — {percent}",
+      "stageWaiting": "Waiting for the AI to start…",
+      "stageWaitingNote": "The AI service queues requests when it is busy. This can take a minute or two; the details appear as soon as it starts writing.",
+      "stageWriting": "Writing the details — {done} of {total}",
+      "stageDone": "Done",
+      "firstPhotosOnly": "Only the first {count} photos are read. You can add the rest in the Photos step."
+    },
+    "validation": {
+      "titleRequired": "A listing title is required",
+      "makeRequired": "Make is required",
+      "modelRequired": "Model is required",
+      "yearInvalid": "Year must be between {min} and {max}",
+      "priceInvalid": "Price must be greater than {min}",
+      "mileageInvalid": "Mileage must be {min} or more",
+      "bodyTypeRequired": "Body type is required",
+      "fuelTypeRequired": "Fuel type is required",
+      "transmissionRequired": "Transmission is required",
+      "colorRequired": "Colour is required",
+      "seatsInvalid": "Seats must be between {min} and {max}",
+      "descriptionTooShort": "Description must be at least {min} characters",
+      "imagesRequired": "Add at least one image",
+      "imagesTooMany": "You can add at most {max} images"
+    },
+    "coach": {
+      "title": "Listing quality",
+      "body": "See what would make this listing stronger before you publish. Tailored advice uses one AI use.",
+      "check": "Check listing quality",
+      "checking": "Checking…",
+      "again": "Check again",
+      "score": "Score: {score} / {max}",
+      "perfect": "Nothing to improve — this listing is complete.",
+      "failed": "Couldn’t check the listing",
+      "adviceSkipped": "Tailored AI advice isn’t available right now (not on your plan, this month’s AI listings are used up, or a temporary error). The checks above still apply.",
+      "issues": {
+        "fewPhotos": "Add at least {min} photos",
+        "morePhotos": "Add more photos — {good} or more works best",
+        "shortDescription": "The description is too short to help a buyer",
+        "briefDescription": "Say more in the description — condition, service history, owners",
+        "noFeatures": "List the car’s features",
+        "fewFeatures": "List more of the car’s features",
+        "zeroMileage": "Mileage is 0 km — enter the real odometer reading"
+      }
+    },
+    "condition": {
+      "title": "History & condition",
+      "hint": "Optional. Buyers ask about these first. Leave “Not stated” if you're not sure — it's shown as nothing, never as “no”.",
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No",
+      "fields": {
+        "originalPaint": "Original paint (no repainted panels)",
+        "accidentFree": "Accident-free",
+        "priceNegotiable": "Price negotiable",
+        "ownerCount": "Owners so far",
+        "serviceHistory": "Service history",
+        "licenseValidUntil": "Licence valid until"
+      },
+      "owners": "{count, plural, one {First owner} other {{value} owners}}",
+      "ownersOrMore": "{value} or more owners",
+      "service": {
+        "FULL": "Full, documented",
+        "PARTIAL": "Partial",
+        "NONE": "None"
+      },
+      "monthPicker": {
+        "clear": "Clear — not stated",
+        "previousYear": "Previous year",
+        "nextYear": "Next year"
+      }
+    }
+  },
+  "testDrives": {
+    "title": "Test Drive Management",
+    "subtitle": "Manage test drive requests and appointments",
+    "filter": {
+      "searchPlaceholder": "Search by car model or customer name",
+      "searchLabel": "Search test drives",
+      "clearSearch": "Clear search",
+      "statusPlaceholder": "Filter by status",
+      "allStatus": "All statuses",
+      "clearFilters": "Clear filters",
+      "loading": "Loading…"
+    },
+    "stats": {
+      "title": "Test Drive Requests",
+      "pending": "{count} pending",
+      "confirmed": "{count} confirmed",
+      "cancelled": "{count} cancelled",
+      "total": "{count} total",
+      "refresh": "Refresh"
+    },
+    "table": {
+      "car": "Car",
+      "customer": "Customer",
+      "dateTime": "Date & Time",
+      "status": "Status",
+      "actions": "Actions",
+      "timeRange": "{start} – {end}"
+    },
+    "actions": {
+      "details": "Details",
+      "viewDetails": "View details",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "openMenu": "Open menu"
+    },
+    "customer": {
+      "unknown": "Unknown customer",
+      "noEmail": "No email on file"
+    },
+    "empty": {
+      "title": "No test drive requests found",
+      "filtered": "Try adjusting your search or filters.",
+      "body": "Test drive requests appear here once customers start booking."
+    },
+    "modal": {
+      "title": "Test Drive Details",
+      "description": "Everything recorded for this test drive request",
+      "carSection": "Car",
+      "customerSection": "Customer Information",
+      "scheduleSection": "Schedule",
+      "notesSection": "Customer Notes",
+      "requestSection": "Request Information",
+      "date": "Date:",
+      "time": "Time:",
+      "status": "Status:",
+      "created": "Created:",
+      "close": "Close"
+    },
+    "toasts": {
+      "statusChanged": "Test drive updated",
+      "confirmed": "Test drive confirmed",
+      "cancelled": "Test drive cancelled",
+      "updateFailed": "Couldn’t update the test drive",
+      "unexpected": "Something went wrong while updating the test drive."
+    }
+  },
+  "buyerQuestions": {
+    "title": "Buyer Questions",
+    "subtitle": "Questions buyers asked the AI assistant that your listings don't answer. Answer once, and the assistant tells every later buyer.",
+    "tabs": {
+      "OPEN": "Unanswered",
+      "ANSWERED": "Answered",
+      "DISMISSED": "Dismissed"
+    },
+    "tabHints": {
+      "OPEN": "Most-asked first. These are the gaps buyers keep running into.",
+      "ANSWERED": "The assistant quotes these to buyers as your answer.",
+      "DISMISSED": "Hidden from this list. Restore one to answer it."
+    },
+    "empty": {
+      "OPEN": {
+        "title": "No unanswered questions",
+        "description": "When the assistant can't answer a buyer from your listing, the question lands here."
+      },
+      "ANSWERED": {
+        "title": "Nothing answered yet",
+        "description": "Your answers will appear here."
+      },
+      "DISMISSED": {
+        "title": "Nothing dismissed",
+        "description": "Questions you dismiss appear here."
+      }
+    },
+    "askedTimes": "{count, plural, one {Asked once} other {Asked {value} times}}",
+    "lastAsked": "Last asked {when}",
+    "askedIn": {
+      "en": "Asked in English",
+      "ar": "Asked in Arabic"
+    },
+    "yourAnswer": "Your answer",
+    "allCarsBadge": "All cars",
+    "answerLabel": "Your answer to this question",
+    "answerPlaceholder": "Answer as you would to a buyer. Stick to facts you're sure of.",
+    "allCarsLabel": "This is true for all my cars",
+    "allCarsHint": "For dealership policies like financing, trade-ins or inspections.",
+    "loadFailed": "Couldn't load questions. Please refresh.",
+    "actions": {
+      "answer": "Answer",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "dismiss": "Dismiss",
+      "removeAnswer": "Remove answer",
+      "restore": "Restore"
+    },
+    "toasts": {
+      "answered": "Saved. The assistant will use your answer from now on.",
+      "dismissed": "Question dismissed.",
+      "reopened": "Question moved back to unanswered.",
+      "failed": "Couldn't save that. Please try again."
+    }
+  },
+  "settings": {
+    "meta": {
+      "title": "Settings",
+      "description": "Manage your dealership settings"
+    },
+    "title": "Settings",
+    "subtitle": "Manage your settings and preferences",
+    "configure": "Configure",
+    "back": "Back to settings",
+    "cards": {
+      "profile": {
+        "title": "Organization Profile",
+        "description": "Manage public dealership details and discovery location"
+      },
+      "workingHours": {
+        "title": "Working Hours",
+        "description": "Configure business operating hours and availability"
+      },
+      "team": {
+        "title": "Team Members",
+        "description": "Manage your team members and their roles"
+      },
+      "terms": {
+        "title": "Terms for buyers",
+        "description": "Financing, trade-ins, inspections and delivery, shown on every listing"
+      },
+      "weeklySummary": {
+        "title": "Weekly summary",
+        "description": "A Saturday email with your week's numbers, and the language of your emails"
+      }
+    },
+    "profile": {
+      "title": "Organization Profile",
+      "subtitle": "Manage the public details customers see across dealership and car discovery pages.",
+      "loading": "Loading profile…",
+      "website": "Website",
+      "description": "Description",
+      "save": "Save Profile",
+      "saving": "Saving…",
+      "toasts": {
+        "loadFailed": "Couldn’t load your organization profile",
+        "updated": "Profile saved",
+        "updateFailed": "Couldn’t save your organization profile"
+      }
+    },
+    "workingHours": {
+      "title": "Working Hours",
+      "subtitle": "Configure your business operating hours",
+      "cardTitle": "Business Hours",
+      "cardDescription": "Set your opening hours for each day. Customers see these on your storefront.",
+      "to": "to",
+      "closed": "Closed",
+      "openLabel": "Opens",
+      "closeLabel": "Closes",
+      "save": "Save Working Hours",
+      "saving": "Saving…",
+      "toasts": {
+        "incomplete": "Please set hours for every day of the week",
+        "updated": "Working hours saved",
+        "updateFailed": "Couldn’t save your working hours"
+      }
+    },
+    "team": {
+      "title": "Team Members",
+      "count": "{count} of {limit} members",
+      "unlimited": "unlimited",
+      "cardTitle": "Team Members",
+      "cardDescription": "Manage your team members and their roles within the organization.",
+      "emptyTitle": "No team members yet",
+      "emptyBody": "Invite members to collaborate with your organization",
+      "noName": "No name",
+      "you": "You",
+      "joined": "Joined {when}",
+      "roles": {
+        "OWNER": "Owner",
+        "MEMBER": "Member"
+      },
+      "invite": {
+        "cta": "Invite Member",
+        "limitReached": "Member limit reached",
+        "title": "Invite Team Member",
+        "description": "Invite someone to join your organization. They need an account to accept.",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "member@example.com",
+        "roleLabel": "Role",
+        "submit": "Send Invitation",
+        "submitting": "Inviting…",
+        "emailRequired": "Enter an email address",
+        "invited": "Invitation sent",
+        "failed": "Couldn’t invite that member",
+        "unexpected": "Something went wrong while inviting the member."
+      },
+      "remove": {
+        "label": "Remove member",
+        "title": "Remove Team Member",
+        "body": "Are you sure you want to remove <b>{name}</b> from the organization? This cannot be undone.",
+        "confirm": "Remove Member",
+        "removing": "Removing…",
+        "removed": "Member removed",
+        "failed": "Couldn’t remove that member",
+        "unexpected": "Something went wrong while removing the member.",
+        "ownerBlocked": "The organization owner cannot be removed"
+      },
+      "roleChange": {
+        "updated": "Role updated",
+        "failed": "Couldn’t update that role",
+        "unexpected": "Something went wrong while updating the role."
+      }
+    },
+    "terms": {
+      "title": "Terms for buyers",
+      "subtitle": "Shown on every one of your listings",
+      "cardTitle": "What you offer buyers",
+      "cardDescription": "True of every car you sell. Buyers see these on each listing, and the AI assistant answers from them. Leave “Not stated” for anything you'd rather discuss in person.",
+      "notStated": "Not stated",
+      "yes": "Yes",
+      "no": "No",
+      "fields": {
+        "offersFinancing": "Instalments / financing",
+        "acceptsTradeIn": "Trade-ins accepted",
+        "allowsInspection": "Independent inspection allowed",
+        "offersDelivery": "Delivery available",
+        "financingNote": "Financing details"
+      },
+      "financingNotePlaceholder": "e.g. Through NBE and Banque Misr, up to 5 years, 30% down payment",
+      "save": "Save terms",
+      "saved": "Saved. Your listings show the new terms.",
+      "saveFailed": "Couldn't save your terms. Please try again."
+    },
+    "weeklySummary": {
+      "title": "Weekly summary",
+      "subtitle": "Your week on AutoMe, by email every Saturday",
+      "cardTitle": "Email settings",
+      "cardDescription": "The owners of the dealership receive a short summary every Saturday morning: test-drive requests, buyer questions, your cars and your AI listings.",
+      "enabledLabel": "Send the weekly summary",
+      "enabledHelp": "Sent to the dealership's owners every Saturday at 9:00 (Cairo).",
+      "languageLabel": "Email language",
+      "languageHelp": "The weekly summary is written in this language.",
+      "save": "Save",
+      "saved": "Email settings saved",
+      "saveFailed": "Couldn't save your email settings. Please try again."
+    }
+  },
+  "billing": {
+    "title": "Billing & Subscription",
+    "subtitle": "Manage your subscription plan and billing information",
+    "nonOwner": {
+      "title": "View-Only Access",
+      "body": "You can see the current plan and usage, but only the organization owner can manage billing, change plans or update payment methods.",
+      "ownerLabel": "Organization Owner"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "TRIALING": "Trial",
+      "PAST_DUE": "Past Due",
+      "CANCELED": "Canceled"
+    },
+    "current": {
+      "title": "Current Plan",
+      "defaultPlan": "Starter",
+      "renewsOn": "Renews on {date}",
+      "trialEndsOn": "Trial ends on {date}",
+      "pastDue": "Payment overdue — please update your payment method",
+      "accessEndsOn": "Access ends on {date}",
+      "freePlan": "You’re on the free Starter plan",
+      "manage": "Manage Subscription",
+      "carListings": "Car Listings",
+      "teamMembers": "Team Members",
+      "testDrives": "Test Drives (This Month)",
+      "portalFailed": "Couldn’t open the billing portal. Please try again."
+    },
+    "usage": {
+      "unlimited": "Unlimited",
+      "tooltipUnlimited": "{current} {label} used — no limit",
+      "tooltip": "{current} of {limit} used ({percent}) — {remaining} remaining",
+      "runningLow": "Running low?",
+      "upgradeLink": "Upgrade for more"
+    },
+    "banner": {
+      "trialEndsToday": "Your Trial Ends Today!",
+      "trialTitle": "Trial Period",
+      "trialEndingSoon": "Your trial is ending soon. Add a payment method to continue after it ends.",
+      "trialActive": "Your trial is active. Add a payment method to continue after it ends.",
+      "canceledTitle": "Subscription Canceled",
+      "canceled": "Your subscription has been canceled.",
+      "pastDueTitle": "Payment Failed",
+      "updatePayment": "Update Payment Method",
+      "dismiss": "Dismiss alert",
+      "pastDueBody": "Your last payment failed. Please update your payment method to avoid an interruption.",
+      "trialEndsInDays": "{count, plural, one {Trial Ends in {value} Day} other {Trial Ends in {value} Days}}",
+      "trialEndsOnBody": "Your trial ends on {date}. Add a payment method to keep using all features.",
+      "addPayment": "Add Payment Method",
+      "canceledWithDate": "Your subscription has been canceled. You keep your current plan’s features until {date}.",
+      "resubscribe": "Re-subscribe",
+      "freeTitle": "Free Plan",
+      "freeBody": "You’re on the free Starter plan. Upgrade to unlock more car listings, team members and premium features.",
+      "upgradeNow": "Upgrade Now",
+      "yourTrialEndsToday": "Your Trial Ends Today!",
+      "yourTrialEndsInDays": "{count, plural, one {Your Trial Ends in {value} Day} other {Your Trial Ends in {value} Days}}",
+      "canceledAccessEnds": "Your subscription has been canceled. Access ends on {date}.",
+      "portalFailed": "Couldn’t open the billing portal. Please try again."
+    },
+    "plans": {
+      "title": "Choose Your Plan",
+      "subtitle": "Pick the plan that fits your dealership",
+      "compare": "Compare",
+      "cards": "Cards",
+      "feature": "Feature",
+      "currentBadge": "Current Plan",
+      "currentShort": "Current",
+      "select": "Select",
+      "ownerOnly": "Owner Only",
+      "ownerOnlyLong": "Only the owner can change the plan",
+      "switchTo": "Switch to {plan}",
+      "changePlan": "Change Plan",
+      "confirm": "Confirm",
+      "perMonthShort": "mo",
+      "perYearShort": "yr",
+      "priceWithPeriod": "{price}/{period}",
+      "changeFailed": "Couldn’t change the plan. Please try again.",
+      "changed": "Your plan has been updated.",
+      "changedTitle": "Plan Updated",
+      "backToBilling": "Back to Billing",
+      "footerNote": "All plans include secure data storage and email support. <link>Contact sales</link> for custom solutions.",
+      "includedFeatures": "Included features:",
+      "switchDialogWithPrice": "Switch to <b>{plan}</b> for <b>{price}</b>?",
+      "switchDialogFree": "Switch to <b>{plan}</b>?",
+      "processing": "Processing…",
+      "switchedTo": "You’ve switched to the <b>{plan}</b> plan.",
+      "featuresActive": "Your new plan features are active now. Any billing change appears on your next invoice."
+    },
+    "payment": {
+      "title": "Payment Method",
+      "subtitle": "Manage the card your subscription is billed to",
+      "card": "Card",
+      "update": "Update",
+      "securedByStripe": "Secured by Stripe",
+      "unavailable": "Unable to load payment method",
+      "loadFailed": "Couldn’t load your payment method",
+      "brands": {
+        "amex": "American Express",
+        "diners": "Diners Club"
+      },
+      "onFile": "Your payment method on file for subscription billing",
+      "noneTitle": "No payment method on file",
+      "noneBody": "Add a payment method to subscribe to a paid plan",
+      "add": "Add Payment Method",
+      "endingIn": "{brand} ending in {last4}",
+      "expires": "Expires {month}/{year}",
+      "expiringSoon": "— Expiring soon",
+      "portalFailed": "Couldn’t open the billing portal. Please try again."
+    },
+    "invoices": {
+      "title": "Invoices",
+      "subtitle": "Your past invoices and receipts",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions",
+      "downloadPdf": "Download PDF",
+      "viewInvoice": "View invoice",
+      "loadMore": "Load More",
+      "emptyTitle": "No invoices yet",
+      "emptyBody": "Invoices appear here after your first payment",
+      "loadFailed": "Couldn’t load your invoices",
+      "historyTitle": "Invoice History",
+      "historySubtitle": "View and download your past invoices from Stripe",
+      "tryAgain": "Try Again",
+      "invoiceNumber": "#{number}",
+      "statuses": {
+        "PAID": "Paid",
+        "OPEN": "Open",
+        "DRAFT": "Draft",
+        "VOID": "Void",
+        "UNCOLLECTIBLE": "Uncollectible",
+        "UNKNOWN": "Unknown"
+      }
+    },
+    "history": {
+      "title": "Billing History",
+      "subtitle": "View your subscription changes and billing events",
+      "date": "Date",
+      "event": "Event",
+      "description": "Description",
+      "emptyTitle": "No billing history yet",
+      "loadFailed": "Couldn’t load your billing history",
+      "by": "By",
+      "needHelp": "Need help with billing? <link>Contact our billing team</link>",
+      "events": {
+        "SUBSCRIPTION_CREATED": "Created",
+        "SUBSCRIPTION_UPGRADED": "Upgraded",
+        "SUBSCRIPTION_DOWNGRADED": "Downgraded",
+        "SUBSCRIPTION_CANCELED": "Canceled",
+        "SUBSCRIPTION_RENEWED": "Renewed"
+      }
+    }
+  },
+  "auditLogs": {
+    "meta": {
+      "title": "Audit Logs",
+      "description": "Track all actions and changes in your organization"
+    },
+    "title": "Audit Logs",
+    "subtitle": "Track all actions and changes in your organization",
+    "unknownUser": "Unknown User",
+    "retention": {
+      "label": "Retention: {value}",
+      "withPlan": "{duration} ({plan})",
+      "unlimited": "Unlimited",
+      "days": "{count, plural, one {{value} day} other {{value} days}}",
+      "years": "{count, plural, one {{value} year} other {{value} years}}",
+      "tooltip": "Audit logs are automatically deleted after the retention period. Upgrade your plan for longer retention."
+    },
+    "filters": {
+      "label": "Filters:",
+      "searchPlaceholder": "Search by User ID…",
+      "dateRangePlaceholder": "Pick a date range",
+      "dateRange": "{start} – {end}",
+      "entityTypePlaceholder": "Entity Type",
+      "actionPlaceholder": "Action",
+      "allEntityTypes": "All Types",
+      "allActions": "All Actions",
+      "reset": "Reset"
+    },
+    "table": {
+      "timestamp": "Timestamp",
+      "action": "Action",
+      "entity": "Entity",
+      "user": "User",
+      "details": "Details",
+      "impersonated": "Impersonated",
+      "viewDetails": "View details"
+    },
+    "empty": {
+      "title": "No audit logs found"
+    },
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} entries"
+    },
+    "details": {
+      "title": "Audit Log Details",
+      "recordedOn": "Recorded on {date}",
+      "action": "Action",
+      "entityType": "Entity Type",
+      "entityId": "Entity ID",
+      "ipAddress": "IP Address",
+      "executedBy": "Executed by",
+      "impersonatedAction": "Impersonated Action",
+      "previousState": "Previous State",
+      "newState": "New State"
+    },
+    "actions": {
+      "ORG_CREATED": "Organization Created",
+      "ORG_UPDATED": "Organization Updated",
+      "ORG_DELETED": "Organization Deleted",
+      "ORG_SUSPENDED": "Organization Suspended",
+      "ORG_ACTIVATED": "Organization Activated",
+      "MEMBER_INVITED": "Member Invited",
+      "MEMBER_ACCEPTED": "Member Accepted",
+      "MEMBER_REMOVED": "Member Removed",
+      "MEMBER_ROLE_CHANGED": "Member Role Changed",
+      "SUBSCRIPTION_CREATED": "Subscription Created",
+      "SUBSCRIPTION_UPGRADED": "Subscription Upgraded",
+      "SUBSCRIPTION_DOWNGRADED": "Subscription Downgraded",
+      "SUBSCRIPTION_CANCELED": "Subscription Canceled",
+      "SUBSCRIPTION_RENEWED": "Subscription Renewed",
+      "CAR_CREATED": "Car Created",
+      "CAR_UPDATED": "Car Updated",
+      "CAR_DELETED": "Car Deleted",
+      "CAR_STATUS_CHANGED": "Car Status Changed",
+      "CAR_FEATURED_TOGGLED": "Car Featured Toggled",
+      "TEST_DRIVE_CREATED": "Test Drive Created",
+      "TEST_DRIVE_CONFIRMED": "Test Drive Confirmed",
+      "TEST_DRIVE_CANCELED": "Test Drive Canceled",
+      "TEST_DRIVE_COMPLETED": "Test Drive Completed",
+      "USER_CREATED": "User Created",
+      "USER_UPDATED": "User Updated",
+      "USER_ROLE_CHANGED": "User Role Changed",
+      "USER_DELETED": "User Deleted",
+      "WORKING_HOURS_UPDATED": "Working Hours Updated",
+      "ORG_SETTINGS_UPDATED": "Settings Updated",
+      "IMPERSONATION_STARTED": "Impersonation Started",
+      "IMPERSONATION_ENDED": "Impersonation Ended"
+    },
+    "entities": {
+      "ORGANIZATION": "Organization",
+      "USER": "User",
+      "CAR": "Car",
+      "TEST_DRIVE": "Test Drive",
+      "MEMBERSHIP": "Membership",
+      "SUBSCRIPTION": "Subscription",
+      "WORKING_HOURS": "Working Hours",
+      "IMPERSONATION_SESSION": "Impersonation Session"
+    }
+  }
+}

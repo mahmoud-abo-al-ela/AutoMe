@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "@/i18n/navigation";
-import { StartConversationButton, ChatSidebar } from "@/components/StreamChat";
+import { StartConversationButton, useChatDock } from "@/components/StreamChat";
 import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -21,19 +20,13 @@ const MobileStickyBar = ({
   const t = useTranslations("carDetail.actions");
     const { isSignedIn } = useUser();
     const router = useRouter();
-    const [chatOpen, setChatOpen] = useState(false);
-    const [selectedCarId, setSelectedCarId] = useState<string | null>(null);
+    const { openCarChat } = useChatDock();
 
     const handleChatClick = () => {
         if (!isSignedIn) {
             router.push(`/messages?carId=${car.id}`);
             return;
         }
-    };
-
-    const handleChatOpen = (carId: string) => {
-        setSelectedCarId(carId);
-        setChatOpen(true);
     };
 
     const priceFormatted = formatPrice
@@ -59,7 +52,7 @@ const MobileStickyBar = ({
                     {isSignedIn ? (
                         <StartConversationButton
                             carId={car.id}
-                            onChatOpen={handleChatOpen}
+                            onChatOpen={openCarChat}
                             className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md"
                         />
                     ) : (
@@ -73,14 +66,6 @@ const MobileStickyBar = ({
                     )}
                 </div>
             </div>
-
-            {isSignedIn && (
-                <ChatSidebar
-                    open={chatOpen}
-                    onOpenChange={setChatOpen}
-                    carId={selectedCarId}
-                />
-            )}
 
             {/* Spacer to prevent content from being hidden behind the sticky bar */}
             <div className="h-16 lg:hidden" />

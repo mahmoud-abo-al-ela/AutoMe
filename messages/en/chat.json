@@ -1,0 +1,94 @@
+{
+  "inbox": {
+    "meta": {
+      "title": "Messages",
+      "description": "Chat with dealerships about cars you're interested in"
+    },
+    "title": "Messages",
+    "subtitle": "Chat with dealerships about cars you're interested in",
+    "subtitleForOrg": "Chat with {name} about cars you're interested in"
+  },
+  "orgInbox": {
+    "meta": {
+      "title": "Messages",
+      "description": "Manage customer conversations"
+    },
+    "title": "Customer Messages",
+    "subtitle": "Manage conversations with your customers",
+    "listTitle": "Customer Messages",
+    "loadFailed": "Unable to load conversations"
+  },
+  "window": {
+    "emptyTitle": "Select a conversation",
+    "emptyBody": "Choose a conversation from the list to start messaging",
+    "untitled": "Conversation",
+    "viewDetails": "View details",
+    "back": "Back to conversations",
+    "buyer": "Buyer",
+    "withBuyer": "Buyer: {name}"
+  },
+  "preview": {
+    "noMessages": "No messages yet",
+    "ownPrefix": "You: {text}",
+    "attachment": "Sent an attachment",
+    "unknownUser": "Unknown User"
+  },
+  "badge": {
+    "overflow": "{max}+"
+  },
+  "translation": {
+    "translate": "Translate",
+    "translating": "Translating…",
+    "showOriginal": "Show original",
+    "translated": "Translated",
+    "failed": "Couldn't translate this message. Please try again.",
+    "translatedByAi": "Translated by AI"
+  },
+  "dock": {
+    "title": "Chat with the dealer",
+    "messageDealer": "Message Dealer",
+    "startTitle": "Ask {dealer} about this car",
+    "startBody": "Tap a question or write your own. The dealer gets your message and replies here.",
+    "theDealer": "the dealer",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "minimize": "Minimise chat",
+    "expand": "Open chat",
+    "close": "Close chat",
+    "loading": "Loading conversation…",
+    "carFailed": "We couldn't load this car. Close the chat and try again.",
+    "sendFailed": "Your message wasn't sent. Please try again.",
+    "sold": "Sold",
+    "unavailable": "Unavailable",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "testDrive": "Test drive",
+    "viewCar": "View car",
+    "whatsappText": "Hi, I'm interested in the {car} I saw on AutoMe.",
+    "quick": {
+      "label": "Suggested questions",
+      "available": "Is it still available?",
+      "price": "What's your best price?",
+      "visit": "Can I come and see it?",
+      "installments": "Do you offer installments?",
+      "tradeIn": "Can I trade in my car?"
+    }
+  },
+  "tabs": {
+    "label": "Filter conversations",
+    "all": "All",
+    "unread": "Unread",
+    "empty": "No conversations yet.",
+    "emptyUnread": "You're all caught up — no unread messages."
+  },
+  "status": {
+    "seen": "Seen"
+  },
+  "safety": {
+    "scamWarning": "Be careful: never send money before you've seen the car and met the dealer in person.",
+    "spamWarning": "This looks like spam. Don't open links you don't recognise.",
+    "hidden": "Hidden: this message may be offensive.",
+    "show": "Show message",
+    "hiddenPreview": "Hidden message"
+  }
+}

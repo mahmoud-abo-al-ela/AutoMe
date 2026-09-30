@@ -20,6 +20,22 @@ declare module "stream-chat" {
     user_role?: string | null;
   }
 
+  /**
+   * Translations of a message, written by the server when a member taps
+   * "Translate" (lib/services/chat/translation). Each keeps the text it was
+   * made from, so an edited message is never shown an old translation.
+   */
+  interface CustomMessageData {
+    translations?: Partial<Record<"ar" | "en", { text: string; source: string }>>;
+    /**
+     * Set by the server when moderation flags the message (lib/services/chat/
+     * moderation); absent on a clean one. Keeps the text it judged, like a
+     * translation, so an edit is judged afresh. Not named `moderation`:
+     * Stream reserves that field for its own moderation product.
+     */
+    safety_flag?: { category: "scam" | "spam" | "abuse"; source: string };
+  }
+
   interface CustomChannelData {
     organization_id?: string;
     car_id?: string;

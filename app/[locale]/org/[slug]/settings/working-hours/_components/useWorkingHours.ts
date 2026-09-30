@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getDealershipInfo, updateWorkingHours } from "@/actions/settings";
@@ -16,14 +17,17 @@ export interface WorkingHourRow {
 
 export type WorkingHoursByDay = Record<DayOfWeek, WorkingHourRow>;
 
-const DAYS: { label: string; value: DayOfWeek }[] = [
-    { label: "Monday", value: "MONDAY" },
-    { label: "Tuesday", value: "TUESDAY" },
-    { label: "Wednesday", value: "WEDNESDAY" },
-    { label: "Thursday", value: "THURSDAY" },
-    { label: "Friday", value: "FRIDAY" },
-    { label: "Saturday", value: "SATURDAY" },
-    { label: "Sunday", value: "SUNDAY" },
+/** Seeds the default row per day. Order is irrelevant here — the form decides
+ * what the dealer sees, and it runs Saturday to Friday. The labels this list
+ * used to carry were never rendered. */
+const DAYS: { value: DayOfWeek }[] = [
+    { value: "SATURDAY" },
+    { value: "SUNDAY" },
+    { value: "MONDAY" },
+    { value: "TUESDAY" },
+    { value: "WEDNESDAY" },
+    { value: "THURSDAY" },
+    { value: "FRIDAY" },
 ];
 
 const DEFAULT_WORKING_HOURS = DAYS.reduce((acc, day) => {
@@ -37,6 +41,7 @@ const DEFAULT_WORKING_HOURS = DAYS.reduce((acc, day) => {
 }, {} as WorkingHoursByDay);
 
 export function useWorkingHours() {
+    const t = useTranslations("org.settings.workingHours.toasts");
     const [workingHours, setWorkingHours] =
         useState<WorkingHoursByDay>(DEFAULT_WORKING_HOURS);
 
@@ -119,23 +124,21 @@ export function useWorkingHours() {
             }));
 
         if (hoursArray.length !== 7) {
-            toast.error("Please configure all days of the week");
+            toast.error(t("incomplete"));
             return;
         }
 
         try {
             const response = await updateWorkingHoursFn(hoursArray);
             if (response.success) {
-                toast.success("Working hours updated successfully");
+                toast.success(t("updated"));
             } else {
                 // A returned error response used to fall through silently, so a
                 // rejected save looked identical to a successful one.
-                toast.error(
-                    response.error?.message || "Failed to update working hours",
-                );
+                toast.error(response.error?.message || t("updateFailed"));
             }
         } catch {
-            toast.error("Failed to update working hours");
+            toast.error(t("updateFailed"));
         }
     };
 

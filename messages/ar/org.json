@@ -1,0 +1,957 @@
+{
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "cars": "السيارات",
+    "testDrives": "القيادات التجريبية",
+    "messages": "الرسائل",
+    "buyerQuestions": "أسئلة المشترين",
+    "billing": "الفوترة",
+    "auditLogs": "سجل النشاط",
+    "settings": "الإعدادات",
+    "fallbackOrgName": "لوحة تحكم AutoMe",
+    "openSidebar": "فتح القائمة الجانبية",
+    "collapseSidebar": "طي القائمة الجانبية",
+    "expandSidebar": "توسيع القائمة الجانبية",
+    "backToSite": "العودة إلى الموقع"
+  },
+  "meta": {
+    "notFoundTitle": "المعرض غير موجود",
+    "description": "تصفح سيارات {name}"
+  },
+  "error": {
+    "title": "حدث خطأ ما",
+    "body": "نعتذر عن الإزعاج. حدث خطأ غير متوقع.",
+    "retry": "حاول مرة أخرى",
+    "home": "العودة إلى الرئيسية"
+  },
+  "impersonation": {
+    "viewingAs": "تتصفح باسم <b>{name}</b>",
+    "viewingAsIn": "تتصفح باسم <b>{name}</b> داخل <b>{org}</b>",
+    "unknownUser": "مستخدم",
+    "superAdmin": "(المشرف العام: {name})",
+    "exit": "إنهاء انتحال الهوية",
+    "ending": "جارٍ الإنهاء…",
+    "ended": "تم إنهاء انتحال الهوية",
+    "endFailed": "تعذّر إنهاء انتحال الهوية"
+  },
+  "upgradeBanner": {
+    "notIncluded": "باقة {plan} لا تشمل {resource}.",
+    "notIncludedBody": "قم بترقية باقتك لتفعيلها.",
+    "atLimit": "لقد وصلت إلى حد {resource} في باقة {plan}.",
+    "nearLimit": "لقد استخدمت {current} من {limit} {resource} في باقة {plan}.",
+    "body": "قم بترقية باقتك للحصول على حدود أعلى ومزايا إضافية.",
+    "cta": "ترقية الباقة",
+    "dismiss": "إغلاق التنبيه",
+    "resources": {
+      "cars": "السيارات",
+      "members": "أعضاء الفريق",
+      "aiProcessing": "طلبات المعالجة بالذكاء الاصطناعي"
+    },
+    "noPlan": "ليس لديك باقة مفعّلة بعد.",
+    "noPlanBody": "اختر باقة لتفعيل {resource}."
+  },
+  "dashboard": {
+    "meta": {
+      "title": "لوحة التحكم",
+      "description": "نظرة سريعة على معرضك"
+    },
+    "title": "لوحة التحكم",
+    "subtitle": "مرحبًا بعودتك — إليك ما يحدث في معرضك.",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "analytics": "التحليلات"
+    },
+    "stats": {
+      "users": "إجمالي المستخدمين",
+      "cars": "السيارات المعروضة",
+      "testDrives": "القيادات التجريبية"
+    },
+    "ranges": {
+      "label": "اختر فترة زمنية",
+      "last7": "آخر ٧ أيام",
+      "last14": "آخر ١٤ يومًا",
+      "last30": "آخر ٣٠ يومًا",
+      "last90": "آخر ٣ أشهر"
+    },
+    "overview": {
+      "title": "نظرة عامة",
+      "description": "المستخدمون والسيارات والقيادات التجريبية عبر الوقت",
+      "emptyDescription": "لا توجد بيانات",
+      "emptyBody": "لا توجد بيانات لعرضها في الرسم البياني",
+      "series": {
+        "users": "المستخدمون",
+        "cars": "السيارات",
+        "testDrives": "القيادات التجريبية"
+      }
+    },
+    "analytics": {
+      "totalValue": "القيمة الإجمالية للمخزون",
+      "averagePrice": "متوسط سعر السيارة",
+      "conversionRate": "معدل التحويل",
+      "conversionRateNote": "من الطلبات إلى المؤكدة",
+      "addedThisMonth": "السيارات المضافة هذا الشهر",
+      "overall": "الإجمالي",
+      "vsLastMonth": "{percent} مقارنة بالشهر الماضي"
+    },
+    "funnel": {
+      "title": "مسار القيادات التجريبية",
+      "description": "معدلات التحويل عبر مراحل القيادة التجريبية",
+      "total": "إجمالي الطلبات",
+      "confirmed": "القيادات التجريبية المؤكدة",
+      "completed": "المكتملة",
+      "cancelled": "الملغاة",
+      "share": "({percent})",
+      "shareOfTotal": "({percent} من الإجمالي)",
+      "shareOfConfirmed": "({percent} من المؤكدة)"
+    },
+    "popularCars": {
+      "title": "السيارات الأكثر طلبًا",
+      "description": "الأكثر إضافة إلى المفضلة",
+      "descriptionTop": "أكثر {count} سيارات إضافةً إلى المفضلة",
+      "emptyTitle": "لا توجد سيارات في المفضلة بعد",
+      "emptyBody": "عندما يضيف المستخدمون سيارات إلى مفضلتهم ستظهر هنا.",
+      "saved": "أضافها {count}"
+    },
+    "inventory": {
+      "title": "حالة المخزون",
+      "description": "التوزيع حسب التوفر",
+      "emptyTitle": "لا يوجد مخزون بعد",
+      "emptyBody": "أضف سيارات لعرض توزيع مخزونك.",
+      "totalCars": "إجمالي السيارات",
+      "legend": "{value} ({percent})"
+    },
+    "trends": {
+      "title": "اتجاهات القيادات التجريبية",
+      "description": "حجم الحجوزات حسب الحالة عبر الوقت",
+      "emptyDescription": "الحجم عبر الوقت",
+      "emptyTitle": "لا توجد بيانات قيادات تجريبية",
+      "emptyBody": "ستظهر الاتجاهات بمجرد أن يبدأ العملاء في حجز قيادات تجريبية."
+    }
+  },
+  "cars": {
+    "meta": {
+      "title": "السيارات",
+      "description": "إدارة سياراتك ومخزونك"
+    },
+    "title": "إدارة السيارات",
+    "subtitle": "إدارة قوائم سياراتك ومخزونك",
+    "filter": {
+      "searchPlaceholder": "ابحث بالموديل أو العنوان…",
+      "searchLabel": "البحث في السيارات",
+      "clearSearch": "مسح البحث",
+      "statusPlaceholder": "تصفية حسب الحالة",
+      "allStatus": "كل الحالات",
+      "clear": "مسح",
+      "addCar": "إضافة سيارة"
+    },
+    "stats": {
+      "title": "مخزون السيارات",
+      "available": "{count} متاحة",
+      "sold": "{count} مباعة",
+      "unavailable": "{count} غير متاحة",
+      "featured": "{count} مميزة",
+      "refresh": "تحديث"
+    },
+    "table": {
+      "vehicle": "السيارة",
+      "pricing": "السعر",
+      "status": "الحالة",
+      "featured": "مميزة",
+      "actions": "الإجراءات",
+      "added": "أُضيفت في: {date}",
+      "notFeatured": "غير مميزة",
+      "unknownStatus": "غير معروفة"
+    },
+    "rowActions": {
+      "openMenu": "فتح القائمة",
+      "label": "الإجراءات",
+      "view": "عرض",
+      "viewDetails": "عرض التفاصيل",
+      "edit": "تعديل",
+      "feature": "تمييز",
+      "unfeature": "إلغاء التمييز",
+      "makeFeatured": "تمييز السيارة",
+      "removeFeatured": "إلغاء تمييز السيارة",
+      "statusLabel": "الحالة",
+      "changeStatus": "تغيير الحالة",
+      "markAvailable": "تعيين كمتاحة",
+      "markSold": "تعيين كمباعة",
+      "markUnavailable": "تعيين كغير متاحة",
+      "delete": "حذف",
+      "deleteCar": "حذف السيارة"
+    },
+    "empty": {
+      "title": "لا توجد سيارات",
+      "filtered": "جرّب تعديل البحث أو عوامل التصفية للعثور على ما تبحث عنه.",
+      "body": "أضف سيارتك الأولى لتبدأ في بناء مخزونك."
+    },
+    "error": {
+      "title": "تعذّر تحميل السيارات",
+      "body": "حدث خطأ أثناء تحميل مخزونك."
+    },
+    "deleteDialog": {
+      "title": "حذف السيارة",
+      "body": "هل أنت متأكد من حذف <b>«{title}»</b>؟ لا يمكن التراجع عن هذا، وستُزال السيارة من مخزونك نهائيًا.",
+      "deleting": "جارٍ الحذف…"
+    },
+    "pagination": {
+      "showing": "عرض {start} إلى {end} من {total} سيارة",
+      "showingShort": "{start}–{end} من {total}",
+      "perPage": "عدد العناصر في الصفحة",
+      "first": "الصفحة الأولى",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "last": "الصفحة الأخيرة"
+    },
+    "toasts": {
+      "refreshed": "تم تحديث المخزون",
+      "refreshFailed": "تعذّر تحديث المخزون",
+      "deleted": "تم حذف السيارة",
+      "deletedBody": "تمت إزالة السيارة من مخزونك.",
+      "deleteFailed": "تعذّر حذف السيارة",
+      "deleteFailedBody": "لم نتمكن من حذف السيارة. حاول مرة أخرى.",
+      "updated": "تم تحديث السيارة",
+      "updatedBody": "تم حفظ بيانات السيارة.",
+      "updateFailed": "تعذّر تحديث السيارة",
+      "updateFailedBody": "لم نتمكن من تحديث السيارة. حاول مرة أخرى."
+    }
+  },
+  "carForm": {
+    "meta": {
+      "title": "إضافة سيارة",
+      "description": "أضف سيارة إلى مخزونك"
+    },
+    "modePicker": {
+      "title": "إضافة سيارة جديدة",
+      "subtitle": "اختر طريقة إدخال بيانات سيارتك",
+      "manual": {
+        "title": "إدخال يدوي",
+        "body": "أدخل كل بيانات السيارة بنفسك عبر النموذج الكامل. الأنسب عندما تكون المعلومات جاهزة لديك.",
+        "point1": "تحكم كامل في التفاصيل",
+        "point2": "تسعير ومزايا مخصصة",
+        "point3": "سريع ومباشر",
+        "cta": "ابدأ الإدخال اليدوي"
+      },
+      "ai": {
+        "title": "الرفع بالذكاء الاصطناعي",
+        "body": "ارفع صور السيارة ودع الذكاء الاصطناعي يستخرج التفاصيل. ذكي وسريع ودقيق.",
+        "point1": "استخراج تلقائي للتفاصيل",
+        "point2": "تقدير السعر السوقي",
+        "point3": "التعرف على المزايا",
+        "cta": "الرفع بالذكاء الاصطناعي",
+        "badge": "باقة Pro",
+        "locked": "ترقَّ إلى Pro لتفعيلها",
+        "remaining": "متبقٍ {remaining} من {limit} إعلانات بالذكاء الاصطناعي هذا الشهر",
+        "exhaustedBadge": "نفد الرصيد",
+        "exhausted": "نفد رصيد الذكاء الاصطناعي لهذا الشهر — يتجدد في أول الشهر"
+      }
+    },
+    "modePage": {
+      "manualTitle": "الإدخال اليدوي للسيارة",
+      "aiTitle": "رفع السيارة بالذكاء الاصطناعي",
+      "lockedTitle": "الرفع بالذكاء الاصطناعي يتطلب باقة مدفوعة",
+      "lockedBody": "قم بالترقية إلى باقة Pro أو Enterprise لتفعيل الرفع بالذكاء الاصطناعي مع استخراج التفاصيل تلقائيًا وتقدير السعر السوقي والتعرف على المزايا.",
+      "goBack": "رجوع",
+      "upgrade": "ترقية الباقة"
+    },
+    "edit": {
+      "title": "تعديل بيانات السيارة",
+      "errorTitle": "تعذّر تحميل هذه السيارة",
+      "errorBody": "لم يتم العثور على السيارة، أو ليس لديك صلاحية الوصول إليها.",
+      "backToCars": "العودة إلى السيارات"
+    },
+    "sections": {
+      "basic": "البيانات الأساسية",
+      "specs": "المواصفات",
+      "details": "تفاصيل إضافية",
+      "status": "الحالة والظهور"
+    },
+    "form": {
+      "titleAdd": "بيانات السيارة",
+      "titleEdit": "تعديل بيانات السيارة",
+      "titleAi": "البيانات المستخرجة بالذكاء الاصطناعي",
+      "subtitleAdd": "أدخل كل تفاصيل السيارة التي تريد عرضها",
+      "subtitleEdit": "حدّث تفاصيل هذا الإعلان",
+      "subtitleAi": "راجع التفاصيل المستخرجة وعدّلها قبل الإرسال",
+      "uploadedAlt": "السيارة المرفوعة",
+      "uploadedImage": "الصورة المرفوعة",
+      "startOver": "البدء من جديد",
+      "aiConfidence": "دقة الذكاء الاصطناعي:",
+      "submitAdd": "إضافة السيارة",
+      "submitEdit": "تحديث السيارة",
+      "submittingAdd": "جارٍ إضافة السيارة…",
+      "submittingEdit": "جارٍ تحديث السيارة…",
+      "validationToastTitle": "أكمِل كل الحقول المطلوبة",
+      "validationToastBody": "املأ الحقول المُظللة للمتابعة",
+      "addedToast": "تمت إضافة السيارة",
+      "updatedToast": "تم تحديث السيارة",
+      "addFailed": "تعذّرت إضافة السيارة",
+      "updateFailed": "تعذّر تحديث السيارة",
+      "previous": "السابق",
+      "next": "التالي",
+      "step": "{name} ({current}/{total})",
+      "translationSkipped": "تم الحفظ بدون النسخة {other, select, en {الإنجليزية} other {العربية}} — تعذّر على الذكاء الاصطناعي كتابتها (غير متاحة في باقتك، أو انتهى رصيد هذا الشهر، أو خطأ مؤقت). سيرى هؤلاء الزوار نصك مع تنبيه بأنه غير مترجم.",
+      "aiYears": "تشير الصور إلى موديل من {from} إلى {to}. تأكد من سنة الصنع قبل الحفظ."
+    },
+    "fields": {
+      "makeHint": "الشركة المصنّعة للسيارة",
+      "modelHint": "اسم موديل السيارة",
+      "yearHint": "سنة صنع السيارة",
+      "titleLabel": "عنوان الإعلان",
+      "titleHint": "يُنشأ من الماركة والموديل وسنة الصنع",
+      "titlePlaceholder": "يُنشأ بعد إدخال الماركة والموديل وسنة الصنع",
+      "titleReady": "تم إنشاء العنوان",
+      "titlePending": "أدخل الماركة والموديل وسنة الصنع لإنشاء العنوان",
+      "priceLabel": "السعر (ج.م)",
+      "priceHint": "سعر الإعلان بالجنيه المصري",
+      "mileageHint": "المسافة التي قطعتها السيارة",
+      "bodyTypeHint": "شكل هيكل السيارة",
+      "bodyTypePlaceholder": "اختر نوع الهيكل",
+      "fuelTypeHint": "نوع الوقود الذي تستخدمه السيارة",
+      "fuelTypePlaceholder": "اختر نوع الوقود",
+      "transmissionHint": "نوع ناقل الحركة",
+      "transmissionPlaceholder": "اختر ناقل الحركة",
+      "seatsHint": "عدد المقاعد في السيارة",
+      "seatsPlaceholder": "اختر عدد المقاعد",
+      "seatsCount": "{count, plural, zero {{value} مقعد} one {مقعد واحد} two {مقعدان} few {{value} مقاعد} many {{value} مقعدًا} other {{value} مقعد}}",
+      "seatsMore": "أكثر من {count} مقاعد",
+      "colorHint": "اللون الخارجي للسيارة",
+      "colorPlaceholder": "اختر اللون",
+      "descriptionLabel": "الوصف",
+      "descriptionHint": "وصف تفصيلي للسيارة",
+      "descriptionPlaceholder": "اكتب وصفًا تفصيليًا للسيارة…",
+      "descriptionMin": "{count} حرفًا على الأقل",
+      "descriptionCount": "{count} حرفًا",
+      "featuresLabel": "المزايا",
+      "featuresHint": "اكتب المزايا الرئيسية مفصولة بفواصل",
+      "featuresPlaceholder": "فرش جلد، فتحة سقف، كاميرا خلفية",
+      "statusHint": "حالة توفر السيارة حاليًا",
+      "statusPlaceholder": "اختر الحالة",
+      "featuredLabel": "تمييز هذه السيارة في الصفحة الرئيسية",
+      "featuredHint": "السيارات المميزة تظهر في قسم الأبرز",
+      "readyTitle": "جاهزة للإرسال",
+      "readyBody": "كل البيانات المطلوبة مكتملة. يمكنك إضافة هذه السيارة إلى مخزونك.",
+      "titleArLabel": "العنوان بالعربية",
+      "titleArHint": "العنوان الذي يراه المشترون العرب. اتركه فارغًا لعرض العنوان الإنجليزي.",
+      "titleArPlaceholder": "بورشه باناميرا توربو ٢٠١٨"
+    },
+    "images": {
+      "label": "الصور",
+      "hint": "أضف حتى {count} صور للسيارة",
+      "drop": "أفلت الصور هنا",
+      "prompt": "اسحب الصور وأفلتها هنا، أو اضغط للاختيار",
+      "limits": "حتى {count} صور، {size} ميجابايت لكل صورة",
+      "full": "لقد أضفت الحد الأقصى وهو {count} صور. احذف صورة لإضافة أخرى.",
+      "previewAlt": "معاينة {index}",
+      "remove": "حذف الصورة {index}",
+      "tooMany": "يمكنك رفع {count} صور كحد أقصى.",
+      "failed": "تعذّرت إضافة الصورة. حاول مرة أخرى."
+    },
+    "ai": {
+      "processingTitle": "الذكاء الاصطناعي يقرأ الصور",
+      "processingBody": "يقوم الذكاء الاصطناعي بتحليل صورك واستخراج تفاصيل السيارة…",
+      "uploadTitle": "ارفع صور السيارة",
+      "uploadPrompt": "أفلت حتى ٣ صور للسيارة نفسها هنا، أو اضغط للتصفح. صورة شعار الموديل الخلفي أو التابلوه تساعد الذكاء الاصطناعي على تحديد الموديل بدقة.",
+      "uploadDropping": "أفلت صور سيارتك هنا…",
+      "choose": "اختر الصور",
+      "formats": "JPG وPNG وWEBP، حتى ١٠ ميجابايت لكل صورة",
+      "featuresTitle": "ما الذي يقوم به الذكاء الاصطناعي",
+      "feature1": "التعرف على الماركة والموديل وسنة الصنع",
+      "feature2": "تقدير السعر من بيانات السوق",
+      "feature3": "استخراج المزايا من الصورة",
+      "feature4": "تقييم الجودة والحالة",
+      "invalidType": "نوع الملف غير مدعوم. ارفع صورة JPG أو PNG أو WEBP.",
+      "tooLarge": "حجم الملف أكبر من {size} ميجابايت.",
+      "extracted": "تم استخراج بيانات السيارة",
+      "processFailed": "تعذّرت قراءة هذه الصور.",
+      "unexpected": "حدث خطأ أثناء معالجة الصورة.",
+      "stageUploading": "جارٍ رفع الصور — {percent}",
+      "stageWaiting": "في انتظار بدء الذكاء الاصطناعي…",
+      "stageWaitingNote": "تنتظر خدمة الذكاء الاصطناعي دورها عند الضغط. قد يستغرق ذلك دقيقة أو دقيقتين، وتظهر التفاصيل فور بدء الكتابة.",
+      "stageWriting": "جارٍ كتابة التفاصيل — {done} من {total}",
+      "stageDone": "تم",
+      "firstPhotosOnly": "تتم قراءة أول {count} صور فقط. يمكنك إضافة الباقي في خطوة الصور."
+    },
+    "validation": {
+      "titleRequired": "عنوان الإعلان مطلوب",
+      "makeRequired": "الماركة مطلوبة",
+      "modelRequired": "الموديل مطلوب",
+      "yearInvalid": "يجب أن تكون سنة الصنع بين {min} و{max}",
+      "priceInvalid": "يجب أن يكون السعر أكبر من {min}",
+      "mileageInvalid": "يجب أن تكون المسافة المقطوعة {min} أو أكثر",
+      "bodyTypeRequired": "نوع الهيكل مطلوب",
+      "fuelTypeRequired": "نوع الوقود مطلوب",
+      "transmissionRequired": "ناقل الحركة مطلوب",
+      "colorRequired": "اللون مطلوب",
+      "seatsInvalid": "يجب أن يكون عدد المقاعد بين {min} و{max}",
+      "descriptionTooShort": "يجب ألا يقل الوصف عن {min} حرفًا",
+      "imagesRequired": "أضف صورة واحدة على الأقل",
+      "imagesTooMany": "يمكنك إضافة {max} صور كحد أقصى"
+    },
+    "coach": {
+      "title": "جودة الإعلان",
+      "body": "اعرف ما الذي يجعل هذا الإعلان أقوى قبل نشره. النصائح المخصصة تستخدم استخدامًا واحدًا للذكاء الاصطناعي.",
+      "check": "افحص جودة الإعلان",
+      "checking": "جارٍ الفحص…",
+      "again": "افحص مرة أخرى",
+      "score": "التقييم: {score} / {max}",
+      "perfect": "لا شيء لتحسينه — الإعلان مكتمل.",
+      "failed": "تعذّر فحص الإعلان",
+      "adviceSkipped": "النصائح المخصصة بالذكاء الاصطناعي غير متاحة الآن (غير متاحة في باقتك، أو نفد رصيد هذا الشهر، أو خطأ مؤقت). الملاحظات أعلاه ما زالت سارية.",
+      "issues": {
+        "fewPhotos": "أضف {min} صور على الأقل",
+        "morePhotos": "أضف صورًا أكثر — {good} صور أو أكثر هو الأفضل",
+        "shortDescription": "الوصف قصير جدًا ولا يساعد المشتري",
+        "briefDescription": "أضف تفاصيل أكثر للوصف — الحالة، سجل الصيانة، عدد الملاك",
+        "noFeatures": "أضف مزايا السيارة",
+        "fewFeatures": "أضف مزايا أكثر للسيارة",
+        "zeroMileage": "العداد ٠ كم — أدخل القراءة الفعلية"
+      }
+    },
+    "condition": {
+      "title": "حالة العربية وتاريخها",
+      "hint": "اختياري. دي أول حاجات المشتري بيسأل عليها. لو مش متأكد سيبها «مش محدد» — مش هتظهر خالص، ومش هتتقري على إنها «لأ».",
+      "notStated": "مش محدد",
+      "yes": "أيوه",
+      "no": "لأ",
+      "fields": {
+        "originalPaint": "فابريكا (من غير رش)",
+        "accidentFree": "من غير حوادث",
+        "priceNegotiable": "السعر قابل للتفاوض",
+        "ownerCount": "عدد الملاك",
+        "serviceHistory": "سجل الصيانة",
+        "licenseValidUntil": "الرخصة سارية لحد"
+      },
+      "owners": "{count, plural, one {أول مالك} two {مالكين} few {{value} ملاك} other {{value} مالك}}",
+      "ownersOrMore": "{value} ملاك أو أكتر",
+      "service": {
+        "FULL": "كامل وموثق",
+        "PARTIAL": "جزئي",
+        "NONE": "مفيش"
+      },
+      "monthPicker": {
+        "clear": "امسح — مش محدد",
+        "previousYear": "السنة اللي فاتت",
+        "nextYear": "السنة الجاية"
+      }
+    }
+  },
+  "testDrives": {
+    "title": "إدارة القيادات التجريبية",
+    "subtitle": "إدارة طلبات القيادة التجريبية والمواعيد",
+    "filter": {
+      "searchPlaceholder": "ابحث بموديل السيارة أو اسم العميل",
+      "searchLabel": "البحث في القيادات التجريبية",
+      "clearSearch": "مسح البحث",
+      "statusPlaceholder": "تصفية حسب الحالة",
+      "allStatus": "كل الحالات",
+      "clearFilters": "مسح عوامل التصفية",
+      "loading": "جارٍ التحميل…"
+    },
+    "stats": {
+      "title": "طلبات القيادة التجريبية",
+      "pending": "{count} قيد الانتظار",
+      "confirmed": "{count} مؤكدة",
+      "cancelled": "{count} ملغاة",
+      "total": "{count} إجمالًا",
+      "refresh": "تحديث"
+    },
+    "table": {
+      "car": "السيارة",
+      "customer": "العميل",
+      "dateTime": "التاريخ والوقت",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "timeRange": "{start} – {end}"
+    },
+    "actions": {
+      "details": "التفاصيل",
+      "viewDetails": "عرض التفاصيل",
+      "confirm": "تأكيد",
+      "cancel": "إلغاء",
+      "openMenu": "فتح القائمة"
+    },
+    "customer": {
+      "unknown": "عميل غير معروف",
+      "noEmail": "لا يوجد بريد إلكتروني"
+    },
+    "empty": {
+      "title": "لا توجد طلبات قيادة تجريبية",
+      "filtered": "جرّب تعديل البحث أو عوامل التصفية.",
+      "body": "ستظهر طلبات القيادة التجريبية هنا بمجرد أن يبدأ العملاء في الحجز."
+    },
+    "modal": {
+      "title": "تفاصيل القيادة التجريبية",
+      "description": "كل ما هو مسجّل عن طلب القيادة التجريبية هذا",
+      "carSection": "السيارة",
+      "customerSection": "بيانات العميل",
+      "scheduleSection": "الموعد",
+      "notesSection": "ملاحظات العميل",
+      "requestSection": "بيانات الطلب",
+      "date": "التاريخ:",
+      "time": "الوقت:",
+      "status": "الحالة:",
+      "created": "تاريخ الطلب:",
+      "close": "إغلاق"
+    },
+    "toasts": {
+      "statusChanged": "تم تحديث القيادة التجريبية",
+      "confirmed": "تم تأكيد القيادة التجريبية",
+      "cancelled": "تم إلغاء القيادة التجريبية",
+      "updateFailed": "تعذّر تحديث القيادة التجريبية",
+      "unexpected": "حدث خطأ أثناء تحديث القيادة التجريبية."
+    }
+  },
+  "buyerQuestions": {
+    "title": "أسئلة المشترين",
+    "subtitle": "أسئلة سألها المشترين للمساعد الذكي وإعلاناتك مش فيها إجابتها. جاوب مرة واحدة، والمساعد هيرد بيها على كل مشتري بعد كده.",
+    "tabs": {
+      "OPEN": "من غير إجابة",
+      "ANSWERED": "اتجاوبت",
+      "DISMISSED": "متجاهلة"
+    },
+    "tabHints": {
+      "OPEN": "الأكتر سؤالًا الأول. دي الحاجات اللي المشترين بيدوروا عليها ومش لاقيينها.",
+      "ANSWERED": "المساعد بيقول الإجابات دي للمشترين على إنها ردك.",
+      "DISMISSED": "مش ظاهرة في القائمة. رجّع أي سؤال عشان تجاوبه."
+    },
+    "empty": {
+      "OPEN": {
+        "title": "مفيش أسئلة من غير إجابة",
+        "description": "لما المساعد ميلاقيش إجابة سؤال المشتري في إعلانك، السؤال هيوصل هنا."
+      },
+      "ANSWERED": {
+        "title": "لسه مجاوبتش على أسئلة",
+        "description": "إجاباتك هتظهر هنا."
+      },
+      "DISMISSED": {
+        "title": "مفيش أسئلة متجاهلة",
+        "description": "الأسئلة اللي بتتجاهلها بتظهر هنا."
+      }
+    },
+    "askedTimes": "{count, plural, one {اتسأل مرة} two {اتسأل مرتين} few {اتسأل {value} مرات} other {اتسأل {value} مرة}}",
+    "lastAsked": "آخر مرة {when}",
+    "askedIn": {
+      "en": "اتسأل بالإنجليزي",
+      "ar": "اتسأل بالعربي"
+    },
+    "yourAnswer": "إجابتك",
+    "allCarsBadge": "كل العربيات",
+    "answerLabel": "إجابتك على السؤال ده",
+    "answerPlaceholder": "جاوب زي ما بترد على مشتري. اكتب بس الحاجات اللي أنت متأكد منها.",
+    "allCarsLabel": "الكلام ده ينطبق على كل عربياتي",
+    "allCarsHint": "لسياسات المعرض زي التقسيط أو البدل أو الفحص.",
+    "loadFailed": "معرفناش نحمّل الأسئلة. اعمل تحديث للصفحة.",
+    "actions": {
+      "answer": "جاوب",
+      "save": "احفظ",
+      "cancel": "إلغاء",
+      "edit": "تعديل",
+      "dismiss": "تجاهل",
+      "removeAnswer": "امسح الإجابة",
+      "restore": "رجّع"
+    },
+    "toasts": {
+      "answered": "اتحفظ. المساعد هيستخدم إجابتك من دلوقتي.",
+      "dismissed": "اتجاهلنا السؤال.",
+      "reopened": "السؤال رجع لقائمة اللي من غير إجابة.",
+      "failed": "معرفناش نحفظ. حاول تاني."
+    }
+  },
+  "settings": {
+    "meta": {
+      "title": "الإعدادات",
+      "description": "إدارة إعدادات معرضك"
+    },
+    "title": "الإعدادات",
+    "subtitle": "إدارة إعداداتك وتفضيلاتك",
+    "configure": "الإعداد",
+    "back": "العودة إلى الإعدادات",
+    "cards": {
+      "profile": {
+        "title": "ملف المعرض",
+        "description": "إدارة بيانات المعرض العامة وموقعه"
+      },
+      "workingHours": {
+        "title": "ساعات العمل",
+        "description": "ضبط ساعات عمل المعرض وأوقات التوفر"
+      },
+      "team": {
+        "title": "أعضاء الفريق",
+        "description": "إدارة أعضاء فريقك وصلاحياتهم"
+      },
+      "terms": {
+        "title": "شروط المعرض للمشترين",
+        "description": "التقسيط والبدل والفحص والتوصيل، بتظهر على كل إعلان"
+      },
+      "weeklySummary": {
+        "title": "الملخص الأسبوعي",
+        "description": "بريد كل سبت بأرقام أسبوعك، ولغة رسائل البريد"
+      }
+    },
+    "profile": {
+      "title": "ملف المعرض",
+      "subtitle": "إدارة البيانات العامة التي يراها العملاء في صفحات المعارض والسيارات.",
+      "loading": "جارٍ تحميل الملف…",
+      "website": "الموقع الإلكتروني",
+      "description": "الوصف",
+      "save": "حفظ الملف",
+      "saving": "جارٍ الحفظ…",
+      "toasts": {
+        "loadFailed": "تعذّر تحميل ملف معرضك",
+        "updated": "تم حفظ الملف",
+        "updateFailed": "تعذّر حفظ ملف معرضك"
+      }
+    },
+    "workingHours": {
+      "title": "ساعات العمل",
+      "subtitle": "اضبط ساعات عمل معرضك",
+      "cardTitle": "ساعات العمل",
+      "cardDescription": "حدّد ساعات العمل لكل يوم. يرى العملاء هذه الساعات في صفحة معرضك.",
+      "to": "إلى",
+      "closed": "مغلق",
+      "openLabel": "يفتح",
+      "closeLabel": "يغلق",
+      "save": "حفظ ساعات العمل",
+      "saving": "جارٍ الحفظ…",
+      "toasts": {
+        "incomplete": "حدّد ساعات العمل لكل أيام الأسبوع",
+        "updated": "تم حفظ ساعات العمل",
+        "updateFailed": "تعذّر حفظ ساعات العمل"
+      }
+    },
+    "team": {
+      "title": "أعضاء الفريق",
+      "count": "{count} من {limit} أعضاء",
+      "unlimited": "عدد غير محدود",
+      "cardTitle": "أعضاء الفريق",
+      "cardDescription": "إدارة أعضاء فريقك وصلاحياتهم داخل المعرض.",
+      "emptyTitle": "لا يوجد أعضاء بعد",
+      "emptyBody": "ادعُ أعضاء للعمل معك في المعرض",
+      "noName": "بلا اسم",
+      "you": "أنت",
+      "joined": "انضم {when}",
+      "roles": {
+        "OWNER": "مالك",
+        "MEMBER": "عضو"
+      },
+      "invite": {
+        "cta": "دعوة عضو",
+        "limitReached": "تم بلوغ الحد الأقصى للأعضاء",
+        "title": "دعوة عضو للفريق",
+        "description": "ادعُ شخصًا للانضمام إلى معرضك. يحتاج إلى حساب لقبول الدعوة.",
+        "emailLabel": "البريد الإلكتروني",
+        "emailPlaceholder": "member@example.com",
+        "roleLabel": "الصلاحية",
+        "submit": "إرسال الدعوة",
+        "submitting": "جارٍ الإرسال…",
+        "emailRequired": "أدخل بريدًا إلكترونيًا",
+        "invited": "تم إرسال الدعوة",
+        "failed": "تعذّرت دعوة هذا العضو",
+        "unexpected": "حدث خطأ أثناء دعوة العضو."
+      },
+      "remove": {
+        "label": "إزالة العضو",
+        "title": "إزالة عضو من الفريق",
+        "body": "هل أنت متأكد من إزالة <b>{name}</b> من المعرض؟ لا يمكن التراجع عن هذا.",
+        "confirm": "إزالة العضو",
+        "removing": "جارٍ الإزالة…",
+        "removed": "تمت إزالة العضو",
+        "failed": "تعذّرت إزالة هذا العضو",
+        "unexpected": "حدث خطأ أثناء إزالة العضو.",
+        "ownerBlocked": "لا يمكن إزالة مالك المعرض"
+      },
+      "roleChange": {
+        "updated": "تم تحديث الصلاحية",
+        "failed": "تعذّر تحديث الصلاحية",
+        "unexpected": "حدث خطأ أثناء تحديث الصلاحية."
+      }
+    },
+    "terms": {
+      "title": "شروط المعرض للمشترين",
+      "subtitle": "بتظهر على كل إعلاناتك",
+      "cardTitle": "إيه اللي بتقدمه للمشتري",
+      "cardDescription": "بتنطبق على كل العربيات اللي بتبيعها. المشتري بيشوفها على كل إعلان، والمساعد الذكي بيرد منها. سيب «مش محدد» لأي حاجة تحب تتكلم فيها وجهًا لوجه.",
+      "notStated": "مش محدد",
+      "yes": "أيوه",
+      "no": "لأ",
+      "fields": {
+        "offersFinancing": "تقسيط / تمويل",
+        "acceptsTradeIn": "بنقبل البدل",
+        "allowsInspection": "مسموح بفحص خارجي",
+        "offersDelivery": "في توصيل",
+        "financingNote": "تفاصيل التقسيط"
+      },
+      "financingNotePlaceholder": "مثلًا: عن طريق البنك الأهلي وبنك مصر، لحد ٥ سنين، مقدم ٣٠٪",
+      "save": "احفظ الشروط",
+      "saved": "اتحفظ. إعلاناتك بتعرض الشروط الجديدة.",
+      "saveFailed": "معرفناش نحفظ الشروط. حاول تاني."
+    },
+    "weeklySummary": {
+      "title": "الملخص الأسبوعي",
+      "subtitle": "أسبوعك على AutoMe في بريدك كل سبت",
+      "cardTitle": "إعدادات البريد",
+      "cardDescription": "يصل ملّاك المعرض ملخص قصير صباح كل سبت: طلبات تجربة القيادة، وأسئلة المشترين، وسياراتك، وإعلانات الذكاء الاصطناعي.",
+      "enabledLabel": "إرسال الملخص الأسبوعي",
+      "enabledHelp": "يُرسل إلى ملّاك المعرض كل سبت الساعة ٩ صباحًا (بتوقيت القاهرة).",
+      "languageLabel": "لغة البريد",
+      "languageHelp": "يُكتب الملخص الأسبوعي بهذه اللغة.",
+      "save": "حفظ",
+      "saved": "تم حفظ إعدادات البريد",
+      "saveFailed": "تعذّر حفظ إعدادات البريد. حاول مرة أخرى."
+    }
+  },
+  "billing": {
+    "title": "الفوترة والاشتراك",
+    "subtitle": "إدارة باقة اشتراكك وبيانات الفوترة",
+    "nonOwner": {
+      "title": "صلاحية اطّلاع فقط",
+      "body": "يمكنك الاطّلاع على الباقة الحالية والاستخدام، لكن مالك المعرض وحده من يمكنه إدارة الفوترة أو تغيير الباقة أو تحديث وسيلة الدفع.",
+      "ownerLabel": "مالك المعرض"
+    },
+    "status": {
+      "ACTIVE": "نشط",
+      "TRIALING": "تجريبي",
+      "PAST_DUE": "متأخر السداد",
+      "CANCELED": "ملغى"
+    },
+    "current": {
+      "title": "الباقة الحالية",
+      "defaultPlan": "Starter",
+      "renewsOn": "يتجدد في {date}",
+      "trialEndsOn": "تنتهي الفترة التجريبية في {date}",
+      "pastDue": "السداد متأخر — يرجى تحديث وسيلة الدفع",
+      "accessEndsOn": "ينتهي الوصول في {date}",
+      "freePlan": "أنت على باقة Starter المجانية",
+      "manage": "إدارة الاشتراك",
+      "carListings": "السيارات المعروضة",
+      "teamMembers": "أعضاء الفريق",
+      "testDrives": "القيادات التجريبية (هذا الشهر)",
+      "portalFailed": "تعذّر فتح بوابة الفوترة. حاول مرة أخرى."
+    },
+    "usage": {
+      "unlimited": "غير محدود",
+      "tooltipUnlimited": "{current} {label} مستخدمة — بلا حد",
+      "tooltip": "{current} من {limit} مستخدمة ({percent}) — يتبقى {remaining}",
+      "runningLow": "أوشكت على الحد؟",
+      "upgradeLink": "ترقَّ للحصول على المزيد"
+    },
+    "banner": {
+      "trialEndsToday": "فترتك التجريبية تنتهي اليوم!",
+      "trialTitle": "الفترة التجريبية",
+      "trialEndingSoon": "فترتك التجريبية تقترب من نهايتها. أضف وسيلة دفع للاستمرار بعد انتهائها.",
+      "trialActive": "فترتك التجريبية نشطة. أضف وسيلة دفع للاستمرار بعد انتهائها.",
+      "canceledTitle": "تم إلغاء الاشتراك",
+      "canceled": "تم إلغاء اشتراكك.",
+      "pastDueTitle": "فشل السداد",
+      "updatePayment": "تحديث وسيلة الدفع",
+      "dismiss": "إغلاق التنبيه",
+      "pastDueBody": "فشلت آخر عملية سداد. يرجى تحديث وسيلة الدفع لتفادي انقطاع الخدمة.",
+      "trialEndsInDays": "{count, plural, zero {تنتهي الفترة التجريبية خلال {value} يوم} one {تنتهي الفترة التجريبية غدًا} two {تنتهي الفترة التجريبية خلال يومين} few {تنتهي الفترة التجريبية خلال {value} أيام} many {تنتهي الفترة التجريبية خلال {value} يومًا} other {تنتهي الفترة التجريبية خلال {value} يوم}}",
+      "trialEndsOnBody": "تنتهي فترتك التجريبية في {date}. أضف وسيلة دفع لمواصلة استخدام كل المزايا.",
+      "addPayment": "إضافة وسيلة دفع",
+      "canceledWithDate": "تم إلغاء اشتراكك. تحتفظ بمزايا باقتك الحالية حتى {date}.",
+      "resubscribe": "إعادة الاشتراك",
+      "freeTitle": "الباقة المجانية",
+      "freeBody": "أنت على باقة Starter المجانية. قم بالترقية لعرض المزيد من السيارات وإضافة أعضاء ومزايا إضافية.",
+      "upgradeNow": "الترقية الآن",
+      "yourTrialEndsToday": "فترتك التجريبية تنتهي اليوم!",
+      "yourTrialEndsInDays": "{count, plural, zero {فترتك التجريبية تنتهي خلال {value} يوم} one {فترتك التجريبية تنتهي غدًا} two {فترتك التجريبية تنتهي خلال يومين} few {فترتك التجريبية تنتهي خلال {value} أيام} many {فترتك التجريبية تنتهي خلال {value} يومًا} other {فترتك التجريبية تنتهي خلال {value} يوم}}",
+      "canceledAccessEnds": "تم إلغاء اشتراكك. ينتهي الوصول في {date}.",
+      "portalFailed": "تعذّر فتح بوابة الفوترة. حاول مرة أخرى."
+    },
+    "plans": {
+      "title": "اختر باقتك",
+      "subtitle": "اختر الباقة التي تناسب معرضك",
+      "compare": "مقارنة",
+      "cards": "بطاقات",
+      "feature": "الميزة",
+      "currentBadge": "باقتك الحالية",
+      "currentShort": "الحالية",
+      "select": "اختيار",
+      "ownerOnly": "للمالك فقط",
+      "ownerOnlyLong": "المالك وحده من يمكنه تغيير الباقة",
+      "switchTo": "التحويل إلى {plan}",
+      "changePlan": "تغيير الباقة",
+      "confirm": "تأكيد",
+      "perMonthShort": "شهر",
+      "perYearShort": "سنة",
+      "priceWithPeriod": "{price}/{period}",
+      "changeFailed": "تعذّر تغيير الباقة. حاول مرة أخرى.",
+      "changed": "تم تحديث باقتك.",
+      "changedTitle": "تم تحديث الباقة",
+      "backToBilling": "العودة إلى الفوترة",
+      "footerNote": "كل الباقات تشمل تخزينًا آمنًا للبيانات ودعمًا عبر البريد الإلكتروني. <link>تواصل مع المبيعات</link> للحلول المخصصة.",
+      "includedFeatures": "المزايا المشمولة:",
+      "switchDialogWithPrice": "التحويل إلى <b>{plan}</b> مقابل <b>{price}</b>؟",
+      "switchDialogFree": "التحويل إلى <b>{plan}</b>؟",
+      "processing": "جارٍ المعالجة…",
+      "switchedTo": "لقد انتقلت إلى باقة <b>{plan}</b>.",
+      "featuresActive": "مزايا باقتك الجديدة مفعّلة الآن. سيظهر أي تغيير في الفوترة على فاتورتك التالية."
+    },
+    "payment": {
+      "title": "وسيلة الدفع",
+      "subtitle": "إدارة البطاقة التي يُحصَّل منها اشتراكك",
+      "card": "بطاقة",
+      "update": "تحديث",
+      "securedByStripe": "مؤمَّن بواسطة Stripe",
+      "unavailable": "تعذّر تحميل وسيلة الدفع",
+      "loadFailed": "تعذّر تحميل وسيلة الدفع",
+      "brands": {
+        "amex": "أمريكان إكسبريس",
+        "diners": "دايترز كلوب"
+      },
+      "onFile": "وسيلة الدفع المسجّلة لتحصيل اشتراكك",
+      "noneTitle": "لا توجد وسيلة دفع مسجّلة",
+      "noneBody": "أضف وسيلة دفع للاشتراك في باقة مدفوعة",
+      "add": "إضافة وسيلة دفع",
+      "endingIn": "{brand} تنتهي بـ {last4}",
+      "expires": "تنتهي في {month}/{year}",
+      "expiringSoon": "— على وشك الانتهاء",
+      "portalFailed": "تعذّر فتح بوابة الفوترة. حاول مرة أخرى."
+    },
+    "invoices": {
+      "title": "الفواتير",
+      "subtitle": "فواتيرك وإيصالاتك السابقة",
+      "date": "التاريخ",
+      "description": "الوصف",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "actions": "الإجراءات",
+      "downloadPdf": "تنزيل PDF",
+      "viewInvoice": "عرض الفاتورة",
+      "loadMore": "تحميل المزيد",
+      "emptyTitle": "لا توجد فواتير بعد",
+      "emptyBody": "ستظهر الفواتير هنا بعد أول عملية سداد",
+      "loadFailed": "تعذّر تحميل فواتيرك",
+      "historyTitle": "سجل الفواتير",
+      "historySubtitle": "اطّلع على فواتيرك السابقة ونزّلها من Stripe",
+      "tryAgain": "حاول مرة أخرى",
+      "invoiceNumber": "رقم {number}",
+      "statuses": {
+        "PAID": "مدفوعة",
+        "OPEN": "مستحقة",
+        "DRAFT": "مسودة",
+        "VOID": "ملغاة",
+        "UNCOLLECTIBLE": "غير قابلة للتحصيل",
+        "UNKNOWN": "غير معروفة"
+      }
+    },
+    "history": {
+      "title": "سجل الفوترة",
+      "subtitle": "اطّلع على تغييرات اشتراكك وأحداث الفوترة",
+      "date": "التاريخ",
+      "event": "الحدث",
+      "description": "الوصف",
+      "emptyTitle": "لا يوجد سجل فوترة بعد",
+      "loadFailed": "تعذّر تحميل سجل الفوترة",
+      "by": "بواسطة",
+      "needHelp": "تحتاج مساعدة في الفوترة؟ <link>تواصل مع فريق الفوترة</link>",
+      "events": {
+        "SUBSCRIPTION_CREATED": "إنشاء",
+        "SUBSCRIPTION_UPGRADED": "ترقية",
+        "SUBSCRIPTION_DOWNGRADED": "تخفيض",
+        "SUBSCRIPTION_CANCELED": "إلغاء",
+        "SUBSCRIPTION_RENEWED": "تجديد"
+      }
+    }
+  },
+  "auditLogs": {
+    "meta": {
+      "title": "سجل النشاط",
+      "description": "تتبّع كل الإجراءات والتغييرات داخل معرضك"
+    },
+    "title": "سجل النشاط",
+    "subtitle": "تتبّع كل الإجراءات والتغييرات داخل معرضك",
+    "unknownUser": "مستخدم غير معروف",
+    "retention": {
+      "label": "مدة الاحتفاظ: {value}",
+      "withPlan": "{duration} ({plan})",
+      "unlimited": "غير محدودة",
+      "days": "{count, plural, zero {{value} يوم} one {يوم واحد} two {يومان} few {{value} أيام} many {{value} يومًا} other {{value} يوم}}",
+      "years": "{count, plural, zero {{value} سنة} one {سنة واحدة} two {سنتان} few {{value} سنوات} many {{value} سنة} other {{value} سنة}}",
+      "tooltip": "تُحذف سجلات النشاط تلقائيًا بعد انتهاء مدة الاحتفاظ. ارتقِ بخطتك للحصول على مدة أطول."
+    },
+    "filters": {
+      "label": "عوامل التصفية:",
+      "searchPlaceholder": "ابحث بمعرّف المستخدم…",
+      "dateRangePlaceholder": "اختر نطاقًا زمنيًا",
+      "dateRange": "{start} – {end}",
+      "entityTypePlaceholder": "نوع العنصر",
+      "actionPlaceholder": "الإجراء",
+      "allEntityTypes": "كل الأنواع",
+      "allActions": "كل الإجراءات",
+      "reset": "إعادة تعيين"
+    },
+    "table": {
+      "timestamp": "التوقيت",
+      "action": "الإجراء",
+      "entity": "العنصر",
+      "user": "المستخدم",
+      "details": "التفاصيل",
+      "impersonated": "بانتحال الهوية",
+      "viewDetails": "عرض التفاصيل"
+    },
+    "empty": {
+      "title": "لا توجد سجلات نشاط"
+    },
+    "pagination": {
+      "showing": "عرض {start} إلى {end} من إجمالي {total} سجل"
+    },
+    "details": {
+      "title": "تفاصيل سجل النشاط",
+      "recordedOn": "سُجّل في {date}",
+      "action": "الإجراء",
+      "entityType": "نوع العنصر",
+      "entityId": "معرّف العنصر",
+      "ipAddress": "عنوان IP",
+      "executedBy": "نفّذه",
+      "impersonatedAction": "إجراء بانتحال الهوية",
+      "previousState": "الحالة السابقة",
+      "newState": "الحالة الجديدة"
+    },
+    "actions": {
+      "ORG_CREATED": "إنشاء المعرض",
+      "ORG_UPDATED": "تحديث المعرض",
+      "ORG_DELETED": "حذف المعرض",
+      "ORG_SUSPENDED": "إيقاف المعرض",
+      "ORG_ACTIVATED": "تفعيل المعرض",
+      "MEMBER_INVITED": "دعوة عضو",
+      "MEMBER_ACCEPTED": "قبول العضوية",
+      "MEMBER_REMOVED": "إزالة عضو",
+      "MEMBER_ROLE_CHANGED": "تغيير صلاحية عضو",
+      "SUBSCRIPTION_CREATED": "إنشاء اشتراك",
+      "SUBSCRIPTION_UPGRADED": "ترقية الاشتراك",
+      "SUBSCRIPTION_DOWNGRADED": "خفض الاشتراك",
+      "SUBSCRIPTION_CANCELED": "إلغاء الاشتراك",
+      "SUBSCRIPTION_RENEWED": "تجديد الاشتراك",
+      "CAR_CREATED": "إضافة سيارة",
+      "CAR_UPDATED": "تحديث سيارة",
+      "CAR_DELETED": "حذف سيارة",
+      "CAR_STATUS_CHANGED": "تغيير حالة سيارة",
+      "CAR_FEATURED_TOGGLED": "تغيير تمييز سيارة",
+      "TEST_DRIVE_CREATED": "طلب قيادة تجريبية",
+      "TEST_DRIVE_CONFIRMED": "تأكيد قيادة تجريبية",
+      "TEST_DRIVE_CANCELED": "إلغاء قيادة تجريبية",
+      "TEST_DRIVE_COMPLETED": "إتمام قيادة تجريبية",
+      "USER_CREATED": "إنشاء مستخدم",
+      "USER_UPDATED": "تحديث مستخدم",
+      "USER_ROLE_CHANGED": "تغيير صلاحية مستخدم",
+      "USER_DELETED": "حذف مستخدم",
+      "WORKING_HOURS_UPDATED": "تحديث ساعات العمل",
+      "ORG_SETTINGS_UPDATED": "تحديث الإعدادات",
+      "IMPERSONATION_STARTED": "بدء انتحال الهوية",
+      "IMPERSONATION_ENDED": "إنهاء انتحال الهوية"
+    },
+    "entities": {
+      "ORGANIZATION": "المعرض",
+      "USER": "المستخدم",
+      "CAR": "السيارة",
+      "TEST_DRIVE": "القيادة التجريبية",
+      "MEMBERSHIP": "العضوية",
+      "SUBSCRIPTION": "الاشتراك",
+      "WORKING_HOURS": "ساعات العمل",
+      "IMPERSONATION_SESSION": "جلسة انتحال الهوية"
+    }
+  }
+}

@@ -2,10 +2,16 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Car, Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
 import { cn } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
+import { currentFlag } from "@/lib/utils/chat-moderation";
+import { useCarTitle } from "@/hooks/use-car-title";
 import type { Channel as StreamChannel } from "stream-chat";
+
+/** Above this the dot shows "9+" — it is 20px across. */
+const CAP = 9;
 
 export function UserChannelPreview({
     channel,
@@ -16,6 +22,7 @@ export function UserChannelPreview({
     setActiveChannel?: (channel: StreamChannel) => void;
     activeChannel?: StreamChannel | null;
 }) {
+    const t = useTranslations("chat");
     const { client } = useChatContext();
     const isActive = activeChannel?.id === channel.id;
     const unreadCount = channel.countUnread();
@@ -24,25 +31,37 @@ export function UserChannelPreview({
     const carData = channel.data?.car_data;
     const organizationData = channel.data?.organization_data;
 
-    // Determine display info - prefer car data, fallback to organization
-    const displayTitle = carData?.title || organizationData?.name || "Conversation";
+    // Determine display info - prefer car data, fallback to organization. The
+    // car's title is read live in the reader's language: the channel's saved
+    // copy is English only.
+    const carTitle = useCarTitle(
+        carData?.id ?? channel.data?.car_id,
+        carData?.title || organizationData?.name || t("window.untitled")
+    );
+    const displayTitle = carTitle.title;
     const displayImage = carData?.images?.[0] || carData?.image;
     const isCar = !!carData;
 
     const lastMessage = channel.state.messages[channel.state.messages.length - 1];
     const lastMessageTime = lastMessage?.created_at;
 
-    const { messageTimestamp: formatTime } = useFormatters();
+    const { messageTimestamp: formatTime, number } = useFormatters();
 
     // Get last message preview
     const getMessagePreview = () => {
-        if (!lastMessage) return "No messages yet";
+        if (!lastMessage) return t("preview.noMessages");
 
-        const isCurrentUser = lastMessage.user?.id === client.userID;
-        const prefix = isCurrentUser ? "You: " : "";
-        const text = lastMessage.text || "Sent an attachment";
-
-        return prefix + text;
+        // An abusive message stays hidden in the list too (MessageSafety).
+        const mine = lastMessage.user?.id === client.userID;
+        if (!mine && currentFlag(lastMessage.safety_flag, lastMessage.text?.trim() ?? "") === "abuse") {
+            return t("safety.hiddenPreview");
+        }
+        const text = lastMessage.text || t("preview.attachment");
+        // The prefix is part of the message rather than concatenated: in
+        // Arabic it is a different word in a different place.
+        return lastMessage.user?.id === client.userID
+            ? t("preview.ownPrefix", { text })
+            : text;
     };
 
     return (
@@ -74,7 +93,9 @@ export function UserChannelPreview({
                 {unreadCount > 0 && (
                     <div className="absolute -top-1 -end-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
                         <span className="text-micro font-bold text-primary-foreground">
-                            {unreadCount > 9 ? "9+" : unreadCount}
+                            {unreadCount > CAP
+                                ? t("badge.overflow", { max: number(CAP) })
+                                : number(unreadCount)}
                         </span>
                     </div>
                 )}
@@ -87,8 +108,12 @@ export function UserChannelPreview({
                     <h4 className={cn(
                         "font-semibold text-sm truncate",
                         unreadCount > 0 && "text-foreground"
-                    )}>
-                        {displayTitle}
+                    )} dir={carTitle.dir}>
+                        {carTitle.loading ? (
+                            <span className="block h-4 w-36 max-w-full animate-pulse rounded bg-muted" aria-hidden />
+                        ) : (
+                            displayTitle
+                        )}
                     </h4>
                     <span className="text-xs text-muted-foreground shrink-0">
                         {formatTime(lastMessageTime)}

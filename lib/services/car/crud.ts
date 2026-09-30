@@ -4,20 +4,32 @@ import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import * as storageService from "@/lib/services/storage";
 import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
-import { STATUS_FORM_TO_DB } from "@/lib/constants/car-options";
+import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
 import type { CarStatus } from "@/lib/generated/prisma";
+import { licenseMonthToDate } from "@/lib/utils/car-disclosures";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
 
+/** Either status spelling to the DB enum; a missing status is AVAILABLE. */
+function toCarStatus(status: string | null | undefined): CarStatus {
+  return normalizeCarStatus(status) ?? "AVAILABLE";
+}
+
 /**
- * Map a form status label to its DB enum, defaulting to AVAILABLE. The form
- * value is a free string at this boundary, so the lookup is indexed loosely.
+ * The disclosure columns from validated input. `undefined` leaves a column
+ * untouched (a caller that does not send them, like the AI draft path); `null`
+ * clears it, which is how the form says "not stated".
  */
-function toCarStatus(formStatus: string | null | undefined): CarStatus {
-  return (
-    (STATUS_FORM_TO_DB as Record<string, CarStatus>)[formStatus ?? ""] ||
-    "AVAILABLE"
-  );
+function disclosureColumns(data: CarInput | UpdateCarFullInput) {
+  return {
+    originalPaint: data.originalPaint,
+    accidentFree: data.accidentFree,
+    ownerCount: data.ownerCount,
+    serviceHistory: data.serviceHistory,
+    priceNegotiable: data.priceNegotiable,
+    licenseValidUntil:
+      data.licenseValidUntil === undefined ? undefined : licenseMonthToDate(data.licenseValidUntil),
+  };
 }
 
 /**
@@ -74,8 +86,14 @@ export async function createCar(
     fuelType: carData.fuelType,
     transmission: carData.transmission,
     description: carData.description,
+    titleEn: carData.titleEn,
+    titleAr: carData.titleAr,
+    descriptionEn: carData.descriptionEn,
+    descriptionAr: carData.descriptionAr,
     location: carData.location,
     features: carData.features,
+    featuresAr: carData.featuresAr,
+    ...disclosureColumns(carData),
     seats: carData.seats,
     status,
     featured: carData.featured,
@@ -109,14 +127,9 @@ export async function updateCar(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  // Unlike the create/full-update paths this keeps an unmapped status as-is
-  // rather than falling back to AVAILABLE, so it does not use toCarStatus.
-  const dataToUpdate: UpdateCarInput & { status?: string } = { ...updateData };
-  if (updateData.status) {
-    dataToUpdate.status =
-      (STATUS_FORM_TO_DB as Record<string, CarStatus>)[updateData.status] ||
-      updateData.status;
-  }
+  // The schema has already normalised status to the DB enum; an absent one
+  // stays absent (this is a partial update), rather than becoming AVAILABLE.
+  const dataToUpdate: UpdateCarInput = { ...updateData };
 
   return await carRepository.updateCar(carId, dataToUpdate);
 }
@@ -242,8 +255,14 @@ export async function updateCarFull(
     fuelType: carData.fuelType,
     transmission: carData.transmission,
     description: carData.description,
+    titleEn: carData.titleEn,
+    titleAr: carData.titleAr,
+    descriptionEn: carData.descriptionEn,
+    descriptionAr: carData.descriptionAr,
     location: carData.location,
     features: carData.features,
+    featuresAr: carData.featuresAr,
+    ...disclosureColumns(carData),
     seats: carData.seats,
     status,
     featured: carData.featured,

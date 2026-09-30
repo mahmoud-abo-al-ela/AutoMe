@@ -2,9 +2,14 @@
 import { logError } from "@/lib/utils/errors";
 
 import { useEffect, useState, Component } from "react";
+import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+/** Above this the badge shows "99+" rather than a number nobody reads. */
+const CAP = 99;
 import type { ChannelFilters } from "stream-chat";
 
 type OrgUnreadBadgeProps = {
@@ -40,6 +45,8 @@ class OrgUnreadBadgeErrorBoundary extends Component<
 
 function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps) {
     const { client, channel: activeChannel } = useChatContext();
+    const t = useTranslations("chat");
+    const { number } = useFormatters();
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
@@ -97,7 +104,9 @@ function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps)
                 className
             )}
         >
-            {unreadCount > 99 ? "99+" : unreadCount}
+            {unreadCount > CAP
+                ? t("badge.overflow", { max: number(CAP) })
+                : number(unreadCount)}
         </Badge>
     );
 }

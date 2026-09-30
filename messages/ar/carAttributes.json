@@ -141,5 +141,10 @@
     "seats": "المقاعد",
     "location": "الموقع",
     "status": "الحالة"
+  },
+  "status": {
+    "AVAILABLE": "متاحة",
+    "SOLD": "مباعة",
+    "UNAVAILABLE": "غير متاحة"
   }
 }

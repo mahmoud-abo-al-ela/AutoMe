@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import { CarFront, MessageSquare } from "lucide-react";
@@ -18,6 +19,7 @@ export type OrgSidebarProps = {
 };
 
 export default function AdminSidebar({ organization, userRole }: OrgSidebarProps) {
+  const t = useTranslations("org.nav");
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -68,7 +70,7 @@ export default function AdminSidebar({ organization, userRole }: OrgSidebarProps
     return null;
   }
 
-  const orgName = organization?.name || "AutoMe Admin";
+  const orgName = organization?.name || t("fallbackOrgName");
 
   return (
     <>
@@ -101,7 +103,7 @@ export default function AdminSidebar({ organization, userRole }: OrgSidebarProps
         <Link
           href={`/org/${organization.slug}/messages`}
           className="relative p-2 rounded-lg hover:bg-sidebar-accent transition-colors"
-          title="Messages"
+          title={t("messages")}
         >
           <MessageSquare className="h-5 w-5 text-sidebar-foreground" />
           <OrgUnreadBadge

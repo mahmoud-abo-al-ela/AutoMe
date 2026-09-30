@@ -4,12 +4,12 @@ import { PlanLimitError } from "@/lib/utils/errors";
 // The metering count is the only thing that decides whether the gate trips.
 // Mock the repository so we control "how many AI calls this org made this month"
 // without a database. countQuery in plan-limits.js delegates here.
-const { countOrgAiCallsThisMonth } = vi.hoisted(() => ({
-  countOrgAiCallsThisMonth: vi.fn(),
+const { countOrgAiCarsThisMonth } = vi.hoisted(() => ({
+  countOrgAiCarsThisMonth: vi.fn(),
 }));
 
 vi.mock("@/lib/repositories/ai-usage", () => ({
-  countOrgAiCallsThisMonth,
+  countOrgAiCarsThisMonth,
   countPlatformCallsSince: vi.fn(),
 }));
 
@@ -34,7 +34,7 @@ beforeEach(() => {
 
 describe("withUsageLimit(aiProcessing)", () => {
   it("refuses the 6th AI call when the plan limit is 5", async () => {
-    countOrgAiCallsThisMonth.mockResolvedValue(5); // already at the limit
+    countOrgAiCarsThisMonth.mockResolvedValue(5); // already at the limit
     const inner = vi.fn();
 
     const guarded = withUsageLimit("aiProcessing", inner);
@@ -44,7 +44,7 @@ describe("withUsageLimit(aiProcessing)", () => {
   });
 
   it("allows the call while under the limit", async () => {
-    countOrgAiCallsThisMonth.mockResolvedValue(2);
+    countOrgAiCarsThisMonth.mockResolvedValue(2);
     const inner = vi.fn().mockResolvedValue("ok");
 
     const guarded = withUsageLimit("aiProcessing", inner);

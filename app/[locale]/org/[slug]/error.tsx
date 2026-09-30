@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -12,6 +13,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("org.error");
+
   useEffect(() => {
     console.error("Global Error:", error);
   }, [error]);
@@ -23,17 +26,17 @@ export default function GlobalError({
           <AlertTriangle className="h-8 w-8 text-red-600" />
         </div>
         
-        <h1 className="text-3xl font-bold text-gray-900">Something went wrong</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
         <p className="text-gray-500">
-          We apologize for the inconvenience. An unexpected error has occurred.
+          {t("body")}
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Button onClick={() => reset()} variant="default" className="w-full sm:w-auto">
-            Try again
+            {t("retry")}
           </Button>
           <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href="/">Go back home</Link>
+            <Link href="/">{t("home")}</Link>
           </Button>
         </div>
       </div>

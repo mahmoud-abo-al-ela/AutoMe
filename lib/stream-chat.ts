@@ -34,6 +34,8 @@ export interface ChannelOrganizationData {
     id: string;
     name: string;
     slug: string;
+    /** Shown to the buyer in place of the staff member who replied. */
+    logo?: string | null;
 }
 
 let serverClient: StreamChat | null = null;
@@ -173,6 +175,7 @@ export async function createCarInquiryChannel({
             id: organizationData.id,
             name: organizationData.name,
             slug: organizationData.slug,
+            logo: organizationData.logo ?? null,
         } : undefined,
     } as ChannelData);
 

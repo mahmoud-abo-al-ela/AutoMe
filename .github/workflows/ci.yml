@@ -1,10 +1,14 @@
 name: CI
 
 on:
+  # Every pull request, whatever it targets: work is stacked on feature
+  # branches (feat/ai-foundation → feat/phase-3-localization → main), and a
+  # filter on main left those PRs unchecked until the very last merge.
   pull_request:
-    branches: [main]
   push:
     branches: [main]
+  # Run on demand from the Actions tab, e.g. to check a branch before a PR.
+  workflow_dispatch:
 
 # A new push cancels the previous run on the same branch.
 concurrency:

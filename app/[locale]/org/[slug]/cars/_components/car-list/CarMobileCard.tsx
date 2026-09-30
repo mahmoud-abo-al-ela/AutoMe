@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
-import { formatCarPrice } from "@/lib/utils/currency";
+import { useTranslations } from "next-intl";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -42,7 +42,8 @@ const CarMobileCard = ({
     const params = useParams();
     const router = useRouter();
     const slug = params?.slug;
-    const { date: shortDate } = useFormatters();
+    const t = useTranslations("org.cars");
+    const { date: shortDate, price } = useFormatters();
     const carStatus = car.status.toLowerCase();
     return (
         <Card className={`overflow-hidden transition-all duration-200 p-0 ${isCarDisabled ? "opacity-60" : ""
@@ -83,7 +84,7 @@ const CarMobileCard = ({
 
                         {/* Price */}
                         <div className="font-bold text-lg text-green-700">
-                            {formatCarPrice(Number(car.price))}
+                            {price(Number(car.price))}
                         </div>
 
                         {/* Status Badge */}
@@ -107,7 +108,7 @@ const CarMobileCard = ({
                                 className="h-8 w-8 p-0 cursor-pointer"
                                 disabled={isCarDisabled}
                             >
-                                <span className="sr-only">Open menu</span>
+                                <span className="sr-only">{t("rowActions.openMenu")}</span>
                                 {isThisCarUpdating || isThisCarDeleting ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
                                 ) : (
@@ -116,14 +117,14 @@ const CarMobileCard = ({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t("rowActions.label")}</DropdownMenuLabel>
                             <DropdownMenuItem
                                 onClick={() => window.open(`/cars/${car.id}`, "_blank")}
                                 className="cursor-pointer"
                                 disabled={isCarDisabled}
                             >
                                 <Eye className="me-2 h-4 w-4" />
-                                View Details
+                                {t("rowActions.viewDetails")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => router.push(`/org/${slug}/cars/${car.id}/edit`)}
@@ -131,7 +132,7 @@ const CarMobileCard = ({
                                 disabled={isCarDisabled}
                             >
                                 <Pencil className="me-2 h-4 w-4" />
-                                Edit
+                                {t("rowActions.edit")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() =>
@@ -144,10 +145,12 @@ const CarMobileCard = ({
                                 disabled={isCarDisabled}
                             >
                                 <Star className="me-2 h-4 w-4" />
-                                {car.featured ? "Remove Featured" : "Make Featured"}
+                                {car.featured
+                                    ? t("rowActions.removeFeatured")
+                                    : t("rowActions.makeFeatured")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t("rowActions.changeStatus")}</DropdownMenuLabel>
                             {carStatus !== "available" && (
                                 <DropdownMenuItem
                                     onClick={() =>
@@ -160,7 +163,7 @@ const CarMobileCard = ({
                                     disabled={isCarDisabled}
                                 >
                                     <CheckCircle className="me-2 h-4 w-4 text-green-600" />
-                                    Mark Available
+                                    {t("rowActions.markAvailable")}
                                 </DropdownMenuItem>
                             )}
                             {carStatus !== "sold" && (
@@ -175,7 +178,7 @@ const CarMobileCard = ({
                                     disabled={isCarDisabled}
                                 >
                                     <XCircle className="me-2 h-4 w-4 text-gray-600" />
-                                    Mark as Sold
+                                    {t("rowActions.markSold")}
                                 </DropdownMenuItem>
                             )}
                             {carStatus !== "unavailable" && (
@@ -190,7 +193,7 @@ const CarMobileCard = ({
                                     disabled={isCarDisabled}
                                 >
                                     <Clock className="me-2 h-4 w-4 text-gray-600" />
-                                    Mark Unavailable
+                                    {t("rowActions.markUnavailable")}
                                 </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
@@ -200,7 +203,7 @@ const CarMobileCard = ({
                                 disabled={isCarDisabled}
                             >
                                 <Trash2 className="me-2 h-4 w-4" />
-                                Delete Car
+                                {t("rowActions.deleteCar")}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

@@ -17,6 +17,12 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
 const nextConfig = {
   experimental: {
     rootParams: true,
+    serverActions: {
+      // Saving a car sends its photos through a server action, and the 1 MB
+      // default refused all but the smallest. Kept under the 4.5 MB request
+      // body Vercel allows a function.
+      bodySizeLimit: "4mb",
+    },
   },
   images: {
     formats: ["image/avif", "image/webp"],

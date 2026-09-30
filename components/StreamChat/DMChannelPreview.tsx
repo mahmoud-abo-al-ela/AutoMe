@@ -1,13 +1,26 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Car, Building2 } from "lucide-react";
+import { Car, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
 import { cn } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
+import { currentFlag } from "@/lib/utils/chat-moderation";
+import { useCarTitle } from "@/hooks/use-car-title";
 import type { Channel as StreamChannel } from "stream-chat";
+import { useConversationSide } from "./ConversationHeader";
 
+/** Above this the dot shows "9+" — it is 20px across. */
+const CAP = 9;
+
+/**
+ * A conversation in the dealer's inbox: which car, which buyer, the last
+ * message. The car comes first — a dealership with forty cars reads its inbox
+ * by car — so its photo is the avatar and its title sits under the buyer's
+ * name. The buyer is the conversation's creator, not "the first other
+ * member", which with several staff on a channel could be a colleague.
+ */
 export function DMChannelPreview({
     channel,
     setActiveChannel,
@@ -17,31 +30,35 @@ export function DMChannelPreview({
     setActiveChannel?: (channel: StreamChannel) => void;
     activeChannel?: StreamChannel | null;
 }) {
+    const t = useTranslations("chat");
     const { client } = useChatContext();
-    const isActive = activeChannel?.id === channel.id;
+    const { buyer, other } = useConversationSide(channel);
+    const person = buyer ?? other;
+    const isActive = activeChannel?.cid === channel.cid;
     const unreadCount = channel.countUnread();
 
-    // Get the other user in the conversation (not the current user)
-    const members = Object.values(channel.state.members ?? {});
-    const otherMember = members.find((member) => member.user?.id !== client.userID);
-    const otherUser = otherMember?.user;
-
-    // Get car info from channel data
     const carData = channel.data?.car_data;
+    const carImage = carData?.images?.[0] || carData?.image;
+    // Live, in the reader's language; the channel's saved title is English only.
+    const carTitle = useCarTitle(carData?.id ?? channel.data?.car_id, carData?.title ?? "");
     const lastMessage = channel.state.messages[channel.state.messages.length - 1];
-    const lastMessageTime = lastMessage?.created_at;
 
-    const { messageTimestamp: formatTime } = useFormatters();
+    const { messageTimestamp: formatTime, number } = useFormatters();
 
-    // Get last message preview
     const getMessagePreview = () => {
-        if (!lastMessage) return "No messages yet";
+        if (!lastMessage) return t("preview.noMessages");
 
-        const isCurrentUser = lastMessage.user?.id === client.userID;
-        const prefix = isCurrentUser ? "You: " : "";
-        const text = lastMessage.text || "Sent an attachment";
-
-        return prefix + text;
+        // An abusive message stays hidden in the list too (MessageSafety).
+        const mine = lastMessage.user?.id === client.userID;
+        if (!mine && currentFlag(lastMessage.safety_flag, lastMessage.text?.trim() ?? "") === "abuse") {
+            return t("safety.hiddenPreview");
+        }
+        const text = lastMessage.text || t("preview.attachment");
+        // The prefix is part of the message rather than concatenated: in
+        // Arabic it is a different word in a different place.
+        return lastMessage.user?.id === client.userID
+            ? t("preview.ownPrefix", { text })
+            : text;
     };
 
     return (
@@ -52,45 +69,55 @@ export function DMChannelPreview({
                 isActive && "bg-muted"
             )}
         >
-            {/* Avatar */}
             <div className="relative shrink-0">
-                <Avatar className="h-12 w-12 ring-2 ring-background">
-                    {otherUser?.image ? (
-                        <AvatarImage src={otherUser.image} alt={otherUser.name} />
+                <Avatar className={cn("h-12 w-12", carData && "rounded-lg")}>
+                    {carImage ? (
+                        <AvatarImage src={carImage} alt="" className="object-cover" />
+                    ) : person?.image ? (
+                        <AvatarImage src={person.image} alt="" />
                     ) : null}
-                    <AvatarFallback className="bg-primary/10">
-                        <Building2 className="h-6 w-6 text-primary" />
+                    <AvatarFallback className={cn("bg-primary/10", carData && "rounded-lg")}>
+                        {carData ? <Car className="h-6 w-6 text-primary" /> : <User className="h-6 w-6 text-primary" />}
                     </AvatarFallback>
                 </Avatar>
                 {unreadCount > 0 && (
                     <div className="absolute -top-1 -end-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
                         <span className="text-micro font-bold text-primary-foreground">
-                            {unreadCount > 9 ? "9+" : unreadCount}
+                            {unreadCount > CAP
+                                ? t("badge.overflow", { max: number(CAP) })
+                                : number(unreadCount)}
                         </span>
                     </div>
                 )}
             </div>
 
-            {/* Content */}
             <div className="flex-1 min-w-0 text-start">
-                {/* Top row: Name and Time */}
-                <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className={cn(
-                        "font-semibold text-sm truncate",
-                        unreadCount > 0 && "text-foreground"
-                    )}>
-                        {otherUser?.name || "Unknown User"}
+                <div className="flex items-start justify-between gap-2">
+                    <h4 className={cn("font-semibold text-sm truncate", unreadCount > 0 && "text-foreground")}>
+                        {person?.name || t("preview.unknownUser")}
                     </h4>
                     <span className="text-xs text-muted-foreground shrink-0">
-                        {formatTime(lastMessageTime)}
+                        {formatTime(lastMessage?.created_at)}
                     </span>
                 </div>
 
-                {/* Last message preview */}
-                <p className={cn(
-                    "text-sm truncate",
-                    unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
-                )}>
+                {carTitle.title && (
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <Car className="h-3 w-3 shrink-0" aria-hidden />
+                        {carTitle.loading ? (
+                            <span className="block h-3 w-28 animate-pulse rounded bg-muted" aria-hidden />
+                        ) : (
+                            <span className="truncate" dir={carTitle.dir}>{carTitle.title}</span>
+                        )}
+                    </p>
+                )}
+
+                <p
+                    className={cn(
+                        "mt-0.5 text-sm truncate",
+                        unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+                    )}
+                >
                     {getMessagePreview()}
                 </p>
             </div>

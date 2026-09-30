@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, ArrowRightCircle, Ban } from "lucide-react";
@@ -14,18 +16,21 @@ const FunnelStage = ({
   title,
   count,
   percentage,
+  share,
   colorClass,
   isLast,
   icon: Icon,
-  subtitle,
 }: {
   title: string;
-  count: number;
+  /** Already formatted — see the numerals note in lib/utils/intl-locale. */
+  count: string;
+  /** 0-100, for the progress bar only; null means a full bar. */
   percentage: number | null;
+  /** The translated "(12.5% of total)" aside, or null when there is none. */
+  share: string | null;
   colorClass: StageColors;
   isLast?: boolean;
   icon: LucideIcon;
-  subtitle?: string;
 }) => (
   <div className="relative group">
     <div className="flex items-center justify-between mb-2">
@@ -35,9 +40,9 @@ const FunnelStage = ({
       </div>
       <div className="text-end">
         <span className="text-xl font-bold">{count}</span>
-        {percentage !== null && (
+        {share && (
           <span className="text-sm text-muted-foreground ms-2 hidden sm:inline-block">
-            ({percentage.toFixed(1)}%{subtitle ? ` ${subtitle}` : ''})
+            {share}
           </span>
         )}
       </div>
@@ -56,32 +61,39 @@ const FunnelStage = ({
 );
 
 const ConversionFunnel = ({ funnel }: { funnel: ConversionFunnelData | null }) => {
+  const t = useTranslations("org.dashboard");
+  const { number } = useFormatters();
+
+  const percent = (value: number) =>
+    number(value / 100, { style: "percent", maximumFractionDigits: 1 });
+
   if (!funnel) return null;
 
   // Colors for each stage
   const stages = [
     {
-      title: "Total Requests",
-      count: funnel.total,
+      title: t("funnel.total"),
+      count: number(funnel.total),
       percentage: 100,
+      share: null,
       icon: ArrowRightCircle,
       color: { bg: "bg-blue-500", text: "text-blue-500", track: "bg-blue-100 dark:bg-blue-950" }
     },
     {
-      title: "Confirmed Test Drives",
-      count: funnel.confirmed,
+      title: t("funnel.confirmed"),
+      count: number(funnel.confirmed),
       percentage: funnel.confirmedRate,
+      share: t("funnel.shareOfTotal", { percent: percent(funnel.confirmedRate) }),
       icon: CheckCircle2,
-      color: { bg: "bg-emerald-500", text: "text-emerald-500", track: "bg-emerald-100 dark:bg-emerald-950" },
-      subtitle: "of total"
+      color: { bg: "bg-emerald-500", text: "text-emerald-500", track: "bg-emerald-100 dark:bg-emerald-950" }
     },
     {
-      title: "Completed",
-      count: funnel.completed,
+      title: t("funnel.completed"),
+      count: number(funnel.completed),
       percentage: funnel.completedRate,
+      share: t("funnel.shareOfConfirmed", { percent: percent(funnel.completedRate) }),
       icon: CheckCircle2,
-      color: { bg: "bg-green-600", text: "text-green-600", track: "bg-green-100 dark:bg-green-950" },
-      subtitle: "of confirmed"
+      color: { bg: "bg-green-600", text: "text-green-600", track: "bg-green-100 dark:bg-green-950" }
     }
   ];
 
@@ -90,8 +102,8 @@ const ConversionFunnel = ({ funnel }: { funnel: ConversionFunnelData | null }) =
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Test Drive Funnel</CardTitle>
-        <CardDescription>Conversion rates across the test drive pipeline</CardDescription>
+        <CardTitle>{t("funnel.title")}</CardTitle>
+        <CardDescription>{t("funnel.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8 pt-4">
         {stages.map((stage, idx) => (
@@ -100,9 +112,9 @@ const ConversionFunnel = ({ funnel }: { funnel: ConversionFunnelData | null }) =
             title={stage.title}
             count={stage.count}
             percentage={stage.percentage}
+            share={stage.share}
             colorClass={stage.color}
             icon={stage.icon}
-            subtitle={stage.subtitle}
             isLast={idx === stages.length - 1}
           />
         ))}
@@ -111,11 +123,15 @@ const ConversionFunnel = ({ funnel }: { funnel: ConversionFunnelData | null }) =
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Ban className="h-4 w-4 text-red-500" />
-              <span>Cancelled</span>
+              <span>{t("funnel.cancelled")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground">{funnel.cancelled}</span>
-              <span className="text-muted-foreground">({cancelledRate.toFixed(1)}%)</span>
+              <span className="font-semibold text-foreground">
+                {number(funnel.cancelled)}
+              </span>
+              <span className="text-muted-foreground">
+                {t("funnel.share", { percent: percent(cancelledRate) })}
+              </span>
             </div>
           </div>
         </div>

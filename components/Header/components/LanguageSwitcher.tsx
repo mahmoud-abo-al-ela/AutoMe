@@ -28,8 +28,17 @@ import { cn } from "@/lib/utils";
  */
 export default function LanguageSwitcher({
   className,
+  showLabel = true,
+  onSwitch,
 }: {
   className?: string;
+  /** Hidden in the collapsed org sidebar, where 64px fits an icon and
+   * nothing else. The aria-label still names the target language, so the
+   * control stays readable to a screen reader either way. */
+  showLabel?: boolean;
+  /** Fired after a switch is started — the mobile org sidebar closes its
+   * sheet on it, which client-side navigation alone does not do. */
+  onSwitch?: () => void;
 }) {
   const t = useTranslations("common.language");
   const locale = useLocale() as Locale;
@@ -42,6 +51,7 @@ export default function LanguageSwitcher({
 
   const switchLanguage = () => {
     if (otherLocale === locale) return;
+    onSwitch?.();
     startTransition(() => {
       // Passing the params through unchanged keeps dynamic segments intact;
       // only the locale changes.
@@ -62,13 +72,15 @@ export default function LanguageSwitcher({
       {/* The language name is always written in its own script, never
           translated — someone who cannot read the current UI language has to
           be able to find their own. */}
-      <span
-        lang={otherLocale}
-        dir={otherLocale === "ar" ? "rtl" : "ltr"}
-        className="text-sm font-medium"
-      >
-        {otherLabel}
-      </span>
+      {showLabel && (
+        <span
+          lang={otherLocale}
+          dir={otherLocale === "ar" ? "rtl" : "ltr"}
+          className="text-sm font-medium"
+        >
+          {otherLabel}
+        </span>
+      )}
     </Button>
   );
 }

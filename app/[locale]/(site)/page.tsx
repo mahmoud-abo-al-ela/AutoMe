@@ -1,3 +1,13 @@
+/**
+ * The hero photo search calls Gemini from here, and the vision models take
+ * 7-17s. Vercel functions default to 10s, and a platform kill is the worst
+ * failure available: the AI client's own ledger write never runs, so the
+ * request is spent but invisible to the usage breaker, and the reader gets a
+ * bare 504 instead of a typed error. The client budgets itself to 45s; this is
+ * the ceiling that budget has to sit under.
+ */
+export const maxDuration = 60;
+
 import Hero from "@/components/Hero/Hero";
 import Featured from "@/components/FeaturedCars/Featured";
 import Why from "@/components/Why/Why";

@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,11 +28,17 @@ export default function OrganizationProfileForm({
   handleStateChange,
   cityOptions,
 }: OrganizationProfileFormProps) {
+  const t = useTranslations("org.settings.profile");
+  // The field and location labels are the onboarding wizard's — the dealer
+  // filled these in there first, and editing them here should read the same.
+  const tFields = useTranslations("onboarding.orgDetails.fields");
+  const tLocation = useTranslations("onboarding.orgDetails.location");
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{tFields("name.label")}</Label>
           <Input
             id="name"
             value={profile.name}
@@ -40,7 +47,7 @@ export default function OrganizationProfileForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{tFields("email.label")}</Label>
           <Input
             id="email"
             type="email"
@@ -49,7 +56,7 @@ export default function OrganizationProfileForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{tFields("phone.label")}</Label>
           <Input
             id="phone"
             value={profile.phone}
@@ -57,7 +64,7 @@ export default function OrganizationProfileForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="website">Website</Label>
+          <Label htmlFor="website">{t("website")}</Label>
           <Input
             id="website"
             value={profile.website}
@@ -65,39 +72,39 @@ export default function OrganizationProfileForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="country">Country</Label>
+          <Label htmlFor="country">{tLocation("country.label")}</Label>
           <SearchableLocationSelect
             id="country"
             value={profile.country || undefined}
             options={countryOptions}
-            placeholder="Select country"
-            searchPlaceholder="Search countries..."
-            emptyMessage="No countries found."
+            placeholder={tLocation("country.placeholder")}
+            searchPlaceholder={tLocation("country.searchPlaceholder")}
+            emptyMessage={tLocation("country.emptyMessage")}
             onValueChange={handleCountryChange}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="region">Governorate / State</Label>
+          <Label htmlFor="region">{tLocation("region.label")}</Label>
           <SearchableLocationSelect
             id="region"
             value={selectedStateCode || undefined}
             options={stateOptions}
-            placeholder="Select governorate"
-            searchPlaceholder="Search states..."
-            emptyMessage="No states found."
+            placeholder={tLocation("region.placeholder")}
+            searchPlaceholder={tLocation("region.searchPlaceholder")}
+            emptyMessage={tLocation("region.emptyMessage")}
             disabled={!profile.country || stateOptions.length === 0}
             onValueChange={handleStateChange}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="city">{tLocation("city.label")}</Label>
           <SearchableLocationSelect
             id="city"
             value={profile.city || undefined}
             options={cityOptions}
-            placeholder="Select city"
-            searchPlaceholder="Search cities..."
-            emptyMessage="No cities found."
+            placeholder={tLocation("city.placeholder")}
+            searchPlaceholder={tLocation("city.searchPlaceholder")}
+            emptyMessage={tLocation("city.emptyMessage")}
             disabled={!selectedStateCode || cityOptions.length === 0}
             onValueChange={(city) => updateField("city", city)}
           />
@@ -105,7 +112,7 @@ export default function OrganizationProfileForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
+        <Label htmlFor="address">{tFields("address.label")}</Label>
         <Input
           id="address"
           value={profile.address}
@@ -114,7 +121,7 @@ export default function OrganizationProfileForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("description")}</Label>
         <Textarea
           id="description"
           value={profile.description}
@@ -127,10 +134,10 @@ export default function OrganizationProfileForm({
         {saving ? (
           <span className="flex items-center">
             <Loader2 className="me-2 h-4 w-4 animate-spin" />
-            Saving...
+            {t("saving")}
           </span>
         ) : (
-          "Save Profile"
+          t("save")
         )}
       </Button>
     </form>

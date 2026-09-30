@@ -19,6 +19,8 @@ import {
     ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { getPaymentMethod } from "@/actions/billing";
 import { createBillingPortalSession } from "@/actions/billing";
 
@@ -57,6 +59,8 @@ type ManageProps = {
 };
 
 function NoPaymentMethod({ isOwner, onManage, isLoading }: ManageProps) {
+    const t = useTranslations("org.billing.payment");
+
     return (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -65,10 +69,10 @@ function NoPaymentMethod({ isOwner, onManage, isLoading }: ManageProps) {
                 </div>
                 <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                        No payment method on file
+                        {t("noneTitle")}
                     </p>
                     <p className="text-xs text-muted-foreground/70">
-                        Add a payment method to subscribe to a paid plan
+                        {t("noneBody")}
                     </p>
                 </div>
             </div>
@@ -84,7 +88,7 @@ function NoPaymentMethod({ isOwner, onManage, isLoading }: ManageProps) {
                     ) : (
                         <CreditCard className="h-4 w-4 me-2" />
                     )}
-                    Add Payment Method
+                    {t("add")}
                 </Button>
             )}
         </div>
@@ -97,6 +101,8 @@ function CardDisplay({
     onManage,
     isLoading,
 }: ManageProps & { paymentMethod: NonNullable<PaymentMethodData> }) {
+    const t = useTranslations("org.billing.payment");
+    const { number } = useFormatters();
     const brandColor = BRAND_COLORS[paymentMethod.brand] || BRAND_COLORS.Card;
     const isExpiringSoon = isCardExpiringSoon(
         paymentMethod.expMonth,
@@ -117,7 +123,10 @@ function CardDisplay({
                     <div className="flex items-center gap-2">
                         <CreditCard className={`h-4 w-4 ${brandColor}`} />
                         <span className="text-sm font-medium">
-                            {paymentMethod.brand} ending in {paymentMethod.last4}
+                            {t("endingIn", {
+                                brand: paymentMethod.brand,
+                                last4: paymentMethod.last4,
+                            })}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -127,12 +136,18 @@ function CardDisplay({
                                     : "text-muted-foreground"
                                 }`}
                         >
-                            Expires {String(paymentMethod.expMonth).padStart(2, "0")}/
-                            {paymentMethod.expYear}
+                            {t("expires", {
+                                month: number(paymentMethod.expMonth, {
+                                    minimumIntegerDigits: 2,
+                                }),
+                                year: number(paymentMethod.expYear, {
+                                    useGrouping: false,
+                                }),
+                            })}
                         </span>
                         {isExpiringSoon && (
                             <span className="text-xs text-amber-600 dark:text-amber-400">
-                                — Expiring soon
+                                {t("expiringSoon")}
                             </span>
                         )}
                     </div>
@@ -151,7 +166,7 @@ function CardDisplay({
                     ) : (
                         <Settings className="h-4 w-4 me-2" />
                     )}
-                    Update
+                    {t("update")}
                 </Button>
             )}
         </div>
@@ -188,6 +203,7 @@ export default function PaymentMethod({
     organizationId: string;
     isOwner: boolean;
 }) {
+    const t = useTranslations("org.billing.payment");
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethodData>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isPortalLoading, setIsPortalLoading] = useState(false);
@@ -205,15 +221,14 @@ export default function PaymentMethod({
                 // data } and always got undefined — the saved card has never
                 // rendered its details.
                 if (!result.success) {
-                    setError(result.error.message || "Failed to load payment method");
+                    setError(result.error.message || t("loadFailed"));
                     return;
                 }
                 setPaymentMethod(result.data);
             } catch (err) {
                 console.error("Failed to fetch payment method:", err);
                 setError(
-                    (err instanceof Error && err.message) ||
-                        "Failed to load payment method"
+                    (err instanceof Error && err.message) || t("loadFailed")
                 );
             } finally {
                 setIsLoading(false);
@@ -221,6 +236,9 @@ export default function PaymentMethod({
         }
 
         fetchPaymentMethod();
+    // `t` is read only for the error fallback. Listing it would refetch on a
+    // language switch, which is a network round trip for the same data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [organizationId]);
 
     const handleManagePayment = async () => {
@@ -231,10 +249,7 @@ export default function PaymentMethod({
             // matching fix in CurrentPlan.tsx.
             const result = await createBillingPortalSession(organizationId, pathname);
             if (!result.success) {
-                toast.error(
-                    result.error.message ||
-                        "Failed to open billing portal. Please try again."
-                );
+                toast.error(result.error.message || t("portalFailed"));
                 setIsPortalLoading(false);
                 return;
             }
@@ -242,8 +257,7 @@ export default function PaymentMethod({
         } catch (error) {
             console.error("Failed to open billing portal:", error);
             toast.error(
-                (error instanceof Error && error.message) ||
-                    "Failed to open billing portal. Please try again."
+                (error instanceof Error && error.message) || t("portalFailed")
             );
             setIsPortalLoading(false);
         }
@@ -256,15 +270,15 @@ export default function PaymentMethod({
                     <div>
                         <CardTitle className="flex items-center gap-2 text-base">
                             <CreditCard className="h-5 w-5" />
-                            Payment Method
+                            {t("title")}
                         </CardTitle>
                         <CardDescription className="mt-1">
-                            Your payment method on file for subscription billing
+                            {t("onFile")}
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <ShieldCheck className="h-3.5 w-3.5" />
-                        <span>Secured by Stripe</span>
+                        <span>{t("securedByStripe")}</span>
                     </div>
                 </div>
             </CardHeader>
@@ -274,7 +288,7 @@ export default function PaymentMethod({
                 ) : error ? (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <AlertCircle className="h-4 w-4" />
-                        <span>Unable to load payment method</span>
+                        <span>{t("unavailable")}</span>
                     </div>
                 ) : paymentMethod ? (
                     <CardDisplay

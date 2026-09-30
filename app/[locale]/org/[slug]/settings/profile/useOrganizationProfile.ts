@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   getOrganizationProfile,
   updateOrganizationProfile,
@@ -59,6 +60,7 @@ const normalizeProfile = (
 });
 
 export function useOrganizationProfile() {
+  const t = useTranslations("org.settings.profile.toasts");
   const [profile, setProfile] = useState<OrganizationProfileFormState>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -79,10 +81,7 @@ export function useOrganizationProfile() {
         const profileResponse = await getOrganizationProfile();
 
         if (!profileResponse.success) {
-          toast.error(
-            profileResponse.error?.message ||
-              "Failed to load organization profile",
-          );
+          toast.error(profileResponse.error?.message || t("loadFailed"));
           return;
         }
 
@@ -92,17 +91,17 @@ export function useOrganizationProfile() {
 
         setProfile(normalizedProfile);
       } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Failed to load organization profile",
-        );
+        toast.error(error instanceof Error ? error.message : t("loadFailed"));
       } finally {
         setLoading(false);
       }
     };
 
     loadProfile();
+    // `t` is only read inside the catch, for a toast. Listing it would refetch
+    // the profile on a language switch, which is a network round trip to show
+    // the same data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateField = (
@@ -129,21 +128,15 @@ export function useOrganizationProfile() {
     try {
       const response = await updateOrganizationProfile(profile);
       if (!response.success) {
-        toast.error(
-          response.error?.message || "Failed to update organization profile",
-        );
+        toast.error(response.error?.message || t("updateFailed"));
         return;
       }
 
       setProfile(normalizeProfile(response.data));
-      toast.success(
-        response.message || "Organization profile updated successfully",
-      );
+      toast.success(response.message || t("updated"));
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to update organization profile",
+        error instanceof Error ? error.message : t("updateFailed"),
       );
     } finally {
       setSaving(false);

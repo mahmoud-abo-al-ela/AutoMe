@@ -1,11 +1,14 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Award, CheckCircle } from "lucide-react";
+import { Award, CheckCircle, Languages } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { localeDirection } from "@/i18n/routing";
+import type { ResolvedCarFeatures } from "@/lib/utils/car-text";
 
-const CarFeatures = ({ features }: { features: string[] }) => {
+const CarFeatures = ({ resolved }: { resolved: ResolvedCarFeatures }) => {
   const t = useTranslations("carDetail.features");
+  const { features } = resolved;
   if (!features || features.length === 0) {
     return null;
   }
@@ -21,7 +24,11 @@ const CarFeatures = ({ features }: { features: string[] }) => {
             {t("title")}
           </h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+        {/* dir follows the list, not the page — see CarDescription. */}
+        <div
+          dir={localeDirection[resolved.locale]}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4"
+        >
           {features.map((feature, index) => (
             <div
               key={index}
@@ -36,6 +43,13 @@ const CarFeatures = ({ features }: { features: string[] }) => {
             </div>
           ))}
         </div>
+
+        {resolved.fellBack && (
+          <p className="mt-3 sm:mt-4 flex items-center gap-1.5 text-xs text-gray-500">
+            <Languages className="w-3.5 h-3.5 shrink-0" aria-hidden />
+            {t("notTranslated")}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

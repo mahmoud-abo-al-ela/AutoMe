@@ -1,23 +1,64 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, FileImage, Upload, Brain } from "lucide-react";
 import React from "react";
 import { useDropzone, type DropzoneOptions } from "react-dropzone";
+import { useFormatters } from "@/hooks/use-formatters";
+import type { CarListingProgress } from "@/hooks/use-car-listing-stream";
 
 interface AIUploadSectionProps {
   onDrop: NonNullable<DropzoneOptions["onDrop"]>;
   isProcessing: boolean;
-  error?: string | null;
+  /** Already worded — a rate limit arrives as a live countdown. */
+  error?: React.ReactNode;
   /** Drag state is owned by the parent's own dropzone, not this one. */
   isDragActive?: boolean;
+  /** Real progress from the extraction stream; null before it starts. */
+  progress?: CarListingProgress | null;
 }
+
+/**
+ * The bar, from real events only. The first 10% is the upload (bytes sent);
+ * the rest is fields the model has written. Google's queue sits between the
+ * two with no signal at all, so the bar holds at 10% there and pulses — an
+ * honest "waiting", not an invented percentage.
+ */
+function percentOf(progress: CarListingProgress): number {
+  if (progress.phase === "done") return 1;
+  if (progress.phase === "writing" && progress.fieldsTotal > 0) {
+    return 0.1 + 0.9 * (progress.fieldsDone / progress.fieldsTotal);
+  }
+  return 0.1 * progress.uploaded;
+}
+
 
 const AIUploadSection = ({
   onDrop,
   isProcessing,
   error,
   isDragActive,
+  progress = null,
 }: AIUploadSectionProps) => {
+  const t = useTranslations("org.carForm.ai");
+  const { number } = useFormatters();
+  const fraction = progress ? percentOf(progress) : 0;
+  const waiting = progress?.phase === "waiting";
+
+  const stage = !progress
+    ? t("stageUploading", { percent: number(0, { style: "percent" }) })
+    : progress.phase === "uploading"
+      ? t("stageUploading", { percent: number(progress.uploaded, { style: "percent" }) })
+      : progress.phase === "writing"
+        ? t("stageWriting", {
+            done: number(progress.fieldsDone),
+            total: number(progress.fieldsTotal),
+          })
+        : progress.phase === "done"
+          ? t("stageDone")
+          : t("stageWaiting");
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {
@@ -25,7 +66,8 @@ const AIUploadSection = ({
       "image/png": [".png"],
       "image/webp": [".webp"],
     },
-    maxFiles: 1,
+    // No maxFiles: the parent keeps the first few and says so.
+    multiple: true,
     disabled: isProcessing,
   });
 
@@ -39,20 +81,32 @@ const AIUploadSection = ({
                 <Brain className="h-10 w-10 text-purple-600 animate-pulse" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                AI Processing Image
+                {t("processingTitle")}
               </h3>
               <p className="text-gray-600 mb-6">
-                Our AI is analyzing your image and extracting car details...
+                {t("processingBody")}
               </p>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div
+                className="w-full bg-gray-200 rounded-full h-2 mb-4 overflow-hidden"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(fraction * 100)}
+                aria-valuetext={stage}
+              >
                 <div
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 h-2 rounded-full animate-pulse"
-                  style={{ width: "70%" }}
-                ></div>
+                  className={`bg-gradient-to-r from-purple-600 to-indigo-600 h-2 rounded-full transition-[width] duration-300 ease-out ${
+                    waiting ? "animate-pulse" : ""
+                  }`}
+                  style={{ width: `${fraction * 100}%` }}
+                />
               </div>
-              <p className="text-sm text-gray-500">
-                This usually takes 30-60 seconds
+              <p className="text-sm font-medium text-gray-700" aria-live="polite">
+                {stage}
               </p>
+              {waiting && (
+                <p className="text-xs text-gray-500 mt-2">{t("stageWaitingNote")}</p>
+              )}
             </div>
           ) : (
             <>
@@ -71,22 +125,20 @@ const AIUploadSection = ({
                   <FileImage className="h-8 w-8 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Upload Car Image
+                  {t("uploadTitle")}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {isDragActive
-                    ? "Drop your car image here..."
-                    : "Drop your car image here or click to browse. Our AI will automatically extract car details."}
+                  {isDragActive ? t("uploadDropping") : t("uploadPrompt")}
                 </p>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 mb-4"
                   disabled={isProcessing}
                 >
                   <Upload className="h-4 w-4 me-2" />
-                  Choose Image
+                  {t("choose")}
                 </Button>
                 <p className="text-sm text-gray-500">
-                  Supports JPG, PNG, WEBP up to 10MB each
+                  {t("formats")}
                 </p>
               </div>
 
@@ -103,13 +155,13 @@ const AIUploadSection = ({
                   </div>
                   <div>
                     <h4 className="font-semibold text-blue-900 mb-2">
-                      AI Features
+                      {t("featuresTitle")}
                     </h4>
                     <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• Automatic make, model, and year detection</li>
-                      <li>• Price estimation based on market data</li>
-                      <li>• Feature extraction from images</li>
-                      <li>• Quality and condition assessment</li>
+                      <li>• {t("feature1")}</li>
+                      <li>• {t("feature2")}</li>
+                      <li>• {t("feature3")}</li>
+                      <li>• {t("feature4")}</li>
                     </ul>
                   </div>
                 </div>

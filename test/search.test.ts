@@ -9,6 +9,8 @@ vi.hoisted(() => {
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { searchCarsRanked } from "@/lib/repositories/car/search";
+import { foldSearchText } from "@/lib/utils/search-text";
+import { FOLD_FIXTURES } from "@/lib/utils/search-text.fixtures";
 import { findManyCars } from "@/lib/repositories/car/queries";
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
@@ -108,5 +110,178 @@ describe.skipIf(!hasTestDb)("findManyCars plain-listing branch (real Postgres)",
 
     expect(pagination.total).toBe(3);
     expect(cars).toHaveLength(3);
+  });
+});
+
+
+// The whole Arabic search story rests on one claim: `foldSearchText` in
+// TypeScript and `fold_search_text` in SQL do the same thing. The query is
+// built through the first and the stored `searchVector` through the second, so
+// if they ever disagree the index answers questions nobody asked — results stop
+// being merely incomplete and start being arbitrary.
+//
+// Two implementations in two languages against two string APIs cannot be kept
+// in step by reading them. This runs the same fixtures through both.
+describe.skipIf(!hasTestDb)("the search fold agrees across TS and SQL", () => {
+  afterAll(async () => {
+    await db.$disconnect();
+  });
+
+  it.each(FOLD_FIXTURES)("folds %j the same way", async (value) => {
+    const [row] = await db.$queryRaw<{ folded: string }[]>`
+      SELECT fold_search_text(${value}) AS folded
+    `;
+
+    expect(row?.folded).toBe(foldSearchText(value));
+  });
+
+  it("finds an Arabic listing by a differently spelled query", async () => {
+    // The end-to-end version of the same claim: written with a ta marbuta,
+    // searched with a heh.
+    await db.organization.deleteMany({ where: { id: ORG_ID } });
+    await db.organization.create({
+      data: { id: ORG_ID, name: "Test Search Dealer", slug: ORG_SLUG, isActive: true },
+    });
+    await db.car.createMany({
+      data: [
+        car({
+          make: "Toyota",
+          model: "Corolla",
+          title: "سيارة نظيفة جدًا",
+          description: "موديل ٢٠٢٠ فابريكا بالكامل",
+        }),
+      ],
+    });
+
+    try {
+      for (const term of ["سياره", "سيارة", "نظيفه", "2020"]) {
+        const { cars } = await searchCarsRanked({ search: term, organizationId: ORG_ID });
+        expect(cars.length, `no match for "${term}"`).toBeGreaterThan(0);
+      }
+    } finally {
+      await db.car.deleteMany({ where: { organizationId: ORG_ID } });
+      await db.organization.deleteMany({ where: { id: ORG_ID } });
+    }
+  });
+});
+
+// Bilingual listing copy only helps if it is reachable. `searchVector` is a
+// STORED generated column, so a column that is not an argument to
+// car_search_document is invisible to search however it is indexed — a dealer's
+// Arabic description would land in a column nobody could query. That is the
+// same class of bug 20260922120000 fixed, arriving through a different door,
+// so it gets the same kind of test.
+describe.skipIf(!hasTestDb)("bilingual listing text (real Postgres)", () => {
+  const BILINGUAL_ORG = "org_test_bilingual";
+
+  beforeAll(async () => {
+    await db.car.deleteMany({ where: { organizationId: BILINGUAL_ORG } });
+    await db.organization.deleteMany({ where: { id: BILINGUAL_ORG } });
+    await db.organization.create({
+      data: {
+        id: BILINGUAL_ORG,
+        name: "Bilingual Dealer",
+        slug: "bilingual-dealer",
+        isActive: true,
+      },
+    });
+    await db.car.createMany({
+      data: [
+        car({
+          make: "Porsche",
+          model: "Panamera",
+          organizationId: BILINGUAL_ORG,
+          titleEn: "Porsche Panamera Turbo 2018",
+          titleAr: "بورشه باناميرا تيربو ٢٠١٨",
+          descriptionEn: "Well kept, single owner, full service history.",
+          descriptionAr: "سيارة نظيفة جداً بحالة ممتازة وصيانة كاملة",
+        }),
+        car({
+          make: "Kia",
+          model: "Sportage",
+          organizationId: BILINGUAL_ORG,
+          titleEn: "Kia Sportage 2021",
+          titleAr: "كيا سبورتاج ٢٠٢١",
+        }),
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    await db.car.deleteMany({ where: { organizationId: BILINGUAL_ORG } });
+    await db.organization.deleteMany({ where: { id: BILINGUAL_ORG } });
+  });
+
+  it("finds a car by text that exists only in its Arabic description", async () => {
+    const { cars } = await searchCarsRanked({
+      search: "ممتازة",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Panamera"]);
+  });
+
+  it("finds a car by its Arabic title", async () => {
+    const { cars } = await searchCarsRanked({
+      search: "سبورتاج",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Sportage"]);
+  });
+
+  it("folds the query against Arabic stored text, both directions", async () => {
+    // Stored with ة, queried with ه — the single most common way an Arabic
+    // reader's spelling differs from the dealer's.
+    const { cars } = await searchCarsRanked({
+      search: "نظيفه",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Panamera"]);
+  });
+
+  it("matches an Arabic title written in Arabic-Indic digits from a Western-digit query", async () => {
+    // The title stores ٢٠٢١; a buyer types 2021.
+    const { cars } = await searchCarsRanked({
+      search: "2021",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toContain("Sportage");
+  });
+
+  it("finds a car by its English bilingual title", async () => {
+    const { cars } = await searchCarsRanked({
+      search: "Turbo",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars.map((c) => c?.model)).toEqual(["Panamera"]);
+  });
+
+  it("returns the bilingual columns to the client", async () => {
+    // CAR_COLUMNS is an explicit select; a new column that is not listed there
+    // simply never reaches the page, however well it is stored.
+    const { cars } = await searchCarsRanked({
+      search: "Panamera",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars[0]).toMatchObject({
+      titleAr: "بورشه باناميرا تيربو ٢٠١٨",
+      descriptionAr: "سيارة نظيفة جداً بحالة ممتازة وصيانة كاملة",
+      titleEn: "Porsche Panamera Turbo 2018",
+    });
+  });
+
+  it("keeps title ranked above description", async () => {
+    // Both cars carry Arabic text; the one matching in a title must lead.
+    const { cars } = await searchCarsRanked({
+      search: "باناميرا",
+      organizationId: BILINGUAL_ORG,
+    });
+
+    expect(cars[0]?.model).toBe("Panamera");
   });
 });

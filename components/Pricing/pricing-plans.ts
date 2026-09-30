@@ -70,9 +70,29 @@ export type DbPlan = {
 /** The flags `mapDbPlanToUi` looks for inside the features JSON. */
 type PlanFeatureFlags = {
   chat?: boolean;
-  aiProcessing?: { enabled?: boolean };
+  aiProcessing?: { enabled?: boolean; limit?: number };
+  aiAssistant?: { enabled?: boolean };
   prioritySupport?: boolean;
 };
+
+/**
+ * The AI bullet states the monthly allowance rather than a bare yes/no, since
+ * the plans that have AI differ only in how much. Enabled with no limit reads
+ * as not included, because withUsageLimit enforces a missing limit as 0.
+ */
+function aiProcessingFeature(ai: PlanFeatureFlags["aiProcessing"]): PlanFeature {
+  const limit = ai?.limit ?? 0;
+  if (!ai?.enabled || limit === 0) return { key: "aiProcessing", included: false };
+  if (limit === -1) return { key: "aiProcessingUnlimited", included: true };
+  return { key: "aiProcessingMonthly", params: { count: limit }, included: true };
+}
+
+/** The buyer assistant has no monthly cap: included, unlimited, or not at all. */
+function aiAssistantFeature(ai: PlanFeatureFlags["aiAssistant"]): PlanFeature {
+  return ai?.enabled
+    ? { key: "aiAssistantUnlimited", included: true }
+    : { key: "aiAssistant", included: false };
+}
 
 /**
  * Read the feature flags out of the Json column. Anything that is not a plain
@@ -98,7 +118,8 @@ export const defaultPlans: UiPlan[] = [
       { key: "imagesPerCar", params: { count: 5 }, included: true },
       { key: "auditLogs", params: { count: 30 }, included: true },
       { key: "liveChat", included: false },
-      { key: "aiProcessing", included: false },
+      { key: "aiProcessingMonthly", params: { count: 5 }, included: true },
+      { key: "aiAssistantUnlimited", included: true },
       { key: "prioritySupport", included: false },
     ],
     ctaLink: "/onboarding",
@@ -117,7 +138,8 @@ export const defaultPlans: UiPlan[] = [
       { key: "imagesPerCar", params: { count: 10 }, included: true },
       { key: "auditLogs", params: { count: 90 }, included: true },
       { key: "liveChat", included: true },
-      { key: "aiProcessing", included: true },
+      { key: "aiProcessingMonthly", params: { count: 100 }, included: true },
+      { key: "aiAssistantUnlimited", included: true },
       { key: "prioritySupport", included: true },
     ],
     ctaLink: "/onboarding",
@@ -136,7 +158,8 @@ export const defaultPlans: UiPlan[] = [
       { key: "imagesPerCar", params: { count: 20 }, included: true },
       { key: "auditLogsUnlimited", included: true },
       { key: "liveChat", included: true },
-      { key: "aiProcessing", included: true },
+      { key: "aiProcessingUnlimited", included: true },
+      { key: "aiAssistantUnlimited", included: true },
       { key: "prioritySupport", included: true },
     ],
     ctaLink: "/onboarding",
@@ -172,7 +195,8 @@ export function planFeatureKeys(plan: DbPlan): PlanFeature[] {
       ? { key: "auditLogs", params: { count: plan.auditLogRetentionDays }, included: true }
       : { key: "auditLogsUnlimited", included: true },
     { key: "liveChat", included: !!f.chat },
-    { key: "aiProcessing", included: !!f.aiProcessing?.enabled },
+    aiProcessingFeature(f.aiProcessing),
+    aiAssistantFeature(f.aiAssistant),
     { key: "prioritySupport", included: !!f.prioritySupport },
   ];
 }

@@ -148,6 +148,14 @@ model Organization {
   settings Json? // Feature flags, preferences
 
   // Rating & Reviews (denormalized for efficient querying)
+  // Dealership-wide terms a buyer asks about, set once in settings and true of
+  // every car it sells. Null means "not stated", as on the car's own fields.
+  offersFinancing  Boolean?
+  financingNote    String? // banks, years, down payment — the dealer's words
+  acceptsTradeIn   Boolean?
+  allowsInspection Boolean? // an independent mechanic may look at the car
+  offersDelivery   Boolean?
+
   averageRating Float @default(0)
   totalReviews  Int   @default(0)
 
@@ -161,6 +169,15 @@ model Organization {
   impersonationSessions ImpersonationSession[]
   dealershipReviews     DealershipReview[]
   aiUsage               AiUsage[]
+  buyerQuestions        BuyerQuestion[]
+  assistantAnswers      AssistantAnswer[]
+  digestSends           DigestSend[]
+
+  // Emails to the dealership (the weekly summary) are written in this
+  // language: "ar" or "en". Arabic by default — the market is Egypt.
+  emailLocale         String  @default("ar")
+  // The owners get a weekly summary email unless the dealership turns it off.
+  weeklyDigestEnabled Boolean @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -360,6 +377,9 @@ model User {
 
   // AI usage
   aiUsage AiUsage[]
+
+  // Buyer questions this user answered as a dealership member.
+  answeredBuyerQuestions BuyerQuestion[]
 }
 
 // ============ CAR MODEL ============
@@ -390,8 +410,44 @@ model Car {
   images        String[]
   title         String?
   description   String?
+
+  // Bilingual listing copy, written by the vision model at extraction time and
+  // editable by the dealer. Nullable and additive: `title`/`description` above
+  // stay the source of record, so a car created before this existed still
+  // renders. `resolveCarTitle`/`resolveCarDescription` in lib/utils/car-text.ts
+  // pick per locale and fall back rather than showing a reader a blank.
+  //
+  // All four feed the searchVector — see the 20260922160000 migration. Text
+  // that is not an argument to car_search_document cannot be searched.
+  titleEn       String?
+  titleAr       String?
+  descriptionEn String?
+  descriptionAr String?
+
   location      String?
   features      String[]
+  // The Arabic feature list, beside `features` (which stays the English source
+  // of record). Written by the vision model, editable by the dealer; resolved
+  // per locale by `resolveCarFeatures`. Feeds the searchVector too.
+  featuresAr    String[]
+  // Alt text per image, written by the model after a save, in both languages:
+  // { [imageUrl]: { en, ar } }. Keyed by URL, not by position — updateCarFull
+  // reorders and deletes images, which would silently misalign a parallel
+  // array. Absent for a URL means "not described yet"; the gallery then falls
+  // back to "Make Model — image n". Not searchable by design: it describes
+  // photos, and matching "rear view" in search would be noise.
+  imageAlts     Json?
+
+  // What a buyer asks before anything else, stated by the dealer. Every one is
+  // nullable on purpose, and null means "not stated" — never "no". A listing
+  // saying nothing about accidents is not a listing claiming there were none,
+  // and the buyer assistant declines rather than guessing either way.
+  originalPaint     Boolean? // "فابريكا": no panel repainted
+  accidentFree      Boolean?
+  ownerCount        Int? // owners the car has had, 1 = first owner
+  serviceHistory    ServiceHistory?
+  priceNegotiable   Boolean?
+  licenseValidUntil DateTime? @db.Date // the month the licence runs to
 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -403,6 +459,8 @@ model Car {
 
   savedBy       SavedCar[]
   testDrive     TestDrive[]
+  buyerQuestions BuyerQuestion[]
+  assistantAnswers AssistantAnswer[]
 
   @@index([organizationId])
   @@index([make, model])
@@ -567,7 +625,104 @@ model AiUsage {
   errorCode String?
   createdAt DateTime @default(now())
 
+  // The car this call helped save, set when the dealer saves it. A plan's AI
+  // allowance counts distinct cars, not calls: the photo read, translation and
+  // coach advice for one car are one use. No relation on purpose — deleting
+  // the car must not hand the use back.
+  carId String?
+
   @@index([organizationId, feature, createdAt]) // monthly per-org quota count
   @@index([feature, createdAt]) // per-feature reporting
   @@index([createdAt]) // platform-wide RPD/RPM breaker, all features
+}
+
+enum ServiceHistory {
+  FULL // every service documented
+  PARTIAL
+  NONE
+}
+
+enum BuyerQuestionStatus {
+  OPEN
+  ANSWERED
+  DISMISSED
+}
+
+// A question a buyer asked the listing assistant that the listing could not
+// answer. The dealer sees it in their inbox; their answer becomes a fact the
+// assistant cites for every later buyer ("the dealer says…").
+//
+// No buyer identity is stored — no user, no IP. Repeats of the same question
+// on the same car fold into one row (questionKey) and raise askCount, which is
+// what tells the dealer which gaps matter.
+model BuyerQuestion {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // The car it was asked on. An answer marked appliesToAllCars is still
+  // anchored here, but is cited on every car of the dealership.
+  carId          String
+  car            Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  question    String // as first asked, trimmed, at most 300 characters
+  questionKey String // folded form, for recognising a repeat
+  locale      String // the page language it was asked in
+  askCount    Int      @default(1)
+  lastAskedAt DateTime @default(now())
+
+  status           BuyerQuestionStatus @default(OPEN)
+  answer           String?
+  appliesToAllCars Boolean             @default(false)
+  answeredById     String?
+  answeredBy       User?               @relation(fields: [answeredById], references: [id], onDelete: SetNull)
+  answeredAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([carId, questionKey])
+  @@index([organizationId, status, lastAskedAt]) // the dealer's inbox
+  @@index([organizationId, status, appliesToAllCars]) // dealership-wide answers
+}
+
+// An answer the listing assistant gave a buyer, kept so the buyer can rate it.
+// A 👎 also files the question in the dealer's Buyer Questions inbox, where
+// the dealer's answer becomes a fact the assistant cites next time. No buyer
+// identity is stored; rows older than 90 days are pruned on the next answer
+// for the same car.
+model AssistantAnswer {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  carId          String
+  car            Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  question String // the question as it stands alone, at most 300 characters
+  answer   String // what the buyer was shown, at most 600 characters
+  locale   String
+
+  helpful Boolean? // null until rated; rated once
+  ratedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, helpful, createdAt]) // what buyers found unhelpful
+  @@index([carId, createdAt]) // pruning per car
+}
+
+// One weekly summary email per dealership per week. The row is claimed
+// (inserted) before anything is sent, and the unique pair is what makes a
+// cron that fires twice — or retries — send one email, not two. A send that
+// fails outright deletes its row so the next run can try again.
+model DigestSend {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // The Saturday (Cairo) the summarised week starts on.
+  weekStart      DateTime     @db.Date
+  // How many owners it reached; 0 until sent.
+  recipients     Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, weekStart])
 }

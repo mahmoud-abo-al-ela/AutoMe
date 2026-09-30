@@ -1,22 +1,30 @@
 // Data serialization utilities
 import type { User, Car, TestDrive } from "@/lib/generated/prisma";
+import { parseImageAlts } from "@/lib/utils/image-alts";
+import { licenseMonth, statedTerms, type DealershipTerms } from "@/lib/utils/car-disclosures";
 
-/** Organization summary as the car/dealership queries select it. */
-interface OrgSummary {
+/** Organization summary as the car/dealership queries select it. The terms
+ * are selected by the detail query only. */
+interface OrgSummary extends Partial<DealershipTerms> {
+  /** Present once serialized; the helpers are called again on their own output. */
+  terms?: Partial<DealershipTerms>;
   name: string;
   logo: string | null;
   slug: string;
   phone?: string | null;
   address?: string | null;
+  city?: string | null;
+  region?: string | null;
 }
 
 /**
- * A full car row with the organization relation optionally joined. The three
+ * A full car row with the organization relation optionally joined. The
  * serialized columns are widened because these helpers are idempotent and are
  * genuinely called with both raw Prisma rows and already-serialized cars.
  */
-type CarInput = Omit<Car, "price" | "createdAt" | "updatedAt"> & {
+type CarInput = Omit<Car, "price" | "createdAt" | "updatedAt" | "licenseValidUntil"> & {
   price: Car["price"] | number | string;
+  licenseValidUntil?: Date | string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
   organization?: OrgSummary | null;
@@ -62,6 +70,8 @@ function serializeCarInner(car: CarInput) {
       car.updatedAt instanceof Date
         ? car.updatedAt.toISOString()
         : car.updatedAt,
+    // A month, not an instant: "2027-03", so no reader's timezone can shift it.
+    licenseValidUntil: licenseMonth(car.licenseValidUntil),
     // Pass through organization data if included in the query
     ...(car.organization && {
       organization: {
@@ -70,6 +80,10 @@ function serializeCarInner(car: CarInput) {
         slug: car.organization.slug,
         ...(car.organization.phone && { phone: car.organization.phone }),
         ...(car.organization.address && { address: car.organization.address }),
+        ...(car.organization.city && { city: car.organization.city }),
+        ...(car.organization.region && { region: car.organization.region }),
+        // Only what the dealer stated — see statedTerms.
+        terms: car.organization.terms ?? statedTerms(car.organization),
       },
     }),
   };
@@ -139,12 +153,17 @@ export function serializePartialCar(car: PartialCarInput | null) {
 /** The non-null body of `serializeCarWithImages`. See `serializeCarInner`. */
 function serializeCarWithImagesInner(car: CarInput) {
   const serialized = serializeCarInner(car);
+  const alts = parseImageAlts(car.imageAlts);
 
   return {
     ...serialized,
     images: serialized.images.map((url) => ({
       url,
       alt: `${car.make} ${car.model}`,
+      // Model-written alt text in both languages, keyed by URL so it follows
+      // the image through reorders. Null until the car has been described;
+      // the gallery then uses `alt`.
+      description: alts[url] ?? null,
     })),
   };
 }

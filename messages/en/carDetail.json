@@ -19,7 +19,9 @@
     "next": "Next image",
     "viewImage": "View image {index}",
     "thumbnail": "Thumbnail {index}",
-    "galleryTitle": "{title} — Gallery"
+    "galleryTitle": "{title} — Gallery",
+    "describedAlt": "{description} — image {index} of {total}",
+    "describedAltShort": "{description} — image {index}"
   },
   "tabs": {
     "description": "Description",
@@ -28,10 +30,48 @@
   },
   "description": {
     "title": "Vehicle Description",
-    "empty": "No description available for this vehicle."
+    "empty": "No description available for this vehicle.",
+    "notTranslated": "Not available in English — showing the original listing."
   },
   "features": {
-    "title": "Features & Equipment"
+    "title": "Features & Equipment",
+    "notTranslated": "Not available in English — showing the original list."
+  },
+  "assistant": {
+    "title": "Ask about this car",
+    "subtitle": "Quick answers about this car.",
+    "placeholder": "e.g. Is it automatic?",
+    "inputLabel": "Your question about this car",
+    "ask": "Ask",
+    "asking": "Typing…",
+    "suggestions": {
+      "features": "What features does it have?",
+      "hours": "When is the dealership open?",
+      "mileage": "How many kilometres has it done?"
+    },
+    "you": "You",
+    "disclaimer": "Confirm with the dealer before you buy.",
+    "notInListing": "We don't have that information. The dealer can tell you.",
+    "unavailable": "The assistant can't answer right now. You can still ask the dealer.",
+    "askDealer": "Ask the dealer",
+    "actions": {
+      "directions": "Directions",
+      "call": "Call",
+      "testDrive": "Book a test drive"
+    },
+    "rating": {
+      "helpful": "Helpful",
+      "notHelpful": "Not helpful",
+      "thanks": "Thanks for the feedback.",
+      "sentToDealer": "Thanks — we have sent your question to the dealer to answer."
+    },
+    "failed": "Couldn't get an answer. Please try again.",
+    "offTopic": "I can only help with questions about this car.",
+    "smallTalk": {
+      "greeting": "Hi! Ask me anything about this car.",
+      "thanks": "You're welcome! Ask if anything else comes up.",
+      "noise": "I didn't catch that — try asking about the price, condition or specs."
+    }
   },
   "specs": {
     "title": "Technical Specifications",
@@ -76,5 +116,47 @@
   "errors": {
     "fetchFailed": "Failed to fetch car details",
     "fetchError": "An error occurred while fetching car details"
+  },
+  "meta": {
+    "notFoundTitle": "Car not found",
+    "notFoundDescription": "This listing is no longer available. Browse our other cars for sale in Egypt.",
+    "generatedTitle": "{year} {make} {model} for sale",
+    "generatedDescription": "{year} {make} {model} for sale in Egypt. See photos, specifications, price and dealership details on AutoMe."
+  },
+  "history": {
+    "title": "History & terms",
+    "originalPaint": "Original paint",
+    "repainted": "Has repainted panels",
+    "accidentFree": "No accidents",
+    "hadAccident": "Has been in an accident",
+    "owners": "{count, plural, one {First owner} other {{value} owners so far}}",
+    "service": {
+      "FULL": "Full service history",
+      "PARTIAL": "Partial service history",
+      "NONE": "No service records"
+    },
+    "negotiable": "Price negotiable",
+    "fixedPrice": "Fixed price",
+    "licensedUntil": "Licensed until {month}",
+    "dealershipTerms": "From this dealership",
+    "terms": {
+      "offersFinancing": {
+        "yes": "Instalments available",
+        "no": "No instalments"
+      },
+      "acceptsTradeIn": {
+        "yes": "Trade-ins accepted",
+        "no": "No trade-ins"
+      },
+      "allowsInspection": {
+        "yes": "Independent inspection welcome",
+        "no": "No outside inspection"
+      },
+      "offersDelivery": {
+        "yes": "Delivery available",
+        "no": "No delivery"
+      }
+    },
+    "statedByDealer": "As stated by the dealer. Confirm before you buy."
   }
 }

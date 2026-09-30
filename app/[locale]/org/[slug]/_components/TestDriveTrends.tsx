@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
@@ -18,6 +19,9 @@ export type TestDriveTrendPoint = {
 };
 
 const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
+  const t = useTranslations("org.dashboard");
+  // The four statuses are already named for the public test-drive surface.
+  const tStatus = useTranslations("testDrive.status");
   const [timeRange, setTimeRange] = useState("30d");
 
   const filteredData = useMemo(() => {
@@ -34,25 +38,25 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
 
   // Chart axis and tooltip labels follow the reader's locale; the axis
   // *orientation* stays physical (see the i18n skill).
-  const { date: formatDateFor } = useFormatters();
+  const { date: formatDateFor, number } = useFormatters();
   const chartDate = (value: string | number | Date) =>
     formatDateFor(value, { day: "numeric", month: "short", year: undefined });
 
   const chartConfig = {
     completed: {
-      label: "Completed",
+      label: tStatus("COMPLETED"),
       color: "#10b981", // emerald-500
     },
     confirmed: {
-      label: "Confirmed",
+      label: tStatus("CONFIRMED"),
       color: "#3b82f6", // blue-500
     },
     pending: {
-      label: "Pending",
+      label: tStatus("PENDING"),
       color: "#f59e0b", // amber-500
     },
     cancelled: {
-      label: "Cancelled",
+      label: tStatus("CANCELLED"),
       color: "#ef4444", // red-500
     },
   };
@@ -61,16 +65,16 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Test Drive Trends</CardTitle>
-          <CardDescription>Volume over time</CardDescription>
+          <CardTitle>{t("trends.title")}</CardTitle>
+          <CardDescription>{t("trends.emptyDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center h-[300px]">
           <div className="bg-muted rounded-full p-4 mb-4">
             <Timer className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-lg font-medium">No test drive data</p>
+          <p className="text-lg font-medium">{t("trends.emptyTitle")}</p>
           <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
-            Trends will appear once customers start booking test drives.
+            {t("trends.emptyBody")}
           </p>
         </CardContent>
       </Card>
@@ -82,28 +86,26 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
-            <CardTitle>Test Drive Trends</CardTitle>
-            <CardDescription>
-              Booking volume by status over time
-            </CardDescription>
+            <CardTitle>{t("trends.title")}</CardTitle>
+            <CardDescription>{t("trends.description")}</CardDescription>
           </div>
 
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
               className="w-[140px] rounded-lg"
-              aria-label="Select a time range"
+              aria-label={t("ranges.label")}
             >
-              <SelectValue placeholder="Last 30 days" />
+              <SelectValue placeholder={t("ranges.last30")} />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="30d" className="rounded-lg">
-                Last 30 days
+                {t("ranges.last30")}
               </SelectItem>
               <SelectItem value="14d" className="rounded-lg">
-                Last 14 days
+                {t("ranges.last14")}
               </SelectItem>
               <SelectItem value="7d" className="rounded-lg">
-                Last 7 days
+                {t("ranges.last7")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -148,7 +150,7 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
                 axisLine={false}
                 tickMargin={8}
                 width={40}
-                tickFormatter={(value) => value}
+                tickFormatter={(value: number) => number(value)}
               />
               <ChartTooltip
                 cursor={false}

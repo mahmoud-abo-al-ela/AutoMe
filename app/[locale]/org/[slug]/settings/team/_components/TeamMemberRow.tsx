@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export default function TeamMemberRow({
     onRoleChange,
     loadingRoleUpdate,
 }: TeamMemberRowProps) {
+  const t = useTranslations("org.settings.team");
   const { relativeToNow } = useFormatters();
     const isCurrentUser = member.userId === currentUserId;
     const isOwnerRole = member.role === "OWNER";
@@ -50,11 +52,11 @@ export default function TeamMemberRow({
                 <div>
                     <div className="flex items-center gap-2">
                         <p className="font-medium text-sm sm:text-base">
-                            {member.user.name || "No name"}
+                            {member.user.name || t("noName")}
                         </p>
                         {isCurrentUser && (
                             <Badge variant="secondary" className="text-xs">
-                                You
+                                {t("you")}
                             </Badge>
                         )}
                     </div>
@@ -62,7 +64,9 @@ export default function TeamMemberRow({
                         {member.user.email}
                     </p>
                     <p className="text-xs text-gray-400">
-                        Joined {relativeToNow(new Date(member.user.createdAt))}
+                        {t("joined", {
+                            when: relativeToNow(new Date(member.user.createdAt)),
+                        })}
                     </p>
                 </div>
             </div>
@@ -71,7 +75,7 @@ export default function TeamMemberRow({
                 {isOwnerRole ? (
                     <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
                         <Crown className="h-3 w-3 me-1" />
-                        Owner
+                        {t("roles.OWNER")}
                     </Badge>
                 ) : isOwner ? (
                     <Select
@@ -90,13 +94,13 @@ export default function TeamMemberRow({
                             <SelectItem value="MEMBER">
                                 <div className="flex items-center gap-2">
                                     <User className="h-4 w-4" />
-                                    Member
+                                    {t("roles.MEMBER")}
                                 </div>
                             </SelectItem>
                             <SelectItem value="OWNER">
                                 <div className="flex items-center gap-2">
                                     <Crown className="h-4 w-4" />
-                                    Owner
+                                    {t("roles.OWNER")}
                                 </div>
                             </SelectItem>
                         </SelectContent>
@@ -104,7 +108,7 @@ export default function TeamMemberRow({
                 ) : (
                     <Badge variant="secondary">
                         <User className="h-3 w-3 me-1" />
-                        Member
+                        {t("roles.MEMBER")}
                     </Badge>
                 )}
 
@@ -114,6 +118,7 @@ export default function TeamMemberRow({
                         size="sm"
                         onClick={() => onRemove(member)}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        aria-label={t("remove.label")}
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
