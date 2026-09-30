@@ -19,6 +19,7 @@ import { queryKeys } from "@/lib/query-client";
 import { compareUtils } from "@/lib/utils";
 import { logError } from "@/lib/utils/errors";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 
 /** Mirrors the cap enforced by compareUtils.addToCompare. */
 const COMPARE_LIMIT = 3;
@@ -45,6 +46,7 @@ export default function CarCardActions({
   const [isInCompare, setIsInCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { signIn } = useAuthRedirects();
   const { isSignedIn } = useAuth();
   const queryClient = useQueryClient();
 
@@ -63,7 +65,7 @@ export default function CarCardActions({
 
     if (!isSignedIn) {
       toast.info(t("signInToSave"), {
-        action: { label: t("signIn"), onClick: () => router.push("/sign-in") },
+        action: { label: t("signIn"), onClick: () => router.push(signIn) },
       });
       return;
     }

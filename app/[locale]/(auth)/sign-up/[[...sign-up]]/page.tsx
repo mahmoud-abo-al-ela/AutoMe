@@ -20,13 +20,19 @@ export default async function SignUpPage({
   // to the default locale — so signing in on /ar with no return path landed
   // the reader on /en.
   const redirectUrl = safeRedirectPath(query?.redirect_url, `/${locale}`);
+  const returnQuery = `?redirect_url=${encodeURIComponent(redirectUrl)}`;
 
   return (
     <SignUp
       forceRedirectUrl={redirectUrl}
       fallbackRedirectUrl={redirectUrl}
-      // See the sign-in page: the footer link back to sign-in needs the locale.
-      signInUrl={`/${locale}/sign-in`}
+      // See the sign-in page: the reverse transfer — signing up with an
+      // address that already has an account — finishes as a sign-in.
+      signInForceRedirectUrl={redirectUrl}
+      signInFallbackRedirectUrl={redirectUrl}
+      // See the sign-in page: the footer link back to sign-in needs the locale
+      // and the return path.
+      signInUrl={`/${locale}/sign-in${returnQuery}`}
     />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 
 /**
  * Post-authentication destinations, carrying the locale.
@@ -19,11 +20,23 @@ import { useLocale } from "next-intl";
  */
 export function useAuthRedirects() {
   const locale = useLocale();
+  // Locale-free, as `@/i18n/navigation` reports it: "/cars/abc".
+  const pathname = usePathname();
 
   return {
     /** Where Clerk lands after a successful sign-in or sign-up. */
     afterSignIn: `/${locale}/auth-redirect`,
     /** Where Clerk lands after signing out: the reader's own home page. */
     afterSignOut: `/${locale}`,
+    /**
+     * The sign-in page, told to bring the reader back here afterwards. Without
+     * `redirect_url` the sign-in page can only fall back to the locale home,
+     * so signing in from a car page lost the car. The return path carries the
+     * locale because Clerk navigates to it directly, outside next-intl.
+     */
+    signIn: {
+      pathname: "/sign-in",
+      query: { redirect_url: `/${locale}${pathname === "/" ? "" : pathname}` },
+    },
   };
 }

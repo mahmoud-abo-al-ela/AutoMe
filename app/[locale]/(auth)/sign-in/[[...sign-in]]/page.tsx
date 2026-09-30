@@ -20,15 +20,22 @@ export default async function SignInPage({
   // to the default locale — so signing in on /ar with no return path landed
   // the reader on /en.
   const redirectUrl = safeRedirectPath(query?.redirect_url, `/${locale}`);
+  const returnQuery = `?redirect_url=${encodeURIComponent(redirectUrl)}`;
 
   return (
     <SignIn
       forceRedirectUrl={redirectUrl}
       fallbackRedirectUrl={redirectUrl}
+      // A sign-in can finish as a sign-up — "Continue with Google" for an
+      // address with no account does. That leg reads these instead, and with
+      // them unset Clerk sent the new user to "/", which resolves to /en.
+      signUpForceRedirectUrl={redirectUrl}
+      signUpFallbackRedirectUrl={redirectUrl}
       // The card footer links to sign-up. Left to itself Clerk builds that from
       // NEXT_PUBLIC_CLERK_SIGN_UP_URL ("/sign-up"), which has no locale, so an
-      // Arabic reader following it was dropped into English.
-      signUpUrl={`/${locale}/sign-up`}
+      // Arabic reader following it was dropped into English. It also carries
+      // the return path, or switching cards forgets where the reader came from.
+      signUpUrl={`/${locale}/sign-up${returnQuery}`}
     />
   );
 }
