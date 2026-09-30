@@ -81,9 +81,9 @@ function withChrome(text?: string, mentioned?: UserResponse[], options?: RenderT
   return (
     <>
       <FlagNotice />
-      <FlaggedText>
-        <div dir="auto">{defaultRenderText(text, mentioned, options)}</div>
-      </FlaggedText>
+      <div dir="auto">
+        <FlaggedText plain={text ?? ""}>{defaultRenderText(text, mentioned, options)}</FlaggedText>
+      </div>
       <TranslateToggle />
     </>
   );
@@ -149,10 +149,15 @@ export function ChatMessage(props: MessageUIComponentProps) {
   // when fields like `text` or `updated_at` change — never `i18n` — so with
   // i18n alone the label changed and the words did not. This copy is only
   // what is drawn; the message itself is untouched.
+  //
+  // Attachments are dropped from every drawn message: chat is text only
+  // (owner's decision), and the one kind Stream still attaches on its own —
+  // a link-preview card — put a spam link above its own warning. Link
+  // previews are also off on the channel type; this covers older messages.
   const shown = useMemo(
     () =>
-      asSeen(
-        toggle.showing && translation
+      asSeen({
+        ...(toggle.showing && translation
           ? {
               ...message,
               text: translation,
@@ -162,8 +167,9 @@ export function ChatMessage(props: MessageUIComponentProps) {
                 language: message.i18n?.language ?? userLanguage,
               },
             }
-          : message
-      ),
+          : message),
+        attachments: [],
+      }),
     [asSeen, toggle.showing, translation, message, userLanguage]
   );
 

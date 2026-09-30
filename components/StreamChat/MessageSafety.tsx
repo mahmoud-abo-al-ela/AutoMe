@@ -52,11 +52,21 @@ export function FlagNotice() {
   );
 }
 
-/** An abusive message's text, hidden until the reader chooses to see it. */
-export function FlaggedText({ children }: { children: ReactNode }) {
+/**
+ * A flagged message's text. Abuse is hidden until the reader chooses to see
+ * it. Any flagged message — once shown — is drawn as plain text, links not
+ * clickable: a scam or spam link was the one thing in the bubble a reader
+ * could act on, and it sat above its own warning. `plain` is the raw text;
+ * `children` is Stream's rendering (markdown, clickable links) for everything
+ * that is not flagged.
+ */
+export function FlaggedText({ children, plain }: { children: ReactNode; plain: string }) {
   const t = useTranslations("chat.safety");
   const flag = useContext(FlagContext);
-  if (!flag || flagDisplay(flag.category) !== "hide" || flag.revealed) return <>{children}</>;
+  if (!flag) return <>{children}</>;
+  if (flagDisplay(flag.category) !== "hide" || flag.revealed) {
+    return <p className="whitespace-pre-wrap">{plain}</p>;
+  }
   return (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm italic text-muted-foreground">
       <span className="inline-flex items-center gap-1.5">
