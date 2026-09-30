@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "@/i18n/navigation";
-import { StartConversationButton, useChatDock } from "@/components/StreamChat";
+import { StartConversationButton, carChatReturnPath, useChatDock } from "@/components/StreamChat";
 import type { CarDetail, PriceFormatter } from "../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 
 const MobileStickyBar = ({
     car,
@@ -21,10 +22,12 @@ const MobileStickyBar = ({
     const { isSignedIn } = useUser();
     const router = useRouter();
     const { openCarChat } = useChatDock();
+    const { signInTo } = useAuthRedirects();
 
     const handleChatClick = () => {
         if (!isSignedIn) {
-            router.push(`/messages?carId=${car.id}`);
+            // Sign in, then back to this car with its chat open.
+            router.push(signInTo(carChatReturnPath(car.id)));
             return;
         }
     };

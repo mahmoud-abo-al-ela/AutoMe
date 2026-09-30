@@ -23,7 +23,18 @@ export function useAuthRedirects() {
   // Locale-free, as `@/i18n/navigation` reports it: "/cars/abc".
   const pathname = usePathname();
 
+  /**
+   * The sign-in page, told to come back to `path` (locale-free, may carry a
+   * query) — for a click that means "do this after signing in", like opening
+   * a car's chat, where coming back to the bare page would drop the intent.
+   */
+  const signInTo = (path: string) => ({
+    pathname: "/sign-in" as const,
+    query: { redirect_url: `/${locale}${path === "/" ? "" : path}` },
+  });
+
   return {
+    signInTo,
     /** Where Clerk lands after a successful sign-in or sign-up. */
     afterSignIn: `/${locale}/auth-redirect`,
     /** Where Clerk lands after signing out: the reader's own home page. */
@@ -34,9 +45,6 @@ export function useAuthRedirects() {
      * so signing in from a car page lost the car. The return path carries the
      * locale because Clerk navigates to it directly, outside next-intl.
      */
-    signIn: {
-      pathname: "/sign-in",
-      query: { redirect_url: `/${locale}${pathname === "/" ? "" : pathname}` },
-    },
+    signIn: signInTo(pathname),
   };
 }

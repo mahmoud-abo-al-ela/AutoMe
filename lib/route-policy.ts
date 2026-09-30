@@ -17,6 +17,9 @@
 export const PROTECTED_ROUTES = [
   "/test-drive(.*)",
   "/wishlist(.*)",
+  // Chat needs an account. Protected here so a signed-out visit comes back
+  // after sign-in; the page's own redirect carried no return address.
+  "/messages(.*)",
   // The org dashboard layout also redirects, but doing it here means an
   // anonymous request never reaches the layout — or the queries it runs.
   "/org(.*)",

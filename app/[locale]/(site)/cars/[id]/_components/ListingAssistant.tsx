@@ -21,6 +21,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
+import { useUser } from "@clerk/nextjs";
+import { carChatReturnPath, useChatDock } from "@/components/StreamChat";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import type { Locale } from "@/i18n/routing";
 import { askListingAssistant, rateListingAssistantAnswer } from "@/actions/listing-assistant";
 import { ActionErrorText } from "@/components/ActionErrorText";
@@ -308,14 +311,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
               t("notInListing")}
         </span>
       </p>
-      {/* Middleware sends a signed-out buyer through sign-in and back. */}
-      <Link
-        href={`/messages?carId=${carId}`}
-        className="inline-flex items-center gap-1.5 font-semibold text-amber-900 underline underline-offset-2"
-      >
-        <MessageCircle className="w-3.5 h-3.5" aria-hidden />
-        {t("askDealer")}
-      </Link>
+      <AskDealerLink carId={carId} label={t("askDealer")} />
     </div>
   );
 }
@@ -325,6 +321,36 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
  * can answer it properly — so the buyer is told that, not just thanked.
  * Shown as rated at once; a failed request only loses the rating.
  */
+/**
+ * "Ask the dealer" when the assistant cannot answer: the car's chat, opened in
+ * place for a signed-in buyer; for a signed-out one, sign-in first and then
+ * back to this car with the chat open (OpenChatFromLink). It used to link to
+ * /messages, whose sign-in had no way back — the buyer ended on the home page.
+ */
+function AskDealerLink({ carId, label }: { carId: string; label: string }) {
+  const { isSignedIn } = useUser();
+  const { openCarChat } = useChatDock();
+  const { signInTo } = useAuthRedirects();
+  const className =
+    "inline-flex cursor-pointer items-center gap-1.5 font-semibold text-amber-900 underline underline-offset-2";
+  const content = (
+    <>
+      <MessageCircle className="w-3.5 h-3.5" aria-hidden />
+      {label}
+    </>
+  );
+
+  return isSignedIn ? (
+    <button type="button" onClick={() => openCarChat(carId)} className={className}>
+      {content}
+    </button>
+  ) : (
+    <Link href={signInTo(carChatReturnPath(carId))} className={className}>
+      {content}
+    </Link>
+  );
+}
+
 function AnswerRating({ answerId }: { answerId: string }) {
   const t = useTranslations("carDetail.assistant.rating");
   const [rated, setRated] = useState<"up" | "down" | null>(null);

@@ -12,6 +12,8 @@ import { queryKeys } from "@/lib/query-client";
 import type { CarDetail, PriceFormatter } from "../../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
+import { carChatReturnPath } from "@/components/StreamChat";
 import { useFormatters } from "@/hooks/use-formatters";
 
 export const useCarInfoCard = (car: CarDetail) => {
@@ -26,6 +28,7 @@ export const useCarInfoCard = (car: CarDetail) => {
   const [testDriveId, setTestDriveId] = useState<string | null>(null);
   const router = useRouter();
   const { isSignedIn } = useUser();
+  const { signInTo } = useAuthRedirects();
 
   // Check if car is in compare list on component mount
   useEffect(() => {
@@ -132,9 +135,10 @@ export const useCarInfoCard = (car: CarDetail) => {
     }
   };
 
+  // Signed out only — a signed-in reader gets the chat button itself. Sign in,
+  // then come back to this car with its chat open (OpenChatFromLink).
   const handleChatClick = () => {
-    // Let middleware handle redirect if not signed in
-    router.push(`/messages?carId=${car.id}`);
+    router.push(signInTo(carChatReturnPath(car.id)));
   };
 
   // Bound to this listing's own currency, so presenters stay currency-agnostic.

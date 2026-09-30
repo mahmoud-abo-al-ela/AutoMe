@@ -8,7 +8,9 @@ import {
   ListingAssistant,
   CarHistoryCard,
 } from "./";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { OpenChatFromLink } from "@/components/StreamChat";
 import type { CarDetail } from "../_lib/car-detail-types";
 import { getTranslations } from "next-intl/server";
 import { isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
@@ -96,6 +98,11 @@ const CarContent = async ({ id }: { id: string }) => {
 
       {/* Mobile sticky CTA bar */}
       <MobileStickyBar car={car} />
+
+      {/* Opens this car's chat when the page is reached back from sign-in. */}
+      <Suspense fallback={null}>
+        <OpenChatFromLink carId={car.id} />
+      </Suspense>
     </div>
   );
 };

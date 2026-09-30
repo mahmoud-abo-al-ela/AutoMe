@@ -85,3 +85,21 @@ describe("Clerk redirect targets", () => {
     expect(offendersFor(SIGN_OUT_LITERAL)).toEqual([]);
   });
 });
+
+/**
+ * A chat button that sent a signed-out buyer to /messages?carId=… lost them:
+ * /messages redirected to sign-in with no return address, and they landed on
+ * the home page with neither the car nor the chat. Chat entry points go
+ * through `signInTo(carChatReturnPath(id))` instead (see OpenChatFromLink).
+ */
+const MESSAGES_BY_CAR = /\/messages\?carId=/g;
+
+describe("chat entry points", () => {
+  it("matches the old path when one is present", () => {
+    expect("router.push(`/messages?carId=${car.id}`)".match(MESSAGES_BY_CAR)).not.toBeNull();
+  });
+
+  it("never send a buyer to /messages?carId= — it had no way back after sign-in", () => {
+    expect(offendersFor(MESSAGES_BY_CAR)).toEqual([]);
+  });
+});

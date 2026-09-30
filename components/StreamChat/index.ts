@@ -5,6 +5,7 @@ export { ChatWindow } from "./ChatWindow";
 export { StartConversationButton } from "./StartConversationButton";
 export { UnreadBadge } from "./UnreadBadge";
 export { useChatDock } from "./dock/ChatDockContext";
+export { OpenChatFromLink, carChatReturnPath } from "./dock/OpenChatFromLink";
 export { DMChannelPreview } from "./DMChannelPreview";
 export { OrgUnreadBadge } from "./OrgUnreadBadge";
 export { UserChannelPreview } from "./UserChannelPreview";
