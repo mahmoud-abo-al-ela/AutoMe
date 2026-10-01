@@ -6,6 +6,8 @@ import BackToTop from "@/components/BackToTop";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
 import Loading from "@/components/Loading";
+import LocaleSuggestion from "@/components/Header/LocaleSuggestion";
+import type { Locale } from "@/i18n/routing";
 
 export default async function SiteLayout({
   children,
@@ -14,7 +16,7 @@ export default async function SiteLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-
+  const { locale } = await params;
   const user = await checkUser();
   const organization = await getCurrentOrganization();
   // `theme` is a Json column, so it can be any JSON value; only a plain object
@@ -43,6 +45,7 @@ export default async function SiteLayout({
         }} />
       )}
       <MainHeader user={user} organizationSlug={organization?.slug} organization={organization} />
+      <LocaleSuggestion locale={locale as Locale} />
       <main
         // No font class here. This used to carry a SECOND Inter instance,
         // which set font-family: Inter, Inter Fallback on every page body —

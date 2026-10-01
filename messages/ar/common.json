@@ -24,9 +24,9 @@
   "language": {
     "label": "اللغة",
     "switchTo": "التبديل إلى {language}",
-    "suggestionBody": "هذا الموقع متاح أيضًا بـ{language}.",
+    "suggestionBody": "هذا الموقع متاح أيضًا باللغة {language}.",
     "suggestionAccept": "التبديل إلى {language}",
-    "suggestionDismiss": "المتابعة بـ{language}"
+    "suggestionDismiss": "المتابعة باللغة {language}"
   },
   "pagination": {
     "showing": "عرض {start} إلى {end} من إجمالي {total} {noun}",
