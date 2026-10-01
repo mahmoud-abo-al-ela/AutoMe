@@ -68,6 +68,16 @@ export function periodStartingToday(period: BillingPeriod, now: Date = new Date(
 }
 
 /**
+ * A free trial from today: whole Cairo days, ending at 00:00 Cairo after the
+ * last one. Nothing is paid upfront; the first payment is a renewal from the
+ * trial's end, asked for like any other.
+ */
+export function trialPeriod(days: number, now: Date = new Date()): PeriodBounds {
+  const today = cairoDate(now);
+  return { start: cairoMidnight(today), end: cairoMidnight(addDays(today, days)) };
+}
+
+/**
  * The period a renewal pays for: it starts where the current one ends, so
  * paying early loses no days and paying during the grace does not add the
  * grace days on top.

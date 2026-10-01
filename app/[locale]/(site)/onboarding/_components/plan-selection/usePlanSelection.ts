@@ -7,9 +7,10 @@ import { useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
 import { calculateSavingsPercentage } from "@/components/Pricing/pricing-plans";
 import { createPlanSelectionSchema } from "../schemas";
-import { createCheckoutSession } from "@/actions/payment";
+import { createSignupCheckout } from "@/actions/payment";
 import { createOrganization, saveOnboardingFormData } from "@/actions/onboarding";
 import { clearOnboardingDraft } from "../../_lib/onboarding-draft";
+import { planSignupKind } from "@/lib/utils/plan-signup";
 import type { z } from "zod";
 import type {
     BillingPeriod,
@@ -73,12 +74,13 @@ export function usePlanSelection({
     const handleCreateOrg = async () => {
         setLoading(true);
         try {
-            // No billingPeriod: this is the free-plan path, there is no
-            // subscription to bill, and OrganizationInput has never carried the
-            // field — it was being silently dropped by the action's validation.
+            // The free plan, or a trial: the dealership is created now. A
+            // trial's billing period is what its first payment, at the trial's
+            // end, is for.
             const result = await createOrganization({
                 ...formData,
                 planId: selectedPlanId,
+                billingPeriod,
                 userId,
             });
 
@@ -105,11 +107,12 @@ export function usePlanSelection({
         const plan = plans.find((p) => p.id === data.planId);
         if (!plan) return;
 
-        if (plan.monthlyPrice === 0) {
-            // Free plan — create org directly, then redirect to dashboard
+        if (planSignupKind(plan) !== "paid") {
+            // Free plan or trial — create the dealership now, then the dashboard.
             await handleCreateOrg();
         } else {
-            // Paid plan — save form data, redirect to Stripe Checkout
+            // Paid plan — save the form, then pay at Paymob. The dealership is
+            // created when the payment settles.
             setLoading(true);
             try {
                 // 1. Save onboarding data to server
@@ -125,21 +128,16 @@ export function usePlanSelection({
                     return;
                 }
 
-                // 2. Create Stripe Checkout Session
-                const res = await createCheckoutSession(
+                // 2. Open a Paymob checkout
+                const res = await createSignupCheckout(
                     plan.id,
                     billingPeriod,
                     sessionRes.data.sessionId,
                 );
 
-                if (res.success && res.data.url) {
-                    // 3. Redirect to Stripe Checkout
+                if (res.success) {
+                    // 3. To Paymob's checkout page
                     window.location.href = res.data.url;
-                } else if (res.success) {
-                    // Stripe can return a session without a url; assigning null
-                    // to location.href navigates to "/null" instead of failing.
-                    toast.error(t("checkoutFailed"));
-                    setLoading(false);
                 } else {
                     toast.error(actionError(res.error, t("paymentFailed")));
                     setLoading(false);

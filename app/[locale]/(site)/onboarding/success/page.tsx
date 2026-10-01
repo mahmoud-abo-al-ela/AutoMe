@@ -1,7 +1,8 @@
 import { redirect } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { checkUser } from "@/lib/checkUser";
-import { createOrganizationAfterCheckout } from "@/actions/onboarding";
+import { confirmSignupPayment } from "@/actions/onboarding";
+import { PaymentConfirming } from "@/components/billing/PaymentConfirming";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -33,48 +34,80 @@ export async function generateMetadata({
 /** The four things a new dealer is pointed at, in the order they matter. */
 const NEXT_STEPS = ["listCar", "inviteTeam", "brand", "hours"] as const;
 
+/**
+ * Where Paymob returns the buyer after a sign-up payment. `ref` is our Payment
+ * id; the other parameters Paymob appends are unsigned and never read. The
+ * dealership exists once the payment settles, through Paymob's callback or
+ * through confirmSignupPayment asking Paymob here.
+ */
 export default async function OnboardingSuccessPage({
     params,
     searchParams,
 }: {
     params: Promise<{ locale: string }>;
-    searchParams: Promise<{ session_id?: string }>;
+    searchParams: Promise<{ ref?: string }>;
 }) {
     const { locale } = await params;
+    const { ref } = await searchParams;
 
-    const { session_id } = await searchParams;
-
-    // Validate session_id is present
-    if (!session_id) {
-        redirect({ href: "/onboarding?error=missing_session", locale });
+    if (!ref) {
+        redirect({ href: "/onboarding", locale });
     }
 
-    // Ensure user is authenticated
     const user = await checkUser();
     if (!user) {
         redirect({ href: "/sign-in", locale });
     }
 
-    // Create the organization using the checkout session
-    const result = await createOrganizationAfterCheckout(session_id);
+    const result = await confirmSignupPayment(ref);
+    if (!result.success) return <FailurePage error={result.error} />;
 
-    if (result.success) {
-        // Two success shapes: the idempotent path carries a ready-made
-        // `redirect`, the freshly-created path only the organization.
-        const data = result.data;
+    const { state, organizationSlug } = result.data;
+    if (state === "paid" && organizationSlug) {
         return (
             <SuccessPage
-                orgSlug={data.organization.slug}
-                dashboardUrl={
-                    "redirect" in data
-                        ? data.redirect
-                        : `/org/${data.organization.slug}/dashboard`
-                }
+                orgSlug={organizationSlug}
+                dashboardUrl={`/org/${organizationSlug}/dashboard`}
             />
         );
     }
+    if (state === "failed") return <DeclinedPage />;
 
-    return <FailurePage error={result.error} />;
+    const t = await getTranslations("onboarding.success.confirming");
+    return (
+        <PaymentConfirming
+            title={t("title")}
+            body={t("body")}
+            slowBody={t("slow")}
+            checkAgain={t("checkAgain")}
+        />
+    );
+}
+
+/** The card was declined or the checkout abandoned: nothing was charged. */
+async function DeclinedPage() {
+    const t = await getTranslations("onboarding.success.declined");
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+            <Card className="max-w-md w-full">
+                <CardContent className="pt-6 text-center space-y-4">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                        <AlertCircle className="h-6 w-6 text-destructive" />
+                    </div>
+                    <h1 className="text-xl font-semibold">{t("title")}</h1>
+                    <p className="text-muted-foreground text-sm">{t("body")}</p>
+                    {/* Onboarding resumes the saved session, so nothing is re-typed. */}
+                    <Link
+                        href="/onboarding"
+                        className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                        {t("retry")}
+                    </Link>
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
 
 async function FailurePage({ error }: { error: ActionError }) {
@@ -100,7 +133,6 @@ async function FailurePage({ error }: { error: ActionError }) {
                     </div>
                     <h1 className="text-xl font-semibold">{t("title")}</h1>
                     <p className="text-muted-foreground text-sm">{message}</p>
-                    <p className="text-muted-foreground text-sm">{t("paid")}</p>
                     <div className="flex flex-col gap-2 pt-2">
                         <Link
                             href="/onboarding"

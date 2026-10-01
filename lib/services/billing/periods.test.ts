@@ -7,6 +7,7 @@ import {
   periodStartingToday,
   renewalPeriod,
   renewalStage,
+  trialPeriod,
 } from "@/lib/services/billing/periods";
 
 describe("addPeriod", () => {
@@ -46,6 +47,20 @@ describe("periodStartingToday", () => {
     const p = periodStartingToday("MONTHLY", new Date("2026-09-30T23:30:00Z"));
     expect(p.start.toISOString()).toBe("2026-09-30T21:00:00.000Z");
     expect(p.end.toISOString()).toBe("2026-10-31T22:00:00.000Z");
+  });
+});
+
+describe("trialPeriod", () => {
+  it("runs whole Cairo days from today", () => {
+    // 23:30 UTC on Sep 30 is Oct 1 in Cairo; 14 days ends 00:00 Oct 15.
+    const p = trialPeriod(14, new Date("2026-09-30T23:30:00Z"));
+    expect(p.start.toISOString()).toBe("2026-09-30T21:00:00.000Z");
+    expect(p.end.toISOString()).toBe("2026-10-14T21:00:00.000Z");
+  });
+
+  it("is followed by a renewal from its end", () => {
+    const trial = trialPeriod(14, new Date("2026-10-01T09:00:00Z"));
+    expect(renewalPeriod(trial.end, "MONTHLY").start.getTime()).toBe(trial.end.getTime());
   });
 });
 

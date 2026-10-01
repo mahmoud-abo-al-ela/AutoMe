@@ -51,7 +51,8 @@
     "alreadyFree": "You’re already on the free plan.",
     "notConfigured": "Billing for this plan isn’t available right now. Please contact support.",
     "paymentSetupFailed": "We couldn’t set up your payment. Please try again.",
-    "paymentIncomplete": "Your payment hasn’t been completed yet."
+    "paymentIncomplete": "Your payment hasn’t been completed yet.",
+    "checkoutRequired": "This plan is paid at checkout."
   },
   "compare": {
     "noCars": "None of these cars are available any more."
@@ -82,5 +83,10 @@
       "past": "That time has already passed.",
       "taken": "That time has just been booked. Please choose another."
     }
+  },
+  "onboarding": {
+    "slugTaken": "That dealership address is already taken. Please choose another name.",
+    "alreadyOwner": "You already own a dealership.",
+    "sessionExpired": "Your sign-up details have expired. Please go through the steps again."
   }
 }

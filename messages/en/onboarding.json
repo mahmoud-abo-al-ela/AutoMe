@@ -133,7 +133,7 @@
     "select": "Select {plan}",
     "noPlanSelected": "Please select a plan to continue",
     "trust": {
-      "stripe": "Secure checkout by Stripe",
+      "paymob": "Secure checkout by Paymob",
       "cancelAnytime": "Cancel anytime",
       "noSetupFees": "No setup fees"
     },
@@ -143,7 +143,8 @@
       "saveFailed": "Couldn’t save your details",
       "checkoutFailed": "Couldn’t start checkout. Please try again.",
       "paymentFailed": "Couldn’t start the payment"
-    }
+    },
+    "trial": "{count, plural, one {{value} day} other {{value} days}} free, no payment now"
   },
   "success": {
     "meta": {
@@ -157,7 +158,6 @@
     "failed": {
       "title": "Setup Failed",
       "body": "Something went wrong while setting up your dealership.",
-      "paid": "Your payment was successful. Please try again or contact support if the issue persists.",
       "retry": "Return to Onboarding",
       "support": "Contact Support"
     },
@@ -172,6 +172,17 @@
       "inviteTeam": "Invite team members to help manage your dealership",
       "brand": "Customize your dealership profile and branding",
       "hours": "Review your working hours and contact information"
+    },
+    "confirming": {
+      "title": "Confirming your payment",
+      "body": "We’re waiting for Paymob to confirm your payment. This usually takes a few seconds.",
+      "slow": "This is taking longer than usual. If you paid, your dealership will be ready as soon as Paymob confirms the payment. You can check again in a moment.",
+      "checkAgain": "Check again"
+    },
+    "declined": {
+      "title": "Your payment didn’t go through",
+      "body": "Nothing was charged. You can try again with the same card or another one; your details are saved.",
+      "retry": "Try again"
     }
   }
 }

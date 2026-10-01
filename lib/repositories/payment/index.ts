@@ -99,3 +99,22 @@ export async function completeOnboardingSessionInTx(tx: Prisma.TransactionClient
 export async function findOnboardingSessionData(id: string) {
   return db.onboardingSession.findUnique({ where: { id }, select: { id: true, data: true, status: true } });
 }
+
+/** What a success page needs to know about a payment, and whose it is. */
+export async function findPaymentSummary(id: string) {
+  return db.payment.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      status: true,
+      purpose: true,
+      userId: true,
+      organizationId: true,
+      periodStart: true,
+      periodEnd: true,
+      organization: { select: { slug: true } },
+    },
+  });
+}
+
+export type PaymentSummary = NonNullable<Awaited<ReturnType<typeof findPaymentSummary>>>;
