@@ -37,7 +37,7 @@ export type UiPlan = {
   planKey: PlanKey | null;
   /** Untranslated DB name, used only when `planKey` is null. */
   name: string;
-  /** Cents. null means "contact us" pricing, which renders as "Custom". */
+  /** Piasters. null means "contact us" pricing, which renders as "Custom". */
   monthlyPrice: number | null;
   yearlyPrice?: number | null;
   popular: boolean;
@@ -129,8 +129,8 @@ export const defaultPlans: UiPlan[] = [
   {
     planKey: "pro",
     name: "Professional",
-    monthlyPrice: 4900,
-    yearlyPrice: 47040,
+    monthlyPrice: 80000,
+    yearlyPrice: 800000,
     popular: true,
     features: [
       { key: "carListings", params: { count: 50 }, included: true },
@@ -149,8 +149,8 @@ export const defaultPlans: UiPlan[] = [
   {
     planKey: "enterprise",
     name: "Enterprise",
-    monthlyPrice: null,
-    yearlyPrice: null,
+    monthlyPrice: 150000,
+    yearlyPrice: 1500000,
     popular: false,
     features: [
       { key: "carListingsUnlimited", included: true },

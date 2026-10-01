@@ -28,8 +28,13 @@ async function getPlansData() {
     include: { plan: true },
   });
 
+  // Piasters a month: a yearly subscription counts a twelfth of its price.
   const monthlyRecurringRevenue = mrr.reduce(
-    (sum, sub) => sum + (sub.plan?.monthlyPrice || 0),
+    (sum, sub) =>
+      sum +
+      (sub.billingPeriod === "YEARLY"
+        ? Math.round((sub.plan?.yearlyPrice || 0) / 12)
+        : sub.plan?.monthlyPrice || 0),
     0
   );
 

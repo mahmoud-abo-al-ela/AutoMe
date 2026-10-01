@@ -76,7 +76,7 @@ export default function PlanFormTabs({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="monthlyPrice">Monthly Price ($)</Label>
+            <Label htmlFor="monthlyPrice">Monthly Price (EGP)</Label>
             <Input
               id="monthlyPrice"
               type="number"
@@ -92,7 +92,7 @@ export default function PlanFormTabs({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="yearlyPrice">Yearly Price ($)</Label>
+            <Label htmlFor="yearlyPrice">Yearly Price (EGP)</Label>
             <Input
               id="yearlyPrice"
               type="number"
@@ -191,8 +191,8 @@ export default function PlanFormTabs({
               }}
             />
             <p className="text-xs text-muted-foreground">
-              Applies to subscribers on this plan. Sent to Stripe as the
-              checkout trial period, so it is not charged until the trial ends.
+              New dealerships on this plan start it at once with no payment; the
+              first payment is asked for before the trial ends.
             </p>
           </div>
         </div>

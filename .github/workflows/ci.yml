@@ -38,8 +38,6 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: placeholder
       NEXT_PUBLIC_STREAM_API_KEY: placeholder
       STREAM_API_SECRET: placeholder
-      # Stripe's constructor throws on an undefined key (module scope in lib/services/stripe/*).
-      STRIPE_SECRET_KEY: sk_test_placeholder
       # arcjet({ key }) runs at module scope in lib/arcjet.js.
       ARCJET_KEY: ajkey_placeholder
       GEMINI_API_KEY: placeholder
@@ -116,8 +114,6 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: placeholder
       SUPABASE_SERVICE_ROLE_KEY: placeholder
-      STRIPE_SECRET_KEY: sk_test_placeholder
-      STRIPE_WEBHOOK_SECRET: whsec_placeholder
       ARCJET_KEY: ajkey_placeholder
       GEMINI_API_KEY: placeholder
 

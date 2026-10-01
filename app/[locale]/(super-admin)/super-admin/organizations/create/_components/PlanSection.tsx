@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import type { Plan } from "@/lib/generated/prisma";
 import type { CreateOrganizationFormData } from "./CreateOrganizationForm";
+import { formatPlanAmount } from "@/lib/utils/currency";
 
 export default function PlanSection({
   formData,
@@ -55,7 +56,7 @@ export default function PlanSection({
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{plan.name}</span>
                       <span className="text-muted-foreground">
-                        - ${(plan.monthlyPrice / 100).toFixed(0)}/mo
+                        - {formatPlanAmount(plan.monthlyPrice)}/mo
                       </span>
                     </div>
                   </SelectItem>

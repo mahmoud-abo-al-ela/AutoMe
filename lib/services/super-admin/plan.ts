@@ -1,6 +1,5 @@
 import type { PlanType, Prisma } from "@/lib/generated/prisma";
 import * as planRepo from "@/lib/repositories/super-admin/plan";
-import * as stripePlanService from "@/lib/services/stripe/plan";
 import { ConflictError, NotFoundError } from "@/lib/utils/errors";
 
 /**
@@ -29,6 +28,7 @@ function toInt(value: string | number | null | undefined): number {
   return parseInt(String(value), 10) || 0;
 }
 
+/** Prices arrive in piasters: the form converts the EGP the admin types. */
 export async function updatePlan(planId: string, data: PlanFormInput) {
   // Get the existing plan first
   const existingPlan = await planRepo.findPlanById(planId);
@@ -48,29 +48,6 @@ export async function updatePlan(planId: string, data: PlanFormInput) {
     trialDays: toInt(data.trialDays),
     features: data.features || {},
   };
-
-  // Update Stripe resources if the plan has Stripe integration
-  const { stripeProductId } = existingPlan;
-  if (stripeProductId) {
-    const stripeResources = await stripePlanService.updatePlanStripeResources(
-      {
-        id: planId,
-        name: data.name,
-        type: existingPlan.type,
-        monthlyPrice: toInt(data.monthlyPrice),
-        yearlyPrice: toInt(data.yearlyPrice),
-      },
-      {
-        stripeProductId,
-        stripeMonthlyPriceId: existingPlan.stripeMonthlyPriceId,
-        stripeYearlyPriceId: existingPlan.stripeYearlyPriceId,
-      }
-    );
-
-    updateData.stripeProductId = stripeResources.stripeProductId;
-    updateData.stripeMonthlyPriceId = stripeResources.stripeMonthlyPriceId;
-    updateData.stripeYearlyPriceId = stripeResources.stripeYearlyPriceId;
-  }
 
   return planRepo.updatePlan(planId, updateData);
 }
@@ -96,19 +73,6 @@ export async function createPlan(data: PlanFormInput) {
     features: data.features || {},
   };
 
-  // Create Stripe resources for the plan. The row does not exist yet, so there
-  // is no plan ID to stamp onto the Stripe product metadata — same as before.
-  const stripeResources = await stripePlanService.createPlanStripeResources({
-    name: planData.name,
-    type: planData.type,
-    monthlyPrice: toInt(data.monthlyPrice),
-    yearlyPrice: toInt(data.yearlyPrice),
-  });
-
-  planData.stripeProductId = stripeResources.stripeProductId;
-  planData.stripeMonthlyPriceId = stripeResources.stripeMonthlyPriceId;
-  planData.stripeYearlyPriceId = stripeResources.stripeYearlyPriceId;
-
   return planRepo.createPlan(planData);
 }
 
@@ -126,10 +90,11 @@ export async function deletePlan(planId: string) {
     );
   }
 
-  // Archive Stripe resources if the plan has Stripe integration
-  const { stripeProductId } = plan;
-  if (stripeProductId) {
-    await stripePlanService.archivePlanStripeResources({ stripeProductId });
+  // Payments keep their plan as a financial record (Payment.planId is RESTRICT).
+  if (plan._count.payments > 0) {
+    throw new ConflictError(
+      `Cannot delete a plan that has been paid for (${plan._count.payments} payment(s)). Deactivate it instead.`
+    );
   }
 
   await planRepo.deletePlan(planId);

@@ -1,55 +1,5 @@
-// Webhook repository - Data access layer for webhook-related mutations
-import { Prisma } from "@/lib/generated/prisma";
+// Webhook repository - idempotency ledger for provider webhooks (Paymob, Clerk)
 import { db } from "@/lib/prisma";
-
-/**
- * Create a new subscription
- */
-export async function createSubscription(data: Prisma.SubscriptionUncheckedCreateInput) {
-    return db.subscription.create({
-        data,
-    });
-}
-
-/**
- * Update subscription by organization ID
- */
-export async function updateSubscriptionByOrgId(
-    organizationId: string,
-    data: Prisma.SubscriptionUncheckedUpdateInput,
-) {
-    return db.subscription.update({
-        where: { organizationId },
-        data,
-    });
-}
-
-/**
- * Update subscription by ID
- */
-export async function updateSubscriptionById(
-    subscriptionId: string,
-    data: Prisma.SubscriptionUncheckedUpdateInput,
-) {
-    return db.subscription.update({
-        where: { id: subscriptionId },
-        data,
-    });
-}
-
-/**
- * Upsert subscription (create or update)
- */
-export async function upsertSubscription(
-    organizationId: string,
-    data: Prisma.SubscriptionUncheckedCreateInput,
-) {
-    return db.subscription.upsert({
-        where: { organizationId },
-        create: data,
-        update: data,
-    });
-}
 
 /**
  * Atomically claim a webhook event for processing (idempotency guard).

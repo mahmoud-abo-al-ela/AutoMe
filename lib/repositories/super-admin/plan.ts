@@ -22,7 +22,7 @@ export async function findPlanWithSubscriptionCount(planId: string) {
     where: { id: planId },
     include: {
       _count: {
-        select: { subscriptions: true },
+        select: { subscriptions: true, payments: true },
       },
     },
   });

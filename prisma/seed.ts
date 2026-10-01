@@ -1011,8 +1011,8 @@ async function main() {
     data: {
       name: "Pro",
       type: "PRO",
-      monthlyPrice: 4900, // $49.00
-      yearlyPrice: 47000, // $470.00 (save 2 months)
+      monthlyPrice: 80000, // EGP 800, in piasters
+      yearlyPrice: 800000, // EGP 8,000 (two months free)
       maxCars: 100,
       maxMembers: 10,
       maxImagesPerCar: 15,
@@ -1034,8 +1034,8 @@ async function main() {
     data: {
       name: "Enterprise",
       type: "ENTERPRISE",
-      monthlyPrice: 19900, // $199.00
-      yearlyPrice: 190000, // $1,900.00 (save 2+ months)
+      monthlyPrice: 150000, // EGP 1,500
+      yearlyPrice: 1500000, // EGP 15,000 (two months free)
       maxCars: -1, // Unlimited
       maxMembers: -1, // Unlimited
       maxImagesPerCar: 30,

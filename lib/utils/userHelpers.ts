@@ -2,7 +2,6 @@
  * Helper functions for user role and membership checks
  */
 import type { MemberRole } from "@/lib/generated/prisma";
-import { ValidationError } from "@/lib/utils/errors";
 
 /** A membership joined with just enough of its organization to match by slug. */
 export interface MembershipWithOrgSlug {
@@ -32,23 +31,6 @@ export function displayNameFor(user: {
   return "Customer";
 }
 
-/**
- * The email address to bill to, or a clear refusal.
- *
- * Subscribing genuinely requires one: Stripe sends receipts, invoices and
- * dunning notices there, and Checkout wants it up front. Rather than let a
- * phone-only account reach Stripe with a null, this stops early and tells the
- * user what to do about it.
- */
-export function requireBillingEmail(user: { email?: string | null }): string {
-  if (!user.email) {
-    throw new ValidationError(
-      "Add an email address to your account before subscribing — we need somewhere to send receipts.",
-      "email"
-    );
-  }
-  return user.email;
-}
 
 /**
  * Check if user has an organization membership (any role)

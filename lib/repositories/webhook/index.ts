@@ -1,3 +1,2 @@
-// Webhook repository - Data access layer
-export * from "./queries";
+// Webhook repository - the idempotency ledger for incoming provider webhooks
 export * from "./mutations";

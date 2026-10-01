@@ -228,11 +228,6 @@ model Plan {
   // Free-trial length granted when a subscription is created. 0 = no trial.
   trialDays Int @default(0)
 
-  // Stripe Integration
-  stripeProductId      String? @unique
-  stripeMonthlyPriceId String? @unique
-  stripeYearlyPriceId  String? @unique
-
   // Limits
   maxCars            Int @default(10)
   maxMembers         Int @default(1)
@@ -259,11 +254,6 @@ model Subscription {
   plan           Plan         @relation(fields: [planId], references: [id])
 
   status SubscriptionStatus @default(TRIALING)
-
-  // Stripe Integration
-  stripeCustomerId        String? @unique
-  stripeSubscriptionId    String? @unique
-  stripeCheckoutSessionId String? @unique
 
   // Billing Period. AutoMe keeps the calendar itself (Paymob is paid through
   // a link each period): see lib/services/billing/periods.ts.
@@ -674,11 +664,11 @@ model DealershipReview {
 
 // ============ WEBHOOKS ============
 
-// Idempotency ledger for incoming provider webhooks (Stripe, Paymob, Clerk).
+// Idempotency ledger for incoming provider webhooks (Paymob, Clerk).
 // `id` is the provider's own event id, so a duplicate delivery collides on the PK.
 model WebhookEvent {
-  id          String   @id // provider event id (Stripe `evt_...`, Paymob transaction id, Svix `msg_...`)
-  provider    String // "stripe" | "paymob" | "clerk"
+  id          String   @id // provider event id (Paymob "<transaction id>:<outcome>", Svix `msg_...`)
+  provider    String // "paymob" | "clerk" ("stripe" on rows from before Paymob)
   type        String
   processedAt DateTime @default(now())
 
