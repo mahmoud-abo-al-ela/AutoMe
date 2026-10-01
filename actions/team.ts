@@ -173,7 +173,7 @@ export const removeMember = withOrgAuth(
 
     // Cannot remove yourself
     if (targetMembership.userId === ctx.user.id) {
-      throw new ValidationError("Cannot remove yourself");
+      throw new ValidationError("Cannot remove yourself", null, { key: "errors.team.cannotRemoveSelf" });
     }
 
     // Audit log before deletion

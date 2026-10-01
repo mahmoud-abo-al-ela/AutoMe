@@ -1,6 +1,7 @@
 // Payment service - Business logic for Stripe Checkout session creation
 import * as billingRepo from "@/lib/repositories/billing";
 import * as stripeService from "@/lib/services/stripe/subscription";
+import { NotFoundError } from "@/lib/utils/errors";
 
 /** The authenticated-user fields the payment services read. */
 export interface PaymentUser {
@@ -27,7 +28,7 @@ export async function createCheckoutSession(
     const plan = await billingRepo.findPlanById(planId);
 
     if (!plan) {
-        throw new Error("Invalid plan");
+        throw new NotFoundError("Plan");
     }
 
     // Determine the Stripe price ID based on billing period

@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { PROTECTED_ROUTES, SUPER_ADMIN_ROUTES } from "@/lib/route-policy";
 import {
   localeAlternates,
   openGraphLocale,
   openGraphAlternateLocales,
+  sitemapEntries,
+  crawlDisallowPaths,
   truncateForMeta,
   META_DESCRIPTION_LIMIT,
 } from "@/lib/utils/seo-meta";
@@ -57,6 +60,84 @@ describe("localeAlternates", () => {
       "https://autome.test/en/cars/abc"
     );
     process.env.NEXT_PUBLIC_APP_URL = "https://autome.test";
+  });
+});
+
+describe("localeAlternates for the home page", () => {
+  it("has no trailing slash, because the served URL has none", () => {
+    const { canonical, languages } = localeAlternates("/", "ar");
+
+    expect(canonical).toBe("https://autome.test/ar");
+    expect(languages["en-EG"]).toBe("https://autome.test/en");
+    expect(languages["x-default"]).toBe("https://autome.test/en");
+  });
+
+  it("uses the origin it is given, for a dealership storefront", () => {
+    const { canonical, languages } = localeAlternates(
+      "/cars",
+      "en",
+      "https://cairo-motors.autome.test"
+    );
+
+    expect(canonical).toBe("https://cairo-motors.autome.test/en/cars");
+    expect(languages["ar-EG"]).toBe("https://cairo-motors.autome.test/ar/cars");
+  });
+});
+
+describe("sitemapEntries", () => {
+  it("emits one entry per locale", () => {
+    const urls = sitemapEntries("/cars/abc").map((e) => e.url);
+
+    expect(urls).toEqual([
+      "https://autome.test/en/cars/abc",
+      "https://autome.test/ar/cars/abc",
+    ]);
+  });
+
+  it("gives every entry the same complete hreflang set, itself included", () => {
+    // Google discards a sitemap hreflang cluster whose members disagree, or
+    // whose member does not list itself.
+    const entries = sitemapEntries("/about");
+    const [first, ...rest] = entries.map((e) => e.alternates?.languages);
+
+    for (const languages of rest) expect(languages).toEqual(first);
+    for (const entry of entries) {
+      expect(Object.values(entry.alternates?.languages ?? {})).toContain(
+        entry.url
+      );
+    }
+    expect(first?.["x-default"]).toBe("https://autome.test/en/about");
+  });
+
+  it("carries the page's fields onto every locale", () => {
+    const lastModified = new Date("2026-09-01T00:00:00Z");
+    const entries = sitemapEntries("/cars/abc", { lastModified });
+
+    expect(entries.every((e) => e.lastModified === lastModified)).toBe(true);
+  });
+});
+
+describe("crawlDisallowPaths", () => {
+  it("keeps every signed-in surface out of the index, in every locale", () => {
+    // Derived from the route policy, so a newly protected route is covered by
+    // the edit that protects it. This asserts the derivation, not a copy.
+    const disallowed = crawlDisallowPaths();
+
+    for (const pattern of [...PROTECTED_ROUTES, ...SUPER_ADMIN_ROUTES]) {
+      const base = pattern.replace("(.*)", "");
+      expect(disallowed).toContain(`/en${base}`);
+      expect(disallowed).toContain(`/ar${base}`);
+    }
+  });
+
+  it("blocks the auth screens and the API, but no page meant to rank", () => {
+    const disallowed = crawlDisallowPaths();
+
+    expect(disallowed).toContain("/api/");
+    expect(disallowed).toContain("/ar/sign-in");
+    for (const page of ["/cars", "/dealerships", "/about", "/contact"]) {
+      expect(disallowed.some((d) => `/en${page}`.startsWith(d))).toBe(false);
+    }
   });
 });
 

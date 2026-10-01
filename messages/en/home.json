@@ -141,17 +141,17 @@
     "titleAccent": "Questions",
     "subtitle": "Everything you need to know about {brand}. Can’t find your answer?",
     "contactUs": "Contact us",
-    "q1": "How does {brand}’s AI recommendation system work?",
-    "a1": "Our AI analyzes thousands of data points including your budget, preferences, driving habits, and market trends to recommend the perfect car for you. The system learns from millions of successful car purchases to provide increasingly accurate suggestions.",
-    "q2": "Is it free to use {brand} as a buyer?",
-    "a2": "Yes! {brand} is completely free for car buyers. You can browse listings, get AI recommendations, schedule test drives, and communicate with dealers at no cost. We only charge dealerships for premium features.",
-    "q3": "How do I schedule a test drive?",
-    "a3": "Simply find a car you’re interested in, click the “Schedule Test Drive” button, and choose your preferred date and time. The dealership will confirm your appointment, and the car will be ready when you arrive. No waiting, no hassle.",
-    "q4": "Are the cars on {brand} verified?",
-    "a4": "Yes, all vehicles listed on {brand} go through a rigorous verification process. Our team checks vehicle history, condition reports, and dealer credentials. We also provide market price analysis to ensure you’re getting a fair deal.",
+    "q1": "How does {brand} use AI?",
+    "a1": "To make finding and buying a car easier: search with a photo of a car you like, ask questions about a listing and get an answer from its details (where the dealership has turned this on), read listings in Arabic or English, and translate messages with a dealership in one tap.",
+    "q2": "Is {brand} free for buyers?",
+    "a2": "Yes. Browsing cars, asking questions, booking test drives and messaging dealerships cost you nothing. Dealerships pay a subscription to list their cars.",
+    "q3": "How do I book a test drive?",
+    "a3": "Open the car you’re interested in, select “Schedule Test Drive” and pick a date and time within the dealership’s working hours. Your request stays pending until the dealership confirms it, and you can follow it on your Test Drives page. You need to be signed in to book.",
+    "q4": "Does {brand} inspect the cars?",
+    "a4": "No. Every car is listed by a dealership, and each dealership has a public page with its location, working hours and reviews from buyers. See the car in person — a test drive is the easiest way — and check its papers before you buy.",
     "q5": "Can I sell my car on {brand}?",
-    "a5": "Currently, {brand} focuses on connecting buyers with verified dealerships. However, we’re working on a peer-to-peer marketplace feature that will allow individual sellers to list their vehicles. Stay tuned for updates!",
-    "q6": "What payment methods are accepted?",
-    "a6": "{brand} supports various payment methods including bank transfers, financing through our partner lenders, and dealership payment plans. All transactions are secured with advanced encryption and buyer protection."
+    "a5": "Not as a private seller: only dealerships can list cars on {brand}.",
+    "q6": "How do I pay for a car?",
+    "a6": "Directly to the dealership. {brand} doesn’t take payments for cars, so agree the price, payment and any financing with the dealership itself — you can message them from the car’s page with “Chat Now”."
   }
 }

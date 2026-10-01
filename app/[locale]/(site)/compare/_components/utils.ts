@@ -1,4 +1,4 @@
-import { compareUtils } from "@/lib/utils";
+import { compareUtils, MAX_COMPARE_CARS } from "@/lib/utils";
 import { formatCarPrice } from "@/lib/utils/currency";
 import { formatMileage as formatMileageKm } from "@/lib/utils/units";
 import type {
@@ -201,7 +201,5 @@ export const computeWinners = (
 export const getCarTitle = (car: CompareCar): string =>
     car.title || `${car.year} ${car.make} ${car.model}`;
 
-/**
- * Maximum number of cars allowed in a comparison.
- */
-export const MAX_COMPARE_CARS = 3;
+/** Maximum number of cars allowed in a comparison; defined in lib/utils. */
+export { MAX_COMPARE_CARS };

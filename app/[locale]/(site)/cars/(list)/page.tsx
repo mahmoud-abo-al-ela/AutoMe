@@ -2,6 +2,9 @@ import { getCars } from "@/actions/cars-listing";
 import ClientPage from "./ClientPage";
 import { Suspense } from "react";
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { localizedPageMetadata } from "@/lib/utils/page-seo";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -16,6 +19,28 @@ const num = (v: string | string[] | undefined) => {
   const value = one(v);
   return value ? Number(value) : undefined;
 };
+
+/**
+ * The canonical is the bare listing, whatever the filters. Every filter
+ * combination is a distinct URL over the same stock; indexing each one would
+ * split the page's ranking across thousands of near-duplicates. On a
+ * dealership subdomain the list is that dealership's stock, so it is
+ * canonical there rather than on the marketplace.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "cars.meta" });
+
+  return localizedPageMetadata("/cars", locale as Locale, {
+    title: t("title"),
+    description: t("description"),
+    tenantScoped: true,
+  });
+}
 
 export default async function BrowseCarsPage({
   params: routeParams,

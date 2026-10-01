@@ -9,6 +9,7 @@
   "rateLimitReady": "You can try again now.",
   "serviceUnavailable": "The service is temporarily unavailable. Please try again.",
   "planLimit": "You have reached your plan's limit for {resource}.",
+  "noBillingAccount": "There’s no billing account for this dealership yet. Choose a plan first.",
   "resources": {
     "Resource": "The item",
     "Car": "The car",
@@ -43,5 +44,43 @@
   "requestDenied": "That request was blocked. If you think this is a mistake, please try again.",
   "chat": {
     "cannotTranslate": "This message can't be translated."
+  },
+  "invalidInput": "Some of the details aren’t valid. Please check them and try again.",
+  "invalidForm": "Please check the form and try again.",
+  "billing": {
+    "alreadyFree": "You’re already on the free plan.",
+    "notConfigured": "Billing for this plan isn’t available right now. Please contact support.",
+    "paymentSetupFailed": "We couldn’t set up your payment. Please try again.",
+    "paymentIncomplete": "Your payment hasn’t been completed yet."
+  },
+  "compare": {
+    "noCars": "None of these cars are available any more."
+  },
+  "team": {
+    "cannotRemoveSelf": "You can’t remove yourself from the team."
+  },
+  "review": {
+    "invalidRating": "Choose a rating from {min} to {max}.",
+    "alreadyReviewed": "You’ve already reviewed this dealership."
+  },
+  "upload": {
+    "tooLarge": "Each image must be {max} MB or smaller.",
+    "unsupportedType": "Only JPEG, PNG and WebP images are allowed.",
+    "required": "Add at least one image.",
+    "tooMany": "You can add at most {max} images."
+  },
+  "testDrive": {
+    "carUnavailable": "This car isn’t available for test drives.",
+    "notEditable": "Only pending test drives can be changed.",
+    "notCancellable": "This test drive can no longer be cancelled.",
+    "slot": {
+      "invalid": "That date or time isn’t valid.",
+      "outsideWindow": "Test drives can be booked up to {days} days ahead.",
+      "closed": "The dealership is closed on that day.",
+      "outsideHours": "That time is outside the dealership’s working hours.",
+      "offGrid": "Please choose one of the offered times.",
+      "past": "That time has already passed.",
+      "taken": "That time has just been booked. Please choose another."
+    }
   }
 }

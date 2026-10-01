@@ -109,7 +109,9 @@ export const createBillingPortalSession = withAuth(
     const subscription = organization.subscription;
     if (!subscription?.stripeCustomerId) {
       throw new ValidationError(
-        "No active Stripe subscription found. Please subscribe to a plan first."
+        "No active Stripe subscription found. Please subscribe to a plan first.",
+        null,
+        { key: "errors.noBillingAccount" }
       );
     }
 
@@ -120,7 +122,9 @@ export const createBillingPortalSession = withAuth(
         : "http://localhost:3000");
 
     if (!appUrl) {
-      throw new ValidationError("NEXT_PUBLIC_APP_URL is not configured");
+      // Misconfiguration, not the reader's input: a plain Error, so the
+      // response withholds it and the page shows its own fallback.
+      throw new Error("NEXT_PUBLIC_APP_URL is not configured");
     }
 
     const returnUrl = `${appUrl}${returnPath}`;
@@ -172,7 +176,7 @@ export const createPlanChangeSession = withAuth(
         : "http://localhost:3000");
 
     if (!appUrl) {
-      throw new ValidationError("NEXT_PUBLIC_APP_URL is not configured");
+      throw new Error("NEXT_PUBLIC_APP_URL is not configured");
     }
 
     const subscription = organization.subscription;
@@ -205,13 +209,15 @@ export const createPlanChangeSession = withAuth(
 
     // Case 2: No existing subscription and new plan is free — nothing to do
     if (newPrice === 0) {
-      throw new ValidationError("You are already on the free plan");
+      throw new ValidationError("You are already on the free plan", null, { key: "errors.billing.alreadyFree" });
     }
 
     // Case 3: No existing Stripe subscription — create a Checkout session
     if (!stripePriceId) {
       throw new ValidationError(
-        `Plan "${newPlan.name}" is not configured for Stripe billing. Please contact support.`
+        `Plan "${newPlan.name}" is not configured for Stripe billing. Please contact support.`,
+        null,
+        { key: "errors.billing.notConfigured" }
       );
     }
 

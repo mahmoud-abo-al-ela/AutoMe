@@ -5,12 +5,14 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { getTestDrives, updateTestDriveStatus } from "@/actions/test-drive";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { useDebounce } from "@/hooks/use-debounce";
 
 export const useAdminTestDrives = () => {
     const t = useTranslations("org.testDrives.toasts");
+    const actionError = useActionError();
     const queryClient = useQueryClient();
     const [statusFilter, setStatusFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
@@ -90,13 +92,13 @@ export const useAdminTestDrives = () => {
                 };
                 toast.success(t(byStatus[newStatus] ?? "statusChanged"));
             } else {
-                toast.error(response.error.message || t("updateFailed"));
+                toast.error(actionError(response.error, t("updateFailed")));
             }
         } catch (error) {
             logError("Error updating test drive status:", error);
             toast.error(t("unexpected"));
         }
-    }, [updateStatusFn, t]);
+    }, [updateStatusFn, t, actionError]);
 
     const handleFilterChange = useCallback((value: string) => {
         setStatusFilter(value);

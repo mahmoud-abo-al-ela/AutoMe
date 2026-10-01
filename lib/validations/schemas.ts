@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
+import { isDateString } from "@/lib/utils/booking-slots";
 
 /**
  * The per-language title and description columns, shared by the create and
@@ -219,9 +220,16 @@ export const memberIdSchema = z.object({
 
 // ============ TEST DRIVE ============
 
+/**
+ * A test drive's date is a Cairo calendar day, kept as "YYYY-MM-DD" end to
+ * end. Coercing it to a Date turned the form's local midnight into an
+ * instant, which a browser west of UTC sends as the previous day.
+ */
+const testDriveDate = z.string().refine(isDateString, "Date must be YYYY-MM-DD");
+
 export const requestTestDriveSchema = z.object({
   carId: z.string().min(1, "Car is required"),
-  date: z.coerce.date(),
+  date: testDriveDate,
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
   notes: z.string().max(1000).optional().default(""),
@@ -229,7 +237,7 @@ export const requestTestDriveSchema = z.object({
 
 export const editTestDriveSchema = z.object({
   testDriveId: z.string().min(1, "Test drive ID is required"),
-  date: z.coerce.date(),
+  date: testDriveDate,
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
   notes: z.string().max(1000).optional().default(""),

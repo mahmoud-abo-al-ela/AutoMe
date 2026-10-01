@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import {
   getOrganizationProfile,
   updateOrganizationProfile,
@@ -61,6 +62,7 @@ const normalizeProfile = (
 
 export function useOrganizationProfile() {
   const t = useTranslations("org.settings.profile.toasts");
+  const actionError = useActionError();
   const [profile, setProfile] = useState<OrganizationProfileFormState>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,7 +83,7 @@ export function useOrganizationProfile() {
         const profileResponse = await getOrganizationProfile();
 
         if (!profileResponse.success) {
-          toast.error(profileResponse.error?.message || t("loadFailed"));
+          toast.error(actionError(profileResponse.error, t("loadFailed")));
           return;
         }
 
@@ -90,8 +92,9 @@ export function useOrganizationProfile() {
         );
 
         setProfile(normalizedProfile);
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : t("loadFailed"));
+      } catch {
+        // Network or framework failure: English and technical, not for the reader.
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -128,16 +131,15 @@ export function useOrganizationProfile() {
     try {
       const response = await updateOrganizationProfile(profile);
       if (!response.success) {
-        toast.error(response.error?.message || t("updateFailed"));
+        toast.error(actionError(response.error, t("updateFailed")));
         return;
       }
 
       setProfile(normalizeProfile(response.data));
-      toast.success(response.message || t("updated"));
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : t("updateFailed"),
-      );
+      // The action's `message` is an English sentence; the toast is ours.
+      toast.success(t("updated"));
+    } catch {
+      toast.error(t("updateFailed"));
     } finally {
       setSaving(false);
     }

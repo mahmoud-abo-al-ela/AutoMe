@@ -1,7 +1,7 @@
 // Dealership detail service - Business logic layer
 import * as dealershipRepo from "@/lib/repositories/dealership";
 import { serializeCars } from "@/lib/utils/serializers";
-import { AuthenticationError, ValidationError } from "@/lib/utils/errors";
+import { AuthenticationError, NotFoundError, ValidationError } from "@/lib/utils/errors";
 import { formatWorkingHours } from "@/lib/utils/working-hours";
 import type { CarFilters, CarPagination } from "@/lib/services/car/listing";
 import type { DealershipReviewInput } from "@/lib/validations/schemas";
@@ -17,7 +17,7 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
     const dealership = await dealershipRepo.findDealershipBySlug(slug.trim());
 
     if (!dealership) {
-        throw new ValidationError("Dealership not found", "slug");
+        throw new NotFoundError("Dealership");
     }
 
     // Format working hours
@@ -147,7 +147,7 @@ export async function createDealershipReview(
 
     // Validate rating
     if (!rating || rating < 1 || rating > 5) {
-        throw new ValidationError("Rating must be between 1 and 5", "rating");
+        throw new ValidationError("Rating must be between 1 and 5", "rating", { key: "errors.review.invalidRating", params: { min: 1, max: 5 } });
     }
 
     // Check if user has already reviewed this dealership
@@ -159,7 +159,8 @@ export async function createDealershipReview(
     if (existingReview) {
         throw new ValidationError(
             "You have already reviewed this dealership",
-            "review"
+            "review",
+            { key: "errors.review.alreadyReviewed" }
         );
     }
 

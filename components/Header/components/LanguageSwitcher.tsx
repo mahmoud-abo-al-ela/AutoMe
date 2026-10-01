@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Languages } from "lucide-react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, localeLabels, type Locale } from "@/i18n/routing";
+import { rememberLocaleChoice } from "@/lib/utils/locale-suggestion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,11 @@ import { cn } from "@/lib/utils";
  * instead of dropping the reader on the home page. `router.replace` rather
  * than `push` so the switch does not add a history entry: pressing Back after
  * changing language should leave the page you came from, not bounce you
- * between translations of the same one.
+ * between translations of the same one. The query string is carried over so
+ * a filtered car list stays filtered in the other language.
+ *
+ * Switching is an explicit choice, so it is remembered: the Accept-Language
+ * suggestion banner never offers a language to someone who has picked one.
  */
 export default function LanguageSwitcher({
   className,
@@ -52,10 +57,13 @@ export default function LanguageSwitcher({
   const switchLanguage = () => {
     if (otherLocale === locale) return;
     onSwitch?.();
+    rememberLocaleChoice(otherLocale);
     startTransition(() => {
       // Passing the params through unchanged keeps dynamic segments intact;
       // only the locale changes.
-      router.replace(pathname, { locale: otherLocale });
+      router.replace(`${pathname}${window.location.search}`, {
+        locale: otherLocale,
+      });
     });
   };
 

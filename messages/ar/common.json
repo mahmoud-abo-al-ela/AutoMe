@@ -24,9 +24,9 @@
   "language": {
     "label": "اللغة",
     "switchTo": "التبديل إلى {language}",
-    "suggestionBody": "هذا الموقع متاح أيضًا بـ{language}.",
+    "suggestionBody": "هذا الموقع متاح أيضًا باللغة {language}.",
     "suggestionAccept": "التبديل إلى {language}",
-    "suggestionDismiss": "المتابعة بـ{language}"
+    "suggestionDismiss": "المتابعة باللغة {language}"
   },
   "pagination": {
     "showing": "عرض {start} إلى {end} من إجمالي {total} {noun}",
@@ -53,7 +53,9 @@
     "wishlistError": "تعذّر تحديث قائمة الرغبات",
     "compareAdded": "تمت الإضافة إلى المقارنة",
     "compareRemoved": "تمت الإزالة من المقارنة",
-    "compareLimit": "يمكنك مقارنة {max} سيارات كحد أقصى في المرة الواحدة"
+    "compareLimit": "يمكنك مقارنة {max} سيارات كحد أقصى في المرة الواحدة",
+    "wishlistAdded": "أُضيفت إلى قائمة رغباتك",
+    "wishlistRemoved": "أُزيلت من قائمة رغباتك"
   },
   "time": {
     "togglePeriod": "التبديل بين صباحًا ومساءً"

@@ -4,6 +4,7 @@ import { formatNumber } from "@/lib/utils/number";
 import type { Locale } from "@/i18n/routing";
 import { getDealershipBySlug } from "@/actions/dealerships";
 import { DealershipDetailPresenter } from "./_components";
+import { localizedPageMetadata } from "@/lib/utils/page-seo";
 
 export async function generateMetadata({
     params,
@@ -44,11 +45,16 @@ export async function generateMetadata({
                 value: formatNumber(carCount || 0, locale as Locale),
             });
 
-        return {
+        const meta = await localizedPageMetadata(`/dealerships/${slug}`, locale as Locale, {
             title,
             description: desc,
+        });
+
+        return {
+            ...meta,
             keywords: [name, t("keywords"), city, region].filter(Boolean).join(", "),
             openGraph: {
+                ...meta.openGraph,
                 title: socialTitle,
                 description: desc,
                 type: "website",
@@ -60,7 +66,6 @@ export async function generateMetadata({
                         alt: `${name} logo`,
                     },
                 ],
-                siteName: "AutoMe",
             },
             twitter: {
                 card: "summary_large_image",

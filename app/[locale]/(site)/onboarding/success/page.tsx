@@ -11,6 +11,8 @@ import {
     type ErrorTranslator,
 } from "@/lib/utils/error-messages";
 import type { Metadata } from "next";
+import type { Locale } from "@/i18n/routing";
+import { formatNumber } from "@/lib/utils/number";
 
 export const dynamic = 'force-dynamic';
 
@@ -78,13 +80,15 @@ export default async function OnboardingSuccessPage({
 async function FailurePage({ error }: { error: ActionError }) {
     const t = await getTranslations("onboarding.success.failed");
     const tErrors = await getTranslations("errors");
+    const locale = (await getLocale()) as Locale;
 
     // The action names its error with a key; the English `message` it also
     // carries is only the developer-facing fallback.
     const message = resolveActionError(
         tErrors as unknown as ErrorTranslator,
         error,
-        t("body")
+        t("body"),
+        (n) => formatNumber(n, locale)
     );
 
     return (

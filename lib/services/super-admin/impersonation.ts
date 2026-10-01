@@ -1,5 +1,6 @@
 import * as impersonationRepo from "@/lib/repositories/super-admin/impersonation";
 import * as membershipRepo from "@/lib/repositories/super-admin/membership";
+import { NotFoundError } from "@/lib/utils/errors";
 
 /**
  * Impersonation service for Super Admin operations
@@ -17,7 +18,7 @@ export async function startImpersonation(
   );
 
   if (!targetUser || targetUser.memberships.length === 0) {
-    throw new Error("User not found in this organization");
+    throw new NotFoundError("User");
   }
 
   // Create impersonation session

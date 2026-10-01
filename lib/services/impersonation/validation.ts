@@ -1,4 +1,5 @@
 import { db } from "@/lib/prisma";
+import { AuthorizationError } from "@/lib/utils/errors";
 
 /**
  * Validate that a user is a Super Admin
@@ -9,7 +10,7 @@ export async function validateSuperAdmin(superAdminId: string) {
   });
 
   if (!superAdmin || superAdmin.role !== "ADMIN") {
-    throw new Error("Only Admins can impersonate users");
+    throw new AuthorizationError("Only Admins can impersonate users");
   }
 
   return superAdmin;
@@ -36,7 +37,7 @@ export async function validateTargetMembership(
   });
 
   if (!targetMembership) {
-    throw new Error("Target user does not have access to this organization");
+    throw new AuthorizationError("Target user does not have access to this organization");
   }
 
   return targetMembership;

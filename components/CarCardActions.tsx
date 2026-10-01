@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
@@ -41,6 +42,7 @@ export default function CarCardActions({
   isWishlistPage?: boolean;
 }) {
   const t = useTranslations("common.carActions");
+  const actionError = useActionError();
   const fmt = useFormatters();
   const [isFavorite, setIsFavorite] = useState(isWishlisted);
   const [isInCompare, setIsInCompare] = useState(false);
@@ -80,7 +82,7 @@ export default function CarCardActions({
           onWishlistChange(carId);
         }
       } else {
-        toast.error(response.error?.message || t("wishlistError"));
+        toast.error(actionError(response.error, t("wishlistError")));
       }
     } catch (error) {
       logError("Failed to toggle wishlist", error);

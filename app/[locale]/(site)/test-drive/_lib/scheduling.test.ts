@@ -64,14 +64,27 @@ describe("generateAvailableDates", () => {
     const hours = toWorkingHours([entry("MONDAY", "09:00", "17:00")]);
     expect(hours.TUESDAY).toEqual(closed());
 
-    const dates = generateAvailableDates(hours, 14);
+    const dates = generateAvailableDates(hours);
 
     expect(dates.length).toBeGreaterThan(0);
     expect(dates.every((d) => dayOfWeekFor(d) === "MONDAY")).toBe(true);
   });
 
   it("offers nothing when the dealership is closed all week", () => {
-    expect(generateAvailableDates(toWorkingHours([]), 14)).toEqual([]);
+    expect(generateAvailableDates(toWorkingHours([]))).toEqual([]);
+  });
+
+  it("covers exactly the booking window, starting on Cairo's today", () => {
+    // 21:30 UTC on Thursday 1 Oct is already Friday 2 Oct in Cairo.
+    const everyDay = toWorkingHours(
+      (["SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"] as const).map(
+        (day) => entry(day, "09:00", "17:00")
+      )
+    );
+    const dates = generateAvailableDates(everyDay, new Date("2026-10-01T21:30:00Z"));
+
+    expect(dates).toHaveLength(14);
+    expect([dates[0].getFullYear(), dates[0].getMonth(), dates[0].getDate()]).toEqual([2026, 9, 2]);
   });
 });
 
@@ -83,6 +96,14 @@ describe("makeIsDateDisabled", () => {
     const nextTuesday = new Date();
     nextTuesday.setDate(nextTuesday.getDate() + ((2 - nextTuesday.getDay() + 7) % 7 || 7));
     expect(isDisabled(nextTuesday)).toBe(true);
+  });
+
+  it("disables days past the booking horizon even on an open day", () => {
+    // Thursday 1 Oct 2026 in Cairo; Mondays 12 Oct (inside) and 19 Oct (outside).
+    const now = new Date("2026-10-01T08:00:00Z");
+    const isDisabledAt = makeIsDateDisabled(hours, now);
+    expect(isDisabledAt(new Date(2026, 9, 12))).toBe(false);
+    expect(isDisabledAt(new Date(2026, 9, 19))).toBe(true);
   });
 
   it("disables dates in the past even on an open day", () => {

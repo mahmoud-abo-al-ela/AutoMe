@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMemberRole, removeMember } from "@/actions/team";
 import { queryKeys } from "@/lib/query-client";
@@ -9,6 +10,7 @@ import type { TeamMember, TeamMemberRole } from "../_lib/team-types";
 export function useTeamActions(organizationId: string) {
     const tRemove = useTranslations("org.settings.team.remove");
     const tRole = useTranslations("org.settings.team.roleChange");
+    const actionError = useActionError();
     const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
     const queryClient = useQueryClient();
@@ -46,7 +48,7 @@ export function useTeamActions(organizationId: string) {
                 toast.success(tRemove("removed"));
                 queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
-                toast.error(response?.error?.message || tRemove("failed"));
+                toast.error(actionError(response?.error, tRemove("failed")));
             }
         } catch (error) {
             console.error("Remove member error:", error);
@@ -68,7 +70,7 @@ export function useTeamActions(organizationId: string) {
                 toast.success(tRole("updated"));
                 queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) });
             } else {
-                toast.error(response?.error?.message || tRole("failed"));
+                toast.error(actionError(response?.error, tRole("failed")));
             }
         } catch (error) {
             console.error("Update role error:", error);

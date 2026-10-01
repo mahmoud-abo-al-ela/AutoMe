@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getDealershipInfo, updateWorkingHours } from "@/actions/settings";
@@ -42,6 +43,7 @@ const DEFAULT_WORKING_HOURS = DAYS.reduce((acc, day) => {
 
 export function useWorkingHours() {
     const t = useTranslations("org.settings.workingHours.toasts");
+    const actionError = useActionError();
     const [workingHours, setWorkingHours] =
         useState<WorkingHoursByDay>(DEFAULT_WORKING_HOURS);
 
@@ -135,7 +137,7 @@ export function useWorkingHours() {
             } else {
                 // A returned error response used to fall through silently, so a
                 // rejected save looked identical to a successful one.
-                toast.error(response.error?.message || t("updateFailed"));
+                toast.error(actionError(response.error, t("updateFailed")));
             }
         } catch {
             toast.error(t("updateFailed"));

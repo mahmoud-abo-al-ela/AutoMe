@@ -12,6 +12,7 @@ import { routing, localeDirection } from "@/i18n/routing";
 import { clerkLocalization } from "@/i18n/clerk-localization";
 import { getTranslations } from "next-intl/server";
 import { getCurrentOrganization } from "@/lib/getOrganization";
+import { requestOrigin } from "@/lib/utils/page-seo";
 
 // NOTE: the font stack in globals.css names these families directly rather
 // than using the --font-* variables below. next/font expands those to
@@ -75,10 +76,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home.meta" });
-  const organization = await getCurrentOrganization();
+  const [organization, origin] = await Promise.all([
+    getCurrentOrganization(),
+    requestOrigin(),
+  ]);
+
+  // Resolves relative Open Graph image paths into the absolute URLs social
+  // crawlers require. Without it Next falls back to localhost and warns.
+  const metadataBase = new URL(origin);
 
   if (organization) {
     return {
+      metadataBase,
       title: {
         default: organization.name,
         template: `%s | ${organization.name}`,
@@ -90,6 +99,7 @@ export async function generateMetadata({
   }
 
   return {
+    metadataBase,
     // The home tab is the one place worth more than the bare brand: it is the
     // title a search result leads with, and "AutoMe" alone says nothing about
     // what the product does.

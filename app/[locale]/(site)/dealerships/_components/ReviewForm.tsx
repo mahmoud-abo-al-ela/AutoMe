@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Star, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +20,7 @@ const ReviewForm = ({
     onSuccess: () => void;
 }) => {
     const t = useTranslations("dealerships.reviews.form");
+    const actionError = useActionError();
     const fmt = useFormatters();
     const [rating, setRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
@@ -82,7 +84,7 @@ const ReviewForm = ({
                     onSuccess();
                 }
             } else {
-                toast.error(response.error?.message || t("failed"));
+                toast.error(actionError(response.error, t("failed")));
             }
         } catch (error) {
             console.error("Error submitting review:", error);

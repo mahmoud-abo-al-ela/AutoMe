@@ -6,6 +6,7 @@ import { IMAGE_EXTENSION, sniffImageType } from "@/lib/utils/image-type";
 
 /** Matches the 5 MB the car form quotes and checks client-side. */
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const TOO_LARGE = { key: "errors.upload.tooLarge", params: { max: 5 } };
 
 /**
  * Upload bytes only as the image format they actually are. The declared type
@@ -14,11 +15,11 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
  */
 function checkedImage(buffer: Buffer) {
   if (buffer.length > MAX_IMAGE_BYTES) {
-    throw new ValidationError("Each image must be 5 MB or smaller", "images");
+    throw new ValidationError("Each image must be 5 MB or smaller", "images", TOO_LARGE);
   }
   const contentType = sniffImageType(buffer);
   if (!contentType) {
-    throw new ValidationError("Only JPEG, PNG and WebP images are allowed", "images");
+    throw new ValidationError("Only JPEG, PNG and WebP images are allowed", "images", { key: "errors.upload.unsupportedType" });
   }
   return { buffer, extension: IMAGE_EXTENSION[contentType], contentType };
 }
@@ -35,7 +36,7 @@ export async function processImageFile(imageFile: File | string) {
   ) {
     return processBase64String(imageFile);
   }
-  throw new ValidationError("Invalid image format", "image");
+  throw new ValidationError("Invalid image format", "image", { key: "errors.upload.unsupportedType" });
 }
 
 /**
@@ -44,7 +45,7 @@ export async function processImageFile(imageFile: File | string) {
 async function processFileObject(file: File) {
   // Refuse before reading an oversized body into memory.
   if (file.size > MAX_IMAGE_BYTES) {
-    throw new ValidationError("Each image must be 5 MB or smaller", "images");
+    throw new ValidationError("Each image must be 5 MB or smaller", "images", TOO_LARGE);
   }
   return checkedImage(Buffer.from(await file.arrayBuffer()));
 }
@@ -99,13 +100,14 @@ export async function uploadCarImages(
   maxImages = VALIDATION_RULES.CAR.MAX_IMAGES
 ) {
   if (!Array.isArray(images) || images.length === 0) {
-    throw new ValidationError("At least one image is required", "images");
+    throw new ValidationError("At least one image is required", "images", { key: "errors.upload.required" });
   }
 
   if (images.length > maxImages) {
     throw new ValidationError(
       `Maximum of ${maxImages} images allowed`,
-      "images"
+      "images",
+      { key: "errors.upload.tooMany", params: { max: maxImages } }
     );
   }
 

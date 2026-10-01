@@ -20,6 +20,39 @@ import Pricing from "@/components/Pricing/Pricing";
 import FAQ from "@/components/FAQ/FAQ";
 import { getActivePlans } from "@/actions/billing";
 import { getCurrentOrganization } from "@/lib/getOrganization";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { localizedPageMetadata } from "@/lib/utils/page-seo";
+
+/**
+ * The tab title comes from the root layout's `title.default` (the
+ * dealership's name on a subdomain), so none is set here — but Open Graph
+ * does not inherit it, so the preview title is spelled out.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home.meta" });
+  const organization = await getCurrentOrganization();
+  const meta = await localizedPageMetadata("/", locale as Locale, {
+    tenantScoped: true,
+  });
+
+  return {
+    ...meta,
+    openGraph: {
+      ...meta.openGraph,
+      // Mirrors the root layout's tab title and description.
+      title: organization?.name ?? t("title"),
+      description: organization
+        ? organization.description || `${organization.name} — AutoMe`
+        : t("description"),
+    },
+  };
+}
 
 export default async function Home({
   params,

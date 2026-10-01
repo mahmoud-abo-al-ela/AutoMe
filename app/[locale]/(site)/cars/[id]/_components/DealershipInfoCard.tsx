@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { CarDetailOrganization } from "../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
+import { telHref } from "@/lib/utils/phone";
 
 const DealershipInfoCard = ({
     organization,
@@ -91,7 +92,7 @@ const DealershipInfoCard = ({
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                             <a
-                                                href={`tel:${phone}`}
+                                                href={telHref(phone) ?? `tel:${phone}`}
                                                 className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
                                             >
                                                 <Phone className="h-3.5 w-3.5 flex-shrink-0 text-green-500" />
@@ -129,7 +130,7 @@ const DealershipInfoCard = ({
                             asChild
                             className="gap-2 bg-white/80 hover:bg-white cursor-pointer text-xs sm:text-sm"
                         >
-                            <a href={`tel:${phone}`}>
+                            <a href={telHref(phone) ?? `tel:${phone}`}>
                                 <Phone className="h-3.5 w-3.5 text-green-600" />
                                 <span className="hidden sm:inline">{t("call")}</span>
                             </a>

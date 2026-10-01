@@ -4,6 +4,7 @@ import { MapPin, Phone, Mail, Globe, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { LucideIcon } from "lucide-react";
 import type { DealershipDetail } from "../_lib/detail-types";
+import { telHref } from "@/lib/utils/phone";
 
 interface ContactCardProps {
     icon: LucideIcon;
@@ -65,7 +66,8 @@ export const DealershipContactInfo = ({
             iconColorClass: "text-green-600",
             label: t("callNow"),
             value: dealership.phone,
-            href: `tel:${dealership.phone}`,
+            // International form, so it dials from a foreign SIM or abroad.
+            href: telHref(dealership.phone) ?? `tel:${dealership.phone}`,
             external: false,
         });
     }

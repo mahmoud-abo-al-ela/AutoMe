@@ -1,4 +1,13 @@
 // Standardized API response helpers
+import { isOperationalError } from "./errors";
+
+/**
+ * The code an error response carries when what was thrown was not one of our
+ * own AppErrors — a Prisma failure, a third-party SDK error, a bug. Its
+ * message is not passed on (see createErrorResponse), and the client shows
+ * its own contextual fallback for it rather than any server text.
+ */
+export const UNEXPECTED_ERROR_CODE = "UNEXPECTED_ERROR";
 
 export interface SuccessResponse<T> {
     success: true;
@@ -72,6 +81,26 @@ export function createSuccessResponse<T>(data: T, message: string | null = null)
 
 export function createErrorResponse(error: unknown): ErrorResponse {
     const err = (error ?? {}) as ErrorLike;
+
+    // Only an AppError's message was written to be read. Anything else is
+    // whatever the failing library said — a Prisma error quotes the query
+    // and the column, a Stripe or Supabase one names our account's objects,
+    // and its `code` ("P2002") is theirs, not ours. Every wrapper logs the
+    // original before calling this, so nothing is lost by withholding it.
+    if (!isOperationalError(error)) {
+        const response: ErrorResponse = {
+            success: false,
+            error: {
+                message:
+                    process.env.NODE_ENV === "development" && err.message
+                        ? err.message
+                        : "An unexpected error occurred",
+                code: UNEXPECTED_ERROR_CODE,
+            },
+        };
+        if (process.env.NODE_ENV === "development") response.error.stack = err.stack;
+        return response;
+    }
 
     const response: ErrorResponse = {
         success: false,

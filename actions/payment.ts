@@ -15,26 +15,34 @@ function handleStripeError(error: unknown): never {
   const err = error as { message?: string; type?: string; code?: string };
   if (err.message?.includes("STRIPE_SECRET_KEY is not configured")) {
     throw new ValidationError(
-      "Payment system is not configured. Please contact support."
+      "Payment system is not configured. Please contact support.",
+      null,
+      { key: "errors.billing.notConfigured" }
     );
   }
 
   if (err.type === "StripeInvalidRequestError") {
     if (err.message?.includes("No such price")) {
       throw new ValidationError(
-        "The selected plan has an invalid Stripe configuration. Please contact support."
+        "The selected plan has an invalid Stripe configuration. Please contact support.",
+        null,
+        { key: "errors.billing.notConfigured" }
       );
     }
     if (err.message?.includes("No such customer")) {
       throw new ValidationError(
-        "Customer account issue. Please try again."
+        "Customer account issue. Please try again.",
+        null,
+        { key: "errors.billing.paymentSetupFailed" }
       );
     }
   }
 
   if (err.type === "StripeAuthenticationError") {
     throw new ValidationError(
-      "Payment system configuration error. Please contact support."
+      "Payment system configuration error. Please contact support.",
+      null,
+      { key: "errors.billing.notConfigured" }
     );
   }
 

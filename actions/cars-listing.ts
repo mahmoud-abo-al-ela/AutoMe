@@ -115,7 +115,7 @@ export const getCarTitles = withErrorHandling(async (input: unknown) => {
 
 export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {
   if (!carIds || !Array.isArray(carIds) || carIds.length === 0) {
-    throw new ValidationError("No car IDs provided", "carIds");
+    throw new ValidationError("No car IDs provided", "carIds", { key: "errors.compare.noCars" });
   }
 
   // Scope to current organization when on a subdomain
@@ -123,7 +123,7 @@ export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {
   const cars = await carRepository.findCarsByIds(carIds, organization?.id || null);
 
   if (!cars || cars.length === 0) {
-    throw new ValidationError("No cars found with the provided IDs", "carIds");
+    throw new ValidationError("No cars found with the provided IDs", "carIds", { key: "errors.compare.noCars" });
   }
 
   const carsWithImages = cars.map(serializeCarWithImages);
