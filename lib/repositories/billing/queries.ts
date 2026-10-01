@@ -41,6 +41,7 @@ export async function findActiveSubscription(organizationId: string) {
     },
     include: {
       plan: true,
+      pendingPlan: true,
     },
     orderBy: {
       createdAt: "desc",
@@ -56,6 +57,7 @@ export async function findSubscriptionByOrgId(organizationId: string) {
     where: { organizationId },
     include: {
       plan: true,
+      pendingPlan: true,
     },
   });
 }

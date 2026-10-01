@@ -27,7 +27,7 @@ describe.skipIf(!hasTestDb)("claimWebhookEvent idempotency (real Postgres)", () 
   });
 
   it("lets exactly one of two concurrent claims for the same event id win", async () => {
-    const evt = { id: "evt_test_race", provider: "stripe", type: "customer.subscription.updated" };
+    const evt = { id: "evt_test_race", provider: "paymob", type: "transaction.paid" };
 
     const results = await Promise.all([claimWebhookEvent(evt), claimWebhookEvent(evt)]);
 
@@ -37,14 +37,14 @@ describe.skipIf(!hasTestDb)("claimWebhookEvent idempotency (real Postgres)", () 
   });
 
   it("treats a redelivery of the same id as a duplicate (no re-claim)", async () => {
-    const evt = { id: "evt_test_dupe", provider: "stripe", type: "invoice.paid" };
+    const evt = { id: "evt_test_dupe", provider: "paymob", type: "transaction.failed" };
 
     expect(await claimWebhookEvent(evt)).toBe(true);
     expect(await claimWebhookEvent(evt)).toBe(false);
   });
 
   it("release makes a failed event re-claimable on the provider's retry", async () => {
-    const evt = { id: "evt_test_release", provider: "stripe", type: "customer.subscription.updated" };
+    const evt = { id: "evt_test_release", provider: "paymob", type: "transaction.paid" };
 
     expect(await claimWebhookEvent(evt)).toBe(true);
     expect(await claimWebhookEvent(evt)).toBe(false); // still claimed

@@ -7,9 +7,9 @@ import { formatWorkingHours } from "@/lib/utils/working-hours";
 import {
   BOOKING_HORIZON_DAYS,
   checkBooking,
-  dateOnlyToUtc,
   dayOfWeekForDate,
 } from "@/lib/utils/booking-slots";
+import { dateOnlyToUtc } from "@/lib/utils/date-only";
 import {
   AuthenticationError,
   NotFoundError,

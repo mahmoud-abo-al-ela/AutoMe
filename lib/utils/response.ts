@@ -84,7 +84,7 @@ export function createErrorResponse(error: unknown): ErrorResponse {
 
     // Only an AppError's message was written to be read. Anything else is
     // whatever the failing library said — a Prisma error quotes the query
-    // and the column, a Stripe or Supabase one names our account's objects,
+    // and the column, a Paymob or Supabase one names our account's objects,
     // and its `code` ("P2002") is theirs, not ours. Every wrapper logs the
     // original before calling this, so nothing is lost by withholding it.
     if (!isOperationalError(error)) {

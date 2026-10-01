@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { changeOrganizationPlan } from "@/actions/super-admin";
 import type { Plan } from "@/lib/generated/prisma";
 import type { OrganizationDetail } from "./OrgDetailsHeader";
+import { formatPlanAmount } from "@/lib/utils/currency";
 
 export default function OrgSubscription({
   subscription,
@@ -93,10 +94,7 @@ export default function OrgSubscription({
                 </Badge>
               </div>
               <div className="text-2xl font-bold">
-                {/* currentPlan comes from a find() and can be undefined, in
-                    which case this has always rendered "$NaN". Cast rather
-                    than defaulted, so that pre-existing path is unchanged. */}
-                ${((currentPlan?.monthlyPrice as number) / 100).toFixed(2)}
+                {formatPlanAmount(currentPlan?.monthlyPrice ?? 0)}
                 <span className="text-sm font-normal text-muted-foreground">
                   /month
                 </span>
@@ -133,7 +131,7 @@ export default function OrgSubscription({
                 <SelectContent>
                   {plans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.id}>
-                      {plan.name} - ${(plan.monthlyPrice / 100).toFixed(0)}/mo
+                      {plan.name} - {formatPlanAmount(plan.monthlyPrice)}/mo
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -166,7 +164,7 @@ export default function OrgSubscription({
               <SelectContent>
                 {plans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
-                    {plan.name} - ${(plan.monthlyPrice / 100).toFixed(0)}/mo
+                    {plan.name} - {formatPlanAmount(plan.monthlyPrice)}/mo
                   </SelectItem>
                 ))}
               </SelectContent>

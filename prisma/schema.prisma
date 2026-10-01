@@ -62,6 +62,26 @@ enum SubscriptionStatus {
   PENDING
 }
 
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
+// What a payment pays for.
+enum PaymentPurpose {
+  SIGNUP // the first period; creates the dealership
+  RENEWAL // the next period, from the end of the current one
+  UPGRADE // a higher plan, from today
+}
+
+enum PaymentStatus {
+  PENDING // checkout started, no result yet
+  PAID
+  FAILED
+  EXPIRED // abandoned; never paid
+  REFUNDED
+}
+
 enum AuditAction {
   // Organization
   ORG_CREATED
@@ -172,6 +192,8 @@ model Organization {
   buyerQuestions        BuyerQuestion[]
   assistantAnswers      AssistantAnswer[]
   digestSends           DigestSend[]
+  payments              Payment[]
+  billingNotices        BillingNotice[]
 
   // Emails to the dealership (the weekly summary) are written in this
   // language: "ar" or "en". Arabic by default — the market is Egypt.
@@ -199,17 +221,12 @@ model Plan {
   name String // "Starter", "Pro", "Enterprise"
   type PlanType @unique
 
-  // Pricing (in minor units)
+  // Pricing in EGP piasters (1 EGP = 100), the unit Paymob charges in.
   monthlyPrice Int @default(0)
   yearlyPrice  Int @default(0)
 
   // Free-trial length granted when a subscription is created. 0 = no trial.
   trialDays Int @default(0)
-
-  // Stripe Integration
-  stripeProductId      String? @unique
-  stripeMonthlyPriceId String? @unique
-  stripeYearlyPriceId  String? @unique
 
   // Limits
   maxCars            Int @default(10)
@@ -220,8 +237,10 @@ model Plan {
   // Features (JSON for flexibility)
   features Json // { aiProcessing: { enabled, limit }, analytics, chat, etc. }
 
-  isActive      Boolean        @default(true)
-  subscriptions Subscription[]
+  isActive             Boolean        @default(true)
+  subscriptions        Subscription[]
+  pendingSubscriptions Subscription[] @relation("PendingPlan")
+  payments             Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -236,22 +255,31 @@ model Subscription {
 
   status SubscriptionStatus @default(TRIALING)
 
-  // Stripe Integration
-  stripeCustomerId        String? @unique
-  stripeSubscriptionId    String? @unique
-  stripeCheckoutSessionId String? @unique
-
-  // Billing Period
+  // Billing Period. AutoMe keeps the calendar itself (Paymob is paid through
+  // a link each period): see lib/services/billing/periods.ts.
+  billingPeriod      BillingPeriod @default(MONTHLY)
   currentPeriodStart DateTime?
   currentPeriodEnd   DateTime?
   trialEndsAt        DateTime?
   canceledAt         DateTime?
+
+  // A downgrade (or a switch of billing period) waits for the paid period to
+  // end; the renewal then charges and applies these.
+  pendingPlanId        String?
+  pendingPlan          Plan?          @relation("PendingPlan", fields: [pendingPlanId], references: [id])
+  pendingBillingPeriod BillingPeriod?
+  // Canceled by the owner: keeps the plan until the period ends, then drops
+  // to the free plan instead of asking for a renewal.
+  cancelAtPeriodEnd    Boolean        @default(false)
+  // When the unpaid renewal turned the subscription PAST_DUE.
+  pastDueSince         DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([planId])
   @@index([status])
+  @@index([currentPeriodEnd])
 }
 
 model Membership {
@@ -371,6 +399,9 @@ model User {
 
   // Onboarding
   onboardingSessions OnboardingSession[]
+
+  // Billing
+  payments Payment[]
 
   // Dealership Reviews
   dealershipReviews DealershipReview[]
@@ -549,12 +580,62 @@ model OnboardingSession {
   data      Json
   status    OnboardingSessionStatus @default(PENDING)
   expiresAt DateTime
+  payments  Payment[]
   createdAt DateTime                @default(now())
   updatedAt DateTime                @updatedAt
 
   @@index([userId])
   @@index([status])
   @@index([expiresAt])
+}
+
+// ============ PAYMENTS ============
+
+// One row per checkout attempt through Paymob; the PAID rows are the
+// dealership's invoice history. `id` is sent to Paymob as `special_reference`
+// and comes back on the transaction callback as `merchant_order_id`.
+//
+// Nothing here cascades away: a payment is a financial record and outlives
+// the dealership, the onboarding session and the user who paid.
+model Payment {
+  id String @id @default(uuid())
+
+  // A sign-up payment has no organization until it is paid: it carries the
+  // onboarding session the organization is created from.
+  organizationId      String?
+  organization        Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  onboardingSessionId String?
+  onboardingSession   OnboardingSession? @relation(fields: [onboardingSessionId], references: [id], onDelete: SetNull)
+  userId              String?
+  user                User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  planId        String
+  plan          Plan           @relation(fields: [planId], references: [id])
+  billingPeriod BillingPeriod
+  purpose       PaymentPurpose
+
+  // What was charged, in piasters. The callback must match both exactly.
+  amountCents Int
+  currency    String        @default("EGP")
+  status      PaymentStatus @default(PENDING)
+
+  // Paymob's ids: the intention's order, and the transaction that paid it.
+  providerOrderId       String?
+  providerTransactionId String? @unique
+  method                String? // "card", "wallet"
+  maskedPan             String? // last four digits, as Paymob reports them
+
+  // The period this payment bought, set when it is paid.
+  periodStart DateTime?
+  periodEnd   DateTime?
+  paidAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, createdAt])
+  @@index([onboardingSessionId])
+  @@index([status])
 }
 
 // ============ DEALERSHIP REVIEW ============
@@ -583,11 +664,11 @@ model DealershipReview {
 
 // ============ WEBHOOKS ============
 
-// Idempotency ledger for incoming provider webhooks (Stripe, Clerk).
+// Idempotency ledger for incoming provider webhooks (Paymob, Clerk).
 // `id` is the provider's own event id, so a duplicate delivery collides on the PK.
 model WebhookEvent {
-  id          String   @id // provider event id (e.g. Stripe `evt_...`, Svix `msg_...`)
-  provider    String // "stripe" | "clerk"
+  id          String   @id // provider event id (Paymob "<transaction id>:<outcome>", Svix `msg_...`)
+  provider    String // "paymob" | "clerk" ("stripe" on rows from before Paymob)
   type        String
   processedAt DateTime @default(now())
 
@@ -725,4 +806,19 @@ model DigestSend {
   createdAt      DateTime     @default(now())
 
   @@unique([organizationId, weekStart])
+}
+
+// The billing emails the daily renewals job sends, each claimed once per
+// subscription period, so a re-run or a retry does not email twice.
+model BillingNotice {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // "renewal_due" | "renewal_reminder" | "past_due" | "downgraded"
+  kind           String
+  // The end of the period the email is about.
+  periodEnd      DateTime
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, kind, periodEnd])
 }

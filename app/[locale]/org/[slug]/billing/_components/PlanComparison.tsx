@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { usePathname } from "@/i18n/navigation";
+import { useState, useRef, type ReactNode } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,8 @@ import {
 import { Check, Loader2, LayoutGrid, TableProperties } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createPlanChangeSession } from "@/actions/billing";
+import { changePlan } from "@/actions/billing";
+import { isFreePlan, planChange } from "@/lib/utils/plan-change";
 import { useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -27,24 +28,28 @@ import {
 } from "@/components/Pricing/pricing-plans";
 import PlanCard from "./PlanCard";
 import FeatureComparisonTable from "./FeatureComparisonTable";
-import type { BillingPlan } from "./_lib/billing-types";
+import type { BillingPaidAhead, BillingPlan, BillingSubscription } from "./_lib/billing-types";
 
 export default function PlanComparison({
   plans,
-  currentPlanId,
+  subscription,
+  paidAhead,
   isOwner,
   organizationId,
 }: {
   plans: BillingPlan[];
-  currentPlanId: string | null | undefined;
+  subscription: BillingSubscription;
+  paidAhead: BillingPaidAhead;
   isOwner: boolean;
   organizationId: string;
 }) {
+  const currentPlanId = subscription?.planId;
   const t = useTranslations("org.billing.plans");
   const tPlans = useTranslations("plans");
   const tCommon = useTranslations("common.actions");
   const actionError = useActionError();
-  const { number, locale } = useFormatters();
+  const { number, locale, date } = useFormatters();
+  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
@@ -52,7 +57,6 @@ export default function PlanComparison({
     "monthly"
   );
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
-  const pathname = usePathname();
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   // The dialog names the plan; a DB plan with an unrecognised type falls back
@@ -91,16 +95,21 @@ export default function PlanComparison({
     setIsDialogOpen(true);
   };
 
+  // What confirming would do: the same rule the server applies.
+  const period = billingCycle === "yearly" ? "YEARLY" : "MONTHLY";
+  const change = selectedPlan ? planChange(subscription, selectedPlan, period) : "none";
+  const periodEnd = subscription?.currentPeriodEnd
+    ? date(subscription.currentPeriodEnd, { month: "long" })
+    : "";
+  const selectedPrice = selectedPlan
+    ? formatPlanPrice(selectedPlan, billingCycle, locale) ?? ""
+    : "";
+
   const handlePlanChange = async () => {
     if (!selectedPlan) return;
     setIsChanging(true);
     try {
-      const result = await createPlanChangeSession(
-        organizationId,
-        selectedPlan.id,
-        billingCycle,
-        pathname
-      );
+      const result = await changePlan(organizationId, selectedPlan.id, billingCycle);
 
       if (!result.success) {
         toast.error(actionError(result.error, t("changeFailed")));
@@ -109,13 +118,21 @@ export default function PlanComparison({
       }
 
       if (result.data.type === "redirect") {
-        // The action only returns this branch with a url present.
-        window.location.href = result.data.url!;
-      } else if (result.data.type === "updated") {
-        toast.success(t("switched", { plan: selectedPlanName }));
-        setIsDialogOpen(false);
-        window.location.reload();
+        // To Paymob's checkout; the change applies once the payment does.
+        window.location.href = result.data.url;
+        return;
       }
+      toast.success(
+        result.data.type === "scheduled" && result.data.effectiveAt
+          ? t("scheduledToast", {
+              plan: selectedPlanName,
+              date: date(result.data.effectiveAt, { month: "long" }),
+            })
+          : t("switched", { plan: selectedPlanName })
+      );
+      setIsDialogOpen(false);
+      setIsChanging(false);
+      router.refresh();
     } catch (error) {
       console.error("Failed to change plan:", error);
       // A thrown error is a network or framework failure; its message is
@@ -196,7 +213,7 @@ export default function PlanComparison({
               {plans.map((plan) => {
                 const config = PLAN_CONFIG[plan.type] || PLAN_CONFIG.STARTER;
                 const isCurrent =
-                  plan.id === currentPlanId ||
+                  (plan.id === currentPlanId && (isFreePlan(plan) || period === subscription?.billingPeriod)) ||
                   (!currentPlanId && plan.type === "STARTER");
                 const isPro = plan.type === "PRO";
                 const displayPrice = getDisplayPrice(plan);
@@ -223,7 +240,7 @@ export default function PlanComparison({
             <div className="flex justify-center gap-1.5 md:hidden">
               {plans.map((plan) => {
                 const isCurrent =
-                  plan.id === currentPlanId ||
+                  (plan.id === currentPlanId && (isFreePlan(plan) || period === subscription?.billingPeriod)) ||
                   (!currentPlanId && plan.type === "STARTER");
                 return (
                   <div
@@ -271,25 +288,27 @@ export default function PlanComparison({
             <DialogTitle>{t("changePlan")}</DialogTitle>
             <DialogDescription>
               {selectedPlan &&
-                (getDisplayPrice(selectedPlan) > 0
-                  ? t.rich("switchDialogWithPrice", {
-                      plan: selectedPlanName,
-                      price: t("priceWithPeriod", {
-                        price:
-                          formatPlanPrice(selectedPlan, billingCycle, locale) ??
-                          "",
-                        period: t(
-                          billingCycle === "yearly"
-                            ? "perYearShort"
-                            : "perMonthShort"
-                        ),
-                      }),
-                      b: (chunks) => <strong>{chunks}</strong>,
-                    })
-                  : t.rich("switchDialogFree", {
-                      plan: selectedPlanName,
-                      b: (chunks) => <strong>{chunks}</strong>,
-                    }))}
+                (() => {
+                  const b = (chunks: ReactNode) => <strong>{chunks}</strong>;
+                  const free = isFreePlan(selectedPlan);
+                  switch (change) {
+                    case "none":
+                      return t("dialogNone", { plan: selectedPlanName });
+                    case "pay":
+                      return t.rich("dialogPay", { plan: selectedPlanName, price: selectedPrice, period, b });
+                    case "schedule":
+                      return free
+                        ? t.rich("dialogScheduleFree", { plan: selectedPlanName, date: periodEnd, b })
+                        : t.rich("dialogSchedule", { plan: selectedPlanName, price: selectedPrice, period, date: periodEnd, b });
+                    case "apply":
+                      return free
+                        ? t.rich("dialogApplyFree", { plan: selectedPlanName, b })
+                        : t.rich("dialogApplyTrial", { price: selectedPrice, period, b });
+                  }
+                })()}
+              {paidAhead && change !== "none" && (
+                <span className="mt-2 block text-amber-700 dark:text-amber-400">{t("dialogPaidAhead")}</span>
+              )}
             </DialogDescription>
           </DialogHeader>
 
@@ -323,9 +342,11 @@ export default function PlanComparison({
             >
               {tCommon("cancel")}
             </Button>
+            {/* Nothing to confirm when already on it, or when the next period
+                is paid (the server refuses those changes too). */}
             <Button
               onClick={handlePlanChange}
-              disabled={isChanging}
+              disabled={isChanging || change === "none" || !!paidAhead}
               className="cursor-pointer"
             >
               {isChanging ? (
@@ -333,6 +354,8 @@ export default function PlanComparison({
                   <Loader2 className="h-4 w-4 me-2 animate-spin" />
                   {t("processing")}
                 </>
+              ) : change === "pay" ? (
+                t("goToPayment")
               ) : (
                 t("confirm")
               )}

@@ -8,6 +8,8 @@
  * makes the early one wait in winter.
  */
 
+import { cairoMidnight, utcToDateOnly } from "@/lib/utils/date-only";
+
 const ZONE = "Africa/Cairo";
 const DAY_MS = 86_400_000;
 
@@ -46,22 +48,6 @@ function cairoWall(instant: Date): CairoWall {
   };
 }
 
-/** Minutes Cairo is ahead of UTC at an instant. */
-function cairoOffsetMinutes(instant: number): number {
-  const w = cairoWall(new Date(instant));
-  const asUtc = Date.UTC(w.year, w.month - 1, w.day, w.hour, w.minute);
-  return Math.round((asUtc - Math.floor(instant / 60_000) * 60_000) / 60_000);
-}
-
-/** The instant Cairo's clocks read 00:00 on a calendar day. */
-function cairoMidnight(year: number, month: number, day: number): Date {
-  const wallAsUtc = Date.UTC(year, month - 1, day);
-  // The offset at the guess can differ from the offset at the answer on a
-  // transition day; asking twice settles it.
-  const first = wallAsUtc - cairoOffsetMinutes(wallAsUtc) * 60_000;
-  return new Date(wallAsUtc - cairoOffsetMinutes(first) * 60_000);
-}
-
 export interface DigestWeek {
   /** Saturday 00:00 Cairo, inclusive. */
   start: Date;
@@ -88,7 +74,7 @@ export function digestWeek(now: Date): DigestWeek {
   const thisSaturday = new Date(today - sinceSaturday * DAY_MS);
   const lastSaturday = new Date(thisSaturday.getTime() - 7 * DAY_MS);
 
-  const at = (d: Date) => cairoMidnight(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+  const at = (d: Date) => cairoMidnight(utcToDateOnly(d));
   return {
     start: at(lastSaturday),
     end: at(thisSaturday),

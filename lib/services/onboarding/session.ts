@@ -120,7 +120,7 @@ export async function markOnboardingSessionCompleted(sessionId: string): Promise
 
 /**
  * Get or resume a pending onboarding session for a user.
- * Used when the user returns to the onboarding page (e.g., after cancelling Stripe Checkout).
+ * Used when the user returns to the onboarding page (e.g., after leaving Paymob's checkout).
  *
  * @param {string} userId - The authenticated user's ID
  * @returns {Promise<{ sessionId: string, data: Object }|null>} The session or null

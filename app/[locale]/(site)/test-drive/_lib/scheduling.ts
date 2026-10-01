@@ -4,12 +4,8 @@ import type { DayOfWeek } from "@/lib/generated/prisma";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 import { format } from "date-fns";
 import { cairoNow } from "@/lib/utils/datetime";
-import {
-  addDays,
-  bookingWindow,
-  dateOnlyToUtc,
-  dayOfWeekForDate,
-} from "@/lib/utils/booking-slots";
+import { bookingWindow, dayOfWeekForDate } from "@/lib/utils/booking-slots";
+import { addDays, dateOnlyToUtc } from "@/lib/utils/date-only";
 
 export { dayOfWeekForDate, endTimeOptions } from "@/lib/utils/booking-slots";
 

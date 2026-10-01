@@ -25,5 +25,61 @@
     "aiUnlimited": "{used} (غير محدود)",
     "cta": "افتح لوحة التحكم",
     "footer": "يصلك هذا الملخص كل سبت. يمكنك إيقافه أو تغيير لغته من الإعدادات ← الملخص الأسبوعي."
+  },
+  "billing": {
+    "cta": {
+      "renew": "جدّد الآن",
+      "pay": "ادفع الآن",
+      "plans": "اختر باقة",
+      "billing": "عرض الفوترة",
+      "retry": "حاول مرة أخرى"
+    },
+    "renewalDue": {
+      "subject": "تتجدد باقة {plan} في {date}",
+      "heading": "حان وقت تجديد باقة {plan}",
+      "body": "معرض {dealership} على باقة {plan} حتى {date}. ادفع {amount} عن {period, select, YEARLY {سنة} other {شهر}} قادم للاحتفاظ بها دون انقطاع."
+    },
+    "renewalReminder": {
+      "subject": "أيام قليلة متبقية على باقة {plan}: جدّد قبل {date}",
+      "heading": "أيام قليلة متبقية على باقة {plan}",
+      "body": "تنتهي باقة {plan} لمعرض {dealership} في {date}. ادفع {amount} عن {period, select, YEARLY {سنة} other {شهر}} قادم قبل ذلك للاحتفاظ بها."
+    },
+    "trialDue": {
+      "subject": "تنتهي الفترة التجريبية لباقة {plan} في {date}",
+      "heading": "فترتك التجريبية تقترب من نهايتها",
+      "body": "تنتهي الفترة التجريبية المجانية لباقة {plan} لمعرض {dealership} في {date}. ادفع {amount} عن {period, select, YEARLY {سنة} other {شهر}} للاحتفاظ بباقة {plan} بعدها."
+    },
+    "trialReminder": {
+      "subject": "أيام قليلة متبقية في الفترة التجريبية لباقة {plan}",
+      "heading": "أيام قليلة متبقية في فترتك التجريبية",
+      "body": "تنتهي الفترة التجريبية المجانية لباقة {plan} لمعرض {dealership} في {date}. ادفع {amount} عن {period, select, YEARLY {سنة} other {شهر}} للاحتفاظ بباقة {plan}، وإلا ينتقل معرضك إلى باقة Starter المجانية."
+    },
+    "pastDue": {
+      "subject": "السداد متأخر لباقة {plan}",
+      "heading": "لم نستلم الدفع بعد",
+      "body": "لم تُجدَّد باقة {plan} لمعرض {dealership}. ادفع قبل {date} للاحتفاظ بها، وبعد ذلك ينتقل معرضك إلى باقة Starter المجانية."
+    },
+    "downgradedCanceled": {
+      "subject": "معرض {dealership} الآن على باقة Starter المجانية",
+      "heading": "انتهت باقة {plan}",
+      "body": "كما طلبت، انتهت باقة {plan} وأصبح معرض {dealership} على باقة Starter المجانية. تنطبق حدودها من اليوم، ويمكنك اختيار باقة من جديد في أي وقت."
+    },
+    "downgradedUnpaid": {
+      "subject": "معرض {dealership} الآن على باقة Starter المجانية",
+      "heading": "معرضك الآن على باقة Starter المجانية",
+      "body": "لم نستلم الدفع لباقة {plan}، لذا انتقل معرض {dealership} إلى باقة Starter المجانية. تنطبق حدودها من اليوم، ويمكنك الدفع لباقة في أي وقت لاستعادة كل شيء."
+    },
+    "paymentReceived": {
+      "subject": "تم استلام الدفع: {amount}",
+      "heading": "شكرًا لك على الدفع",
+      "body": "استلمنا {amount} مقابل باقة {plan}. معرض {dealership} مدفوع حتى {date}.",
+      "bodyAhead": "استلمنا {amount} مقابل باقة {plan}. تبدأ الفترة التالية لمعرض {dealership} في {start} وهي مدفوعة حتى {date}."
+    },
+    "paymentFailed": {
+      "subject": "لم تتم عملية الدفع",
+      "heading": "لم تتم عملية الدفع",
+      "body": "لم تكتمل عملية دفع {amount} مقابل باقة {plan}، ولم يُخصم أي مبلغ. يمكنك المحاولة مرة أخرى من صفحة الفوترة."
+    },
+    "footer": "تصلك هذه الرسالة لأنك مالك معرض {dealership} على AutoMe."
   }
 }

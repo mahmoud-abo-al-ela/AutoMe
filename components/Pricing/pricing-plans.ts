@@ -2,7 +2,7 @@
 import { Zap, Shield, Headphones, type LucideIcon } from "lucide-react";
 import type { Prisma } from "@/lib/generated/prisma";
 import type { Locale } from "@/i18n/routing";
-import { formatNumber } from "@/lib/utils/number";
+import { formatPlanAmount } from "@/lib/utils/currency";
 
 /**
  * A feature bullet, as a message key plus its ICU params rather than a
@@ -37,7 +37,7 @@ export type UiPlan = {
   planKey: PlanKey | null;
   /** Untranslated DB name, used only when `planKey` is null. */
   name: string;
-  /** Cents. null means "contact us" pricing, which renders as "Custom". */
+  /** Piasters. null means "contact us" pricing, which renders as "Custom". */
   monthlyPrice: number | null;
   yearlyPrice?: number | null;
   popular: boolean;
@@ -129,8 +129,8 @@ export const defaultPlans: UiPlan[] = [
   {
     planKey: "pro",
     name: "Professional",
-    monthlyPrice: 4900,
-    yearlyPrice: 47040,
+    monthlyPrice: 80000,
+    yearlyPrice: 800000,
     popular: true,
     features: [
       { key: "carListings", params: { count: 50 }, included: true },
@@ -149,8 +149,8 @@ export const defaultPlans: UiPlan[] = [
   {
     planKey: "enterprise",
     name: "Enterprise",
-    monthlyPrice: null,
-    yearlyPrice: null,
+    monthlyPrice: 150000,
+    yearlyPrice: 1500000,
     popular: false,
     features: [
       { key: "carListingsUnlimited", included: true },
@@ -257,13 +257,8 @@ export function calculateSavingsPercentage(plans: PlanPricing[]): number {
  * `plans.custom` in that case rather than this module returning the English
  * word "Custom".
  *
- * Plan pricing is deliberately USD and does NOT go through formatCarPrice:
- * Stripe charges these in dollars (lib/services/stripe/plan.ts), so showing
- * them as EGP would misstate what the customer is billed.
- *
- * The digits, however, are the reader's — `formatNumber` routes them through
- * `intlLocale`, so an Arabic page reads ٤٩ like every other number on it
- * rather than being the one place that stays Western.
+ * Plans are priced and charged in EGP through Paymob, so this is the amount
+ * the dealership pays, in the reader's digits (formatPlanAmount).
  */
 export function formatPlanPrice(
   plan: PlanPricing,
@@ -271,11 +266,8 @@ export function formatPlanPrice(
   locale: Locale = "en",
 ): string | null {
   if (plan.monthlyPrice === null) return null;
-  const price =
-    billingPeriod === "monthly"
-      ? plan.monthlyPrice
-      : plan.yearlyPrice || plan.monthlyPrice * 12 * 0.8;
-  return `$${formatNumber(Math.floor(price / 100), locale)}`;
+  const price = billingPeriod === "monthly" ? plan.monthlyPrice : (plan.yearlyPrice ?? 0);
+  return formatPlanAmount(price, locale);
 }
 
 /** Message key under `plans` for the billing period, or null to render nothing. */

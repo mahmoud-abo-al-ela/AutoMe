@@ -1,48 +1,22 @@
 "use server";
 
+import { z } from "zod";
 import { db } from "@/lib/prisma";
-import { resolveLogoUrl } from "@/lib/services/onboarding/logo";
 import {
   saveOnboardingSession as saveSession,
-  getOnboardingSessionForUser,
-  markOnboardingSessionCompleted,
   resumeOnboardingSession as resumeSession,
 } from "@/lib/services/onboarding/session";
-import { sendWelcomeEmail } from "@/lib/services/notification";
-import { retrieveCheckoutSession } from "@/lib/services/stripe/subscription";
-import { findSubscriptionByCheckoutSessionId } from "@/lib/repositories/webhook";
-import Stripe from "stripe";
+import { createUnpaidOrganization } from "@/lib/services/billing/signup";
+import { confirmPayment } from "@/lib/services/billing/confirm";
+import { findPaymentSummary } from "@/lib/repositories/payment";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { createSuccessResponse } from "@/lib/utils/response";
-import {
-  AuthenticationError,
-  ValidationError,
-  NotFoundError,
-  ConflictError,
-  logError,
-} from "@/lib/utils/errors";
-import { createOrganizationInTransaction } from "@/lib/services/onboarding/creation";
+import { NotFoundError } from "@/lib/utils/errors";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { organizationSchema } from "@/lib/validations/schemas";
 import type { OrganizationInput } from "@/lib/validations/schemas";
 import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
-import aj from "@/lib/arcjet";
-import {
-  assertArcjetAllowed,
-  assertArcjetConfigured,
-} from "@/lib/middleware/with-rate-limit";
-import { request } from "@arcjet/next";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key");
-
-/**
- * Stripe returns customer/subscription unexpanded here, so these arrive as ID
- * strings; the object branch exists only to narrow the expandable union.
- */
-function idOf(value: string | { id: string } | null | undefined): string | null {
-  if (!value) return null;
-  return typeof value === "string" ? value : value.id;
-}
 
 export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
   if (!slug || slug.length < 3) {
@@ -57,124 +31,41 @@ export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
   return createSuccessResponse({ available: !existing });
 });
 
-export const createOrganization = withAuth(
-  async (
-    ctx,
-    {
-      name,
-      slug,
-      email,
-      phone,
-      address,
-      country,
-      region,
-      city,
-      logo,
-      planId,
-      workingHours,
-      userId,
-      subscriptionId,
-      paymentIntentId,
-    }: OrganizationInput
-  ) => {
-    // Rate limit org creation
-    const req = await request();
-    assertArcjetConfigured();
-    const decision = await aj.protect(req, { requested: 1 });
-    assertArcjetAllowed(decision);
+/**
+ * Create a dealership on the free plan, or on a paid plan's free trial. A paid
+ * plan without a trial is refused: those are created only by a settled
+ * Paymob payment (lib/services/billing/settle.ts), whatever the client sends.
+ */
+export const createOrganization = withAuth(async (ctx, input: OrganizationInput) => {
+  await enforceRateLimit();
+  const data = validateAction(organizationSchema, input);
 
-    // Validate payload
-    const validatedData = validateAction(organizationSchema, {
-      name,
-      slug,
-      email,
-      phone,
-      address,
-      country,
-      region,
-      city,
-      logo,
-      planId,
-      workingHours,
-      userId,
-      subscriptionId,
-      paymentIntentId,
-    });
-    // Validate slug availability
-    const existing = await db.organization.findUnique({
-      where: { slug },
-      select: { id: true },
-    });
-    if (existing) {
-      throw new ConflictError("This URL slug is already taken");
-    }
+  const organization = await createUnpaidOrganization({
+    user: ctx.user,
+    details: {
+      name: data.name,
+      slug: data.slug,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      country: data.country,
+      region: data.region,
+      city: data.city,
+      workingHours: data.workingHours,
+    },
+    logo: data.logo,
+    planId: data.planId,
+    billingPeriod: data.billingPeriod === "yearly" ? "YEARLY" : "MONTHLY",
+  });
 
-    // Get the plan
-    const plan = await db.plan.findUnique({
-      where: { id: planId },
-    });
-
-    if (!plan) {
-      throw new NotFoundError("Plan");
-    }
-
-    // Retrieve Stripe subscription if provided
-    let stripeSubscription = null;
-    if (subscriptionId) {
-      stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
-    }
-
-    // Upload logo to storage if provided (base64)
-    const logoUrl = await resolveLogoUrl(logo, slug);
-
-    const stripeData = {
-      subscriptionId: stripeSubscription?.id || subscriptionId,
-      customerId: idOf(stripeSubscription?.customer),
-      paymentIntentId,
-      stripeSubscription,
-      trialDays: plan.trialDays,
-    };
-
-    const organization = await createOrganizationInTransaction({
-      name,
-      slug,
-      email,
-      phone,
-      address,
-      country,
-      region,
-      city,
-      logoUrl,
-      workingHours,
-      userId: ctx.user.id,
-      userEmail: ctx.user.email,
-      planId: plan.id,
-      stripeData,
-    });
-
-    // Send welcome email. Skipped for accounts with no address (phone-only
-    // Clerk signups); the organization is created either way.
-    if (ctx.user.email) {
-      sendWelcomeEmail({
-        to: ctx.user.email,
-        userName: ctx.user.name || "there",
-        dealershipName: organization.name,
-        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
-      }).catch((error) => {
-        // Non-blocking: email failure should not fail the main operation
-        logError(error);
-      });
-    }
-
-    return createSuccessResponse({
-      organization: {
-        id: organization.id,
-        name: organization.name,
-        slug: organization.slug,
-      },
-    });
-  }
-);
+  return createSuccessResponse({
+    organization: {
+      id: organization.id,
+      name: organization.name,
+      slug: organization.slug,
+    },
+  });
+});
 
 export const saveOnboardingFormData = withAuth(
   async (ctx, formData: OnboardingSessionData) => {
@@ -195,122 +86,28 @@ export const resumeOnboardingFormData = withAuth(async (ctx) => {
   });
 });
 
-export const createOrganizationAfterCheckout = withAuth(
-  async (ctx, stripeSessionId: string) => {
-    const session = await retrieveCheckoutSession(stripeSessionId);
+const paymentRefSchema = z.string().uuid();
 
-    if (session.payment_status !== "paid") {
-      throw new ValidationError("Payment not completed", null, { key: "errors.billing.paymentIncomplete" });
-    }
+/**
+ * Where a sign-up payment stands, for the page Paymob returns the buyer to.
+ * Settles it from Paymob's own answer when the callback has not arrived yet.
+ *
+ * Not rate limited: the page polls this every few seconds while a payment is
+ * confirming, which the shared bucket (10 an hour) would cut off. It only
+ * answers for the caller's own payment, and asks Paymob only while unpaid.
+ */
+export const confirmSignupPayment = withAuth(async (ctx, ref: string) => {
+  const paymentId = validateAction(paymentRefSchema, ref);
+  const payment = await findPaymentSummary(paymentId);
 
-    const existingSub =
-      await findSubscriptionByCheckoutSessionId(stripeSessionId);
-    if (existingSub?.organization) {
-      return createSuccessResponse({
-        organization: existingSub.organization,
-        redirect: `/org/${existingSub.organization.slug}/dashboard`,
-      });
-    }
-
-    const { onboardingSessionId } = session.metadata ?? {};
-    const onboardingData = await getOnboardingSessionForUser(
-      onboardingSessionId,
-      ctx.user.id
-    );
-
-    if (!onboardingData) {
-      throw new NotFoundError(
-        "Onboarding session not found or expired. Please restart onboarding."
-      );
-    }
-
-    const {
-      name,
-      slug,
-      email,
-      phone,
-      address,
-      country,
-      region,
-      city,
-      logo,
-      planId,
-      workingHours,
-    } = onboardingData;
-
-    const existing = await db.organization.findUnique({
-      where: { slug },
-      select: { id: true },
-    });
-    if (existing) {
-      throw new ConflictError("This URL slug is already taken");
-    }
-
-    const plan = await db.plan.findUnique({
-      where: { id: planId },
-    });
-
-    if (!plan) {
-      throw new NotFoundError("Plan");
-    }
-
-    let stripeSubscription = null;
-    const sessionSubscriptionId = idOf(session.subscription);
-    if (sessionSubscriptionId) {
-      stripeSubscription = await stripe.subscriptions.retrieve(
-        sessionSubscriptionId
-      );
-    }
-
-    const logoUrl = await resolveLogoUrl(logo, slug);
-
-    const stripeData = {
-      subscriptionId: stripeSubscription?.id ?? sessionSubscriptionId,
-      customerId: idOf(session.customer),
-      checkoutSessionId: stripeSessionId,
-      stripeSubscription,
-      trialDays: plan.trialDays,
-    };
-
-    const organization = await createOrganizationInTransaction({
-      name,
-      slug,
-      email,
-      phone,
-      address,
-      country,
-      region,
-      city,
-      logoUrl,
-      workingHours,
-      userId: ctx.user.id,
-      userEmail: ctx.user.email,
-      planId: plan.id,
-      stripeData,
-    });
-
-    // Send welcome email. Skipped for accounts with no address (phone-only
-    // Clerk signups); the organization is created either way.
-    if (ctx.user.email) {
-      sendWelcomeEmail({
-        to: ctx.user.email,
-        userName: ctx.user.name || "there",
-        dealershipName: organization.name,
-        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${organization.slug}/dashboard`,
-      }).catch((error) => {
-        // Non-blocking: email failure should not fail the main operation
-        logError(error);
-      });
-    }
-
-    await markOnboardingSessionCompleted(onboardingSessionId);
-
-    return createSuccessResponse({
-      organization: {
-        id: organization.id,
-        name: organization.name,
-        slug: organization.slug,
-      },
-    });
+  // Someone else's payment reads as no payment at all.
+  if (!payment || payment.userId !== ctx.user.id || payment.purpose !== "SIGNUP") {
+    throw new NotFoundError("Payment");
   }
-);
+
+  const { state, payment: current } = await confirmPayment(payment);
+  return createSuccessResponse({
+    state,
+    organizationSlug: current.organization?.slug ?? null,
+  });
+});

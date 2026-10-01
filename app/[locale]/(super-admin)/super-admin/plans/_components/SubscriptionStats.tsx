@@ -1,11 +1,12 @@
 import {
-  DollarSign,
+  Banknote,
   TrendingUp,
   CheckCircle,
   XCircle,
   Clock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatPlanAmount } from "@/lib/utils/currency";
 
 export default function SubscriptionStats({
   stats,
@@ -21,8 +22,8 @@ export default function SubscriptionStats({
   const statCards = [
     {
       title: "Monthly Recurring Revenue",
-      value: `$${mrr.toLocaleString()}`,
-      icon: DollarSign,
+      value: formatPlanAmount(mrr),
+      icon: Banknote,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },

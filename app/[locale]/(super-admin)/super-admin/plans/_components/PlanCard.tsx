@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { formatPlanAmount } from "@/lib/utils/currency";
 
 const planColors: Record<PlanType, string> = {
   STARTER: "border-gray-200 dark:border-gray-700",
@@ -100,7 +101,7 @@ export default function PlanCard({
         </div>
         <div className="mt-4">
           <span className="text-4xl font-bold">
-            ${plan.monthlyPrice === 0 ? "0" : (plan.monthlyPrice / 100).toFixed(2)}
+            {formatPlanAmount(plan.monthlyPrice)}
           </span>
           <span className="text-muted-foreground">/month</span>
           {plan.monthlyPrice > 0 && plan.yearlyPrice > 0 && (

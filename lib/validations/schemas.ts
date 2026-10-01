@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
-import { isDateString } from "@/lib/utils/booking-slots";
+import { isDateString } from "@/lib/utils/date-only";
 
 /**
  * The per-language title and description columns, shared by the create and
@@ -150,8 +150,8 @@ export const organizationSchema = z.object({
     })
   ).optional(),
   userId: z.string().optional(),
-  subscriptionId: z.string().optional().nullable(),
-  paymentIntentId: z.string().optional().nullable(),
+  // Only read for a trial: the period its first payment will be for.
+  billingPeriod: z.enum(["monthly", "yearly"]).optional(),
 });
 
 const optionalText = (max: number) =>
@@ -259,13 +259,12 @@ export const dealershipReviewSchema = z.object({
 // ============ PAYMENT ============
 
 
-export const createCheckoutSessionSchema = z.object({
+export const signupCheckoutSchema = z.object({
   planId: z.string().min(1, "Plan is required"),
   // "monthly"/"yearly" is the onboarding UI's vocabulary — it is what the plan
-  // toggle holds, what is persisted in the onboarding session, and what
-  // createCheckoutSession compares against.
+  // toggle holds and what is persisted in the onboarding session.
   billingPeriod: z.enum(["monthly", "yearly"]),
-  onboardingSessionId: z.string().min(1).optional().nullable(),
+  onboardingSessionId: z.string().min(1),
 });
 
 // ============ IMPERSONATION (super-admin) ============
@@ -291,7 +290,7 @@ export type RequestTestDriveInput = z.infer<typeof requestTestDriveSchema>;
 export type EditTestDriveInput = z.infer<typeof editTestDriveSchema>;
 export type UpdateTestDriveStatusInput = z.infer<typeof updateTestDriveStatusSchema>;
 export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
-export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
+export type SignupCheckoutInput = z.infer<typeof signupCheckoutSchema>;
 export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
 

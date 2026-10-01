@@ -1,81 +1,36 @@
 "use server";
 
-import * as paymentService from "@/lib/services/payment";
+import { getLocale } from "next-intl/server";
+import { startSignupCheckout } from "@/lib/services/billing/signup";
 import { withAuth } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
-import {
-  createCheckoutSessionSchema,
-} from "@/lib/validations/schemas";
+import { signupCheckoutSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { ValidationError } from "@/lib/utils/errors";
-import { requireBillingEmail } from "@/lib/utils/userHelpers";
+import { isLocale, routing } from "@/i18n/routing";
 
-function handleStripeError(error: unknown): never {
-  const err = error as { message?: string; type?: string; code?: string };
-  if (err.message?.includes("STRIPE_SECRET_KEY is not configured")) {
-    throw new ValidationError(
-      "Payment system is not configured. Please contact support.",
-      null,
-      { key: "errors.billing.notConfigured" }
-    );
-  }
-
-  if (err.type === "StripeInvalidRequestError") {
-    if (err.message?.includes("No such price")) {
-      throw new ValidationError(
-        "The selected plan has an invalid Stripe configuration. Please contact support.",
-        null,
-        { key: "errors.billing.notConfigured" }
-      );
-    }
-    if (err.message?.includes("No such customer")) {
-      throw new ValidationError(
-        "Customer account issue. Please try again.",
-        null,
-        { key: "errors.billing.paymentSetupFailed" }
-      );
-    }
-  }
-
-  if (err.type === "StripeAuthenticationError") {
-    throw new ValidationError(
-      "Payment system configuration error. Please contact support.",
-      null,
-      { key: "errors.billing.notConfigured" }
-    );
-  }
-
-  throw error;
-}
-
-export const createCheckoutSession = withAuth(
-  async (
-    ctx,
-    planId: string,
-    billingPeriod: string,
-    onboardingSessionId: string
-  ) => {
+/**
+ * Open a Paymob checkout for a paid plan chosen in onboarding. The dealership
+ * is created when the payment settles, not here.
+ */
+export const createSignupCheckout = withAuth(
+  async (ctx, planId: string, billingPeriod: string, onboardingSessionId: string) => {
     await enforceRateLimit();
-    const validated = validateAction(createCheckoutSessionSchema, {
+    const validated = validateAction(signupCheckoutSchema, {
       planId,
       billingPeriod,
       onboardingSessionId,
     });
 
-    try {
-      const result = await paymentService.createCheckoutSession(
-        // Narrows ctx.user.email from string | null; a phone-only account
-        // cannot subscribe until it has an address to receive receipts at.
-        { ...ctx.user, email: requireBillingEmail(ctx.user) },
-        validated.planId,
-        validated.billingPeriod,
-        validated.onboardingSessionId
-      );
+    const locale = await getLocale();
+    const checkout = await startSignupCheckout({
+      user: ctx.user,
+      onboardingSessionId: validated.onboardingSessionId,
+      planId: validated.planId,
+      billingPeriod: validated.billingPeriod === "yearly" ? "YEARLY" : "MONTHLY",
+      locale: isLocale(locale) ? locale : routing.defaultLocale,
+    });
 
-      return createSuccessResponse({ url: result.url });
-    } catch (error) {
-      handleStripeError(error);
-    }
+    return createSuccessResponse({ url: checkout.url });
   }
 );

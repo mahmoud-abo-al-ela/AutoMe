@@ -20,6 +20,7 @@ import {
 } from "@/components/Pricing/pricing-plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { PlanFeatureList } from "./PlanFeatureList";
+import { planSignupKind } from "@/lib/utils/plan-signup";
 import type { PlanConfig } from "./constants";
 import type {
     BillingPeriod,
@@ -141,6 +142,16 @@ export function PlanCard({
                                 </span>
                             )}
                         </div>
+                        {/* A trial starts the dealership now; the first
+                            payment is asked for before it ends. */}
+                        {planSignupKind(plan) === "trial" && (
+                            <p className="mt-2 text-sm font-medium text-green-700">
+                                {t("trial", {
+                                    count: plan.trialDays,
+                                    value: fmt.number(plan.trialDays),
+                                })}
+                            </p>
+                        )}
                     </div>
                 </CardHeader>
 

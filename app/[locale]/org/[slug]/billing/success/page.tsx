@@ -2,148 +2,118 @@ import { redirect } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { planKeyFor } from "@/components/Pricing/pricing-plans";
 import { checkUser } from "@/lib/checkUser";
-import {
-    getOrganizationBySlug,
-    getUserMembership,
-} from "@/lib/getOrganization";
-import { retrieveCheckoutSession } from "@/lib/services/stripe/subscription";
-import { db } from "@/lib/prisma";
+import { getOrganizationBySlug } from "@/lib/getOrganization";
+import { confirmBillingPayment } from "@/actions/billing";
+import { PaymentConfirming } from "@/components/billing/PaymentConfirming";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils/datetime";
+import type { Locale } from "@/i18n/routing";
+
+export const dynamic = "force-dynamic";
 
 /**
- * Success page after a plan change via Stripe Checkout.
- * Verifies the checkout session and updates the local subscription record.
+ * Where Paymob returns the owner after paying for an upgrade or a renewal.
+ * `ref` is our Payment id; the rest of Paymob's query string is unsigned and
+ * never read. confirmBillingPayment answers only for this dealership's own
+ * payment, to its owner, and settles it from Paymob if the callback is late.
  */
 export default async function BillingSuccessPage({
     params,
     searchParams,
 }: {
     params: Promise<{ slug: string }>;
-    searchParams: Promise<{ session_id?: string }>;
+    searchParams: Promise<{ ref?: string }>;
 }) {
     const { slug } = await params;
-    const { session_id } = await searchParams;
-    const locale = await getLocale();
+    const { ref } = await searchParams;
+    const locale = (await getLocale()) as Locale;
+    const billingPath = `/org/${slug}/billing`;
 
-    if (!session_id) {
-        redirect({ href: `/org/${slug}/billing`, locale });
-    }
+    if (!ref) redirect({ href: billingPath, locale });
 
     const user = await checkUser();
-    if (!user) {
-        redirect({ href: "/sign-in", locale });
-    }
+    if (!user) redirect({ href: "/sign-in", locale });
 
     const organization = await getOrganizationBySlug(slug);
-    if (!organization) {
-        redirect({ href: "/", locale });
+    if (!organization) redirect({ href: "/", locale });
+
+    const result = await confirmBillingPayment(organization.id, ref);
+    // Not this owner's payment, or not this dealership's: back to billing.
+    if (!result.success) redirect({ href: billingPath, locale });
+
+    const t = await getTranslations("org.billing.success");
+    const { state, purpose, plan, periodEnd } = result.data;
+
+    if (state === "pending") {
+        return (
+            <PaymentConfirming
+                title={t("confirming.title")}
+                body={t("confirming.body")}
+                slowBody={t("confirming.slow")}
+                checkAgain={t("confirming.checkAgain")}
+            />
+        );
     }
 
-    const membership = await getUserMembership(user.id, organization.id);
-    if (!membership || membership.role !== "OWNER") {
-        redirect({ href: `/org/${slug}/billing`, locale });
+    if (state === "failed") {
+        return (
+            <ResultCard
+                icon={<AlertCircle className="h-16 w-16 text-destructive" />}
+                title={t("declined.title")}
+                body={t("declined.body")}
+                back={t("back")}
+                href={billingPath}
+            />
+        );
     }
 
-    // Retrieve the Stripe Checkout session
-    let session;
-    try {
-        session = await retrieveCheckoutSession(session_id);
-    } catch (error) {
-        console.error("Failed to retrieve checkout session:", error);
-        redirect({ href: `/org/${slug}/billing`, locale });
-    }
-
-    // Verify the session is for this organization
-    const metadata = session.metadata || {};
-    if (metadata.organizationId !== organization.id) {
-        redirect({ href: `/org/${slug}/billing`, locale });
-    }
-
-    // Update the local subscription record if this is a plan change checkout
-    if (metadata.type === "plan_change" && session.status === "complete") {
-        const existingSubscription = await db.subscription.findUnique({
-            where: { organizationId: organization.id },
-        });
-
-        // retrieveCheckoutSession does not pass `expand`, so Stripe returns
-        // these as plain ids. The union type exists because expansion is
-        // possible in general; narrowing here means that if expansion is ever
-        // added, these degrade to null instead of writing an object into a
-        // string column.
-        const sessionSubscriptionId =
-            typeof session.subscription === "string" ? session.subscription : null;
-        const sessionCustomerId =
-            typeof session.customer === "string" ? session.customer : null;
-
-        if (existingSubscription) {
-            // Update existing subscription with new Stripe data
-            await db.subscription.update({
-                where: { id: existingSubscription.id },
-                data: {
-                    planId: metadata.planId,
-                    status: "ACTIVE",
-                    stripeSubscriptionId: sessionSubscriptionId || existingSubscription.stripeSubscriptionId,
-                    stripeCustomerId: sessionCustomerId || existingSubscription.stripeCustomerId,
-                    stripeCheckoutSessionId: session.id,
-                },
-            });
-        } else {
-            // Create a new subscription record
-            await db.subscription.create({
-                data: {
-                    organizationId: organization.id,
-                    planId: metadata.planId,
-                    status: "ACTIVE",
-                    stripeSubscriptionId: sessionSubscriptionId,
-                    stripeCustomerId: sessionCustomerId,
-                    stripeCheckoutSessionId: session.id,
-                    currentPeriodStart: new Date(),
-                    currentPeriodEnd: new Date(
-                        Date.now() + 30 * 24 * 60 * 60 * 1000
-                    ),
-                },
-            });
-        }
-    }
-
-    // Get the new plan name for display
-    const newPlan = metadata.planId
-        ? await db.plan.findUnique({ where: { id: metadata.planId } })
-        : null;
-
-    const t = await getTranslations("org.billing.plans");
     const tPlans = await getTranslations("plans");
-    // A plan whose type has no message key falls back to its DB name.
-    const planKey = planKeyFor(newPlan?.type);
+    const planKey = planKeyFor(plan.type);
+    const planName = planKey ? tPlans(`plans.${planKey}.name`) : plan.name;
+    const until = periodEnd ? formatDate(periodEnd, locale, { month: "long" }) : "";
 
+    return (
+        <ResultCard
+            icon={<CheckCircle2 className="h-16 w-16 text-green-500" />}
+            title={purpose === "UPGRADE" ? t("upgradedTitle", { plan: planName }) : t("renewedTitle")}
+            body={
+                purpose === "UPGRADE"
+                    ? t("upgradedBody", { date: until })
+                    : t("renewedBody", { plan: planName, date: until })
+            }
+            back={t("back")}
+            href={billingPath}
+        />
+    );
+}
+
+function ResultCard({
+    icon,
+    title,
+    body,
+    back,
+    href,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    body: string;
+    back: string;
+    href: string;
+}) {
     return (
         <div className="flex items-center justify-center min-h-[60vh]">
             <Card className="max-w-md w-full">
                 <CardHeader className="text-center">
-                    <div className="flex justify-center mb-4">
-                        <CheckCircle2 className="h-16 w-16 text-green-500" />
-                    </div>
-                    <CardTitle className="text-2xl">{t("changedTitle")}</CardTitle>
+                    <div className="flex justify-center mb-4">{icon}</div>
+                    <CardTitle className="text-2xl">{title}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
-                    <p className="text-muted-foreground">
-                        {newPlan
-                            ? t.rich("switchedTo", {
-                                  plan: planKey
-                                      ? tPlans(`plans.${planKey}.name`)
-                                      : newPlan.name,
-                                  b: (chunks) => <strong>{chunks}</strong>,
-                              })
-                            : t("changed")}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        {t("featuresActive")}
-                    </p>
+                    <p className="text-muted-foreground">{body}</p>
                     <Button asChild className="w-full">
-                        <Link href={`/org/${slug}/billing`}>{t("backToBilling")}</Link>
+                        <Link href={href}>{back}</Link>
                     </Button>
                 </CardContent>
             </Card>

@@ -26,8 +26,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && pnpm db:seed",
-    "db:studio": "prisma studio",
-    "db:sync-plans": "tsx prisma/sync-plans-to-stripe.ts"
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@arcjet/inspect": "1.0.0-beta.8",
@@ -89,7 +88,6 @@
     "sonner": "^2.0.3",
     "stream-chat": "^9.29.0",
     "stream-chat-react": "^13.13.3",
-    "stripe": "^20.1.2",
     "svix": "^1.84.1",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",

@@ -53,7 +53,7 @@ export function PlanSelectionFooter({
             >
                 <span className="flex items-center gap-1.5">
                     <ShieldCheck className="h-4 w-4 text-green-600" />
-                    {t("trust.stripe")}
+                    {t("trust.paymob")}
                 </span>
                 <span className="flex items-center gap-1.5">
                     <RefreshCw className="h-4 w-4 text-green-600" />
