@@ -3,7 +3,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
 import { calculateSavingsPercentage } from "@/components/Pricing/pricing-plans";
 import { createPlanSelectionSchema } from "../schemas";
@@ -36,6 +36,7 @@ export function usePlanSelection({
     userId: string;
 }) {
     const router = useRouter();
+    const locale = useLocale();
     const t = useTranslations("onboarding.planSelection.toasts");
     const tValidation = useTranslations("onboarding.orgDetails.validation");
     const actionError = useActionError();
@@ -133,6 +134,7 @@ export function usePlanSelection({
                     plan.id,
                     billingPeriod,
                     sessionRes.data.sessionId,
+                    locale,
                 );
 
                 if (res.success) {

@@ -1,20 +1,20 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
 import { startSignupCheckout } from "@/lib/services/billing/signup";
 import { withAuth } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { signupCheckoutSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { isLocale, routing } from "@/i18n/routing";
+import { returnLocale } from "@/lib/utils/return-locale";
 
 /**
  * Open a Paymob checkout for a paid plan chosen in onboarding. The dealership
- * is created when the payment settles, not here.
+ * is created when the payment settles, not here. `locale` is the page's, for
+ * the page Paymob returns the buyer to.
  */
 export const createSignupCheckout = withAuth(
-  async (ctx, planId: string, billingPeriod: string, onboardingSessionId: string) => {
+  async (ctx, planId: string, billingPeriod: string, onboardingSessionId: string, locale: string) => {
     await enforceRateLimit();
     const validated = validateAction(signupCheckoutSchema, {
       planId,
@@ -22,13 +22,12 @@ export const createSignupCheckout = withAuth(
       onboardingSessionId,
     });
 
-    const locale = await getLocale();
     const checkout = await startSignupCheckout({
       user: ctx.user,
       onboardingSessionId: validated.onboardingSessionId,
       planId: validated.planId,
       billingPeriod: validated.billingPeriod === "yearly" ? "YEARLY" : "MONTHLY",
-      locale: isLocale(locale) ? locale : routing.defaultLocale,
+      locale: returnLocale(locale),
     });
 
     return createSuccessResponse({ url: checkout.url });
