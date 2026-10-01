@@ -2,7 +2,16 @@ import type { getBookedTimeSlots } from "@/actions/test-drive";
 import type { ActionResponse } from "@/lib/utils/response";
 import type { DayOfWeek } from "@/lib/generated/prisma";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
+import { format } from "date-fns";
 import { cairoNow } from "@/lib/utils/datetime";
+import {
+  addDays,
+  bookingWindow,
+  dateOnlyToUtc,
+  dayOfWeekForDate,
+} from "@/lib/utils/booking-slots";
+
+export { dayOfWeekForDate, endTimeOptions } from "@/lib/utils/booking-slots";
 
 export type { DayOfWeek };
 
@@ -21,7 +30,7 @@ export type WorkingHours = Record<DayOfWeek, DayHours>;
 /** One already-booked slot for a car on a given date. */
 export type BookedSlot = PayloadOf<ReturnType<typeof getBookedTimeSlots>>[number];
 
-/** Indexed by `Date.getDay()`. */
+/** Saturday-first is the picker's business; this is just every day once. */
 const DAY_NAMES: readonly DayOfWeek[] = [
   "SUNDAY",
   "MONDAY",
@@ -32,8 +41,13 @@ const DAY_NAMES: readonly DayOfWeek[] = [
   "SATURDAY",
 ];
 
-/** The working-hours key for a date. */
-export const dayOfWeekFor = (date: Date): DayOfWeek => DAY_NAMES[date.getDay()];
+/**
+ * The working-hours key for a day the picker handed us. The picker's Date is
+ * local midnight on the day clicked, so its local calendar date is that day;
+ * the weekday is then taken from the date string, never from a zone.
+ */
+export const dayOfWeekFor = (date: Date): DayOfWeek =>
+  dayOfWeekForDate(format(date, "yyyy-MM-dd"));
 
 /**
  * Half-hour slots between two "HH:mm" times, excluding the closing time itself.
@@ -93,32 +107,38 @@ export const filterPastTimeSlots = (
   return slots.filter((slot) => slot > time);
 };
 
-/** Past dates and days the dealership is closed cannot be booked. */
+/**
+ * Days outside the booking window (Cairo's today plus the horizon) and days
+ * the dealership is closed cannot be picked — the same window the server
+ * enforces. "Today" used to be the visitor's own, so someone abroad could be
+ * offered a day Cairo had already finished, and the horizon was not applied
+ * at all.
+ */
 export const makeIsDateDisabled =
-  (workingHours: WorkingHours) =>
+  (workingHours: WorkingHours, now: Date = new Date()) =>
     (date: Date): boolean => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const day = format(date, "yyyy-MM-dd");
+      const { first, last } = bookingWindow(now);
+      if (day < first || day > last) return true;
 
-      if (date < today) return true;
-
-      return !workingHours[dayOfWeekFor(date)]?.isOpen;
+      return !workingHours[dayOfWeekForDate(day)]?.isOpen;
     };
 
-/** The next `days` calendar days on which the dealership is open. */
+/**
+ * The open days in the booking window, as the local-midnight Dates the picker
+ * works in (built from the parts, so no zone moves them).
+ */
 export const generateAvailableDates = (
   workingHours: WorkingHours,
-  days = 14
+  now: Date = new Date()
 ): Date[] => {
-  const today = new Date();
+  const { first, last } = bookingWindow(now);
   const dates: Date[] = [];
 
-  for (let i = 0; i < days; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-
-    if (workingHours[dayOfWeekFor(date)]?.isOpen) {
-      dates.push(date);
+  for (let day = first; day <= last; day = addDays(day, 1)) {
+    if (workingHours[dayOfWeekForDate(day)]?.isOpen) {
+      const utc = dateOnlyToUtc(day);
+      dates.push(new Date(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate()));
     }
   }
 

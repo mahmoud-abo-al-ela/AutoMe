@@ -72,6 +72,15 @@
   "testDrive": {
     "carUnavailable": "This car isn’t available for test drives.",
     "notEditable": "Only pending test drives can be changed.",
-    "notCancellable": "This test drive can no longer be cancelled."
+    "notCancellable": "This test drive can no longer be cancelled.",
+    "slot": {
+      "invalid": "That date or time isn’t valid.",
+      "outsideWindow": "Test drives can be booked up to {days} days ahead.",
+      "closed": "The dealership is closed on that day.",
+      "outsideHours": "That time is outside the dealership’s working hours.",
+      "offGrid": "Please choose one of the offered times.",
+      "past": "That time has already passed.",
+      "taken": "That time has just been booked. Please choose another."
+    }
   }
 }

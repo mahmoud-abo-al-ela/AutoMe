@@ -10,11 +10,13 @@ import { useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
 import { requestTestDrive, getBookedTimeSlots } from "@/actions/test-drive";
 import {
-    dayOfWeekFor,
+    dayOfWeekForDate,
+    endTimeOptions,
     filterAvailableTimeSlots,
     filterPastTimeSlots,
     generateTimeSlots,
     makeIsDateDisabled,
+    type BookedSlot,
     type DayOfWeek,
     type TestDriveFormValues,
     type WorkingHours,
@@ -48,6 +50,7 @@ export const useTestDriveForm = ({
     const [submitting, setSubmitting] = useState(false);
     const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(null);
     const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+    const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
     const [calendarOpen, setCalendarOpen] = useState(false);
 
     const {
@@ -74,7 +77,7 @@ export const useTestDriveForm = ({
         if (!date) return;
 
         const dateString = format(date, "yyyy-MM-dd");
-        const dayOfWeek = dayOfWeekFor(date);
+        const dayOfWeek = dayOfWeekForDate(dateString);
 
         if (!workingHours[dayOfWeek]?.isOpen) {
             toast.error(t("toasts.closedOnDay"));
@@ -101,10 +104,11 @@ export const useTestDriveForm = ({
             const bookedSlotsResult = await getBookedTimeSlots(carId, dateString);
 
             if (bookedSlotsResult.success) {
-                setAvailableTimeSlots(
-                    filterAvailableTimeSlots(allSlots, bookedSlotsResult.data || [])
-                );
+                const booked = bookedSlotsResult.data || [];
+                setBookedSlots(booked);
+                setAvailableTimeSlots(filterAvailableTimeSlots(allSlots, booked));
             } else {
+                setBookedSlots([]);
                 // If there's an error fetching booked slots, show all slots
                 console.warn(
                     "Could not fetch booked time slots:",
@@ -114,6 +118,7 @@ export const useTestDriveForm = ({
             }
         } catch (error) {
             console.error("Error fetching booked time slots:", error);
+            setBookedSlots([]);
             // Fallback to showing all slots if there's an error
             setAvailableTimeSlots(allSlots);
         }
@@ -130,13 +135,10 @@ export const useTestDriveForm = ({
     };
 
     // Get available end times based on selected start time
+    // Up to the next booking or closing time, never across a booking.
     const getAvailableEndTimes = () => {
-        if (!watchStartTime || availableTimeSlots.length === 0) return [];
-
-        const startIndex = availableTimeSlots.indexOf(watchStartTime);
-        if (startIndex === -1) return [];
-
-        return availableTimeSlots.slice(startIndex + 1);
+        if (!watchStartTime || !selectedDay) return [];
+        return endTimeOptions(watchStartTime, workingHours[selectedDay], bookedSlots);
     };
 
     // Form submission handler

@@ -12,7 +12,8 @@ import {
   editTestDriveSchema,
   updateTestDriveStatusSchema,
 } from "@/lib/validations/schemas";
-import { NotFoundError, logError } from "@/lib/utils/errors";
+import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
+import { isDateString } from "@/lib/utils/booking-slots";
 import { displayNameFor } from "@/lib/utils/userHelpers";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
@@ -236,8 +237,19 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
 });
 
 export const getBookedTimeSlots = withErrorHandling(
-  async (carId: string, date: string) => {
-  const bookedSlots = await testDriveService.getBookedTimeSlots(carId, date);
+  async (carId: string, date: string, excludeTestDriveId?: string) => {
+  if (!isDateString(date)) {
+    throw new ValidationError("Date must be YYYY-MM-DD", "date", {
+      key: "errors.testDrive.slot.invalid",
+    });
+  }
+  // excludeTestDriveId only removes a booking from the busy list the caller
+  // sees; the edit itself is still checked against everything else.
+  const bookedSlots = await testDriveService.getBookedTimeSlots(
+    carId,
+    date,
+    excludeTestDriveId
+  );
   return createSuccessResponse(bookedSlots);
 });
 

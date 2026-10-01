@@ -13,6 +13,7 @@ import {
 } from "./errors";
 import { createErrorResponse, UNEXPECTED_ERROR_CODE } from "./response";
 import { resolveActionError, type ErrorTranslator } from "./error-messages";
+import { BOOKING_PROBLEMS } from "./booking-slots";
 
 /**
  * The contract these pin: a thrown AppError names its user-facing text with a
@@ -227,6 +228,17 @@ describe("the errors namespace", () => {
     for (const key of keys) {
       expect(has(en, key), `en is missing errors.${key}`).toEqual(expect.any(String));
       expect(has(ar, key), `ar is missing errors.${key}`).toEqual(expect.any(String));
+    }
+  });
+
+  it("has a message for every reason a test-drive slot is refused", () => {
+    // The booking service builds these keys from the reason, so the source
+    // scan above cannot see them.
+    for (const problem of BOOKING_PROBLEMS) {
+      for (const [locale, messages] of [["en", en], ["ar", ar]] as const) {
+        const slot = (messages.testDrive as { slot?: Record<string, string> }).slot;
+        expect(slot?.[problem], `${locale} lacks testDrive.slot.${problem}`).toEqual(expect.any(String));
+      }
     }
   });
 

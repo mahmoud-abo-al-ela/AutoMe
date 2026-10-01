@@ -5,6 +5,12 @@ import * as carRepository from "@/lib/repositories/car";
 import * as workingHoursRepository from "@/lib/repositories/dealership/working-hours";
 import { formatWorkingHours } from "@/lib/utils/working-hours";
 import {
+  BOOKING_HORIZON_DAYS,
+  checkBooking,
+  dateOnlyToUtc,
+  dayOfWeekForDate,
+} from "@/lib/utils/booking-slots";
+import {
   AuthenticationError,
   NotFoundError,
   ValidationError,
@@ -13,10 +19,45 @@ import {
 
 interface TestDriveFormData {
   carId: string;
-  date: string | Date;
+  /** Calendar date, "YYYY-MM-DD", in Cairo. */
+  date: string;
   startTime: string;
   endTime: string;
   notes?: string;
+}
+
+/**
+ * Refuse a booking the form would never have offered. The form applies the
+ * same rules (lib/utils/booking-slots), but a server action accepts whatever
+ * a caller sends, and until this check the server stored any date and time.
+ *
+ * Not transactional: two requests for one slot in the same instant can both
+ * pass. At a dealership's volume the second becomes a pending request the
+ * dealer declines, which is the failure this would otherwise prevent.
+ */
+async function assertBookable(
+  booking: { carId: string; organizationId: string; date: string; startTime: string; endTime: string },
+  excludeTestDriveId?: string
+) {
+  const [rows, booked] = await Promise.all([
+    workingHoursRepository.findWorkingHours(booking.organizationId),
+    testDriveRepository.getBookedTimeSlots(booking.carId, booking.date, excludeTestDriveId),
+  ]);
+  const hours = formatWorkingHours(rows).find(
+    (entry) => entry.dayKey === dayOfWeekForDate(booking.date)
+  );
+
+  const problem = checkBooking(booking, hours, booked);
+  if (problem) {
+    throw new ValidationError(
+      `Test drive slot rejected (${problem}): ${booking.date} ${booking.startTime}-${booking.endTime}`,
+      "startTime",
+      {
+        key: `errors.testDrive.slot.${problem}`,
+        params: problem === "outsideWindow" ? { days: BOOKING_HORIZON_DAYS } : undefined,
+      }
+    );
+  }
 }
 
 /**
@@ -37,8 +78,10 @@ export async function requestTestDrive(testDriveData: TestDriveFormData, userId:
     throw new ValidationError("Car is not available for test drive", "carId", { key: "errors.testDrive.carUnavailable" });
   }
 
+  await assertBookable({ ...testDriveData, organizationId: car.organizationId });
+
   return await testDriveRepository.createTestDrive({
-    date: new Date(testDriveData.date),
+    date: dateOnlyToUtc(testDriveData.date),
     startTime: testDriveData.startTime,
     endTime: testDriveData.endTime,
     notes: testDriveData.notes || "",
@@ -85,8 +128,17 @@ export async function editTestDrive(testDriveId: string, updateData: Omit<TestDr
     );
   }
 
+  await assertBookable(
+    {
+      ...updateData,
+      carId: existingTestDrive.carId,
+      organizationId: existingTestDrive.organizationId,
+    },
+    testDriveId
+  );
+
   return await testDriveRepository.updateTestDrive(testDriveId, {
-    date: new Date(updateData.date),
+    date: dateOnlyToUtc(updateData.date),
     startTime: updateData.startTime,
     endTime: updateData.endTime,
     notes: updateData.notes || "",
@@ -158,8 +210,8 @@ export async function checkExistingTestDrive(carId: string, userId?: string | nu
 /**
  * Get booked time slots for a car
  */
-export async function getBookedTimeSlots(carId: string, date: string | Date) {
-  return await testDriveRepository.getBookedTimeSlots(carId, date);
+export async function getBookedTimeSlots(carId: string, date: string, excludeTestDriveId?: string) {
+  return await testDriveRepository.getBookedTimeSlots(carId, date, excludeTestDriveId);
 }
 
 /**
