@@ -25,10 +25,10 @@ jobs:
       # pages are prerendered. These placeholders exist to get the build to run,
       # never to reach a real service. CI compiles and throws the artifact away.
       #
-      # Pointed at localhost on purpose: `app/(site)/dealerships/sitemap.js` calls
-      # getDealerships() at build time, so the build does try to reach Postgres.
-      # localhost fails fast with connection-refused instead of hanging on DNS,
-      # and the sitemap try/catches into a minimal fallback either way.
+      # Pointed at localhost on purpose: if any page does reach Postgres at build
+      # time, localhost fails fast with connection-refused instead of hanging on
+      # DNS. (`app/sitemap.ts` used to be that page; it reads request headers
+      # now, so it renders per request, not at build.)
       DATABASE_URL: postgresql://user:pass@localhost:5432/autome
       DIRECT_URL: postgresql://user:pass@localhost:5432/autome
       NEXT_PUBLIC_APP_URL: http://localhost:3000
