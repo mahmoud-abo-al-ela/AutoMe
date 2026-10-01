@@ -79,7 +79,8 @@ export const useCarInfoCard = (car: CarDetail) => {
 
       if (response.success) {
         setIsFavorite(!isFavorite);
-        toast.success(response.message || "Wishlist updated");
+        // Not `response.message`: that is the service's English sentence.
+        toast.success(t(isFavorite ? "wishlistRemoved" : "wishlistAdded"));
         // `error` is an object, not a string — comparing it to "Unauthorized"
         // was never true, so auth failures fell through silently.
       } else if (response.error.code === "AUTHENTICATION_ERROR") {

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { addCar, updateCarFull } from "@/actions/cars";
+import { useActionError } from "@/hooks/use-action-error";
 import { useTranslations, useLocale } from "next-intl";
 import type { Locale } from "@/i18n/routing";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -182,6 +183,7 @@ export const useCarForm = (
 
     const t = useTranslations("org.carForm.validation");
     const tForm = useTranslations("org.carForm.form");
+    const actionError = useActionError();
     const { number } = useFormatters();
     const locale = useLocale() as Locale;
 
@@ -423,12 +425,12 @@ export const useCarForm = (
             }
             router.push(`/org/${slug}/cars`);
         } else {
-            // The action's own message wins when it sent one; otherwise the
-            // translated fallback. Same order as resolveActionError.
-            const errorMessage =
-                response?.error?.message ||
-                (isEditMode ? tForm("updateFailed") : tForm("addFailed"));
-            toast.error(errorMessage);
+            toast.error(
+                actionError(
+                    response?.error,
+                    isEditMode ? tForm("updateFailed") : tForm("addFailed")
+                )
+            );
         }
     };
 

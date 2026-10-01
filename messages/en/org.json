@@ -787,7 +787,8 @@
       "switchDialogFree": "Switch to <b>{plan}</b>?",
       "processing": "Processing…",
       "switchedTo": "You’ve switched to the <b>{plan}</b> plan.",
-      "featuresActive": "Your new plan features are active now. Any billing change appears on your next invoice."
+      "featuresActive": "Your new plan features are active now. Any billing change appears on your next invoice.",
+      "switched": "Switched to the {plan} plan"
     },
     "payment": {
       "title": "Payment Method",

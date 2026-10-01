@@ -22,6 +22,7 @@ import {
 import { UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { inviteTeamMember } from "@/actions/team";
 import { queryKeys } from "@/lib/query-client";
@@ -39,6 +40,7 @@ export default function InviteMemberButton({
   const t = useTranslations("org.settings.team.invite");
   const tRoles = useTranslations("org.settings.team.roles");
   const tCommon = useTranslations("common.actions");
+  const actionError = useActionError();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<TeamMemberRole>("MEMBER");
@@ -68,7 +70,7 @@ export default function InviteMemberButton({
         setRole("MEMBER");
         queryClient.invalidateQueries({ queryKey: queryKeys.team.members(organizationId) }); // Refresh to show new member
       } else {
-        toast.error(response?.error?.message || t("failed"));
+        toast.error(actionError(response?.error, t("failed")));
       }
     } catch (error) {
       console.error("Invite error:", error);

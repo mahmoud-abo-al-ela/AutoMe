@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 
 import { useState } from "react";
@@ -44,6 +45,7 @@ export default function SubscriptionAlert({
 }) {
     const [isPortalLoading, setIsPortalLoading] = useState(false);
     const t = useTranslations("org.billing.banner");
+    const actionError = useActionError();
     const { number } = useFormatters();
     const [isDismissed, setIsDismissed] = useState(false);
     const pathname = usePathname();
@@ -63,16 +65,16 @@ export default function SubscriptionAlert({
             // .data. See CurrentPlan.tsx and PaymentMethod.tsx.
             const result = await createBillingPortalSession(organizationId, pathname);
             if (!result.success) {
-                toast.error(result.error.message || t("portalFailed"));
+                toast.error(actionError(result.error, t("portalFailed")));
                 setIsPortalLoading(false);
                 return;
             }
             window.location.href = result.data.url;
         } catch (error) {
             console.error("Failed to open billing portal:", error);
-            toast.error(
-                (error instanceof Error && error.message) || t("portalFailed")
-            );
+            // A thrown error is a network or framework failure; its message is
+            // English and technical, so the reader gets the translated one.
+            toast.error(t("portalFailed"));
             setIsPortalLoading(false);
         }
     };

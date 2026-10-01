@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPlanChangeSession } from "@/actions/billing";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 import { PLAN_CONFIG } from "./_lib/plan-display";
 import {
@@ -42,6 +43,7 @@ export default function PlanComparison({
   const t = useTranslations("org.billing.plans");
   const tPlans = useTranslations("plans");
   const tCommon = useTranslations("common.actions");
+  const actionError = useActionError();
   const { number, locale } = useFormatters();
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -101,22 +103,24 @@ export default function PlanComparison({
       );
 
       if (!result.success) {
-        throw new Error(result.error?.message || "Failed to change plan.");
+        toast.error(actionError(result.error, t("changeFailed")));
+        setIsChanging(false);
+        return;
       }
 
       if (result.data.type === "redirect") {
         // The action only returns this branch with a url present.
         window.location.href = result.data.url!;
       } else if (result.data.type === "updated") {
-        toast.success(`Successfully switched to ${selectedPlan.name} plan!`);
+        toast.success(t("switched", { plan: selectedPlanName }));
         setIsDialogOpen(false);
         window.location.reload();
       }
     } catch (error) {
       console.error("Failed to change plan:", error);
-      toast.error(
-        (error instanceof Error && error.message) || t("changeFailed")
-      );
+      // A thrown error is a network or framework failure; its message is
+      // English and technical, so the reader gets the translated one.
+      toast.error(t("changeFailed"));
       setIsChanging(false);
     }
   };

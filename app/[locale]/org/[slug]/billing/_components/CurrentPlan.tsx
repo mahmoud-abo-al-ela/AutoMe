@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 import { createBillingPortalSession } from "@/actions/billing";
 import {
@@ -48,6 +49,7 @@ export default function CurrentPlan({
 }) {
   const t = useTranslations("org.billing.current");
   const tStatus = useTranslations("org.billing.status");
+  const actionError = useActionError();
   const { locale } = useFormatters();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const pathname = usePathname();
@@ -68,16 +70,16 @@ export default function CurrentPlan({
       // the same defect as the onboarding checkout one, missed in that sweep.
       const result = await createBillingPortalSession(organizationId, pathname);
       if (!result.success) {
-        toast.error(result.error.message || t("portalFailed"));
+        toast.error(actionError(result.error, t("portalFailed")));
         setIsPortalLoading(false);
         return;
       }
       window.location.href = result.data.url;
     } catch (error) {
       console.error("Failed to open billing portal:", error);
-      toast.error(
-        (error instanceof Error && error.message) || t("portalFailed")
-      );
+      // A thrown error is a network or framework failure; its message is
+      // English and technical, so the reader gets the translated one.
+      toast.error(t("portalFailed"));
       setIsPortalLoading(false);
     }
   };

@@ -53,7 +53,9 @@
     "wishlistError": "Couldn’t update wishlist",
     "compareAdded": "Added to comparison",
     "compareRemoved": "Removed from comparison",
-    "compareLimit": "You can compare up to {max} cars at a time"
+    "compareLimit": "You can compare up to {max} cars at a time",
+    "wishlistAdded": "Added to your wishlist",
+    "wishlistRemoved": "Removed from your wishlist"
   },
   "time": {
     "togglePeriod": "Switch between AM and PM"
