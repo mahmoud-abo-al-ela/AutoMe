@@ -34,7 +34,7 @@ export async function requestTestDrive(testDriveData: TestDriveFormData, userId:
   }
 
   if (car.status !== "AVAILABLE") {
-    throw new ValidationError("Car is not available for test drive", "carId");
+    throw new ValidationError("Car is not available for test drive", "carId", { key: "errors.testDrive.carUnavailable" });
   }
 
   return await testDriveRepository.createTestDrive({
@@ -81,6 +81,7 @@ export async function editTestDrive(testDriveId: string, updateData: Omit<TestDr
     throw new ValidationError(
       `Cannot edit a test drive that is ${existingTestDrive.status.toLowerCase()}. Only pending test drives can be edited.`,
       "status",
+      { key: "errors.testDrive.notEditable" },
     );
   }
 
@@ -121,6 +122,7 @@ export async function cancelTestDrive(testDriveId: string, userId: string) {
     throw new ValidationError(
       `Cannot cancel a test drive that is ${testDrive.status.toLowerCase()}`,
       "status",
+      { key: "errors.testDrive.notCancellable" },
     );
   }
 

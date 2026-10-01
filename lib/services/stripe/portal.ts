@@ -1,5 +1,6 @@
 // Stripe Customer Portal service - Create billing portal sessions
 import Stripe from "stripe";
+import { AppError } from "@/lib/utils/errors";
 
 /**
  * Initialize Stripe with validation
@@ -19,7 +20,11 @@ export async function createBillingPortalSession(
     const stripe = getStripeClient();
 
     if (!stripeCustomerId) {
-        throw new Error("No Stripe customer ID found for this subscription");
+        // A dealership that never checked out has no Stripe customer, which the
+        // owner should be told rather than shown a generic failure.
+        throw new AppError("No Stripe customer ID found for this subscription", 409, "NO_BILLING_ACCOUNT", {
+            key: "errors.noBillingAccount",
+        });
     }
 
     const session = await stripe.billingPortal.sessions.create({

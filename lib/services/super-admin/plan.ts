@@ -1,6 +1,7 @@
 import type { PlanType, Prisma } from "@/lib/generated/prisma";
 import * as planRepo from "@/lib/repositories/super-admin/plan";
 import * as stripePlanService from "@/lib/services/stripe/plan";
+import { ConflictError, NotFoundError } from "@/lib/utils/errors";
 
 /**
  * Plan service for Super Admin operations
@@ -33,7 +34,7 @@ export async function updatePlan(planId: string, data: PlanFormInput) {
   const existingPlan = await planRepo.findPlanById(planId);
 
   if (!existingPlan) {
-    throw new Error("Plan not found");
+    throw new NotFoundError("Plan");
   }
 
   const updateData: Prisma.PlanUncheckedUpdateInput = {
@@ -79,7 +80,7 @@ export async function createPlan(data: PlanFormInput) {
   const existingPlan = await planRepo.findPlanByType(data.type);
 
   if (existingPlan) {
-    throw new Error(`A ${data.type} plan already exists`);
+    throw new ConflictError(`A ${data.type} plan already exists`);
   }
 
   const planData: Prisma.PlanUncheckedCreateInput = {
@@ -116,11 +117,11 @@ export async function deletePlan(planId: string) {
   const plan = await planRepo.findPlanWithSubscriptionCount(planId);
 
   if (!plan) {
-    throw new Error("Plan not found");
+    throw new NotFoundError("Plan");
   }
 
   if (plan._count.subscriptions > 0) {
-    throw new Error(
+    throw new ConflictError(
       `Cannot delete plan with ${plan._count.subscriptions} active subscription(s). Please migrate subscribers first.`
     );
   }

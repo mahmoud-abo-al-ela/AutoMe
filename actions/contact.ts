@@ -47,7 +47,10 @@ export const submitContactForm = withErrorHandling(async (formData: unknown) => 
     const field = issue?.path?.[0];
     throw new ValidationError(
       issue?.message || "Please check the form and try again.",
-      typeof field === "string" ? field : null
+      typeof field === "string" ? field : null,
+      // The schema's messages are English; the form already showed the
+      // translated per-field ones before submitting.
+      { key: "errors.invalidForm" }
     );
   }
 

@@ -3,6 +3,7 @@ import * as planRepo from "@/lib/repositories/super-admin/plan";
 import * as userRepo from "@/lib/repositories/super-admin/user";
 import * as membershipRepo from "@/lib/repositories/super-admin/membership";
 import { sendOrganizationInvitationEmail } from "./email";
+import { AppError, ConflictError, NotFoundError } from "@/lib/utils/errors";
 
 /**
  * Organization service for Super Admin operations
@@ -33,14 +34,14 @@ export async function createOrganization(data: CreateOrganizationInput) {
   const existingOrg = await orgRepo.findOrganizationBySlug(slug);
 
   if (existingOrg) {
-    throw new Error("An organization with this slug already exists");
+    throw new ConflictError("An organization with this slug already exists");
   }
 
   // Get the plan
   const plan = await planRepo.findPlanById(data.planId);
 
   if (!plan) {
-    throw new Error("Selected plan not found");
+    throw new NotFoundError("Plan");
   }
 
   // Check if owner email is provided and user exists
@@ -97,7 +98,8 @@ export async function createOrganization(data: CreateOrganizationInput) {
       const message =
         emailError instanceof Error ? emailError.message : String(emailError);
       if (message.includes("EmailJS")) {
-        throw new Error(`Organization created but email failed: ${message}`);
+        // Operational, so staff see why: the org exists and only the email is missing.
+        throw new AppError(`Organization created but email failed: ${message}`, 502, "EMAIL_DELIVERY_FAILED");
       }
     }
   }
@@ -114,7 +116,7 @@ export async function deleteOrganization(orgId: string) {
   const org = await orgRepo.findOrganizationForDeletion(orgId);
 
   if (!org) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
   // Delete all related data
@@ -127,7 +129,7 @@ export async function changeOrganizationPlan(orgId: string, planId: string) {
   const org = await orgRepo.findOrganizationWithSubscription(orgId);
 
   if (!org) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
   // This will be handled by subscription service

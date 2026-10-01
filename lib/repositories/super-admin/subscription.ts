@@ -1,5 +1,6 @@
 import { db } from "@/lib/prisma";
 import { Prisma } from "@/lib/generated/prisma";
+import { NotFoundError } from "@/lib/utils/errors";
 
 /**
  * Subscription repository for Super Admin operations
@@ -25,7 +26,7 @@ export async function updateOrCreateSubscription(orgId: string, planId: string) 
   });
 
   if (!org) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization");
   }
 
   if (org.subscription) {

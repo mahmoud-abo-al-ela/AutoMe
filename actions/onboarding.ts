@@ -200,7 +200,7 @@ export const createOrganizationAfterCheckout = withAuth(
     const session = await retrieveCheckoutSession(stripeSessionId);
 
     if (session.payment_status !== "paid") {
-      throw new ValidationError("Payment not completed");
+      throw new ValidationError("Payment not completed", null, { key: "errors.billing.paymentIncomplete" });
     }
 
     const existingSub =
