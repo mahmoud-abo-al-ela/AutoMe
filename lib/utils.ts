@@ -5,6 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Maximum number of cars in a comparison. The one source for the limit the
+ * compare tray enforces, the compare page's column count, and the FAQ's
+ * answer about it.
+ */
+export const MAX_COMPARE_CARS = 3;
+
 // Car comparison utilities
 export const compareUtils = {
   getCompareList: (): string[] => {
@@ -15,7 +22,7 @@ export const compareUtils = {
   addToCompare: (carId: string): boolean => {
     const compareList = compareUtils.getCompareList();
     if (compareList.includes(carId)) return false;
-    if (compareList.length >= 3) return false;
+    if (compareList.length >= MAX_COMPARE_CARS) return false;
     compareList.push(carId);
     localStorage.setItem("compareList", JSON.stringify(compareList));
     return true;

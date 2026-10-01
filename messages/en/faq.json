@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Frequently Asked Questions",
+    "description": "Answers to common questions about searching for cars, comparing them, saving favourites, your account and our AI features."
+  },
+  "title": "Frequently Asked Questions",
+  "subtitle": "Answers to common questions about {brand} and our services",
+  "categories": {
+    "buying": "Buying a Car",
+    "account": "Your Account",
+    "features": "Features"
+  },
+  "items": {
+    "findCar": {
+      "q": "How does {brand} help me find the right car?",
+      "a": "Search by make, model or any keyword, in Arabic or English, then narrow the results by price, body type, fuel, transmission and location. You can also upload a photo of a car you like and {brand} will look for cars like it. Every car listed comes from a dealership on {brand}."
+    },
+    "compare": {
+      "q": "Can I compare cars?",
+      "a": "Yes. Add up to {count, plural, one {{max} car} other {{max} cars}} to a comparison to see their specifications, features and prices side by side."
+    },
+    "createAccount": {
+      "q": "How do I create an account?",
+      "a": "Select “Sign in” at the top of any page, then “Sign up”. You can register with your email address and a password, or continue with your Google account."
+    },
+    "security": {
+      "q": "Is my personal information secure?",
+      "a": "Sign-in and your account are handled by a dedicated authentication provider, and every connection to {brand} is encrypted. Our <link>privacy policy</link> explains what we collect, who processes it, and the choices you have."
+    },
+    "wishlist": {
+      "q": "How do I save cars to my wishlist?",
+      "a": "Select the heart icon on any car to add it to your wishlist. Everything you have saved is on the Wishlist page. You need to be signed in to save cars."
+    },
+    "ai": {
+      "q": "What AI features does {brand} offer?",
+      "a": "{brand} uses AI to:",
+      "points": {
+        "photoSearch": "Find cars from a photo you upload",
+        "listingQuestions": "Answer your questions about a listing, from its details and the dealership’s own answers, where the dealership has turned this on",
+        "bilingual": "Show listings in both Arabic and English",
+        "chatTranslation": "Translate messages between you and a dealership with one tap"
+      }
+    }
+  },
+  "contact": {
+    "title": "Still have questions?",
+    "body": "If you couldn’t find the answer you were looking for, our support team is here to help.",
+    "cta": "Contact Support"
+  }
+}

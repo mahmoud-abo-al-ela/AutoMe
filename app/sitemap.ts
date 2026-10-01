@@ -17,8 +17,8 @@ import { sitemapEntries } from "@/lib/utils/seo-meta";
  * `[locale]/dealerships/`, so it was served at `/en/dealerships/sitemap.xml`,
  * listed unprefixed URLs that only redirect, and was referenced from nowhere.
  *
- * `/faq` is left out until it is translated: its Arabic URL serves English,
- * and advertising it as `ar-EG` would be a false hreflang.
+ * A page belongs here only once it is translated: listing an Arabic URL that
+ * serves English as `ar-EG` is a false hreflang.
  */
 const MARKETPLACE_PAGES = [
   "/",
@@ -26,6 +26,7 @@ const MARKETPLACE_PAGES = [
   "/dealerships",
   "/about",
   "/contact",
+  "/faq",
   "/terms",
   "/privacy",
   "/cookies",
