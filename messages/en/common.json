@@ -23,10 +23,7 @@
   },
   "language": {
     "label": "Language",
-    "switchTo": "Switch to {language}",
-    "suggestionBody": "This site is also available in {language}.",
-    "suggestionAccept": "Switch to {language}",
-    "suggestionDismiss": "Keep {language}"
+    "switchTo": "Switch to {language}"
   },
   "pagination": {
     "showing": "Showing {start} to {end} of {total} {noun}",
