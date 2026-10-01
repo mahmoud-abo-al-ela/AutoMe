@@ -13,8 +13,8 @@ import { defineRouting } from "next-intl/routing";
  * on Accept-Language breaks shared links, traps users whose browser language is
  * not the language they want to read, and — because Googlebot crawls
  * predominantly from US IPs — can mean the Arabic pages are never indexed at
- * all. Language is suggested via a dismissible banner and persisted in a cookie;
- * the URL always wins.
+ * all. The reader switches language with the header's switcher; the URL always
+ * wins.
  */
 export const routing = defineRouting({
   locales: ["en", "ar"],

@@ -109,7 +109,7 @@ export default function PlanComparison({
     if (!selectedPlan) return;
     setIsChanging(true);
     try {
-      const result = await changePlan(organizationId, selectedPlan.id, billingCycle);
+      const result = await changePlan(organizationId, selectedPlan.id, billingCycle, locale);
 
       if (!result.success) {
         toast.error(actionError(result.error, t("changeFailed")));

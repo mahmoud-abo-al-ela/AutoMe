@@ -1,7 +1,6 @@
 "use server";
 
 import { z } from "zod";
-import { getLocale } from "next-intl/server";
 import { getOrganizationById, requireOwner } from "@/lib/getOrganization";
 import * as billingService from "@/lib/services/billing";
 import {
@@ -18,7 +17,7 @@ import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { NotFoundError } from "@/lib/utils/errors";
-import { isLocale, routing } from "@/i18n/routing";
+import { returnLocale } from "@/lib/utils/return-locale";
 
 /**
  * Get all active plans
@@ -104,11 +103,6 @@ async function ownedOrganization(userId: string, organizationId: string) {
   return organization;
 }
 
-async function currentLocale() {
-  const locale = await getLocale();
-  return isLocale(locale) ? locale : routing.defaultLocale;
-}
-
 const actorOf = (user: BillingActor): BillingActor => ({ id: user.id, name: user.name, email: user.email });
 
 const planChangeSchema = z.object({
@@ -121,9 +115,11 @@ const planChangeSchema = z.object({
  * Switch plan or billing period. An upgrade returns a Paymob checkout; a
  * downgrade is scheduled for the end of the paid period; changes that cost
  * nothing (during a trial, after a lapse) apply now. See lib/utils/plan-change.
+ *
+ * `locale` is the page's, for the page Paymob returns the owner to.
  */
 export const changePlan = withAuth(
-  async (ctx, organizationId: string, planId: string, billingPeriod: string) => {
+  async (ctx, organizationId: string, planId: string, billingPeriod: string, locale: string) => {
     await enforceRateLimit();
     const input = validateAction(planChangeSchema, { organizationId, planId, billingPeriod });
     const organization = await ownedOrganization(ctx.user.id, input.organizationId);
@@ -133,7 +129,7 @@ export const changePlan = withAuth(
       actor: actorOf(ctx.user),
       planId: input.planId,
       billingPeriod: input.billingPeriod === "yearly" ? "YEARLY" : "MONTHLY",
-      locale: await currentLocale(),
+      locale: returnLocale(locale),
     });
     return createSuccessResponse(result);
   }
@@ -142,13 +138,13 @@ export const changePlan = withAuth(
 const uuidSchema = z.string().uuid();
 
 /** Pay for the next period now (a trial's first payment, or a renewal that is due). */
-export const payRenewal = withAuth(async (ctx, organizationId: string) => {
+export const payRenewal = withAuth(async (ctx, organizationId: string, locale: string) => {
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   const { url } = await payRenewalService({
     organization,
     actor: actorOf(ctx.user),
-    locale: await currentLocale(),
+    locale: returnLocale(locale),
   });
   return createSuccessResponse({ url });
 });

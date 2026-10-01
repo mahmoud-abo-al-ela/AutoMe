@@ -20,7 +20,7 @@ export function useBillingActions(organizationId: string) {
   const router = useRouter();
   const t = useTranslations("org.billing.current");
   const actionError = useActionError();
-  const { date } = useFormatters();
+  const { date, locale } = useFormatters();
   const [busy, setBusy] = useState<Busy>(null);
 
   const run = async <T,>(
@@ -48,7 +48,7 @@ export function useBillingActions(organizationId: string) {
     busy,
     /** To Paymob's checkout; the page stays busy while the browser leaves. */
     payNow: () =>
-      run("pay", () => payRenewal(organizationId), ({ url }) => {
+      run("pay", () => payRenewal(organizationId, locale), ({ url }) => {
         window.location.href = url;
       }),
     cancel: () =>
