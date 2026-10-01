@@ -25,5 +25,61 @@
     "aiUnlimited": "{used} (unlimited)",
     "cta": "Open your dashboard",
     "footer": "You get this summary every Saturday. You can turn it off or change its language in Settings → Weekly summary."
+  },
+  "billing": {
+    "cta": {
+      "renew": "Renew now",
+      "pay": "Pay now",
+      "plans": "Choose a plan",
+      "billing": "View billing",
+      "retry": "Try again"
+    },
+    "renewalDue": {
+      "subject": "Your {plan} plan renews on {date}",
+      "heading": "Time to renew {plan}",
+      "body": "{dealership} is on {plan} until {date}. Pay {amount} for the next {period, select, YEARLY {year} other {month}} to keep it without a break."
+    },
+    "renewalReminder": {
+      "subject": "A few days left on {plan}: renew by {date}",
+      "heading": "A few days left on {plan}",
+      "body": "{dealership}’s {plan} plan ends on {date}. Pay {amount} for the next {period, select, YEARLY {year} other {month}} before then to keep it."
+    },
+    "trialDue": {
+      "subject": "Your {plan} trial ends on {date}",
+      "heading": "Your trial is ending",
+      "body": "{dealership}’s free {plan} trial ends on {date}. Pay {amount} for a {period, select, YEARLY {year} other {month}} to keep {plan} after it."
+    },
+    "trialReminder": {
+      "subject": "A few days left in your {plan} trial",
+      "heading": "A few days left in your trial",
+      "body": "{dealership}’s free {plan} trial ends on {date}. Pay {amount} for a {period, select, YEARLY {year} other {month}} to keep {plan}; otherwise you move to the free Starter plan."
+    },
+    "pastDue": {
+      "subject": "Payment overdue for {plan}",
+      "heading": "We haven’t received your payment",
+      "body": "{dealership}’s {plan} plan wasn’t renewed. Pay by {date} to keep it; after that your dealership moves to the free Starter plan."
+    },
+    "downgradedCanceled": {
+      "subject": "{dealership} is now on the free Starter plan",
+      "heading": "Your {plan} plan has ended",
+      "body": "As you asked, {plan} has ended and {dealership} is now on the free Starter plan. Its limits apply from today. You can choose a plan again at any time."
+    },
+    "downgradedUnpaid": {
+      "subject": "{dealership} is now on the free Starter plan",
+      "heading": "Your dealership is on the free Starter plan",
+      "body": "We didn’t receive the payment for {plan}, so {dealership} has moved to the free Starter plan. Its limits apply from today. Pay for a plan at any time to get everything back."
+    },
+    "paymentReceived": {
+      "subject": "Payment received: {amount}",
+      "heading": "Thank you for your payment",
+      "body": "We received {amount} for {plan}. {dealership} is paid until {date}.",
+      "bodyAhead": "We received {amount} for {plan}. {dealership}’s next period starts on {start} and is paid until {date}."
+    },
+    "paymentFailed": {
+      "subject": "Your payment didn’t go through",
+      "heading": "Your payment didn’t go through",
+      "body": "Your payment of {amount} for {plan} wasn’t completed, and nothing was charged. You can try again from your billing page."
+    },
+    "footer": "You get this email because you own {dealership} on AutoMe."
   }
 }

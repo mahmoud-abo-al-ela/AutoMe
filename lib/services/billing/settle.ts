@@ -15,6 +15,8 @@ import {
   renewalStage,
   type PeriodBounds,
 } from "./periods";
+import { paidPeriodState } from "./transitions";
+import { emailOwners } from "./notices";
 
 /**
  * Apply a Paymob transaction to the Payment it pays for. The one place a
@@ -88,10 +90,19 @@ export async function settlePayment(
   if (outcome === "pending") return { status: "pending", paymentId };
 
   if (outcome === "failed") {
-    await paymentRepo.markPaymentFailed(paymentId, {
+    const newlyFailed = await paymentRepo.markPaymentFailed(paymentId, {
       providerTransactionId: String(transaction.id),
       ...card(transaction),
     });
+    // An owner paying from a billing email may have closed the tab. A sign-up
+    // has no dealership to email yet; its page says so.
+    if (newlyFailed && payment.organizationId) {
+      await emailOwners(payment.organizationId, {
+        kind: "paymentFailed",
+        plan: payment.plan,
+        amountCents: payment.amountCents,
+      });
+    }
     return { status: "failed", paymentId };
   }
 
@@ -129,14 +140,14 @@ export async function settlePayment(
       periodStart: period.start,
       periodEnd: period.end,
     });
-    return { organizationId, slug };
+    return { organizationId, slug, period };
   });
 
   if (!applied) {
     return { status: "already_paid", paymentId, organizationId: payment.organizationId };
   }
 
-  await afterPaid(payment, applied, signup);
+  await afterPaid(payment, applied, signup, now);
   return { status: "paid", paymentId, purpose: payment.purpose, organizationId: applied.organizationId };
 }
 
@@ -229,28 +240,15 @@ function subscriptionOf(payment: PaymentForSettlement) {
   return { organizationId: payment.organizationId, subscription };
 }
 
-/** Everything a payment resolves: the plan is paid and nothing is waiting on it. */
-const SETTLED_STATE = {
-  status: "ACTIVE",
-  pendingPlanId: null,
-  pendingBillingPeriod: null,
-  cancelAtPeriodEnd: false,
-  canceledAt: null,
-  pastDueSince: null,
-  trialEndsAt: null,
-} as const;
-
 async function applyUpgrade(tx: Prisma.TransactionClient, payment: PaymentForSettlement, now: Date) {
   const { organizationId } = subscriptionOf(payment);
   const period = periodStartingToday(payment.billingPeriod, now);
 
-  await paymentRepo.updateSubscriptionInTx(tx, organizationId, {
-    ...SETTLED_STATE,
-    planId: payment.planId,
-    billingPeriod: payment.billingPeriod,
-    currentPeriodStart: period.start,
-    currentPeriodEnd: period.end,
-  });
+  await paymentRepo.updateSubscriptionInTx(
+    tx,
+    organizationId,
+    paidPeriodState(payment.planId, payment.billingPeriod, period)
+  );
   return { organizationId, period, slug: null };
 }
 
@@ -282,13 +280,11 @@ async function applyRenewal(tx: Prisma.TransactionClient, payment: PaymentForSet
   if (period.start.getTime() <= now.getTime()) {
     // The current period is over (the grace, or a fresh start): the renewal is
     // the period in effect, now.
-    await paymentRepo.updateSubscriptionInTx(tx, organizationId, {
-      ...SETTLED_STATE,
-      planId: payment.planId,
-      billingPeriod: payment.billingPeriod,
-      currentPeriodStart: period.start,
-      currentPeriodEnd: period.end,
-    });
+    await paymentRepo.updateSubscriptionInTx(
+      tx,
+      organizationId,
+      paidPeriodState(payment.planId, payment.billingPeriod, period)
+    );
   } else {
     // Paid ahead. The current period runs out on its plan; the daily job moves
     // the subscription onto this payment's period when it does. Paying
@@ -305,8 +301,13 @@ async function applyRenewal(tx: Prisma.TransactionClient, payment: PaymentForSet
 
 async function afterPaid(
   payment: PaymentForSettlement,
-  { organizationId, slug }: { organizationId: string; slug: string | null },
-  signup: PreparedSignup | null
+  {
+    organizationId,
+    slug,
+    period,
+  }: { organizationId: string; slug: string | null; period: PeriodBounds },
+  signup: PreparedSignup | null,
+  now: Date
 ): Promise<void> {
   // Audit and email use their own connections and never fail the payment.
   try {
@@ -341,5 +342,14 @@ async function afterPaid(
         dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/org/${slug ?? signup.data.slug}/dashboard`,
       }).catch((error) => logError(error));
     }
+  } else {
+    // A renewal paid ahead starts later; say when.
+    await emailOwners(organizationId, {
+      kind: "paymentReceived",
+      plan: payment.plan,
+      amountCents: payment.amountCents,
+      until: period.end,
+      startsOn: period.start.getTime() > now.getTime() ? period.start : null,
+    });
   }
 }

@@ -6,6 +6,7 @@ import { ConflictError, NotFoundError, ValidationError } from "@/lib/utils/error
 import { isFreePlan, planChange } from "@/lib/utils/plan-change";
 import { startCheckout } from "./checkout";
 import { renewalStage } from "./periods";
+import { freePlanState } from "./transitions";
 
 /**
  * What a dealership owner can do to its subscription from the billing page.
@@ -112,19 +113,7 @@ export async function changePlan({
 
   // "apply": nothing paid is cut short.
   if (isFreePlan(target)) {
-    await billingRepo.updateSubscription(organization.id, {
-      planId: target.id,
-      billingPeriod: "MONTHLY",
-      status: "ACTIVE",
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: null,
-      trialEndsAt: null,
-      pastDueSince: null,
-      pendingPlanId: null,
-      pendingBillingPeriod: null,
-      cancelAtPeriodEnd: false,
-      canceledAt: null,
-    });
+    await billingRepo.updateSubscription(organization.id, freePlanState(target.id, new Date()));
     await auditHelpers.logSubscriptionChanged(
       { id: subscription.id, organizationId: organization.id, planId: target.id, status: "ACTIVE" },
       subscription.planId,

@@ -21,6 +21,7 @@ vi.mock("@/lib/services/audit/audit", () => ({
   auditHelpers: { logOrgCreated: vi.fn(), logSubscriptionChanged: vi.fn() },
 }));
 vi.mock("@/lib/services/notification", () => ({ sendWelcomeEmail: vi.fn() }));
+vi.mock("@/lib/services/billing/notices", () => ({ emailOwners: vi.fn(async () => 1) }));
 vi.mock("@/lib/utils/errors", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/utils/errors")>()),
   logError: vi.fn(),
@@ -30,6 +31,7 @@ import * as paymentRepo from "@/lib/repositories/payment";
 import { createOrganizationRecords } from "@/lib/services/onboarding/creation";
 import { resolveLogoUrl } from "@/lib/services/onboarding/logo";
 import { sendWelcomeEmail } from "@/lib/services/notification";
+import { emailOwners } from "@/lib/services/billing/notices";
 import { db } from "@/lib/prisma";
 import { settlePayment, SettlementError } from "@/lib/services/billing/settle";
 import { periodFrom } from "@/lib/services/billing/periods";
@@ -85,6 +87,7 @@ const payment = (overrides: Record<string, unknown> = {}) => ({
   currency: "EGP",
   userId: "user-1",
   user: { email: "mona@example.com", name: "Mona" },
+  plan: { id: "plan-pro", type: "PRO", name: "Pro" },
   organizationId: "org-1",
   onboardingSessionId: null,
   organization: { id: "org-1", subscription: subscription() },
@@ -343,6 +346,50 @@ describe("settlePayment — renewal", () => {
       tx,
       "org-1",
       expect.objectContaining({ planId: "plan-pro", currentPeriodStart: fresh.start, currentPeriodEnd: fresh.end })
+    );
+  });
+});
+
+describe("settlePayment — the owners' emails", () => {
+  it("emails a declined renewal or upgrade once, and never for a sign-up", async () => {
+    given(payment({ purpose: "RENEWAL" }));
+    vi.mocked(paymentRepo.markPaymentFailed).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    await settlePayment("payment-1", { ...paidTx, success: false }, NOW);
+    await settlePayment("payment-1", { ...paidTx, success: false }, NOW); // already failed
+    expect(emailOwners).toHaveBeenCalledTimes(1);
+    expect(emailOwners).toHaveBeenCalledWith("org-1", {
+      kind: "paymentFailed",
+      plan: { id: "plan-pro", type: "PRO", name: "Pro" },
+      amountCents: 150_000,
+    });
+
+    vi.mocked(emailOwners).mockClear();
+    given(payment({ purpose: "SIGNUP", organizationId: null, organization: null }));
+    vi.mocked(paymentRepo.markPaymentFailed).mockResolvedValue(true);
+    await settlePayment("payment-1", { ...paidTx, success: false }, NOW);
+    expect(emailOwners).not.toHaveBeenCalled();
+  });
+
+  it("confirms an upgrade's payment, paid until the new period ends", async () => {
+    given(payment());
+    await settlePayment("payment-1", paidTx, NOW);
+    expect(emailOwners).toHaveBeenCalledWith(
+      "org-1",
+      expect.objectContaining({
+        kind: "paymentReceived",
+        until: periodFrom("2026-10-15", "MONTHLY").end,
+        startsOn: null,
+      })
+    );
+  });
+
+  it("says when a renewal paid ahead starts", async () => {
+    given(payment({ purpose: "RENEWAL" }));
+    await settlePayment("payment-1", paidTx, new Date("2026-10-28T09:00:00Z"));
+    const november = periodFrom("2026-11-01", "MONTHLY");
+    expect(emailOwners).toHaveBeenCalledWith(
+      "org-1",
+      expect.objectContaining({ kind: "paymentReceived", until: november.end, startsOn: november.start })
     );
   });
 });

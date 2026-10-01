@@ -193,6 +193,7 @@ model Organization {
   assistantAnswers      AssistantAnswer[]
   digestSends           DigestSend[]
   payments              Payment[]
+  billingNotices        BillingNotice[]
 
   // Emails to the dealership (the weekly summary) are written in this
   // language: "ar" or "en". Arabic by default — the market is Egypt.
@@ -815,4 +816,19 @@ model DigestSend {
   createdAt      DateTime     @default(now())
 
   @@unique([organizationId, weekStart])
+}
+
+// The billing emails the daily renewals job sends, each claimed once per
+// subscription period, so a re-run or a retry does not email twice.
+model BillingNotice {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // "renewal_due" | "renewal_reminder" | "past_due" | "downgraded"
+  kind           String
+  // The end of the period the email is about.
+  periodEnd      DateTime
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, kind, periodEnd])
 }
