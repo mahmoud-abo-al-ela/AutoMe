@@ -24,6 +24,7 @@ import { licenseMonth, statedDisclosures, statedTerms } from "@/lib/utils/car-di
 import { parseImageAlts } from "@/lib/utils/image-alts";
 import type { Locale } from "@/i18n/routing";
 import type { Trace } from "@/lib/utils/dev-trace";
+import { telHref } from "@/lib/utils/phone";
 
 /**
  * The buyer assistant on a public listing: whether a listing offers it, and
@@ -293,7 +294,10 @@ function actionFor(
     return [{ kind, href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(organization.address)}` }];
   }
   if (kind === "call" && organization.phone) {
-    return [{ kind, href: `tel:${organization.phone.replace(/[^\d+]/g, "")}`, phone: organization.phone }];
+    // International form, so it dials from a foreign SIM or abroad; a number
+    // Egypt cannot route keeps its old digits-only link.
+    const href = telHref(organization.phone) ?? `tel:${organization.phone.replace(/[^\d+]/g, "")}`;
+    return [{ kind, href, phone: organization.phone }];
   }
   return [];
 }

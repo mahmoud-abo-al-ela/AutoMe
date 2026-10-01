@@ -24,6 +24,7 @@ import {
 import { OpenStatusBadge } from "./OpenStatusBadge";
 import { ShareDealershipButton } from "./ShareDealershipButton";
 import type { DealershipDetail } from "../_lib/detail-types";
+import { telHref } from "@/lib/utils/phone";
 
 const MAX_DESCRIPTION_LINES = 2;
 const LINE_HEIGHT_PX = 24; // approximate line height for text-sm/base
@@ -167,7 +168,7 @@ export const DealershipHeader = ({
                                             asChild
                                             className="gap-2 bg-white/80 hover:bg-white cursor-pointer"
                                         >
-                                            <a href={`tel:${dealership.phone}`}>
+                                            <a href={telHref(dealership.phone) ?? `tel:${dealership.phone}`}>
                                                 <Phone className="h-4 w-4 text-green-600" />
                                                 <span className="hidden sm:inline">{t("call")}</span>
                                             </a>

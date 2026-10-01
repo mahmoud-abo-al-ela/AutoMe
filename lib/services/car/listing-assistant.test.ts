@@ -261,7 +261,7 @@ describe("askAboutListing", () => {
       answer: "They also have a K5.",
       actions: [
         { kind: "directions", href: "https://www.google.com/maps/search/?api=1&query=12%20Nile%20St%2C%20Cairo" },
-        { kind: "call", href: "tel:01001234567", phone: "0100 123-4567" },
+        { kind: "call", href: "tel:+201001234567", phone: "0100 123-4567" },
       ],
       cars: [{ id: "car-k5", year: 2021, make: "Kia", model: "K5", price: 900000, currency: "EGP", image: "https://img/k5.jpg" }],
     });
