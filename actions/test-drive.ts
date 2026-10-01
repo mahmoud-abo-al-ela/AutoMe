@@ -13,7 +13,7 @@ import {
   updateTestDriveStatusSchema,
 } from "@/lib/validations/schemas";
 import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
-import { isDateString } from "@/lib/utils/booking-slots";
+import { isDateString } from "@/lib/utils/date-only";
 import { displayNameFor } from "@/lib/utils/userHelpers";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 

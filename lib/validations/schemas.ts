@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
-import { isDateString } from "@/lib/utils/booking-slots";
+import { isDateString } from "@/lib/utils/date-only";
 
 /**
  * The per-language title and description columns, shared by the create and

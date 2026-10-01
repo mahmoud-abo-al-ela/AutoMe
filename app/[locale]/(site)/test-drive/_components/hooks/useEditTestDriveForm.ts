@@ -23,7 +23,7 @@ import {
     type WorkingHours,
 } from "../../_lib/scheduling";
 import type { TestDriveDetail } from "../../_lib/test-drive-types";
-import { utcToDateOnly } from "@/lib/utils/booking-slots";
+import { utcToDateOnly } from "@/lib/utils/date-only";
 
 export const useEditTestDriveForm = ({
     testDrive,

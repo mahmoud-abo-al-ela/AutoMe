@@ -4,10 +4,9 @@ import {
   checkBooking,
   dayOfWeekForDate,
   endTimeOptions,
-  isDateString,
-  utcToDateOnly,
   type DayHours,
 } from "@/lib/utils/booking-slots";
+import { isDateString, utcToDateOnly } from "@/lib/utils/date-only";
 
 // Thursday 1 October 2026, 11:00 in Cairo (UTC+3 under Egypt's summer time).
 const NOW = new Date("2026-10-01T08:00:00Z");

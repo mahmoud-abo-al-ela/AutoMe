@@ -1,5 +1,6 @@
 import type { DayOfWeek } from "@/lib/generated/prisma";
 import { cairoNow } from "@/lib/utils/datetime";
+import { addDays, dateOnlyToUtc, isDateString } from "@/lib/utils/date-only";
 
 /**
  * The rules for when a test drive can be booked, shared by the booking form
@@ -34,7 +35,6 @@ const DAY_NAMES: readonly DayOfWeek[] = [
   "SATURDAY",
 ];
 
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export interface DayHours {
@@ -48,34 +48,9 @@ export interface TimeRange {
   endTime: string;
 }
 
-/** A real calendar date in "YYYY-MM-DD" form (rejects 2026-02-30). */
-export function isDateString(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    DATE_RE.test(value) &&
-    dateOnlyToUtc(value).toISOString().slice(0, 10) === value
-  );
-}
-
-/** The `@db.Date` value for a calendar date: midnight UTC on that day. */
-export function dateOnlyToUtc(date: string): Date {
-  return new Date(`${date}T00:00:00.000Z`);
-}
-
-/** The calendar date a `@db.Date` value holds, without a zone shifting it. */
-export function utcToDateOnly(value: Date | string): string {
-  return (value instanceof Date ? value.toISOString() : value).slice(0, 10);
-}
-
 /** The working-hours key for a calendar date. */
 export function dayOfWeekForDate(date: string): DayOfWeek {
   return DAY_NAMES[dateOnlyToUtc(date).getUTCDay()];
-}
-
-export function addDays(date: string, days: number): string {
-  const d = dateOnlyToUtc(date);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
 }
 
 const toMinutes = (time: string): number => {
