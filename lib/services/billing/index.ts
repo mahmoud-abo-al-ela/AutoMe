@@ -1,6 +1,9 @@
 // Billing service - Business logic layer for plans, subscriptions, and billing
 import type { AuditAction, PlanType, Prisma } from "@/lib/generated/prisma";
 import * as billingRepo from "@/lib/repositories/billing";
+import { cairoMidnight } from "@/lib/utils/date-only";
+import { isFreePlan } from "@/lib/utils/plan-change";
+import { daysLeft, graceEndsOn, renewalStage } from "./periods";
 
 /**
  * Get all active plans for display (onboarding, billing, etc.)
@@ -60,17 +63,38 @@ export async function getUsageStats(organizationId: string) {
  * @param {string} organizationId - The organization ID
  * @returns {Promise<Object>} Complete billing data including subscription, plans, and usage
  */
-export async function getBillingData(organizationId: string) {
-  const [subscription, plans, usage] = await Promise.all([
+export async function getBillingData(organizationId: string, now: Date = new Date()) {
+  const [subscription, plans, usage, payments] = await Promise.all([
     getActiveSubscription(organizationId),
     getActivePlans(),
     getUsageStats(organizationId),
+    billingRepo.findPaymentHistory(organizationId),
   ]);
+
+  const periodEnd = subscription?.currentPeriodEnd ?? null;
+  const paidAhead = periodEnd ? await billingRepo.findPaidRenewalAhead(organizationId, periodEnd) : null;
+
+  // The renewal as of now, in Cairo days (periods.ts); null on the free plan.
+  const renewal =
+    subscription && periodEnd && !isFreePlan(subscription.plan)
+      ? {
+          stage: renewalStage(periodEnd, now),
+          daysLeft: daysLeft(periodEnd, now),
+          /** The day the dealership moves to the free plan if still unpaid. */
+          graceEndsAt: cairoMidnight(graceEndsOn(periodEnd)),
+          plan: subscription.pendingPlan ?? subscription.plan,
+          billingPeriod: subscription.pendingBillingPeriod ?? subscription.billingPeriod,
+        }
+      : null;
 
   return {
     subscription,
     plans,
     usage,
+    payments,
+    paidAhead,
+    renewal,
+    lastPayment: payments.find((payment) => payment.status === "PAID") ?? null,
   };
 }
 

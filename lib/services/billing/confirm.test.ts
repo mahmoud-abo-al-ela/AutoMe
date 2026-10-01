@@ -22,6 +22,7 @@ const summary = (status: PaymentSummary["status"], slug: string | null = null): 
   periodStart: null,
   periodEnd: null,
   organization: slug ? { slug } : null,
+  plan: { name: "Pro", type: "PRO" },
 });
 
 beforeEach(() => vi.clearAllMocks());

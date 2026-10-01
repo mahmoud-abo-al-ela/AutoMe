@@ -52,7 +52,10 @@
     "notConfigured": "Billing for this plan isn’t available right now. Please contact support.",
     "paymentSetupFailed": "We couldn’t set up your payment. Please try again.",
     "paymentIncomplete": "Your payment hasn’t been completed yet.",
-    "checkoutRequired": "This plan is paid at checkout."
+    "checkoutRequired": "This plan is paid at checkout.",
+    "alreadyOnPlan": "You’re already on this plan.",
+    "renewalAlreadyPaid": "Your next period is already paid, so your plan can’t change until it starts. Contact support if you need help.",
+    "renewalNotDue": "There’s nothing to pay right now."
   },
   "compare": {
     "noCars": "None of these cars are available any more."

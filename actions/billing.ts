@@ -1,25 +1,24 @@
 "use server";
 
-import { checkUser } from "@/lib/checkUser";
-import { getOrganizationById, getUserMembership, requireOwner } from "@/lib/getOrganization";
+import { z } from "zod";
+import { getLocale } from "next-intl/server";
+import { getOrganizationById, requireOwner } from "@/lib/getOrganization";
 import * as billingService from "@/lib/services/billing";
-import { createBillingPortalSession as createPortalSession } from "@/lib/services/stripe/portal";
 import {
-  createNewSubscriptionCheckout,
-  updateSubscriptionPlan,
-} from "@/lib/services/stripe/plan-change";
-import { getCustomerInvoices } from "@/lib/services/stripe/invoices";
-import { getDefaultPaymentMethod } from "@/lib/services/stripe/payment-method";
+  cancelPlan as cancelPlanService,
+  changePlan as changePlanService,
+  keepCurrentPlan as keepCurrentPlanService,
+  payRenewal as payRenewalService,
+  type BillingActor,
+} from "@/lib/services/billing/manage";
+import { confirmPayment } from "@/lib/services/billing/confirm";
+import { findPaymentSummary } from "@/lib/repositories/payment";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
+import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
+import { validateAction } from "@/lib/middleware/with-validation";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { requireBillingEmail } from "@/lib/utils/userHelpers";
-import {
-  AuthenticationError,
-  AuthorizationError,
-  NotFoundError,
-  ValidationError,
-} from "@/lib/utils/errors";
-
+import { NotFoundError } from "@/lib/utils/errors";
+import { isLocale, routing } from "@/i18n/routing";
 
 /**
  * Get all active plans
@@ -95,207 +94,101 @@ export const getUsageStats = withAuth(async (ctx, organizationId: string) => {
   return createSuccessResponse(stats);
 });
 
+// ---------------------------------------------------------------- managing the plan
 
-
-export const createBillingPortalSession = withAuth(
-  async (ctx, organizationId: string, returnPath: string) => {
-    const organization = await getOrganizationById(organizationId);
-    if (!organization) {
-      throw new NotFoundError("Organization");
-    }
-
-    await requireOwner(ctx.user.id, organization.id);
-
-    const subscription = organization.subscription;
-    if (!subscription?.stripeCustomerId) {
-      throw new ValidationError(
-        "No active Stripe subscription found. Please subscribe to a plan first.",
-        null,
-        { key: "errors.noBillingAccount" }
-      );
-    }
-
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.NODE_ENV === "production"
-        ? undefined
-        : "http://localhost:3000");
-
-    if (!appUrl) {
-      // Misconfiguration, not the reader's input: a plain Error, so the
-      // response withholds it and the page shows its own fallback.
-      throw new Error("NEXT_PUBLIC_APP_URL is not configured");
-    }
-
-    const returnUrl = `${appUrl}${returnPath}`;
-    const session = await createPortalSession(
-      subscription.stripeCustomerId,
-      returnUrl
-    );
-    return createSuccessResponse(session);
-  }
-);
-
-
-
-export const createPlanChangeSession = withAuth(
-  async (
-    ctx,
-    organizationId: string,
-    newPlanId: string,
-    billingCycle: string,
-    billingPagePath: string
-  ) => {
-    const organization = await getOrganizationById(organizationId);
-    if (!organization) {
-      throw new NotFoundError("Organization");
-    }
-
-    await requireOwner(ctx.user.id, organization.id);
-
-    // Get the new plan details
-    const newPlan = await billingService.getPlanById(newPlanId);
-    if (!newPlan) {
-      throw new NotFoundError("Plan");
-    }
-
-    // Determine the Stripe price ID based on billing cycle
-    const stripePriceId =
-      billingCycle === "yearly"
-        ? newPlan.stripeYearlyPriceId
-        : newPlan.stripeMonthlyPriceId;
-
-    // Check if the new plan is free (downgrade to starter)
-    const newPrice =
-      billingCycle === "yearly" ? newPlan.yearlyPrice : newPlan.monthlyPrice;
-
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.NODE_ENV === "production"
-        ? undefined
-        : "http://localhost:3000");
-
-    if (!appUrl) {
-      throw new Error("NEXT_PUBLIC_APP_URL is not configured");
-    }
-
-    const subscription = organization.subscription;
-
-    // Case 1: User has an existing Stripe subscription — update it
-    if (subscription?.stripeSubscriptionId && stripePriceId) {
-      const updatedSubscription = await updateSubscriptionPlan({
-        stripeSubscriptionId: subscription.stripeSubscriptionId,
-        newStripePriceId: stripePriceId,
-        newPlanId: newPlan.id,
-      });
-
-      // Update our local subscription record with the new plan
-      const { db } = await import("@/lib/prisma");
-      await db.subscription.update({
-        where: { id: subscription.id },
-        data: {
-          planId: newPlan.id,
-          status:
-            updatedSubscription.status === "active"
-              ? "ACTIVE"
-              : subscription.status,
-        },
-      });
-
-      // `as const` on both branches so callers get a discriminated union and
-      // can narrow on `type` to reach `url`.
-      return createSuccessResponse({ type: "updated" as const });
-    }
-
-    // Case 2: No existing subscription and new plan is free — nothing to do
-    if (newPrice === 0) {
-      throw new ValidationError("You are already on the free plan", null, { key: "errors.billing.alreadyFree" });
-    }
-
-    // Case 3: No existing Stripe subscription — create a Checkout session
-    if (!stripePriceId) {
-      throw new ValidationError(
-        `Plan "${newPlan.name}" is not configured for Stripe billing. Please contact support.`,
-        null,
-        { key: "errors.billing.notConfigured" }
-      );
-    }
-
-    const successUrl = `${appUrl}${billingPagePath}/success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${appUrl}${billingPagePath}`;
-
-    const { url } = await createNewSubscriptionCheckout({
-      customerEmail: requireBillingEmail(ctx.user),
-      stripePriceId,
-      successUrl,
-      cancelUrl,
-      metadata: {
-        userId: ctx.user.id,
-        planId: newPlan.id,
-        organizationId: organization.id,
-        billingCycle,
-        type: "plan_change",
-      },
-    });
-
-    return createSuccessResponse({ type: "redirect" as const, url });
-  }
-);
-
-
-
-/**
- * Get the default payment method for an organization's Stripe customer
- */
-export const getPaymentMethod = withAuth(async (ctx, organizationId: string) => {
+/** The organization, if the caller owns it; the billing actions are owner-only. */
+async function ownedOrganization(userId: string, organizationId: string) {
   const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
+  if (!organization) throw new NotFoundError("Organization");
+  await requireOwner(userId, organization.id);
+  return organization;
+}
 
-  const membership = await getUserMembership(ctx.user.id, organization.id);
-  if (!membership) {
-    throw new AuthorizationError("You are not a member of this organization");
-  }
+async function currentLocale() {
+  const locale = await getLocale();
+  return isLocale(locale) ? locale : routing.defaultLocale;
+}
 
-  const subscription = organization.subscription;
-  if (!subscription?.stripeCustomerId) {
-    return createSuccessResponse(null);
-  }
+const actorOf = (user: BillingActor): BillingActor => ({ id: user.id, name: user.name, email: user.email });
 
-  const paymentMethod = await getDefaultPaymentMethod(
-    subscription.stripeCustomerId
-  );
-  return createSuccessResponse(paymentMethod);
+const planChangeSchema = z.object({
+  organizationId: z.string().uuid(),
+  planId: z.string().min(1),
+  billingPeriod: z.enum(["monthly", "yearly"]),
 });
 
+/**
+ * Switch plan or billing period. An upgrade returns a Paymob checkout; a
+ * downgrade is scheduled for the end of the paid period; changes that cost
+ * nothing (during a trial, after a lapse) apply now. See lib/utils/plan-change.
+ */
+export const changePlan = withAuth(
+  async (ctx, organizationId: string, planId: string, billingPeriod: string) => {
+    await enforceRateLimit();
+    const input = validateAction(planChangeSchema, { organizationId, planId, billingPeriod });
+    const organization = await ownedOrganization(ctx.user.id, input.organizationId);
 
-
-export const getInvoices = withAuth(
-  async (
-    ctx,
-    organizationId: string,
-    options: { limit?: number; startingAfter?: string } = {}
-  ) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  await requireOwner(ctx.user.id, organization.id);
-
-  const subscription = organization.subscription;
-  if (!subscription?.stripeCustomerId) {
-    return createSuccessResponse({
-      invoices: [],
-      hasMore: false,
-      nextCursor: null,
+    const result = await changePlanService({
+      organization,
+      actor: actorOf(ctx.user),
+      planId: input.planId,
+      billingPeriod: input.billingPeriod === "yearly" ? "YEARLY" : "MONTHLY",
+      locale: await currentLocale(),
     });
+    return createSuccessResponse(result);
+  }
+);
+
+const uuidSchema = z.string().uuid();
+
+/** Pay for the next period now (a trial's first payment, or a renewal that is due). */
+export const payRenewal = withAuth(async (ctx, organizationId: string) => {
+  await enforceRateLimit();
+  const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
+  const { url } = await payRenewalService({
+    organization,
+    actor: actorOf(ctx.user),
+    locale: await currentLocale(),
+  });
+  return createSuccessResponse({ url });
+});
+
+/** Stop renewing: the plan runs to the end of what is paid, then the free plan. */
+export const cancelPlan = withAuth(async (ctx, organizationId: string) => {
+  await enforceRateLimit();
+  const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
+  const result = await cancelPlanService({ organization, actor: actorOf(ctx.user) });
+  return createSuccessResponse(result);
+});
+
+/** Undo a scheduled cancellation or plan change. */
+export const keepCurrentPlan = withAuth(async (ctx, organizationId: string) => {
+  await enforceRateLimit();
+  const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
+  await keepCurrentPlanService({ organization });
+  return createSuccessResponse({ kept: true });
+});
+
+/**
+ * Where an upgrade or renewal payment stands, for the page Paymob returns the
+ * owner to; settles it from Paymob's own answer if the callback is late.
+ * Not rate limited, like confirmSignupPayment: the page polls it.
+ */
+export const confirmBillingPayment = withAuth(async (ctx, organizationId: string, ref: string) => {
+  const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
+  const payment = await findPaymentSummary(validateAction(uuidSchema, ref));
+
+  // Another dealership's payment reads as no payment at all.
+  if (!payment || payment.organizationId !== organization.id || payment.purpose === "SIGNUP") {
+    throw new NotFoundError("Payment");
   }
 
-  const invoices = await getCustomerInvoices(
-    subscription.stripeCustomerId,
-    options
-  );
-  return createSuccessResponse(invoices);
+  const { state, payment: current } = await confirmPayment(payment);
+  return createSuccessResponse({
+    state,
+    purpose: current.purpose,
+    plan: current.plan,
+    periodStart: current.periodStart,
+    periodEnd: current.periodEnd,
+  });
 });

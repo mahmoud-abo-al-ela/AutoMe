@@ -113,6 +113,7 @@ export async function findPaymentSummary(id: string) {
       periodStart: true,
       periodEnd: true,
       organization: { select: { slug: true } },
+      plan: { select: { name: true, type: true } },
     },
   });
 }

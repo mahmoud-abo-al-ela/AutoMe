@@ -55,6 +55,7 @@ describe("org messages", () => {
       "settings.team.invite.emailPlaceholder",
       "billing.current.defaultPlan",
       "billing.plans.priceWithPeriod",
+      "billing.payments.period",
       "dashboard.funnel.share",
       "dashboard.inventory.legend",
       "cars.pagination.showingShort",
