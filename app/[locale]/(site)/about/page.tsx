@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { Button } from "@/components/ui/button";
 import {
   Car,
@@ -21,7 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about.meta" });
 
-  return { title: t("title"), description: t("description") };
+  return localizedPageMetadata("/about", locale as Locale, {
+    title: t("title"),
+    description: t("description"),
+  });
 }
 
 // Icons and order only. Every string these used to carry now lives in

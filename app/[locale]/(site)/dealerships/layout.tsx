@@ -10,14 +10,11 @@ export async function generateMetadata({
     const t = await getTranslations({ locale, namespace: "dealerships.meta" });
 
     return {
-        title: t("title"),
-        description: t("description"),
+        // Keywords only. A plain-string `title` here carries no template, so
+        // the listing and every dealership page beneath it lost the root
+        // layout's "%s | AutoMe"; title, description and Open Graph are set
+        // by each page instead.
         keywords: t("keywords"),
-        openGraph: {
-            title: t("title"),
-            description: t("ogDescription"),
-            type: "website",
-        },
     };
 }
 

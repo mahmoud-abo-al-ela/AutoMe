@@ -1,20 +1,6 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import type { Locale } from "@/i18n/routing";
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "cars.meta" });
-
-  return {
-    title: t("title"),
-    description: t("description"),
-  };
-}
+// No metadata here. A plain-string `title` in a layout carries no template,
+// so every page beneath it lost the root layout's "%s | AutoMe" and rendered
+// a bare title. The listing's title lives on the listing page.
 
 export default async function CarsLayout({
   children,

@@ -35,6 +35,13 @@ const isSubdomainRedirectToHomeRoute = createRouteMatcher(
 // the intl middleware entirely, or every fetch gains a redirect hop.
 const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"]);
 
+// Crawler files are per host, not per language, and live at the root. The
+// intl middleware would redirect /sitemap.xml to /en/sitemap.xml, which does
+// not exist. They still go through Clerk's handler, which is what sets the
+// sanitized x-subdomain header they read to tell a storefront from the
+// marketplace.
+const isCrawlerFile = createRouteMatcher(["/sitemap.xml", "/robots.txt"]);
+
 const isPublicApiRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
@@ -189,7 +196,7 @@ export default async function middleware(
   req: NextRequest,
   event: NextFetchEvent
 ) {
-  if (isApiRoute(req)) {
+  if (isApiRoute(req) || isCrawlerFile(req)) {
     return clerk(req, event);
   }
 

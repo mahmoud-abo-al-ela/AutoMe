@@ -3,6 +3,22 @@ import { Link } from "@/i18n/navigation";
 import { MapPin } from "lucide-react";
 import { contactMethods, faqQuickLinks } from "./contact-data";
 import ContactForm from "./_components/ContactForm";
+import type { Locale } from "@/i18n/routing";
+import { localizedPageMetadata } from "@/lib/utils/page-seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "contact.meta" });
+
+  return localizedPageMetadata("/contact", locale as Locale, {
+    title: t("title"),
+    description: t("description"),
+  });
+}
 
 export default async function ContactPage({
   params,
