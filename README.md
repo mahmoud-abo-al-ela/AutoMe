@@ -11,7 +11,7 @@ Dealerships subscribe, showcase their new and used cars on a branded storefront,
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Prisma_7-4169e1?logo=postgresql&logoColor=white)](https://www.prisma.io)
 [![Gemini](https://img.shields.io/badge/AI-Gemini_%2B_multi--provider-8e75b2?logo=googlegemini&logoColor=white)](https://ai.google.dev)
-[![Stripe](https://img.shields.io/badge/Billing-Stripe-635bff?logo=stripe&logoColor=white)](https://stripe.com)
+[![Paymob](https://img.shields.io/badge/Billing-Paymob-0b5fff)](https://paymob.com)
 [![Vitest](https://img.shields.io/badge/tests-Vitest_%2B_live_AI_evals-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev)
 
 [AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd) • [Deployment](#deployment)
@@ -47,7 +47,7 @@ AI is not a feature bolted onto the side — it is how a car gets listed, how a 
 ## SaaS model
 
 - **Tenancy.** Each dealership is an organization with its own members, roles, subdomain and data. Every repository query is scoped by an organization id resolved on the server from the session and subdomain — never from request input.
-- **Subscriptions.** Starter, Pro and Enterprise plans billed through Stripe, with signature-verified, idempotent webhooks keeping subscription state in sync.
+- **Subscriptions.** Starter, Pro and Enterprise plans priced in EGP and paid through Paymob, a payment each period: renewal reminders a week and three days ahead, a seven-day grace, then the free plan. An upgrade is paid now; a downgrade waits for the paid period to end. Paymob's callbacks are HMAC-verified and idempotent, and a daily job looks up any payment whose callback never arrived.
 - **Entitlements.** Plans gate features and set limits on cars, team members, photos per car and **AI listings per month**. Limits are enforced on the server in the same guard stack as authentication.
 - **Usage metering.** Every AI call writes a ledger row — tenant, feature, provider, model, tokens, latency, outcome — on success *and* failure. That ledger drives plan limits, per-provider capacity caps and cost reporting. A plan's AI allowance counts cars saved with AI's help, so the photo read, translation and advice behind one listing are one use.
 - **Fair use.** Free-plan traffic runs at a lower priority against shared AI capacity, so paying dealerships are never the ones told "AI busy".
@@ -70,7 +70,7 @@ flowchart LR
     Services --> AI["AI client<br/>cache → breaker → chain → validate → meter"]
     AI --> Gemini["Google Gemini / Gemma"] & Gateway["OpenAI-compatible providers"]
 
-    Web -.-> Clerk["Clerk auth"] & Stripe["Stripe billing"] & Stream["Stream chat"] & Supabase["Supabase storage"] & Arcjet["Arcjet protection"]
+    Web -.-> Clerk["Clerk auth"] & Paymob["Paymob billing"] & Stream["Stream chat"] & Supabase["Supabase storage"] & Arcjet["Arcjet protection"]
 ```
 
 **Request path.** Route → server action → service → repository → Prisma. Each server action runs the same guards in the same order: authentication and tenant resolution (`withOrgAuth`), Zod validation, plan gate and usage limit, then rate limiting. Route handlers under `app/api/` assemble the same guards themselves.
@@ -130,7 +130,7 @@ prisma/              Schema, migrations and seed
 | Application | Next.js 15 (App Router, Server Actions, streaming), React 19, TypeScript |
 | Data | PostgreSQL, Prisma 7, full-text search with Arabic normalization; Supabase storage |
 | AI | Google Gemini and Gemma, OpenAI-compatible providers; Zod-derived JSON schemas |
-| Identity and billing | Clerk, Stripe |
+| Identity and billing | Clerk, Paymob |
 | Realtime | Stream Chat |
 | Security | Arcjet rate limiting, bot detection and shield; Zod validation at every boundary |
 | Localization | next-intl, Arabic (RTL) and English |
@@ -144,7 +144,7 @@ prisma/              Schema, migrations and seed
 
 - Node.js 22+ and pnpm 9 (`corepack enable` installs the pinned version)
 - PostgreSQL (a Supabase project provides the database and file storage)
-- Clerk, Stripe, Stream and Arcjet accounts, and at least one AI provider key
+- Clerk, Paymob (an Egyptian merchant account), Stream and Arcjet accounts, and at least one AI provider key
 
 ### Run locally
 
@@ -173,7 +173,12 @@ Dealership storefronts are served on subdomains; locally, open `http://<slug>.lo
 | `DATABASE_URL` | PostgreSQL connection string |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SECRET` | Authentication and the Clerk webhook |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Image storage |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Subscriptions and the Stripe webhook |
+| `PAYMOB_SECRET_KEY` | Secret: creates checkouts (Intention API) and refunds |
+| `PAYMOB_PUBLIC_KEY` | Public: opens Paymob's hosted checkout page |
+| `PAYMOB_API_KEY` | Secret: looks payments up when a callback is late or lost |
+| `PAYMOB_HMAC_SECRET` | Secret: verifies Paymob's transaction callback |
+| `PAYMOB_CARD_INTEGRATION_ID` | The card integration offered at checkout; its test/live mode must match the keys |
+| `CRON_SECRET` | Authorizes `/api/cron/*`. Billing depends on it: the daily renewals job sends reminders, ends grace periods and catches missed payments |
 | `NEXT_PUBLIC_STREAM_API_KEY`, `STREAM_API_SECRET` | Buyer–dealer chat |
 | `ARCJET_KEY` | Rate limiting — production refuses requests without it |
 | `GEMINI_API_KEY` and/or `CODECRAFT_API_KEY` | AI providers |
@@ -183,7 +188,7 @@ Dealership storefronts are served on subdomains; locally, open `http://<slug>.lo
 
 | Variable | Purpose |
 | --- | --- |
-| `CRON_SECRET` | Authorizes `/api/cron/*`; without it those routes refuse to run |
+| `PAYMOB_WALLET_INTEGRATION_ID` | Mobile-wallet integration, for when wallets are offered at checkout (not yet) |
 | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN` | Error monitoring and source maps |
 | `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY`, `FROM_EMAIL`, `CONTACT_EMAIL` | Contact form and notification email |
 | `CODECRAFT_API_KEY_2`, `CODECRAFT_API_KEY_3`, … | Extra keys for a provider, used in order |
@@ -207,7 +212,6 @@ Dealership storefronts are served on subdomains; locally, open `http://<slug>.lo
 | `pnpm db:migrate` | Create and apply a migration in development |
 | `pnpm db:seed` / `pnpm db:reset` | Seed / reset and re-seed the database |
 | `pnpm db:studio` | Prisma Studio |
-| `pnpm db:sync-plans` | Create or update the plans' products and prices in Stripe |
 
 </details>
 
@@ -238,7 +242,7 @@ flowchart LR
 ```
 
 - **Reproducible installs.** `--frozen-lockfile` fails the run if `package.json` changed without the lockfile.
-- **The migrations are tested, not just the code.** The test job applies every migration to a fresh PostgreSQL 16 — including the full-text search column, the `pg_trgm` extension and the GIN indexes — then runs the database-backed suites against it: the Stripe webhook idempotency race and Arabic/English search ranking.
+- **The migrations are tested, not just the code.** The test job applies every migration to a fresh PostgreSQL 16 — including the full-text search column, the `pg_trgm` extension and the GIN indexes — then runs the database-backed suites against it: the webhook idempotency race, a payment settled by two callers at once creating exactly one dealership, the billing-email ledger, and Arabic/English search ranking.
 - **A real production build.** `next build` prerenders pages and runs module-level code, which catches failures a type-check cannot.
 - **No real secrets.** Both jobs run on placeholder credentials that cannot reach a real service; the only secret is a Clerk *development* key the build needs to validate its format.
 
@@ -252,6 +256,7 @@ Built for [Vercel](https://vercel.com).
 > Apply migrations to the production database (`pnpm prisma migrate deploy`) **before** deploying code that depends on them.
 
 - Enable **Fluid compute** — the AI routes declare `maxDuration = 300` to outlast provider queues.
-- Point Stripe and Clerk webhooks at `/api/webhooks/stripe` and `/api/webhooks/clerk`, and run `pnpm db:sync-plans` once per Stripe account.
+- Set Paymob's transaction callback to `https://<your-domain>/api/webhooks/paymob` (each checkout also names it). It must be public HTTPS, which Paymob cannot reach on localhost: test payments against a preview deployment. (Locally, the payment success pages still confirm a payment by asking Paymob directly.) Point Clerk's webhook at `/api/webhooks/clerk`.
+- Set `CRON_SECRET`: `vercel.json` runs `/api/cron/billing-renewals` daily at 05:00 UTC (07:00–08:00 Cairo). Plan prices are edited in EGP in the super-admin plan editor.
 - Add a wildcard domain (`*.your-domain`) so dealership storefronts resolve.
-- Set `CRON_SECRET`, then run `POST /api/cron/backfill-image-alts` until it reports nothing remaining, to describe photos of cars listed before photo descriptions existed.
+- Run `POST /api/cron/backfill-image-alts` (with `CRON_SECRET`) until it reports nothing remaining, to describe photos of cars listed before photo descriptions existed.
