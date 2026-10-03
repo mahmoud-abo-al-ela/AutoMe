@@ -38,13 +38,7 @@ export function PageHeader({
   const body = (
     <div className={cn("flex flex-col gap-4", inverse && "max-w-3xl gap-5")}>
       {eyebrow && (
-        <p
-          className={cn(
-            "flex w-fit items-center gap-2 text-micro font-semibold",
-            inverse ? "rounded-full bg-inverse-foreground/10 px-3 py-1.5" : "text-muted-foreground",
-          )}
-        >
-          <span aria-hidden className="size-2 rounded-full border border-border-strong bg-marker" />
+        <p className={cn("text-caption font-semibold", inverse ? "text-inverse-foreground/70" : "text-muted-foreground")}>
           {eyebrow}
         </p>
       )}

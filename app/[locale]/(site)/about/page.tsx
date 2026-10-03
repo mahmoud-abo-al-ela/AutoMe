@@ -82,10 +82,7 @@ export default async function AboutPage({ params }: Props) {
 
   const figures = counts.length > 0 && (
     <section aria-label={t("figures.label")} className="flex flex-col gap-3">
-      <p className="flex items-center gap-2 text-micro font-semibold text-inverse-foreground/70">
-        <span aria-hidden className="size-2 rounded-full bg-marker" />
-        {t("figures.label")}
-      </p>
+      <p className="text-caption font-semibold text-inverse-foreground/70">{t("figures.label")}</p>
       <dl
         className={cn(
           "grid gap-px overflow-hidden rounded-control border border-inverse-foreground/15 bg-inverse-foreground/15",
@@ -140,10 +137,7 @@ export default async function AboutPage({ params }: Props) {
       <section aria-labelledby="mission-title" className={`${container} pt-12 sm:pt-16`}>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-4">
-            <p className="flex items-center gap-2 text-micro font-semibold text-muted-foreground">
-              <span aria-hidden className="size-2 rounded-full border border-border-strong bg-marker" />
-              {t("mission.eyebrow")}
-            </p>
+            <p className="text-caption font-semibold text-muted-foreground">{t("mission.eyebrow")}</p>
             <h2 id="mission-title" className="text-h1 font-extrabold">
               {t("mission.headline")} <span className="text-primary">{t("mission.headlineAccent")}</span>
             </h2>

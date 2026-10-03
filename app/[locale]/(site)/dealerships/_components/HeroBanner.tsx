@@ -44,10 +44,7 @@ export const HeroBanner = ({
     <header className="mb-6 flex flex-col gap-5 border-b border-border pb-6 lg:mb-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-h1 font-extrabold">{t("title")}</h1>
-        <p className="flex items-center gap-2 text-caption text-muted-foreground">
-          <span aria-hidden className="size-2 rounded-full border border-border-strong bg-marker" />
-          {subtitle}
-        </p>
+        <p className="text-caption text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="relative w-full lg:max-w-xl">

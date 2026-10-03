@@ -47,7 +47,6 @@ export function MarketReadout({ summary, className }: { summary: MarketSummary; 
             summary.updatedAt && i === lastIndex && "max-sm:hidden"
           )}
         >
-          {i === 0 && <span aria-hidden className="size-2 rounded-full border border-border-strong bg-marker" />}
           {item}
         </span>
       ))}
