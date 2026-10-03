@@ -24,15 +24,15 @@ export function PlanSelectionHeader({
             transition={{ duration: 0.5 }}
             className="text-center space-y-4"
         >
-            <div className="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-2xl border border-blue-100">
-                <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg">
-                    <CreditCard className="h-6 w-6 text-white" />
+            <div className="inline-flex items-center justify-center gap-3 bg-card p-4 rounded-control border border-border">
+                <div className="p-3 rounded-control border-2 border-border-strong bg-marker">
+                    <CreditCard className="h-6 w-6" />
                 </div>
                 <div className="text-start">
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
+                    <h2 className="text-h2 font-extrabold">
                         {t("title")}
                     </h2>
-                    <p className="text-sm text-gray-600 mt-1">{t("subtitle")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
                 </div>
             </div>
 

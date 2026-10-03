@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Trophy, Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { specCategories } from "./utils";
+import { useSpecValue } from "./use-spec-value";
 import type {
   CompareCar,
   CompareDifferences,
@@ -26,12 +27,13 @@ const SideBySideSpecs = ({
 }) => {
     const t = useTranslations("compare");
     const tFields = useTranslations("carAttributes.fields");
+    const specValue = useSpecValue();
   return (
     <div>
       {specCategories.map((category) => (
         <div key={category.id}>
           {/* Sticky category header */}
-          <div className="sticky top-0 z-[5] px-3 py-2 bg-gray-100 border-b text-xs font-semibold text-muted-foreground">
+          <div className="sticky top-0 z-[5] px-3 py-2 bg-muted border-b text-xs font-semibold text-muted-foreground">
             {t(`sections.${category.id}`)}
           </div>
           <div className="divide-y">
@@ -44,14 +46,14 @@ const SideBySideSpecs = ({
                   key={spec.key}
                   className={cn(
                     "transition-colors duration-200",
-                    showHighlight && "bg-amber-50/60"
+                    showHighlight && "bg-marker-soft/60"
                   )}
                 >
                   {/* Label row */}
                   <div
                     className={cn(
                       "px-3 pt-2 pb-0.5 text-micro text-muted-foreground",
-                      showHighlight && "border-s-2 border-s-amber-400"
+                      showHighlight && "border-s-2 border-s-marker"
                     )}
                   >
                     {tFields(spec.key)}
@@ -60,9 +62,7 @@ const SideBySideSpecs = ({
                   <div className="grid grid-cols-2 gap-2 px-3 pb-2">
                     {cars.map((car) => {
                       const rawValue = car[spec.key];
-                      const displayValue = spec.format
-                        ? spec.format(rawValue)
-                        : rawValue || "—";
+                      const displayValue = specValue(spec.key, rawValue);
                       const isWinner = winners[spec.key] === car.id;
 
                       return (
@@ -70,11 +70,11 @@ const SideBySideSpecs = ({
                           key={car.id}
                           className={cn(
                             "text-xs font-medium flex items-center gap-1 rounded px-1.5 py-0.5",
-                            isWinner && highlightDifferences && "bg-emerald-50 text-emerald-700"
+                            isWinner && highlightDifferences && "bg-positive-soft text-positive"
                           )}
                         >
                           {isWinner && highlightDifferences && (
-                            <Trophy className="h-2.5 w-2.5 text-emerald-600 flex-shrink-0" />
+                            <Trophy className="h-2.5 w-2.5 text-positive flex-shrink-0" />
                           )}
                           {displayValue}
                         </div>
@@ -90,7 +90,7 @@ const SideBySideSpecs = ({
 
       {/* Features side-by-side */}
       <div>
-        <div className="sticky top-0 z-[5] px-3 py-2 bg-gray-100 border-b text-xs font-semibold text-muted-foreground">
+        <div className="sticky top-0 z-[5] px-3 py-2 bg-muted border-b text-xs font-semibold text-muted-foreground">
           {t("features")}
         </div>
         <div className="divide-y">
@@ -121,13 +121,13 @@ const SideBySideSpecs = ({
                   key={feature}
                   className={cn(
                     "transition-colors duration-200",
-                    showHighlight && "bg-amber-50/60"
+                    showHighlight && "bg-marker-soft/60"
                   )}
                 >
                   <div
                     className={cn(
                       "px-3 pt-2 pb-0.5 text-micro text-muted-foreground line-clamp-1",
-                      showHighlight && "border-s-2 border-s-amber-400"
+                      showHighlight && "border-s-2 border-s-marker"
                     )}
                   >
                     {feature}
@@ -138,12 +138,12 @@ const SideBySideSpecs = ({
                       return (
                         <div key={car.id} className="flex items-center gap-1">
                           {has ? (
-                            <div className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                              <Check className="h-2.5 w-2.5 text-emerald-600" />
+                            <div className="h-4 w-4 rounded-full bg-positive-soft flex items-center justify-center">
+                              <Check className="h-2.5 w-2.5 text-positive" />
                             </div>
                           ) : (
-                            <div className="h-4 w-4 rounded-full bg-gray-100 flex items-center justify-center">
-                              <Minus className="h-2.5 w-2.5 text-gray-400" />
+                            <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
+                              <Minus className="h-2.5 w-2.5 text-muted-foreground" />
                             </div>
                           )}
                         </div>

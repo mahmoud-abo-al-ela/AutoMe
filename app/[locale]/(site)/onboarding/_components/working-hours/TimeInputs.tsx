@@ -27,11 +27,11 @@ export default function TimeInputs({
             className="flex items-center justify-end gap-4 flex-1"
         >
             <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg">
-                    <Sun className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center gap-2 bg-primary-soft px-3 py-2 rounded-lg">
+                    <Sun className="h-4 w-4 text-primary" />
                     <Label
                         htmlFor={`${day.key}-open`}
-                        className="text-sm font-semibold text-gray-700 whitespace-nowrap"
+                        className="text-sm font-semibold text-muted-foreground whitespace-nowrap"
                     >
                         {t("opens")}
                     </Label>
@@ -46,17 +46,17 @@ export default function TimeInputs({
                             value={field.value}
                             onChange={field.onChange}
                             onBlur={field.onBlur}
-                            className="w-full sm:w-36 h-11 text-base border-blue-300 focus:border-blue-500 focus:ring-blue-500/20"
+                            className="w-full sm:w-36 h-11 text-base border-primary/30 focus:border-primary/30 focus:ring-primary/20"
                         />
                     )}
                 />
             </div>
             <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 bg-indigo-50 px-3 py-2 rounded-lg">
-                    <Moon className="h-4 w-4 text-indigo-600" />
+                <div className="flex items-center gap-2 bg-primary-soft px-3 py-2 rounded-lg">
+                    <Moon className="h-4 w-4 text-primary" />
                     <Label
                         htmlFor={`${day.key}-close`}
-                        className="text-sm font-semibold text-gray-700 whitespace-nowrap"
+                        className="text-sm font-semibold text-muted-foreground whitespace-nowrap"
                     >
                         {t("closes")}
                     </Label>
@@ -71,7 +71,7 @@ export default function TimeInputs({
                             value={field.value}
                             onChange={field.onChange}
                             onBlur={field.onBlur}
-                            className="w-full sm:w-36 h-11 text-base border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            className="w-full sm:w-36 h-11 text-base border-primary/30 focus:border-primary/30 focus:ring-primary/20"
                         />
                     )}
                 />

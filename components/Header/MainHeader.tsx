@@ -1,116 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Link } from "@/i18n/navigation";
-import {
-  Menu,
-  X,
-  Heart,
-  CarFront,
-  LayoutDashboard,
-  ArrowLeft,
-  MessageSquare,
-} from "lucide-react";
-import MobileMenu from "./MobileMenu";
-import { Button } from "@/components/ui/button";
-import { UserButton, SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
-import { usePathname } from "@/i18n/navigation";
-import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
-import { UnreadBadge } from "@/components/StreamChat";
 import { useTranslations } from "next-intl";
+import { CarFront, Heart, MessageSquare } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand";
+import { UnreadBadge } from "@/components/StreamChat";
+import { navItems, subdomainNavItems, adminNavItems } from "@/lib/HeaderConfig";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import { useHeaderAccess } from "./use-header-access";
 import { cn } from "@/lib/utils";
-
-const NAV_ICONS = { Heart, CarFront, LayoutDashboard, ArrowLeft, MessageSquare };
-
-type NavLinkProps = {
-  href: string;
-  label: string;
-  /** Key into NAV_ICONS. A link with no icon renders as a text nav item. */
-  icon?: string;
-  iconClass?: string;
-  size?: number;
-  isMobile?: boolean;
-  onClick?: () => void;
-  isActive?: boolean;
-  showUnreadBadge?: boolean;
-  organizationId?: string | null;
-};
-
-function NavLink({
-  href,
-  label,
-  icon,
-  iconClass,
-  size = 24,
-  isMobile,
-  onClick,
-  isActive,
-  showUnreadBadge,
-  organizationId,
-}: NavLinkProps) {
-  const Icon = icon ? NAV_ICONS[icon as keyof typeof NAV_ICONS] : null;
-
-  // Special styling for messages icon
-  const isMessagesIcon = icon === "MessageSquare";
-
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "group flex items-center text-sm font-medium transition-all duration-200 relative",
-        isMobile ? "py-1 gap-2" : "rounded-md relative overflow-hidden",
-        isMessagesIcon && !isMobile
-          ? "p-2"
-          : !isMobile
-            ? "px-3 py-2 gap-2"
-            : "gap-2",
-        isActive
-          ? `text-primary font-semibold ${!isMobile ? "bg-primary/5" : ""}`
-          : "hover:text-primary",
-      )}
-      onClick={onClick}
-      aria-current={isActive ? "page" : undefined}
-      title={label}
-      aria-label={label}
-    >
-      {Icon && (
-        <span
-          className={cn(
-            "relative inline-flex items-center justify-center",
-            isMessagesIcon &&
-            !isMobile &&
-            "p-1.5 rounded-full hover:bg-muted/80 transition-colors",
-          )}
-        >
-          <Icon
-            size={isMessagesIcon ? 22 : size}
-            className={cn(
-              iconClass,
-              isActive ? "text-primary" : "",
-              "transition-transform duration-300 group-hover:scale-110",
-            )}
-          />
-          {showUnreadBadge && (
-            <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organizationId} />
-          )}
-        </span>
-      )}
-      {!icon && (
-        <>
-          <span className={isActive ? "font-medium" : ""}>{label}</span>
-          {!isMobile && isActive && (
-            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left transition-transform duration-300" />
-          )}
-          {!isMobile && !isActive && (
-            <span className="absolute bottom-0 start-0 h-0.5 w-full bg-primary transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
-          )}
-        </>
-      )}
-    </Link>
-  );
-}
 
 export type HeaderUser = {
   name?: string | null;
@@ -128,6 +29,75 @@ export type HeaderOrganization = {
   logo?: string | null;
 } | null;
 
+/** A section is current on its own page and on everything under it (/cars/123 is still Browse). */
+export function isCurrentSection(pathname: string | null | undefined, href: string) {
+  if (!pathname) return false;
+  return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/**
+ * Desktop nav item (Figma: Header). The current page is marked twice — full
+ * ink and a marker bar on the header's bottom edge — so it never relies on
+ * colour alone.
+ */
+function NavItem({ href, label, active }: { href: string; label: string; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "group relative flex h-full items-center px-3 text-caption font-medium transition-colors",
+        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {label}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute inset-x-3 bottom-0 h-[3px] rounded-t-full bg-marker transition-opacity",
+          active ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+        )}
+      />
+    </Link>
+  );
+}
+
+/** Square 40px icon link; the label is both its tooltip and its accessible name. */
+function IconLink({
+  href,
+  label,
+  active,
+  children,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      title={label}
+      aria-label={label}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "relative inline-flex size-10 items-center justify-center rounded-control transition-colors hover:bg-muted",
+        active && "bg-muted"
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/**
+ * Site header (Figma: Header, MobileTopBar) — sticky and in normal flow, so
+ * pages no longer guess its height with their own top margins.
+ *
+ * Phones get only the brand and the language toggle here: navigation lives in
+ * the bottom tab bar (BottomTabBar), so nothing crowds — or clips at — the
+ * screen edge.
+ */
 export default function MainHeader({
   user,
   organizationSlug,
@@ -137,229 +107,100 @@ export default function MainHeader({
   organizationSlug?: string | null;
   organization?: HeaderOrganization;
 }) {
-  // Sign-out is a client event; `user` is the server's answer from the last
-  // render, so a moment after signing out the prop still describes a member.
-  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
-  // live state has to gate anything derived from the prop.
-  //
-  // While Clerk is still loading, the server's answer stands: a signed-out
-  // visitor has no `user` to derive anything from anyway, so trusting it costs
-  // nothing and spares a signed-in one a flicker.
-  const { isLoaded, isSignedIn } = useAuth();
-  const signedIn = !isLoaded || isSignedIn === true;
-
-  const hasOrgMembership =
-    signedIn && (user?.memberships?.length ?? 0) > 0;
-
-  // Get user's first organization (for admin link)
-  const userOrg = user?.memberships?.[0]?.organization;
-  const userOrgSlug = organizationSlug || userOrg?.slug;
-
-  // Whether we're on a subdomain (tenant context)
-  const isOnSubdomain = !!organizationSlug;
-
-  // Check if user is a platform super admin (UserRole.ADMIN)
-  const isSuperAdmin = signedIn && user?.role === "ADMIN";
-
-  // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
-  const isOwner =
-    isSuperAdmin ||
-    (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
-
   const t = useTranslations("nav");
   const { afterSignOut, signIn } = useAuthRedirects();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const isOnAdminPath = pathname?.startsWith("/super-admin");
-  const isOnOrgPath = pathname?.startsWith("/org/");
+  const access = useHeaderAccess(user, organizationSlug);
+  const { pathname } = access;
 
-  // Show admin nav for org members when on subdomain and not already on admin path
-  // Show admin nav for org members/admins when on subdomain and not already on admin path
-  const showAdminNav = (hasOrgMembership || isSuperAdmin) && organizationSlug && !isOnAdminPath;
-
-  // Dashboard link for org members (used on main domain)
-  const orgDashboardHref = userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/super-admin";
-
-  // Use subdomain-specific nav items when on a tenant subdomain
-  const publicNavItems = isOnSubdomain ? subdomainNavItems : navItems;
-
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
+  const brandName = access.isOnSubdomain && organization?.name ? organization.name : "AutoMe";
+  const items = access.showAdminNav
+    ? adminNavItems
+    : access.isOnSubdomain
+      ? subdomainNavItems
+      : navItems;
+  const onAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
 
   return (
-    <header
-      className={`fixed top-0 z-50 w-full border-b transition-all duration-300 ease-in-out bg-background
-          ${isMenuOpen ? "border-transparent" : ""}
-        `}
-    >
-      <>
-        <div className="container flex h-14 md:h-16 items-center mx-auto">
-          <Link
-            href="/"
-            className="me-6 flex items-center gap-2 transition-transform duration-300 hover:scale-105"
-            title={isOnSubdomain && organization?.name ? organization.name : t("home")}
-            aria-label={isOnSubdomain && organization?.name ? organization.name : t("home")}
-          >
-            {isOnSubdomain && organization?.logo ? (
-              <img
-                src={organization.logo}
-                alt={organization.name ?? ""}
-                className="h-8 w-8 rounded-full object-cover ms-4 md:ms-0"
-              />
-            ) : null}
-            <span className="text-2xl font-bold text-primary ms-4 md:ms-0">
-              {isOnSubdomain && organization?.name ? (
-                <span className="text-black dark:text-white">{organization.name}</span>
-              ) : (
-                <>Auto<span className="text-black dark:text-white">Me</span></>
-              )}
-            </span>
-          </Link>
-          <div className="hidden md:flex items-center justify-between w-full">
-            <nav className="flex justify-center gap-1 lg:gap-2 mx-6 flex-1">
-              {showAdminNav
-                ? // Show admin navigation for org members
-                adminNavItems.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    href={item.href}
-                    label={t(item.labelKey)}
-                    isActive={pathname === item.href}
-                  />
-                ))
-                : // Show public navigation (tenant-aware)
-                publicNavItems.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    href={item.href}
-                    label={t(item.labelKey)}
-                    isActive={pathname === item.href}
-                  />
-                ))}
-            </nav>
+    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/85">
+      <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-6 px-4 md:h-[72px] md:px-8 xl:px-20">
+        <Link
+          href="/"
+          aria-label={access.isOnSubdomain ? brandName : t("goHome")}
+          className="flex shrink-0 items-center gap-2 rounded-plate"
+        >
+          {access.isOnSubdomain && organization?.logo ? (
+            // Dealership logos are arbitrary remote URLs; next/image would need
+            // every host allow-listed.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={organization.logo} alt="" className="size-9 rounded-control object-cover" />
+          ) : null}
+          <Logo name={brandName} />
+        </Link>
 
-            {/* Context switcher for org members */}
-            {(hasOrgMembership || isSuperAdmin) && !isOnOrgPath && (
-              <div className="me-4">
-                {isOnAdminPath ? (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/">{t("viewStorefront")}</Link>
-                  </Button>
-                ) : (
-                  <Button variant="default" size="sm" asChild>
-                    <Link href={orgDashboardHref}>{t("dashboard")}</Link>
-                  </Button>
-                )}
+        <nav aria-label={t("primaryNav")} className="hidden h-full flex-1 items-stretch justify-center gap-1 md:flex">
+          {items.map((item) => (
+            <NavItem
+              key={item.href}
+              href={item.href}
+              label={t(item.labelKey)}
+              active={isCurrentSection(pathname, item.href)}
+            />
+          ))}
+        </nav>
+
+        <div className="ms-auto flex items-center gap-2 md:ms-0">
+          {access.showDashboardLink && (
+            <Button
+              variant={access.isOnAdminPath ? "outline-strong" : "inverse"}
+              size="control"
+              asChild
+              className="hidden md:inline-flex"
+            >
+              <Link href={access.isOnAdminPath ? "/" : access.dashboardHref}>
+                {access.isOnAdminPath ? t("viewStorefront") : t("dashboard")}
+              </Link>
+            </Button>
+          )}
+
+          <LanguageSwitcher className="h-10 rounded-control px-2.5 max-md:[&>span]:hidden" />
+
+          <SignedOut>
+            {!access.isOnSubdomain && (
+              <Link
+                href="/#for-dealers"
+                className="hidden rounded-control px-2.5 py-2 text-caption font-medium text-muted-foreground transition-colors hover:text-foreground lg:inline-flex"
+              >
+                {t("forDealers")}
+              </Link>
+            )}
+            {!onAuthPage && (
+              <Button variant="outline-strong" size="control" asChild className="hidden md:inline-flex">
+                <Link href={signIn}>{t("signIn")}</Link>
+              </Button>
+            )}
+          </SignedOut>
+
+          <SignedIn>
+            {!access.isOwner && (
+              <div className="hidden items-center gap-1 md:flex">
+                <IconLink href="/wishlist" label={t("wishlist")} active={isCurrentSection(pathname, "/wishlist")}>
+                  <Heart className="size-5" />
+                </IconLink>
+                <IconLink href="/messages" label={t("messages")} active={isCurrentSection(pathname, "/messages")}>
+                  <MessageSquare className="size-5" />
+                  <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organization?.id} />
+                </IconLink>
+                <IconLink href="/test-drive" label={t("testDrive")} active={isCurrentSection(pathname, "/test-drive")}>
+                  <CarFront className="size-5" />
+                </IconLink>
               </div>
             )}
-
-            <div className="flex items-center gap-6">
-              <SignedOut>
-                {pathname !== "/sign-in" && pathname !== "/sign-up" && (
-                  <Button
-                    variant="default"
-                    className="cursor-pointer transition-all duration-300 hover:shadow-md"
-                  >
-                    <Link
-                      href={signIn}
-                      className="w-full flex items-center justify-center"
-                    >
-                      {t("signIn")}
-                    </Link>
-                  </Button>
-                )}
-              </SignedOut>
-              <SignedIn>
-                <div className="flex items-center gap-6">
-                  {signedInLinks
-                    .filter(
-                      // Only notAdmin does any filtering. This also tested
-                      // adminOnly and adminPath, which no entry in
-                      // signedInLinks defines, so both were constant-true.
-                      (link: (typeof signedInLinks)[number] & {
-                        showUnreadBadge?: boolean;
-                      }) => !link.notAdmin || !isOwner,
-                    )
-                    .map((link) => (
-                      <NavLink
-                        key={link.href}
-                        href={link.href}
-                        label={t(link.labelKey)}
-                        icon={link.icon}
-                        iconClass={link.iconClass}
-                        size={link.size}
-                        isActive={pathname === link.href}
-                        showUnreadBadge={link.showUnreadBadge}
-                        organizationId={organization?.id}
-                      />
-                    ))}
-                  <UserButton
-                    afterSignOutUrl={afterSignOut}
-                    appearance={{
-                      elements: {
-                        avatarBox:
-                          "hover:scale-110 transition-transform duration-300",
-                      },
-                    }}
-                  />
-                </div>
-              </SignedIn>
-              <LanguageSwitcher />
+            <div className="hidden md:block">
+              <UserButton afterSignOutUrl={afterSignOut} />
             </div>
-          </div>
-
-          {/* Mobile icons - Messages and Menu */}
-          <div className="md:hidden ms-auto flex items-center gap-1">
-            <LanguageSwitcher />
-            {/* Messages icon with unread badge - only show when signed in and not org owner */}
-            <SignedIn>
-              {!isOwner && (
-                <Link
-                  href="/messages"
-                  className="relative flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
-                  title={t("messages")}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  <UnreadBadge className="absolute -top-0.5 -end-0.5" organizationId={organization?.id} />
-                </Link>
-              )}
-            </SignedIn>
-
-            {/* Menu toggle */}
-            <button
-              className="flex items-center justify-center rounded-full w-10 h-10 transition-colors hover:bg-muted active:bg-muted/80"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? t("closeMenu") : t("openMenu")}
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-menu"
-            >
-              <div className="relative w-6 h-6">
-                <X
-                  className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${isMenuOpen
-                    ? "opacity-100 rotate-0 scale-100"
-                    : "opacity-0 rotate-90 scale-75"
-                    }`}
-                />
-                <Menu
-                  className={`absolute inset-0 h-6 w-6 transition-all duration-300 ${isMenuOpen
-                    ? "opacity-0 -rotate-90 scale-75"
-                    : "opacity-100 rotate-0 scale-100"
-                    }`}
-                />
-              </div>
-            </button>
-          </div>
+          </SignedIn>
         </div>
-
-        <MobileMenu
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
-          user={user}
-          organizationSlug={organizationSlug}
-          organization={organization}
-        />
-      </>
+      </div>
     </header>
   );
 }

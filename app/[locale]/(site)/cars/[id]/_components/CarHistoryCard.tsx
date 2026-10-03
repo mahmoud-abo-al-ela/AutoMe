@@ -68,11 +68,11 @@ const CarHistoryCard = ({ car, terms = {} }: Props) => {
   const list = (lines: Line[]) => (
     <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {lines.map((line) => (
-        <li key={line.key} className="flex items-start gap-2 text-sm text-gray-700">
+        <li key={line.key} className="flex items-start gap-2 text-sm text-muted-foreground">
           {line.positive ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
           ) : (
-            <MinusCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden />
+            <MinusCircle className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden />
           )}
           {line.text}
         </li>
@@ -81,31 +81,31 @@ const CarHistoryCard = ({ car, terms = {} }: Props) => {
   );
 
   return (
-    <Card className="shadow-lg border-0 bg-white p-0">
+    <Card className=" border-0 bg-card p-0">
       <CardContent className="p-4 sm:p-6 md:p-8 space-y-4">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="p-1.5 sm:p-2 bg-emerald-100 rounded-lg">
-            <ClipboardList className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" aria-hidden />
+          <div className="p-1.5 sm:p-2 bg-positive-soft rounded-lg">
+            <ClipboardList className="w-4 h-4 sm:w-5 sm:h-5 text-positive" aria-hidden />
           </div>
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{t("title")}</h3>
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">{t("title")}</h3>
         </div>
 
         {carLines.length > 0 && list(carLines)}
 
         {termLines.length > 0 && (
           <div className="space-y-2 border-t pt-4">
-            <h4 className="text-sm font-semibold text-gray-900">{t("dealershipTerms")}</h4>
+            <h4 className="text-sm font-semibold text-foreground">{t("dealershipTerms")}</h4>
             {list(termLines)}
             {terms.financingNote && (
               // The dealer's own words, in whatever language they wrote them.
-              <p dir="auto" className="text-sm text-gray-600">
+              <p dir="auto" className="text-sm text-muted-foreground">
                 {terms.financingNote}
               </p>
             )}
           </div>
         )}
 
-        <p className="text-xs text-gray-400">{t("statedByDealer")}</p>
+        <p className="text-xs text-muted-foreground">{t("statedByDealer")}</p>
       </CardContent>
     </Card>
   );

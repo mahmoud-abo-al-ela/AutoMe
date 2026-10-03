@@ -9,9 +9,9 @@
     "save": "Save",
     "search": "Search",
     "viewDetails": "View details",
-    "viewDealer": "View dealer",
     "clearFilters": "Clear Filters",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "backToTop": "Back to top"
   },
   "states": {
     "empty": "Nothing here yet",
@@ -19,7 +19,8 @@
     "loading": "Loading…",
     "notTranslated": "Not available in Arabic — showing the English original",
     "noResults": "No results found",
-    "noResultsBody": "Try adjusting your search or filters to find what you’re looking for."
+    "noResultsBody": "Try adjusting your search or filters to find what you’re looking for.",
+    "onTheWay": "On the way…"
   },
   "language": {
     "label": "Language",
@@ -56,5 +57,16 @@
   },
   "time": {
     "togglePeriod": "Switch between AM and PM"
+  },
+  "market": {
+    "below": "{value} below market",
+    "above": "{value} above market",
+    "fair": "Fair price",
+    "unknown": "No price comparison yet",
+    "comparables": "{count, plural, one {{value} similar car} other {{value} similar cars}}",
+    "median": "Market median",
+    "medianFor": "Median {median} across {comparables} on AutoMe",
+    "gaugeLabel": "Price compared with similar cars on AutoMe: {verdict}",
+    "unknownDetail": "Fewer than 3 similar cars are on sale right now, so there is no fair median to compare this price with yet."
   }
 }

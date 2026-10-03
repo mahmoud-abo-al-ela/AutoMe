@@ -31,7 +31,7 @@ export function BillingToggle({
     return (
         <div className="flex items-center justify-center gap-4">
             <span
-                className={`text-sm font-semibold transition-colors ${billingPeriod === "monthly" ? "text-gray-900" : "text-gray-500"
+                className={`text-sm font-semibold transition-colors ${billingPeriod === "monthly" ? "text-foreground" : "text-muted-foreground"
                     }`}
             >
                 {t("monthly")}
@@ -42,16 +42,16 @@ export function BillingToggle({
                 aria-checked={isYearly}
                 aria-label={t("billingPeriodLabel")}
                 onClick={onToggle}
-                className="cursor-pointer relative inline-flex h-8 w-16 items-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="cursor-pointer relative inline-flex h-8 w-16 items-center rounded-full bg-inverse transition-colors hover:bg-inverse-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
                 <motion.span
-                    className="absolute start-1 inline-block h-6 w-6 transform rounded-full bg-white shadow-lg"
+                    className="absolute start-1 inline-block h-6 w-6 transform rounded-full bg-card"
                     animate={{ x: isYearly ? knobOffset : 0 }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
             </button>
             <span
-                className={`text-sm font-semibold transition-colors ${billingPeriod === "yearly" ? "text-gray-900" : "text-gray-500"
+                className={`text-sm font-semibold transition-colors ${billingPeriod === "yearly" ? "text-foreground" : "text-muted-foreground"
                     }`}
             >
                 {t("yearly")}
@@ -63,7 +63,7 @@ export function BillingToggle({
                 <motion.span
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="ms-2 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"
+                    className="ms-2 inline-flex items-center rounded-full bg-positive-soft px-3 py-1 text-xs font-semibold text-positive"
                 >
                     {t(isYearly ? "saving" : "save", {
                         percentage: fmt.number(savingsPercentage),

@@ -2,7 +2,7 @@ import ComparePageSkeleton from "@/app/[locale]/(site)/compare/_components/Compa
 
 export default function CompareLoading() {
   return (
-    <div className="pt-20">
+    <div className="pt-6">
       <ComparePageSkeleton />
     </div>
   );

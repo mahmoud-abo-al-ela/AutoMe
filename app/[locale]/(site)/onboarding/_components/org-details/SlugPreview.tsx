@@ -28,10 +28,10 @@ export default function SlugPreview({
 
     const tone =
         status === "taken"
-            ? "border-red-200 bg-red-50"
+            ? "border-destructive/30 bg-destructive-soft"
             : status === "available"
-              ? "border-green-200 bg-green-50"
-              : "border-gray-200 bg-gray-50";
+              ? "border-positive/30 bg-positive-soft"
+              : "border-border bg-muted";
 
     return (
         <motion.div
@@ -39,14 +39,14 @@ export default function SlugPreview({
             animate={{ opacity: 1, y: 0 }}
             className={`flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border px-3 py-2 ${tone}`}
         >
-            <Globe className="h-4 w-4 shrink-0 text-gray-400" />
-            <span className="text-xs text-gray-500">{t("prefix")}</span>
+            <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">{t("prefix")}</span>
             <span
                 dir="ltr"
-                className="font-mono text-sm font-semibold text-gray-900 break-all"
+                className="font-mono text-sm font-semibold text-foreground break-all"
             >
                 {slug}
-                <span className="font-normal text-gray-500">.{ROOT_DOMAIN}</span>
+                <span className="font-normal text-muted-foreground">.{ROOT_DOMAIN}</span>
             </span>
 
             <AnimatePresence mode="wait">
@@ -56,7 +56,7 @@ export default function SlugPreview({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="ms-auto flex items-center gap-1 text-xs font-medium text-gray-500"
+                        className="ms-auto flex items-center gap-1 text-xs font-medium text-muted-foreground"
                     >
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         {t("checking")}
@@ -68,7 +68,7 @@ export default function SlugPreview({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="ms-auto flex items-center gap-1 text-xs font-semibold text-green-700"
+                        className="ms-auto flex items-center gap-1 text-xs font-semibold text-positive"
                     >
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         {t("available")}
@@ -80,7 +80,7 @@ export default function SlugPreview({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="ms-auto flex items-center gap-1 text-xs font-semibold text-red-700"
+                        className="ms-auto flex items-center gap-1 text-xs font-semibold text-destructive"
                     >
                         <XCircle className="h-3.5 w-3.5" />
                         {t("taken")}

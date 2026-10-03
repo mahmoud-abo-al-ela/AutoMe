@@ -104,14 +104,7 @@
     "processing": "Processing…"
   },
   "dealership": {
-    "listedBy": "Listed by",
-    "soldBy": "Sold by",
-    "view": "View →",
-    "getDirections": "Get directions",
-    "callDealership": "Call dealership",
-    "viewAllCars": "View All Cars",
-    "call": "Call",
-    "directions": "Directions"
+    "soldBy": "Sold by"
   },
   "errors": {
     "fetchFailed": "Failed to fetch car details",

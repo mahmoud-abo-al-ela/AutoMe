@@ -47,24 +47,24 @@ export const DealershipWorkingHours = ({
     }
 
     return (
-        <Card className="border-slate-100 shadow-sm">
+        <Card className="border-border">
             <CardContent className="p-6">
                 {/* Header with open/closed status */}
                 <div className="flex items-center justify-between mb-5">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-slate-500" />
+                        <Clock className="h-5 w-5 text-muted-foreground" />
                         {t("workingHours.title")}
                     </h3>
                     <div
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${openStatus.isOpen
-                                ? "bg-green-50 text-green-700"
-                                : "bg-red-50 text-red-700"
+                                ? "bg-positive-soft text-positive"
+                                : "bg-destructive-soft text-destructive"
                             }`}
                     >
                         <span
                             className={`h-2 w-2 rounded-full ${openStatus.isOpen
-                                    ? "bg-green-500 animate-pulse"
-                                    : "bg-red-500"
+                                    ? "bg-positive animate-pulse"
+                                    : "bg-destructive"
                                 }`}
                         />
                         {openStatus.isOpen
@@ -88,13 +88,13 @@ export const DealershipWorkingHours = ({
                                 key={wh.dayKey}
                                 className={`flex justify-between items-center text-sm px-3 py-2.5 rounded-lg transition-colors ${isToday
                                         ? "bg-primary/5 border border-primary/10 font-medium"
-                                        : "hover:bg-slate-50"
+                                        : "hover:bg-muted"
                                     }`}
                             >
                                 <span
                                     className={`flex items-center gap-2 ${isToday
                                             ? "text-primary font-semibold"
-                                            : "font-medium text-slate-700"
+                                            : "font-medium text-muted-foreground"
                                         }`}
                                 >
                                     {isToday && (
@@ -112,8 +112,8 @@ export const DealershipWorkingHours = ({
                                         wh.isOpen
                                             ? isToday
                                                 ? "text-primary font-semibold"
-                                                : "text-green-600"
-                                            : "text-red-500"
+                                                : "text-positive"
+                                            : "text-destructive"
                                     }
                                 >
                                     {wh.isOpen ? (

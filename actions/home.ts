@@ -1,5 +1,7 @@
 "use server";
 import * as carRepository from "@/lib/repositories/car";
+import { withMarketPositions } from "@/lib/services/car/market-price";
+import type { SerializedCar } from "@/lib/utils/serializers";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
@@ -18,7 +20,8 @@ export const getFeaturedCars = withErrorHandling(async (limit = 4) => {
     { page: 1, limit }
   );
 
-  return createSuccessResponse(result.cars);
+  // findManyCars only ever serializes real rows; see getCars.
+  return createSuccessResponse(await withMarketPositions(result.cars as SerializedCar[]));
 });
 
 /**

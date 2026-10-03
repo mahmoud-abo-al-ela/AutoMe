@@ -1,24 +1,23 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { X, ArrowRight, Car as CarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { X, ArrowRight, Fuel, Calendar, Gauge, Car as CarIcon } from "lucide-react";
-import { formatPrice, formatMileage, getCarTitle } from "./utils";
+import { PricePlate } from "@/components/brand";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useCarAttributes } from "@/hooks/use-car-attributes";
+import { resolveCarTitle } from "@/lib/utils/car-text";
+import type { Locale } from "@/i18n/routing";
 import type { CompareCar } from "../_lib/compare-types";
 
 /**
- * Card-based car display for the compare page sticky header row.
+ * A car at the head of a comparison column: photo, title, the price plate and
+ * the year · km · fuel line, with remove and "view details".
  *
- * Features:
- *  - Image with gradient overlay showing price
- *  - Remove button with AnimatePresence exit animation
- *  - Quick stats row: year, mileage, fuel type as small badges
- *  - "View Details" link button
- *  - Subtle hover elevation via framer-motion
+ * Text goes through the same helpers as the listing cards, so the Arabic page
+ * gets the Arabic title, its own digits and translated fuel types.
  */
 const CompareCarCard = ({
     car,
@@ -28,96 +27,54 @@ const CompareCarCard = ({
     onRemove: (carId: string) => void;
 }) => {
     const tCommon = useTranslations("common.actions");
+    const tCarActions = useTranslations("common.carActions");
+    const locale = useLocale() as Locale;
+    const fmt = useFormatters();
+    const attr = useCarAttributes();
+
+    // A year is a number but never a quantity, so it is not grouped.
+    const year = fmt.number(car.year, { useGrouping: false });
+    const title = resolveCarTitle(car, locale)?.text ?? `${year} ${car.make} ${car.model}`;
+    const facts = [year, car.mileage != null ? fmt.mileage(car.mileage) : null, attr.fuel(car.fuelType) || null]
+        .filter(Boolean)
+        .join(" · ");
+
     return (
-        <AnimatePresence mode="popLayout">
-            <motion.div
-                key={car.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.85 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                whileHover={{ y: -2, boxShadow: "0 8px 25px -5px rgba(0,0,0,0.1)" }}
-                className="relative bg-white rounded-lg border border-gray-200 overflow-hidden"
+        <article className="relative flex flex-col overflow-hidden rounded-control border border-border bg-card">
+            <Button
+                onClick={() => onRemove(car.id)}
+                size="icon"
+                variant="ghost"
+                className="absolute end-2 top-2 z-10 size-9 rounded-full bg-field/90 hover:bg-destructive-soft hover:text-destructive print:hidden"
+                aria-label={`${tCarActions("removeFromCompare")}: ${title}`}
             >
-                {/* Remove button */}
-                <Button
-                    onClick={() => onRemove(car.id)}
-                    size="icon"
-                    variant="ghost"
-                    className="absolute top-2 end-2 z-10 h-7 w-7 bg-white/80 backdrop-blur-sm rounded-full hover:bg-red-50 hover:text-red-600 cursor-pointer shadow-sm print:hidden"
-                    aria-label={`Remove ${getCarTitle(car)} from comparison`}
-                >
-                    <X className="h-3.5 w-3.5" />
-                </Button>
+                <X className="size-4" />
+            </Button>
 
-                {/* Image with gradient overlay */}
-                <div className="aspect-[4/3] relative bg-muted">
-                    {/* A car with no images used to pass an undefined `src` to
-                        next/image, which throws and takes the page down. */}
-                    {car.images[0]?.url ? (
-                        <Image
-                            src={car.images[0].url}
-                            alt={getCarTitle(car)}
-                            fill
-                            className="object-cover"
-                        />
-                    ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                            <CarIcon className="h-10 w-10 text-muted-foreground/40" />
-                        </div>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
-                    <Badge className="absolute bottom-2 start-2 bg-white/90 text-gray-900 hover:bg-white text-xs font-semibold shadow-sm">
-                        {formatPrice(car.price)}
-                    </Badge>
-                </div>
-
-                {/* Car info */}
-                <div className="p-3">
-                    <h3 className="font-semibold text-sm md:text-base mb-2 line-clamp-1">
-                        {getCarTitle(car)}
-                    </h3>
-
-                    {/* Quick stats badges */}
-                    <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                        <Badge
-                            variant="outline"
-                            className="text-micro px-1.5 py-0 h-5 gap-1"
-                        >
-                            <Calendar className="h-2.5 w-2.5" />
-                            {car.year}
-                        </Badge>
-                        {car.mileage && (
-                            <Badge
-                                variant="outline"
-                                className="text-micro px-1.5 py-0 h-5 gap-1"
-                            >
-                                <Gauge className="h-2.5 w-2.5" />
-                                {formatMileage(car.mileage)}
-                            </Badge>
-                        )}
-                        {car.fuelType && (
-                            <Badge
-                                variant="outline"
-                                className="text-micro px-1.5 py-0 h-5 gap-1"
-                            >
-                                <Fuel className="h-2.5 w-2.5" />
-                                {car.fuelType}
-                            </Badge>
-                        )}
+            <div className="relative aspect-[3/2] bg-muted">
+                {/* A car with no images used to pass an undefined `src` to
+                    next/image, which throws and takes the page down. */}
+                {car.images[0]?.url ? (
+                    <Image src={car.images[0].url} alt="" fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover" />
+                ) : (
+                    <div className="flex size-full items-center justify-center">
+                        <CarIcon aria-hidden className="size-10 text-muted-foreground/40" />
                     </div>
+                )}
+            </div>
 
-                    {/* View Details link */}
-                    <Button asChild size="sm" className="w-full text-xs h-8 print:hidden">
-                        <Link href={`/cars/${car.id}`}>
-                            {tCommon("viewDetails")}
-                            <ArrowRight className="ms-1 h-3 w-3" />
-                        </Link>
-                    </Button>
-                </div>
-            </motion.div>
-        </AnimatePresence>
+            <div className="flex flex-1 flex-col gap-3 p-4">
+                <h3 className="line-clamp-2 text-body font-semibold">{title}</h3>
+                <PricePlate amount={car.price} size="sm" className="self-start" />
+                {facts && <p className="text-micro text-muted-foreground">{facts}</p>}
+                <Button asChild variant="outline-strong" size="control" className="mt-auto w-full print:hidden">
+                    <Link href={`/cars/${car.id}`}>
+                        {tCommon("viewDetails")}
+                        <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+                    </Link>
+                </Button>
+            </div>
+        </article>
     );
 };
 

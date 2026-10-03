@@ -141,7 +141,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                                     {t("averageRating")}
                                 </p>
                                 <div className="flex items-center justify-center gap-2">
-                                    <Star className="h-8 w-8 fill-yellow-400 text-yellow-400" />
+                                    <Star className="h-8 w-8 fill-marker text-foreground" />
                                     <span className="text-4xl font-bold">
                                         {averageRating}
                                     </span>
@@ -159,9 +159,9 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                                             <span className="text-sm w-8 text-end">
                                                 {fmt.number(rating)}★
                                             </span>
-                                            <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                                            <div className="flex-1 h-3 bg-border rounded-full overflow-hidden">
                                                 <div
-                                                    className="h-full bg-yellow-400 transition-all duration-500"
+                                                    className="h-full bg-marker transition-all duration-500"
                                                     style={{
                                                         width: `${(ratingDistribution[rating] / totalReviews) * 100}%`,
                                                     }}
@@ -200,7 +200,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                     {[1, 2, 3].map((i) => (
                         <div
                             key={i}
-                            className="h-32 bg-gray-100 rounded-lg animate-pulse"
+                            className="h-32 bg-muted rounded-lg animate-pulse"
                         />
                     ))}
                 </div>

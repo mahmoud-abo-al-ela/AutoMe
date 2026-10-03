@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { StarRating } from "@/components/common/StarRating";
 import {
-    Building2,
     Phone,
     Mail,
     Globe,
@@ -56,16 +55,14 @@ export const DealershipHeader = ({
         });
 
     return (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 via-white to-blue-50/30 shadow-md border border-slate-100 mb-6">
+        <div className="relative overflow-hidden rounded-control bg-card border border-border mb-6">
             {/* Decorative background elements */}
-            <div className="absolute top-0 end-0 w-72 h-72 bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-            <div className="absolute bottom-0 start-0 w-48 h-48 bg-gradient-to-tr from-purple-100/30 to-transparent rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
             <div className="relative p-6 sm:p-8 lg:p-10">
                 <div className="flex flex-col sm:flex-row gap-6 lg:gap-8">
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden bg-white relative shadow-md ring-1 ring-slate-200/60">
+                        <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-control overflow-hidden bg-card relative ring-1 ring-slate-200/60">
                             {dealership.logo ? (
                                 <Image
                                     src={dealership.logo}
@@ -76,8 +73,17 @@ export const DealershipHeader = ({
                                     priority
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-                                    <Building2 className="h-14 w-14 sm:h-16 sm:w-16 lg:h-20 lg:w-20 text-white" />
+                                <div className="w-full h-full flex items-center justify-center bg-marker border-2 border-border-strong text-foreground">
+                                    {/* Initials on marker yellow, as on the dealership cards. */}
+                                    <span aria-hidden className="text-[2.5rem] font-black sm:text-[3rem]">
+                                        {dealership.name
+                                            .split(/\s+/)
+                                            .filter(Boolean)
+                                            .map((word: string) => word[0])
+                                            .join("")
+                                            .toUpperCase()
+                                            .slice(0, 2)}
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -87,7 +93,7 @@ export const DealershipHeader = ({
                     <div className="flex-1 min-w-0">
                         {/* Name + Verified Badge */}
                         <div className="flex flex-wrap items-start gap-3 mb-2">
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground leading-tight">
                                 {dealership.name}
                             </h1>
                         </div>
@@ -102,7 +108,7 @@ export const DealershipHeader = ({
                                         size={16}
                                     />
                                 </div>
-                                <span className="text-lg font-semibold text-slate-900">
+                                <span className="text-lg font-semibold text-foreground">
                                     {formatRating(dealership.averageRating)}
                                 </span>
                                 {dealership.totalReviews > 0 && (
@@ -127,7 +133,7 @@ export const DealershipHeader = ({
                             <div className="mb-5">
                                 <div
                                     ref={descriptionRef}
-                                    className={`text-sm sm:text-base text-slate-600 leading-relaxed transition-all duration-300 ${!isDescriptionExpanded && isDescriptionClamped
+                                    className={`text-sm sm:text-base text-muted-foreground leading-relaxed transition-all duration-300 ${!isDescriptionExpanded && isDescriptionClamped
                                         ? "line-clamp-2"
                                         : ""
                                         }`}
@@ -166,10 +172,10 @@ export const DealershipHeader = ({
                                             variant="outline"
                                             size="sm"
                                             asChild
-                                            className="gap-2 bg-white/80 hover:bg-white cursor-pointer"
+                                            className="gap-2 bg-field/80 hover:bg-card cursor-pointer"
                                         >
                                             <a href={telHref(dealership.phone) ?? `tel:${dealership.phone}`}>
-                                                <Phone className="h-4 w-4 text-green-600" />
+                                                <Phone className="h-4 w-4 text-positive" />
                                                 <span className="hidden sm:inline">{t("call")}</span>
                                             </a>
                                         </Button>
@@ -187,10 +193,10 @@ export const DealershipHeader = ({
                                             variant="outline"
                                             size="sm"
                                             asChild
-                                            className="gap-2 bg-white/80 hover:bg-white cursor-pointer"
+                                            className="gap-2 bg-field/80 hover:bg-card cursor-pointer"
                                         >
                                             <a href={`mailto:${dealership.email}`}>
-                                                <Mail className="h-4 w-4 text-blue-600" />
+                                                <Mail className="h-4 w-4 text-primary" />
                                                 <span className="hidden sm:inline">{t("email")}</span>
                                             </a>
                                         </Button>
@@ -208,14 +214,14 @@ export const DealershipHeader = ({
                                             variant="outline"
                                             size="sm"
                                             asChild
-                                            className="gap-2 bg-white/80 hover:bg-white cursor-pointer"
+                                            className="gap-2 bg-field/80 hover:bg-card cursor-pointer"
                                         >
                                             <a
                                                 href={dealership.website}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
-                                                <Globe className="h-4 w-4 text-purple-600" />
+                                                <Globe className="h-4 w-4 text-primary" />
                                                 <span className="hidden sm:inline">{t("website")}</span>
                                             </a>
                                         </Button>
@@ -233,14 +239,14 @@ export const DealershipHeader = ({
                                             variant="outline"
                                             size="sm"
                                             asChild
-                                            className="gap-2 bg-white/80 hover:bg-white cursor-pointer"
+                                            className="gap-2 bg-field/80 hover:bg-card cursor-pointer"
                                         >
                                             <a
                                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dealership.address)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
-                                                <MapPin className="h-4 w-4 text-red-500" />
+                                                <MapPin className="h-4 w-4 text-destructive" />
                                                 <span className="hidden sm:inline">{t("directions")}</span>
                                             </a>
                                         </Button>
@@ -255,7 +261,7 @@ export const DealershipHeader = ({
                                 dealership={dealership}
                                 variant="outline"
                                 size="sm"
-                                className="gap-2 bg-white/80 hover:bg-white"
+                                className="gap-2 bg-field/80 hover:bg-card"
                             />
                         </div>
                     </div>

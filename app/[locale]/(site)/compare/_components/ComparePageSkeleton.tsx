@@ -25,10 +25,10 @@ const ComparePageSkeleton = () => {
 
             {/* ── Car cards skeleton (desktop) ────────────────────────────────── */}
             <div className="hidden md:block">
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="bg-card rounded-lg overflow-hidden">
                     {/* Car cards row */}
                     <div className="grid grid-cols-[250px_1fr]">
-                        <div className="p-4 bg-gray-50 border-b border-e">
+                        <div className="p-4 bg-muted border-b border-e">
                             <Skeleton className="h-6 w-28" />
                         </div>
                         <div className="grid grid-cols-3 border-b">
@@ -57,7 +57,7 @@ const ComparePageSkeleton = () => {
                     {specCategories.map((category) => (
                         <div key={category.id}>
                             {/* Category header */}
-                            <div className="grid grid-cols-[250px_1fr] bg-gray-100">
+                            <div className="grid grid-cols-[250px_1fr] bg-muted">
                                 <div className="p-3 border-b border-e">
                                     <Skeleton className="h-5 w-40" />
                                 </div>
@@ -77,7 +77,7 @@ const ComparePageSkeleton = () => {
                                     key={spec.key}
                                     className="grid grid-cols-[250px_1fr] border-b last:border-b-0"
                                 >
-                                    <div className="p-3 border-e bg-gray-50">
+                                    <div className="p-3 border-e bg-muted">
                                         <Skeleton className="h-4 w-20" />
                                     </div>
                                     <div className="grid grid-cols-3">
@@ -99,7 +99,7 @@ const ComparePageSkeleton = () => {
 
             {/* ── Car cards skeleton (mobile) ─────────────────────────────────── */}
             <div className="md:hidden">
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="bg-card rounded-lg overflow-hidden">
                     {Array.from({ length: 2 }).map((_, i) => (
                         <div key={`mobile-card-${i}`} className="p-4 border-b last:border-b-0">
                             <div className="flex gap-3">

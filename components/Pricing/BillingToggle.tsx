@@ -26,7 +26,7 @@ export function BillingToggle({
   // at the wrong end of the track and animates away from the label it selects.
   const knobOffset = direction === "rtl" ? -KNOB_TRAVEL : KNOB_TRAVEL;
     return (
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex flex-wrap items-center gap-3">
             <span
                 className={`text-sm font-semibold transition-colors ${billingPeriod === "monthly" ? "text-foreground" : "text-muted-foreground"
                     }`}
@@ -39,7 +39,7 @@ export function BillingToggle({
                 aria-checked={isYearly}
                 aria-label={t("billingPeriodLabel")}
                 onClick={onToggle}
-                className="cursor-pointer relative inline-flex h-8 w-16 items-center rounded-full bg-primary transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="cursor-pointer relative inline-flex h-8 w-16 items-center rounded-full bg-inverse transition-all hover:bg-inverse-hover focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
                 <motion.span
                     className="absolute start-1 inline-block h-6 w-6 transform rounded-full bg-white shadow-lg"
@@ -57,7 +57,7 @@ export function BillingToggle({
                 <motion.span
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="ms-2 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"
+                    className="inline-flex items-center rounded-full bg-positive-soft px-3 py-1 text-micro font-semibold text-positive"
                 >
                     {t("save", { percentage: fmt.number(savingsPercentage ?? 0) })}
                 </motion.span>

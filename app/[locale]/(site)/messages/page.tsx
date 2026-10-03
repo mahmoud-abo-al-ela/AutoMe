@@ -35,7 +35,7 @@ export default async function MessagesPage({
   const organization = await getCurrentOrganization();
 
   return (
-    <div className="container mx-auto px-4 pb-6 pt-20 max-w-[1600px]">
+    <div className="container mx-auto px-4 pb-6 pt-6 max-w-[1600px]">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">{t("title")}</h1>
         <p className="text-sm md:text-base text-muted-foreground">

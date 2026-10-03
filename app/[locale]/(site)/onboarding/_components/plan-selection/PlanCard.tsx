@@ -74,23 +74,13 @@ export function PlanCard({
                     // h-full + column flex so every card fills the grid row and
                     // the footer sits at the bottom regardless of how many
                     // features the plan lists (Enterprise has one more).
-                    "relative flex h-full flex-col cursor-pointer transition-all duration-300 hover:shadow-2xl",
-                    // While selected the plan's own accent colour is dropped so
-                    // the green selection reads as a single state, rather than
-                    // a purple/blue border competing with the green ring.
-                    isSelected ? "border-green-500" : config.border,
-                    isSelected
-                        ? "ring-4 ring-green-500 shadow-2xl scale-105 z-10"
-                        : "hover:scale-102",
-                    isPro && !isSelected && "shadow-xl",
+                    "relative flex h-full flex-col cursor-pointer transition-all duration-300",
+                    // While selected the tier's own border is dropped so the
+                    // selection reads as a single state.
+                    isSelected ? "z-10 border-2 border-foreground ring-2 ring-foreground" : config.border,
                 )}
                 onClick={() => onSelect(plan.id)}
             >
-                {/* Background gradient */}
-                <div
-                    className={`absolute inset-0 bg-gradient-to-br ${config.bg} opacity-50 -z-10`}
-                />
-
                 {config.badgeKey && !isSelected && (
                     <motion.div
                         initial={{ scale: 0 }}
@@ -98,7 +88,7 @@ export function PlanCard({
                         transition={{ type: "spring", stiffness: 200, damping: 10 }}
                         className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
                     >
-                        <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-1.5 shadow-lg text-sm font-semibold">
+                        <Badge className="border-2 border-border-strong bg-marker px-4 py-1.5 text-sm font-semibold text-marker-foreground">
                             {tPlans(config.badgeKey)}
                         </Badge>
                     </motion.div>
@@ -110,7 +100,7 @@ export function PlanCard({
                         transition={{ type: "spring", stiffness: 200, damping: 10 }}
                         className="absolute -top-4 left-1/2 -translate-x-1/2 z-20"
                     >
-                        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-1.5 shadow-lg text-sm font-semibold">
+                        <Badge className="bg-inverse px-4 py-1.5 text-sm font-semibold text-inverse-foreground">
                             {t("selectedBadge")}
                         </Badge>
                     </motion.div>
@@ -121,10 +111,7 @@ export function PlanCard({
                         <motion.div
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 0.6 }}
-                            className={cn(
-                                "p-3 rounded-xl bg-white shadow-md",
-                                config.color,
-                            )}
+                            className={cn("rounded-control p-3", config.tile)}
                         >
                             <Icon className="h-6 w-6" />
                         </motion.div>
@@ -132,12 +119,12 @@ export function PlanCard({
                     </div>
                     <div className="pt-2">
                         <div className="flex items-baseline gap-1">
-                            <span className="text-5xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
+                            <span className="text-[2.5rem] font-black tabular-nums">
                                 {price}
                             </span>
                             {/* A quoted plan has no period to name. */}
                             {periodKey && (
-                                <span className="text-gray-600 text-lg font-medium">
+                                <span className="text-muted-foreground text-lg font-medium">
                                     /{tPlans(periodKey)}
                                 </span>
                             )}
@@ -145,7 +132,7 @@ export function PlanCard({
                         {/* A trial starts the dealership now; the first
                             payment is asked for before it ends. */}
                         {planSignupKind(plan) === "trial" && (
-                            <p className="mt-2 text-sm font-medium text-green-700">
+                            <p className="mt-2 text-sm font-medium text-positive">
                                 {t("trial", {
                                     count: plan.trialDays,
                                     value: fmt.number(plan.trialDays),
@@ -164,12 +151,9 @@ export function PlanCard({
                 <CardFooter className="relative z-10 mt-auto">
                     <Button
                         type="button"
-                        className={`w-full h-12 text-base font-semibold transition-all duration-300 cursor-pointer hover:bg-transparent ${isSelected
-                            ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg"
-                            : isPro
-                                ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-                                : "bg-white border-2 hover:border-blue-500 text-gray-800"
-                            }`}
+                        variant={isSelected ? "inverse" : isPro ? "marker" : "outline-strong"}
+                        size="xl"
+                        className="w-full"
                         onClick={() => onSelect(plan.id)}
                     >
                         {isSelected ? (

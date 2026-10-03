@@ -1,282 +1,131 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-
+import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
+import { CarFront, ChevronRight, LogOut } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, UserButton, useClerk, useAuth } from "@clerk/nextjs";
-import { LogOut } from "lucide-react";
-import { usePathname } from "@/i18n/navigation";
-import { navItems, subdomainNavItems, adminNavItems, signedInLinks } from "@/lib/HeaderConfig";
-import { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { getNavIcon } from "./mobile-menu-icons";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { navItems, subdomainNavItems, adminNavItems } from "@/lib/HeaderConfig";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
-import NavLink from "./MobileMenuNavLink";
-import type { HeaderUser, HeaderOrganization } from "./MainHeader";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import { isCurrentSection, type HeaderOrganization, type HeaderUser } from "./MainHeader";
+import { useHeaderAccess } from "./use-header-access";
+import { cn } from "@/lib/utils";
 
+/**
+ * The phone "More" sheet, opened from the bottom tab bar: everything that is
+ * not one of the four primary tabs — the remaining sections, the dashboard
+ * for dealership members, language, and the account.
+ *
+ * A Radix sheet rather than the hand-rolled panel it replaces, so focus is
+ * trapped, Escape closes it, focus returns to the More tab, and scroll lock
+ * is handled — none of which the old panel did.
+ */
 export default function MobileMenu({
-  isMenuOpen,
-  setIsMenuOpen,
+  open,
+  onOpenChange,
   user,
   organizationSlug,
   organization,
 }: {
-  isMenuOpen: boolean;
-  setIsMenuOpen: (open: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   user?: HeaderUser;
   organizationSlug?: string | null;
   organization?: HeaderOrganization;
 }) {
   const t = useTranslations("nav");
-  const pathname = usePathname();
-
-  // Sign-out is a client event; `user` is the server's answer from the last
-  // render, so a moment after signing out the prop still describes a member.
-  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
-  // live state has to gate anything derived from the prop.
-  //
-  // While Clerk is still loading, the server's answer stands: a signed-out
-  // visitor has no `user` to derive anything from anyway, so trusting it costs
-  // nothing and spares a signed-in one a flicker.
-  const { isLoaded, isSignedIn } = useAuth();
-  const signedIn = !isLoaded || isSignedIn === true;
-
-  const hasOrgMembership =
-    signedIn && (user?.memberships?.length ?? 0) > 0;
-
-  // Get user's first organization (for dashboard link)
-  const userOrg = user?.memberships?.[0]?.organization;
-  const userOrgSlug = organizationSlug || userOrg?.slug;
-
-  // Whether we're on a subdomain (tenant context)
-  const isOnSubdomain = !!organizationSlug;
-
-  // Check if user is a platform super admin (UserRole.ADMIN)
-  const isSuperAdmin = signedIn && user?.role === "ADMIN";
-
-  // Check if user can manage the organization (OWNER role in any org OR platform ADMIN)
-  const isOwner =
-    isSuperAdmin ||
-    (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
-
-  const menuRef = useRef<HTMLDivElement>(null);
+  const tFooter = useTranslations("footer");
   const { signOut } = useClerk();
   const { afterSignOut, signIn } = useAuthRedirects();
-  const isOnAdminPath = pathname?.startsWith("/super-admin");
-  const isOnOrgPath = pathname?.startsWith("/org/");
+  const access = useHeaderAccess(user, organizationSlug);
+  const close = () => onOpenChange(false);
 
-  // Show admin nav for org members/admins when on subdomain and not already on admin path
-  const showAdminNav = (hasOrgMembership || isSuperAdmin) && organizationSlug && !isOnAdminPath;
+  // Home and Browse are tabs already; the rest of the section nav lives here.
+  const sections = (access.showAdminNav ? adminNavItems : access.isOnSubdomain ? subdomainNavItems : navItems).filter(
+    (item) => item.href !== "/cars"
+  );
+  const extra = access.isOnSubdomain
+    ? []
+    : [
+        { href: "/about", label: tFooter("aboutUs") },
+        { href: "/contact", label: tFooter("contactUs") },
+      ];
 
-  // Dashboard link for org members (used on main domain)
-  const orgDashboardHref = userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/super-admin";
-
-  // Use subdomain-specific nav items when on a tenant subdomain
-  const publicNavItems = isOnSubdomain ? subdomainNavItems : navItems;
-  const navToShow = showAdminNav ? adminNavItems : publicNavItems;
-
-  // Filter out messages from signed-in links (it's now in header)
-  const filteredSignedInLinks = signedInLinks.filter(
-    (link) => link.icon !== "MessageSquare",
+  const row = (href: string, label: string, icon?: React.ReactNode) => (
+    <Link
+      key={href}
+      href={href}
+      onClick={close}
+      aria-current={isCurrentSection(access.pathname, href) ? "page" : undefined}
+      className={cn(
+        "flex min-h-12 items-center gap-3 rounded-control px-3 text-body font-medium transition-colors hover:bg-muted",
+        isCurrentSection(access.pathname, href) && "bg-muted"
+      )}
+    >
+      {icon}
+      <span className="flex-1">{label}</span>
+      <ChevronRight aria-hidden className="size-4 text-muted-foreground rtl:rotate-180" />
+    </Link>
   );
 
-  useEffect(() => {
-    // Prevent body scroll when menu is open
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        isMenuOpen
-      ) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen, setIsMenuOpen]);
-
   return (
-    <AnimatePresence>
-      {isMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden"
-            style={{ zIndex: 39 }}
-            onClick={() => setIsMenuOpen(false)}
-          />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="max-h-[85dvh] gap-0 rounded-t-sheet border-0 bg-card p-0 pb-[env(safe-area-inset-bottom)]">
+        <SheetTitle className="sr-only">{t("more")}</SheetTitle>
+        <div aria-hidden className="mx-auto mt-3 h-1 w-10 rounded-full bg-border" />
 
-          {/* Menu Panel */}
-          <motion.div
-            ref={menuRef}
-            initial={{ opacity: 0, y: -10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-14 start-3 end-3 bg-background border rounded-3xl shadow-2xl md:hidden overflow-hidden"
-            style={{ zIndex: 40, maxHeight: "calc(100vh - 5rem)" }}
-          >
-            {/* User section */}
-            <SignedIn>
-              <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
-                <div className="flex items-center gap-3">
-                  <UserButton
-                    afterSignOutUrl={afterSignOut}
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-11 h-11 rounded-full shadow-md",
-                      },
-                    }}
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm">
-                      {user?.name || t("welcomeBack")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      signOut({ redirectUrl: afterSignOut });
-                    }}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
-                    aria-label={t("signOut")}
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </button>
-                </div>
+        <div className="overflow-y-auto px-4 pb-4 pt-3">
+          <SignedIn>
+            <div className="mb-3 flex items-center gap-3 rounded-control bg-muted p-3">
+              <UserButton afterSignOutUrl={afterSignOut} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-caption font-semibold">{user?.name || t("welcomeBack")}</p>
+                {user?.email && <p dir="ltr" className="truncate text-micro text-muted-foreground rtl:text-right">{user.email}</p>}
               </div>
-            </SignedIn>
-
-            {/* Navigation */}
-            <div
-              className="p-3 overflow-y-auto"
-              style={{ maxHeight: "calc(100vh - 14rem)" }}
-            >
-              {/* Context switcher for org members */}
-              {(hasOrgMembership || isSuperAdmin) && !isOnOrgPath && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="mb-3"
-                >
-                  {isOnAdminPath ? (
-                    <Link href="/" onClick={() => setIsMenuOpen(false)}>
-                      <Button
-                        variant="outline"
-                        className="w-full py-6 rounded-2xl font-semibold"
-                      >
-                        {t("viewStorefront")}
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Link href={orgDashboardHref} onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        {t("dashboard")}
-                      </Button>
-                    </Link>
-                  )}
-                </motion.div>
-              )}
-
-              {/* Main nav */}
-              <div className="space-y-1">
-                {navToShow.map((item, index) => {
-                  const NavIcon = getNavIcon(item.labelKey);
-                  return (
-                    <NavLink
-                      key={item.href}
-                      href={item.href}
-                      label={t(item.labelKey)}
-                      IconComponent={NavIcon}
-                      onClick={() => setIsMenuOpen(false)}
-                      isActive={pathname === item.href}
-                      animationDelay={index * 40}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Signed in links */}
-              <SignedIn>
-                <div className="my-3 mx-2 h-px bg-border" />
-                <div className="space-y-1">
-                  {filteredSignedInLinks
-                    .filter(
-                      // Same dead adminOnly/adminPath clauses as MainHeader,
-                      // removed here too; only notAdmin filters anything.
-                      (link: (typeof filteredSignedInLinks)[number] & {
-                        showUnreadBadge?: boolean;
-                      }) => !link.notAdmin || !isOwner,
-                    )
-                    .map((link, index) => (
-                      <NavLink
-                        key={link.href}
-                        href={link.href}
-                        label={t(link.labelKey)}
-                        icon={link.icon}
-                        iconClass={link.iconClass}
-                        size={18}
-                        onClick={() => setIsMenuOpen(false)}
-                        isActive={pathname === link.href}
-                        animationDelay={(navItems.length + index) * 40}
-                        showUnreadBadge={link.showUnreadBadge}
-                        organizationId={organization?.id}
-                      />
-                    ))}
-                </div>
-              </SignedIn>
-
-              {/* Sign in button */}
-              <SignedOut>
-                {pathname !== "/sign-in" && pathname !== "/sign-up" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: 0.15 }}
-                    className="mt-4"
-                  >
-                    <Link href={signIn} onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full py-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25">
-                        {t("signIn")}
-                      </Button>
-                    </Link>
-                  </motion.div>
-                )}
-              </SignedOut>
+              <Button
+                variant="ghost"
+                size="icon-control"
+                aria-label={t("signOut")}
+                title={t("signOut")}
+                onClick={() => {
+                  close();
+                  signOut({ redirectUrl: afterSignOut });
+                }}
+              >
+                <LogOut className="size-5" />
+              </Button>
             </div>
+          </SignedIn>
 
-            {/* Footer */}
-            <div className="px-5 py-3 border-t bg-muted/30 text-center">
-              <p className="text-micro text-muted-foreground">
-                {isOnSubdomain && organization?.name
-                  ? `© 2026 ${organization.name} • Powered by AutoMe`
-                  : "© 2026 AutoMe • All rights reserved"}
-              </p>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+          {access.showDashboardLink && (
+            <Button variant="inverse" size="xl" asChild className="mb-3 w-full">
+              <Link href={access.isOnAdminPath ? "/" : access.dashboardHref} onClick={close}>
+                {access.isOnAdminPath ? t("viewStorefront") : t("dashboard")}
+              </Link>
+            </Button>
+          )}
+
+          <nav aria-label={t("more")} className="flex flex-col">
+            {sections.map((item) => row(item.href, t(item.labelKey)))}
+            <SignedIn>{!access.isOwner && row("/test-drive", t("testDrive"), <CarFront aria-hidden className="size-5" />)}</SignedIn>
+            {extra.map((item) => row(item.href, item.label))}
+            {!access.isOnSubdomain && row("/#for-dealers", t("forDealers"))}
+          </nav>
+
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+            <LanguageSwitcher className="h-11 rounded-control" onSwitch={close} />
+            <SignedOut>
+              <Button variant="marker" size="xl" asChild>
+                <Link href={signIn} onClick={close}>
+                  {t("signIn")}
+                </Link>
+              </Button>
+            </SignedOut>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

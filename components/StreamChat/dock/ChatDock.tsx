@@ -152,7 +152,7 @@ function DockWindow({ carId, onCarPage }: { carId: string; onCarPage: boolean })
         onAnimationEnd={onAnimationEnd}
         style={leaving ? HOLD_LAST_FRAME : undefined}
         className={cn(
-          "fixed bottom-20 start-4 z-50 flex origin-left items-center gap-1 rounded-full border bg-background py-1 pe-1 ps-1 shadow-xl rtl:origin-right lg:bottom-4",
+          "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] start-4 z-50 flex origin-left items-center gap-1 rounded-full border bg-background py-1 pe-1 ps-1 shadow-xl rtl:origin-right lg:bottom-4",
           leaving ? BUBBLE_EXIT : BUBBLE_ENTER
         )}
       >
@@ -203,11 +203,11 @@ function DockWindow({ carId, onCarPage }: { carId: string; onCarPage: boolean })
       onKeyDown={(e) => e.key === "Escape" && minimize()}
       onAnimationEnd={onAnimationEnd}
       style={leaving ? HOLD_LAST_FRAME : undefined}
-      // Same bottom as the bubble at every width (bottom-20 clears the car
-      // page's sticky bar below lg), so it shrinks into the spot the bubble
+      // Same bottom as the bubble at every width (below lg it clears the car
+      // page's sticky bar and the phone tab bar), so it shrinks into the spot the bubble
       // then appears in.
       className={cn(
-        "fixed inset-0 z-50 flex origin-bottom-left flex-col overflow-hidden bg-background shadow-2xl rtl:origin-bottom-right sm:inset-auto sm:bottom-20 sm:start-4 sm:h-[min(600px,calc(100dvh-6rem))] sm:w-[380px] sm:rounded-2xl sm:border lg:bottom-4 lg:h-[min(600px,calc(100dvh-2rem))]",
+        "fixed inset-0 z-50 flex origin-bottom-left flex-col overflow-hidden bg-background shadow-2xl rtl:origin-bottom-right sm:inset-auto sm:bottom-[calc(5.5rem+env(safe-area-inset-bottom))] sm:start-4 sm:h-[min(600px,calc(100dvh-6rem))] sm:w-[380px] sm:rounded-2xl sm:border lg:bottom-4 lg:h-[min(600px,calc(100dvh-2rem))]",
         leaving ? WINDOW_EXIT : WINDOW_ENTER
       )}
     >

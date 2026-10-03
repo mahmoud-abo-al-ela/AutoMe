@@ -24,7 +24,7 @@ export async function generateMetadata({
 
 function OnboardingLoader() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+    <div className="min-h-screen bg-background">
       <div className="container max-w-4xl py-12 px-4">
         <div className="space-y-8">
           <div className="text-center space-y-2">
@@ -70,8 +70,8 @@ export default async function OnboardingPage({
 
   return (
     <Suspense fallback={<OnboardingLoader />}>
-      <div className="bg-gradient-to-br from-background to-muted">
-        <div className="container mx-auto py-12 pt-20 px-4">
+      <div className="bg-background">
+        <div className="container mx-auto py-12 px-4">
           <OnboardingWizard user={user} plans={plans} />
         </div>
       </div>

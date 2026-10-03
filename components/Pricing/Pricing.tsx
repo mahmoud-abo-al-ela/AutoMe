@@ -1,17 +1,11 @@
 "use client";
 import { useTranslations } from "next-intl";
-
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Shield } from "lucide-react";
 import { BillingToggle } from "./BillingToggle";
-import {
-  resolvePlans,
-  calculateSavingsPercentage,
-  type DbPlan,
-} from "./pricing-plans";
+import { resolvePlans, calculateSavingsPercentage, type DbPlan } from "./pricing-plans";
 import PricingCard from "./PricingCard";
 
+/** Dealership plans, directly under the "For dealers" band on the home page. */
 const Pricing = ({ plans: dbPlans }: { plans?: DbPlan[] | null }) => {
   const t = useTranslations("home.pricing");
   const [billingPeriod, setBillingPeriod] = useState("monthly");
@@ -20,52 +14,27 @@ const Pricing = ({ plans: dbPlans }: { plans?: DbPlan[] | null }) => {
   const savingsPercentage = calculateSavingsPercentage(plans);
 
   return (
-    <section id="pricing" className="py-16 sm:py-24 bg-background">
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="text-center mb-12 sm:mb-16"
-        >
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            <Shield className="h-4 w-4" />
-            <span>{t("badge")}</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-            {t("title")}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-brand-accent">
-              {t("titleAccent")}
-            </span>
+    <div id="pricing" className="scroll-mt-24 pt-12 sm:pt-16">
+      <div className="mb-10 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-h1 font-extrabold">
+            {t("title")} {t("titleAccent")}
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            {t("subtitle")}
-          </p>
-
-          <BillingToggle
-            billingPeriod={billingPeriod}
-            onToggle={() =>
-              setBillingPeriod((prev) =>
-                prev === "monthly" ? "yearly" : "monthly",
-              )
-            }
-            savingsPercentage={savingsPercentage}
-          />
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
-            <PricingCard
-              key={index}
-              plan={plan}
-              billingPeriod={billingPeriod}
-              index={index}
-            />
-          ))}
+          <p className="text-body text-muted-foreground">{t("subtitle")}</p>
         </div>
+        <BillingToggle
+          billingPeriod={billingPeriod}
+          onToggle={() => setBillingPeriod((prev) => (prev === "monthly" ? "yearly" : "monthly"))}
+          savingsPercentage={savingsPercentage}
+        />
       </div>
-    </section>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {plans.map((plan, index) => (
+          <PricingCard key={index} plan={plan} billingPeriod={billingPeriod} />
+        ))}
+      </div>
+    </div>
   );
 };
 

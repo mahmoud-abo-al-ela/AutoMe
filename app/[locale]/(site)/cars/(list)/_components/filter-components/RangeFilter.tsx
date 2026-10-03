@@ -69,11 +69,11 @@ export const RangeFilter = ({
     >
       <div className="pt-2 pb-3">
         <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-md border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-foreground">
+          <div className="rounded-plate border border-border bg-field px-3 py-1.5 text-micro font-semibold tabular-nums">
             {formatValue(local[0])}
           </div>
           <div className="mx-2 h-px w-4 bg-border" />
-          <div className="rounded-md border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-foreground">
+          <div className="rounded-plate border border-border bg-field px-3 py-1.5 text-micro font-semibold tabular-nums">
             {formatValue(local[1])}
           </div>
         </div>

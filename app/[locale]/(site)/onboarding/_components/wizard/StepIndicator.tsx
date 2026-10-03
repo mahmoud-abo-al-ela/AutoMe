@@ -25,20 +25,20 @@ export default function StepIndicator({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
             className={`flex w-24 shrink-0 flex-col items-center gap-2 sm:w-32 ${isCurrent
-                    ? "text-blue-600"
+                    ? "text-foreground"
                     : isCompleted
-                        ? "text-green-600"
-                        : "text-gray-400"
+                        ? "text-positive"
+                        : "text-muted-foreground"
                 }`}
         >
             <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className={`h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-300 shadow-md ${isCurrent
-                        ? "border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-blue-200"
+                className={`h-12 w-12 sm:h-14 sm:w-14 rounded-control flex items-center justify-center border-2 transition-all duration-300 ${isCurrent
+                        ? "border-border-strong bg-marker shadow-key"
                         : isCompleted
-                            ? "border-green-600 bg-green-600 text-white shadow-green-200"
-                            : "border-gray-300 bg-white"
+                            ? "border-positive bg-positive text-white"
+                            : "border-border bg-card"
                     }`}
             >
                 {isCompleted ? (
@@ -61,7 +61,7 @@ export default function StepIndicator({
                 <span className="text-xs sm:text-sm font-semibold block whitespace-nowrap">
                     {t(`${step.key}.name`)}
                 </span>
-                <span className="text-micro sm:text-xs text-gray-500 block">
+                <span className="text-micro sm:text-xs text-muted-foreground block">
                     {t(`${step.key}.description`)}
                 </span>
             </div>

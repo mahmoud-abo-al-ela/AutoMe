@@ -105,11 +105,11 @@ const CompareWinnerBadge = ({
             transition={{ duration: 0.3, delay: 0.1 }}
             className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full",
-                "bg-emerald-50 border border-emerald-200 text-emerald-700",
+                "bg-positive-soft border border-positive/30 text-positive",
                 "text-xs font-medium"
             )}
         >
-            <Trophy className="h-3 w-3 text-emerald-600" />
+            <Trophy className="h-3 w-3 text-positive" />
             <span>{t(`winners.${categoryWinner.labelKey}`)}:</span>
             <span className="font-semibold truncate max-w-[120px]">
                 {getCarTitle(categoryWinner.car)}

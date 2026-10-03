@@ -6,7 +6,10 @@
     "print": "Print comparison",
     "share": "Share comparison",
     "highlightDifferencesLabel": "Highlight Differences",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "clearAll": "Clear all",
+    "confirmClear": "Remove all?",
+    "clearHint": "Click again to remove every car from the comparison"
   },
   "sections": {
     "basic": "Basic Information",
@@ -32,5 +35,9 @@
     "noneTitle": "No Cars to Compare",
     "noneBody": "Start by browsing our inventory and adding cars to your comparison list. You can compare up to {max} cars side by side.",
     "browseCars": "Browse Cars"
+  },
+  "mobile": {
+    "showCar": "Show {title}",
+    "sideBySide": "Side by side"
   }
 }

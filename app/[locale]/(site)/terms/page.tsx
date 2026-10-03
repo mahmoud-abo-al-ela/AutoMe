@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/utils/datetime";
 import type { Locale } from "@/i18n/routing";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { LEGAL_LAST_UPDATED } from "../_lib/legal";
+import { LegalDocument } from "../_components/LegalDocument";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -24,28 +25,16 @@ export default async function TermsPage({ params }: Props) {
   const sections = ["s1", "s2", "s3"] as const;
 
   return (
-    <div className="container mx-auto px-4 pt-28 pb-12 md:pt-32 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8">{t("terms.title")}</h1>
-      <div className="prose prose-blue max-w-none">
-        <p className="text-gray-500 mb-8">
-          {t("lastUpdated", {
-            date: formatDate(LEGAL_LAST_UPDATED, locale as Locale),
-          })}
-        </p>
-
-        {sections.map((section) => (
-          <section key={section}>
-            <h2 className="text-2xl font-semibold mt-8 mb-4">
-              {t(`terms.${section}.heading`)}
-            </h2>
-            <p>{t(`terms.${section}.body`)}</p>
-          </section>
-        ))}
-
-        <p className="text-sm text-gray-500 mt-12 border-t pt-6">
-          {t("governingLanguage")}
-        </p>
-      </div>
-    </div>
+    <LegalDocument
+      title={t("terms.title")}
+      updated={t("lastUpdated", { date: formatDate(LEGAL_LAST_UPDATED, locale as Locale) })}
+    >
+      {sections.map((section) => (
+        <section key={section} className="flex flex-col gap-4">
+          <h2>{t(`terms.${section}.heading`)}</h2>
+          <p>{t(`terms.${section}.body`)}</p>
+        </section>
+      ))}
+    </LegalDocument>
   );
 }

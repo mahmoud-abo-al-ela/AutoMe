@@ -44,14 +44,14 @@ export const OpenStatusBadge = ({
         <Badge
             variant="outline"
             className={`gap-1.5 px-2.5 py-1 text-xs font-medium border-0 ${status.isOpen
-                    ? "bg-green-50 text-green-700"
-                    : "bg-red-50 text-red-700"
+                    ? "bg-positive-soft text-positive"
+                    : "bg-destructive-soft text-destructive"
                 } ${className}`}
         >
             <span
                 className={`h-2 w-2 rounded-full ${status.isOpen
-                        ? "bg-green-500 animate-pulse"
-                        : "bg-red-500"
+                        ? "bg-positive animate-pulse"
+                        : "bg-destructive"
                     }`}
             />
             <span>

@@ -19,12 +19,37 @@
      import does not remove that face either.
 
      The @font-face rules still come from next/font (both `.variable` classes
-     are applied on <html>); this only controls resolution order. */
-  --font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, sans-serif;
+     are applied on <html>); this only controls resolution order.
+
+     The stack itself lives in --app-font-sans so the public site can swap it
+     for Alexandria (one face covering both scripts) without touching the
+     dashboards — `@theme inline` would otherwise bake the literal stack into
+     the font-sans utility. */
+  --font-sans: var(--app-font-sans);
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
   --color-brand-accent: var(--brand-accent);
   --color-brand-accent-foreground: var(--brand-accent-foreground);
+  /* Public-site tokens. Only defined under the site theme (the
+     [data-theme="site"] block below), so they are inert in the dashboards. */
+  --color-marker: var(--marker);
+  --color-marker-hover: var(--marker-hover);
+  --color-marker-soft: var(--marker-soft);
+  --color-marker-foreground: var(--marker-foreground);
+  --color-plate-band: var(--plate-band);
+  --color-field: var(--field);
+  --color-inverse: var(--inverse);
+  --color-inverse-hover: var(--inverse-hover);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-border-strong: var(--border-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-hover: var(--primary-hover);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-price-below: var(--price-below);
+  --color-price-fair: var(--price-fair);
+  --color-price-above: var(--price-above);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -102,9 +127,26 @@
 
   --text-micro: 0.75rem;
   --text-micro--line-height: 1.45;
+
+  /* Public-site shape and depth (Figma: Radius collection, Shadow/* styles).
+     Named by job rather than size so a component says what it is: a plate,
+     a control, a sheet, a hero panel. */
+  --radius-plate: 6px;
+  --radius-control: 12px;
+  --radius-sheet: 20px;
+  --radius-hero: 28px;
+
+  /* The hard "key" shadow is the plate's and the primary button's only —
+     tactile, like a pressed key. Everything else on the site is flat. */
+  --shadow-key: 0 3px 0 0 var(--border-strong);
+  --shadow-key-pressed: 0 1px 0 0 var(--border-strong);
+  --shadow-float: 0 12px 32px -8px rgb(23 24 27 / 0.22),
+    0 2px 6px 0 rgb(23 24 27 / 0.08);
 }
 
 :root {
+  --app-font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -175,6 +217,87 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ---------------------------------------------------------------------------
+   Public-site theme — "Cairo Plate" (Figma: AutoMe — Design System & Public
+   Screens, Color collection). Limestone, asphalt, plate blue and road-marking
+   yellow, set in Alexandria.
+
+   Scoped with :has() on the root rather than on the (site) layout's wrapper:
+   Radix portals (selects, dialogs, sheets) and Sonner toasts render into
+   <body>, outside any wrapper, and would otherwise fall back to the dashboard
+   palette. The dashboards never render [data-theme="site"], so nothing here
+   reaches them.
+
+   The shadcn names are kept, so every existing `bg-primary` / `text-muted-
+   foreground` on the site picks the new palette up without an edit:
+   --primary is plate blue (links, selection, focus — and the colour a
+   dealership's subdomain theme replaces); the yellow call-to-action is the
+   separate --marker, which always carries asphalt text.
+   --------------------------------------------------------------------------- */
+:root:has([data-theme="site"]) {
+  --app-font-sans: "Alexandria", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+
+  --background: #f1ebe0; /* limestone/100 */
+  --foreground: #17181b; /* asphalt/900 */
+  --card: #fffcf6; /* limestone/50 */
+  --card-foreground: #17181b;
+  --popover: #ffffff;
+  --popover-foreground: #17181b;
+  --field: #ffffff;
+  --muted: #e6ded0; /* limestone/200 */
+  --muted-foreground: #5c5549; /* asphalt/600 — 6.3:1 on limestone */
+  --secondary: #e6ded0;
+  --secondary-foreground: #17181b;
+  --accent: #e6ded0;
+  --accent-foreground: #17181b;
+  --border: #ddd3c2; /* limestone/300 */
+  --input: #ddd3c2;
+  --border-strong: #17181b;
+  --disabled-foreground: #a39883; /* limestone/500 */
+
+  --primary: #1d4e9e; /* plate/600 */
+  --primary-hover: #163e80;
+  --primary-soft: #e7eef8;
+  --primary-foreground: #ffffff;
+  --ring: #1d4e9e;
+
+  --marker: #ffc629; /* marker/400 — 12:1 with asphalt text */
+  --marker-hover: #f2b705;
+  --marker-soft: #fff1c2;
+  --marker-foreground: #17181b;
+  --plate-band: #a9c9ec; /* plate/200 */
+
+  --inverse: #17181b;
+  --inverse-hover: #2a2b2f;
+  --inverse-foreground: #ffffff;
+
+  --positive: #1f7a5a;
+  --positive-soft: #e3f2eb;
+  --destructive: #c2452d; /* brick/600 */
+  --destructive-soft: #fbe8e3;
+
+  --price-below: #1f7a5a;
+  --price-fair: #a39883;
+  --price-above: #c2452d;
+
+  /* Alexandria's Black and ExtraBold carry the headings; the sizes step up
+     from the dashboard scale because the site's headlines are its voice. */
+  --text-display: clamp(2.125rem, 1.25rem + 3.6vw, 4rem);
+  --text-display--line-height: 1.06;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: clamp(1.75rem, 1.3rem + 1.9vw, 2.5rem);
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h2: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: 0;
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.4;
+  /* 13px floor in both languages (Arabic already had it). */
+  --text-micro: 0.8125rem;
 }
 
 /* Custom sidebar enhancements */
@@ -401,6 +524,191 @@
 
 .dark .skeleton-shimmer {
   background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+}
+
+/* Limestone on the public site, so a loading card reads as the card it becomes. */
+:root:has([data-theme="site"]) .skeleton-shimmer {
+  background: linear-gradient(90deg, var(--muted) 25%, #efe8db 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+  }
+}
+
+/* Road loader (components/brand/RoadLoader): marker dashes running under the
+   logo plate. One dash + gap is 46px, so shifting the pattern by exactly that
+   loops seamlessly. The road runs toward the reading start — the plate is
+   "driving" onward — so Arabic reverses it. */
+@keyframes road-run {
+  to { background-position-x: -46px; }
+}
+
+.road-run {
+  background: repeating-linear-gradient(to right, var(--marker) 0 32px, transparent 32px 46px);
+  animation: road-run 0.6s linear infinite;
+}
+
+[dir="rtl"] .road-run {
+  animation-direction: reverse;
+}
+
+/* Scrollbars on the public site. The page's is a slim asphalt pill floating
+   in the limestone track, and turns marker yellow while dragged — a road
+   marking. Scroll areas inside the page (the filter rail, sheets, menus) get
+   a thinner one on a clear track. Chromium and Safari style these through
+   ::-webkit-scrollbar; Firefox has no such pseudo-elements, so it gets the
+   standard colours instead — scoped by @supports, because in Chromium a
+   scrollbar-color (which inherits) would switch the pseudo-elements off.
+   Scroll areas that hide their bar ([scrollbar-width:none]) keep it hidden.
+   The page rules name body too: Chrome can take the viewport's scrollbar
+   style from body, which the inner-area rule would otherwise match. */
+:root:has([data-theme="site"]) *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+:root:has([data-theme="site"]) *::-webkit-scrollbar-track,
+:root:has([data-theme="site"]) *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+:root:has([data-theme="site"]) *::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--foreground) 22%, transparent);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+:root:has([data-theme="site"]) *::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--foreground) 45%, transparent);
+}
+
+:root:has([data-theme="site"])::-webkit-scrollbar,
+:root:has([data-theme="site"]) body::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+:root:has([data-theme="site"])::-webkit-scrollbar-track,
+:root:has([data-theme="site"]) body::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+:root:has([data-theme="site"])::-webkit-scrollbar-thumb,
+:root:has([data-theme="site"]) body::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  background-color: color-mix(in oklab, var(--foreground) 38%, transparent);
+  border: 4px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+:root:has([data-theme="site"])::-webkit-scrollbar-thumb:hover,
+:root:has([data-theme="site"]) body::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--foreground) 62%, transparent);
+}
+
+:root:has([data-theme="site"])::-webkit-scrollbar-thumb:active,
+:root:has([data-theme="site"]) body::-webkit-scrollbar-thumb:active {
+  background-color: var(--marker);
+  box-shadow: inset 0 0 0 1.5px var(--foreground);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :root:has([data-theme="site"]) {
+    scrollbar-color: color-mix(in oklab, var(--foreground) 38%, transparent) var(--background);
+  }
+}
+
+/* A vertical scrollbar on the right in Arabic too. Browsers put an RTL scroll
+   area's bar on the left, while the page's own stays on the right; the two
+   then sit on opposite sides. The scroller runs LTR so its bar goes right,
+   and its content is set back to RTL. Only the CSS direction changes — the
+   dir attribute, which Tailwind's rtl: variants and Radix read, stays. */
+[dir="rtl"] .scrollbar-end {
+  direction: ltr;
+}
+
+[dir="rtl"] .scrollbar-end > * {
+  direction: rtl;
+}
+
+/* Home hero overlay (components/Hero/Hero.tsx), three layers over the photo,
+   all from the site's own palette:
+   - wash: the plate blue multiplied in, so any photo takes the site's cool
+     tone (on a dealership's subdomain, its own --primary);
+   - scrim: asphalt rising from the foot and from the text side, so the
+     headline reads on any car in any light — mirrored in Arabic;
+   - glow: a low marker-yellow light behind the words, like a sodium street
+     lamp at kerb level. */
+.hero-wash {
+  background: var(--primary);
+  mix-blend-mode: multiply;
+  opacity: 0.45;
+}
+
+.hero-scrim {
+  --hero-foot: linear-gradient(
+    to top,
+    var(--inverse) 0%,
+    color-mix(in oklab, var(--inverse) 72%, transparent) 32%,
+    transparent 70%
+  );
+  background:
+    var(--hero-foot),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--inverse) 80%, transparent) 0%,
+      color-mix(in oklab, var(--inverse) 35%, transparent) 40%,
+      transparent 66%
+    );
+}
+
+[dir="rtl"] .hero-scrim {
+  background:
+    var(--hero-foot),
+    linear-gradient(
+      to left,
+      color-mix(in oklab, var(--inverse) 80%, transparent) 0%,
+      color-mix(in oklab, var(--inverse) 35%, transparent) 40%,
+      transparent 66%
+    );
+}
+
+.hero-glow {
+  background: radial-gradient(
+    60% 55% at 10% 100%,
+    color-mix(in oklab, var(--marker) 30%, transparent) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+}
+
+[dir="rtl"] .hero-glow {
+  background: radial-gradient(
+    60% 55% at 90% 100%,
+    color-mix(in oklab, var(--marker) 30%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Held back 300ms, so a fast load never flashes the loader. */
+@keyframes loader-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.loader-in {
+  animation: loader-in 0.2s ease-out 0.3s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .road-run {
+    animation: none;
+  }
 }
 
 /* Animated gradient background */

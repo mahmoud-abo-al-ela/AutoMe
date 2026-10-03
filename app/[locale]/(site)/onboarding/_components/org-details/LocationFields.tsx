@@ -79,10 +79,10 @@ export default function LocationFields({
                 >
                     <Label
                         htmlFor={field.id}
-                        className="text-sm font-semibold text-gray-700 flex items-center gap-2"
+                        className="text-sm font-semibold text-muted-foreground flex items-center gap-2"
                     >
                         {t(`${field.id}.label`)}
-                        <span className="text-red-500">*</span>
+                        <span className="text-destructive">*</span>
                     </Label>
                     <SearchableLocationSelect
                         id={field.id}
@@ -93,7 +93,7 @@ export default function LocationFields({
                         emptyMessage={t(`${field.id}.emptyMessage`)}
                         disabled={field.disabled}
                         onValueChange={field.onValueChange}
-                        triggerClassName="h-12 text-base border-gray-300"
+                        triggerClassName="h-12 text-base border-border"
                     />
                 </motion.div>
             ))}

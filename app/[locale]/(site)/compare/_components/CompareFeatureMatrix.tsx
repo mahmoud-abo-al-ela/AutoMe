@@ -38,7 +38,7 @@ const CompareFeatureMatrix = ({
     if (allFeatures.length === 0) {
         return (
             <div className="grid grid-cols-[200px_1fr] md:grid-cols-[250px_1fr] border-b">
-                <div className="p-3 text-sm text-muted-foreground border-e bg-gray-50">
+                <div className="p-3 text-sm text-muted-foreground border-e bg-muted">
                     {t("features")}
                 </div>
                 <div className="grid grid-cols-3">
@@ -66,7 +66,7 @@ const CompareFeatureMatrix = ({
                         key={feature}
                         className={cn(
                             "grid grid-cols-[200px_1fr] md:grid-cols-[250px_1fr] border-b last:border-b-0 transition-colors duration-200",
-                            showHighlight && "bg-amber-50/60"
+                            showHighlight && "bg-marker-soft/60"
                         )}
                     >
                         {/* Feature label */}
@@ -74,10 +74,10 @@ const CompareFeatureMatrix = ({
                             className={cn(
                                 "p-3 text-sm text-muted-foreground border-e flex items-center",
                                 showHighlight
-                                    ? "bg-amber-50 border-s-2 border-s-amber-400"
+                                    ? "bg-marker-soft border-s-2 border-s-amber-400"
                                     : isEven
-                                        ? "bg-gray-50/80"
-                                        : "bg-gray-50"
+                                        ? "bg-muted/80"
+                                        : "bg-muted"
                             )}
                         >
                             <span className="line-clamp-1">{feature}</span>
@@ -92,18 +92,18 @@ const CompareFeatureMatrix = ({
                                         key={`${car.id}-${feature}`}
                                         className={cn(
                                             "p-3 text-sm border-e last:border-e-0 flex items-center justify-center transition-colors duration-200",
-                                            showHighlight && "bg-amber-50/40",
-                                            !showHighlight && isEven && "bg-white",
-                                            !showHighlight && !isEven && "bg-gray-50/30"
+                                            showHighlight && "bg-marker-soft/40",
+                                            !showHighlight && isEven && "bg-card",
+                                            !showHighlight && !isEven && "bg-muted/30"
                                         )}
                                     >
                                         {has ? (
-                                            <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center">
-                                                <Check className="h-3 w-3 text-emerald-600" />
+                                            <div className="h-5 w-5 rounded-full bg-positive-soft flex items-center justify-center">
+                                                <Check className="h-3 w-3 text-positive" />
                                             </div>
                                         ) : (
-                                            <div className="h-5 w-5 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <Minus className="h-3 w-3 text-gray-400" />
+                                            <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center">
+                                                <Minus className="h-3 w-3 text-muted-foreground" />
                                             </div>
                                         )}
                                     </div>
@@ -114,9 +114,9 @@ const CompareFeatureMatrix = ({
                             {Array.from({ length: emptySlots }).map((_, i) => (
                                 <div
                                     key={`empty-feature-${feature}-${i}`}
-                                    className="p-3 text-sm border-e last:border-e-0 text-muted-foreground bg-gray-50/50 flex items-center justify-center"
+                                    className="p-3 text-sm border-e last:border-e-0 text-muted-foreground bg-muted/50 flex items-center justify-center"
                                 >
-                                    <Minus className="h-3 w-3 text-gray-300" />
+                                    <Minus className="h-3 w-3 text-muted-foreground/60" />
                                 </div>
                             ))}
                         </div>

@@ -1,29 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "framer-motion";
+import { AlertCircle, Car, SearchX, SlidersHorizontal } from "lucide-react";
 import FilterPanel from "./FilterPanel";
 import CarsHero from "./CarsHero";
-import ResultsSummary from "./ResultsSummary";
+import ResultsSummary, { type ResultsView } from "./ResultsSummary";
 import { ActiveFilters } from "./ActiveFilters";
 import { CompareTray } from "./CompareTray";
+import { ListingRow } from "./ListingRow";
 import CarCard from "@/components/CarCard";
-import CarCardSkeleton from "@/components/CarCardSkeleton";
-import { Car, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Pagination, PaginationInfo } from "@/components/common/Pagination";
-import { EmptyState } from "@/components/common/EmptyState";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Pagination } from "@/components/common/Pagination";
+import CarCardSkeleton from "@/components/CarCardSkeleton";
+import { SiteEmptyState, type MarketSummary } from "@/components/brand";
 import type { CarsPageData } from "../_lib/cars-types";
 import { useFormatters } from "@/hooks/use-formatters";
 
+const VIEW_KEY = "autome.cars.view";
+
+/**
+ * Browse page (Figma: Browse — desktop / mobile). Desktop: a sticky filter
+ * rail with live counts beside the results. Phones: a sticky toolbar with the
+ * Filters sheet and sort — the old fixed bottom filter bar sat under the tab
+ * bar. The list view is a desktop layout; it applies only once a ≥1024px
+ * viewport is confirmed after hydration, so the server render is always grid.
+ */
 export const CarsPagePresenter = ({
   cars,
   pagination,
@@ -41,13 +44,33 @@ export const CarsPagePresenter = ({
   optionsLoading,
   activeFilters,
   handlers,
-}: CarsPageData) => {
+  summary,
+}: CarsPageData & { summary?: MarketSummary | null }) => {
   const t = useTranslations("cars");
   const fmt = useFormatters();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
+  const [view, setView] = useState<ResultsView>("grid");
+  const [isDesktop, setIsDesktop] = useState(false);
   const hasActiveFilters = activeFilters.length > 0;
-  const gridCols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+
+  useEffect(() => {
+    // A per-viewer convenience: storage can be unavailable (private mode).
+    try {
+      if (localStorage.getItem(VIEW_KEY) === "list") setView("list");
+    } catch {}
+    const query = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  const changeView = (next: ResultsView) => {
+    setView(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {}
+  };
 
   const panelProps = {
     filters,
@@ -57,158 +80,131 @@ export const CarsPagePresenter = ({
     optionsLoading,
     onReset: handlers.resetAllFilters,
   };
+  const showList = view === "list" && isDesktop;
+
+  const filtersButton = (
+    <Button variant="outline-strong" size="control" className="lg:hidden" onClick={() => setIsFilterOpen(true)}>
+      <SlidersHorizontal />
+      {hasActiveFilters ? t("filters.openWithCount", { value: fmt.number(activeFilters.length) }) : t("filters.open")}
+    </Button>
+  );
+
+  let results: React.ReactNode;
+  if (loading || isPaging || isFilterPending) {
+    results = (
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+        {Array.from({ length: Math.min(perPage, 12) }).map((_, i) => (
+          <CarCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  } else if (isError) {
+    results = (
+      <div role="alert" className="flex flex-wrap items-center gap-4 rounded-control border border-destructive bg-destructive-soft p-4">
+        <AlertCircle aria-hidden className="size-6 shrink-0 text-destructive" />
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">{t("states.errorTitle")}</p>
+          <p className="text-caption text-muted-foreground">{errorMessage || t("states.errorBody")}</p>
+        </div>
+        <Button variant="outline-strong" size="control" onClick={() => refetch()}>
+          {t("states.retry")}
+        </Button>
+      </div>
+    );
+  } else if (cars.length === 0) {
+    results = hasActiveFilters ? (
+      <SiteEmptyState
+        icon={SearchX}
+        title={t("states.filteredEmptyTitle")}
+        description={t("states.filteredEmptyBody")}
+        primary={{ label: t("filters.clearAll"), onClick: handlers.resetAllFilters }}
+      />
+    ) : (
+      <SiteEmptyState icon={Car} title={t("states.emptyTitle")} description={t("states.emptyBody")} />
+    );
+  } else {
+    results = (
+      <div className={isFetching ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"}>
+        {showList ? (
+          <ul className="flex flex-col gap-4">
+            {cars.map((car, i) => (
+              <li key={car.id}>
+                <ListingRow car={car} index={i} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+            {cars.map((car, i) => (
+              <li key={car.id}>
+                <CarCard car={car} index={i} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {pagination.totalPages > 1 && (
+          <div className="mt-10 border-t border-border pt-6">
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              onPageChange={handlers.changePage}
+              disabled={isFetching}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto mt-14 px-4 pb-24 pt-8">
-        <CarsHero
-          searchQuery={searchValue}
-          onSearchChange={handlers.setSearch}
-          onClearSearch={() => handlers.setSearch("")}
-          totalCount={pagination.total}
-          onQuickPick={handlers.applyPatch}
-        />
+    <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">
+      <CarsHero
+        searchQuery={searchValue}
+        onSearchChange={handlers.setSearch}
+        onClearSearch={() => handlers.setSearch("")}
+        onQuickPick={handlers.applyPatch}
+        summary={summary}
+      />
 
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Desktop sidebar */}
-          <aside className="hidden w-full lg:sticky lg:top-24 lg:block lg:w-1/4 lg:self-start">
-            <FilterPanel {...panelProps} />
-          </aside>
+      <div className="flex gap-6">
+        {/* scrollbar-end: the rail's bar stays on the right in Arabic, on the
+            same side as the page's (globals.css). */}
+        <aside className="scrollbar-end sticky top-[88px] hidden max-h-[calc(100dvh-104px)] w-[296px] shrink-0 self-start overflow-y-auto overscroll-contain lg:block">
+          <FilterPanel {...panelProps} />
+        </aside>
 
-          {/* Results */}
-          <div className="w-full lg:w-3/4" id="cars-results-section">
-            <ActiveFilters filters={activeFilters} onClearFilter={handlers.clearFilter} />
-
-            {!isError && (cars.length > 0 || loading) && (
-              <ResultsSummary
-                currentPage={pagination.page}
-                limit={pagination.limit}
-                total={pagination.total}
-                sortBy={filters.sortBy || "newest"}
-                onSortChange={handlers.setSort}
-                perPage={perPage}
-                onPerPageChange={handlers.changePerPage}
-                isLoading={isFetching}
-              />
-            )}
-
-            {loading || isPaging || isFilterPending ? (
-              <div className={`grid ${gridCols} gap-5 sm:gap-7`}>
-                {Array.from({ length: perPage > 12 ? 12 : perPage }).map((_, i) => (
-                  <CarCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : isError ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-16 text-center">
-                <h3 className="mb-2 text-lg font-semibold text-destructive">
-                  {t("states.errorTitle")}
-                </h3>
-                <p className="mb-6 max-w-md text-sm text-muted-foreground">
-                  {errorMessage || t("states.errorBody")}
-                </p>
-                <Button onClick={() => refetch()} variant="outline" className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  {t("states.retry")}
-                </Button>
-              </div>
-            ) : cars.length === 0 ? (
-              hasActiveFilters ? (
-                <EmptyState
-                  variant="filtered"
-                  title={t("states.filteredEmptyTitle")}
-                  description={t("states.filteredEmptyBody")}
-                  onClearFilters={handlers.resetAllFilters}
-                />
-              ) : (
-                <EmptyState
-                  icon={Car}
-                  title={t("states.emptyTitle")}
-                  description={t("states.emptyBody")}
-                />
-              )
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className={isFetching ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"}
-              >
-                <motion.div
-                  className={`grid ${gridCols} gap-5 sm:gap-7`}
-                  initial={reduceMotion ? false : "hidden"}
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.05 } },
-                  }}
-                >
-                  {cars.map((car, i) => (
-                    <motion.div
-                      key={car.id}
-                      variants={{
-                        hidden: { opacity: 0, y: 16 },
-                        visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
-                      }}
-                    >
-                      <CarCard car={car} index={i} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-
-                {pagination.totalPages > 1 && (
-                  <div className="mt-8 space-y-4 border-t border-border pt-4">
-                    <Pagination
-                      currentPage={pagination.page}
-                      totalPages={pagination.totalPages}
-                      onPageChange={handlers.changePage}
-                      disabled={isFetching}
-                    />
-                    <PaginationInfo
-                      currentPage={pagination.page}
-                      limit={pagination.limit}
-                      total={pagination.total}
-                      noun="cars"
-                    />
-                  </div>
-                )}
-              </motion.div>
-            )}
+        <div className="flex min-w-0 flex-1 flex-col gap-4" id="cars-results-section">
+          <div className="sticky top-14 z-30 -mx-4 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+            <ResultsSummary
+              total={pagination.total}
+              sortBy={filters.sortBy || "newest"}
+              onSortChange={handlers.setSort}
+              view={view}
+              onViewChange={changeView}
+              isLoading={isFetching}
+              leading={filtersButton}
+            />
           </div>
+          <ActiveFilters filters={activeFilters} onClearFilter={handlers.clearFilter} />
+          {results}
         </div>
       </div>
 
-      {/* Mobile filter trigger — sticky bottom bar */}
-      <div className="safe-area-inset-bottom fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 p-3 backdrop-blur-md lg:hidden">
-        <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="w-full gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              <span>{t("filters.title")}</span>
-              {hasActiveFilters && (
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-white">
-                  {fmt.number(activeFilters.length)}
-                </span>
-              )}
+      <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <SheetContent side="bottom" className="max-h-[90dvh] gap-0 rounded-t-sheet border-0 bg-card p-0">
+          <div className="flex items-center border-b border-border px-4 py-3">
+            <SheetTitle className="text-body font-semibold">{t("filters.title")}</SheetTitle>
+          </div>
+          <div className="scrollbar-end flex-1 overflow-y-auto overscroll-contain px-4 pb-4">
+            <FilterPanel {...panelProps} />
+          </div>
+          <div className="border-t border-border bg-card px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <Button variant="marker" size="xl" className="w-full" onClick={() => setIsFilterOpen(false)}>
+              {t("filters.showResults", { count: pagination.total, value: fmt.number(pagination.total) })}
             </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="flex w-[88%] flex-col p-0 sm:w-[360px]">
-            <SheetHeader className="sticky top-0 z-10 border-b border-border bg-background px-4 py-3">
-              <SheetTitle className="text-base font-semibold">{t("filters.title")}</SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 overflow-y-auto p-4">
-              <FilterPanel {...panelProps} />
-            </div>
-            <div className="sticky bottom-0 z-10 border-t border-border bg-background px-4 py-3">
-              <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-                {t("filters.showResults", {
-                  count: pagination.total,
-                  value: fmt.number(pagination.total),
-                })}
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <CompareTray />
     </div>

@@ -1,5 +1,19 @@
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+// The theme's own scales (app/globals.css), registered so twMerge knows what
+// they are. Unregistered, `text-body` reads as a text colour — so
+// cn("text-body", "text-muted-foreground") silently dropped the size — and
+// `rounded-control` never replaced the `rounded-md` it was meant to.
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      text: ["display", "h1", "h2", "h3", "body", "caption", "micro"],
+      radius: ["plate", "control", "sheet", "hero"],
+      shadow: ["key", "key-pressed", "float"],
+    },
+  },
+});
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

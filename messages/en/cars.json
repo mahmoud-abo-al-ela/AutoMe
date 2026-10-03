@@ -16,11 +16,9 @@
     "quickLuxury": "Luxury"
   },
   "results": {
-    "summary": "Showing <range>{start}-{end}</range> of <strong>{total}</strong> {count, plural, one {vehicle} other {vehicles}}",
-    "perPage": "{value} / page",
-    "perPageLabel": "Results per page",
     "sortLabel": "Sort results",
-    "sortPlaceholder": "Sort by"
+    "sortPlaceholder": "Sort by",
+    "count": "{count, plural, one {{value} car} other {{value} cars}}"
   },
   "sort": {
     "newest": "Newest First",
@@ -61,7 +59,9 @@
     "mileage": "Mileage",
     "loadingRange": "Loading range…",
     "any": "Any",
-    "activeCount": "{value} active"
+    "activeCount": "{value} active",
+    "open": "Filters",
+    "openWithCount": "Filters ({value})"
   },
   "activeFilters": {
     "search": "Search",
@@ -81,10 +81,11 @@
     "errorTitle": "Something went wrong",
     "errorBody": "We couldn't load cars right now. Please try again.",
     "retry": "Retry",
-    "filteredEmptyTitle": "No cars match your filters",
-    "filteredEmptyBody": "Try widening your price range or removing a filter to see more results.",
+    "filteredEmptyTitle": "No cars match all of these filters",
+    "filteredEmptyBody": "Remove a filter or widen the price range — the counts beside each option show what is left.",
     "emptyTitle": "No cars listed yet",
-    "emptyBody": "There are no vehicles available right now. Please check back soon."
+    "emptyBody": "There are no vehicles available right now. Please check back soon.",
+    "browseAll": "Browse all cars"
   },
   "compare": {
     "selected": "{count, plural, one {{value} car} other {{value} cars}} to compare",
@@ -92,5 +93,28 @@
     "action": "Compare",
     "needTwo": "Add at least 2 cars to compare",
     "clear": "Clear comparison"
+  },
+  "browse": {
+    "title": "Browse cars"
+  },
+  "readout": {
+    "label": "Market right now",
+    "live": "{count, plural, one {{value} car} other {{value} cars}} on sale",
+    "median": "Median {price}",
+    "dealers": "{count, plural, one {{value} dealership} other {{value} dealerships}}",
+    "cities": "{count, plural, one {{value} city} other {{value} cities}}",
+    "updated": "Updated {when}"
+  },
+  "view": {
+    "label": "Results layout",
+    "grid": "Grid",
+    "list": "List"
+  },
+  "row": {
+    "mileage": "Mileage",
+    "fuel": "Fuel",
+    "gearbox": "Gearbox",
+    "body": "Body",
+    "viewCar": "View car"
   }
 }

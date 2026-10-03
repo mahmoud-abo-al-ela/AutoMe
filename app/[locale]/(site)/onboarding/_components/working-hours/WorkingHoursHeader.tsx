@@ -12,16 +12,16 @@ export default function WorkingHoursHeader() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-4 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100"
+            className="flex items-center gap-4 bg-card p-6 rounded-control border border-border"
         >
-            <div className="p-3 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl shadow-lg">
-                <Clock className="h-6 w-6 text-white" />
+            <div className="p-3 rounded-control border-2 border-border-strong bg-marker">
+                <Clock className="h-6 w-6" />
             </div>
             <div className="flex-1">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-indigo-900 bg-clip-text text-transparent">
+                <h2 className="text-h2 font-extrabold">
                     {t("title")}
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">{t("subtitle")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
             </div>
         </motion.div>
     );

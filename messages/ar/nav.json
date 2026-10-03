@@ -20,5 +20,13 @@
   "openMenu": "فتح القائمة",
   "closeMenu": "إغلاق القائمة",
   "viewStorefront": "عرض المتجر",
-  "welcomeBack": "مرحبًا بعودتك"
+  "welcomeBack": "مرحبًا بعودتك",
+  "search": "بحث",
+  "saved": "المحفوظة",
+  "more": "المزيد",
+  "forDealers": "للمعارض",
+  "searchCars": "ابحث عن عربية",
+  "primaryNav": "التنقل الرئيسي",
+  "goHome": "الصفحة الرئيسية لـ AutoMe",
+  "unread": "رسائل غير مقروءة"
 }

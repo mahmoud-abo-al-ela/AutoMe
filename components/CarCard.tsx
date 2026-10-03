@@ -1,38 +1,44 @@
 "use client";
-import { useTranslations, useLocale } from "next-intl";
+import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
+import { Car as CarIcon } from "lucide-react";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { usePlaceNames } from "@/hooks/use-place-names";
 import { useFormatters } from "@/hooks/use-formatters";
-import {
-  Building2,
-  Calendar,
-  Car as CarIcon,
-  ChevronRight,
-  ExternalLink,
-  MapPin,
-  Fuel,
-  Gauge,
-} from "lucide-react";
-import { Link } from "@/i18n/navigation";
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { usePathname } from "@/i18n/navigation";
-import { getCarColorHex } from "@/lib/constants/car-options";
+import { Link, usePathname } from "@/i18n/navigation";
+import { PricePlate, PriceVerdictLine } from "@/components/brand";
 import { resolveCarTitle } from "@/lib/utils/car-text";
 import { localeDirection, type Locale } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 import CarCardActions from "./CarCardActions";
 import type { SerializedCar } from "@/lib/utils/serializers";
+import type { MarketPosition } from "@/lib/services/car/market-price";
 
 /**
  * Cards are rendered from several sources (featured, listings, wishlist), which
- * agree on the serialized car but differ on whether the wishlist flag rode
- * along, so it is optional here rather than part of SerializedCar.
+ * agree on the serialized car but differ on what rode along — the wishlist
+ * flag and the market position — so both are optional here rather than part
+ * of SerializedCar.
  */
-type CarCardCar = SerializedCar & { isWishlisted?: boolean };
+type CarCardCar = SerializedCar & {
+  isWishlisted?: boolean;
+  marketPosition?: MarketPosition | null;
+};
 
+/**
+ * Listing card (Figma: CarCard, Grid and Compact).
+ *
+ * Responsive by CSS rather than by prop: below `sm` it is the 2-up phone card
+ * (4:3 photo, two-line title, year · km, no compare), from `sm` the full card.
+ * Doing it in CSS keeps one server render valid at every width — a JS
+ * breakpoint would hydrate the wrong card first.
+ *
+ * The photo stays clean except for the two things that belong on it: the
+ * price plate at the reading start and Save/Compare at the end. The whole
+ * card is one link (the title's stretched ::after); the action buttons sit
+ * above it as siblings, never nested inside the link.
+ */
 const CarCard = ({
   car,
   onWishlistChange,
@@ -42,202 +48,95 @@ const CarCard = ({
   onWishlistChange?: (removedCarId: string) => void;
   index?: number;
 }) => {
-  const t = useTranslations("common.actions");
+  const tStatus = useTranslations("carDetail.header");
   const locale = useLocale() as Locale;
   const attr = useCarAttributes();
   const place = usePlaceNames();
   const fmt = useFormatters();
-  const [imageError, setImageError] = useState(false);
   const pathname = usePathname();
-  const isWishlistPage = pathname === "/wishlist";
-
-  // Reads the listing's own currency rather than assuming the market default.
-  const formatPrice = (price: number) =>
-    fmt.price(price, car.priceCurrency);
-
-  const formatMileage = (mileage: number) => fmt.mileage(mileage);
+  const [imageError, setImageError] = useState(false);
+  const sold = car.status === "SOLD";
 
   // A year is a number but never a quantity: grouping would render 2020 as
   // "2,020" in English and "٢٬٠٢٠" in Arabic.
-  const formatYear = (year: number) => fmt.number(year, { useGrouping: false });
+  const year = fmt.number(car.year, { useGrouping: false });
 
   // The generated form stays as the last resort: a car with no stored title in
-  // any language still needs a heading, and building it needs the locale-aware
-  // year formatting above.
+  // any language still needs a heading.
   const resolvedTitle = resolveCarTitle(car, locale);
-  const carTitle =
-    resolvedTitle?.text ?? `${formatYear(car.year)} ${car.make} ${car.model}`;
-  const subtitle = [attr.body(car.bodyType), attr.transmission(car.transmission)]
-    .filter(Boolean)
-    .join(" • ");
-  const detailHref = `/cars/${car.id}`;
+  const carTitle = resolvedTitle?.text ?? `${year} ${car.make} ${car.model}`;
+  const mileage = car.mileage != null ? fmt.mileage(car.mileage) : null;
+  const gearbox = attr.transmission(car.transmission);
+  const where = [car.organization?.name, place.car(car)].filter(Boolean).join(" · ");
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="car-card group/card flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md"
-    >
-      {/* Media */}
-      <div className="group relative overflow-hidden">
-        <Link href={detailHref} aria-label={carTitle}>
-          <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-            {car.images?.[0] && !imageError ? (
-              <Image
-                src={car.images[0]}
-                alt={carTitle}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                onError={() => setImageError(true)}
-                priority={index < 3}
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-muted">
-                <CarIcon className="h-10 w-10 text-muted-foreground/40" />
-              </div>
+    <article className="group/card relative flex h-full flex-col overflow-hidden rounded-control border border-border bg-card transition-colors hover:border-border-strong focus-within:border-border-strong">
+      <div className="relative aspect-[4/3] bg-muted sm:aspect-[3/2]">
+        {car.images?.[0] && !imageError ? (
+          <Image
+            src={car.images[0]}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+            className={cn(
+              "object-cover transition-transform duration-500 ease-out motion-safe:group-hover/card:scale-[1.03]",
+              sold && "opacity-45"
             )}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
-            <div className="absolute bottom-3 start-3 z-10">
-              <span className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/90 px-3 py-1.5 text-sm font-bold text-slate-900 shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 sm:text-base">
-                {formatPrice(car.price)}
-              </span>
-            </div>
+            onError={() => setImageError(true)}
+            priority={index < 4}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <CarIcon aria-hidden className="size-10 text-muted-foreground/40" />
           </div>
-        </Link>
-
-        {/* Action buttons (siblings of the media link, not nested) */}
+        )}
+        <PricePlate
+          amount={car.price}
+          currency={car.priceCurrency}
+          size="sm"
+          className={cn("pointer-events-none absolute bottom-2 start-2 z-[5] sm:bottom-3 sm:start-3", sold && "opacity-70")}
+        />
+        {sold && (
+          <span className="pointer-events-none absolute start-2 top-2 z-[5] rounded-plate bg-destructive-soft px-2 py-0.5 text-micro font-medium text-destructive sm:start-3 sm:top-3">
+            {tStatus("statusSold")}
+          </span>
+        )}
         <CarCardActions
           carId={car.id}
-          isWishlisted={car?.isWishlisted || false}
+          isWishlisted={car.isWishlisted || false}
           onWishlistChange={onWishlistChange}
-          isWishlistPage={isWishlistPage}
+          isWishlistPage={pathname === "/wishlist"}
         />
       </div>
 
-      {/* Body */}
-      <div className="flex flex-grow flex-col bg-card p-3 sm:p-5">
-        <Link href={detailHref} className="block">
-          <div className="mb-2 sm:mb-2.5">
-            {/* dir follows the title's own language, so an untranslated
-                English title inside an RTL card does not render reordered. */}
-            <h3
-              dir={
-                resolvedTitle ? localeDirection[resolvedTitle.locale] : undefined
-              }
-              className="line-clamp-1 text-sm font-semibold tracking-tight sm:text-base"
-            >
-              {carTitle}
-            </h3>
-            {subtitle && (
-              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{subtitle}</p>
-            )}
-          </div>
-
-          <div className="mb-3 grid grid-cols-2 gap-x-2 gap-y-2 text-xs text-muted-foreground sm:mb-4 sm:gap-y-2.5">
-            <div className="flex items-center">
-              <div className="me-1.5 rounded-full bg-muted p-1">
-                <Calendar className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
-              </div>
-              <span className="font-medium text-foreground">{formatYear(car.year)}</span>
-            </div>
-            {car.mileage != null && (
-              <div className="flex items-center">
-                <div className="me-1.5 rounded-full bg-muted p-1">
-                  <Gauge className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
-                </div>
-                <span className="truncate font-medium text-foreground">{formatMileage(car.mileage)}</span>
-              </div>
-            )}
-            {car.fuelType && (
-              <div className="flex items-center">
-                <div className="me-1.5 rounded-full bg-muted p-1">
-                  <Fuel className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
-                </div>
-                <span className="truncate font-medium text-foreground">{attr.fuel(car.fuelType)}</span>
-              </div>
-            )}
-            {place.car(car) && (
-              <div className="flex items-center">
-                <div className="me-1.5 rounded-full bg-muted p-1">
-                  <MapPin className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
-                </div>
-                <span className="truncate font-medium text-foreground">
-                  {place.car(car)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="mb-4 flex flex-wrap gap-1.5 sm:mb-5 sm:gap-2">
-            {car.bodyType && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-micro font-medium">
-                {attr.body(car.bodyType)}
-              </Badge>
-            )}
-            {car.transmission && (
-              <Badge variant="secondary" className="rounded-full px-2.5 py-0.5 text-micro font-medium">
-                {attr.transmission(car.transmission)}
-              </Badge>
-            )}
-            {car.color && (
-              <Badge
-                variant="outline"
-                className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-micro font-medium"
-              >
-                <span
-                  className="inline-block h-2.5 w-2.5 rounded-full border border-border shadow-inner"
-                  style={{ backgroundColor: getCarColorHex(car.color) }}
-                />
-                {attr.color(car.color)}
-              </Badge>
-            )}
-          </div>
-        </Link>
-
-        {car.organization && (
-          <>
-            <div className="mb-3 h-px w-full bg-border" />
-            <Link
-              href={`/dealerships/${car.organization.slug}`}
-              className="group/dealer mb-3 flex items-center gap-2 px-1 sm:mb-4"
-            >
-              {car.organization.logo ? (
-                <Image
-                  src={car.organization.logo}
-                  alt={car.organization.name}
-                  width={24}
-                  height={24}
-                  className="h-5 w-5 flex-shrink-0 rounded-full border border-border object-cover shadow-sm transition-colors group-hover/dealer:border-primary/50 sm:h-6 sm:w-6"
-                />
-              ) : (
-                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-border bg-muted transition-colors group-hover/dealer:border-primary/50 sm:h-6 sm:w-6">
-                  <Building2 className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
-                </div>
-              )}
-              <span className="truncate text-xs font-medium text-muted-foreground transition-colors group-hover/dealer:text-primary">
-                {car.organization.name}
-              </span>
-              <span className="ms-auto flex items-center text-micro text-primary opacity-0 transition-all duration-300 group-hover/dealer:translate-x-1 group-hover/dealer:opacity-100">
-                {t("viewDealer")} <ChevronRight className="h-3 w-3" />
-              </span>
-            </Link>
-          </>
-        )}
-
-        <div className="mt-auto">
-          <Link href={detailHref} className="block">
-            <Button
-              size="sm"
-              className="group/cta h-8 w-full gap-1.5 rounded-lg text-xs shadow-md transition-all duration-300 hover:shadow-lg sm:h-9"
-            >
-              {t("viewDetails")}
-              <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-1 sm:h-3.5 sm:w-3.5" />
-            </Button>
+      <div className="flex flex-1 flex-col gap-1 p-3 sm:gap-1.5 sm:p-4">
+        <h3
+          // dir follows the title's own language, so an untranslated English
+          // title inside an RTL card does not render reordered.
+          dir={resolvedTitle ? localeDirection[resolvedTitle.locale] : undefined}
+          className="line-clamp-2 text-start text-caption font-semibold sm:line-clamp-1 sm:text-[1.0625rem] sm:leading-6"
+        >
+          <Link
+            href={`/cars/${car.id}`}
+            className="outline-none after:absolute after:inset-0 after:z-[1] after:rounded-control focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50"
+          >
+            {carTitle}
           </Link>
-        </div>
+        </h3>
+        <p className="truncate text-micro text-muted-foreground sm:text-caption">
+          {[year, mileage].filter(Boolean).join(" · ")}
+          {gearbox && <span className="max-sm:hidden"> · {gearbox}</span>}
+        </p>
+        {!sold && (
+          <PriceVerdictLine
+            percent={car.marketPosition?.percent ?? null}
+            listings={car.marketPosition?.listings}
+            countClassName="max-sm:hidden"
+          />
+        )}
+        {where && <p className="mt-auto truncate pt-1.5 text-micro text-muted-foreground max-sm:hidden">{where}</p>}
       </div>
-    </motion.div>
+    </article>
   );
 };
 

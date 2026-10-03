@@ -50,7 +50,7 @@ const EditTestDriveForm = ({
             <Card className="p-4 md:p-6 mx-2 md:mx-0 gap-3">
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                     <h2 className="text-xl font-semibold">{testDrive.car?.title}</h2>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <span className="bg-primary-soft text-primary text-xs font-medium px-2.5 py-0.5 rounded-full">
                         {t(`status.${testDrive.status}`)}
                     </span>
                 </div>

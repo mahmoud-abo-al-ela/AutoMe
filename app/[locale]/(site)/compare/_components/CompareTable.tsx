@@ -60,9 +60,9 @@ const CompareTable = ({
   const emptySlots = MAX_COMPARE_CARS - cars.length;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-card rounded-lg overflow-hidden">
       {/* ── Sticky car cards row ──────────────────────────────────────── */}
-      <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
+      <div className="sticky top-0 z-10 bg-card border-b">
         <motion.div
           layout
           className="grid grid-cols-3 gap-4 p-4"
@@ -90,7 +90,7 @@ const CompareTable = ({
         onValueChange={handlers.setActiveCategory}
         className="w-full"
       >
-        <div className="border-b bg-gray-50/80 px-4 pt-3">
+        <div className="border-b bg-muted/80 px-4 pt-3">
           <TabsList className="bg-transparent h-auto p-0 gap-1">
             {specCategories.map((category) => {
               const Icon = CATEGORY_ICONS[category.id] || Info;
@@ -98,7 +98,7 @@ const CompareTable = ({
                 <TabsTrigger
                   key={category.id}
                   value={category.id}
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-b-primary px-4 py-2 text-sm gap-1.5"
+                  className="data-[state=active]:bg-card data-[state=active]: rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-b-primary px-4 py-2 text-sm gap-1.5"
                 >
                   <Icon className="h-3.5 w-3.5" />
                   {t(`sections.${category.id}`)}
@@ -108,7 +108,7 @@ const CompareTable = ({
             {/* Features tab */}
             <TabsTrigger
               value="features"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-b-primary px-4 py-2 text-sm gap-1.5"
+              className="data-[state=active]:bg-card data-[state=active]: rounded-t-md rounded-b-none border-b-2 border-transparent data-[state=active]:border-b-primary px-4 py-2 text-sm gap-1.5"
             >
               <ListChecks className="h-3.5 w-3.5" />
               {t("features")}
@@ -124,7 +124,7 @@ const CompareTable = ({
             className="mt-0 focus-visible:outline-none focus-visible:ring-0"
           >
             {/* Winner badge */}
-            <div className="px-4 py-2 bg-gradient-to-r from-gray-50 to-white border-b flex items-center justify-between">
+            <div className="px-4 py-2 bg-muted border-b border-border flex items-center justify-between">
               <h3 className="text-sm font-semibold text-muted-foreground">
                 {t(`sections.${category.id}`)}
               </h3>
@@ -142,7 +142,6 @@ const CompareTable = ({
                 label={tFields(spec.key)}
                 specKey={spec.key}
                 cars={cars}
-                format={spec.format}
                 highlighted={highlightDifferences}
                 isDifferent={differences[spec.key] || false}
                 winnerCarId={winners[spec.key] || null}
@@ -158,7 +157,7 @@ const CompareTable = ({
           className="mt-0 focus-visible:outline-none focus-visible:ring-0"
         >
           {/* Winner badge */}
-          <div className="px-4 py-2 bg-gradient-to-r from-gray-50 to-white border-b flex items-center justify-between">
+          <div className="px-4 py-2 bg-muted border-b border-border flex items-center justify-between">
             <h3 className="text-sm font-semibold text-muted-foreground">
               {t("featuresComparison")}
             </h3>

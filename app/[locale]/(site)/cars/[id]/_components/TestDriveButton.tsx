@@ -1,106 +1,74 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CalendarDays } from "lucide-react";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { CalendarDays, Loader2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CarDetail } from "../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
 
+/** Book / view a test drive — the secondary action under "Message dealer". */
 const TestDriveButton = ({
-    car,
-    testDriveId,
-    isCheckingTestDrive,
-    isScheduleLoading,
-    onScheduleTestDrive,
-    onViewTestDrive,
+  car,
+  testDriveId,
+  isCheckingTestDrive,
+  isScheduleLoading,
+  onScheduleTestDrive,
+  onViewTestDrive,
 }: {
-    car: CarDetail;
-    testDriveId: string | null;
-    isCheckingTestDrive: boolean;
-    isScheduleLoading: boolean;
-    onScheduleTestDrive: () => void;
-    onViewTestDrive: () => void;
+  car: CarDetail;
+  testDriveId: string | null;
+  isCheckingTestDrive: boolean;
+  isScheduleLoading: boolean;
+  onScheduleTestDrive: () => void;
+  onViewTestDrive: () => void;
 }) => {
   const t = useTranslations("carDetail.testDrive");
-    // If car is not available
-    if (car.status !== "AVAILABLE") {
-        return (
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div>
-                            <Button
-                                variant="outline"
-                                disabled
-                                className="w-full py-3 sm:py-4 rounded-xl cursor-not-allowed opacity-60"
-                            >
-                                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-                                {t("schedule")}
-                            </Button>
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>{t("unavailable")}</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        );
-    }
 
-    // If checking for existing test drive
-    if (isCheckingTestDrive) {
-        return (
-            <Button
-                variant="outline"
-                disabled
-                className="w-full py-3 sm:py-4 rounded-xl"
-            >
-                <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin me-2"></div>
-                {t("checking")}
-            </Button>
-        );
-    }
-
-    // If user has already scheduled a test drive
-    if (testDriveId) {
-        return (
-            <Button
-                variant="outline"
-                onClick={onViewTestDrive}
-                className="w-full py-3 sm:py-4 rounded-xl hover:scale-105 transition-transform cursor-pointer bg-blue-50 border-blue-200 text-blue-700"
-            >
-                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-                {t("viewYours")}
-            </Button>
-        );
-    }
-
-    // Default case: Schedule a test drive
+  if (car.status !== "AVAILABLE") {
     return (
-        <Button
-            variant="outline"
-            onClick={onScheduleTestDrive}
-            disabled={isScheduleLoading}
-            className="w-full py-3 sm:py-4 rounded-xl hover:scale-105 transition-transform cursor-pointer"
-        >
-            {isScheduleLoading ? (
-                <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-t-2 border-blue-500 border-t-transparent rounded-full animate-spin me-2"></div>
-                    {t("processing")}
-                </div>
-            ) : (
-                <>
-                    <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-                    {t("schedule")}
-                </>
-            )}
-        </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {/* A disabled button swallows pointer events; the span carries the tooltip. */}
+            <span tabIndex={0} className="block rounded-control">
+              <Button variant="outline-strong" size="xl" disabled className="w-full">
+                <CalendarDays />
+                {t("schedule")}
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t("unavailable")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
+  }
+
+  if (isCheckingTestDrive) {
+    return (
+      <Button variant="outline-strong" size="xl" disabled className="w-full">
+        <Loader2 className="motion-safe:animate-spin" />
+        {t("checking")}
+      </Button>
+    );
+  }
+
+  if (testDriveId) {
+    return (
+      <Button variant="outline-strong" size="xl" onClick={onViewTestDrive} className="w-full bg-positive-soft">
+        <CalendarDays />
+        {t("viewYours")}
+      </Button>
+    );
+  }
+
+  return (
+    <Button variant="outline-strong" size="xl" onClick={onScheduleTestDrive} disabled={isScheduleLoading} className="w-full">
+      {isScheduleLoading ? <Loader2 className="motion-safe:animate-spin" /> : <CalendarDays />}
+      {isScheduleLoading ? t("processing") : t("schedule")}
+    </Button>
+  );
 };
 
 export default TestDriveButton;

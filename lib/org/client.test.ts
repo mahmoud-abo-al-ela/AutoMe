@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getOrgSlugFromPath } from "@/lib/org/client";
+import { getOrgSlugFromPath, isDashboardPath } from "@/lib/org/client";
 
 describe("getOrgSlugFromPath", () => {
   it.each([
@@ -18,4 +18,20 @@ describe("getOrgSlugFromPath", () => {
   it.each(["/ar/cars", "/", "/ar/org"])("is null outside a dashboard (%s)", (path) => {
     expect(getOrgSlugFromPath(path)).toBeNull();
   });
+});
+
+describe("isDashboardPath", () => {
+  it.each(["/ar/org/mo-motors/dashboard", "/en/super-admin", "/en/super-admin/users/1", "/org/mo-motors"])(
+    "is true for a dashboard (%s)",
+    (path) => {
+      expect(isDashboardPath(path)).toBe(true);
+    }
+  );
+
+  it.each(["/en", "/ar/cars/123", "/en/organizations", "/en/dealerships/org-motors", "/sign-in"])(
+    "is false for a public page (%s)",
+    (path) => {
+      expect(isDashboardPath(path)).toBe(false);
+    }
+  );
 });

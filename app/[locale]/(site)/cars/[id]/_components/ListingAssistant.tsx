@@ -120,15 +120,15 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
   };
 
   return (
-    <Card className="shadow-lg border-0 bg-white p-0">
+    <Card className=" border-0 bg-card p-0">
       <CardContent className="p-4 sm:p-6 md:p-8 space-y-4">
         <div className="flex items-start gap-2 sm:gap-3">
-          <div className="p-1.5 sm:p-2 bg-violet-100 rounded-lg shrink-0">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-violet-600" aria-hidden />
+          <div className="p-1.5 sm:p-2 bg-primary-soft rounded-lg shrink-0">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" aria-hidden />
           </div>
           <div>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{t("title")}</h3>
-            <p className="text-sm text-gray-500">{t("subtitle")}</p>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">{t("title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
           // the conversation grows.
           <ol
             ref={paneRef}
-            className="h-72 sm:h-80 space-y-3 overflow-y-auto overscroll-contain rounded-lg bg-gray-50/60 p-3"
+            className="h-72 sm:h-80 space-y-3 overflow-y-auto overscroll-contain rounded-lg bg-muted/60 p-3"
             aria-live="polite"
           >
             {exchanges.map((exchange) => (
@@ -145,7 +145,7 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
                 {/* The buyer on the reading-start side — right in Arabic, left in
                     English — and the answer on the far side; logical classes
                     mirror it with the page direction. */}
-                <p className="w-fit max-w-[85%] rounded-2xl rounded-es-sm bg-blue-600 px-3 py-2 text-sm text-white">
+                <p className="w-fit max-w-[85%] rounded-control rounded-es-sm bg-primary px-3 py-2 text-sm text-white">
                   <span className="sr-only">{t("you")}: </span>
                   {/* dir="auto" on the text, not the bubble: a question typed in
                       the other language keeps its own direction, while the
@@ -165,7 +165,7 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
                 key={key}
                 type="button"
                 onClick={() => submit(t(`suggestions.${key}`))}
-                className="cursor-pointer rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs sm:text-sm text-violet-700 hover:bg-violet-100 transition-colors"
+                className="cursor-pointer rounded-full border border-primary/30 bg-primary-soft px-3 py-1.5 text-xs sm:text-sm text-primary hover:bg-primary-soft transition-colors"
               >
                 {t(`suggestions.${key}`)}
               </button>
@@ -196,7 +196,7 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
           </Button>
         </form>
 
-        <p className="text-xs text-gray-400">{t("disclaimer")}</p>
+        <p className="text-xs text-muted-foreground">{t("disclaimer")}</p>
       </CardContent>
     </Card>
   );
@@ -205,18 +205,18 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
 function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: string }) {
   const t = useTranslations("carDetail.assistant");
   // The far side from the buyer, with its tail on the corner nearest that edge.
-  const bubble = "ms-auto w-fit max-w-[85%] rounded-2xl rounded-ee-sm px-3 py-2 text-sm";
+  const bubble = "ms-auto w-fit max-w-[85%] rounded-control rounded-ee-sm px-3 py-2 text-sm";
 
   if (!exchange.reply && !exchange.error) {
     // A typing indicator, not a sentence; the label is for screen readers.
     return (
-      <p className={`${bubble} flex items-center gap-1 bg-gray-100 py-3`}>
+      <p className={`${bubble} flex items-center gap-1 bg-muted py-3`}>
         <span className="sr-only">{t("asking")}</span>
         {[0, 150, 300].map((delay) => (
           <span
             key={delay}
             aria-hidden
-            className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+            className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground"
             style={{ animationDelay: `${delay}ms` }}
           />
         ))}
@@ -226,7 +226,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
 
   if (exchange.error) {
     return (
-      <p className={`${bubble} bg-red-50 text-red-700`}>
+      <p className={`${bubble} bg-destructive-soft text-destructive`}>
         <ActionErrorText error={exchange.error.action} fallback={t("failed")} />
       </p>
     );
@@ -240,7 +240,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
         ? t(`smallTalk.${exchange.reply.kind}`)
         : exchange.reply.message || t("offTopic");
     return (
-      <p className={`${bubble} bg-gray-100 text-gray-800`}>
+      <p className={`${bubble} bg-muted text-foreground`}>
         <span dir="auto">{text}</span>
       </p>
     );
@@ -250,7 +250,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
     const { answer, answerId, actions = [], cars = [] } = exchange.reply;
     return (
       <div className="space-y-2">
-        <p className={`${bubble} bg-gray-100 text-gray-800`}>
+        <p className={`${bubble} bg-muted text-foreground`}>
           <span dir="auto">{answer}</span>
         </p>
         {answerId && <AnswerRating answerId={answerId} />}
@@ -267,7 +267,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
           <div className="ms-auto flex w-fit max-w-[85%] flex-wrap justify-end gap-2">
             {actions.map((action) => {
               const chip =
-                "inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs sm:text-sm font-medium text-violet-700 hover:bg-violet-50 transition-colors";
+                "inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-card px-3 py-1.5 text-xs sm:text-sm font-medium text-primary hover:bg-primary-soft transition-colors";
               if (action.kind === "testDrive") {
                 // In-app: the locale-aware Link keeps the buyer's language.
                 return (
@@ -302,7 +302,7 @@ function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId: strin
   }
 
   return (
-    <div className={`${bubble} space-y-2 bg-amber-50 text-amber-900`}>
+    <div className={`${bubble} space-y-2 bg-marker-soft text-foreground`}>
       <p>
         <span dir="auto">
           {exchange.reply?.status === "unavailable"
@@ -332,7 +332,7 @@ function AskDealerLink({ carId, label }: { carId: string; label: string }) {
   const { openCarChat } = useChatDock();
   const { signInTo } = useAuthRedirects();
   const className =
-    "inline-flex cursor-pointer items-center gap-1.5 font-semibold text-amber-900 underline underline-offset-2";
+    "inline-flex cursor-pointer items-center gap-1.5 font-semibold text-foreground underline underline-offset-2";
   const content = (
     <>
       <MessageCircle className="w-3.5 h-3.5" aria-hidden />
@@ -362,14 +362,14 @@ function AnswerRating({ answerId }: { answerId: string }) {
 
   if (rated) {
     return (
-      <p className="ms-auto w-fit max-w-[85%] text-xs text-gray-500" role="status">
+      <p className="ms-auto w-fit max-w-[85%] text-xs text-muted-foreground" role="status">
         {rated === "up" ? t("thanks") : t("sentToDealer")}
       </p>
     );
   }
 
   const button =
-    "cursor-pointer rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors";
+    "cursor-pointer rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground transition-colors";
   return (
     <div className="ms-auto flex w-fit items-center gap-1">
       <button type="button" onClick={() => rate(true)} className={button} aria-label={t("helpful")} title={t("helpful")}>
@@ -390,20 +390,20 @@ function SuggestedCarLink({ car }: { car: SuggestedCar }) {
   return (
     <Link
       href={`/cars/${car.id}`}
-      className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-2 pe-3 hover:border-violet-300 hover:bg-violet-50/40 transition-colors"
+      className="flex items-center gap-3 rounded-control border border-border bg-card p-2 pe-3 hover:border-primary/30 hover:bg-primary-soft/60 transition-colors"
     >
-      <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+      <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
         {car.image ? (
           <Image src={car.image} alt="" fill sizes="64px" className="object-cover" />
         ) : (
-          <CarIcon className="absolute inset-0 m-auto h-5 w-5 text-gray-300" aria-hidden />
+          <CarIcon className="absolute inset-0 m-auto h-5 w-5 text-muted-foreground/60" aria-hidden />
         )}
       </div>
       <div className="min-w-0 text-sm">
-        <p className="truncate font-semibold text-gray-900">{title}</p>
-        <p className="text-gray-600">{fmt.price(car.price, car.currency)}</p>
+        <p className="truncate font-semibold text-foreground">{title}</p>
+        <p className="text-muted-foreground">{fmt.price(car.price, car.currency)}</p>
       </div>
-      <ChevronRight className="ms-auto h-4 w-4 shrink-0 text-gray-400 rtl:-scale-x-100" aria-hidden />
+      <ChevronRight className="ms-auto h-4 w-4 shrink-0 text-muted-foreground rtl:-scale-x-100" aria-hidden />
     </Link>
   );
 }
