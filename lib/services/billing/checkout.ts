@@ -2,7 +2,7 @@ import type { BillingPeriod, PaymentPurpose } from "@/lib/generated/prisma";
 import type { Locale } from "@/i18n/routing";
 import * as billingRepo from "@/lib/repositories/billing";
 import * as paymentRepo from "@/lib/repositories/payment";
-import { checkoutUrl, createIntention, paymobConfig } from "@/lib/services/paymob";
+import { PaymobApiError, checkoutUrl, createIntention, paymobConfig } from "@/lib/services/paymob";
 import { EGYPT_DIALING_CODE, isEgyptNationalPhone, toNationalEgyptPhone } from "@/lib/utils/phone";
 import { NotFoundError, ServiceUnavailableError, ValidationError, logError } from "@/lib/utils/errors";
 
@@ -58,9 +58,15 @@ export interface Checkout {
   url: string;
 }
 
-/** The public origin Paymob calls back and returns buyers to. */
+/**
+ * The public origin Paymob calls back and returns buyers to. Required in
+ * production; in development it falls back to the local server, as the rest of
+ * the app does. Paymob cannot call localhost back, so there the success page
+ * confirms the payment by asking Paymob (confirm.ts).
+ */
 function appUrl(): string {
-  const url = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
+  const url = configured || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000");
   if (!url) {
     throw new ServiceUnavailableError("NEXT_PUBLIC_APP_URL is not configured", {
       key: "errors.billing.notConfigured",
@@ -99,7 +105,7 @@ function returnPath(input: CheckoutInput, paymentId: string): string {
 export async function startCheckout(input: CheckoutInput): Promise<Checkout> {
   // Configuration first: a misconfigured deployment must not leave a PENDING
   // row behind for every click.
-  const { cardIntegrationId } = paymobConfig();
+  const { cardIntegrationId, walletIntegrationId } = paymobConfig();
   const origin = appUrl();
 
   const plan = await billingRepo.findPlanById(input.planId);
@@ -129,11 +135,11 @@ export async function startCheckout(input: CheckoutInput): Promise<Checkout> {
   const { firstName, lastName } = billingName(input.payer.name, input.dealership.name);
   const periodLabel = input.billingPeriod === "YEARLY" ? "yearly" : "monthly";
 
-  try {
-    const intention = await createIntention({
+  const intentionWith = (paymentMethods: number[]) =>
+    createIntention({
       amountCents,
       currency: "EGP",
-      paymentMethods: [cardIntegrationId],
+      paymentMethods,
       items: [{ name: `AutoMe ${plan.name} (${periodLabel})`, amountCents }],
       billing: {
         firstName,
@@ -146,6 +152,27 @@ export async function startCheckout(input: CheckoutInput): Promise<Checkout> {
       redirectionUrl: `${origin}${returnPath(input, payment.id)}`,
       expiresInSeconds: CHECKOUT_TTL_SECONDS,
     });
+
+  try {
+    let intention;
+    try {
+      // Card always; mobile wallets too when an integration is configured. The
+      // buyer picks on Paymob's page.
+      intention = await intentionWith(
+        walletIntegrationId ? [cardIntegrationId, walletIntegrationId] : [cardIntegrationId]
+      );
+    } catch (error) {
+      // A wallet integration Paymob has not enabled for Unified Checkout must
+      // never cost a card payment: say so in the log and offer card alone.
+      if (!walletIntegrationId || !(error instanceof PaymobApiError) || error.status !== 404) throw error;
+      logError(`Paymob refused wallet integration ${walletIntegrationId}; checkout offers card only:`, error);
+      intention = await intentionWith([cardIntegrationId]);
+    }
+    if (walletIntegrationId && !intention.offeredIntegrationIds.includes(walletIntegrationId)) {
+      // Paymob accepted the checkout but left wallets out: the integration is
+      // not enabled for Unified Checkout on the account (Paymob support).
+      console.warn(`Paymob did not offer wallet integration ${walletIntegrationId} at checkout`);
+    }
 
     await paymentRepo.setPaymentProviderOrder(payment.id, intention.orderId);
     return { paymentId: payment.id, url: checkoutUrl(intention.clientSecret) };
