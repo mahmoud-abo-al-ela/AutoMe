@@ -1,144 +1,116 @@
-"use client";
-import { useTranslations } from "next-intl";
-
-import React from "react";
 import Image from "next/image";
-import { CheckCircle, ChevronDown } from "lucide-react";
+import type { CSSProperties } from "react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { motion } from "framer-motion";
+import { formatNumber } from "@/lib/utils/number";
+import { formatCarPrice } from "@/lib/utils/currency";
+import { BUDGET_MAX_EGP } from "@/lib/constants/car-options";
+import { HeroParallax } from "@/components/Home/motion/HeroParallax";
+import type { Locale } from "@/i18n/routing";
 import HeroSearch from "./HeroSearch";
 
-const Hero = () => {
-  const t = useTranslations("home.hero");
-  const scrollToFeatures = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const featuresSection = document.getElementById("featured");
-    if (featuresSection) {
-      featuresSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+/** The live counts the search band states — from getMarketSummary, never typed into copy. */
+export interface HeroSummary {
+  listings: number;
+  dealerships: number;
+}
+
+/** A CSS custom property for the entrance timing (globals.css: .hero-*). */
+const cssVar = (name: string, value: string | number) => ({ [name]: value }) as CSSProperties;
+
+/**
+ * Home hero, "Street level" (Figma: Home — hero B). The hero photo across the
+ * full width, the headline set low on it, and the plate search docked on its
+ * bottom edge.
+ *
+ * The overlay is built from the site's palette: a plate-blue wash, asphalt
+ * rising behind the words so the headline reads on any photo, and a low
+ * marker-yellow glow like a street lamp. The quick picks sit below, on the
+ * page, to keep the photo uncluttered.
+ *
+ * Motion: the photo settles from a slow zoom and drifts in parallax, the
+ * headline's words rise in one by one, a road-paint stroke paints in under the
+ * accent clause, and the rest follows; the glow breathes. The entrance is CSS so the headline — the page's largest paint —
+ * never waits for JavaScript; all of it stops under reduced motion.
+ *
+ * The live count is stated once, on the search's plate band, from computed
+ * numbers only; when they could not be read the band falls back to a label.
+ */
+export default async function Hero({ summary }: { summary: HeroSummary | null }) {
+  const t = await getTranslations("home.hero");
+  const locale = (await getLocale()) as Locale;
+  const n = (value: number) => formatNumber(value, locale);
+
+  const quickPicks = [
+    { href: `/cars?maxPrice=${BUDGET_MAX_EGP}`, label: t("quickUnder", { price: formatCarPrice(BUDGET_MAX_EGP, locale) }) },
+    { href: "/cars?transmission=Automatic", label: t("quickAutomatic") },
+    { href: "/cars?bodyType=SUV", label: t("quickSuv") },
+    { href: "/cars?fuelType=Electric", label: t("quickElectric") },
+    { href: "/cars?minSeats=7", label: t("quickSevenSeats") },
+  ];
+
+  // Word by word, so each can rise on its own beat; the spaces stay as text.
+  const leadWords = `${t("titleLead")} ${t("titleTrustLead")}`.split(/\s+/).filter(Boolean);
+  const accentWords = t("titleTrustAccent").split(/\s+/).filter(Boolean);
+  const word = (text: string, index: number) => (
+    <span key={index} className="hero-word" style={cssVar("--i", index)}>
+      {text}
+    </span>
+  );
 
   return (
-    <section
-      id="main-content"
-      className="relative bg-slate-950 text-white min-h-screen flex items-center overflow-hidden"
-    >
-      {/* Self-hosted, optimized background image + brand-tinted ambient glows */}
-      <div className="absolute inset-0 overflow-hidden">
-        <Image
-          src="/hero-car.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        {/* Darkening overlays keep the white hero text legible over the photo */}
-        <div className="absolute inset-0 bg-slate-950/70" />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/60 to-slate-950/95" />
-        {/* Brand glows inherit tenant --primary / --brand-accent */}
-        <div className="absolute -top-1/4 end-1/4 w-[32rem] h-[32rem] bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 start-1/4 w-[28rem] h-[28rem] bg-brand-accent/15 rounded-full blur-3xl" />
+    <section id="main-content" aria-labelledby="hero-title" className="relative">
+      <div className="relative isolate overflow-hidden bg-inverse text-inverse-foreground">
+        <HeroParallax>
+          <Image src="/hero-car.jpg" alt="" fill priority sizes="100vw" className="hero-settle object-cover" />
+        </HeroParallax>
+        {/* The overlay, from the site's palette (globals.css: .hero-*). */}
+        <div aria-hidden className="hero-wash absolute inset-0 -z-30" />
+        <div aria-hidden className="hero-scrim absolute inset-0 -z-20" />
+        <div aria-hidden className="hero-glow absolute inset-0 -z-10" />
+
+        <div className="mx-auto flex min-h-[min(68svh,560px)] w-full max-w-[1360px] flex-col justify-end gap-4 px-4 pb-16 pt-24 sm:min-h-[min(78svh,720px)] sm:gap-5 sm:px-6 sm:pb-24 xl:px-0">
+          <h1 id="hero-title" className="max-w-[14ch] text-display font-black">
+            {leadWords.flatMap((text, i) => [word(text, i), " "])}
+            <span className="hero-paint text-marker">
+              {accentWords.flatMap((text, i) => [i > 0 ? " " : null, word(text, leadWords.length + i)])}
+            </span>
+          </h1>
+
+          <p
+            className="hero-follow max-w-[34rem] text-body text-inverse-foreground/80 sm:text-[1.125rem]"
+            style={cssVar("--delay", "0.55s")}
+          >
+            {t("subtitle")}
+          </p>
+        </div>
       </div>
 
-      <div className="container mx-auto relative z-10 px-4 md:px-6 -mt-20 md:mt-0">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 leading-tight"
-          >
-            {t("headline")}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-brand-accent">
-              {t("headlineAccent")}
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-100/90 mb-6 sm:mb-8 md:mb-10 max-w-3xl mx-auto px-2 sm:px-0 leading-relaxed"
-          >
-            {t("subheadline")}
-          </motion.p>
-
-          <HeroSearch />
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 md:mb-10 text-xs sm:text-sm md:text-base px-1 sm:px-0"
-          >
-            <Link
-              href="/cars?fuelType=Electric"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105"
-            >
-              ⚡ {t("quickElectric")}
-            </Link>
-            <Link
-              href="/cars?bodyType=SUV"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105"
-            >
-              🚙 {t("quickSuv")}
-            </Link>
-            <Link
-              href="/cars?bodyType=Sedan"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105 hidden sm:block"
-            >
-              🚗 {t("quickSedan")}
-            </Link>
-            <Link
-              href="/cars?transmission=Automatic"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:scale-105"
-            >
-              ⚙️ {t("quickAutomatic")}
-            </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 text-xs md:text-sm"
-          >
-            <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
-              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
-              <span className="text-blue-100">{t("trustRecommendations")}</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-white/20"></div>
-            <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
-              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
-              <span className="text-blue-100">{t("trustPriceAnalysis")}</span>
-            </div>
-            <div className="hidden sm:block h-4 w-px bg-white/20"></div>
-            <div className="flex items-center bg-white/5 backdrop-blur-sm border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full">
-              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400 me-2" />
-              <span className="text-blue-100">{t("trustVirtualTours")}</span>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="absolute -bottom-30 left-1/2 transform -translate-x-1/2"
-          >
-            <a
-              href="#features"
-              onClick={scrollToFeatures}
-              className="flex items-center justify-center w-12 h-12 text-white rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 animate-bounce transition-all duration-300 hover:scale-110"
-              aria-label={t("scrollToFeatured")}
-            >
-              <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
-            </a>
-          </motion.div>
+      {/* Docked on the photo's lower edge: half on the photo, half on the page. */}
+      <div className="relative z-10 mx-auto -mt-10 flex w-full max-w-[1360px] flex-col gap-4 px-4 sm:-mt-11 sm:px-6 xl:px-0">
+        <div className="hero-follow w-full max-w-[600px] rounded-control shadow-float" style={cssVar("--delay", "0.7s")}>
+          <HeroSearch
+            bandLabel={
+              summary && summary.listings > 0
+                ? t("plateBand", { value: n(summary.listings) })
+                : t("plateBandFallback")
+            }
+          />
         </div>
+
+        <ul className="flex flex-wrap gap-2.5">
+          {quickPicks.map((pick, i) => (
+            <li key={pick.href} className="hero-follow" style={cssVar("--delay", `${0.85 + i * 0.06}s`)}>
+              <Link
+                href={pick.href}
+                className="inline-flex h-10 items-center rounded-full border border-border-strong/25 bg-card px-4 text-caption font-medium transition-[transform,background-color,border-color] duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:bg-field"
+              >
+                {pick.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
-};
-
-export default Hero;
+}

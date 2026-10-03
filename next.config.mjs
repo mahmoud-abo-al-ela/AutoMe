@@ -45,6 +45,20 @@ const nextConfig = {
     ],
   },
 
+  // /pricing is where people guess the plans are; they are on /for-dealers.
+  // Here rather than as a page: the (site) layout streams behind a Suspense
+  // boundary, so a page's redirect() arrives as a client-side hop with a 200,
+  // not an HTTP redirect.
+  async redirects() {
+    return [
+      {
+        source: "/:locale(en|ar)/pricing",
+        destination: "/:locale/for-dealers",
+        permanent: false,
+      },
+    ];
+  },
+
   webpack: (config) => {
     // @supabase/realtime-js loads its WebSocket impl via a dynamic require, which
     // webpack can't statically analyze ("Critical dependency: the request of a

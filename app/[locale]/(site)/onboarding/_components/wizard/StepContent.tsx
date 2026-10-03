@@ -34,7 +34,7 @@ export default function StepContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
         >
-            <Card className="shadow-2xl border-0 overflow-hidden">
+            <Card className=" border-0 overflow-hidden">
                 <CardContent className="pt-8 pb-8 px-6 sm:px-8">
                     <AnimatePresence mode="wait">
                         <motion.div

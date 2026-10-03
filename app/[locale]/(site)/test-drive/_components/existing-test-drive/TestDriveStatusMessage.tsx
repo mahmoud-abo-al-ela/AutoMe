@@ -15,25 +15,25 @@ const TestDriveStatusMessage = ({ status }: { status: Status }) => {
         switch (status) {
             case "CONFIRMED":
                 return {
-                    bgColor: "bg-green-50",
-                    borderColor: "border-green-200",
-                    textColor: "text-green-800",
+                    bgColor: "bg-positive-soft",
+                    borderColor: "border-positive/30",
+                    textColor: "text-positive",
                     message: t("confirmed", {
                         minutes: fmt.number(ARRIVE_EARLY_MINUTES),
                     }),
                 };
             case "CANCELLED":
                 return {
-                    bgColor: "bg-red-50",
-                    borderColor: "border-red-200",
-                    textColor: "text-red-800",
+                    bgColor: "bg-destructive-soft",
+                    borderColor: "border-destructive/30",
+                    textColor: "text-destructive",
                     message: t("cancelled"),
                 };
             case "COMPLETED":
                 return {
-                    bgColor: "bg-blue-50",
-                    borderColor: "border-blue-200",
-                    textColor: "text-blue-800",
+                    bgColor: "bg-primary-soft",
+                    borderColor: "border-primary/30",
+                    textColor: "text-primary",
                     message: t("completed"),
                 };
             default:

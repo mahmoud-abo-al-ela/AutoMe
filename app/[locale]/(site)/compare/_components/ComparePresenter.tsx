@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
+import { SiteEmptyState } from "@/components/brand";
 import EmptyCompare from "./EmptyCompare";
 import CompareTable from "./CompareTable";
 import MobileCompareTable from "./MobileCompareTable";
@@ -25,8 +25,8 @@ export const ComparePresenter = ({
 }: ComparePageData) => {
     const tCommon = useTranslations("common");
     return (
-        <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen py-20 print:bg-white print:py-4">
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pb-10 sm:pb-16 md:pb-20 print:px-2 print:pb-4">
+        <div className="min-h-[60vh] pb-16 pt-6 sm:pt-8 print:bg-card print:py-4">
+            <div className="mx-auto w-full max-w-[1360px] px-4 sm:px-6 xl:px-0 print:px-2">
                 <AnimatePresence mode="wait">
                     {loading ? (
                         /* ── Loading skeleton ──────────────────────────────── */
@@ -47,27 +47,13 @@ export const ComparePresenter = ({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -12 }}
                             transition={{ duration: 0.3 }}
-                            className="bg-white rounded-xl shadow-md p-8 sm:p-12 text-center"
                         >
-                            <div className="flex flex-col items-center gap-4">
-                                <div className="h-14 w-14 rounded-full bg-red-50 flex items-center justify-center">
-                                    <AlertCircle className="h-7 w-7 text-red-500" />
-                                </div>
-                                <h2 className="text-lg sm:text-xl font-semibold">
-                                    {tCommon("states.error")}
-                                </h2>
-                                <p className="text-sm sm:text-base text-muted-foreground max-w-md">
-                                    {error}
-                                </p>
-                                <Button
-                                    onClick={handlers.retry}
-                                    variant="outline"
-                                    className="cursor-pointer mt-2"
-                                >
-                                    <RefreshCw className="me-2 h-4 w-4" />
-                                    {tCommon("actions.retry")}
-                                </Button>
-                            </div>
+                            <SiteEmptyState
+                                icon={AlertCircle}
+                                title={tCommon("states.error")}
+                                description={error}
+                                primary={{ label: tCommon("actions.retry"), onClick: handlers.retry }}
+                            />
                         </motion.div>
                     ) : !hasCars ? (
                         /* ── Empty / single-car state ──────────────────────── */

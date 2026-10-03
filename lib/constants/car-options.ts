@@ -150,3 +150,15 @@ export const getCarColorHex = (color?: string | null): string => {
 
 /** Photos of one car the AI reads together to identify it. */
 export const MAX_AI_LISTING_PHOTOS = 3;
+
+// Structured price quick-picks (the home hero and the listing). They map to
+// real filters rather than free-text search, so "Under …" and "Luxury" return
+// matching cars.
+//
+// Thresholds are EGP, matching Car.price. Egyptian car prices sit far higher
+// than USD ones because of import duty and taxes, so these are pitched against
+// the real distribution: a little under the median for the budget pick, and
+// the top slice for luxury. (They were once dollar-scale — 30,000 / 60,000 —
+// which made "Under" return almost nothing and "Luxury" almost everything.)
+export const BUDGET_MAX_EGP = 1_500_000;
+export const LUXURY_MIN_EGP = 3_000_000;

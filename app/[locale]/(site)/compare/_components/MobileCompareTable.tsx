@@ -1,7 +1,9 @@
 "use client";
 
 import { useFormatters } from "@/hooks/use-formatters";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { resolveCarTitle } from "@/lib/utils/car-text";
+import type { Locale } from "@/i18n/routing";
 import { useState, useCallback } from "react";
 import { Link } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,6 +52,7 @@ const MobileCompareTable = ({
   handlers: CompareHandlers;
 }) => {
   const t = useTranslations("compare");
+  const locale = useLocale() as Locale;
   const tNouns = useTranslations("common.pagination.nouns");
   const fmt = useFormatters();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -77,13 +80,13 @@ const MobileCompareTable = ({
   const activeCar = cars[activeIndex] || cars[0];
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-card rounded-lg overflow-hidden">
       {/* ── Side-by-side toggle ────────────────────────────────────────── */}
       {cars.length >= 2 && (
-        <div className="flex items-center justify-between px-4 py-2 border-b bg-gray-50/80">
+        <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/80">
           <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-muted-foreground">
             <Columns2 className="h-3.5 w-3.5" />
-            <span>Side by Side</span>
+            <span>{t("mobile.sideBySide")}</span>
             <Switch
               checked={sideBySide}
               onCheckedChange={setSideBySide}
@@ -100,10 +103,11 @@ const MobileCompareTable = ({
                   className={cn(
                     "h-2 w-2 rounded-full transition-all duration-200",
                     i === activeIndex
-                      ? "bg-primary w-4"
-                      : "bg-gray-300"
+                      ? "bg-foreground w-4"
+                      : "bg-border-strong/30"
                   )}
-                  aria-label={`Go to ${getCarTitle(car)}`}
+                  aria-label={t("mobile.showCar", { title: resolveCarTitle(car, locale)?.text ?? getCarTitle(car) })}
+                  aria-current={i === activeIndex || undefined}
                 />
               ))}
             </div>
@@ -185,7 +189,7 @@ const MobileCompareTable = ({
 
       {/* ── Add more cars prompt ───────────────────────────────────────── */}
       {cars.length < MAX_COMPARE_CARS && (
-        <div className="p-4 flex flex-col items-center justify-center bg-gray-50 text-center border-t">
+        <div className="p-4 flex flex-col items-center justify-center bg-muted text-center border-t">
           <p className="text-muted-foreground text-xs mb-2">
             {t("addMore", {
               count: fmt.number(MAX_COMPARE_CARS - cars.length),

@@ -22,10 +22,10 @@ const TestDriveFilters = ({
     const tCommon = useTranslations("common.actions");
 
     return (
-        <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border">
+        <div className="bg-card rounded-lg p-3 sm:p-4 border">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
                 <div className="relative flex-1">
-                    <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder={t("list.searchPlaceholder")}
                         className="ps-10 pe-10 text-sm"
@@ -36,7 +36,7 @@ const TestDriveFilters = ({
                         <button
                             onClick={onClearSearch}
                             aria-label={tCommon("clearSearch")}
-                            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            className="absolute end-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
                         >
                             <X className="h-4 w-4" />
                         </button>

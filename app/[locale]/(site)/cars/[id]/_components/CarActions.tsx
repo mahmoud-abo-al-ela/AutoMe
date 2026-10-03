@@ -1,12 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Scale } from "lucide-react";
+import { MessageSquare, Scale } from "lucide-react";
 import TestDriveButton from "./TestDriveButton";
 import { StartConversationButton, useChatDock } from "@/components/StreamChat";
 import type { CarDetail } from "../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
 
+/**
+ * Contact the dealer (the page's one marker-yellow action), book a test
+ * drive, and — once the car is in the compare list — jump to the comparison.
+ */
 const CarActions = ({
   car,
   testDriveId,
@@ -33,52 +37,33 @@ const CarActions = ({
   const t = useTranslations("carDetail.actions");
   const { openCarChat } = useChatDock();
 
-  const handleChatClick = () => {
-    if (!isSignedIn) {
-      onChatClick?.();
-      return;
-    }
-  };
-
   return (
-    <>
-      <div className="space-y-3 sm:space-y-4">
-        {isSignedIn ? (
-          <StartConversationButton
-            carId={car.id}
-            onChatOpen={openCarChat}
-            className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-          />
-        ) : (
-          <Button
-            onClick={handleChatClick}
-            className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-          >
-            {t("chatNow")}
-          </Button>
-        )}
+    <div className="flex flex-col gap-3">
+      {isSignedIn ? (
+        <StartConversationButton carId={car.id} onChatOpen={openCarChat} variant="marker" size="xl" className="w-full" />
+      ) : (
+        <Button variant="marker" size="xl" className="w-full" onClick={() => onChatClick?.()}>
+          <MessageSquare />
+          {t("chatNow")}
+        </Button>
+      )}
 
-        <TestDriveButton
-          car={car}
-          testDriveId={testDriveId}
-          isCheckingTestDrive={isCheckingTestDrive}
-          isScheduleLoading={isScheduleLoading}
-          onScheduleTestDrive={onScheduleTestDrive}
-          onViewTestDrive={onViewTestDrive}
-        />
+      <TestDriveButton
+        car={car}
+        testDriveId={testDriveId}
+        isCheckingTestDrive={isCheckingTestDrive}
+        isScheduleLoading={isScheduleLoading}
+        onScheduleTestDrive={onScheduleTestDrive}
+        onViewTestDrive={onViewTestDrive}
+      />
 
-        {isInCompare && (
-          <Button
-            variant="secondary"
-            onClick={onGoToCompare}
-            className="w-full py-2 sm:py-3 rounded-xl hover:scale-105 transition-transform cursor-pointer text-xs sm:text-sm"
-          >
-            <Scale className="w-3 h-3 sm:w-4 sm:h-4 me-1 sm:me-2" />
-            {t("goToCompare")}
-          </Button>
-        )}
-      </div>
-    </>
+      {isInCompare && (
+        <Button variant="ghost" size="xl" className="w-full" onClick={onGoToCompare}>
+          <Scale />
+          {t("goToCompare")}
+        </Button>
+      )}
+    </div>
   );
 };
 

@@ -29,7 +29,7 @@ export default function FilterCheckboxPopover({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={`h-9.5 gap-1.5 px-3 rounded-lg bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-all ${active ? "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10" : ""}`}
+          className={`h-9.5 gap-1.5 px-3 rounded-lg bg-card border-border text-muted-foreground font-medium hover:bg-muted transition-all ${active ? "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10" : ""}`}
         >
           <span className="text-xs">{label}</span>
           {active && (
@@ -42,7 +42,7 @@ export default function FilterCheckboxPopover({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className={`${contentWidthClass} p-3 rounded-xl border border-slate-100 shadow-xl bg-white space-y-2`}
+        className={`${contentWidthClass} p-3 rounded-control border border-border bg-card space-y-2`}
       >
         {options.map((opt) => {
           const isChecked = selected.includes(opt);
@@ -55,7 +55,7 @@ export default function FilterCheckboxPopover({
               />
               <label
                 htmlFor={`${idPrefix}-${opt}`}
-                className="text-xs font-semibold text-slate-700 cursor-pointer select-none truncate"
+                className="text-xs font-semibold text-muted-foreground cursor-pointer select-none truncate"
               >
                 {opt}
               </label>

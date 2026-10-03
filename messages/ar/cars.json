@@ -16,11 +16,9 @@
     "quickLuxury": "فاخرة"
   },
   "results": {
-    "summary": "عرض <range>{start}-{end}</range> من إجمالي <strong>{total}</strong> {count, plural, one {سيارة} two {سيارتين} few {سيارات} many {سيارة} other {سيارة}}",
-    "perPage": "{value} / صفحة",
-    "perPageLabel": "عدد النتائج في الصفحة",
     "sortLabel": "ترتيب النتائج",
-    "sortPlaceholder": "الترتيب حسب"
+    "sortPlaceholder": "الترتيب حسب",
+    "count": "{count, plural, one {عربية واحدة} two {عربيتان} few {{value} عربيات} other {{value} عربية}}"
   },
   "sort": {
     "newest": "الأحدث أولًا",
@@ -61,7 +59,9 @@
     "mileage": "المسافة المقطوعة",
     "loadingRange": "جارٍ تحميل النطاق…",
     "any": "الكل",
-    "activeCount": "{value} مُفعّل"
+    "activeCount": "{value} مُفعّل",
+    "open": "الفلاتر",
+    "openWithCount": "الفلاتر ({value})"
   },
   "activeFilters": {
     "search": "بحث",
@@ -81,10 +81,11 @@
     "errorTitle": "حدث خطأ ما",
     "errorBody": "تعذّر تحميل السيارات في الوقت الحالي. من فضلك حاول مرة أخرى.",
     "retry": "إعادة المحاولة",
-    "filteredEmptyTitle": "لا توجد سيارات مطابقة لعوامل الفلترة",
-    "filteredEmptyBody": "جرّب توسيع نطاق السعر أو إزالة أحد عوامل الفلترة لعرض نتائج أكثر.",
+    "filteredEmptyTitle": "لا توجد عربيات تطابق كل الفلاتر دي",
+    "filteredEmptyBody": "شيل فلتر أو وسّع نطاق السعر — الأرقام جنب كل اختيار بتوضح المتاح.",
     "emptyTitle": "لا توجد سيارات معروضة بعد",
-    "emptyBody": "لا توجد سيارات متاحة في الوقت الحالي. من فضلك عاود الزيارة قريبًا."
+    "emptyBody": "لا توجد سيارات متاحة في الوقت الحالي. من فضلك عاود الزيارة قريبًا.",
+    "browseAll": "تصفح كل العربيات"
   },
   "compare": {
     "selected": "{count, plural, one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}} للمقارنة",
@@ -92,5 +93,28 @@
     "action": "قارن",
     "needTwo": "أضف سيارتين على الأقل للمقارنة",
     "clear": "مسح المقارنة"
+  },
+  "browse": {
+    "title": "تصفح العربيات"
+  },
+  "readout": {
+    "label": "السوق دلوقتي",
+    "live": "{count, plural, one {عربية واحدة معروضة} two {عربيتان معروضتان} few {{value} عربيات معروضة} other {{value} عربية معروضة}}",
+    "median": "متوسط السعر {price}",
+    "dealers": "{count, plural, one {معرض واحد} two {معرضان} few {{value} معارض} other {{value} معرض}}",
+    "cities": "{count, plural, one {مدينة واحدة} two {مدينتان} few {{value} مدن} other {{value} مدينة}}",
+    "updated": "آخر تحديث {when}"
+  },
+  "view": {
+    "label": "طريقة العرض",
+    "grid": "شبكة",
+    "list": "قائمة"
+  },
+  "row": {
+    "mileage": "العدّاد",
+    "fuel": "الوقود",
+    "gearbox": "ناقل الحركة",
+    "body": "الهيكل",
+    "viewCar": "عرض العربية"
   }
 }

@@ -25,7 +25,7 @@ export const WishlistPresenter = ({
     const isEmpty = !cars || cars.length === 0;
 
     return (
-        <div className="container py-20 max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="container py-8 max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
@@ -51,15 +51,15 @@ export const WishlistPresenter = ({
             {loading && <LoadingGrid count={6} />}
 
             {!loading && error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                    <h3 className="text-lg font-semibold text-red-800 mb-2">
+                <div className="bg-destructive-soft border border-destructive/30 rounded-lg p-6 text-center">
+                    <h3 className="text-lg font-semibold text-destructive mb-2">
                         {t("loadError")}
                     </h3>
-                    <p className="text-red-600 mb-4">{error}</p>
+                    <p className="text-destructive mb-4">{error}</p>
                     <Button
                         onClick={handlers.retry}
                         variant="outline"
-                        className="bg-white cursor-pointer"
+                        className="bg-card cursor-pointer"
                     >
                         {tActions("retry")}
                     </Button>

@@ -1,25 +1,32 @@
 "use client";
-import { useTranslations } from "next-intl";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Camera, Upload } from "lucide-react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Camera, Search, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 
-const HeroSearch = () => {
+/**
+ * The hero search, drawn as a licence plate (Figma: Plate search): the light-
+ * blue band carries the live count, the body holds the field, and the yellow
+ * key is the page's one primary action.
+ *
+ * Text search goes straight to /cars?search=…; a photo (picked or dropped
+ * anywhere on the field) runs the AI photo search in useImageSearch.
+ */
+const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const t = useTranslations("home.hero");
   const tActions = useTranslations("common.actions");
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
 
-  const handleSearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!searchQuery.trim()) {
       toast.error(t("emptySearch"));
       return;
@@ -27,95 +34,79 @@ const HeroSearch = () => {
     router.push(`/cars?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
+  if (image.isActive) {
+    return (
+      <ImageSearchPanel
+        imagePreview={image.imagePreview}
+        fileName={image.fileName}
+        loading={image.loading}
+        changeImageRef={image.changeImageRef}
+        onFileInputChange={image.onFileInputChange}
+        onCancel={image.reset}
+        onChangeImage={image.openChangePicker}
+        onSearch={image.search}
+      />
+    );
+  }
+
   return (
-    <div className="relative w-full max-w-xl mx-auto">
-      {!image.isActive && (
-        <motion.form
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-2 mb-5 sm:mb-6 md:mb-8 px-2 sm:px-0"
-          onSubmit={handleSearch}
-          {...image.dragProps}
-        >
-          <div
-            className={`relative flex-grow rounded-lg transition-shadow ${
-              image.isDragging ? "ring-2 ring-primary ring-offset-2 ring-offset-transparent" : ""
-            }`}
-          >
-            <Search
-              size={16}
-              className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 sm:size-[18px]"
-            />
-            <Input
-              type="search"
-              placeholder={t("searchPlaceholder")}
-              className="ps-9 h-10 sm:h-11 md:h-12 text-sm md:text-base text-gray-800 bg-white/95 backdrop-blur-sm rounded-lg border-0 focus-visible:ring-primary shadow-lg"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={image.openPicker}
-              title={t("searchByPhoto")}
-              aria-label={t("searchByPhoto")}
-              className={`absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 cursor-pointer hover:text-primary transition-colors ${
-                searchQuery.trim() ? "hidden" : "block"
-              }`}
-            >
-              <Camera size={18} className="sm:size-[20px]" />
-            </button>
-            <input
-              ref={image.fileInputRef}
-              id="imageUpload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={image.onFileInputChange}
-            />
-
-            <AnimatePresence>
-              {image.isDragging && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute inset-0 z-20 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary bg-white/95 text-sm font-medium text-primary backdrop-blur-sm pointer-events-none"
-                >
-                  <Upload size={16} />
-                  {t("dropImage")}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <Button
-            size="lg"
-            type="submit"
-            className="bg-primary hover:bg-primary/90 text-white h-10 sm:h-11 md:h-12 text-sm md:text-base cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg px-4 sm:px-6"
-            disabled={image.loading}
-          >
-            {tActions("search")}
-          </Button>
-        </motion.form>
+    <form
+      role="search"
+      onSubmit={handleSearch}
+      {...image.dragProps}
+      className={cn(
+        "relative w-full max-w-[600px] overflow-hidden rounded-control border-[3px] border-marker bg-field text-foreground",
+        image.isDragging && "ring-4 ring-marker/40"
       )}
+    >
+      <div className="flex items-center justify-between gap-3 bg-plate-band px-3 py-0.5 text-micro font-bold">
+        <span>{bandLabel}</span>
+        <span aria-hidden dir="ltr">
+          EGYPT · مصر
+        </span>
+      </div>
+      <div className="flex items-center gap-1.5 p-1.5 ps-3">
+        <Search aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
+          className="h-12 w-0 min-w-0 flex-1 bg-transparent text-body outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xl"
+          onClick={image.openPicker}
+          title={t("searchByPhoto")}
+          aria-label={t("searchByPhoto")}
+          className={cn(searchQuery.trim() && "max-sm:hidden")}
+        >
+          <Camera />
+        </Button>
+        <Button type="submit" variant="marker" size="xl" disabled={image.loading} className="shrink-0 max-sm:px-3.5">
+          <Search className="sm:hidden" />
+          <span className="max-sm:sr-only">{tActions("search")}</span>
+        </Button>
+        <input
+          ref={image.fileInputRef}
+          id="imageUpload"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={image.onFileInputChange}
+        />
+      </div>
 
-      <AnimatePresence>
-        {image.isActive && (
-          <ImageSearchPanel
-            imagePreview={image.imagePreview}
-            fileName={image.fileName}
-            loading={image.loading}
-            changeImageRef={image.changeImageRef}
-            onFileInputChange={image.onFileInputChange}
-            onCancel={image.reset}
-            onChangeImage={image.openChangePicker}
-            onSearch={image.search}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+      {image.isDragging && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-field/95 text-caption font-semibold">
+          <Upload aria-hidden className="size-5" />
+          {t("dropImage")}
+        </div>
+      )}
+    </form>
   );
 };
 

@@ -108,9 +108,9 @@ export default function LogoUpload({
 
   return (
     <div className="space-y-2">
-      <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+      <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
         {t("label")}
-        <span className="text-red-500">*</span>
+        <span className="text-destructive">*</span>
       </Label>
 
       <AnimatePresence mode="wait">
@@ -122,13 +122,13 @@ export default function LogoUpload({
             exit={{ opacity: 0, scale: 0.9 }}
             className={
               compact
-                ? "flex h-12 items-center gap-3 rounded-md border border-green-200 bg-green-50 px-3"
-                : "relative w-28 h-28 rounded-xl overflow-hidden border-2 border-green-200 bg-green-50"
+                ? "flex h-12 items-center gap-3 rounded-md border border-positive/30 bg-positive-soft px-3"
+                : "relative w-28 h-28 rounded-control overflow-hidden border-2 border-positive/30 bg-positive-soft"
             }
           >
             {compact ? (
               <>
-                <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-white">
+                <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-card">
                   <Image
                     src={value}
                     alt={t("alt")}
@@ -136,7 +136,7 @@ export default function LogoUpload({
                     className="object-contain p-0.5"
                   />
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-positive">
                   {t("added")}
                 </span>
                 <button
@@ -146,7 +146,7 @@ export default function LogoUpload({
                   // A solid red fill on hover was heavier than the green row it
                   // sits in; tinting the icon reads as destructive without
                   // becoming the loudest thing on the form.
-                  className="shrink-0 cursor-pointer rounded-full p-1 text-green-700/70 transition-colors hover:bg-red-100 hover:text-red-600"
+                  className="shrink-0 cursor-pointer rounded-full p-1 text-positive/70 transition-colors hover:bg-destructive-soft hover:text-destructive"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -163,7 +163,7 @@ export default function LogoUpload({
                   type="button"
                   onClick={handleRemove}
                   aria-label={t("remove")}
-                  className="absolute top-1 end-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  className="absolute top-1 end-1 p-1 bg-destructive text-white rounded-full hover:bg-destructive transition-colors"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -179,13 +179,13 @@ export default function LogoUpload({
             className={`relative border-2 border-dashed text-center transition-colors cursor-pointer ${
               compact
                 ? "flex h-12 items-center rounded-md px-3"
-                : "rounded-xl p-4"
+                : "rounded-control p-4"
             } ${
               error
-                ? "border-red-400 bg-red-50"
+                ? "border-red-400 bg-destructive-soft"
                 : dragActive
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                  ? "border-primary/30 bg-primary-soft"
+                  : "border-border hover:border-gray-400 hover:bg-muted"
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -202,33 +202,33 @@ export default function LogoUpload({
 
             {isUploading ? (
               <div className="flex items-center justify-center gap-3 py-2">
-                <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
-                <p className="text-sm text-gray-500">{t("uploading")}</p>
+                <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                <p className="text-sm text-muted-foreground">{t("uploading")}</p>
               </div>
             ) : compact ? (
               <div className="flex w-full items-center gap-2">
-                <ImageIcon className="h-5 w-5 shrink-0 text-gray-400" />
-                <span className="text-sm font-medium text-gray-600">
+                <ImageIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
                   {t("addShort")}
                 </span>
-                <span className="ms-auto text-xs text-gray-400">
+                <span className="ms-auto text-xs text-muted-foreground">
                   {t("constraintShort", { size: maxSizeLabel })}
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <div className="p-2.5 bg-gray-100 rounded-full shrink-0">
-                  <ImageIcon className="h-5 w-5 text-gray-400" />
+                <div className="p-2.5 bg-muted rounded-full shrink-0">
+                  <ImageIcon className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="text-start">
-                  <p className="text-sm font-medium text-gray-700">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {t.rich("dropHint", {
                       browse: (chunks) => (
-                        <span className="text-blue-600">{chunks}</span>
+                        <span className="text-primary">{chunks}</span>
                       ),
                     })}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {t("constraint", { size: maxSizeLabel })}
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export default function LogoUpload({
         <motion.p
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="text-sm text-red-600"
+          className="text-sm text-destructive"
         >
           {error}
         </motion.p>

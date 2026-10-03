@@ -28,8 +28,12 @@ export const PROTECTED_ROUTES = [
 /** Requires a signed-in user; the ADMIN role check happens in the layout. */
 export const SUPER_ADMIN_ROUTES = ["/super-admin(.*)"];
 
-/** Not reachable on a dealership subdomain; redirected to the main domain. */
+/**
+ * Not reachable on a dealership subdomain. The dealer pitch and onboarding
+ * continue on the main domain; the rest return to the storefront's home.
+ */
 export const MAIN_DOMAIN_ONLY_ROUTES = [
+  "/for-dealers(.*)",
   "/pricing(.*)",
   "/signup-org(.*)",
   "/super-admin(.*)",

@@ -9,7 +9,7 @@ import {
   HeroBanner,
   DealershipFilterBar,
 } from "./index";
-import { EmptyState } from "@/components/common/EmptyState";
+import { SiteEmptyState } from "@/components/brand";
 import type { useDealershipsPage } from "@/hooks/use-dealerships-page";
 
 /**
@@ -38,6 +38,7 @@ export const DealershipsPagePresenter = ({
   handlers,
 }: DealershipsPageData) => {
   const t = useTranslations("dealerships.empty");
+  const tCommon = useTranslations("common");
   const hasActiveFilters = activeFilters.length > 0;
   // Keep the previous grid mounted (dimmed) while re-fetching after the first
   // load, so filtering/paging doesn't flash the whole grid to skeletons.
@@ -45,7 +46,7 @@ export const DealershipsPagePresenter = ({
   const showEmpty = !loading && !isError && dealerships.length === 0;
 
   return (
-    <div className="container mx-auto py-4 px-4 mt-18">
+    <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">
       <HeroBanner
         searchQuery={searchValue}
         onSearchChange={handlers.setSearch}
@@ -77,14 +78,15 @@ export const DealershipsPagePresenter = ({
 
         {/* Empty */}
         {showEmpty && (
-          <EmptyState
-            variant={hasActiveFilters ? "filtered" : "standalone"}
+          <SiteEmptyState
             icon={Building2}
             title={t(hasActiveFilters ? "filteredTitle" : "noneTitle")}
             description={t(hasActiveFilters ? "filteredBody" : "noneBody")}
-            onClearFilters={hasActiveFilters ? handlers.resetAllFilters : undefined}
-            actionLabel={hasActiveFilters ? undefined : t("browseCars")}
-            actionHref={hasActiveFilters ? undefined : "/cars"}
+            primary={
+              hasActiveFilters
+                ? { label: tCommon("actions.clearFilters"), onClick: handlers.resetAllFilters }
+                : { label: t("browseCars"), href: "/cars" }
+            }
           />
         )}
 

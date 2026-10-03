@@ -34,7 +34,7 @@ export function ChatWindow() {
         return (
             <div className="flex-1 flex items-center justify-center text-center p-8 bg-background">
                 <div className="max-w-sm">
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                         <MessageSquare className="w-8 h-8 md:w-10 md:h-10 text-primary" />
                     </div>
                     <h3 className="font-semibold text-base md:text-lg mb-2">

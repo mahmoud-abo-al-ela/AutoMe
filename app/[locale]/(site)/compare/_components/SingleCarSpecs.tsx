@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Trophy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { specCategories } from "./utils";
+import { useSpecValue } from "./use-spec-value";
 import type {
   CompareCar,
   CompareDifferences,
@@ -28,12 +29,13 @@ const SingleCarSpecs = ({
 }) => {
     const t = useTranslations("compare");
     const tFields = useTranslations("carAttributes.fields");
+    const specValue = useSpecValue();
   return (
     <div>
       {specCategories.map((category) => (
         <div key={category.id}>
           {/* Sticky category header */}
-          <div className="sticky top-0 z-[5] px-3 py-2 bg-gray-100 border-b text-xs font-semibold text-muted-foreground">
+          <div className="sticky top-0 z-[5] px-3 py-2 bg-muted border-b text-xs font-semibold text-muted-foreground">
             {t(`sections.${category.id}`)}
           </div>
           <div className="divide-y">
@@ -42,21 +44,21 @@ const SingleCarSpecs = ({
               const showHighlight = highlightDifferences && isDifferent;
               const isWinner = winners[spec.key] === car.id;
               const rawValue = car[spec.key];
-              const displayValue = spec.format ? spec.format(rawValue) : rawValue || "—";
+              const displayValue = specValue(spec.key, rawValue);
 
               return (
                 <div
                   key={spec.key}
                   className={cn(
                     "flex justify-between items-center px-3 py-2 text-xs transition-colors duration-200",
-                    showHighlight && "bg-amber-50/60 border-s-2 border-s-amber-400",
-                    isWinner && highlightDifferences && "bg-emerald-50/60"
+                    showHighlight && "bg-marker-soft/60 border-s-2 border-s-marker",
+                    isWinner && highlightDifferences && "bg-positive-soft/60"
                   )}
                 >
                   <span className="text-muted-foreground">{tFields(spec.key)}</span>
                   <span className="font-medium flex items-center gap-1">
                     {isWinner && highlightDifferences && (
-                      <Trophy className="h-3 w-3 text-emerald-600" />
+                      <Trophy className="h-3 w-3 text-positive" />
                     )}
                     {displayValue}
                   </span>
@@ -69,7 +71,7 @@ const SingleCarSpecs = ({
 
       {/* Features */}
       <div>
-        <div className="sticky top-0 z-[5] px-3 py-2 bg-gray-100 border-b text-xs font-semibold text-muted-foreground">
+        <div className="sticky top-0 z-[5] px-3 py-2 bg-muted border-b text-xs font-semibold text-muted-foreground">
           {t("features")}
         </div>
         {car.features && car.features.length > 0 ? (
@@ -87,11 +89,11 @@ const SingleCarSpecs = ({
                   key={idx}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-xs transition-colors duration-200",
-                    showHighlight && "bg-amber-50/60 border-s-2 border-s-amber-400"
+                    showHighlight && "bg-marker-soft/60 border-s-2 border-s-marker"
                   )}
                 >
-                  <div className="h-4 w-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="h-2.5 w-2.5 text-emerald-600" />
+                  <div className="h-4 w-4 rounded-full bg-positive-soft flex items-center justify-center flex-shrink-0">
+                    <Check className="h-2.5 w-2.5 text-positive" />
                   </div>
                   <span>{feature}</span>
                 </div>

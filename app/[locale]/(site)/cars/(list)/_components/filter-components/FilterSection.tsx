@@ -35,16 +35,16 @@ export const FilterSection = ({
 }) => {
   const fmt = useFormatters();
   return (
-    <AccordionItem value={value} className="border-none">
-      <AccordionTrigger className="py-2 hover:no-underline cursor-pointer">
-        <span className="flex items-center gap-1.5 text-sm font-medium">
-          {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground" />}
+    <AccordionItem value={value} className="border-b border-border last:border-b-0">
+      <AccordionTrigger className="min-h-12 cursor-pointer py-3 hover:no-underline">
+        <span className="flex items-center gap-2 text-caption font-semibold">
+          {Icon && <Icon aria-hidden className="size-4 text-muted-foreground" />}
           {label}
         </span>
         {count > 0 && (
           <Badge
             variant="secondary"
-            className="ms-2 bg-primary/10 text-primary text-xs"
+            className="ms-auto me-2 rounded-full bg-inverse px-2 text-micro text-inverse-foreground"
           >
             {fmt.number(count)}
           </Badge>
@@ -52,7 +52,7 @@ export const FilterSection = ({
       </AccordionTrigger>
       <AccordionContent>
         {isEmpty ? (
-          <p className="py-1 text-sm text-muted-foreground">{emptyLabel}</p>
+          <p className="py-1 text-caption text-muted-foreground">{emptyLabel}</p>
         ) : (
           children
         )}

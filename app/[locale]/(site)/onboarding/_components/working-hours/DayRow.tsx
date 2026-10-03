@@ -31,22 +31,22 @@ export default function DayRow({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
-            className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl border-2 transition-all duration-300 ${dayData.closed
-                    ? "bg-gray-50 border-gray-200"
-                    : "bg-white border-blue-200"
+            className={`flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-control border-2 transition-all duration-300 ${dayData.closed
+                    ? "bg-muted border-border"
+                    : "bg-card border-primary/30"
                 }`}
         >
             {/* Day Label */}
             <div className="flex items-center justify-between sm:justify-start sm:w-32">
                 <div className="flex items-center gap-2">
                     <div
-                        className={`p-2 rounded-lg ${dayData.closed ? "bg-gray-200" : "bg-blue-100"
+                        className={`p-2 rounded-lg ${dayData.closed ? "bg-border" : "bg-primary-soft"
                             }`}
                     >
-                        <Calendar className="h-5 w-5 text-gray-600" />
+                        <Calendar className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                        <span className="font-bold text-lg text-gray-900">
+                        <span className="font-bold text-lg text-foreground">
                             {t(`days.${day.key}`)}
                         </span>
                     </div>
@@ -67,8 +67,8 @@ export default function DayRow({
                     />
                     <span
                         className={`text-sm font-semibold px-3 py-1 rounded-full ${dayData.closed
-                                ? "bg-gray-200 text-gray-600"
-                                : "bg-green-100 text-green-700"
+                                ? "bg-border text-muted-foreground"
+                                : "bg-positive-soft text-positive"
                             }`}
                     >
                         {dayData.closed ? t("closed") : t("open")}
@@ -91,8 +91,8 @@ export default function DayRow({
                 />
                 <span
                     className={`text-sm font-semibold px-4 py-1.5 rounded-full ${dayData.closed
-                            ? "bg-gray-200 text-gray-600"
-                            : "bg-green-100 text-green-700"
+                            ? "bg-border text-muted-foreground"
+                            : "bg-positive-soft text-positive"
                         }`}
                 >
                     {dayData.closed ? t("closed") : t("open")}

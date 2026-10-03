@@ -53,7 +53,7 @@ const TimeSelector = ({
                     ))}
                 </SelectContent>
             </Select>
-            {error && <span className="text-xs text-red-500 mt-1 block">{error}</span>}
+            {error && <span className="text-xs text-destructive mt-1 block">{error}</span>}
         </div>
     );
 };

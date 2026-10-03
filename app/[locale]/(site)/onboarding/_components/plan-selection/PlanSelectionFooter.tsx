@@ -36,7 +36,7 @@ export function PlanSelectionFooter({
                 <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-red-600 text-center font-medium"
+                    className="text-sm text-destructive text-center font-medium"
                 >
                     {t("noPlanSelected")}
                 </motion.p>
@@ -49,18 +49,18 @@ export function PlanSelectionFooter({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-600"
+                className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
             >
                 <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-4 w-4 text-green-600" />
+                    <ShieldCheck className="h-4 w-4 text-positive" />
                     {t("trust.paymob")}
                 </span>
                 <span className="flex items-center gap-1.5">
-                    <RefreshCw className="h-4 w-4 text-green-600" />
+                    <RefreshCw className="h-4 w-4 text-positive" />
                     {t("trust.cancelAnytime")}
                 </span>
                 <span className="flex items-center gap-1.5">
-                    <CreditCard className="h-4 w-4 text-green-600" />
+                    <CreditCard className="h-4 w-4 text-positive" />
                     {t("trust.noSetupFees")}
                 </span>
             </motion.div>
@@ -72,14 +72,14 @@ export function PlanSelectionFooter({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-center bg-blue-50 p-4 rounded-xl border border-blue-100"
+                className="text-center bg-primary-soft p-4 rounded-control border border-primary/30"
             >
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-muted-foreground">
                     {t.rich("help", {
                         link: (chunks) => (
                             <a
                                 href={`mailto:${SALES_EMAIL}`}
-                                className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                                className="text-primary hover:text-primary font-semibold hover:underline"
                             >
                                 {chunks}
                             </a>
@@ -108,7 +108,9 @@ export function PlanSelectionFooter({
                     type="submit"
                     disabled={!selectedPlanId || loading}
                     data-continue-btn
-                    className="cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                    variant="marker"
+                    size="xl"
+                    className="px-8"
                 >
                     {loading ? (
                         <>

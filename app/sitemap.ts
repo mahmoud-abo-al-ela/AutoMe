@@ -27,6 +27,7 @@ const MARKETPLACE_PAGES = [
   "/about",
   "/contact",
   "/faq",
+  "/for-dealers",
   "/terms",
   "/privacy",
   "/cookies",

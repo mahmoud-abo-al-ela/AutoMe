@@ -3,14 +3,13 @@
 import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MAX_COMPARE_CARS } from "./utils";
-import type { SpecDefinition } from "./utils";
+import { useSpecValue } from "./use-spec-value";
 import type { CompareCar, SpecKey } from "../_lib/compare-types";
 
 const CompareSpecRow = ({
     label,
     specKey,
     cars,
-    format,
     highlighted,
     isDifferent,
     winnerCarId,
@@ -19,12 +18,12 @@ const CompareSpecRow = ({
     label: string;
     specKey: SpecKey;
     cars: CompareCar[];
-    format?: SpecDefinition["format"];
     highlighted: boolean;
     isDifferent: boolean;
     winnerCarId: string | null;
     isEven: boolean;
 }) => {
+    const specValue = useSpecValue();
     const showHighlight = highlighted && isDifferent;
     const emptySlots = MAX_COMPARE_CARS - cars.length;
 
@@ -32,7 +31,7 @@ const CompareSpecRow = ({
         <div
             className={cn(
                 "grid grid-cols-[200px_1fr] md:grid-cols-[250px_1fr] border-b last:border-b-0 transition-colors duration-200",
-                showHighlight && "bg-amber-50/60"
+                showHighlight && "bg-marker-soft/60"
             )}
         >
             {/* Spec label */}
@@ -40,10 +39,10 @@ const CompareSpecRow = ({
                 className={cn(
                     "p-3 text-sm text-muted-foreground border-e flex items-center",
                     showHighlight
-                        ? "bg-amber-50 border-s-2 border-s-amber-400"
+                        ? "bg-marker-soft border-s-2 border-s-marker"
                         : isEven
-                            ? "bg-gray-50/80"
-                            : "bg-gray-50"
+                            ? "bg-muted/80"
+                            : "bg-muted"
                 )}
             >
                 {label}
@@ -53,9 +52,7 @@ const CompareSpecRow = ({
             <div className="grid grid-cols-3">
                 {cars.map((car) => {
                     const rawValue = car[specKey];
-                    const displayValue = format
-                        ? format(rawValue)
-                        : rawValue || "—";
+                    const displayValue = specValue(specKey, rawValue);
                     const isWinner = winnerCarId === car.id;
 
                     return (
@@ -63,16 +60,16 @@ const CompareSpecRow = ({
                             key={`${car.id}-${specKey}`}
                             className={cn(
                                 "p-3 text-sm border-e last:border-e-0 flex items-center gap-1.5 transition-colors duration-200",
-                                showHighlight && "bg-amber-50/40",
-                                isWinner && highlighted && "bg-emerald-50/60",
-                                !showHighlight && !isWinner && isEven && "bg-white",
-                                !showHighlight && !isWinner && !isEven && "bg-gray-50/30"
+                                showHighlight && "bg-marker-soft/40",
+                                isWinner && highlighted && "bg-positive-soft/60",
+                                !showHighlight && !isWinner && isEven && "bg-card",
+                                !showHighlight && !isWinner && !isEven && "bg-muted/30"
                             )}
                         >
                             {isWinner && highlighted && (
-                                <Trophy className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+                                <Trophy className="h-3.5 w-3.5 text-positive flex-shrink-0" />
                             )}
-                            <span className={cn("font-medium", isWinner && highlighted && "text-emerald-700")}>
+                            <span className={cn("font-medium", isWinner && highlighted && "text-positive")}>
                                 {displayValue}
                             </span>
                         </div>
@@ -83,7 +80,7 @@ const CompareSpecRow = ({
                 {Array.from({ length: emptySlots }).map((_, index) => (
                     <div
                         key={`empty-${specKey}-${index}`}
-                        className="p-3 text-sm border-e last:border-e-0 text-muted-foreground bg-gray-50/50"
+                        className="p-3 text-sm border-e last:border-e-0 text-muted-foreground bg-muted/50"
                     >
                         —
                     </div>

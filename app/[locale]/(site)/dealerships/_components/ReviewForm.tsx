@@ -39,12 +39,12 @@ const ReviewForm = ({
                     count: value,
                     value: fmt.number(value),
                 })}
-                className="transition-transform hover:scale-110"
+                className="transition-transform"
             >
                 <Star
                     className={`h-6 w-6 ${value <= (hoveredRating || rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
+                            ? "fill-marker text-foreground"
+                            : "text-muted-foreground/60"
                         }`}
                 />
             </button>
@@ -104,7 +104,7 @@ const ReviewForm = ({
                     {/* Rating */}
                     <div className="space-y-2">
                         <Label className="text-base font-medium">
-                            {t("overallRating")} <span className="text-red-500">*</span>
+                            {t("overallRating")} <span className="text-destructive">*</span>
                         </Label>
                         <div className="flex gap-2">
                             {[1, 2, 3, 4, 5].map((value) => renderStar(value))}
@@ -122,7 +122,7 @@ const ReviewForm = ({
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder={t("titlePlaceholder")}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                             maxLength={100}
                         />
                     </div>
@@ -137,7 +137,7 @@ const ReviewForm = ({
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             placeholder={t("commentPlaceholder")}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
+                            className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-h-[120px]"
                             maxLength={500}
                         />
                         <p className="text-xs text-muted-foreground text-end">

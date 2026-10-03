@@ -4,24 +4,16 @@
     "description": "Browse cars from trusted dealerships across Egypt. Compare prices, book a test drive, and buy with confidence."
   },
   "hero": {
-    "headline": "Find Your Perfect Car",
-    "headlineAccent": "Powered by AI",
-    "subheadline": "Our AI technology analyzes thousands of vehicles to match you with the perfect car based on your preferences, budget, and needs.",
     "searchPlaceholder": "Search by model, keyword, or drop a photo…",
     "searchByPhoto": "Search by photo",
     "closePhotoSearch": "Close photo search",
     "selectedCarAlt": "Selected car",
     "searchWithImage": "Search With Image",
     "emptySearch": "Please enter a search term",
-    "scrollToFeatured": "Scroll to featured section",
     "quickElectric": "Electric Vehicles",
     "quickSuv": "SUVs",
-    "quickSedan": "Sedans",
     "quickAutomatic": "Automatic",
     "dropImage": "Drop image to search",
-    "trustRecommendations": "AI-Powered Recommendations",
-    "trustPriceAnalysis": "Market Price Analysis",
-    "trustVirtualTours": "Virtual Car Tours",
     "analyzingImage": "Analyzing image…",
     "analyzing": "Analyzing…",
     "changeImage": "Change",
@@ -30,7 +22,15 @@
     "noImageSelected": "Please select an image",
     "detected": "Detected {attributes}",
     "searchFailed": "We could not search with that photo. Please try again.",
-    "notRecognized": "We could not recognise a car in that photo. Try a clearer shot."
+    "notRecognized": "We could not recognise a car in that photo. Try a clearer shot.",
+    "titleLead": "Your next car.",
+    "titleTrustLead": "From a dealer",
+    "titleTrustAccent": "you trust.",
+    "subtitle": "Real photos, prices you can compare with the market, and the dealer just a message away.",
+    "plateBand": "Search {value} cars",
+    "plateBandFallback": "Search cars",
+    "quickUnder": "Under {price}",
+    "quickSevenSeats": "7+ seats"
   },
   "stats": {
     "customersLabel": "Happy Customers",
@@ -47,67 +47,17 @@
     "ratingDescription": "Based on customer reviews"
   },
   "featured": {
-    "title": "Featured Cars",
-    "subtitle": "Explore our curated selection of premium vehicles",
-    "viewAll": "View All Vehicles"
-  },
-  "why": {
-    "badge": "Why Choose Us",
-    "title": "The Smarter Way to",
-    "titleAccent": "Buy Cars",
-    "subtitle": "Experience a revolutionary car buying journey powered by advanced AI technology that puts you in control",
-    "cards": {
-      "insightsTitle": "AI-Powered Insights",
-      "insightsDescription": "Get real-time market analysis and personalized recommendations based on your preferences and budget.",
-      "secureTitle": "Secure Transactions",
-      "secureDescription": "Every purchase is protected with advanced security measures and comprehensive buyer protection.",
-      "supportTitle": "24/7 Support",
-      "supportDescription": "Access round-the-clock customer support and AI assistance whenever you need help with your purchase.",
-      "toursTitle": "Virtual Car Tours",
-      "toursDescription": "Experience 360° virtual tours and detailed walkthroughs from the comfort of your home.",
-      "compareTitle": "Price Comparison",
-      "compareDescription": "Compare prices across multiple dealerships and get the best deal with our market analysis tools.",
-      "financingTitle": "Instant Financing",
-      "financingDescription": "Get pre-approved for financing in minutes with our integrated lending partners."
-    }
-  },
-  "reservation": {
-    "badge": "Easy Scheduling",
-    "title": "Schedule Your Test Drive Online",
-    "description": "Skip the wait and book your test drive appointment in minutes. Choose your preferred date and time, and we'll have the car ready for you.",
-    "cta": "Find a Car",
-    "schedulingTitle": "Easy Scheduling",
-    "schedulingDescription": "Choose from available dates and times that work best for your schedule.",
-    "noWaitTitle": "No Wait Times",
-    "noWaitDescription": "Your car will be ready when you arrive. No unnecessary waiting."
-  },
-  "dealer": {
-    "badge": "For Dealerships",
-    "title": "Start Your Own",
-    "titleAccent": "Digital Dealership",
-    "description": "Join AutoMe and get your dealership online in minutes. Manage inventory, handle customer inquiries, and schedule test drives — all in one powerful platform.",
-    "benefitFree": "Free to get started",
-    "benefitListings": "AI-powered car listings",
-    "benefitTestDrives": "Manage test drives online",
-    "benefitMessaging": "Built-in customer messaging",
-    "startTrial": "Start Free Trial",
-    "learnMore": "Learn More",
-    "dashboardPreview": "Your Dealership Dashboard",
-    "proPlan": "Pro Plan",
-    "statCars": "Cars",
-    "statTestDrives": "Test Drives",
-    "statMessages": "Messages",
-    "newLeads": "+{value} New Leads Today"
+    "title": "Featured cars",
+    "subtitle": "Picked by dealerships across Egypt.",
+    "viewAll": "See all cars"
   },
   "pricing": {
-    "badge": "Pricing Plans",
     "title": "Simple, Transparent",
     "titleAccent": "Pricing",
     "subtitle": "Choose the perfect plan for your dealership. No hidden fees, cancel anytime.",
     "cta": "Get Started"
   },
   "testimonials": {
-    "badge": "Customer Reviews",
     "title": "Loved by Thousands of",
     "titleAccent": "Happy Customers",
     "subtitle": "See what our customers have to say about their experience with {brand}",
@@ -130,28 +80,36 @@
       }
     }
   },
-  "cta": {
-    "title": "Ready to find your perfect car?",
-    "description": "Let's discover your dream car and make your driving experience unforgettable.",
-    "browseAll": "Browse All Vehicles"
+  "body": {
+    "title": "Browse by body type",
+    "allCars": "All {value} cars",
+    "carsCount": "{count, plural, one {{value} car} other {{value} cars}}"
   },
-  "faq": {
-    "badge": "FAQ",
-    "title": "Frequently Asked",
-    "titleAccent": "Questions",
-    "subtitle": "Everything you need to know about {brand}. Can’t find your answer?",
-    "contactUs": "Contact us",
-    "q1": "How does {brand} use AI?",
-    "a1": "To make finding and buying a car easier: search with a photo of a car you like, ask questions about a listing and get an answer from its details (where the dealership has turned this on), read listings in Arabic or English, and translate messages with a dealership in one tap.",
-    "q2": "Is {brand} free for buyers?",
-    "a2": "Yes. Browsing cars, asking questions, booking test drives and messaging dealerships cost you nothing. Dealerships pay a subscription to list their cars.",
-    "q3": "How do I book a test drive?",
-    "a3": "Open the car you’re interested in, select “Schedule Test Drive” and pick a date and time within the dealership’s working hours. Your request stays pending until the dealership confirms it, and you can follow it on your Test Drives page. You need to be signed in to book.",
-    "q4": "Does {brand} inspect the cars?",
-    "a4": "No. Every car is listed by a dealership, and each dealership has a public page with its location, working hours and reviews from buyers. See the car in person — a test drive is the easiest way — and check its papers before you buy.",
-    "q5": "Can I sell my car on {brand}?",
-    "a5": "Not as a private seller: only dealerships can list cars on {brand}.",
-    "q6": "How do I pay for a car?",
-    "a6": "Directly to the dealership. {brand} doesn’t take payments for cars, so agree the price, payment and any financing with the dealership itself — you can message them from the car’s page with “Chat Now”."
+  "features": {
+    "title": "What you get on AutoMe",
+    "priceTitle": "A fair-price check on every car",
+    "priceBody": "Each price is compared with similar cars on sale right now, so you know where it stands before you call.",
+    "askTitle": "Ask the listing",
+    "askBody": "On many listings, ask a question and get an instant answer from the car’s own details and the dealer’s terms.",
+    "chatTitle": "Chat in Arabic or English",
+    "chatBody": "Message the dealership directly. Translation is one tap away, both ways.",
+    "driveTitle": "Book a test drive",
+    "driveBody": "Pick a time that suits you from the dealership’s real opening hours."
+  },
+  "dealerBand": {
+    "eyebrow": "For dealerships",
+    "title": "Got a showroom? Put it on AutoMe.",
+    "description": "AI-written listings in Arabic and English, buyer chat with one-tap translation and test-drive bookings — on your own branded storefront.",
+    "startFree": "Start free",
+    "seePlans": "See plans"
+  },
+  "story": {
+    "sampleCar": "Kia Cerato 2019",
+    "askQ": "Has it ever been in an accident?",
+    "askA": "No accidents on record — and it comes with the dealer's full service history.",
+    "chatFrom": "لسه متاحة؟",
+    "chatTo": "Is it still available?",
+    "translated": "Translated",
+    "booked": "Test drive booked"
   }
 }

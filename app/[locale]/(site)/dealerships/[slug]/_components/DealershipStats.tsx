@@ -56,7 +56,6 @@ function useCountUp(
 
 const StatCard = ({
     icon: Icon,
-    iconBgClass,
     iconColorClass,
     value,
     label,
@@ -66,7 +65,6 @@ const StatCard = ({
     delay = 0,
 }: {
     icon: LucideIcon;
-    iconBgClass: string;
     iconColorClass: string;
     value: number | string;
     label: string;
@@ -102,7 +100,7 @@ const StatCard = ({
         >
             <Card
                 className={`transition-all duration-200 ${isClickable
-                        ? "cursor-pointer hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                        ? "cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
                         : ""
                     }`}
                 onClick={onClick}
@@ -110,12 +108,12 @@ const StatCard = ({
                 <CardContent className="p-5 sm:p-6">
                     <div className="flex items-center gap-3">
                         <div
-                            className={`p-3 rounded-xl bg-gradient-to-br ${iconBgClass}`}
+                            className={`p-3 rounded-control bg-muted text-foreground`}
                         >
                             <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${iconColorClass}`} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-2xl font-bold text-slate-900 tabular-nums">
+                            <p className="text-2xl font-bold text-foreground tabular-nums">
                                 {displayValue}
                             </p>
                             <p className="text-sm text-muted-foreground truncate">
@@ -160,8 +158,7 @@ export const DealershipStats = ({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <StatCard
                 icon={Car}
-                iconBgClass="from-blue-100 to-blue-50"
-                iconColorClass="text-blue-600"
+                iconColorClass="text-primary"
                 value={dealership.carCount || 0}
                 label={t("availableCars")}
                 isAnimatedNumber
@@ -171,8 +168,7 @@ export const DealershipStats = ({
 
             <StatCard
                 icon={Star}
-                iconBgClass="from-yellow-100 to-amber-50"
-                iconColorClass="text-yellow-600"
+                iconColorClass="text-foreground"
                 value={dealership.averageRating || 0}
                 label={t("averageRating")}
                 isAnimatedNumber
@@ -183,8 +179,7 @@ export const DealershipStats = ({
 
             <StatCard
                 icon={Calendar}
-                iconBgClass="from-emerald-100 to-green-50"
-                iconColorClass="text-emerald-600"
+                iconColorClass="text-positive"
                 value={memberSince}
                 label={t("established")}
                 isAnimatedNumber={false}

@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
 
 /**
- * Accessible, tenant-themable filter chip. Renders a real <button> with
- * aria-pressed so it is keyboard reachable and announced. Selected state uses
- * the design token (--primary) rather than a hard-coded colour, so it follows
- * per-tenant branding. Optionally shows a facet count and an X when selected.
+ * Accessible filter chip (Figma: Chip / Filter). A real <button> with
+ * role="checkbox" so it is keyboard reachable and announced. Selected is the
+ * asphalt pill with full-contrast text — the state reads at a glance and
+ * never relies on a tint. The facet count rides along; a zero-count option
+ * is disabled rather than hidden, so the list does not reflow.
  */
 export const FilterChip = ({
   label,
@@ -37,23 +38,22 @@ export const FilterChip = ({
       disabled={isDisabled}
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-        "transition-all duration-200 hover:scale-105 active:scale-95",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+        "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-caption font-medium transition-colors duration-150",
+        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
         selected
-          ? "border-primary bg-primary/10 text-primary hover:bg-primary/15"
-          : "border-border bg-background text-foreground hover:bg-muted",
-        isDisabled && "cursor-not-allowed opacity-40 hover:scale-100",
+          ? "border-inverse bg-inverse text-inverse-foreground hover:bg-inverse-hover"
+          : "border-border bg-field text-foreground hover:border-border-strong",
+        isDisabled && "cursor-not-allowed opacity-40",
         className
       )}
     >
       <span>{label}</span>
       {typeof count === "number" && (
-        <span className={cn("tabular-nums", selected ? "text-primary/70" : "text-muted-foreground")}>
-          ({fmt.number(count)})
+        <span className={cn("text-micro tabular-nums", selected ? "text-inverse-foreground/70" : "text-muted-foreground")}>
+          {fmt.number(count)}
         </span>
       )}
-      {selected && <X className="h-3 w-3" />}
+      {selected && <X aria-hidden className="size-3.5" />}
     </button>
   );
 };

@@ -1,46 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const BackToTop = () => {
+  const t = useTranslations("common.actions");
   const [isVisible, setIsVisible] = useState(false);
 
-  // Show button when page is scrolled down
-  const toggleVisibility = () => {
-    if (window.scrollY > 100) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
-  };
-
-  // Scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   useEffect(() => {
-    window.addEventListener("scroll", toggleVisibility);
+    const toggleVisibility = () => setIsVisible(window.scrollY > 600);
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
+  if (!isVisible) return null;
+
   return (
-    <>
-      {isVisible && (
-        <Button
-          onClick={scrollToTop}
-          className="fixed cursor-pointer bottom-6 end-1 sm:end-6 z-50 p-3 rounded-full shadow-lg bg-primary hover:bg-primary/90 transition-all duration-300"
-          aria-label="Back to top"
-        >
-          <ArrowUp className="h-5 w-5" />
-        </Button>
-      )}
-    </>
+    <Button
+      variant="inverse"
+      size="icon-xl"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      // Below lg it clears the phone tab bar and the car page's contact bar.
+      className="fixed end-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 rounded-full shadow-float lg:end-6 lg:bottom-6"
+      aria-label={t("backToTop")}
+      title={t("backToTop")}
+    >
+      <ArrowUp />
+    </Button>
   );
 };
 

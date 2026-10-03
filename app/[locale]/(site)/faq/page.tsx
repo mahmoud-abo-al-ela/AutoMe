@@ -1,14 +1,9 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { FaqAccordion, PageHeader } from "@/components/brand";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { formatNumber } from "@/lib/utils/number";
@@ -71,57 +66,56 @@ export default async function FAQ({ params }: Props) {
   };
 
   return (
-    <div className="container py-12 max-w-4xl mx-auto mt-12">
-      <h1 className="text-4xl font-bold text-center mb-2">{t("title")}</h1>
-      <p className="text-center text-muted-foreground mb-8">
-        {t("subtitle", { brand })}
-      </p>
+    <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">
+      <PageHeader title={t("title")} subtitle={t("subtitle", { brand })} />
 
-      <div className="space-y-10">
-        {FAQ_CATEGORIES.map((category) => (
-          <div
-            key={category.key}
-            className="border rounded-lg p-6 bg-card shadow-sm"
-          >
-            <h2 className="text-2xl font-semibold mb-4">
-              {t(`categories.${category.key}`)}
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16">
+        {/* Section index: a jump list on wide screens, where the page is
+            long enough to need one. */}
+        <nav aria-label={t("title")} className="hidden lg:block">
+          <ul className="sticky top-[96px] flex flex-col gap-1 border-s border-border">
+            {FAQ_CATEGORIES.map((category) => (
+              <li key={category.key}>
+                <a
+                  href={`#faq-${category.key}`}
+                  className="-ms-px block border-s-2 border-transparent py-1.5 ps-4 text-caption text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+                >
+                  {t(`categories.${category.key}`)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="flex max-w-3xl flex-col gap-12">
+          {FAQ_CATEGORIES.map((category) => (
+            <section key={category.key} id={`faq-${category.key}`} aria-labelledby={`faq-${category.key}-title`} className="scroll-mt-28">
+              <h2 id={`faq-${category.key}-title`} className="mb-2 text-h2 font-extrabold">
+                {t(`categories.${category.key}`)}
+              </h2>
+              <FaqAccordion
+                items={category.items.map((key) => ({
+                  id: key,
+                  question: t(`items.${key}.q`, { brand }),
+                  answer: answer(key),
+                }))}
+              />
+            </section>
+          ))}
+
+          <section aria-labelledby="faq-contact-title" className="flex flex-col items-start gap-4 rounded-sheet border border-border bg-card p-6 sm:p-8">
+            <h2 id="faq-contact-title" className="text-h2 font-extrabold">
+              {t("contact.title")}
             </h2>
-            <Accordion type="single" collapsible className="w-full">
-              {category.items.map((key) => (
-                <AccordionItem key={key} value={key}>
-                  <AccordionTrigger className="text-start cursor-pointer">
-                    {t(`items.${key}.q`, { brand })}
-                  </AccordionTrigger>
-                  {/* forceMount: Radix otherwise leaves a closed panel out
-                      of the DOM, so the server HTML held every question and
-                      no answer — nothing for a search engine to index, and
-                      nothing to read before hydration. Force-mounted, Radix
-                      no longer hides a closed panel itself, so the answer
-                      hides when its panel's data-state is closed. */}
-                  <AccordionContent
-                    forceMount
-                    className="[[data-state=closed]>&]:hidden"
-                  >
-                    <div className="text-muted-foreground">{answer(key)}</div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        ))}
-      </div>
-
-      {/* Contact support section */}
-      <div className="mt-16 bg-muted rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-semibold mb-3">{t("contact.title")}</h2>
-        <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-          {t("contact.body")}
-        </p>
-        {/* asChild: a link inside a <button> is invalid HTML, and only the
-            text — not the padded button around it — was clickable. */}
-        <Button size="lg" asChild>
-          <Link href="/contact">{t("contact.cta")}</Link>
-        </Button>
+            <p className="max-w-lg text-body text-muted-foreground">{t("contact.body")}</p>
+            {/* The link styled as a button — a link inside a <button> is invalid
+                HTML. Not <Button asChild>: in a Server Component the i18n Link
+                suspends on the locale and Radix Slot renders nothing for it. */}
+            <Link href="/contact" className={buttonVariants({ variant: "marker", size: "xl" })}>
+              {t("contact.cta")}
+            </Link>
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -114,22 +114,27 @@ export default function CarCardActions({
     window.dispatchEvent(new Event("compareListUpdated"));
   };
 
+  // Figma: IconButton / OnMedia — white discs on the photo; 36px on the 2-up
+  // phone card, 40px from sm. Compare is hidden on phones: it is a desktop task.
+  const disc = "size-9 rounded-full bg-field text-foreground shadow-sm hover:bg-field sm:size-10";
+
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="absolute end-2 top-2 z-20 flex gap-2">
+      <div className="absolute end-2 top-2 z-20 flex gap-2 sm:end-3 sm:top-3">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="rounded-full bg-white/80 p-1 shadow-sm transition-colors hover:bg-white hover:shadow-md sm:p-1.5"
+              className={disc}
               onClick={handleToggleFavorite}
               disabled={isLoading}
               size="icon"
               variant="ghost"
+              aria-pressed={isFavorite}
               aria-label={t(isFavorite ? "removeFromFavorites" : "addToFavorites")}
             >
               <Heart
-                className={`h-3.5 w-3.5 transition-colors duration-300 sm:h-4 sm:w-4 ${
-                  isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"
+                className={`size-[18px] transition-colors duration-200 ${
+                  isFavorite ? "fill-destructive text-destructive" : ""
                 } ${isLoading ? "opacity-50" : ""}`}
               />
             </Button>
@@ -142,17 +147,14 @@ export default function CarCardActions({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="rounded-full bg-white/80 p-1 shadow-sm transition-colors hover:bg-white hover:shadow-md sm:p-1.5"
+              className={`${disc} max-sm:hidden ${isInCompare ? "!bg-primary !text-primary-foreground" : ""}`}
               onClick={handleToggleCompare}
               size="icon"
               variant="ghost"
+              aria-pressed={isInCompare}
               aria-label={t(isInCompare ? "removeFromCompare" : "addToCompare")}
             >
-              <Scale
-                className={`h-3.5 w-3.5 transition-colors duration-300 sm:h-4 sm:w-4 ${
-                  isInCompare ? "fill-primary text-primary" : "text-gray-500"
-                }`}
-              />
+              <Scale className="size-[18px]" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -21,7 +21,7 @@ const AddCarSlot = (): React.ReactElement => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="relative rounded-lg border-2 border-dashed border-gray-200 bg-gray-50/50 overflow-hidden flex flex-col items-center justify-center min-h-[280px] print:hidden"
+            className="relative rounded-lg border-2 border-dashed border-border bg-muted/50 overflow-hidden flex flex-col items-center justify-center min-h-[280px] print:hidden"
         >
             <motion.div
                 animate={{
@@ -35,10 +35,10 @@ const AddCarSlot = (): React.ReactElement => {
                 }}
                 className="flex flex-col items-center gap-3"
             >
-                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Plus className="h-6 w-6 text-gray-400" />
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                    <Plus className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-gray-400 font-medium">{t("slot.addCar")}</p>
+                <p className="text-sm text-muted-foreground font-medium">{t("slot.addCar")}</p>
             </motion.div>
 
             <Button

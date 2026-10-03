@@ -24,8 +24,8 @@ export default function StepIndicators({
     const fmt = useFormatters();
 
     return (
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-            <p className="mb-4 text-sm font-semibold text-gray-500">
+        <div className="rounded-control border border-border bg-card p-5 sm:p-6">
+            <p className="mb-4 text-sm font-semibold text-muted-foreground">
                 {t("stepOf", {
                     current: fmt.number(currentStep),
                     total: fmt.number(steps.length),
@@ -56,8 +56,8 @@ export default function StepIndicators({
                                 aria-hidden
                                 className={`mt-6 h-0.5 flex-1 rounded-full transition-colors duration-500 sm:mt-7 ${
                                     currentStep > step.id
-                                        ? "bg-green-500"
-                                        : "bg-gray-200"
+                                        ? "bg-positive"
+                                        : "bg-border"
                                 }`}
                             />
                         )}

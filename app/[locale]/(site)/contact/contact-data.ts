@@ -14,6 +14,9 @@ import {
   Building2,
 } from "lucide-react";
 
+/** How quickly the team answers, stated on the page and after sending. */
+export const RESPONSE_HOURS = 24;
+
 export const contactMethods = [
   // `detail` set here is script-neutral and stays as-is; where it is omitted
   // the copy comes from contact.methods.<key>.detail, because an address and a

@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { isDashboardPath } from "@/lib/org/client";
 import Loading from "./Loading";
 
 type LoadingContextValue = {
@@ -22,6 +24,12 @@ export default function LoadingProvider({
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  // The first-load splash covers a page that has already rendered, until the
+  // browser's load event plus 800ms. The public site does not take it: its
+  // pages are server-rendered and readable at once, and its real waits show
+  // the road loader (app/[locale]/loading.tsx and the route loading files).
+  // The dashboards keep it unchanged.
+  const showsSplash = isDashboardPath(usePathname());
 
   useEffect(() => {
     // Check if document is fully loaded
@@ -50,7 +58,7 @@ export default function LoadingProvider({
 
   return (
     <LoadingContext.Provider value={{ isLoading, setIsLoading }}>
-      {isLoading && isFirstLoad && (
+      {showsSplash && isLoading && isFirstLoad && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <Loading />
         </div>

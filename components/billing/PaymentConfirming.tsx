@@ -41,7 +41,7 @@ export function PaymentConfirming({
   }, [attempts, waiting, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardContent className="pt-6 text-center space-y-4" aria-live="polite">
           {waiting && <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" aria-hidden />}

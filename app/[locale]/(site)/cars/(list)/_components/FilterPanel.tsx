@@ -7,8 +7,8 @@ import type {
   CarsFilters,
   CarsHandlers,
 } from "../_lib/cars-types";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+
+
 import { Accordion } from "@/components/ui/accordion";
 
 import {
@@ -71,20 +71,33 @@ const FilterPanel = ({
     (filters.minMileage || filters.maxMileage ? 1 : 0);
 
   return (
-    <div className="w-full rounded-2xl border border-border border-s-4 border-s-primary bg-card p-4 sm:p-5 md:shadow-sm">
-      <div className="mb-4 flex items-center justify-between border-b border-border pb-3 sm:mb-5">
-        <h2 className="flex items-center text-base font-bold sm:text-lg">
-          <Filter className="me-1.5 h-4 w-4 text-primary sm:me-2 sm:h-5 sm:w-5" />
+    <div className="w-full lg:rounded-control lg:border lg:border-border lg:bg-card lg:px-4 lg:pb-2">
+      <div className="flex min-h-14 items-center justify-between gap-3 border-b border-border max-lg:hidden">
+        <h2 className="flex items-center gap-2 text-body font-semibold">
+          <Filter aria-hidden className="size-4" />
           {t("title")}
+          {activeCount > 0 && (
+            <span className="rounded-full bg-inverse px-2 text-micro text-inverse-foreground">
+              {t("activeCount", { value: fmt.number(activeCount) })}
+            </span>
+          )}
         </h2>
         {activeCount > 0 && (
-          <Badge variant="secondary" className="bg-primary/10 px-2 text-xs font-semibold text-primary">
-            {t("activeCount", { value: fmt.number(activeCount) })}
-          </Badge>
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={isLoading}
+            className="flex min-h-10 items-center gap-1.5 text-caption font-medium text-primary hover:underline disabled:opacity-50"
+          >
+            <RotateCcw aria-hidden className="size-3.5" />
+            {t("resetAll")}
+          </button>
         )}
       </div>
 
-      <Accordion type="single" collapsible className="space-y-1 sm:space-y-2">
+      {/* Several sections open at once: price and body type are what most
+          people set first, so they start open; the rest stay one tap away. */}
+      <Accordion type="multiple" defaultValue={["price", "body", "makes"]}>
         <DealershipFilter
           selected={filters.dealership}
           options={opts.dealerships}
@@ -177,19 +190,17 @@ const FilterPanel = ({
         />
       </Accordion>
 
+      {/* Phones: the sheet has no rail header, so reset sits under the list. */}
       {activeCount > 0 && (
-        <>
-          <Separator className="my-3 sm:my-4" />
-          <button
-            type="button"
-            onClick={onReset}
-            disabled={isLoading}
-            className="mx-auto flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            {t("resetAll")}
-          </button>
-        </>
+        <button
+          type="button"
+          onClick={onReset}
+          disabled={isLoading}
+          className="mx-auto mt-3 flex min-h-11 items-center gap-1.5 text-caption font-medium text-primary hover:underline disabled:opacity-50 lg:hidden"
+        >
+          <RotateCcw aria-hidden className="size-3.5" />
+          {t("resetAll")}
+        </button>
       )}
     </div>
   );

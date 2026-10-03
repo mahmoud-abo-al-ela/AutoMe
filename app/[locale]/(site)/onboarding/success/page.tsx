@@ -4,6 +4,7 @@ import { checkUser } from "@/lib/checkUser";
 import { confirmSignupPayment } from "@/actions/onboarding";
 import { PaymentConfirming } from "@/components/billing/PaymentConfirming";
 import { Card, CardContent } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
@@ -89,7 +90,7 @@ async function DeclinedPage() {
     const t = await getTranslations("onboarding.success.declined");
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <Card className="max-w-md w-full">
                 <CardContent className="pt-6 text-center space-y-4">
                     <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -125,7 +126,7 @@ async function FailurePage({ error }: { error: ActionError }) {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <Card className="max-w-md w-full">
                 <CardContent className="pt-6 text-center space-y-4">
                     <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -164,36 +165,36 @@ async function SuccessPage({
     const siteUrl = orgSlug ? `/org/${orgSlug}` : "#";
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="max-w-2xl w-full space-y-6">
                 {/* Success Header */}
                 <div className="text-center space-y-4">
-                    <div className="mx-auto w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
-                        <CheckCircle2 className="h-10 w-10 text-green-600" />
+                    <div className="mx-auto w-20 h-20 rounded-full bg-positive-soft flex items-center justify-center">
+                        <CheckCircle2 className="h-10 w-10 text-positive" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-bold text-foreground">
                         {t("title")}
                     </h1>
-                    <p className="text-lg text-gray-600">{t("subtitle")}</p>
+                    <p className="text-lg text-muted-foreground">{t("subtitle")}</p>
                 </div>
 
                 {/* Action Buttons */}
-                <Card className="shadow-lg border-0">
+                <Card className="border border-border">
                     <CardContent className="pt-6 space-y-4">
-                        <h2 className="text-lg font-semibold text-center text-gray-800">
+                        <h2 className="text-lg font-semibold text-center text-foreground">
                             {t("nextPrompt")}
                         </h2>
                         <div className="flex flex-col sm:flex-row gap-3">
                             <Link
                                 href={dashboardUrl}
-                                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+                                className={buttonVariants({ variant: "marker", size: "xl", className: "flex-1" })}
                             >
                                 {t("dashboard")}
                                 <ArrowRight className="h-5 w-5 rtl:rotate-180" />
                             </Link>
                             <Link
                                 href={siteUrl}
-                                className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border-2 border-gray-200 hover:border-gray-300 bg-white text-gray-700 px-6 py-3 text-base font-semibold hover:bg-gray-50 transition-all duration-300"
+                                className={buttonVariants({ variant: "outline-strong", size: "xl", className: "flex-1" })}
                             >
                                 {t("viewSite")}
                                 {/* Not mirrored: the box-and-arrow means "opens
@@ -205,15 +206,15 @@ async function SuccessPage({
                 </Card>
 
                 {/* Next Steps */}
-                <Card className="shadow-md border-0 bg-white/80">
+                <Card className="border border-border bg-muted">
                     <CardContent className="pt-6">
-                        <h3 className="font-semibold text-gray-800 mb-3">
+                        <h3 className="font-semibold text-foreground mb-3">
                             {t("nextStepsTitle")}
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-600">
+                        <ul className="space-y-2 text-sm text-muted-foreground">
                             {NEXT_STEPS.map((step) => (
                                 <li key={step} className="flex items-start gap-2">
-                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                                    <CheckCircle2 className="h-4 w-4 text-positive mt-0.5 shrink-0" />
                                     <span>{t(`nextSteps.${step}`)}</span>
                                 </li>
                             ))}

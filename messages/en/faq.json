@@ -40,6 +40,26 @@
         "bilingual": "Show listings in both Arabic and English",
         "chatTranslation": "Translate messages between you and a dealership with one tap"
       }
+    },
+    "freeForBuyers": {
+      "q": "Is {brand} free for buyers?",
+      "a": "Yes. Browsing cars, asking questions, booking test drives and messaging dealerships cost you nothing. Dealerships pay a subscription to list their cars."
+    },
+    "testDrive": {
+      "q": "How do I book a test drive?",
+      "a": "Open the car you’re interested in, select “Schedule Test Drive” and pick a date and time within the dealership’s working hours. Your request stays pending until the dealership confirms it, and you can follow it on your Test Drives page. You need to be signed in to book."
+    },
+    "inspection": {
+      "q": "Does {brand} inspect the cars?",
+      "a": "No. Every car is listed by a dealership, and each dealership has a public page with its location, working hours and reviews from buyers. See the car in person — a test drive is the easiest way — and check its papers before you buy."
+    },
+    "sellCar": {
+      "q": "Can I sell my car on {brand}?",
+      "a": "Not as a private seller: only dealerships can list cars on {brand}."
+    },
+    "payment": {
+      "q": "How do I pay for a car?",
+      "a": "Directly to the dealership. {brand} doesn’t take payments for cars, so agree the price, payment and any financing with the dealership itself — you can message them from the car’s page with “Chat Now”."
     }
   },
   "contact": {

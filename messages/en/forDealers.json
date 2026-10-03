@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "For dealerships",
+    "description": "Put your showroom online with AutoMe: AI-written listings in Arabic and English, buyer chat with one-tap translation, test-drive bookings and your own branded storefront."
+  },
+  "hero": {
+    "eyebrow": "For dealerships",
+    "title": "Your showroom,",
+    "accent": "open around the clock.",
+    "subtitle": "A branded storefront for your cars, listings written for you in Arabic and English, and every buyer conversation in one place.",
+    "seePlans": "See plans"
+  },
+  "features": {
+    "title": "Everything your showroom needs",
+    "aiTitle": "AI-written listings",
+    "aiBody": "Upload a photo of the car and AutoMe fills in the listing. Write it in Arabic or English, and it writes the other.",
+    "storefrontTitle": "Your own storefront",
+    "storefrontBody": "A branded page on your own subdomain, with your logo, colours and stock — ready to share.",
+    "chatTitle": "Buyer chat with translation",
+    "chatBody": "Answer buyers from one inbox. Messages translate between Arabic and English in one tap.",
+    "assistantTitle": "Answers on every listing",
+    "assistantBody": "Buyers ask on the listing and get an answer straight away, from the car’s details and your own answers — even after hours.",
+    "driveTitle": "Test-drive bookings",
+    "driveBody": "Buyers book within your real opening hours, and you confirm or reschedule from your dashboard.",
+    "teamTitle": "Your team and your numbers",
+    "teamBody": "Invite your team, each with their own role. See your most-saved cars and test-drive trends, and get a weekly summary by email."
+  },
+  "faq": {
+    "title": "Questions dealerships ask",
+    "subtitle": "Something else on your mind?",
+    "contactUs": "Contact us",
+    "trialQ": "Can I start for free?",
+    "trialA": "Yes. The Starter plan is free: list your first cars, then move up to a paid plan when you need more listings, team members or AI.",
+    "paymentQ": "How do I pay?",
+    "paymentA": "Through Paymob, with a bank card — or a mobile wallet, when one is offered at checkout. All prices are in Egyptian pounds.",
+    "changeQ": "Can I change or cancel my plan?",
+    "changeA": "Yes. Change or cancel your plan any time from Billing in your dashboard.",
+    "limitsQ": "What happens when I reach my plan’s limits?",
+    "limitsA": "You are asked to upgrade before adding more — for example, another car once your plan’s listings are used up.",
+    "storefrontQ": "Do I get my own web address?",
+    "storefrontA": "Yes. Every dealership gets a storefront on its own subdomain, carrying your name, logo and colours."
+  },
+  "cta": {
+    "title": "Ready when you are.",
+    "description": "Set up your dealership in a few minutes — or tell us what you need first.",
+    "contact": "Contact us"
+  },
+  "preview": {
+    "aiWritten": "Written by AI",
+    "newMessage": "New message"
+  }
+}

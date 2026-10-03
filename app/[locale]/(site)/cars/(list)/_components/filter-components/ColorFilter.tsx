@@ -44,22 +44,24 @@ const ColorFilter = ({
               disabled={isLoading || count === 0}
               onClick={() => onSelect(isSelected ? undefined : value)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all duration-200 hover:scale-105 active:scale-95",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+                // Same shape and states as FilterChip; the swatch is the only addition.
+                "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-caption font-medium transition-colors duration-150",
+                "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                 isSelected
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-background text-foreground hover:bg-muted",
-                (isLoading || count === 0) && "cursor-not-allowed opacity-40 hover:scale-100"
+                  ? "border-inverse bg-inverse text-inverse-foreground hover:bg-inverse-hover"
+                  : "border-border bg-field text-foreground hover:border-border-strong",
+                (isLoading || count === 0) && "cursor-not-allowed opacity-40"
               )}
             >
               <span
-                className="h-3 w-3 rounded-full border border-black/10"
+                aria-hidden
+                className="size-3.5 rounded-full border border-black/15"
                 style={{ backgroundColor: getCarColorHex(value) }}
               />
               <span>{attr.color(value)}</span>
               {typeof count === "number" && (
-                <span className={cn("tabular-nums", isSelected ? "text-primary/70" : "text-muted-foreground")}>
-                  ({fmt.number(count)})
+                <span className={cn("text-micro tabular-nums", isSelected ? "text-inverse-foreground/70" : "text-muted-foreground")}>
+                  {fmt.number(count)}
                 </span>
               )}
             </button>

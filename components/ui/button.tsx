@@ -20,12 +20,29 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Public-site variants (Figma: Button). Their colour tokens exist only
+        // under the site theme, so they are not for use in the dashboards.
+        //
+        // marker — the one "do this next" action per view: road-marking yellow,
+        // asphalt border and the hard key shadow, which presses flat on click.
+        marker:
+          "border-2 border-border-strong bg-marker font-semibold text-marker-foreground shadow-key hover:bg-marker-hover active:translate-y-0.5 active:shadow-key-pressed disabled:border-border disabled:bg-muted disabled:text-disabled-foreground disabled:opacity-100 disabled:shadow-none",
+        inverse:
+          "bg-inverse font-semibold text-inverse-foreground hover:bg-inverse-hover disabled:bg-muted disabled:text-disabled-foreground disabled:opacity-100",
+        "outline-strong":
+          "border-2 border-border-strong bg-field font-semibold text-foreground hover:bg-muted disabled:border-border disabled:text-disabled-foreground disabled:opacity-100",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
+        // Site sizes: 48px is the default touch target; 40px only in dense
+        // desktop toolbars.
+        control: "h-10 rounded-control px-4 has-[>svg]:px-3.5",
+        xl: "h-12 rounded-control px-6 text-[0.9375rem] has-[>svg]:px-5 [&_svg:not([class*='size-'])]:size-[18px]",
+        "icon-control": "size-10 rounded-control",
+        "icon-xl": "size-12 rounded-control [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {

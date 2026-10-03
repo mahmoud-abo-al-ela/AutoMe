@@ -3,13 +3,22 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
-import { Button } from "@/components/ui/button";
+import { formatNumber } from "@/lib/utils/number";
+import { formatCarPrice } from "@/lib/utils/currency";
+import { getMarketSummary } from "@/actions/cars-listing";
+import { cn } from "@/lib/utils";
+// buttonVariants on the Link rather than <Button asChild>: in a Server
+// Component the i18n Link suspends on the locale, reaches Radix Slot as a lazy
+// element, and Slot renders nothing for it.
+import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/brand";
+import { SectionHeader } from "@/components/Home/SectionHeader";
+import { StartFreeButton } from "@/components/Home/StartFreeButton";
 import {
   Car,
   Shield,
   Users,
   Zap,
-  Target,
   Heart,
   ArrowRight,
   Building2,
@@ -39,11 +48,6 @@ const values = [
   { key: "customer", icon: Heart },
 ] as const;
 
-// The figures are claims about the business, not copy, so they are translated
-// rather than formatted: "25K+" has no meaningful Arabic rendering through
-// Intl. See the note in the commit — none of these numbers are verified.
-const stats = ["dealerships", "cars", "buyers", "uptime"] as const;
-
 const features = [
   { key: "inventory", icon: Car },
   { key: "messaging", icon: MessageSquare },
@@ -51,171 +55,139 @@ const features = [
   { key: "multiLocation", icon: Building2 },
 ] as const;
 
-export default async function AboutPage({ params }: Props) {
-  const { locale } = await params;
+const container = "mx-auto w-full max-w-[1360px] px-4 sm:px-6 xl:px-0";
 
+export default async function AboutPage({ params }: Props) {
+  const { locale } = (await params) as { locale: Locale };
   const t = await getTranslations("about");
 
+  // The figures are read from the live stock (the same summary the home hero
+  // and Browse use) instead of the "500+ dealerships / 100K+ buyers" this page
+  // used to state, none of which was measured. With nothing listed they are
+  // left out rather than showing zeros, and the hero closes up to one column.
+  const summaryResponse = await getMarketSummary();
+  const summary = summaryResponse.success ? summaryResponse.data : null;
+  const live = summary && summary.listings > 0 ? summary : null;
+  const counts = live
+    ? [
+        { label: t("figures.cars"), value: formatNumber(live.listings, locale) },
+        { label: t("figures.dealerships"), value: formatNumber(live.dealerships, locale) },
+        live.cities > 0 ? { label: t("figures.cities"), value: formatNumber(live.cities, locale) } : null,
+      ].filter((figure) => figure !== null)
+    : [];
+  // The price is the one long figure, and Intl joins "EGP" to the amount with
+  // a no-break space, so it cannot wrap: it gets a row of its own.
+  const median =
+    live?.medianPrice != null ? { label: t("figures.median"), value: formatCarPrice(live.medianPrice, locale) } : null;
+
+  const figures = counts.length > 0 && (
+    <section aria-label={t("figures.label")} className="flex flex-col gap-3">
+      <p className="text-caption font-semibold text-inverse-foreground/70">{t("figures.label")}</p>
+      <dl
+        className={cn(
+          "grid gap-px overflow-hidden rounded-control border border-inverse-foreground/15 bg-inverse-foreground/15",
+          counts.length === 3 ? "grid-cols-3" : "grid-cols-2",
+        )}
+      >
+        {[...counts, ...(median ? [median] : [])].map((figure) => (
+          <div
+            key={figure.label}
+            className={cn(
+              "flex min-w-0 flex-col-reverse justify-end gap-1 bg-inverse p-3 sm:p-5",
+              figure === median && "col-span-full",
+            )}
+          >
+            <dt className="text-micro text-inverse-foreground/70 sm:text-caption">{figure.label}</dt>
+            <dd className={cn("font-black tabular-nums", figure === median ? "text-h2 text-marker" : "text-h3 sm:text-h2")}>
+              {figure.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 start-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 end-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 py-20 md:py-28 relative z-10 text-center">
-          <span className="inline-block text-xs font-semibold uppercase tracking-widest text-blue-300 mb-4">
-            {t("hero.eyebrow")}
-          </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight">
-            {t("hero.headline")}{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-              {t("hero.headlineAccent")}
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8">
-            {t("hero.subtitle")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
-              size="lg"
-              className="bg-primary hover:bg-primary/90"
-            >
-              <Link href="/cars" className="flex items-center gap-2">
-                {t("hero.browseCars")}
-                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border-white/20 bg-white/5 hover:bg-white/10"
-            >
-              <Link href="/contact">{t("hero.getInTouch")}</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    <div className="flex flex-col pb-16">
+      <PageHeader
+        tone="inverse"
+        eyebrow={t("hero.eyebrow")}
+        title={t("hero.headline")}
+        accent={t("hero.headlineAccent")}
+        subtitle={t("hero.subtitle")}
+        aside={figures || undefined}
+      >
+        <Link href="/cars" className={buttonVariants({ variant: "marker", size: "xl" })}>
+          {t("hero.browseCars")}
+          <ArrowRight aria-hidden className="size-4 rtl:rotate-180" />
+        </Link>
+        <Link
+          href="/contact"
+          className={buttonVariants({
+            variant: "outline",
+            size: "xl",
+            className:
+              "border-inverse-foreground/35 bg-transparent text-inverse-foreground hover:bg-inverse-foreground/10 hover:text-inverse-foreground",
+          })}
+        >
+          {t("hero.getInTouch")}
+        </Link>
+      </PageHeader>
 
-      {/* Stats Bar */}
-      <section className="border-b bg-muted/30">
-        <div className="container mx-auto px-4 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
-            {stats.map((stat) => (
-              <div key={stat}>
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
-                  {t(`stats.${stat}.value`)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {t(`stats.${stat}.label`)}
-                </div>
-              </div>
+      <section aria-labelledby="mission-title" className={`${container} pt-12 sm:pt-16`}>
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="flex flex-col gap-4">
+            <p className="text-caption font-semibold text-muted-foreground">{t("mission.eyebrow")}</p>
+            <h2 id="mission-title" className="text-h1 font-extrabold">
+              {t("mission.headline")} <span className="text-primary">{t("mission.headlineAccent")}</span>
+            </h2>
+            <p className="text-body text-foreground sm:text-[1.0625rem]">{t("mission.body1")}</p>
+            <p className="text-body text-muted-foreground">{t("mission.body2")}</p>
+          </div>
+
+          <ul className="grid grid-cols-1 gap-px self-start overflow-hidden rounded-control border border-border bg-border sm:grid-cols-2">
+            {features.map(({ key, icon: Icon }) => (
+              <li key={key} className="flex flex-col gap-2 bg-card p-5">
+                <span aria-hidden className="mb-1 flex size-10 items-center justify-center rounded-plate bg-muted">
+                  <Icon className="size-5" />
+                </span>
+                <h3 className="text-body font-semibold">{t(`features.${key}.title`)}</h3>
+                <p className="text-caption text-muted-foreground">{t(`features.${key}.description`)}</p>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24 max-w-5xl">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="h-5 w-5 text-primary" />
-              <span className="text-sm font-semibold uppercase tracking-wide text-primary">
-                {t("mission.eyebrow")}
+      <section aria-labelledby="values-title" className={`${container} pt-12 sm:pt-16`}>
+        <SectionHeader id="values-title" title={t("values.heading")} subtitle={t("values.subtitle")} />
+        <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {values.map(({ key, icon: Icon }) => (
+            <li key={key} className="flex flex-col gap-3">
+              <span aria-hidden className="flex size-12 items-center justify-center rounded-full border-2 border-border-strong bg-marker">
+                <Icon className="size-[22px]" />
               </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              {t("mission.headline")}{" "}
-              <span className="text-primary">{t("mission.headlineAccent")}</span>
-            </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-              {t("mission.body1")}
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              {t("mission.body2")}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.key}
-                  className="bg-card border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="bg-primary/10 w-10 h-10 rounded-lg flex items-center justify-center mb-3">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">
-                    {t(`features.${feature.key}.title`)}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {t(`features.${feature.key}.description`)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+              <h3 className="text-h3 font-semibold">{t(`values.${key}.title`)}</h3>
+              <p className="text-body text-muted-foreground">{t(`values.${key}.description`)}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* Values Section */}
-      <section className="bg-muted/30 border-y">
-        <div className="container mx-auto px-4 py-16 md:py-24 max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t("values.heading")}
+      <section aria-labelledby="about-cta-title" className={`${container} pt-12 sm:pt-16`}>
+        <div className="flex flex-col gap-6 rounded-sheet border border-border bg-card p-6 sm:p-10 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex max-w-[40rem] flex-col gap-2">
+            <h2 id="about-cta-title" className="text-h2 font-extrabold">
+              {t("cta.heading")}
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              {t("values.subtitle")}
-            </p>
+            <p className="text-body text-muted-foreground">{t("cta.body")}</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value) => {
-              const Icon = value.icon;
-              return (
-                <div
-                  key={value.key}
-                  className="bg-card border rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold mb-2">
-                    {t(`values.${value.key}.title`)}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {t(`values.${value.key}.description`)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24 max-w-3xl text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          {t("cta.heading")}
-        </h2>
-        <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
-          {t("cta.body")}
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg">
-            <Link href="/onboarding" className="flex items-center gap-2">
-              {t("cta.startTrial")}
-              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <StartFreeButton label={t("cta.startTrial")} />
+            <Link href="/contact" className={buttonVariants({ variant: "outline-strong", size: "xl" })}>
+              {t("cta.contactUs")}
             </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/contact">{t("cta.contactUs")}</Link>
-          </Button>
+          </div>
         </div>
       </section>
     </div>

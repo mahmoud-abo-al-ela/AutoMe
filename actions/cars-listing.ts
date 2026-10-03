@@ -12,6 +12,7 @@ import { serializeCarWithImages, type SerializedCar } from "@/lib/utils/serializ
 import type { CarFilters } from "@/lib/services/car/listing";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carTitlesRequestSchema } from "@/lib/validations/schemas";
+import { CAR_CURRENCY } from "@/lib/utils/currency";
 
 /** The listing filters plus the page/limit the client sends alongside them. */
 type CarListingInput = CarFilters & { page?: number; limit?: number };
@@ -27,22 +28,17 @@ export const getCars = withErrorHandling(async (filters: CarListingInput) => {
   }, userId, organization?.id);
 
   // serializeCars maps a nullable serializer, but findManyCars only ever feeds
-  // it real rows, so the nulls are not reachable here.
-  const cars = result.cars as SerializedCar[];
+  // it real rows, so the nulls are not reachable here. Each card also carries
+  // its fair-price verdict — one pooled read for the whole page.
+  const [cars, wishlistIds] = await Promise.all([
+    carService.withMarketPositions(result.cars as SerializedCar[]),
+    userId ? wishlistService.getWishlistCarIds(userId) : Promise.resolve(new Set<string>()),
+  ]);
 
-  // Add wishlist status if user is logged in
-  if (userId) {
-    const wishlistIds = await wishlistService.getWishlistCarIds(userId);
-    result.cars = cars.map((car) => ({
-      ...car,
-      isWishlisted: wishlistIds.has(car.id),
-    }));
-  } else {
-    result.cars = cars.map((car) => ({
-      ...car,
-      isWishlisted: false,
-    }));
-  }
+  result.cars = cars.map((car) => ({
+    ...car,
+    isWishlisted: wishlistIds.has(car.id),
+  }));
 
   return createSuccessResponse(result);
 });
@@ -111,6 +107,23 @@ export const getCarTitles = withErrorHandling(async (input: unknown) => {
   const carIds = validateAction(carTitlesRequestSchema, input);
   const rows = await carRepository.findCarTitlesByIds(carIds);
   return createSuccessResponse(Object.fromEntries(rows.map((row) => [row.id, row])));
+});
+
+/**
+ * The site's live numbers (cars on sale, dealerships, cities, median price,
+ * last update) — the market readout and the hero's eyebrow. Public listing
+ * data only, scoped to the dealership on its subdomain.
+ */
+export const getMarketSummary = withErrorHandling(async () => {
+  const organization = await getCurrentOrganization();
+  const summary = await carRepository.getMarketSummary({
+    organizationId: organization?.id ?? null,
+    currency: CAR_CURRENCY,
+  });
+  return createSuccessResponse({
+    ...summary,
+    updatedAt: summary.updatedAt ? summary.updatedAt.toISOString() : null,
+  });
 });
 
 export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {

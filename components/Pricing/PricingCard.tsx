@@ -1,27 +1,25 @@
 "use client";
 import { useTranslations } from "next-intl";
-
-import { motion } from "framer-motion";
-import { Check, ArrowRight, X } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
-import {
-  formatPlanPrice,
-  planPeriodKey,
-  type UiPlan,
-} from "./pricing-plans";
+import { formatPlanPrice, planPeriodKey, type UiPlan } from "./pricing-plans";
 import { useFormatters } from "@/hooks/use-formatters";
+import { cn } from "@/lib/utils";
 
-// A single pricing plan card.
+/**
+ * A single pricing plan card. The popular plan is the asphalt card with the
+ * marker CTA — the one primary action in the row; the others are outlined.
+ * Plan prices are plain figures, never the price plate: that shape means a
+ * car's price and nothing else.
+ */
 export default function PricingCard({
   plan,
   billingPeriod,
-  index,
 }: {
   plan: UiPlan;
   billingPeriod: string;
-  index: number;
 }) {
   const t = useTranslations("home.pricing");
   // Plan names, bullets and billing copy are shared with the onboarding
@@ -29,6 +27,7 @@ export default function PricingCard({
   // page that happened to render them first.
   const tPlans = useTranslations("plans");
   const fmt = useFormatters();
+  const { isSignedIn } = useAuth();
   // Feature bullets interpolate a plan limit. The number is formatted here
   // rather than left to ICU, which would use the bare `ar` tag and render
   // Western digits against the Eastern ones everywhere else on the card.
@@ -41,138 +40,77 @@ export default function PricingCard({
   // to the untranslated DB name rather than rendering blank.
   const name = plan.planKey ? tPlans(`plans.${plan.planKey}.name`) : plan.name;
   const description = plan.planKey ? tPlans(`plans.${plan.planKey}.description`) : null;
+  const popular = !!plan.popular;
+  const href = isSignedIn ? plan.ctaLink : `/sign-up?redirect_url=${encodeURIComponent(plan.ctaLink)}`;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      viewport={{ once: true }}
-      className={`relative rounded-2xl p-6 sm:p-8 ${plan.popular
-          ? "bg-primary text-primary-foreground shadow-2xl scale-105"
-          : "bg-card border border-border shadow-lg hover:shadow-xl"
-        } transition-all duration-300`}
+    <div
+      className={cn(
+        "relative flex flex-col rounded-control p-6 sm:p-8",
+        popular ? "bg-inverse text-inverse-foreground" : "border border-border bg-card"
+      )}
     >
-      {plan.popular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
-            {tPlans("mostPopular")}
-          </div>
-        </div>
+      {popular && (
+        <span className="absolute -top-3 start-6 rounded-plate border-2 border-border-strong bg-marker px-2.5 py-0.5 text-micro font-bold text-marker-foreground">
+          {tPlans("mostPopular")}
+        </span>
       )}
 
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan.popular
-              ? "bg-white/20"
-              : "bg-primary/10"
-            }`}
+      <div className="mb-5 flex items-center gap-3">
+        <span
+          aria-hidden
+          className={cn(
+            "flex size-11 items-center justify-center rounded-control",
+            popular ? "bg-inverse-foreground/10" : "bg-muted"
+          )}
         >
-          <Icon
-            className={`h-6 w-6 ${plan.popular ? "text-white" : "text-primary"
-              }`}
-          />
-        </div>
+          <Icon className="size-5" />
+        </span>
         <div>
-          <h3
-            className={`text-xl font-bold ${plan.popular ? "text-white" : "text-foreground"
-              }`}
-          >
-            {name}
-          </h3>
-          <p
-            className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
-              }`}
-          >
-            {description}
-          </p>
+          <h3 className="text-h3 font-semibold">{name}</h3>
+          {description && (
+            <p className={cn("text-micro", popular ? "text-inverse-foreground/70" : "text-muted-foreground")}>{description}</p>
+          )}
         </div>
       </div>
 
-      <div className="mb-6">
-        <div className="flex items-baseline gap-1">
-          <span
-            className={`text-4xl sm:text-5xl font-bold ${plan.popular ? "text-white" : "text-foreground"
-              }`}
-          >
-            {price ?? tPlans("custom")}
+      <p className="mb-6 flex items-baseline gap-1.5">
+        <span className="text-[2.5rem] leading-none font-black">{price ?? tPlans("custom")}</span>
+        {periodKey && (
+          <span className={cn("text-caption", popular ? "text-inverse-foreground/70" : "text-muted-foreground")}>
+            /{tPlans(periodKey)}
           </span>
-          <span
-            className={`text-sm ${plan.popular ? "text-blue-100" : "text-muted-foreground"
-              }`}
-          >
-            {periodKey ? `/${tPlans(periodKey)}` : null}
-          </span>
-        </div>
-      </div>
+        )}
+      </p>
 
-      <ul className="space-y-3 mb-8">
+      <ul className="mb-8 flex flex-1 flex-col gap-3">
         {plan.features.map((feature, i) => (
-          <li
-            key={i}
-            className={`flex items-start gap-3 ${!feature.included ? "opacity-60" : ""
-              }`}
-          >
+          <li key={i} className="flex items-start gap-2.5">
             {feature.included ? (
-              <Check
-                className={`h-5 w-5 flex-shrink-0 mt-0.5 ${plan.popular ? "text-green-300" : "text-green-600"
-                  }`}
-              />
+              <Check aria-hidden className={cn("mt-0.5 size-[18px] shrink-0", popular ? "text-marker" : "text-positive")} />
             ) : (
-              <X
-                className={`h-5 w-5 flex-shrink-0 mt-0.5 ${plan.popular ? "text-red-300" : "text-muted-foreground"
-                  }`}
-              />
+              <X aria-hidden className={cn("mt-0.5 size-[18px] shrink-0", popular ? "text-inverse-foreground/50" : "text-muted-foreground")} />
             )}
             <span
-              className={`text-sm ${plan.popular ? "text-white" : "text-foreground"
-                } ${!feature.included && !plan.popular
-                  ? "line-through text-muted-foreground"
-                  : ""
-                }`}
+              className={cn(
+                "text-caption",
+                !feature.included && (popular ? "text-inverse-foreground/60" : "text-muted-foreground")
+              )}
             >
+              {/* The icon is decorative; screen readers get the state in words. */}
+              {!feature.included && <span className="sr-only">{tPlans("notIncluded")}: </span>}
               {tPlans(`features.${feature.key}`, featureParams(feature))}
             </span>
           </li>
         ))}
       </ul>
 
-      <SignedIn>
-        <Button
-          asChild
-          className={`w-full ${plan.popular
-              ? "bg-white text-primary hover:bg-white/90"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-            }`}
-          size="lg"
-        >
-          <Link
-            href={plan.ctaLink}
-            className="flex items-center justify-center gap-2"
-          >
-            {t("cta")}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </SignedIn>
-      <SignedOut>
-        <Button
-          asChild
-          className={`w-full ${plan.popular
-              ? "bg-white text-primary hover:bg-white/90"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-            }`}
-          size="lg"
-        >
-          <Link
-            href={`/sign-up?redirect_url=${encodeURIComponent(plan.ctaLink)}`}
-            className="flex items-center justify-center gap-2"
-          >
-            {t("cta")}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </SignedOut>
-    </motion.div>
+      <Button asChild size="xl" variant={popular ? "marker" : "outline-strong"} className="w-full">
+        <Link href={href}>
+          {t("cta")}
+          <ArrowRight className="rtl:rotate-180" />
+        </Link>
+      </Button>
+    </div>
   );
 }

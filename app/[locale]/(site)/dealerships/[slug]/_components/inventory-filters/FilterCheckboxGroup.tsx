@@ -24,14 +24,14 @@ export default function FilterCheckboxGroup({
 
   return (
     <div className="space-y-3">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</h4>
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</h4>
       <div className="grid grid-cols-2 gap-2">
         {options.map((opt) => {
           const isChecked = selected.includes(opt);
           return (
             <label
               key={opt}
-              className={`flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 cursor-pointer transition-colors ${isChecked ? "bg-primary/5 border-primary/20 text-primary" : "bg-white hover:bg-slate-50 text-slate-700"}`}
+              className={`flex items-center gap-3 p-2.5 rounded-control border border-border cursor-pointer transition-colors ${isChecked ? "bg-primary/5 border-primary/20 text-primary" : "bg-card hover:bg-muted text-muted-foreground"}`}
             >
               <Checkbox
                 checked={isChecked}

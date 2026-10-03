@@ -32,19 +32,19 @@ export function PlanFeatureList({ plan }: { plan: OnboardingPlan }) {
                     className="flex items-start gap-3 text-sm"
                 >
                     {feature.included ? (
-                        <div className="p-1 bg-green-100 rounded-full">
-                            <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <div className="p-1 bg-positive-soft rounded-full">
+                            <Check className="h-4 w-4 text-positive flex-shrink-0" />
                         </div>
                     ) : (
-                        <div className="p-1 bg-gray-100 rounded-full">
-                            <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        <div className="p-1 bg-muted rounded-full">
+                            <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         </div>
                     )}
                     <span
                         className={
                             feature.included
-                                ? "text-gray-800 font-medium"
-                                : "text-gray-500"
+                                ? "text-foreground font-medium"
+                                : "text-muted-foreground"
                         }
                     >
                         {t(

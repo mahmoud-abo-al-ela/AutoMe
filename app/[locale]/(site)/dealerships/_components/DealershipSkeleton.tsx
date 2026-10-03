@@ -3,9 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function DealershipCardSkeleton() {
     return (
-        <div className="flex h-full flex-col items-center rounded-xl border border-border bg-card p-5 text-center sm:p-6">
+        <div className="flex h-full flex-col items-center rounded-control border border-border bg-card p-5 text-center sm:p-6">
             {/* Logo */}
-            <Skeleton className="mb-4 h-20 w-20 rounded-xl" />
+            <Skeleton className="mb-4 h-20 w-20 rounded-control" />
             {/* Name */}
             <Skeleton className="h-5 w-2/3" />
             {/* Rating */}
@@ -38,7 +38,7 @@ export function DealershipGridSkeleton({ count = 8 }) {
 
 export function DealershipDetailSkeleton() {
     return (
-        <div className="container mx-auto px-4 py-4 mt-18 space-y-6">
+        <div className="mx-auto w-full max-w-[1360px] space-y-6 px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">
             {/* Breadcrumb skeleton */}
             <div className="flex items-center gap-2">
                 <Skeleton className="h-4 w-12" />
@@ -49,10 +49,10 @@ export function DealershipDetailSkeleton() {
             </div>
 
             {/* Hero Header skeleton */}
-            <div className="rounded-2xl border border-slate-100 p-6 sm:p-8 lg:p-10">
+            <div className="rounded-control border border-border p-6 sm:p-8 lg:p-10">
                 <div className="flex flex-col sm:flex-row gap-6 lg:gap-8">
                     {/* Logo */}
-                    <Skeleton className="h-28 w-28 sm:h-36 sm:w-36 lg:h-40 lg:w-40 rounded-2xl flex-shrink-0" />
+                    <Skeleton className="h-28 w-28 sm:h-36 sm:w-36 lg:h-40 lg:w-40 rounded-control flex-shrink-0" />
 
                     <div className="flex-1 space-y-4">
                         {/* Name + verified badge */}
@@ -88,7 +88,7 @@ export function DealershipDetailSkeleton() {
                     <Card key={index}>
                         <CardContent className="p-5 sm:p-6">
                             <div className="flex items-center gap-3">
-                                <Skeleton className="h-11 w-11 rounded-xl" />
+                                <Skeleton className="h-11 w-11 rounded-control" />
                                 <div className="space-y-2">
                                     <Skeleton className="h-7 w-16" />
                                     <Skeleton className="h-4 w-24" />
@@ -102,7 +102,7 @@ export function DealershipDetailSkeleton() {
             {/* Tabs skeleton */}
             <div className="space-y-6">
                 {/* Tab triggers */}
-                <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 w-fit">
+                <div className="flex items-center gap-1 p-1 rounded-control bg-muted/60 w-fit">
                     <Skeleton className="h-10 w-32 rounded-lg" />
                     <Skeleton className="h-10 w-28 rounded-lg" />
                     <Skeleton className="h-10 w-24 rounded-lg" />

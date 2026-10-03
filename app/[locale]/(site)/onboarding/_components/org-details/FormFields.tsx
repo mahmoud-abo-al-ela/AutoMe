@@ -78,18 +78,18 @@ export default function FormFields({
                         transition={{ duration: 0.4, delay: index * 0.1 }}
                         className="space-y-2"
                     >
-                        <Label htmlFor={field.id} className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <Label htmlFor={field.id} className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
                             {t(`fields.${field.id}.label`)}
                             {field.required ? (
-                                <span className="text-red-500">*</span>
+                                <span className="text-destructive">*</span>
                             ) : (
-                                <span className="text-xs font-normal text-gray-400">
+                                <span className="text-xs font-normal text-muted-foreground">
                                     {t("optional")}
                                 </span>
                             )}
                         </Label>
                         <div className="relative">
-                            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <div className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
                                 <Icon className="h-5 w-5" />
                             </div>
                             <Input
@@ -107,7 +107,7 @@ export default function FormFields({
                                         : ""
                                     } ${errors[field.id]
                                     ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
+                                    : "border-border focus:border-primary/30 focus:ring-primary/20"
                                     }`}
                             />
                         </div>
@@ -115,7 +115,7 @@ export default function FormFields({
                             <motion.p
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="text-sm text-red-600 flex items-center gap-1"
+                                className="text-sm text-destructive flex items-center gap-1"
                             >
                                 <XCircle className="h-4 w-4" />
                                 {errors[field.id]?.message}

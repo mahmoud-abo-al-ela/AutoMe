@@ -1,38 +1,16 @@
 import { compareUtils, MAX_COMPARE_CARS } from "@/lib/utils";
-import { formatCarPrice } from "@/lib/utils/currency";
-import { formatMileage as formatMileageKm } from "@/lib/utils/units";
 import type {
     CompareCar,
     CompareDifferences,
     CompareWinners,
     SpecKey,
-    SpecValue,
 } from "../_lib/compare-types";
-
-// ─── Formatting Utilities ────────────────────────────────────────────────────
-
-/** Format a numeric price as an EGP currency string, e.g. "EGP 25,000". */
-export const formatPrice = (price: number): string => formatCarPrice(price);
-
-/** Format a numeric mileage value in kilometres, e.g. "45,000 km". */
-export const formatMileage = (mileage: number): string =>
-    formatMileageKm(mileage);
-
-/**
- * Cell formatters for the spec table. A spec's `format` receives whatever
- * `car[key]` holds, so these coerce; `price` and `mileage` are non-nullable
- * numeric columns, so the coercion never actually sees a null in practice.
- */
-const formatPriceCell = (value: SpecValue): string => formatPrice(Number(value));
-const formatMileageCell = (value: SpecValue): string =>
-    formatMileage(Number(value));
 
 // ─── Spec Category Definitions ───────────────────────────────────────────────
 
-/** One row of the comparison table. */
+/** One row of the comparison table. Cells render through useSpecValue. */
 export interface SpecDefinition {
     key: SpecKey;
-    format?: (value: SpecValue) => string;
 }
 
 /** A tab of the comparison table. */
@@ -43,8 +21,7 @@ export interface SpecCategory {
 
 /**
  * Shared specification categories used by both desktop and mobile compare views.
- * Each category contains an array of spec definitions with a data key and an
- * optional format function. The visible label comes from carAttributes.fields,
+ * Each category contains an array of spec definitions keyed by the car field. The visible label comes from carAttributes.fields,
  * keyed by that same data key, so the label and the column cannot drift apart.
  */
 export const specCategories: SpecCategory[] = [
@@ -54,14 +31,14 @@ export const specCategories: SpecCategory[] = [
             { key: "make" },
             { key: "model" },
             { key: "year" },
-            { key: "price", format: formatPriceCell },
+            { key: "price" },
             { key: "bodyType" },
         ],
     },
     {
         id: "performance",
         specs: [
-            { key: "mileage", format: formatMileageCell },
+            { key: "mileage" },
             { key: "fuelType" },
             { key: "transmission" },
             { key: "color" },

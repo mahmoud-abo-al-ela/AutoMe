@@ -8,7 +8,6 @@ import { telHref } from "@/lib/utils/phone";
 
 interface ContactCardProps {
     icon: LucideIcon;
-    iconBgClass: string;
     iconColorClass: string;
     label: string;
     value: string;
@@ -18,7 +17,6 @@ interface ContactCardProps {
 
 const ContactCard = ({
     icon: Icon,
-    iconBgClass,
     iconColorClass,
     label,
     value,
@@ -32,21 +30,21 @@ const ContactCard = ({
     return (
         <a
             href={href}
-            className="group flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50 hover:border-slate-200 hover:shadow-sm transition-all duration-200"
+            className="group flex items-center gap-4 p-4 rounded-control border border-border bg-card hover:bg-muted hover:border-border transition-all duration-200"
             {...linkProps}
         >
-            <div className={`flex-shrink-0 p-2.5 rounded-lg bg-gradient-to-br ${iconBgClass}`}>
+            <div className={`flex-shrink-0 p-2.5 rounded-control bg-muted text-foreground`}>
                 <Icon className={`h-5 w-5 ${iconColorClass}`} />
             </div>
             <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">
                     {label}
                 </p>
-                <p className="text-sm font-medium text-slate-900 truncate group-hover:text-primary transition-colors">
+                <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                     {value}
                 </p>
             </div>
-            <ExternalLink className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors flex-shrink-0" />
+            <ExternalLink className="h-4 w-4 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors flex-shrink-0" />
         </a>
     );
 };
@@ -62,8 +60,7 @@ export const DealershipContactInfo = ({
     if (dealership.phone) {
         contacts.push({
             icon: Phone,
-            iconBgClass: "from-green-100 to-green-50",
-            iconColorClass: "text-green-600",
+            iconColorClass: "text-positive",
             label: t("callNow"),
             value: dealership.phone,
             // International form, so it dials from a foreign SIM or abroad.
@@ -75,8 +72,7 @@ export const DealershipContactInfo = ({
     if (dealership.email) {
         contacts.push({
             icon: Mail,
-            iconBgClass: "from-blue-100 to-blue-50",
-            iconColorClass: "text-blue-600",
+            iconColorClass: "text-primary",
             label: t("sendEmail"),
             value: dealership.email,
             href: `mailto:${dealership.email}`,
@@ -87,8 +83,7 @@ export const DealershipContactInfo = ({
     if (dealership.website) {
         contacts.push({
             icon: Globe,
-            iconBgClass: "from-purple-100 to-purple-50",
-            iconColorClass: "text-purple-600",
+            iconColorClass: "text-primary",
             label: t("visitWebsite"),
             value: dealership.website.replace(/^https?:\/\//, ""),
             href: dealership.website,
@@ -99,8 +94,7 @@ export const DealershipContactInfo = ({
     if (dealership.address) {
         contacts.push({
             icon: MapPin,
-            iconBgClass: "from-red-100 to-red-50",
-            iconColorClass: "text-red-500",
+            iconColorClass: "text-destructive",
             label: t("getDirections"),
             value: dealership.address,
             href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dealership.address)}`,

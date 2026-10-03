@@ -9,9 +9,9 @@
     "save": "حفظ",
     "search": "بحث",
     "viewDetails": "عرض التفاصيل",
-    "viewDealer": "عرض المعرض",
     "clearFilters": "مسح عوامل التصفية",
-    "clearSearch": "مسح البحث"
+    "clearSearch": "مسح البحث",
+    "backToTop": "العودة للأعلى"
   },
   "states": {
     "empty": "لا يوجد شيء هنا بعد",
@@ -19,7 +19,8 @@
     "loading": "جارٍ التحميل…",
     "notTranslated": "غير متوفر بالعربية — يتم عرض النص الإنجليزي الأصلي",
     "noResults": "لا توجد نتائج",
-    "noResultsBody": "جرّب تعديل بحثك أو عوامل التصفية للعثور على ما تبحث عنه."
+    "noResultsBody": "جرّب تعديل بحثك أو عوامل التصفية للعثور على ما تبحث عنه.",
+    "onTheWay": "في الطريق…"
   },
   "language": {
     "label": "اللغة",
@@ -56,5 +57,16 @@
   },
   "time": {
     "togglePeriod": "التبديل بين صباحًا ومساءً"
+  },
+  "market": {
+    "below": "أقل من سعر السوق بـ {value}",
+    "above": "أعلى من سعر السوق بـ {value}",
+    "fair": "سعر مناسب",
+    "unknown": "لا توجد مقارنة سعر بعد",
+    "comparables": "{count, plural, one {سيارة مشابهة واحدة} two {سيارتين مشابهتين} few {{value} سيارات مشابهة} other {{value} سيارة مشابهة}}",
+    "median": "متوسط السوق",
+    "medianFor": "متوسط {median} لـ {comparables} على AutoMe",
+    "gaugeLabel": "السعر مقارنةً بالسيارات المشابهة على AutoMe: {verdict}",
+    "unknownDetail": "المعروض حاليًا أقل من ٣ عربيات مشابهة، فلا يوجد متوسط عادل نقارن به السعر بعد."
   }
 }

@@ -20,5 +20,13 @@
   "openMenu": "Open menu",
   "closeMenu": "Close menu",
   "viewStorefront": "View storefront",
-  "welcomeBack": "Welcome back"
+  "welcomeBack": "Welcome back",
+  "search": "Search",
+  "saved": "Saved",
+  "more": "More",
+  "forDealers": "For dealers",
+  "searchCars": "Search cars",
+  "primaryNav": "Main",
+  "goHome": "AutoMe home",
+  "unread": "Unread messages"
 }

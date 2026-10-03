@@ -11,12 +11,6 @@
     "browseCars": "Browse Cars",
     "getInTouch": "Get in Touch"
   },
-  "stats": {
-    "dealerships": { "value": "500+", "label": "Active Dealerships" },
-    "cars": { "value": "25K+", "label": "Cars Listed" },
-    "buyers": { "value": "100K+", "label": "Happy Buyers" },
-    "uptime": { "value": "99.9%", "label": "Uptime" }
-  },
   "mission": {
     "eyebrow": "Our Mission",
     "headline": "Making automotive commerce",
@@ -47,7 +41,7 @@
     "subtitle": "Our values guide every decision we make, from the features we build to the partnerships we form.",
     "trust": {
       "title": "Trust & Transparency",
-      "description": "We believe car buying should be straightforward. Every listing is verified, every price is honest, and every interaction is built on trust."
+      "description": "Car buying should be straightforward. Every listing names the dealership behind it, and every price is shown against what similar cars are listed for."
     },
     "innovation": {
       "title": "Innovation First",
@@ -67,5 +61,12 @@
     "body": "Whether you’re a dealership looking to go digital or a buyer searching for the perfect ride, AutoMe has you covered.",
     "startTrial": "Start Free Trial",
     "contactUs": "Contact Us"
+  },
+  "figures": {
+    "label": "The market on AutoMe right now",
+    "cars": "Cars for sale now",
+    "dealerships": "Dealerships",
+    "cities": "Cities",
+    "median": "Median asking price"
   }
 }

@@ -66,9 +66,9 @@ const ShareDialog = ({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-2">
-          <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border w-full">
+          <div className="flex flex-col gap-2 bg-muted p-3 rounded-lg border w-full">
             <div className="w-full overflow-hidden">
-              <span className="text-sm block truncate text-gray-600 text-ellipsis w-[250px] md:w-full">
+              <span className="text-sm block truncate text-muted-foreground text-ellipsis w-[250px] md:w-full">
                 {shareUrl}
               </span>
             </div>
@@ -84,7 +84,7 @@ const ShareDialog = ({
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-3">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3">
               {t("shareVia")}
             </h3>
             <div className="grid grid-cols-4 md:grid-cols-2 gap-6 md:gap-2 w-fit md:w-full">
@@ -92,7 +92,7 @@ const ShareDialog = ({
                 <Button
                   key={social.name}
                   variant="outline"
-                  className="flex items-center justify-center gap-2 p-2 h-auto hover:bg-gray-50 transition-all w-fit md:w-full cursor-pointer"
+                  className="flex items-center justify-center gap-2 p-2 h-auto hover:bg-muted transition-all w-fit md:w-full cursor-pointer"
                   onClick={social.action}
                 >
                   <div

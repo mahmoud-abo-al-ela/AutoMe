@@ -19,13 +19,13 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
         formatDateFor(date, { month: "long" });
 
     return (
-        <Card className="border border-gray-200">
+        <Card className="border border-border">
             <CardContent className="p-6">
                 {/* Header: User and Rating */}
                 <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                         {/* User Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                        <div className="w-10 h-10 rounded-full bg-muted text-foreground flex items-center justify-center flex-shrink-0 relative overflow-hidden">
                             {user?.imageUrl ? (
                                 <Image
                                     src={user.imageUrl}
@@ -35,7 +35,7 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
                                     sizes="40px"
                                 />
                             ) : (
-                                <User className="h-5 w-5 text-white" />
+                                <User className="h-5 w-5 text-foreground" />
                             )}
                         </div>
 
@@ -53,7 +53,7 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
                     {/* Rating Badge */}
                     <Badge
                         variant="secondary"
-                        className="bg-yellow-100 text-yellow-800 flex items-center gap-1"
+                        className="bg-marker-soft text-foreground flex items-center gap-1"
                     >
                         <Star className="h-3 w-3 fill-current" />
                         <span className="font-medium">
@@ -72,7 +72,7 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
 
                 {/* Review Comment */}
                 {comment && (
-                    <p className="text-sm text-gray-700 leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                         {comment}
                     </p>
                 )}

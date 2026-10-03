@@ -74,10 +74,10 @@ const DateSelector = ({
                 </PopoverContent>
             </Popover>
             {error && (
-                <span className="text-xs text-red-500 mt-1 block">{error}</span>
+                <span className="text-xs text-destructive mt-1 block">{error}</span>
             )}
             {selectedDay && workingHours[selectedDay] && (
-                <div className="flex items-center text-xs mt-2 text-blue-600">
+                <div className="flex items-center text-xs mt-2 text-primary">
                     <Clock className="w-3 h-3 me-1" />
                     {t("businessHours")}{" "}
                     <TimeRange

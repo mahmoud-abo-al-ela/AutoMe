@@ -38,7 +38,7 @@ const TestDriveCard = ({
                 return (
                     <Badge
                         variant="outline"
-                        className="bg-yellow-50 text-yellow-800 hover:bg-yellow-100 border-yellow-200"
+                        className="bg-marker-soft text-foreground hover:bg-marker-soft border-marker"
                     >
                         {t("status.PENDING")}
                     </Badge>
@@ -47,7 +47,7 @@ const TestDriveCard = ({
                 return (
                     <Badge
                         variant="outline"
-                        className="bg-green-50 text-green-800 hover:bg-green-100 border-green-200"
+                        className="bg-positive-soft text-positive hover:bg-positive-soft border-positive/30"
                     >
                         {t("status.CONFIRMED")}
                     </Badge>
@@ -56,7 +56,7 @@ const TestDriveCard = ({
                 return (
                     <Badge
                         variant="outline"
-                        className="bg-red-50 text-red-800 hover:bg-red-100 border-red-200"
+                        className="bg-destructive-soft text-destructive hover:bg-destructive-soft border-destructive/30"
                     >
                         {t("status.CANCELLED")}
                     </Badge>
@@ -71,7 +71,7 @@ const TestDriveCard = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="group border rounded-lg overflow-hidden hover:shadow-md transition-all duration-200"
+            className="group border rounded-lg overflow-hidden transition-all duration-200"
         >
             <div className="flex flex-col sm:flex-row">
                 <div className="relative w-full sm:w-48 h-32 sm:h-36">
@@ -83,15 +83,15 @@ const TestDriveCard = ({
                                 fill
                                 sizes="(max-width: 640px) 100vw, 12rem"
                                 style={{ objectFit: "cover" }}
-                                className="bg-gray-100 group-hover:scale-105 transition-transform duration-300"
+                                className="bg-muted group-hover: transition-transform duration-300"
                             />
                             <div className="absolute top-1 end-1 block md:hidden">
                                 {getStatusBadge(testDrive.status)}
                             </div>
                         </>
                     ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <Car className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                        <div className="w-full h-full bg-border flex items-center justify-center">
+                            <Car className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
                         </div>
                     )}
                 </div>
@@ -104,11 +104,11 @@ const TestDriveCard = ({
                             </h3>
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1 sm:gap-1.5">
-                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
+                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                                     <span>{formatDate(testDrive.date)}</span>
                                 </div>
                                 <div className="flex items-center gap-1 sm:gap-1.5">
-                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
+                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
                                     <span>
                                         <TimeRange
                                             start={testDrive.startTime}

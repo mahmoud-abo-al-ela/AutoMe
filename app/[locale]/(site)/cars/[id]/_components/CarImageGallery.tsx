@@ -65,8 +65,8 @@ const CarImageGallery = ({
 
   if (!images || images.length === 0) {
     return (
-      <div className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-xl">
-        <Camera className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-gray-300" />
+      <div className="aspect-[16/10] bg-muted flex items-center justify-center rounded-control">
+        <Camera className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-muted-foreground/60" />
       </div>
     );
   }
@@ -85,7 +85,7 @@ const CarImageGallery = ({
         {/* Main Image Display */}
         <div className="relative group">
           <div
-            className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden rounded-xl cursor-pointer"
+            className="aspect-[16/10] bg-muted overflow-hidden rounded-control cursor-pointer"
             onClick={() => setIsImageModalOpen(true)}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -117,7 +117,7 @@ const CarImageGallery = ({
                   prevImage();
                 }}
                 aria-label={t("previous")}
-                className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
+                className="absolute start-2 sm:start-4 top-1/2 transform -translate-y-1/2 bg-field/90 backdrop-blur-sm text-foreground p-1.5 sm:p-2 md:p-3 rounded-full opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-card hover:scale-110 cursor-pointer"
                 size="icon"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 rtl:rotate-180" />
@@ -128,7 +128,7 @@ const CarImageGallery = ({
                   nextImage();
                 }}
                 aria-label={t("next")}
-                className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110 cursor-pointer"
+                className="absolute end-2 sm:end-4 top-1/2 transform -translate-y-1/2 bg-field/90 backdrop-blur-sm text-foreground p-1.5 sm:p-2 md:p-3 rounded-full opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-card hover:scale-110 cursor-pointer"
                 size="icon"
               >
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 rtl:rotate-180" />
@@ -156,8 +156,8 @@ const CarImageGallery = ({
                   aria-label={t("viewImage", { index: fmt.number(index + 1) })}
                   aria-current={index === currentImageIndex ? "true" : undefined}
                   className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-18 rounded-lg overflow-hidden transition-all duration-200 hover:scale-105 snap-start cursor-pointer ${index === currentImageIndex
-                      ? "ring-2 ring-blue-500 shadow-lg shadow-blue-200/50"
-                      : "ring-1 ring-gray-200 hover:ring-gray-300 opacity-70 hover:opacity-100"
+                      ? "ring-2 ring-primary shadow-blue-200/50"
+                      : "ring-1 ring-border hover:ring-border opacity-70 hover:opacity-100"
                     }`}
                 >
                   <Image
@@ -230,8 +230,8 @@ const CarImageGallery = ({
                   onClick={() => setCurrentImageIndex(index)}
                   aria-label={t("viewImage", { index: fmt.number(index + 1) })}
                   className={`flex-shrink-0 w-16 h-12 sm:w-20 sm:h-16 rounded-md overflow-hidden snap-start cursor-pointer transition-all duration-200 ${index === currentImageIndex
-                      ? "ring-2 ring-blue-500 opacity-100"
-                      : "ring-2 ring-transparent hover:ring-gray-400 opacity-60 hover:opacity-100"
+                      ? "ring-2 ring-primary opacity-100"
+                      : "ring-2 ring-transparent hover:ring-border-strong opacity-60 hover:opacity-100"
                     }`}
                 >
                   <Image

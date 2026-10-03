@@ -12,12 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, CheckCircle } from "lucide-react";
+import { Send, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
+import { useFormatters } from "@/hooks/use-formatters";
 import { submitContactForm } from "@/actions/contact";
-import { topics } from "../contact-data";
+import { RESPONSE_HOURS, topics } from "../contact-data";
 
 interface ContactFormState {
   name: string;
@@ -25,6 +26,9 @@ interface ContactFormState {
   topic: string;
   message: string;
 }
+
+// The site's control size and field surface, matching the search inputs.
+const FIELD = "h-12 rounded-control bg-field px-4 text-body";
 
 const EMPTY_FORM: ContactFormState = {
   name: "",
@@ -42,7 +46,7 @@ export default function ContactForm() {
   const t = useTranslations("contact.form");
   const tTopics = useTranslations("contact.topics");
   const actionError = useActionError();
-  const RESPONSE_HOURS = 24;
+  const fmt = useFormatters();
 
   const handleChange = (field: keyof ContactFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -76,16 +80,17 @@ export default function ContactForm() {
 
   if (isSubmitted) {
     return (
-      <div className="bg-card border rounded-xl p-10 text-center shadow-sm">
-        <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="h-8 w-8 text-green-600" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">{t("successTitle")}</h3>
-        <p className="text-muted-foreground mb-6">
-          {t("successBody", { hours: RESPONSE_HOURS })}
+      <div role="status" className="flex flex-col items-start gap-3 rounded-control border border-border bg-card p-6 sm:p-8">
+        <span aria-hidden className="flex size-12 items-center justify-center rounded-full bg-positive-soft">
+          <CheckCircle className="size-6 text-positive" />
+        </span>
+        <h3 className="text-h3 font-semibold">{t("successTitle")}</h3>
+        <p className="mb-2 text-body text-muted-foreground">
+          {t("successBody", { hours: fmt.number(RESPONSE_HOURS) })}
         </p>
         <Button
-          variant="outline"
+          variant="outline-strong"
+          size="control"
           onClick={() => {
             setIsSubmitted(false);
             setFormState(EMPTY_FORM);
@@ -107,6 +112,7 @@ export default function ContactForm() {
           <Input
             id="contact-name"
             placeholder={t("namePlaceholder")}
+            className={FIELD}
             value={formState.name}
             onChange={(e) => handleChange("name", e.target.value)}
             required
@@ -120,6 +126,7 @@ export default function ContactForm() {
             id="contact-email"
             type="email"
             placeholder={t("emailPlaceholder")}
+            className={FIELD}
             value={formState.email}
             onChange={(e) => handleChange("email", e.target.value)}
             required
@@ -133,7 +140,7 @@ export default function ContactForm() {
           value={formState.topic}
           onValueChange={(value) => handleChange("topic", value)}
         >
-          <SelectTrigger id="contact-topic">
+          <SelectTrigger id="contact-topic" className={`${FIELD} w-full`}>
             <SelectValue placeholder={t("topicPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
@@ -154,6 +161,7 @@ export default function ContactForm() {
           id="contact-message"
           placeholder={t("messagePlaceholder")}
           rows={6}
+          className="rounded-control bg-field px-4 py-3 text-body"
           value={formState.message}
           onChange={(e) => handleChange("message", e.target.value)}
           required
@@ -162,18 +170,19 @@ export default function ContactForm() {
 
       <Button
         type="submit"
-        size="lg"
+        variant="marker"
+        size="xl"
         className="w-full sm:w-auto"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
           <>
-            <span className="animate-spin me-2">⏳</span>
+            <Loader2 aria-hidden className="size-4 animate-spin" />
             {t("sending")}
           </>
         ) : (
           <>
-            <Send className="h-4 w-4 me-2" />
+            <Send aria-hidden className="size-4 rtl:-scale-x-100" />
             {t("submit")}
           </>
         )}

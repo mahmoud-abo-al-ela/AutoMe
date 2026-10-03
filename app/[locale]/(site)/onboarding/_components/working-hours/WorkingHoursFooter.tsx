@@ -34,7 +34,9 @@ export default function WorkingHoursFooter({
             <Button
                 type="submit"
                 disabled={loading}
-                className="cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                variant="marker"
+                size="xl"
+                className="px-8"
             >
                 {loading ? (
                     <>

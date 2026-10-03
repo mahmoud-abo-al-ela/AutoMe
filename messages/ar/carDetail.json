@@ -104,14 +104,7 @@
     "processing": "جارٍ المعالجة…"
   },
   "dealership": {
-    "listedBy": "معروضة من",
-    "soldBy": "البائع",
-    "view": "عرض ←",
-    "getDirections": "الحصول على الاتجاهات",
-    "callDealership": "الاتصال بالمعرض",
-    "viewAllCars": "عرض كل السيارات",
-    "call": "اتصال",
-    "directions": "الاتجاهات"
+    "soldBy": "البائع"
   },
   "errors": {
     "fetchFailed": "تعذّر جلب تفاصيل السيارة",

@@ -24,13 +24,15 @@ export default function OrgDetailsFooter({
             {/* A greyed-out button with no explanation makes the user guess
                 what is missing. */}
             {disabled && hint && (
-                <span className="text-sm text-gray-500">{hint}</span>
+                <span className="text-sm text-muted-foreground">{hint}</span>
             )}
             <Button
                 type="submit"
                 disabled={disabled}
                 data-continue-btn
-                className="cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                variant="marker"
+                size="xl"
+                className="px-8"
             >
                 {t("continue")}
                 <ArrowRight className="h-5 w-5 ms-2 rtl:rotate-180" />

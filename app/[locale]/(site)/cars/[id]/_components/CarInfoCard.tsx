@@ -1,19 +1,34 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { Building2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { PricePlate } from "@/components/brand";
 import ShareDialog from "./ShareDialog";
 import CarHeader from "./CarHeader";
 import CarActionButtons from "./CarActionButtons";
 import CarActions from "./CarActions";
+import { MarketPriceBlock } from "./MarketPriceBlock";
 import { useCarInfoCard } from "./hooks/useCarInfoCard";
 import type { CarDetail } from "../_lib/car-detail-types";
-import { useTranslations } from "next-intl";
+import type { MarketPosition } from "@/lib/services/car/market-price";
 
-const CarInfoCard = ({ car }: { car: CarDetail }) => {
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+/**
+ * The decision panel (Figma: Car detail — price panel): what it is, what it
+ * costs, whether that is a fair price, who sells it, and how to reach them.
+ * Sticky beside the gallery on desktop; inline under it on phones, where the
+ * contact bar (MobileStickyBar) carries the primary action.
+ */
+const CarInfoCard = ({ car, market }: { car: CarDetail; market: MarketPosition | null }) => {
   const t = useTranslations("carDetail.dealership");
   const {
     isLoading,
@@ -31,98 +46,67 @@ const CarInfoCard = ({ car }: { car: CarDetail }) => {
     handleScheduleTestDrive,
     handleViewTestDrive,
     handleChatClick,
-    formatPrice,
     isSignedIn,
   } = useCarInfoCard(car);
 
   const organization = car.organization;
-  const orgInitials = organization?.name
-    ? organization.name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-    : "D";
 
   return (
     <>
-      <Card className="shadow-xl border-0 bg-white p-0 rounded-2xl">
-        <CardContent className="p-4 sm:p-6 md:p-8">
-          <div className="flex justify-end rtl:justify-start mb-4 sm:mb-6">
-            <CarActionButtons
-              isFavorite={isFavorite}
-              isInCompare={isInCompare}
-              isLoading={isLoading}
-              onToggleFavorite={handleToggleFavorite}
-              onToggleCompare={handleToggleCompare}
-              onShare={handleShare}
-            />
-          </div>
+      <section aria-labelledby="car-title" className="flex flex-col gap-5 rounded-control border border-border bg-card p-5 sm:p-6">
+        <CarHeader car={car} />
 
-          {/* Car header with badges, title, and price */}
-          <CarHeader car={car} formatPrice={formatPrice} />
-
-          {/* Dealership branding section */}
-          {organization && (
-            <>
-              <Separator className="my-4 sm:my-5" />
-              <Link
-                href={`/dealerships/${organization.slug}`}
-                className="flex items-center gap-3 group p-2.5 -mx-2.5 rounded-xl hover:bg-slate-50 transition-colors"
-              >
-                <Avatar className="h-10 w-10 rounded-lg border border-slate-100 shadow-sm">
-                  {organization.logo ? (
-                    <AvatarImage
-                      src={organization.logo}
-                      alt={organization.name}
-                      className="object-contain"
-                    />
-                  ) : null}
-                  <AvatarFallback className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-xs">
-                    {orgInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground font-medium uppercase tracking-wider">
-                      {t("soldBy")}
-                    </span>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                    {organization.name}
-                  </span>
-                </div>
-                <span className="text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  {t("view")}
-                </span>
-              </Link>
-            </>
-          )}
-
-          <Separator className="my-4 sm:my-5" />
-
-          <CarActions
-            car={car}
-            testDriveId={testDriveId}
-            isCheckingTestDrive={isCheckingTestDrive}
-            isScheduleLoading={isScheduleLoading}
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <PricePlate amount={car.price} currency={car.priceCurrency} size="lg" />
+          <CarActionButtons
+            isFavorite={isFavorite}
             isInCompare={isInCompare}
-            onScheduleTestDrive={handleScheduleTestDrive}
-            onViewTestDrive={handleViewTestDrive}
-            onGoToCompare={handleGoToCompare}
-            isSignedIn={isSignedIn}
-            onChatClick={handleChatClick}
+            isLoading={isLoading}
+            onToggleFavorite={handleToggleFavorite}
+            onToggleCompare={handleToggleCompare}
+            onShare={handleShare}
           />
-        </CardContent>
-      </Card>
+        </div>
 
-      <ShareDialog
-        isOpen={isShareDialogOpen}
-        onOpenChange={setIsShareDialogOpen}
-        car={car}
-      />
+        <MarketPriceBlock market={market} currency={car.priceCurrency} />
+
+        {organization && (
+          <Link
+            href={`/dealerships/${organization.slug}`}
+            className="group flex items-center gap-3 rounded-control border border-border p-3 transition-colors hover:border-border-strong"
+          >
+            {organization.logo ? (
+              // Dealership logos are arbitrary remote URLs (see MainHeader).
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={organization.logo} alt="" className="size-11 shrink-0 rounded-control border border-border bg-field object-contain" />
+            ) : (
+              <span aria-hidden className="flex size-11 shrink-0 items-center justify-center rounded-control border-2 border-border-strong bg-marker text-body font-black">
+                {initialsOf(organization.name)}
+              </span>
+            )}
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-micro text-muted-foreground">{t("soldBy")}</span>
+              <span className="truncate text-caption font-semibold">{organization.name}</span>
+            </span>
+            <ChevronRight aria-hidden className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+          </Link>
+        )}
+
+        <CarActions
+          car={car}
+          testDriveId={testDriveId}
+          isCheckingTestDrive={isCheckingTestDrive}
+          isScheduleLoading={isScheduleLoading}
+          isInCompare={isInCompare}
+          onScheduleTestDrive={handleScheduleTestDrive}
+          onViewTestDrive={handleViewTestDrive}
+          onGoToCompare={handleGoToCompare}
+          isSignedIn={isSignedIn}
+          onChatClick={handleChatClick}
+        />
+      </section>
+
+      <ShareDialog isOpen={isShareDialogOpen} onOpenChange={setIsShareDialogOpen} car={car} />
     </>
   );
 };

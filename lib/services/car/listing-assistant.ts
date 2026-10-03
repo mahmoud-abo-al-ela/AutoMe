@@ -1,14 +1,8 @@
 import * as carRepository from "@/lib/repositories/car";
 import * as billingRepository from "@/lib/repositories/billing";
-import {
-  COMPARISONS,
-  buildListingFacts,
-  closestByPrice,
-  comparisonFor,
-  summarizeMarketPrices,
-  type MarketPrices,
-  type OtherCar,
-} from "@/lib/ai/grounding";
+import { buildListingFacts, closestByPrice, type OtherCar } from "@/lib/ai/grounding";
+// Shared with the site's fair-price gauge, so the two never disagree.
+import { marketPricesFor } from "./market-price";
 import type { CapacityPriority } from "@/lib/ai/breaker";
 import {
   answerListingQuestion,
@@ -305,41 +299,6 @@ function actionFor(
 function suggestedCar(row: OtherCarRow, currency: string): SuggestedCar {
   const { id, year, make, model, price, image } = row;
   return { id, year, make, model, price, currency, image };
-}
-
-/**
- * How comparable listings are priced, trying each of COMPARISONS in turn
- * until one finds enough; null if none does, or a read fails.
- */
-async function marketPricesFor(car: {
-  id: string;
-  make: string;
-  model: string;
-  bodyType: string;
-  year: number;
-  price: number;
-  priceCurrency: string;
-}): Promise<MarketPrices | null> {
-  try {
-    for (const level of COMPARISONS) {
-      const compared = comparisonFor(car, level);
-      const prices = await carRepository.findComparablePrices({
-        make: car.make,
-        model: compared.model,
-        bodyType: compared.bodyType,
-        year: car.year,
-        yearSpan: level.yearSpan,
-        excludeCarId: car.id,
-        currency: car.priceCurrency,
-      });
-      const summary = summarizeMarketPrices(prices, { price: car.price, currency: car.priceCurrency }, compared);
-      if (summary) return summary;
-    }
-    return null;
-  } catch (error) {
-    logError("Loading comparable prices failed; answering without them", error);
-    return null;
-  }
 }
 
 /**

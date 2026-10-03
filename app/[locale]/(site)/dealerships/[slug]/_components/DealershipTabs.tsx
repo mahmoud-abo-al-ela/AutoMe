@@ -38,10 +38,10 @@ export const DealershipTabs = ({
 
     return (
         <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="w-full sm:w-auto h-auto p-1 bg-muted/60 rounded-xl mb-6">
+            <TabsList className="mb-6 h-auto w-full justify-start overflow-x-auto rounded-none border-b border-border bg-transparent p-0 [scrollbar-width:none]">
                 <TabsTrigger
                     value="inventory"
-                    className="gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm cursor-pointer"
+                    className="relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-caption font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong"
                 >
                     <Car className="h-4 w-4" />
                     <span>{t("inventory")}</span>
@@ -57,7 +57,7 @@ export const DealershipTabs = ({
 
                 <TabsTrigger
                     value="reviews"
-                    className="gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm cursor-pointer"
+                    className="relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-caption font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong"
                 >
                     <MessageSquare className="h-4 w-4" />
                     <span>{t("reviews")}</span>
@@ -73,7 +73,7 @@ export const DealershipTabs = ({
 
                 <TabsTrigger
                     value="about"
-                    className="gap-2 px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm cursor-pointer"
+                    className="relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-caption font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong"
                 >
                     <Info className="h-4 w-4" />
                     <span>{t("about")}</span>
@@ -117,7 +117,7 @@ export const DealershipTabs = ({
                     />
 
                     {/* Contact Information */}
-                    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+                    <div className="bg-card rounded-control border border-border p-6">
                         <h3 className="text-lg font-semibold mb-4">
                             {t("contactInformation")}
                         </h3>
