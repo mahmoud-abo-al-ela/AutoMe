@@ -75,13 +75,19 @@ describe("createIntention", () => {
 
   it("posts the intention with the secret key and maps the answer", async () => {
     fetchMock.mockResolvedValue(
-      json(201, { id: "pi_test_abc", intention_order_id: 622803589, client_secret: "egy_csk_test_xyz" })
+      json(201, {
+        id: "pi_test_abc",
+        intention_order_id: 622803589,
+        client_secret: "egy_csk_test_xyz",
+        payment_methods: [{ integration_id: 5123456, method_type: "online" }],
+      })
     );
 
     await expect(createIntention(input)).resolves.toEqual({
       intentionId: "pi_test_abc",
       orderId: "622803589",
       clientSecret: "egy_csk_test_xyz",
+      offeredIntegrationIds: [5123456],
     });
 
     const { url, init, body } = call();

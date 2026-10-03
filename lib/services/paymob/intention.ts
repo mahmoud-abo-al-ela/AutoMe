@@ -39,12 +39,15 @@ export interface Intention {
   /** Paymob's order, the `order.id` on the transaction callback. */
   orderId: string;
   clientSecret: string;
+  /** The integrations Paymob will actually offer: it drops one it has not enabled for checkout. */
+  offeredIntegrationIds: number[];
 }
 
 interface IntentionResponse {
   id: string;
   intention_order_id: number;
   client_secret: string;
+  payment_methods?: { integration_id: number }[];
 }
 
 // Paymob's billing data asks for a street address it does not check for card
@@ -90,6 +93,7 @@ export async function createIntention(input: IntentionInput): Promise<Intention>
     intentionId: data.id,
     orderId: String(data.intention_order_id),
     clientSecret: data.client_secret,
+    offeredIntegrationIds: (data.payment_methods ?? []).map((method) => method.integration_id),
   };
 }
 
