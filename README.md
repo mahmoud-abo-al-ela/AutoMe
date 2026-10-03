@@ -1,6 +1,8 @@
 <div align="center">
 
-# AutoMe
+<h1>
+  <img src="public/brand/autome-logo.png" alt="AutoMe" width="260" />
+</h1>
 
 ### AI-powered SaaS for car dealerships in Egypt
 
