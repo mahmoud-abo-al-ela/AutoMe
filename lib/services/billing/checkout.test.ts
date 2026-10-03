@@ -6,8 +6,9 @@ vi.mock("@/lib/repositories/payment", () => ({
   setPaymentProviderOrder: vi.fn(),
   markPaymentSetupFailed: vi.fn(),
 }));
-vi.mock("@/lib/services/paymob", () => ({
-  paymobConfig: vi.fn(() => ({ cardIntegrationId: 5123456 })),
+vi.mock("@/lib/services/paymob", async (importOriginal) => ({
+  PaymobApiError: (await importOriginal<typeof import("@/lib/services/paymob")>()).PaymobApiError,
+  paymobConfig: vi.fn(() => ({ cardIntegrationId: 5123456, walletIntegrationId: null })),
   createIntention: vi.fn(),
   checkoutUrl: vi.fn((secret: string) => `https://accept.paymob.com/unifiedcheckout/?clientSecret=${secret}`),
 }));
@@ -17,6 +18,7 @@ import * as paymentRepo from "@/lib/repositories/payment";
 import * as paymob from "@/lib/services/paymob";
 import { billingName, billingPhone, startCheckout, type CheckoutInput } from "@/lib/services/billing/checkout";
 import { NotFoundError, ServiceUnavailableError, ValidationError } from "@/lib/utils/errors";
+import { PaymobApiError } from "@/lib/services/paymob/http";
 
 const pro = {
   id: "plan-pro",
@@ -58,6 +60,7 @@ beforeEach(() => {
     intentionId: "pi_test_1",
     orderId: "622803589",
     clientSecret: "egy_csk_test_1",
+    offeredIntegrationIds: [5123456],
   });
 });
 
@@ -129,10 +132,23 @@ describe("startCheckout", () => {
     expect(paymentRepo.createPayment).not.toHaveBeenCalled();
   });
 
-  it("fails closed without a public app URL, before recording anything", async () => {
+  it("fails closed without a public app URL in production, before recording anything", async () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+    vi.stubEnv("NODE_ENV", "production");
     await expect(startCheckout(signup)).rejects.toBeInstanceOf(ServiceUnavailableError);
     expect(paymentRepo.createPayment).not.toHaveBeenCalled();
+  });
+
+  it("uses the local server in development when no app URL is set", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+    vi.stubEnv("NODE_ENV", "development");
+    await startCheckout(signup);
+    expect(paymob.createIntention).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationUrl: "http://localhost:3000/api/webhooks/paymob",
+        redirectionUrl: "http://localhost:3000/ar/onboarding/success?ref=payment-1",
+      })
+    );
   });
 
   it("marks the payment failed and says so when Paymob refuses the intention", async () => {
@@ -141,6 +157,40 @@ describe("startCheckout", () => {
     expect(error).toBeInstanceOf(ServiceUnavailableError);
     expect((error as ServiceUnavailableError).messageKey).toBe("errors.billing.paymentSetupFailed");
     expect(paymentRepo.markPaymentSetupFailed).toHaveBeenCalledWith("payment-1");
+  });
+});
+
+describe("startCheckout with mobile wallets", () => {
+  beforeEach(() => {
+    vi.mocked(paymob.paymobConfig).mockReturnValue({ cardIntegrationId: 5123456, walletIntegrationId: 5956725 } as never);
+  });
+
+  it("offers cards and wallets together when a wallet integration is set", async () => {
+    await startCheckout(signup);
+    expect(paymob.createIntention).toHaveBeenCalledTimes(1);
+    expect(paymob.createIntention).toHaveBeenCalledWith(expect.objectContaining({ paymentMethods: [5123456, 5956725] }));
+  });
+
+  it("falls back to cards alone when Paymob refuses the wallet integration", async () => {
+    vi.mocked(paymob.createIntention)
+      .mockRejectedValueOnce(new PaymobApiError("/v1/intention/", 404, "Integration ID/Name does not exist"))
+      .mockResolvedValueOnce({ intentionId: "pi_2", orderId: "2", clientSecret: "egy_csk_test_2", offeredIntegrationIds: [5123456] });
+
+    await expect(startCheckout(signup)).resolves.toMatchObject({ paymentId: "payment-1" });
+    expect(vi.mocked(paymob.createIntention).mock.calls[1][0]).toMatchObject({ paymentMethods: [5123456] });
+    expect(paymentRepo.markPaymentSetupFailed).not.toHaveBeenCalled();
+  });
+
+  it("does not retry other failures, or a 404 when no wallet was asked for", async () => {
+    vi.mocked(paymob.createIntention).mockRejectedValue(new PaymobApiError("/v1/intention/", 500, "down"));
+    await expect(startCheckout(signup)).rejects.toBeInstanceOf(ServiceUnavailableError);
+    expect(paymob.createIntention).toHaveBeenCalledTimes(1);
+
+    vi.mocked(paymob.createIntention).mockClear();
+    vi.mocked(paymob.paymobConfig).mockReturnValue({ cardIntegrationId: 5123456, walletIntegrationId: null } as never);
+    vi.mocked(paymob.createIntention).mockRejectedValue(new PaymobApiError("/v1/intention/", 404, "no"));
+    await expect(startCheckout(signup)).rejects.toBeInstanceOf(ServiceUnavailableError);
+    expect(paymob.createIntention).toHaveBeenCalledTimes(1);
   });
 });
 

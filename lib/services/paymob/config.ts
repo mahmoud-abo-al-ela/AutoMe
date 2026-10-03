@@ -25,7 +25,10 @@ export interface PaymobConfig {
   /** Key for the transaction callback's HMAC-SHA512. */
   hmacSecret: string;
   cardIntegrationId: number;
-  /** Not offered yet: wallets join once Paymob moves the integration off Shopify. */
+  /**
+   * Mobile wallets, offered next to cards when set. Paymob must also enable
+   * it for Unified Checkout; until then it drops it from the page (or 404s).
+   */
   walletIntegrationId: number | null;
 }
 
