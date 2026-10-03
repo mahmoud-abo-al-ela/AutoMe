@@ -154,8 +154,10 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   // Block main-domain-only routes on subdomains
   if (subdomain && isMainDomainOnlyRoute(req)) {
-    // For onboarding, redirect to the main domain's onboarding page
-    if (pathnameWithoutLocale(url.pathname).startsWith("/onboarding")) {
+    // Becoming a dealer — the pitch and onboarding — continues on the main
+    // domain; anything else returns to this storefront's home.
+    const path = pathnameWithoutLocale(url.pathname);
+    if (path.startsWith("/onboarding") || path.startsWith("/for-dealers")) {
       const mainDomainUrl = ROOT_DOMAIN === "localhost"
         ? `http://localhost:${url.port || "3000"}${url.pathname}${url.search}`
         : `https://${ROOT_DOMAIN}${url.pathname}${url.search}`;

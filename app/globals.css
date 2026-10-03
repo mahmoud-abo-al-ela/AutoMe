@@ -695,6 +695,142 @@
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Home page motion. The hero's entrance is pure CSS on purpose: its headline
+   is the page's largest paint, and nothing above the fold may wait for
+   JavaScript to become visible. Scroll-driven pieces (parallax, section
+   reveals) are Framer Motion, in components/Home/motion.
+   Every animation here stops under prefers-reduced-motion (end of block).
+   --------------------------------------------------------------------------- */
+
+/* Headline words rise in one after another; --i is the word's index. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(0.45em); }
+  to { opacity: 1; transform: none; }
+}
+
+.hero-word {
+  display: inline-block;
+  animation: hero-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 80ms);
+}
+
+/* The accent clause gets a road-paint stroke that paints in under it. */
+@keyframes paint-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.hero-paint {
+  position: relative;
+  white-space: nowrap;
+}
+
+.hero-paint::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.04em;
+  height: 0.11em;
+  border-radius: 999px;
+  background: var(--marker);
+  transform-origin: left;
+  animation: paint-in 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.75s both;
+}
+
+[dir="rtl"] .hero-paint::after {
+  transform-origin: right;
+}
+
+/* Subtitle, search and quick picks follow the headline in. */
+.hero-follow {
+  animation: hero-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--delay, 0.5s);
+}
+
+/* The photo settles from a slow zoom, the street-lamp glow breathes. */
+@keyframes hero-settle {
+  from { transform: scale(1.12); }
+  to { transform: scale(1.02); }
+}
+
+.hero-settle {
+  animation: hero-settle 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.hero-glow {
+  animation: glow-breathe 6s ease-in-out infinite;
+}
+
+/* The story (components/Home/story): pinned under the header on every
+   screen that allows motion, stacked and still otherwise. Chosen here rather
+   than in JavaScript so the right layout paints first; steps after the first
+   wait hidden until the story shows them. */
+.story-pinned {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .story-pinned {
+    display: block;
+  }
+
+  .story-static {
+    display: none;
+  }
+
+  .story-pinned [data-chapter]:not(:first-child),
+  .story-pinned [data-stage-scene]:not(:nth-child(2)) {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* The pinned frame is exactly the screen between the sticky header and, on
+   phones, the bottom tab bar (BottomTabBar: 4rem + the safe area). */
+.story-frame {
+  height: calc(100svh - 56px - 4rem - env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  .story-frame {
+    height: calc(100svh - 72px);
+  }
+}
+
+/* Slow hazard stripes across the dealer band. */
+@keyframes stripes-slide {
+  from { background-position: 0 0; }
+  to { background-position: 56px 0; }
+}
+
+.hazard-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in oklab, var(--foreground) 7%, transparent) 0 14px,
+    transparent 14px 28px
+  );
+  background-size: 56px 56px;
+  animation: stripes-slide 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-word,
+  .hero-follow,
+  .hero-settle,
+  .hero-glow,
+  .hazard-stripes,
+  .hero-paint::after {
+    animation: none;
+  }
+
+}
+
 /* Held back 300ms, so a fast load never flashes the loader. */
 @keyframes loader-in {
   from { opacity: 0; }

@@ -24,6 +24,7 @@ const NAMESPACES = [
   "org",
   "chat",
   "faq",
+  "forDealers",
 ] as const;
 
 export default getRequestConfig(async ({ locale: explicitLocale }) => {

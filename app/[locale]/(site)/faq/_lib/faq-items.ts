@@ -9,9 +9,15 @@
  * driving-habit analysis, maintenance forecasting and depreciation
  * prediction, none of which were ever built — a translation would have made
  * those claims in two languages. Change an answer when the feature changes.
+ *
+ * The buying questions the home page used to answer live here too, so each
+ * question has one answer on the site.
  */
 export const FAQ_CATEGORIES = [
-  { key: "buying", items: ["findCar", "compare"] },
+  {
+    key: "buying",
+    items: ["findCar", "freeForBuyers", "compare", "testDrive", "inspection", "payment", "sellCar"],
+  },
   { key: "account", items: ["createAccount", "security"] },
   { key: "features", items: ["wishlist", "ai"] },
 ] as const;

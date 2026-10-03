@@ -1,6 +1,8 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand";
+import type { HeaderUser } from "@/components/Header/MainHeader";
+import { showsDealerPitch } from "@/lib/org/client";
 
 /**
  * Site footer (Figma: Footer) — asphalt, with the column headings in marker
@@ -11,9 +13,10 @@ import { Logo } from "@/components/brand";
  * there are accounts to link to.
  */
 const Footer = async ({
+  user,
   organization,
 }: {
-  user?: unknown;
+  user?: HeaderUser;
   organization?: {
     name?: string | null;
     description?: string | null;
@@ -51,7 +54,9 @@ const Footer = async ({
               { href: "/about", label: t("aboutUs") },
               { href: "/contact", label: t("contactUs") },
               { href: "/faq", label: t("faq") },
-              { href: "/#for-dealers", label: tNav("forDealers") },
+              ...(showsDealerPitch(user, isOnSubdomain)
+                ? [{ href: "/for-dealers", label: tNav("forDealers") }]
+                : []),
             ],
           },
         ]),

@@ -12,13 +12,13 @@ import Hero from "@/components/Hero/Hero";
 import Featured from "@/components/FeaturedCars/Featured";
 import Stats from "@/components/Stats/Stats";
 import Testimonials from "@/components/Testimonials/Testimonials";
-import Pricing from "@/components/Pricing/Pricing";
-import FAQ from "@/components/FAQ/FAQ";
 import { SectionHeader } from "@/components/Home/SectionHeader";
 import { BodyTypeTiles } from "@/components/Home/BodyTypeTiles";
-import { Features } from "@/components/Home/Features";
+import { ScrollStory } from "@/components/Home/story/ScrollStory";
 import { DealerBand } from "@/components/Home/DealerBand";
-import { getActivePlans } from "@/actions/billing";
+import { MotionRoot } from "@/components/Home/motion/MotionRoot";
+import { RevealBlock } from "@/components/Home/motion/Reveal";
+import { DealerPitchOnly } from "@/components/brand";
 import { getCarsFilters, getMarketSummary } from "@/actions/cars-listing";
 import { getFeaturedCars } from "@/actions/home";
 import { getCurrentOrganization } from "@/lib/getOrganization";
@@ -70,78 +70,86 @@ export default async function Home({
 
   // Everything the page states about the stock is read live, in parallel. A
   // failed read drops its section (or its numbers) rather than the page.
-  const [summaryResponse, filtersResponse, featuredResponse, plansResponse] = await Promise.all([
+  const [summaryResponse, filtersResponse, featuredResponse] = await Promise.all([
     getMarketSummary(),
     getCarsFilters({}),
     getFeaturedCars(4),
-    // The whole ActionResponse envelope used to be handed to <Pricing>, whose
-    // `dbPlans.length > 0` check read undefined on it and quietly fell through
-    // to the hardcoded default plans — so the homepage never showed real pricing.
-    isOnSubdomain ? null : getActivePlans(),
   ]);
   const summary = summaryResponse.success ? summaryResponse.data : null;
   const bodyTypes = filtersResponse.success
     ? [...filtersResponse.data.bodyTypes].sort((a, b) => b.count - a.count).slice(0, 5)
     : [];
   const featured = featuredResponse.success ? featuredResponse.data : [];
-  const plans = plansResponse?.success ? plansResponse.data : null;
   const brandName = organization?.name || "AutoMe";
 
+  // Motion (components/Home/motion and /story, globals.css): the hero's CSS
+  // entrance, the GSAP scroll story, and sections rising in as they arrive —
+  // all switched off under reduced motion.
   return (
-    <div className="flex flex-col">
-      <Hero summary={summary} />
+    <MotionRoot>
+      <div className="flex flex-col pb-16 sm:pb-24">
+        <Hero summary={summary} />
 
-      {bodyTypes.length > 0 && (
-        <HomeSection labelledBy="body-title">
-          <SectionHeader
-            id="body-title"
-            title={t("body.title")}
-            action={
-              summary
-                ? { href: "/cars", label: t("body.allCars", { value: formatNumber(summary.listings, locale) }) }
-                : undefined
-            }
-          />
-          <BodyTypeTiles items={bodyTypes} />
+        {bodyTypes.length > 0 && (
+          <HomeSection labelledBy="body-title">
+            <RevealBlock>
+              <SectionHeader
+                id="body-title"
+                title={t("body.title")}
+                action={
+                  summary
+                    ? { href: "/cars", label: t("body.allCars", { value: formatNumber(summary.listings, locale) }) }
+                    : undefined
+                }
+              />
+            </RevealBlock>
+            <BodyTypeTiles items={bodyTypes} />
+          </HomeSection>
+        )}
+
+        {featured.length > 0 && (
+          <HomeSection labelledBy="featured-title">
+            <RevealBlock>
+              <SectionHeader
+                id="featured-title"
+                title={t("featured.title")}
+                subtitle={t("featured.subtitle")}
+                action={{ href: "/cars", label: t("featured.viewAll") }}
+              />
+            </RevealBlock>
+            <Featured cars={featured} />
+          </HomeSection>
+        )}
+
+        {/* The features as a scroll story: pinned and scrubbed on desktop. */}
+        <ScrollStory />
+
+        <HomeSection>
+          <RevealBlock>
+            <Stats />
+          </RevealBlock>
         </HomeSection>
-      )}
 
-      {featured.length > 0 && (
-        <HomeSection labelledBy="featured-title">
-          <SectionHeader
-            id="featured-title"
-            title={t("featured.title")}
-            subtitle={t("featured.subtitle")}
-            action={{ href: "/cars", label: t("featured.viewAll") }}
-          />
-          <Featured cars={featured} />
+        <HomeSection>
+          <RevealBlock>
+            <Testimonials brand={brandName} />
+          </RevealBlock>
         </HomeSection>
-      )}
 
-      <HomeSection labelledBy="features-title">
-        <SectionHeader id="features-title" title={t("features.title")} />
-        <Features />
-      </HomeSection>
-
-      <HomeSection>
-        <Stats />
-      </HomeSection>
-
-      <HomeSection>
-        <Testimonials brand={brandName} />
-      </HomeSection>
-
-      {!isOnSubdomain && (
-        <HomeSection id="for-dealers" labelledBy="for-dealers-title" className="scroll-mt-24">
-          <DealerBand />
-          <Pricing plans={plans} />
-        </HomeSection>
-      )}
-
-      <HomeSection className="pb-16 sm:pb-24">
-        <FAQ brandName={brandName} />
-      </HomeSection>
-    </div>
+        {/* One band for dealers; the plans, billing questions and the rest of
+            the pitch are on /for-dealers. Not on a dealership's own storefront,
+            and not for anyone already in a dealership (DealerPitchOnly). */}
+        {!isOnSubdomain && (
+          <DealerPitchOnly>
+            <HomeSection labelledBy="for-dealers-title">
+              <RevealBlock>
+                <DealerBand />
+              </RevealBlock>
+            </HomeSection>
+          </DealerPitchOnly>
+        )}
+      </div>
+    </MotionRoot>
   );
 }
 

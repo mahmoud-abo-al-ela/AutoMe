@@ -15,5 +15,7 @@ export { RoadDashes } from "./RoadDashes";
 export { SiteEmptyState } from "./SiteEmptyState";
 export { MarketReadout, type MarketSummary } from "./MarketReadout";
 export { PageHeader } from "./PageHeader";
+export { FaqAccordion, type FaqItem } from "./FaqAccordion";
 export { RoadLoader } from "./RoadLoader";
 export { SiteBrandProvider, useSiteBrandName } from "./SiteBrand";
+export { DealerPitchProvider, DealerPitchOnly } from "./DealerPitch";

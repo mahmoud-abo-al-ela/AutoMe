@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getOrgSlugFromPath, isDashboardPath } from "@/lib/org/client";
+import { getOrgSlugFromPath, isDashboardPath, showsDealerPitch } from "@/lib/org/client";
 
 describe("getOrgSlugFromPath", () => {
   it.each([
@@ -34,4 +34,23 @@ describe("isDashboardPath", () => {
       expect(isDashboardPath(path)).toBe(false);
     }
   );
+});
+
+describe("showsDealerPitch", () => {
+  const member = { role: "USER", memberships: [{ role: "MEMBER" }] };
+
+  it("pitches to signed-out visitors and buyers on the marketplace", () => {
+    expect(showsDealerPitch(null, false)).toBe(true);
+    expect(showsDealerPitch({ role: "USER", memberships: [] }, false)).toBe(true);
+    expect(showsDealerPitch({ role: "USER" }, false)).toBe(true);
+  });
+
+  it("does not pitch to anyone already in a dealership, or a platform admin", () => {
+    expect(showsDealerPitch(member, false)).toBe(false);
+    expect(showsDealerPitch({ role: "ADMIN", memberships: [] }, false)).toBe(false);
+  });
+
+  it("never pitches on a dealership's own storefront", () => {
+    expect(showsDealerPitch(null, true)).toBe(false);
+  });
 });

@@ -23,8 +23,6 @@
     "detected": "Detected {attributes}",
     "searchFailed": "We could not search with that photo. Please try again.",
     "notRecognized": "We could not recognise a car in that photo. Try a clearer shot.",
-    "liveCars": "{count, plural, one {{value} car} other {{value} cars}} on sale",
-    "liveDealers": "{count, plural, one {{value} dealership} other {{value} dealerships}}",
     "titleLead": "Your next car.",
     "titleTrustLead": "From a dealer",
     "titleTrustAccent": "you trust.",
@@ -82,24 +80,6 @@
       }
     }
   },
-  "faq": {
-    "title": "Frequently Asked",
-    "titleAccent": "Questions",
-    "subtitle": "Everything you need to know about {brand}. Can’t find your answer?",
-    "contactUs": "Contact us",
-    "q1": "How does {brand} use AI?",
-    "a1": "To make finding and buying a car easier: search with a photo of a car you like, ask questions about a listing and get an answer from its details (where the dealership has turned this on), read listings in Arabic or English, and translate messages with a dealership in one tap.",
-    "q2": "Is {brand} free for buyers?",
-    "a2": "Yes. Browsing cars, asking questions, booking test drives and messaging dealerships cost you nothing. Dealerships pay a subscription to list their cars.",
-    "q3": "How do I book a test drive?",
-    "a3": "Open the car you’re interested in, select “Schedule Test Drive” and pick a date and time within the dealership’s working hours. Your request stays pending until the dealership confirms it, and you can follow it on your Test Drives page. You need to be signed in to book.",
-    "q4": "Does {brand} inspect the cars?",
-    "a4": "No. Every car is listed by a dealership, and each dealership has a public page with its location, working hours and reviews from buyers. See the car in person — a test drive is the easiest way — and check its papers before you buy.",
-    "q5": "Can I sell my car on {brand}?",
-    "a5": "Not as a private seller: only dealerships can list cars on {brand}.",
-    "q6": "How do I pay for a car?",
-    "a6": "Directly to the dealership. {brand} doesn’t take payments for cars, so agree the price, payment and any financing with the dealership itself — you can message them from the car’s page with “Chat Now”."
-  },
   "body": {
     "title": "Browse by body type",
     "allCars": "All {value} cars",
@@ -122,5 +102,14 @@
     "description": "AI-written listings in Arabic and English, buyer chat with one-tap translation and test-drive bookings — on your own branded storefront.",
     "startFree": "Start free",
     "seePlans": "See plans"
+  },
+  "story": {
+    "sampleCar": "Kia Cerato 2019",
+    "askQ": "Has it ever been in an accident?",
+    "askA": "No accidents on record — and it comes with the dealer's full service history.",
+    "chatFrom": "لسه متاحة؟",
+    "chatTo": "Is it still available?",
+    "translated": "Translated",
+    "booked": "Test drive booked"
   }
 }

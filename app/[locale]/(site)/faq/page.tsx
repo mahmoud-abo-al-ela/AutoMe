@@ -1,11 +1,9 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
-import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { Minus, Plus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { buttonVariants } from "@/components/ui/button";
-import { PageHeader } from "@/components/brand";
+import { FaqAccordion, PageHeader } from "@/components/brand";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { formatNumber } from "@/lib/utils/number";
@@ -95,28 +93,13 @@ export default async function FAQ({ params }: Props) {
               <h2 id={`faq-${category.key}-title`} className="mb-2 text-h2 font-extrabold">
                 {t(`categories.${category.key}`)}
               </h2>
-              <AccordionPrimitive.Root type="single" collapsible className="border-t border-border">
-                {category.items.map((key) => (
-                  <AccordionPrimitive.Item key={key} value={key} className="border-b border-border">
-                    <AccordionPrimitive.Header>
-                      <AccordionPrimitive.Trigger className="group flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-start outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                        <span className="text-[1.0625rem] font-semibold">{t(`items.${key}.q`, { brand })}</span>
-                        <Plus aria-hidden className="size-5 shrink-0 group-data-[state=open]:hidden" />
-                        <Minus aria-hidden className="size-5 shrink-0 group-data-[state=closed]:hidden" />
-                      </AccordionPrimitive.Trigger>
-                    </AccordionPrimitive.Header>
-                    {/* forceMount: Radix otherwise leaves a closed panel out
-                        of the DOM, so the server HTML held every question and
-                        no answer — nothing for a search engine to index, and
-                        nothing to read before hydration. Force-mounted, Radix
-                        no longer hides a closed panel itself, so it is hidden
-                        by its own data-state. */}
-                    <AccordionPrimitive.Content forceMount className="data-[state=closed]:hidden">
-                      <div className="pb-5 text-body text-muted-foreground">{answer(key)}</div>
-                    </AccordionPrimitive.Content>
-                  </AccordionPrimitive.Item>
-                ))}
-              </AccordionPrimitive.Root>
+              <FaqAccordion
+                items={category.items.map((key) => ({
+                  id: key,
+                  question: t(`items.${key}.q`, { brand }),
+                  answer: answer(key),
+                }))}
+              />
             </section>
           ))}
 

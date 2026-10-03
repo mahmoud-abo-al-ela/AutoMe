@@ -165,10 +165,11 @@ export default function MainHeader({
           <LanguageSwitcher className="h-10 rounded-control px-2.5 max-md:[&>span]:hidden" />
 
           <SignedOut>
-            {!access.isOnSubdomain && (
+            {access.showForDealers && (
               <Link
-                href="/#for-dealers"
-                className="hidden rounded-control px-2.5 py-2 text-caption font-medium text-muted-foreground transition-colors hover:text-foreground lg:inline-flex"
+                href="/for-dealers"
+                aria-current={isCurrentSection(pathname, "/for-dealers") ? "page" : undefined}
+                className="hidden rounded-control px-2.5 py-2 text-caption font-medium text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-foreground lg:inline-flex"
               >
                 {t("forDealers")}
               </Link>

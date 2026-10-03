@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { usePathname } from "@/i18n/navigation";
+import { showsDealerPitch } from "@/lib/org/client";
 import type { HeaderUser } from "./MainHeader";
 
 /**
@@ -45,6 +46,8 @@ export function useHeaderAccess(user: HeaderUser | undefined, organizationSlug?:
     /** Org members and admins get a way into the dashboard, except from inside it. */
     showDashboardLink: (hasOrgMembership || isSuperAdmin) && !isOnOrgPath,
     dashboardHref: userOrgSlug ? `/org/${userOrgSlug}/dashboard` : "/super-admin",
+    /** "For dealers" is for visitors without a dealership, on the marketplace. */
+    showForDealers: showsDealerPitch(signedIn ? user : null, !!organizationSlug),
     /** Members on their own subdomain see the admin nav instead of the shop nav. */
     showAdminNav: (hasOrgMembership || isSuperAdmin) && !!organizationSlug && !isOnAdminPath,
   };

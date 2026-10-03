@@ -111,7 +111,7 @@ export default function MobileMenu({
             {sections.map((item) => row(item.href, t(item.labelKey)))}
             <SignedIn>{!access.isOwner && row("/test-drive", t("testDrive"), <CarFront aria-hidden className="size-5" />)}</SignedIn>
             {extra.map((item) => row(item.href, item.label))}
-            {!access.isOnSubdomain && row("/#for-dealers", t("forDealers"))}
+            {access.showForDealers && row("/for-dealers", t("forDealers"))}
           </nav>
 
           <div className="mt-3 flex items-center justify-between border-t border-border pt-3">

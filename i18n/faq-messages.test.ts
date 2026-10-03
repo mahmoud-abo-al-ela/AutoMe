@@ -2,8 +2,6 @@ import { describe, it, expect } from "vitest";
 import { createTranslator } from "next-intl";
 import en from "@/messages/en/faq.json";
 import ar from "@/messages/ar/faq.json";
-import homeEn from "@/messages/en/home.json";
-import homeAr from "@/messages/ar/home.json";
 import {
   FAQ_AI_POINTS,
   FAQ_CATEGORIES,
@@ -60,9 +58,10 @@ describe("faq messages", () => {
   });
 
   it("makes no promise the product does not keep", () => {
-    // The English these replaced, on the FAQ page and the home page's FAQ.
+    // The English these replaced, on the FAQ page and the home page's old FAQ
+    // (whose buying questions now live on the FAQ page).
     // Each was a feature, process or partnership that never existed.
-    const text = JSON.stringify([en, homeEn.faq]).toLowerCase();
+    const text = JSON.stringify(en).toLowerCase();
     for (const claim of [
       "facebook",
       "driving habit",
@@ -79,10 +78,10 @@ describe("faq messages", () => {
     }
   });
 
-  it("keeps the home FAQ's Arabic free of the same claims", () => {
+  it("keeps the Arabic free of the same claims", () => {
     // "موثّقة" (verified), "شركائنا" (our partners), "حماية للمشتري"
     // (buyer protection), "ملايين" (millions).
-    const text = JSON.stringify(homeAr.faq);
+    const text = JSON.stringify(ar);
     for (const claim of ["موثّقة", "شركائنا", "حماية للمشتري", "ملايين"]) {
       expect(text).not.toContain(claim);
     }
