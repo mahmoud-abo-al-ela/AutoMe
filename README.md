@@ -249,16 +249,3 @@ flowchart LR
 - **No real secrets.** Both jobs run on placeholder credentials that cannot reach a real service; the only secret is a Clerk *development* key the build needs to validate its format.
 
 Delivery is to Vercel. Database migrations are applied to production as a deliberate step before the code that needs them ships — never implicitly during a build.
-
-## Deployment
-
-Built for [Vercel](https://vercel.com).
-
-> [!IMPORTANT]
-> Apply migrations to the production database (`pnpm prisma migrate deploy`) **before** deploying code that depends on them.
-
-- Enable **Fluid compute** — the AI routes declare `maxDuration = 300` to outlast provider queues.
-- Set Paymob's transaction callback to `https://<your-domain>/api/webhooks/paymob` (each checkout also names it). It must be public HTTPS, which Paymob cannot reach on localhost: test payments against a preview deployment. (Locally, the payment success pages still confirm a payment by asking Paymob directly.) Point Clerk's webhook at `/api/webhooks/clerk`.
-- Set `CRON_SECRET`: `vercel.json` runs `/api/cron/billing-renewals` daily at 05:00 UTC (07:00–08:00 Cairo). Plan prices are edited in EGP in the super-admin plan editor.
-- Add a wildcard domain (`*.your-domain`) so dealership storefronts resolve.
-- Run `POST /api/cron/backfill-image-alts` (with `CRON_SECRET`) until it reports nothing remaining, to describe photos of cars listed before photo descriptions existed.
