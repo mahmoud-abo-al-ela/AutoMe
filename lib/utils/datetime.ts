@@ -274,6 +274,22 @@ export function formatMessageTimestamp(
   return formatDate(date, locale, { day: "numeric", month: "short", year: undefined });
 }
 
+/**
+ * Rewrite ASCII digits in the locale's numbering system.
+ *
+ * date-fns writes its numbers itself, in ASCII, whatever locale object it is
+ * given — its Arabic locale says "منذ 3 أيام". The digits are mapped through
+ * Intl here rather than hardcoded, so `intlLocale` stays the one place the
+ * numbering system is decided.
+ */
+function localizeDigits(text: string, locale: Locale): string {
+  const digits = new Intl.NumberFormat(intlLocale(locale), {
+    useGrouping: false,
+  });
+  if (digits.format(0) === "0") return text;
+  return text.replace(/\d/g, (d) => digits.format(Number(d)));
+}
+
 /** "3 days ago" / "منذ ٣ أيام", with the locale applied. */
 export function formatRelativeToNow(
   value: DateInput,
@@ -283,9 +299,12 @@ export function formatRelativeToNow(
   const date = toDate(value);
   if (!isValid(date)) return "";
 
-  return formatDistanceToNow(date, {
-    addSuffix: true,
-    ...options,
-    locale: dateFnsLocale(locale),
-  });
+  return localizeDigits(
+    formatDistanceToNow(date, {
+      addSuffix: true,
+      ...options,
+      locale: dateFnsLocale(locale),
+    }),
+    locale
+  );
 }

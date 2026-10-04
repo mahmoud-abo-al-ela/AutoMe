@@ -6,11 +6,15 @@ import {
   formatClockTime,
   formatDate,
   formatDateTime,
+  formatRelativeToNow,
   formatTime,
 } from "./datetime";
 import { formatCarPrice } from "./currency";
 import { formatMileage } from "./units";
 import { formatNumber } from "./number";
+
+// Far enough back that date-fns prints a number ("3 years"), not "about a".
+const THREE_YEARS_AGO = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
 
 /**
  * These pin the two rules that are invisible until they are wrong: Arabic
@@ -35,6 +39,8 @@ describe("Eastern Arabic numerals in Arabic", () => {
     ["formatCarPrice", formatCarPrice(1500000, "ar")],
     ["formatMileage", formatMileage(85000, "ar")],
     ["formatNumber", formatNumber(1234, "ar")],
+    // date-fns writes its own ASCII digits whatever locale it is given.
+    ["formatRelativeToNow", formatRelativeToNow(THREE_YEARS_AGO, "ar")],
   ];
 
   for (const [name, output] of cases) {
@@ -57,6 +63,7 @@ describe("Western digits in English", () => {
     ["formatCarPrice", formatCarPrice(1500000, "en")],
     ["formatMileage", formatMileage(85000, "en")],
     ["formatNumber", formatNumber(1234, "en")],
+    ["formatRelativeToNow", formatRelativeToNow(THREE_YEARS_AGO, "en")],
   ];
 
   for (const [name, output] of cases) {
