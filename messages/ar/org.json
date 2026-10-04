@@ -9,10 +9,8 @@
     "auditLogs": "سجل النشاط",
     "settings": "الإعدادات",
     "fallbackOrgName": "لوحة تحكم AutoMe",
-    "openSidebar": "فتح القائمة الجانبية",
-    "collapseSidebar": "طي القائمة الجانبية",
-    "expandSidebar": "توسيع القائمة الجانبية",
-    "backToSite": "العودة إلى الموقع"
+    "navLabel": "أقسام لوحة التحكم",
+    "addCar": "إضافة سيارة"
   },
   "meta": {
     "notFoundTitle": "المعرض غير موجود",
@@ -55,17 +53,6 @@
       "title": "لوحة التحكم",
       "description": "نظرة سريعة على معرضك"
     },
-    "title": "لوحة التحكم",
-    "subtitle": "مرحبًا بعودتك — إليك ما يحدث في معرضك.",
-    "tabs": {
-      "overview": "نظرة عامة",
-      "analytics": "التحليلات"
-    },
-    "stats": {
-      "users": "إجمالي المستخدمين",
-      "cars": "السيارات المعروضة",
-      "testDrives": "القيادات التجريبية"
-    },
     "ranges": {
       "label": "اختر فترة زمنية",
       "last7": "آخر ٧ أيام",
@@ -84,15 +71,6 @@
         "testDrives": "القيادات التجريبية"
       }
     },
-    "analytics": {
-      "totalValue": "القيمة الإجمالية للمخزون",
-      "averagePrice": "متوسط سعر السيارة",
-      "conversionRate": "معدل التحويل",
-      "conversionRateNote": "من الطلبات إلى المؤكدة",
-      "addedThisMonth": "السيارات المضافة هذا الشهر",
-      "overall": "الإجمالي",
-      "vsLastMonth": "{percent} مقارنة بالشهر الماضي"
-    },
     "funnel": {
       "title": "مسار القيادات التجريبية",
       "description": "معدلات التحويل عبر مراحل القيادة التجريبية",
@@ -103,14 +81,6 @@
       "share": "({percent})",
       "shareOfTotal": "({percent} من الإجمالي)",
       "shareOfConfirmed": "({percent} من المؤكدة)"
-    },
-    "popularCars": {
-      "title": "السيارات الأكثر طلبًا",
-      "description": "الأكثر إضافة إلى المفضلة",
-      "descriptionTop": "أكثر {count} سيارات إضافةً إلى المفضلة",
-      "emptyTitle": "لا توجد سيارات في المفضلة بعد",
-      "emptyBody": "عندما يضيف المستخدمون سيارات إلى مفضلتهم ستظهر هنا.",
-      "saved": "أضافها {count}"
     },
     "inventory": {
       "title": "حالة المخزون",
@@ -126,6 +96,67 @@
       "emptyDescription": "الحجم عبر الوقت",
       "emptyTitle": "لا توجد بيانات قيادات تجريبية",
       "emptyBody": "ستظهر الاتجاهات بمجرد أن يبدأ العملاء في حجز قيادات تجريبية."
+    },
+    "today": {
+      "greeting": {
+        "morning": "صباح الخير",
+        "afternoon": "مساء الخير",
+        "evening": "مساء الخير"
+      },
+      "hello": "{greeting} يا {name}.",
+      "helloNoName": "{greeting}.",
+      "waiting": "{count, plural, =0 {لا شيء ينتظرك الآن.} one {طلب واحد ينتظرك.} two {طلبان ينتظرانك.} few {{value} طلبات تنتظرك.} many {{value} طلبًا ينتظرك.} other {{value} طلب ينتظرك.}}",
+      "storefront": "عرض صفحة معرضك",
+      "tasksLabel": "ينتظرك",
+      "tasks": {
+        "drives": {
+          "title": "قيادات تجريبية بانتظار التأكيد",
+          "empty": "لا شيء بانتظار التأكيد",
+          "next": "{name} الساعة {time}",
+          "more": "+{count} أخرى"
+        },
+        "questions": {
+          "title": "أسئلة مشترين بانتظار الرد",
+          "empty": "لا أسئلة مفتوحة",
+          "latest": "«{question}» عن {car}",
+          "latestNoCar": "«{question}»"
+        },
+        "messages": {
+          "title": "رسائل غير مقروءة",
+          "empty": "صندوق الرسائل فارغ",
+          "some": "افتح صندوق الرسائل",
+          "connecting": "جارٍ التحقق من الرسائل…"
+        }
+      },
+      "kpisLabel": "أرقامك",
+      "kpis": {
+        "cars": "السيارات المعروضة",
+        "carsNote": "+{count} هذا الشهر",
+        "drives": "طلبات القيادة التجريبية",
+        "drivesNote": "آخر ٧ أيام · {delta} مقارنةً بالسبعة السابقة",
+        "saved": "حفظها المشترون",
+        "savedNote": "على {count, plural, zero {{value} سيارة} one {سيارة واحدة} two {سيارتين} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
+        "completion": "طلبات اكتملت قيادتها",
+        "completionNote": "المكتملة من كل الطلبات"
+      },
+      "road": {
+        "title": "قيادات اليوم",
+        "all": "كل القيادات التجريبية",
+        "empty": "لا قيادات تجريبية محجوزة اليوم.",
+        "anonymousBuyer": "مشترٍ"
+      },
+      "saved": {
+        "title": "الأكثر حفظًا لدى المشترين",
+        "all": "كل السيارات",
+        "emptyTitle": "لا حفظ بعد",
+        "emptyBody": "عندما يحفظ المشترون سياراتك، تظهر المفضلة هنا."
+      },
+      "plan": {
+        "usage": "باقة {plan} · {current} من {limit} سيارة",
+        "unlimited": "باقة {plan} · {current} سيارة",
+        "manage": "إدارة الباقة"
+      },
+      "trends": "الاتجاهات"
     }
   },
   "cars": {

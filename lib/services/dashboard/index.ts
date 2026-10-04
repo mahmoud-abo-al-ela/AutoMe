@@ -1,5 +1,7 @@
 // Dashboard service - Business logic layer
 import * as dashboardRepository from "@/lib/repositories/dashboard";
+import * as todayRepository from "@/lib/repositories/dashboard/today";
+import { cairoNow } from "@/lib/utils/datetime";
 import * as userRepository from "@/lib/repositories/user";
 import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
 
@@ -110,4 +112,30 @@ export async function getTestDriveTrendsData(
 ) {
   await verifyAccess(userId, organizationId);
   return await dashboardRepository.getTestDriveTrends(organizationId, days);
+}
+
+const DAY_MS = 86_400_000;
+
+/**
+ * The overview's "today": test drives waiting on the dealer and today's
+ * schedule (by the Cairo calendar), open buyer questions, and the last seven
+ * days of requests against the seven before. Carries the viewer's first name
+ * for the greeting and the Cairo hour to pick it by.
+ */
+export async function getTodayBoard(userId: string, organizationId: string) {
+  const user = await verifyAccess(userId, organizationId);
+  const now = new Date();
+  const cairo = cairoNow(now);
+  const board = await todayRepository.getTodayBoard(organizationId, {
+    today: new Date(`${cairo.date}T00:00:00.000Z`),
+    since: new Date(now.getTime() - 7 * DAY_MS),
+    before: new Date(now.getTime() - 14 * DAY_MS),
+  });
+
+  return {
+    ...board,
+    organizationId,
+    firstName: user.name?.trim().split(/\s+/)[0] ?? null,
+    cairoHour: Number(cairo.time.slice(0, 2)),
+  };
 }

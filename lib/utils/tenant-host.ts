@@ -11,3 +11,14 @@ export const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "autome.com";
 export function tenantHost(slug: string): string {
   return `${slug}.${ROOT_DOMAIN}`;
 }
+
+/**
+ * A dealership's storefront, in a locale: `https://nile-motors.autome.com/ar`.
+ * Protocol and port follow NEXT_PUBLIC_APP_URL, so on a dev machine it is
+ * `http://nile-motors.localhost:3000/en`.
+ */
+export function storefrontUrl(slug: string, locale: string): string {
+  const app = new URL(process.env.NEXT_PUBLIC_APP_URL || `https://${ROOT_DOMAIN}`);
+  const port = app.port ? `:${app.port}` : "";
+  return `${app.protocol}//${tenantHost(slug)}${port}/${locale}`;
+}

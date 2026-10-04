@@ -2,11 +2,16 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 
-export default function GlobalError({
+/**
+ * A dashboard page that failed to render. Shown inside the dashboard's shell,
+ * so the sidebar stays and the dealer can go elsewhere; "Try again" re-renders
+ * the page, the other way out is the public site.
+ */
+export default function OrgError({
   error,
   reset,
 }: {
@@ -16,28 +21,24 @@ export default function GlobalError({
   const t = useTranslations("org.error");
 
   useEffect(() => {
-    console.error("Global Error:", error);
+    console.error("Dashboard error:", error);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-          <AlertTriangle className="h-8 w-8 text-red-600" />
-        </div>
-        
-        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-        <p className="text-gray-500">
-          {t("body")}
-        </p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Button onClick={() => reset()} variant="default" className="w-full sm:w-auto">
+    <div className="flex flex-1 items-center justify-center py-16">
+      <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-sheet border border-border bg-card p-8 text-center">
+        <span aria-hidden className="flex size-14 items-center justify-center rounded-full bg-destructive-soft text-destructive">
+          <AlertTriangle className="size-7" />
+        </span>
+        <h1 className="text-h2 font-extrabold">{t("title")}</h1>
+        <p className="text-body text-muted-foreground">{t("body")}</p>
+        <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+          <Button variant="marker" size="control" onClick={() => reset()}>
             {t("retry")}
           </Button>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href="/">{t("home")}</Link>
-          </Button>
+          <Link href="/" className={buttonVariants({ variant: "outline-strong", size: "control" })}>
+            {t("home")}
+          </Link>
         </div>
       </div>
     </div>

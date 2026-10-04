@@ -9,10 +9,8 @@
     "auditLogs": "Audit Logs",
     "settings": "Settings",
     "fallbackOrgName": "AutoMe Admin",
-    "openSidebar": "Open sidebar menu",
-    "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar",
-    "backToSite": "Back to site"
+    "navLabel": "Dashboard sections",
+    "addCar": "Add car"
   },
   "meta": {
     "notFoundTitle": "Organization not found",
@@ -55,17 +53,6 @@
       "title": "Dashboard",
       "description": "Your dealership at a glance"
     },
-    "title": "Dashboard",
-    "subtitle": "Welcome back — here’s what’s happening with your dealership.",
-    "tabs": {
-      "overview": "Overview",
-      "analytics": "Analytics"
-    },
-    "stats": {
-      "users": "Total Users",
-      "cars": "Cars Listed",
-      "testDrives": "Test Drives"
-    },
     "ranges": {
       "label": "Select a time range",
       "last7": "Last 7 days",
@@ -84,15 +71,6 @@
         "testDrives": "Test Drives"
       }
     },
-    "analytics": {
-      "totalValue": "Total Inventory Value",
-      "averagePrice": "Average Car Price",
-      "conversionRate": "Conversion Rate",
-      "conversionRateNote": "Requests to confirmed",
-      "addedThisMonth": "Cars Added (This Month)",
-      "overall": "Overall",
-      "vsLastMonth": "{percent} vs last month"
-    },
     "funnel": {
       "title": "Test Drive Funnel",
       "description": "Conversion rates across the test drive pipeline",
@@ -103,14 +81,6 @@
       "share": "({percent})",
       "shareOfTotal": "({percent} of total)",
       "shareOfConfirmed": "({percent} of confirmed)"
-    },
-    "popularCars": {
-      "title": "Popular Cars",
-      "description": "Most wishlisted inventory",
-      "descriptionTop": "Top {count} most wishlisted inventory",
-      "emptyTitle": "No wishlisted cars yet",
-      "emptyBody": "When users save cars to their wishlist, they will appear here.",
-      "saved": "Saved by {count}"
     },
     "inventory": {
       "title": "Inventory Status",
@@ -126,6 +96,67 @@
       "emptyDescription": "Volume over time",
       "emptyTitle": "No test drive data",
       "emptyBody": "Trends will appear once customers start booking test drives."
+    },
+    "today": {
+      "greeting": {
+        "morning": "Good morning",
+        "afternoon": "Good afternoon",
+        "evening": "Good evening"
+      },
+      "hello": "{greeting}, {name}.",
+      "helloNoName": "{greeting}.",
+      "waiting": "{count, plural, =0 {Nothing is waiting on you.} one {{value} request is waiting on you.} other {{value} requests are waiting on you.}}",
+      "storefront": "View your storefront",
+      "tasksLabel": "Waiting on you",
+      "tasks": {
+        "drives": {
+          "title": "Test drives to confirm",
+          "empty": "Nothing to confirm",
+          "next": "{name} at {time}",
+          "more": "+{count} more"
+        },
+        "questions": {
+          "title": "Buyer questions waiting",
+          "empty": "No open questions",
+          "latest": "“{question}” on {car}",
+          "latestNoCar": "“{question}”"
+        },
+        "messages": {
+          "title": "Unread messages",
+          "empty": "Your inbox is clear",
+          "some": "Open your inbox",
+          "connecting": "Checking your inbox…"
+        }
+      },
+      "kpisLabel": "Your numbers",
+      "kpis": {
+        "cars": "Cars listed",
+        "carsNote": "+{count} this month",
+        "drives": "Test-drive requests",
+        "drivesNote": "Last 7 days · {delta} vs the 7 before",
+        "saved": "Saved by buyers",
+        "savedNote": "across {count, plural, one {{value} car} other {{value} cars}}",
+        "completion": "Requests that drove",
+        "completionNote": "completed of all requests"
+      },
+      "road": {
+        "title": "Today on the road",
+        "all": "All test drives",
+        "empty": "No test drives booked for today.",
+        "anonymousBuyer": "A buyer"
+      },
+      "saved": {
+        "title": "Most saved by buyers",
+        "all": "All cars",
+        "emptyTitle": "No saves yet",
+        "emptyBody": "When buyers save your cars, the favourites show here."
+      },
+      "plan": {
+        "usage": "{plan} plan · {current} of {limit} cars",
+        "unlimited": "{plan} plan · {current} cars",
+        "manage": "Manage plan"
+      },
+      "trends": "Trends"
     }
   },
   "cars": {

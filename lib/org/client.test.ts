@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getOrgSlugFromPath, isDashboardPath, showsDealerPitch } from "@/lib/org/client";
+import { getOrgSlugFromPath, isSuperAdminPath, showsDealerPitch } from "@/lib/org/client";
 
 describe("getOrgSlugFromPath", () => {
   it.each([
@@ -20,22 +20,6 @@ describe("getOrgSlugFromPath", () => {
   });
 });
 
-describe("isDashboardPath", () => {
-  it.each(["/ar/org/mo-motors/dashboard", "/en/super-admin", "/en/super-admin/users/1", "/org/mo-motors"])(
-    "is true for a dashboard (%s)",
-    (path) => {
-      expect(isDashboardPath(path)).toBe(true);
-    }
-  );
-
-  it.each(["/en", "/ar/cars/123", "/en/organizations", "/en/dealerships/org-motors", "/sign-in"])(
-    "is false for a public page (%s)",
-    (path) => {
-      expect(isDashboardPath(path)).toBe(false);
-    }
-  );
-});
-
 describe("showsDealerPitch", () => {
   const member = { role: "USER", memberships: [{ role: "MEMBER" }] };
 
@@ -52,5 +36,15 @@ describe("showsDealerPitch", () => {
 
   it("never pitches on a dealership's own storefront", () => {
     expect(showsDealerPitch(null, true)).toBe(false);
+  });
+});
+
+describe("isSuperAdminPath", () => {
+  it.each(["/super-admin", "/en/super-admin/plans", "/ar/super-admin"])("%s is the super-admin", (path) => {
+    expect(isSuperAdminPath(path)).toBe(true);
+  });
+
+  it.each(["/en/org/x/dashboard", "/org/x", "/en", "/ar/cars"])("%s is not", (path) => {
+    expect(isSuperAdminPath(path)).toBe(false);
   });
 });

@@ -58,6 +58,7 @@ describe("org messages", () => {
       "billing.payments.period",
       "dashboard.funnel.share",
       "dashboard.inventory.legend",
+      "dashboard.today.helloNoName",
       "cars.pagination.showingShort",
       "carForm.form.step",
       "testDrives.table.timeRange",

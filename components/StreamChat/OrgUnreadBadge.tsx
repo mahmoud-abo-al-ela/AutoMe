@@ -19,10 +19,10 @@ type OrgUnreadBadgeProps = {
 
 // Error boundary to catch context errors
 class OrgUnreadBadgeErrorBoundary extends Component<
-    { children: React.ReactNode },
+    { children: React.ReactNode; fallback?: React.ReactNode },
     { hasError: boolean }
 > {
-    constructor(props: { children: React.ReactNode }) {
+    constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
         super(props);
         this.state = { hasError: false };
     }
@@ -37,16 +37,20 @@ class OrgUnreadBadgeErrorBoundary extends Component<
 
     render() {
         if (this.state.hasError) {
-            return null;
+            return this.props.fallback ?? null;
         }
         return this.props.children;
     }
 }
 
-function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps) {
+/**
+ * Unread messages across this organization's chats, kept live from Stream's
+ * events. null until the chat client is connected. Must run inside the chat
+ * context — use it through OrgUnreadBadge or OrgUnreadCount, whose boundary
+ * catches its absence.
+ */
+function useOrgUnreadCount(organizationId?: string | null): number | null {
     const { client, channel: activeChannel } = useChatContext();
-    const t = useTranslations("chat");
-    const { number } = useFormatters();
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
@@ -94,7 +98,15 @@ function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps)
         };
     }, [client, organizationId, activeChannel]);
 
-    if (!client || unreadCount === 0) return null;
+    return client ? unreadCount : null;
+}
+
+function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps) {
+    const t = useTranslations("chat");
+    const { number } = useFormatters();
+    const unreadCount = useOrgUnreadCount(organizationId);
+
+    if (!unreadCount) return null;
 
     return (
         <Badge
@@ -115,6 +127,35 @@ export function OrgUnreadBadge({ organizationId, className }: OrgUnreadBadgeProp
     return (
         <OrgUnreadBadgeErrorBoundary>
             <OrgUnreadBadgeInner organizationId={organizationId} className={className} />
+        </OrgUnreadBadgeErrorBoundary>
+    );
+}
+
+function OrgUnreadCountInner({
+    organizationId,
+    children,
+}: {
+    organizationId?: string | null;
+    children: (count: number | null) => React.ReactNode;
+}) {
+    return <>{children(useOrgUnreadCount(organizationId))}</>;
+}
+
+/**
+ * The unread count as a render prop, for places that show it as part of
+ * something larger (the dashboard's messages card). `children` gets null
+ * while chat is still connecting, or when there is no chat context at all.
+ */
+export function OrgUnreadCount({
+    organizationId,
+    children,
+}: {
+    organizationId?: string | null;
+    children: (count: number | null) => React.ReactNode;
+}) {
+    return (
+        <OrgUnreadBadgeErrorBoundary fallback={children(null)}>
+            <OrgUnreadCountInner organizationId={organizationId}>{children}</OrgUnreadCountInner>
         </OrgUnreadBadgeErrorBoundary>
     );
 }

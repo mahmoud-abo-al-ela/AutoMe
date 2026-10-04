@@ -227,8 +227,8 @@
    Scoped with :has() on the root rather than on the (site) layout's wrapper:
    Radix portals (selects, dialogs, sheets) and Sonner toasts render into
    <body>, outside any wrapper, and would otherwise fall back to the dashboard
-   palette. The dashboards never render [data-theme="site"], so nothing here
-   reaches them.
+   palette. The super-admin never renders [data-theme="site"], so nothing here
+   reaches it; the dealer dashboard does (with data-surface="work", below).
 
    The shadcn names are kept, so every existing `bg-primary` / `text-muted-
    foreground` on the site picks the new palette up without an edit:
@@ -298,6 +298,19 @@
   --text-h3--line-height: 1.4;
   /* 13px floor in both languages (Arabic already had it). */
   --text-micro: 0.8125rem;
+}
+
+/* ---------------------------------------------------------------------------
+   The dealer dashboard (app/[locale]/org) is on the site theme too, with
+   data-surface="work" adding what only it has: charts, in the brand colours
+   instead of shadcn's defaults.
+   --------------------------------------------------------------------------- */
+:root:has([data-surface="work"]) {
+  --chart-1: #1d4e9e; /* plate */
+  --chart-2: #ffc629; /* marker */
+  --chart-3: #1f7a5a; /* positive */
+  --chart-4: #c2452d; /* brick */
+  --chart-5: #a39883; /* limestone/500 */
 }
 
 /* Custom sidebar enhancements */

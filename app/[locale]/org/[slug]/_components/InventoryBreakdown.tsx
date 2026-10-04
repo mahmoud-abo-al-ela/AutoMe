@@ -3,10 +3,11 @@
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { CarFront } from "lucide-react";
+import { Panel, PanelEmpty } from "./Panel";
+import { CAR_STATUS_TONE } from "./status-tones";
 
 /** Car counts by status from getAnalytics().inventory. */
 export type InventoryBreakdownData = {
@@ -19,9 +20,9 @@ export type InventoryBreakdownData = {
 // Module scope, so the identity is stable: built inside the component it was
 // a fresh object every render, which made it useless as a memo dependency.
 const STATUS_COLORS = {
-  available: "#10b981", // emerald-500
-  sold: "#3b82f6", // blue-500
-  unavailable: "#94a3b8", // slate-400
+  available: CAR_STATUS_TONE.AVAILABLE.color,
+  sold: CAR_STATUS_TONE.SOLD.color,
+  unavailable: CAR_STATUS_TONE.UNAVAILABLE.color,
 };
 
 const InventoryBreakdown = ({
@@ -59,31 +60,14 @@ const InventoryBreakdown = ({
 
   if (!breakdown || breakdown.total === 0) {
     return (
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center h-[300px]">
-          <div className="bg-muted rounded-full p-4 mb-4">
-            <CarFront className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-lg font-medium">{t("emptyTitle")}</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
-            {t("emptyBody")}
-          </p>
-        </CardContent>
-      </Card>
+      <Panel title={t("title")} description={t("description")} className="h-full">
+        <PanelEmpty icon={CarFront} title={t("emptyTitle")} body={t("emptyBody")} />
+      </Panel>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-0">
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-4 flex flex-col justify-center">
+    <Panel title={t("title")} description={t("description")} className="h-full" bodyClassName="justify-center">
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -100,7 +84,7 @@ const InventoryBreakdown = ({
                 innerRadius={60}
                 outerRadius={80}
                 strokeWidth={2}
-                stroke="var(--background)"
+                stroke="var(--card)"
                 paddingAngle={2}
               >
                 {chartData.map((entry, index) => (
@@ -113,7 +97,7 @@ const InventoryBreakdown = ({
                 y="50%" 
                 textAnchor="middle" 
                 dominantBaseline="middle"
-                className="fill-foreground font-bold text-3xl"
+                className="fill-foreground text-3xl font-black"
               >
                 {number(breakdown.total)}
               </text>
@@ -131,7 +115,7 @@ const InventoryBreakdown = ({
         </ChartContainer>
         
         {/* Custom Legend */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
           {chartData.map((entry, index) => {
             const percentage = number(entry.value / breakdown.total, {
               style: "percent",
@@ -144,7 +128,7 @@ const InventoryBreakdown = ({
                   style={{ backgroundColor: entry.fill }}
                 />
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">{entry.name}</span>
+                  <span className="text-caption font-semibold">{entry.name}</span>
                   <span className="text-micro text-muted-foreground">
                     {t("legend", { value: number(entry.value), percent: percentage })}
                   </span>
@@ -153,8 +137,7 @@ const InventoryBreakdown = ({
             );
           })}
         </div>
-      </CardContent>
-    </Card>
+    </Panel>
   );
 };
 
