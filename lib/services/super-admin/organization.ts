@@ -3,7 +3,13 @@ import * as planRepo from "@/lib/repositories/super-admin/plan";
 import * as userRepo from "@/lib/repositories/super-admin/user";
 import * as membershipRepo from "@/lib/repositories/super-admin/membership";
 import { sendOrganizationInvitationEmail } from "./email";
-import { AppError, ConflictError, NotFoundError } from "@/lib/utils/errors";
+import { AppError, ConflictError, NotFoundError, ValidationError } from "@/lib/utils/errors";
+import {
+  isValidSlug,
+  slugFromName,
+  SLUG_MAX_LENGTH,
+  SLUG_MIN_LENGTH,
+} from "@/lib/utils/slug";
 
 /**
  * Organization service for Super Admin operations
@@ -22,13 +28,15 @@ export interface CreateOrganizationInput {
 }
 
 export async function createOrganization(data: CreateOrganizationInput) {
-  // Generate slug from name if not provided
-  const slug =
-    data.slug ||
-    data.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+  // Suggested from the name when not given. An all-Arabic name has no Latin
+  // letters to suggest from, and this used to carry on with an empty slug.
+  const slug = data.slug || slugFromName(data.name);
+  if (!isValidSlug(slug)) {
+    throw new ValidationError(`Invalid slug: "${slug}"`, "slug", {
+      key: "errors.slugInvalid",
+      params: { min: SLUG_MIN_LENGTH, max: SLUG_MAX_LENGTH },
+    });
+  }
 
   // Check if slug already exists
   const existingOrg = await orgRepo.findOrganizationBySlug(slug);

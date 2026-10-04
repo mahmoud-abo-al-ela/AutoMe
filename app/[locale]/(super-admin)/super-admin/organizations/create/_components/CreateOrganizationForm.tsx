@@ -3,6 +3,14 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useActionError } from "@/hooks/use-action-error";
+import { useFormatters } from "@/hooks/use-formatters";
+import {
+  isValidSlug,
+  normalizeSlugInput,
+  slugFromName,
+  SLUG_MAX_LENGTH,
+  SLUG_MIN_LENGTH,
+} from "@/lib/utils/slug";
 import { useRouter } from "@/i18n/navigation";
 import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,7 +49,10 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
   const tActions = useTranslations("common.actions");
   const tCommon = useTranslations("superAdmin.common");
   const actionError = useActionError();
+  const { number } = useFormatters();
   const router = useRouter();
+  // The slug follows the name until the admin types one.
+  const [slugEdited, setSlugEdited] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<CreateOrganizationFormData>({
     name: "",
@@ -59,16 +70,20 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Auto-generate slug from name
-    if (name === "name") {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-      setFormData((prev) => ({ ...prev, slug }));
+    if (name === "slug") {
+      setSlugEdited(true);
+      setFormData((prev) => ({ ...prev, slug: normalizeSlugInput(value) }));
+      return;
     }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      // Suggested from the name's Latin letters; an all-Arabic name suggests
+      // nothing and the slug has to be typed. See lib/utils/slug.
+      ...(name === "name" && !slugEdited ? { slug: slugFromName(value) } : {}),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,6 +91,16 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
 
     if (!formData.name.trim()) {
       toast.error(t("nameRequired"));
+      return;
+    }
+
+    if (!isValidSlug(formData.slug)) {
+      toast.error(
+        t("slugInvalid", {
+          min: number(SLUG_MIN_LENGTH),
+          max: number(SLUG_MAX_LENGTH),
+        })
+      );
       return;
     }
 

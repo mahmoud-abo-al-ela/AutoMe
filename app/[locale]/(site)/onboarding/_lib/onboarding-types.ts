@@ -64,8 +64,11 @@ export interface OnboardingLocation {
  */
 export type OnboardingLocationPatch = Partial<OnboardingLocation>;
 
-/** Availability of the generated slug; null before a name is long enough. */
-export type SlugStatus = "checking" | "available" | "taken" | null;
+/**
+ * State of the slug field: null while it is empty, "invalid" while it is not
+ * yet a complete slug (see lib/utils/slug), then the availability check.
+ */
+export type SlugStatus = "invalid" | "checking" | "available" | "taken" | null;
 
 /**
  * One row of the working-hours editor. The day name is looked up from

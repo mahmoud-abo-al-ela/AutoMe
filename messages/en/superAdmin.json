@@ -181,7 +181,7 @@
         "name": "Organization name *",
         "namePlaceholder": "Nile Motors",
         "slug": "Slug (URL)",
-        "slugHelp": "Generated from the name. Must be unique.",
+        "slugHelp": "Suggested from the name’s English letters — type one if the name is in Arabic. Must be unique.",
         "description": "Description",
         "descriptionPlaceholder": "A brief description of the organization…"
       },
@@ -209,6 +209,7 @@
       },
       "nameRequired": "Organization name is required",
       "planRequired": "Select a plan",
+      "slugInvalid": "The slug needs {min}–{max} English letters or numbers, with single hyphens between words",
       "created": "Organization created",
       "createdBody": "{name} has been created on the {plan} plan.",
       "createFailed": "Couldn’t create the organization",

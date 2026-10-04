@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { checkSlugAvailability } from "@/actions/onboarding";
 import { toLocalEgyptPhone } from "@/lib/utils/phone";
+import { isValidSlug, normalizeSlugInput, slugFromName } from "@/lib/utils/slug";
 import { createOrgDetailsSchema } from "../schemas";
 import type { z } from "zod";
 import type {
@@ -42,9 +43,14 @@ export function useOrgDetails({
     );
 
     const [slugStatus, setSlugStatus] = useState<SlugStatus>(null);
-    const [generatedSlug, setGeneratedSlug] = useState("");
-    const [slugCheckTimeout, setSlugCheckTimeout] =
-        useState<ReturnType<typeof setTimeout> | null>(null);
+    // The slug follows the name until the dealer types their own. A saved
+    // slug that differs from the name's suggestion was typed, so coming back
+    // to this step keeps it rather than regenerating over it.
+    const [slug, setSlug] = useState(formData.slug || "");
+    const [slugEdited, setSlugEdited] = useState(
+        Boolean(formData.slug) &&
+            formData.slug !== slugFromName(formData.name || "")
+    );
     const [logo, setLogo] = useState(formData.logo || "");
     const [logoError, setLogoError] = useState("");
 
@@ -97,58 +103,59 @@ export function useOrgDetails({
         });
     };
 
-    const generateSlug = (name: string) => {
-        return name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, "")
-            .replace(/\s+/g, "-")
-            .replace(/-+/g, "-")
-            .substring(0, 50);
+    // Suggested from the name's Latin letters. An all-Arabic name suggests
+    // nothing, and the dealer types the address instead — see lib/utils/slug.
+    useEffect(() => {
+        if (!slugEdited) setSlug(slugFromName(watchedName || ""));
+    }, [watchedName, slugEdited]);
+
+    const onSlugChange = (value: string) => {
+        setSlugEdited(true);
+        setSlug(normalizeSlugInput(value));
     };
 
     useEffect(() => {
-        if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
-
-        if (watchedName && watchedName.length >= 3) {
-            const slug = generateSlug(watchedName);
-            setGeneratedSlug(slug);
-            setSlugStatus("checking");
-
-            const timeout = setTimeout(async () => {
-                const result = await checkSlugAvailability(slug);
-                // `available` lives under the ActionResponse envelope; reading
-                // it off the top level made every name report as taken.
-                setSlugStatus(
-                    result.success && result.data.available ? "available" : "taken"
-                );
-            }, 500);
-            setSlugCheckTimeout(timeout);
-        } else {
-            setGeneratedSlug("");
+        if (!slug) {
             setSlugStatus(null);
+            return;
+        }
+        if (!isValidSlug(slug)) {
+            setSlugStatus("invalid");
+            return;
         }
 
+        setSlugStatus("checking");
+        let cancelled = false;
+        const timeout = setTimeout(async () => {
+            const result = await checkSlugAvailability(slug);
+            if (cancelled) return;
+            // `available` lives under the ActionResponse envelope; reading
+            // it off the top level made every name report as taken.
+            setSlugStatus(
+                result.success && result.data.available ? "available" : "taken"
+            );
+        }, 500);
+
         return () => {
-            if (slugCheckTimeout) clearTimeout(slugCheckTimeout);
+            cancelled = true;
+            clearTimeout(timeout);
         };
-    }, [watchedName]);
+    }, [slug]);
 
     const onSubmit = (data: OrgDetailsFormValues) => {
-        if (slugStatus === "taken" || !generatedSlug) {
+        if (slugStatus !== "available") {
             return;
         }
         if (!logo) {
             setLogoError(t("logoRequired"));
             return;
         }
-        updateFormData({ ...data, slug: generatedSlug, logo });
+        updateFormData({ ...data, slug, logo });
         onNext();
     };
 
     const isDisabled =
-        slugStatus === "checking" ||
-        slugStatus === "taken" ||
-        !generatedSlug ||
+        slugStatus !== "available" ||
         !watchedName?.trim() ||
         !watchedEmail?.trim() ||
         !watchedPhone?.trim() ||
@@ -162,7 +169,8 @@ export function useOrgDetails({
         handleSubmit,
         errors,
         slugStatus,
-        generatedSlug,
+        slug,
+        onSlugChange,
         onSubmit,
         isDisabled,
         watchedName,

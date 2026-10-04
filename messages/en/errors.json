@@ -47,6 +47,7 @@
   },
   "invalidInput": "Some of the details aren’t valid. Please check them and try again.",
   "invalidForm": "Please check the form and try again.",
+  "slugInvalid": "Choose a web address of {min}–{max} English letters or numbers, with single hyphens between words.",
   "billing": {
     "alreadyFree": "You’re already on the free plan.",
     "notConfigured": "Billing for this plan isn’t available right now. Please contact support.",
