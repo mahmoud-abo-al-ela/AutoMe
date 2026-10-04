@@ -1,6 +1,7 @@
 import { Building2, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { tenantHost } from "@/lib/utils/tenant-host";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,6 +16,7 @@ export default function UserOrganizations({
 }) {
   const t = useTranslations("superAdmin.users.details");
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const tRoles = useTranslations("org.settings.team.roles");
 
   return (
@@ -46,7 +48,9 @@ export default function UserOrganizations({
                 </div>
                 <div className="flex items-center justify-between mt-3">
                   <Badge variant="secondary" className="text-xs">
-                    {m.organization.subscription?.plan?.name || tCommon("noPlan")}
+                    {m.organization.subscription?.plan
+                      ? planDisplayName(tPlans, m.organization.subscription.plan)
+                      : tCommon("noPlan")}
                   </Badge>
                   {/* Styles on the Link, not <Button asChild>: in a server
                       component Radix Slot 1.2.2 can receive the link as a

@@ -16,10 +16,12 @@ import {
 } from "@/components/ui/select";
 import { Link } from "@/i18n/navigation";
 import type { Plan } from "@/lib/generated/prisma";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
   const t = useTranslations("superAdmin.organizations");
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -110,7 +112,7 @@ export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
             <SelectItem value="all">{t("filters.allPlans")}</SelectItem>
             {plans.map((plan) => (
               <SelectItem key={plan.id} value={plan.type}>
-                {plan.name}
+                {planDisplayName(tPlans, plan)}
               </SelectItem>
             ))}
           </SelectContent>

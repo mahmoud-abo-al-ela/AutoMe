@@ -56,8 +56,10 @@ async function getPlatformStats() {
   const planMap = Object.fromEntries(plans.map((p) => [p.id, p]));
 
   const subscriptionBreakdown = subscriptionsByPlan.map((s) => ({
-    // null when the plan row is gone; the card labels it in the reader's language.
-    plan: planMap[s.planId]?.name ?? null,
+    // null when the plan row is gone; the card names it in the reader's language.
+    plan: planMap[s.planId]
+      ? { type: planMap[s.planId].type, name: planMap[s.planId].name }
+      : null,
     count: s._count.id,
   }));
 

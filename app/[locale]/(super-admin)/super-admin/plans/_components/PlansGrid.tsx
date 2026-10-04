@@ -14,6 +14,7 @@ import DeletePlanDialog from "./DeletePlanDialog";
 import { Prisma, type Plan, type PlanType } from "@/lib/generated/prisma";
 import type { PlanFormSubmitData } from "./usePlanForm";
 import type { PlanFormInput } from "@/lib/services/super-admin/plan";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 /** A plan row as page.tsx loads it, with its active-subscription tally. */
 export type PlanWithUsage = Prisma.PlanGetPayload<{
@@ -26,6 +27,7 @@ export type PlanWithUsage = Prisma.PlanGetPayload<{
 export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
   const t = useTranslations("superAdmin.plans");
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const actionError = useActionError();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -69,7 +71,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
 
       if (result.success) {
         toast.success(t("toasts.created"), {
-          description: t("toasts.createdBody", { name: formData.name }),
+          description: t("toasts.createdBody", { name: planDisplayName(tPlans, formData) }),
         });
         setCreateDialog(false);
         startTransition(() => {
@@ -100,7 +102,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
 
       if (result.success) {
         toast.success(t("toasts.updated"), {
-          description: t("toasts.updatedBody", { name: formData.name }),
+          description: t("toasts.updatedBody", { name: planDisplayName(tPlans, formData) }),
         });
         setEditDialog({ open: false, plan: null });
         startTransition(() => {
@@ -129,7 +131,9 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
 
       if (result.success) {
         toast.success(t("toasts.deleted"), {
-          description: t("toasts.deletedBody", { name: deleteDialog.plan.name }),
+          description: t("toasts.deletedBody", {
+            name: planDisplayName(tPlans, deleteDialog.plan),
+          }),
         });
         setDeleteDialog({ open: false, plan: null });
         startTransition(() => {

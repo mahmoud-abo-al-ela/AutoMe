@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { tenantHost } from "@/lib/utils/tenant-host";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Car, Users, Calendar, ExternalLink } from "lucide-react";
@@ -26,6 +27,7 @@ export default function OrganizationRow({
   isPending: boolean;
 }) {
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const { relativeToNow, number } = useFormatters();
 
   const getPlanBadgeColor = (planType: PlanType | undefined) => {
@@ -61,7 +63,9 @@ export default function OrganizationRow({
           variant="secondary"
           className={getPlanBadgeColor(org.subscription?.plan?.type)}
         >
-          {org.subscription?.plan?.name || tCommon("noPlan")}
+          {org.subscription?.plan
+            ? planDisplayName(tPlans, org.subscription.plan)
+            : tCommon("noPlan")}
         </Badge>
       </TableCell>
       <TableCell className="text-center">

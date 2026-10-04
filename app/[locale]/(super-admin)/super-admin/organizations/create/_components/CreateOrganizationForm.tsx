@@ -21,6 +21,7 @@ import ContactInfoSection from "./ContactInfoSection";
 import PlanSection from "./PlanSection";
 import OwnerSection from "./OwnerSection";
 import type { Plan } from "@/lib/generated/prisma";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 /** The fields the create-organization form collects. All are strings, since
  * they come straight from text inputs and a plan Select. */
@@ -50,6 +51,7 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
   const tCommon = useTranslations("superAdmin.common");
   const actionError = useActionError();
   const { number } = useFormatters();
+  const tPlans = useTranslations("plans");
   const router = useRouter();
   // The slug follows the name until the admin types one.
   const [slugEdited, setSlugEdited] = useState(false);
@@ -116,7 +118,10 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
         toast.success(t("created"), {
           description: t("createdBody", {
             name: formData.name,
-            plan: plans.find((p) => p.id === formData.planId)?.name ?? "",
+            plan: (() => {
+              const chosen = plans.find((p) => p.id === formData.planId);
+              return chosen ? planDisplayName(tPlans, chosen) : "";
+            })(),
           }),
         });
         router.push("/super-admin/organizations");

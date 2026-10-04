@@ -61,7 +61,9 @@ export default function PlanCard({
   // The limit a bullet quotes is formatted here rather than left to ICU,
   // which would use the bare `ar` tag and render Western digits.
   const featureParams = (feature: (typeof features)[number]) =>
-    feature.params ? { value: number(feature.params.count) } : undefined;
+    feature.params
+      ? { count: feature.params.count, value: number(feature.params.count) }
+      : undefined;
 
   return (
     <Card

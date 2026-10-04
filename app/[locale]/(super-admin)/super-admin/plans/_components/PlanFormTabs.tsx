@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { planKeyFor } from "@/components/Pricing/pricing-plans";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,12 @@ export default function PlanFormTabs({
 }) {
   const t = useTranslations("superAdmin.plans.form");
   const tPlans = useTranslations("plans.plans");
+  const { number } = useFormatters();
+  // EGP examples in the reader's numerals; the field itself takes ASCII digits.
+  const pricePlaceholder = (egp: number) =>
+    t("pricePlaceholder", {
+      value: number(egp, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    });
   const typeLabel = (type: PlanType) => {
     const key = planKeyFor(type);
     return key ? tPlans(`${key}.name`) : type;
@@ -90,7 +97,7 @@ export default function PlanFormTabs({
               id="monthlyPrice"
               type="number"
               step="0.01"
-              placeholder="e.g., 29.00"
+              placeholder={pricePlaceholder(500)}
               value={inputValues.monthlyPrice}
               onChange={(e) => setInputValues({ ...inputValues, monthlyPrice: e.target.value })}
               onBlur={(e) => {
@@ -106,7 +113,7 @@ export default function PlanFormTabs({
               id="yearlyPrice"
               type="number"
               step="0.01"
-              placeholder="e.g., 290.00"
+              placeholder={pricePlaceholder(5000)}
               value={inputValues.yearlyPrice}
               onChange={(e) => setInputValues({ ...inputValues, yearlyPrice: e.target.value })}
               onBlur={(e) => {

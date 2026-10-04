@@ -21,6 +21,7 @@ import { changeOrganizationPlan } from "@/actions/super-admin";
 import type { Plan } from "@/lib/generated/prisma";
 import type { OrganizationDetail } from "./OrgDetailsHeader";
 import { formatPlanAmount } from "@/lib/utils/currency";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 export default function OrgSubscription({
   subscription,
@@ -34,11 +35,13 @@ export default function OrgSubscription({
   const t = useTranslations("superAdmin.organizations.details.subscription");
   const tCommon = useTranslations("superAdmin.common");
   const tStatus = useTranslations("org.billing.status");
+  const tPlans = useTranslations("plans");
+  const planName = (plan: Plan) => planDisplayName(tPlans, plan);
   const actionError = useActionError();
   const { date: fmtDate, locale } = useFormatters();
   const amount = (minor: number) => formatPlanAmount(minor, locale);
   const planOption = (plan: Plan) =>
-    tCommon("planOption", { name: plan.name, amount: amount(plan.monthlyPrice) });
+    tCommon("planOption", { name: planName(plan), amount: amount(plan.monthlyPrice) });
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedPlan, setSelectedPlan] = useState(subscription?.planId || "");
@@ -54,7 +57,7 @@ export default function OrgSubscription({
       if (result.success) {
         toast.success(t("updated"), {
           description: newPlan
-            ? t("updatedBody", { plan: newPlan.name })
+            ? t("updatedBody", { plan: planName(newPlan) })
             : undefined,
         });
         startTransition(() => {
@@ -89,7 +92,9 @@ export default function OrgSubscription({
           <>
             <div className="p-4 border rounded-lg bg-muted/50">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold">{currentPlan?.name}</span>
+                <span className="text-lg font-bold">
+                  {currentPlan ? planName(currentPlan) : null}
+                </span>
                 <Badge
                   variant={
                     subscription.status === "ACTIVE"

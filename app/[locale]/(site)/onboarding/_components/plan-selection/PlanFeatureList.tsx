@@ -53,7 +53,7 @@ export function PlanFeatureList({ plan }: { plan: OnboardingPlan }) {
                             // ICU, which would render Western digits against
                             // the Eastern ones everywhere else on the card.
                             feature.params
-                                ? { value: fmt.number(feature.params.count) }
+                                ? { count: feature.params.count, value: fmt.number(feature.params.count) }
                                 : undefined
                         )}
                     </span>

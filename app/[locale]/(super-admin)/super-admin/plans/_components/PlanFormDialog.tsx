@@ -2,6 +2,7 @@
 
 import { Loader2, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePlanForm } from "./usePlanForm";
@@ -40,7 +41,8 @@ export default function PlanFormDialog({
     const t = useTranslations("superAdmin.plans.form");
     const tCommon = useTranslations("superAdmin.common");
     const tActions = useTranslations("common.actions");
-    const planName = plan?.name ?? "";
+    const tPlans = useTranslations("plans");
+    const planName = plan ? planDisplayName(tPlans, plan) : "";
 
     const handleSubmit = () => {
         onSubmit(getSubmitData());

@@ -337,6 +337,7 @@
       "typePlaceholder": "Select type",
       "monthlyPrice": "Monthly price (EGP)",
       "yearlyPrice": "Yearly price (EGP)",
+      "pricePlaceholder": "e.g. {value}",
       "maxCars": "Max cars (-1 = unlimited)",
       "maxMembers": "Max members (-1 = unlimited)",
       "maxImages": "Max images per car",

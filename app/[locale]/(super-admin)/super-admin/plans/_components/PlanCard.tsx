@@ -18,13 +18,12 @@ import {
 import { useTranslations } from "next-intl";
 import type { PlanType } from "@/lib/generated/prisma";
 import { useFormatters } from "@/hooks/use-formatters";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import type { PlanFeatures } from "./usePlanForm";
 import type { PlanWithUsage } from "./PlansGrid";
 import {
   Card,
-  CardContent,
-  CardDescription,
+  CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -63,7 +62,6 @@ export default function PlanCard({
   const tPlans = useTranslations("plans");
   const { number, locale } = useFormatters();
   const amount = (minor: number) => formatPlanAmount(minor, locale);
-  const typeKey = planKeyFor(plan.type);
 
   // Plan.features is a Json column; the shape is only written by the plan form.
   const features = (plan.features as Partial<PlanFeatures> | null) || {};
@@ -86,12 +84,10 @@ export default function PlanCard({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl">{plan.name}</CardTitle>
-            <CardDescription>
-              <Badge variant="outline" className="mt-1">
-                {typeKey ? tPlans(`plans.${typeKey}.name`) : plan.type}
-              </Badge>
-            </CardDescription>
+            {/* The shared name for the type, as on the pricing page, so the
+                card reads in the admin's language. The stored name is only a
+                fallback for an unknown type. */}
+            <CardTitle className="text-xl">{planDisplayName(tPlans, plan)}</CardTitle>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -142,7 +138,7 @@ export default function PlanCard({
             <span>
               {plan.maxCars === -1
                 ? tPlans("features.carListingsUnlimited")
-                : tPlans("features.carListings", { value: number(plan.maxCars) })}
+                : tPlans("features.carListings", { count: plan.maxCars, value: number(plan.maxCars) })}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
@@ -150,13 +146,16 @@ export default function PlanCard({
             <span>
               {plan.maxMembers === -1
                 ? tPlans("features.teamMembersUnlimited")
-                : tPlans("features.teamMembers", { value: number(plan.maxMembers) })}
+                : tPlans("features.teamMembers", { count: plan.maxMembers, value: number(plan.maxMembers) })}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Image className="h-4 w-4 text-muted-foreground" />
             <span>
-              {tPlans("features.imagesPerCar", { value: number(plan.maxImagesPerCar) })}
+              {tPlans("features.imagesPerCar", {
+                count: plan.maxImagesPerCar,
+                value: number(plan.maxImagesPerCar),
+              })}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
@@ -165,6 +164,7 @@ export default function PlanCard({
               {plan.auditLogRetentionDays === null
                 ? tPlans("features.auditLogsUnlimited")
                 : tPlans("features.auditLogs", {
+                    count: plan.auditLogRetentionDays,
                     value: number(plan.auditLogRetentionDays),
                   })}
             </span>

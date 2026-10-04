@@ -2,6 +2,7 @@ import { Car, Calendar, Building2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatNumber } from "@/lib/utils/number";
 import type { Locale } from "@/i18n/routing";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Prisma } from "@/lib/generated/prisma";
@@ -23,6 +24,7 @@ export default function TopOrganizations({
 }) {
   const t = useTranslations("superAdmin.analytics.top");
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const locale = useLocale() as Locale;
   const number = (value: number) => formatNumber(value, locale);
 
@@ -64,7 +66,9 @@ export default function TopOrganizations({
                   )}
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {org.subscription?.plan?.name || tCommon("noPlan")}
+                  {org.subscription?.plan
+                    ? planDisplayName(tPlans, org.subscription.plan)
+                    : tCommon("noPlan")}
                 </Badge>
               </div>
             </div>

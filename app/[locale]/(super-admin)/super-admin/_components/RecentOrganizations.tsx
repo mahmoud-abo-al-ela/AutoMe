@@ -4,6 +4,7 @@
 // from a server component throws rather than formatting.
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ export default function RecentOrganizations({
 }) {
   const t = useTranslations("superAdmin.overview.recentOrganizations");
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const { relativeToNow, number } = useFormatters();
 
   const getPlanBadgeColor = (planType: PlanType | undefined) => {
@@ -103,7 +105,9 @@ export default function RecentOrganizations({
                         org.subscription?.plan?.type
                       )}
                     >
-                      {org.subscription?.plan?.name || tCommon("noPlan")}
+                      {org.subscription?.plan
+                        ? planDisplayName(tPlans, org.subscription.plan)
+                        : tCommon("noPlan")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">

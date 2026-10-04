@@ -9,12 +9,16 @@ import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber } from "@/lib/utils/number";
 import type { Locale } from "@/i18n/routing";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 /**
  * One row of the "active subscriptions by plan" breakdown built in page.tsx.
  * `plan` is null when the subscription points at a plan that no longer exists.
  */
-export type SubscriptionBreakdownItem = { plan: string | null; count: number };
+export type SubscriptionBreakdownItem = {
+  plan: { type: string; name: string } | null;
+  count: number;
+};
 
 export default function PlatformStats({
   totalOrganizations,
@@ -33,6 +37,7 @@ export default function PlatformStats({
 }) {
   const t = useTranslations("superAdmin.overview");
   const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const locale = useLocale() as Locale;
   const number = (value: number) => formatNumber(value, locale);
 
@@ -113,11 +118,13 @@ export default function PlatformStats({
             {subscriptionBreakdown.length > 0 ? (
               subscriptionBreakdown.map((item, index) => (
                 <div
-                  key={item.plan ?? `unknown-${index}`}
+                  key={item.plan?.type ?? `unknown-${index}`}
                   className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg"
                 >
                   <span className="font-medium">
-                    {item.plan ?? tCommon("unknown")}
+                    {item.plan
+                      ? planDisplayName(tPlans, item.plan)
+                      : tCommon("unknown")}
                   </span>
                   <span className="text-muted-foreground">·</span>
                   <span className="text-sm text-muted-foreground">

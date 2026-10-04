@@ -3,6 +3,7 @@
 import { Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,8 @@ export default function DeletePlanDialog({
   const t = useTranslations("superAdmin.plans.delete");
   const tCommon = useTranslations("superAdmin.common");
   const tActions = useTranslations("common.actions");
+  const tPlans = useTranslations("plans");
+  const name = plan ? planDisplayName(tPlans, plan) : "";
   const { number } = useFormatters();
   const active = plan?.activeSubscriptions ?? 0;
 
@@ -39,13 +42,13 @@ export default function DeletePlanDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            {t("title", { name: plan?.name ?? "" })}
+            {t("title", { name })}
           </DialogTitle>
           <DialogDescription asChild>
             <div>
               <p>
                 {t.rich("body", {
-                  name: plan?.name ?? "",
+                  name,
                   strong: (chunks) => (
                     <span className="font-semibold">{chunks}</span>
                   ),
