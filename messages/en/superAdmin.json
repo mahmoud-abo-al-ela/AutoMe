@@ -12,7 +12,6 @@
     "analytics": "Analytics",
     "auditLogs": "Audit Logs",
     "impersonation": "Impersonation",
-    "settings": "Platform Settings",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "collapseSidebar": "Collapse sidebar",
@@ -466,55 +465,6 @@
       "started": "Impersonation started",
       "startedBody": "Now viewing {org} as {name}.",
       "failed": "Couldn’t start impersonation"
-    }
-  },
-  "settings": {
-    "title": "Platform Settings",
-    "subtitle": "Configure global platform settings and defaults",
-    "tabs": {
-      "general": "General",
-      "security": "Security",
-      "email": "Email"
-    },
-    "general": {
-      "title": "General settings",
-      "description": "Basic platform settings and branding",
-      "platformName": "Platform name",
-      "supportEmail": "Support email",
-      "trialDays": "Default trial period (days)",
-      "trialDaysHelp": "Length of a new organization’s trial",
-      "maintenance": "Maintenance mode",
-      "maintenanceHelp": "Temporarily block access for everyone except super admins",
-      "maintenanceOn": "Maintenance mode is on. Regular users can’t access the platform.",
-      "saved": "Settings saved"
-    },
-    "security": {
-      "title": "Security settings",
-      "description": "Security policies and authentication settings",
-      "maxLoginAttempts": "Max login attempts",
-      "maxLoginAttemptsHelp": "Failed attempts before an account is locked",
-      "sessionTimeout": "Session timeout (hours)",
-      "sessionTimeoutHelp": "How long an idle session stays signed in",
-      "retention": "Audit log retention (days)",
-      "retentionHelp": "How long audit logs are kept before they are deleted",
-      "mfa": "Require MFA for admins",
-      "mfaHelp": "Require multi-factor authentication on every admin account",
-      "saved": "Security settings saved"
-    },
-    "email": {
-      "title": "Email settings",
-      "description": "Email sending and notification settings",
-      "fromName": "From name",
-      "fromEmail": "From email",
-      "notifications": "Email notifications",
-      "welcome": "Welcome email",
-      "welcomeHelp": "Send a welcome email to new organization owners",
-      "reminders": "Test drive reminders",
-      "remindersHelp": "Send reminder emails before scheduled test drives",
-      "sendTest": "Send test email",
-      "sending": "Sending…",
-      "testSent": "Test email sent",
-      "saved": "Email settings saved"
     }
   }
 }

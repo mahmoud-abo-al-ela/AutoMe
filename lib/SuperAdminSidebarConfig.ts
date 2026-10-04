@@ -6,7 +6,6 @@ import {
   BarChart3,
   FileText,
   UserCog,
-  Settings,
 } from "lucide-react";
 
 /**
@@ -57,12 +56,6 @@ export const superAdminSidebarItems = [
     labelKey: "impersonation",
     icon: UserCog,
     path: "/super-admin/impersonation",
-  },
-  {
-    name: "settings",
-    labelKey: "settings",
-    icon: Settings,
-    path: "/super-admin/settings",
   },
 ] as const;
 
