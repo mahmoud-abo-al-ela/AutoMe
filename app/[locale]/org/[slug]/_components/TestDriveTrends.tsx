@@ -1,13 +1,18 @@
 "use client";
-
 import React, { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { useFormatters } from "@/hooks/use-formatters";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Timer } from "lucide-react";
+import { useFormatters } from "@/hooks/use-formatters";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Panel, PanelEmpty } from "./Panel";
+import { RangeSelect } from "./OverviewChart";
 
 /** One day of the test-drive trend series, split by status. */
 export type TestDriveTrendPoint = {
@@ -18,6 +23,17 @@ export type TestDriveTrendPoint = {
   cancelled: number;
 };
 
+// Stacked bottom to top. Each status has the colour it has everywhere in the
+// dashboard: waiting is marker yellow, confirmed plate blue, completed green,
+// cancelled brick.
+const STATUSES = ["completed", "confirmed", "pending", "cancelled"] as const;
+const STATUS_COLOR = {
+  completed: "var(--positive)",
+  confirmed: "var(--primary)",
+  pending: "var(--marker)",
+  cancelled: "var(--destructive)",
+} as const;
+
 const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
   const t = useTranslations("org.dashboard");
   // The four statuses are already named for the public test-drive surface.
@@ -26,178 +42,94 @@ const TestDriveTrends = ({ data }: { data: TestDriveTrendPoint[] }) => {
 
   const filteredData = useMemo(() => {
     if (!data) return [];
-    
-    const daysMap: Record<string, number> = { "7d": 7, "14d": 14, "30d": 30 };
-    const days = daysMap[timeRange] || 30;
-    const cutoffDate = new Date(Date.now() - days * 86400000);
-
+    const days = { "7d": 7, "14d": 14, "30d": 30 }[timeRange] ?? 30;
+    const cutoff = Date.now() - days * 86_400_000;
     return data
-      .filter((item) => new Date(item.date) >= cutoffDate)
+      .filter((item) => new Date(item.date).getTime() >= cutoff)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [data, timeRange]);
 
-  // Chart axis and tooltip labels follow the reader's locale; the axis
-  // *orientation* stays physical (see the i18n skill).
   const { date: formatDateFor, number } = useFormatters();
   const chartDate = (value: string | number | Date) =>
     formatDateFor(value, { day: "numeric", month: "short", year: undefined });
 
-  const chartConfig = {
-    completed: {
-      label: tStatus("COMPLETED"),
-      color: "#10b981", // emerald-500
-    },
-    confirmed: {
-      label: tStatus("CONFIRMED"),
-      color: "#3b82f6", // blue-500
-    },
-    pending: {
-      label: tStatus("PENDING"),
-      color: "#f59e0b", // amber-500
-    },
-    cancelled: {
-      label: tStatus("CANCELLED"),
-      color: "#ef4444", // red-500
-    },
-  };
+  const chartConfig = Object.fromEntries(
+    STATUSES.map((key) => [key, { label: tStatus(key.toUpperCase()), color: STATUS_COLOR[key] }]),
+  );
 
   if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("trends.title")}</CardTitle>
-          <CardDescription>{t("trends.emptyDescription")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center h-[300px]">
-          <div className="bg-muted rounded-full p-4 mb-4">
-            <Timer className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-lg font-medium">{t("trends.emptyTitle")}</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
-            {t("trends.emptyBody")}
-          </p>
-        </CardContent>
-      </Card>
+      <Panel title={t("trends.title")} description={t("trends.emptyDescription")}>
+        <PanelEmpty icon={Timer} title={t("trends.emptyTitle")} body={t("trends.emptyBody")} />
+      </Panel>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <CardTitle>{t("trends.title")}</CardTitle>
-            <CardDescription>{t("trends.description")}</CardDescription>
-          </div>
-
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger
-              className="w-[140px] rounded-lg"
-              aria-label={t("ranges.label")}
-            >
-              <SelectValue placeholder={t("ranges.last30")} />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="30d" className="rounded-lg">
-                {t("ranges.last30")}
-              </SelectItem>
-              <SelectItem value="14d" className="rounded-lg">
-                {t("ranges.last14")}
-              </SelectItem>
-              <SelectItem value="7d" className="rounded-lg">
-                {t("ranges.last7")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={filteredData}>
-              <defs>
-                <linearGradient id="fillCompleted" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-completed)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-completed)" stopOpacity={0.1} />
+    <Panel
+      title={t("trends.title")}
+      description={t("trends.description")}
+      actions={
+        <RangeSelect
+          value={timeRange}
+          onChange={setTimeRange}
+          label={t("ranges.label")}
+          options={[
+            { value: "7d", label: t("ranges.last7") },
+            { value: "14d", label: t("ranges.last14") },
+            { value: "30d", label: t("ranges.last30") },
+          ]}
+        />
+      }
+      bodyClassName="px-2 sm:px-6"
+    >
+      <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={filteredData}>
+            <defs>
+              {STATUSES.map((key) => (
+                <linearGradient key={key} id={`fill-drive-${key}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={`var(--color-${key})`} stopOpacity={0.45} />
+                  <stop offset="95%" stopColor={`var(--color-${key})`} stopOpacity={0.04} />
                 </linearGradient>
-                <linearGradient id="fillConfirmed" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-confirmed)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-confirmed)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillPending" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-pending)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-pending)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillCancelled" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-cancelled)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-cancelled)" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                minTickGap={32}
-                tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return chartDate(date);
-                }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                width={40}
-                tickFormatter={(value: number) => number(value)}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value) => {
-                      return chartDate(value);
-                    }}
-                    indicator="dot"
-                  />
-                }
-              />
-              {/* Render stack order: bottom to top visually */}
+              ))}
+            </defs>
+            <CartesianGrid vertical={false} stroke="var(--border)" />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={32}
+              tickFormatter={(value) => chartDate(new Date(value))}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              width={40}
+              tickFormatter={(value: number) => number(value)}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent labelFormatter={(value) => chartDate(value)} indicator="dot" />}
+            />
+            {STATUSES.map((key) => (
               <Area
-                dataKey="completed"
+                key={key}
+                dataKey={key}
                 type="monotone"
-                fill="url(#fillCompleted)"
-                stroke="var(--color-completed)"
+                fill={`url(#fill-drive-${key})`}
+                stroke={`var(--color-${key})`}
+                strokeWidth={2}
                 stackId="a"
               />
-              <Area
-                dataKey="confirmed"
-                type="monotone"
-                fill="url(#fillConfirmed)"
-                stroke="var(--color-confirmed)"
-                stackId="a"
-              />
-              <Area
-                dataKey="pending"
-                type="monotone"
-                fill="url(#fillPending)"
-                stroke="var(--color-pending)"
-                stackId="a"
-              />
-              <Area
-                dataKey="cancelled"
-                type="monotone"
-                fill="url(#fillCancelled)"
-                stroke="var(--color-cancelled)"
-                stackId="a"
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+            ))}
+            <ChartLegend content={<ChartLegendContent />} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </Panel>
   );
 };
 

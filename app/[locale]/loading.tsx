@@ -3,24 +3,24 @@
 import { usePathname } from "next/navigation";
 import Loading from "@/components/Loading";
 import { RoadLoader } from "@/components/brand";
-import { isDashboardPath } from "@/lib/org/client";
+import { getOrgSlugFromPath, isSuperAdminPath } from "@/lib/org/client";
 
 /**
  * The boundary above every locale route, shown on a cold load or reload while
  * the route's layout resolves (the public layout awaits the user and the
- * dealership). Public routes — the site, sign-in, sign-up — get the road
- * loader; dashboard routes keep theirs.
+ * dealership). The public site and the dealer dashboard get the road loader;
+ * the super-admin keeps its own.
  *
- * The public site's palette applies only under data-theme="site", which the
- * (site) layout sets once it mounts — before that, this wrapper sets it, so
- * the loader appears in the site's colours. The site font is not loaded here
- * on purpose (the dashboards would pay for it too); on a cold load the plate
- * shows the fallback face for that moment.
+ * The site palette applies only under data-theme="site", which the layouts
+ * set once they mount — before that, this wrapper sets it (in work mode for
+ * the dashboard), so the loader appears in the right colours. The site font
+ * is not loaded here on purpose (the super-admin would pay for it too); on a
+ * cold load the plate shows the fallback face for that moment.
  */
 export default function LoadingUI() {
   const pathname = usePathname();
 
-  if (isDashboardPath(pathname)) {
+  if (isSuperAdminPath(pathname)) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
         <Loading />
@@ -29,7 +29,11 @@ export default function LoadingUI() {
   }
 
   return (
-    <div data-theme="site" className="flex min-h-screen items-center justify-center bg-background text-foreground">
+    <div
+      data-theme="site"
+      data-surface={getOrgSlugFromPath(pathname) ? "work" : undefined}
+      className="flex min-h-screen items-center justify-center bg-background text-foreground"
+    >
       <RoadLoader />
     </div>
   );

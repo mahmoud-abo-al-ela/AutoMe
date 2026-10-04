@@ -33,3 +33,8 @@ export const getTestDriveTrendsData = withOrgAuth(async (ctx) => {
   const trends = await dashboardService.getTestDriveTrendsData(ctx.userId, ctx.organization.id, days);
   return createSuccessResponse(trends);
 });
+
+export const getTodayBoard = withOrgAuth(async (ctx) => {
+  const board = await dashboardService.getTodayBoard(ctx.userId, ctx.organization.id);
+  return createSuccessResponse(board);
+});
