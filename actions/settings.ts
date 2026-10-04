@@ -1,6 +1,6 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { validateAction } from "@/lib/middleware/with-validation";
@@ -25,11 +25,11 @@ export const updateOrganizationProfile = withOrgAuth(async (ctx, payload: unknow
     ctx.organization.id
   );
 
-  revalidatePath(`/org/${ctx.organization.slug}/settings/profile`);
-  revalidatePath(`/dealerships/${ctx.organization.slug}`);
-  revalidatePath("/dealerships");
-  revalidatePath("/cars");
-  revalidatePath("/");
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings/profile`);
+  revalidateLocalized(`/dealerships/${ctx.organization.slug}`);
+  revalidateLocalized("/dealerships");
+  revalidateLocalized("/cars");
+  revalidateLocalized("/");
 
   return createSuccessResponse(updatedProfile, "Organization profile updated successfully");
 });
@@ -48,9 +48,10 @@ export const updateDealershipTerms = withOrgAuth(async (ctx, payload: unknown) =
   );
 
   // Shown on every one of the dealership's listings, and cited by the assistant.
-  revalidatePath(`/org/${ctx.organization.slug}/settings/terms`);
-  revalidatePath(`/dealerships/${ctx.organization.slug}`);
-  revalidatePath("/cars", "layout");
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings/terms`);
+  revalidateLocalized(`/dealerships/${ctx.organization.slug}`);
+  // Every car page shows its dealership's terms.
+  revalidateRouteTree("/[locale]/(site)/cars");
 
   return createSuccessResponse(updated, "Dealership terms updated");
 });
@@ -67,7 +68,7 @@ export const updateEmailPreferences = withOrgAuth(async (ctx, payload: unknown) 
     ctx.userId,
     ctx.organization.id
   );
-  revalidatePath(`/org/${ctx.organization.slug}/settings/weekly-summary`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings/weekly-summary`);
   return createSuccessResponse(updated, "Email settings updated");
 });
 
@@ -80,8 +81,8 @@ export const updateWorkingHours = withOrgAuth(
   async (ctx, workingHours: WorkingHourInput[]) => {
   await dealershipService.updateWorkingHours(workingHours, ctx.userId, ctx.organization.id);
 
-  revalidatePath(`/org/${ctx.organization.slug}/settings/working-hours`);
-  revalidatePath("/");
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings/working-hours`);
+  revalidateLocalized("/");
 
   return createSuccessResponse(null, "Working hours updated successfully");
 });
@@ -96,8 +97,8 @@ export const updateUserRole = withOrgAuth(
   async (ctx, targetUserId: string, role: UserRole) => {
   await dealershipService.updateUserRole(targetUserId, role, ctx.userId, ctx.organization.id);
 
-  revalidatePath("/admin/settings/users");
-  revalidatePath("/");
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
+  revalidateLocalized("/");
 
   return createSuccessResponse(null, "User role updated successfully");
 });
@@ -105,7 +106,7 @@ export const updateUserRole = withOrgAuth(
 export const deleteUser = withOrgAuth(async (ctx, targetUserId: string) => {
   await dealershipService.deleteUser(targetUserId, ctx.userId, ctx.organization.id);
 
-  revalidatePath("/admin/settings/users");
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
 
   return createSuccessResponse(null, "User deleted successfully");
 });

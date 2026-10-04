@@ -6,7 +6,7 @@ import {
   endImpersonation,
   getCurrentImpersonationSession,
 } from "@/lib/services/impersonation";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
 import {
@@ -70,7 +70,7 @@ export const endImpersonationAction = withErrorHandling(async () => {
 
   await endImpersonation(session.id, user.email);
 
-  revalidatePath("/super-admin");
+  revalidateLocalized("/super-admin");
 
   return createSuccessResponse(null, "Impersonation session ended");
 });

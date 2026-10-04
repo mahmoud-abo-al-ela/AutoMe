@@ -1,7 +1,7 @@
 "use server";
 
 
-import { revalidatePath } from "next/cache";
+import { revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
@@ -110,7 +110,9 @@ export const createDealershipReview = withAuth(
         validatedReview
     );
 
-    revalidatePath(`/dealerships/${organizationId}`);
+    // The detail page is keyed by slug, which this action does not have; the
+    // listing shows the rating too.
+    revalidateRouteTree("/[locale]/(site)/dealerships");
 
     return createSuccessResponse(result, result.message);
 });

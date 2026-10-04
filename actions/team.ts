@@ -4,7 +4,7 @@ import { db } from "@/lib/prisma";
 import {
   getUserMembership,
 } from "@/lib/getOrganization";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
@@ -77,7 +77,7 @@ export const inviteTeamMember = withOrgAuth(
       ctx.user.email
     );
 
-    revalidatePath("/admin/team");
+    revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
 
     return createSuccessResponse(null, "Team member invited successfully");
   })
@@ -132,7 +132,7 @@ export const updateMemberRole = withOrgAuth(
       ctx.user.email
     );
 
-    revalidatePath("/admin/team");
+    revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
 
     return createSuccessResponse(null, "Member role updated successfully");
   }
@@ -188,7 +188,7 @@ export const removeMember = withOrgAuth(
       where: { id: memberId },
     });
 
-    revalidatePath("/admin/team");
+    revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
 
     return createSuccessResponse(null, "Member removed successfully");
   }

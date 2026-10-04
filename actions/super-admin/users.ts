@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as userService from "@/lib/services/super-admin/user";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -25,7 +25,7 @@ export const updateUserRole = withSuperAdmin(
       },
     });
 
-    revalidatePath("/super-admin/users");
+    revalidateLocalized("/super-admin/users");
     return createSuccessResponse(null, "User role updated");
   }
 );

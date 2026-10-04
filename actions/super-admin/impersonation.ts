@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as impersonationService from "@/lib/services/super-admin/impersonation";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
@@ -32,7 +32,7 @@ export const startImpersonation = withSuperAdmin(
     // no direct db access from the action layer.
     await auditHelpers.logImpersonationStarted(session, admin.email);
 
-    revalidatePath("/super-admin/impersonation");
+    revalidateLocalized("/super-admin/impersonation");
     return createSuccessResponse({
       session,
       orgSlug: session.organization.slug,
@@ -48,6 +48,6 @@ export const endImpersonation = withSuperAdmin(async (admin, sessionId: string) 
 
   await auditHelpers.logImpersonationEnded(session, admin.email);
 
-  revalidatePath("/super-admin/impersonation");
+  revalidateLocalized("/super-admin/impersonation");
   return createSuccessResponse(null, "Impersonation session ended");
 });

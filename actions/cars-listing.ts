@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as carService from "@/lib/services/car";
 import * as wishlistService from "@/lib/services/wishlist";
 import * as carRepository from "@/lib/repositories/car";
@@ -82,8 +82,8 @@ export const getCarsFilters = withErrorHandling(async (filters: CarFilters = {})
 export const toggleWishlist = withAuth(async (ctx, carId: string) => {
   const result = await wishlistService.toggleWishlist(carId, ctx.userId);
 
-  revalidatePath("/wishlist");
-  revalidatePath("/cars");
+  revalidateLocalized("/wishlist");
+  revalidateLocalized("/cars");
 
   return createSuccessResponse(result, result.message);
 });

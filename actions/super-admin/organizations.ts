@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as orgService from "@/lib/services/super-admin/organization";
 import * as subscriptionService from "@/lib/services/super-admin/subscription";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
@@ -33,7 +33,7 @@ export const createOrganization = withSuperAdmin(
     },
   });
 
-  revalidatePath("/super-admin/organizations");
+  revalidateLocalized("/super-admin/organizations");
   return createSuccessResponse({ organization });
 });
 
@@ -56,7 +56,7 @@ export const updateOrganizationStatus = withSuperAdmin(
       },
     });
 
-    revalidatePath("/super-admin/organizations");
+    revalidateLocalized("/super-admin/organizations");
     return createSuccessResponse(null, `Organization ${isActive ? "activated" : "suspended"}`);
   }
 );
@@ -82,7 +82,7 @@ export const deleteOrganization = withSuperAdmin(async (admin, orgId: string) =>
     },
   });
 
-  revalidatePath("/super-admin/organizations");
+  revalidateLocalized("/super-admin/organizations");
   return createSuccessResponse(null, "Organization deleted");
 });
 
@@ -109,7 +109,7 @@ export const changeOrganizationPlan = withSuperAdmin(
       },
     });
 
-    revalidatePath("/super-admin/organizations");
+    revalidateLocalized("/super-admin/organizations");
     return createSuccessResponse(null, "Plan changed successfully");
   }
 );

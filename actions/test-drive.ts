@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as testDriveService from "@/lib/services/test-drive";
 import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -23,6 +23,18 @@ import {
   sendTestDriveAdminNotificationEmail,
   sendTestDriveStatusUpdateEmail,
 } from "@/lib/services/notification";
+
+/**
+ * Every page that shows a test drive: the car's page, the buyer's booking
+ * page, and the dealer's list and dashboard. Dealer pages go by route tree
+ * because the user-side actions have the organization's id, not its slug.
+ */
+function revalidateTestDrivePages(carId: string | null | undefined) {
+  if (carId) revalidateLocalized(`/cars/${carId}`);
+  revalidateLocalized("/test-drive");
+  revalidateRouteTree("/[locale]/org/[slug]/test-drives");
+  revalidateRouteTree("/[locale]/org/[slug]/dashboard");
+}
 
 export const requestTestDrive = withAuth(async (ctx, rawData) => {
   await enforceRateLimit();
@@ -105,8 +117,7 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
     }
   }
 
-  revalidatePath("/cars/[id]");
-  revalidatePath("/admin");
+  revalidateTestDrivePages(testDriveData.carId);
 
   return createSuccessResponse(
     testDrive,
@@ -162,9 +173,7 @@ export const editTestDrive = withAuth(async (ctx, input) => {
     ctx.userId,
   );
 
-  revalidatePath("/cars/[id]");
-  revalidatePath("/admin");
-  revalidatePath("/admin/test-drives");
+  revalidateTestDrivePages(updatedTestDrive?.carId);
 
   return createSuccessResponse(
     updatedTestDrive,
@@ -178,9 +187,7 @@ export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId: string) =
     ctx.userId,
   );
 
-  revalidatePath("/cars/[id]");
-  revalidatePath("/admin");
-  revalidatePath("/admin/test-drives");
+  revalidateTestDrivePages(cancelledTestDrive?.carId);
 
   return createSuccessResponse(
     cancelledTestDrive,
@@ -226,9 +233,7 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
     }
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/test-drives");
-  revalidatePath("/reservation");
+  revalidateTestDrivePages(updatedTestDrive?.carId);
 
   return createSuccessResponse(
     updatedTestDrive,
