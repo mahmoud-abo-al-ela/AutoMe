@@ -144,7 +144,11 @@ export default function DealershipTermsPage() {
                 <Label htmlFor="financingNote">{t("fields.financingNote")}</Label>
                 <Textarea
                   id="financingNote"
-                  dir="auto"
+                  // "auto" only once there is text: an empty field has nothing to judge by
+                  // (the placeholder does not count), so "auto" fell back to LTR and the
+                  // Arabic page showed its placeholder and caret on the left. Empty, it
+                  // follows the page; typed, it follows the text.
+                  dir={form.financingNote ? "auto" : undefined}
                   maxLength={200}
                   rows={2}
                   placeholder={t("financingNotePlaceholder")}
