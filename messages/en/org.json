@@ -857,7 +857,8 @@
       "declined": {
         "title": "Your payment didn’t go through",
         "body": "Nothing was charged and your plan hasn’t changed. You can try again from the billing page."
-      }
+      },
+      "returning": "Taking you back to billing…"
     }
   },
   "auditLogs": {

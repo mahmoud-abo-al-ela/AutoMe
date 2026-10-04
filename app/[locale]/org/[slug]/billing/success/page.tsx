@@ -8,7 +8,8 @@ import { PaymentConfirming } from "@/components/billing/PaymentConfirming";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { AutoReturn } from "@/components/billing/AutoReturn";
 import { formatDate } from "@/lib/utils/datetime";
 import type { Locale } from "@/i18n/routing";
 
@@ -86,6 +87,8 @@ export default async function BillingSuccessPage({
             }
             back={t("back")}
             href={billingPath}
+            // A paid result has nothing left to do here: back to billing.
+            autoReturn={t("returning")}
         />
     );
 }
@@ -96,12 +99,15 @@ function ResultCard({
     body,
     back,
     href,
+    autoReturn,
 }: {
     icon: React.ReactNode;
     title: string;
     body: string;
     back: string;
     href: string;
+    /** When set, the page goes back to `href` on its own and says so. */
+    autoReturn?: string;
 }) {
     return (
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -112,9 +118,13 @@ function ResultCard({
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                     <p className="text-muted-foreground">{body}</p>
-                    <Button asChild className="w-full">
-                        <Link href={href}>{back}</Link>
-                    </Button>
+                    {/* Styled link, not <Button asChild>: on a server page the
+                        link can reach Radix Slot 1.2.2 as a lazy element,
+                        which it renders as nothing — the button vanished. */}
+                    <Link href={href} className={buttonVariants({ className: "w-full" })}>
+                        {back}
+                    </Link>
+                    {autoReturn && <AutoReturn href={href} label={autoReturn} />}
                 </CardContent>
             </Card>
         </div>
