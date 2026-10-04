@@ -6,7 +6,8 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import type { LucideIcon } from "lucide-react";
 
@@ -44,9 +45,15 @@ const SharedSettingCard = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <Button asChild className="w-full text-sm sm:text-base">
-              <Link href={page.path}>{cta}</Link>
-            </Button>
+            {/* Styles on the Link, not <Button asChild>: this renders on the
+                server, where Radix Slot 1.2.2 can receive the link as a lazy
+                element and render nothing — the cards had no working button. */}
+            <Link
+              href={page.path}
+              className={cn(buttonVariants(), "w-full text-sm sm:text-base")}
+            >
+              {cta}
+            </Link>
           </CardContent>
         </Card>
       ))}
