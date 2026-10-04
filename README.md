@@ -16,7 +16,7 @@ Dealerships subscribe, showcase their new and used cars on a branded storefront,
 [![Paymob](https://img.shields.io/badge/Billing-Paymob-0b5fff)](https://paymob.com)
 [![Vitest](https://img.shields.io/badge/tests-Vitest_%2B_live_AI_evals-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev)
 
-[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd) • [Deployment](#deployment)
+[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd)
 
 </div>
 
