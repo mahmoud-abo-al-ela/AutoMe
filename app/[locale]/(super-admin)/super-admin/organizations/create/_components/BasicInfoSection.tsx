@@ -28,7 +28,7 @@ export default function BasicInfoSection({
           <Building2 className="h-5 w-5" />
           {t("title")}
         </CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardDescription>{t("subtitle")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

@@ -178,7 +178,7 @@
       "back": "Back to organizations",
       "basic": {
         "title": "Basic information",
-        "description": "The organization’s basic details",
+        "subtitle": "The organization’s basic details",
         "name": "Organization name *",
         "namePlaceholder": "Nile Motors",
         "slug": "Slug (URL)",
