@@ -68,6 +68,7 @@ export const TestDrivesPresenter = ({
     handlers,
 }: TestDrivesPresenterProps) => {
     const t = useTranslations("org.testDrives");
+    const tCommon = useTranslations("common.actions");
     if (loading && testDrives.length === 0) {
         return (
             <div>
@@ -75,10 +76,10 @@ export const TestDrivesPresenter = ({
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-                                Test Drive Management
+                                {t("title")}
                             </h1>
                             <p className="text-gray-600 text-sm md:text-base">
-                                Manage test drive requests and appointments
+                                {t("subtitle")}
                             </p>
                         </div>
                     </div>
@@ -95,10 +96,10 @@ export const TestDrivesPresenter = ({
                 <Card className="shadow-lg border-0 bg-white relative overflow-hidden gap-4 pt-0">
                     <CardHeader className="border-b p-3">
                         <CardTitle className="text-lg sm:text-xl">
-                            Test Drive Requests
+                            {t("stats.title")}
                         </CardTitle>
                         <CardDescription className="text-sm">
-                            Manage test drive requests and appointments
+                            {t("subtitle")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-0 relative">
@@ -123,10 +124,10 @@ export const TestDrivesPresenter = ({
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-                                Test Drive Management
+                                {t("title")}
                             </h1>
                             <p className="text-gray-600 text-sm md:text-base">
-                                Manage test drive requests and appointments
+                                {t("subtitle")}
                             </p>
                         </div>
                     </div>
@@ -135,21 +136,21 @@ export const TestDrivesPresenter = ({
                 <Card className="shadow-lg border-0 bg-white gap-4 pt-0">
                     <CardHeader className="border-b p-3">
                         <CardTitle className="text-lg sm:text-xl">
-                            Test Drive Requests
+                            {t("stats.title")}
                         </CardTitle>
                         <CardDescription className="text-sm">
-                            Manage test drive requests and appointments
+                            {t("subtitle")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col justify-center items-center min-h-[400px] p-6">
                         <div className="text-red-500 mb-4 text-center">
                             <p className="text-lg font-semibold mb-2">
-                                Error Loading Test Drives
+                                {t("error.title")}
                             </p>
-                            <p className="text-sm text-gray-600">{error?.message}</p>
+                            <p className="text-sm text-gray-600">{error}</p>
                         </div>
                         <Button onClick={() => handlers.retry()} variant="outline">
-                            Try Again
+                            {tCommon("retry")}
                         </Button>
                     </CardContent>
                 </Card>

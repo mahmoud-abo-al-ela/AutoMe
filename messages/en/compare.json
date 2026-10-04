@@ -39,5 +39,9 @@
   "mobile": {
     "showCar": "Show {title}",
     "sideBySide": "Side by side"
+  },
+  "share": {
+    "title": "Car comparison",
+    "text": "Check out this car comparison!"
   }
 }

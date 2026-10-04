@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Slider } from "@/components/ui/slider";
 
 /**
@@ -35,6 +36,7 @@ export const RangeControl = ({
   const selectedMin = value?.[0] ?? min;
   const selectedMax = value?.[1] ?? max;
 
+  const t = useTranslations("common.filters");
   const [local, setLocal] = useState([selectedMin, selectedMax]);
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export const RangeControl = ({
         disabled={disabled || !ready}
       />
       {!ready && (
-        <p className="mt-2 text-center text-xs text-muted-foreground">No inventory data</p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">{t("noRangeData")}</p>
       )}
     </div>
   );

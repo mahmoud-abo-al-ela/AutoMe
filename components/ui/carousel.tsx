@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react"
+import { useTranslations } from "next-intl"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
@@ -54,6 +55,7 @@ function Carousel({
   // embla does not read `dir` off the document — without passing direction
   // explicitly, an RTL carousel scrolls the wrong way and starts on the wrong
   // slide, while still *looking* correct until you interact with it.
+  const t = useTranslations("common.carousel")
   const direction = useDirection();
   const [carouselRef, api] = useEmblaCarousel({
     ...opts,
@@ -124,7 +126,7 @@ function Carousel({
         onKeyDownCapture={handleKeyDown}
         className={cn("relative", className)}
         role="region"
-        aria-roledescription="carousel"
+        aria-roledescription={t("carousel")}
         data-slot="carousel"
         {...props}>
         {children}
@@ -162,11 +164,12 @@ function CarouselItem({
   ...props
 }: React.ComponentProps<"div">) {
   const { orientation } = useCarousel()
+  const t = useTranslations("common.carousel")
 
   return (
     <div
       role="group"
-      aria-roledescription="slide"
+      aria-roledescription={t("slide")}
       data-slot="carousel-item"
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
@@ -184,6 +187,7 @@ function CarouselPrevious({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+  const t = useTranslations("common.carousel")
 
   return (
     <Button
@@ -197,7 +201,7 @@ function CarouselPrevious({
       onClick={scrollPrev}
       {...props}>
       <ArrowLeft className="rtl:rotate-180" />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">{t("previous")}</span>
     </Button>
   );
 }
@@ -209,6 +213,7 @@ function CarouselNext({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
+  const t = useTranslations("common.carousel")
 
   return (
     <Button
@@ -222,7 +227,7 @@ function CarouselNext({
       onClick={scrollNext}
       {...props}>
       <ArrowRight className="rtl:rotate-180" />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">{t("next")}</span>
     </Button>
   );
 }

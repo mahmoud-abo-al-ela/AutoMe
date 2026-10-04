@@ -3,6 +3,7 @@ import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
+import { useFormatters } from "@/hooks/use-formatters"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = {
@@ -139,6 +140,9 @@ Partial<
     labelKey?: string
   }) {
   const { config } = useChart()
+  // The page's locale, not the browser's: `toLocaleString()` would put Western
+  // digits in an Arabic dashboard whenever the browser runs in English.
+  const { number } = useFormatters()
 
   const tooltipLabel = React.useMemo(() => {
     if (hideLabel || !payload?.length) {
@@ -239,7 +243,9 @@ Partial<
                     </div>
                     {item.value && (
                       <span className="text-foreground font-mono font-medium tabular-nums">
-                        {item.value.toLocaleString()}
+                        {typeof item.value === "number"
+                          ? number(item.value)
+                          : String(item.value)}
                       </span>
                     )}
                   </div>

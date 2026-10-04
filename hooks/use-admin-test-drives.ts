@@ -12,6 +12,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 
 export const useAdminTestDrives = () => {
     const t = useTranslations("org.testDrives.toasts");
+    const tError = useTranslations("org.testDrives.error");
     const actionError = useActionError();
     const queryClient = useQueryClient();
     const [statusFilter, setStatusFilter] = useState("all");
@@ -29,7 +30,7 @@ export const useAdminTestDrives = () => {
     const {
         data: queryData,
         isLoading: loading,
-        error,
+        error: fetchThrew,
         refetch: fetchTestDrives,
     } = useQuery({
         queryKey: queryKeys.testDrives.list({
@@ -48,6 +49,14 @@ export const useAdminTestDrives = () => {
     });
 
     const testDrives = queryData?.success ? queryData.data?.testDrives || [] : [];
+
+    // Reader-facing text, or null when the list loaded. A failed response used
+    // to read as "no requests yet"; a thrown one carries only English.
+    const error: string | null = fetchThrew
+        ? tError("body")
+        : queryData && !queryData.success
+            ? actionError(queryData.error, tError("body"))
+            : null;
     
     // Update pagination state when query data changes
     useEffect(() => {

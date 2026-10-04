@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Input } from "@/components/ui/input";
 import { FilterChip } from "./FilterChip";
 
@@ -35,17 +37,19 @@ export const ChipGroup = ({
   options = [],
   selectedValues = [],
   onToggle,
-  searchPlaceholder = "Search...",
-  emptyLabel = "No options available",
+  searchPlaceholder,
+  emptyLabel,
   disabled = false,
   collapseAt = COLLAPSED_COUNT,
   searchable = true,
 }: ChipGroupProps) => {
+  const t = useTranslations("common.filters");
+  const { number } = useFormatters();
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState("");
 
   if (options.length === 0) {
-    return <p className="px-1 py-2 text-xs text-muted-foreground">{emptyLabel}</p>;
+    return <p className="px-1 py-2 text-xs text-muted-foreground">{emptyLabel ?? t("noOptions")}</p>;
   }
 
   const canSearch = searchable && options.length > collapseAt;
@@ -63,8 +67,8 @@ export const ChipGroup = ({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={searchPlaceholder}
-            aria-label={searchPlaceholder}
+            placeholder={searchPlaceholder ?? t("search")}
+            aria-label={searchPlaceholder ?? t("search")}
             className="h-8 ps-8 text-xs"
           />
         </div>
@@ -88,7 +92,7 @@ export const ChipGroup = ({
             onClick={() => setExpanded(true)}
             className="rounded-full px-2 text-xs font-medium text-primary hover:underline"
           >
-            +{hiddenCount} more
+            {t("showMore", { count: number(hiddenCount) })}
           </button>
         )}
         {expanded && filtered.length > collapseAt && (
@@ -97,11 +101,11 @@ export const ChipGroup = ({
             onClick={() => setExpanded(false)}
             className="rounded-full px-2 text-xs font-medium text-muted-foreground hover:underline"
           >
-            Show less
+            {t("showLess")}
           </button>
         )}
         {query && filtered.length === 0 && (
-          <p className="py-1 text-xs text-muted-foreground">No matches</p>
+          <p className="py-1 text-xs text-muted-foreground">{t("noMatches")}</p>
         )}
       </div>
     </div>

@@ -10,7 +10,7 @@ import {
     handleRemoveCar,
 } from "@/app/[locale]/(site)/compare/_components/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@/i18n/routing";
 import { resolveCarFeatures } from "@/lib/utils/car-text";
 import { queryKeys } from "@/lib/query-client";
@@ -56,6 +56,7 @@ export const useComparePage = () => {
     // compare view (matrix, side-by-side, single) matches and lists them in
     // one language instead of each re-deriving it.
     const locale = useLocale() as Locale;
+    const t = useTranslations("compare.share");
     const cars = useMemo(
         () =>
             (compareList.length === 0 ? [] : (carsData || [])).map((car) => ({
@@ -92,8 +93,8 @@ export const useComparePage = () => {
             // Try the native Web Share API first (mobile-friendly)
             if (navigator.share) {
                 await navigator.share({
-                    title: "Car Comparison",
-                    text: "Check out this car comparison!",
+                    title: t("title"),
+                    text: t("text"),
                     url,
                 });
                 return { success: true, method: "share" };
@@ -107,7 +108,7 @@ export const useComparePage = () => {
             logError("Share failed:", err);
             return { success: false, error: err instanceof Error ? err.message : String(err) };
         }
-    }, []);
+    }, [t]);
 
     const printComparison = useCallback(() => {
         window.print();

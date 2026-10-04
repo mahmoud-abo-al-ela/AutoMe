@@ -4,6 +4,7 @@ import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 import { useDirection } from "@radix-ui/react-direction";
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 
@@ -65,6 +66,7 @@ function SheetContent({
   // screen. Doing the flip once, here, keeps position, border and animation
   // in agreement by construction.
   const direction = useDirection();
+  const tActions = useTranslations("common.actions")
   const flip = { left: "right", right: "left" } as const;
   const physicalSide =
     direction === "rtl" && (side === "left" || side === "right")
@@ -93,7 +95,7 @@ function SheetContent({
         <SheetPrimitive.Close
           className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 end-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
           <XIcon className="size-4" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{tActions("close")}</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
     </SheetPortal>

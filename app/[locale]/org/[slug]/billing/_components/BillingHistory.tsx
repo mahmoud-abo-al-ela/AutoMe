@@ -56,29 +56,27 @@ export default function BillingHistory({
 }) {
   const [billingHistory, setBillingHistory] = useState<BillingHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // A flag, not the server's message: that arrives in English, and the reader
+  // is told the same translated thing whatever the cause.
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     async function fetchBillingHistory() {
       try {
         const result = await getBillingHistory(organizationId);
         if (!result.success) {
-          throw new Error(result.error?.message || t("loadFailed"));
+          setFailed(true);
+          return;
         }
         setBillingHistory(result.data.history || []);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : t("loadFailed")
-        );
+      } catch {
+        setFailed(true);
       } finally {
         setLoading(false);
       }
     }
 
     fetchBillingHistory();
-  // `t` is read only for the error fallback. Listing it would refetch on a
-  // language switch, which is a network round trip for the same data.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const t = useTranslations("org.billing.history");
@@ -111,18 +109,18 @@ export default function BillingHistory({
     );
   }
 
-  if (error) {
+  if (failed) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" />
-            Billing History
+            {t("title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            Failed to load billing history
+            {t("loadFailed")}
           </div>
         </CardContent>
       </Card>
