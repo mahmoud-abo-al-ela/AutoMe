@@ -1,6 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   AreaChart,
   Area,
@@ -25,13 +27,14 @@ export default function PlatformOverviewChart({
 }: {
   data: MonthlyGrowthPoint[];
 }) {
+  const t = useTranslations("superAdmin.overview.growth");
+  const { number } = useFormatters();
+
   return (
     <Card className="col-span-1">
       <CardHeader>
-        <CardTitle className="text-lg">Platform Growth</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          New organizations, users, and cars over the last 6 months
-        </p>
+        <CardTitle className="text-lg">{t("title")}</CardTitle>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -66,6 +69,7 @@ export default function PlatformOverviewChart({
                 tickLine={false}
                 axisLine={false}
                 allowDecimals={false}
+                tickFormatter={(value: number) => number(value)}
               />
               <Tooltip
                 contentStyle={{
@@ -74,12 +78,15 @@ export default function PlatformOverviewChart({
                   borderRadius: "8px",
                   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
+                formatter={(value) =>
+                  typeof value === "number" ? number(value) : value
+                }
               />
               <Legend />
               <Area
                 type="monotone"
                 dataKey="organizations"
-                name="Organizations"
+                name={t("series.organizations")}
                 stroke="#8b5cf6"
                 strokeWidth={2}
                 fillOpacity={1}
@@ -88,7 +95,7 @@ export default function PlatformOverviewChart({
               <Area
                 type="monotone"
                 dataKey="users"
-                name="Users"
+                name={t("series.users")}
                 stroke="#3b82f6"
                 strokeWidth={2}
                 fillOpacity={1}
@@ -97,7 +104,7 @@ export default function PlatformOverviewChart({
               <Area
                 type="monotone"
                 dataKey="cars"
-                name="Cars"
+                name={t("series.cars")}
                 stroke="#22c55e"
                 strokeWidth={2}
                 fillOpacity={1}

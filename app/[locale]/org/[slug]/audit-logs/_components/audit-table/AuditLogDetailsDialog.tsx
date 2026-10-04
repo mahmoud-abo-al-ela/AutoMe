@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useFormatters } from "@/hooks/use-formatters";
-import { useAuditLabels } from "../../_lib/use-audit-labels";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
 import {
   Activity,
   Code,

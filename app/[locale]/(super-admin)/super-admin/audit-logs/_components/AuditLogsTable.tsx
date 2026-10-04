@@ -1,6 +1,8 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import {
@@ -58,7 +60,9 @@ export default function AuditLogsTable({
   logs: AuditLogRow[];
   pagination: AuditLogsPagination;
 }) {
-  const { dateTime: fmtDateTime, relativeToNow } = useFormatters();
+  const t = useTranslations("superAdmin");
+  const labels = useAuditLabels();
+  const { dateTime: fmtDateTime, relativeToNow, number } = useFormatters();
   const router = useRouter();
   const [detailsDialog, setDetailsDialog] = useState<{
     open: boolean;
@@ -80,19 +84,19 @@ export default function AuditLogsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[180px]">Timestamp</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Entity</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead className="w-[80px]">Details</TableHead>
+              <TableHead className="w-[180px]">{t("auditLogs.columns.timestamp")}</TableHead>
+              <TableHead>{t("auditLogs.columns.user")}</TableHead>
+              <TableHead>{t("auditLogs.columns.action")}</TableHead>
+              <TableHead>{t("auditLogs.columns.entity")}</TableHead>
+              <TableHead>{t("auditLogs.columns.organization")}</TableHead>
+              <TableHead className="w-[80px]">{t("auditLogs.columns.details")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {logs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-48 p-0">
-                  <EmptyState variant="inline" icon={ScrollText} title="No audit logs found" />
+                  <EmptyState variant="inline" icon={ScrollText} title={t("auditLogs.empty")} />
                 </TableCell>
               </TableRow>
             ) : (
@@ -131,7 +135,7 @@ export default function AuditLogsTable({
                         </Avatar>
                         <div>
                           <div className="text-sm font-medium">
-                            {log.user?.name || "Unknown"}
+                            {log.user?.name || t("common.unknown")}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {log.userEmail}
@@ -146,13 +150,13 @@ export default function AuditLogsTable({
                         }`}
                       >
                         <ActionIcon className="h-3 w-3" />
-                        {log.action.replace(/_/g, " ")}
+                        {labels.action(log.action)}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium text-sm">
-                          {log.entityType}
+                          {labels.entity(log.entityType)}
                         </div>
                         <div className="text-xs text-muted-foreground truncate max-w-[150px]">
                           {log.entityId}
@@ -167,7 +171,7 @@ export default function AuditLogsTable({
                         </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">
-                          Platform
+                          {t("common.platform")}
                         </span>
                       )}
                     </TableCell>
@@ -176,6 +180,7 @@ export default function AuditLogsTable({
                         variant="ghost"
                         size="sm"
                         onClick={() => setDetailsDialog({ open: true, log })}
+                        aria-label={t("auditLogs.viewDetails")}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -192,9 +197,11 @@ export default function AuditLogsTable({
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-            {pagination.total} logs
+            {t("auditLogs.pagination", {
+              from: number((pagination.page - 1) * pagination.limit + 1),
+              to: number(Math.min(pagination.page * pagination.limit, pagination.total)),
+              total: number(pagination.total),
+            })}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -203,8 +210,8 @@ export default function AuditLogsTable({
               onClick={() => handlePageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
             >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
+              <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+              {t("common.previous")}
             </Button>
             <Button
               variant="outline"
@@ -212,8 +219,8 @@ export default function AuditLogsTable({
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages}
             >
-              Next
-              <ChevronRight className="h-4 w-4" />
+              {t("common.next")}
+              <ChevronRight className="h-4 w-4 rtl:rotate-180" />
             </Button>
           </div>
         </div>

@@ -26,6 +26,7 @@ const NAMESPACES = [
   "faq",
   "forDealers",
   "auth",
+  "superAdmin",
 ] as const;
 
 export default getRequestConfig(async ({ locale: explicitLocale }) => {

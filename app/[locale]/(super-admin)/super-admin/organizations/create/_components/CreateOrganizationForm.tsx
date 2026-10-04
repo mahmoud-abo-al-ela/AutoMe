@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useRouter } from "@/i18n/navigation";
 import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,10 @@ export type CreateOrganizationSectionProps = {
 };
 
 export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
+  const t = useTranslations("superAdmin.organizations.form");
+  const tActions = useTranslations("common.actions");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<CreateOrganizationFormData>({
@@ -69,12 +75,12 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error("Organization name is required");
+      toast.error(t("nameRequired"));
       return;
     }
 
     if (!formData.planId) {
-      toast.error("Please select a plan");
+      toast.error(t("planRequired"));
       return;
     }
 
@@ -82,15 +88,16 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
       const result = await createOrganization(formData);
 
       if (result.success) {
-        toast.success("Organization created successfully", {
-          description: `${formData.name} has been created with the ${
-            plans.find((p) => p.id === formData.planId)?.name
-          } plan.`,
+        toast.success(t("created"), {
+          description: t("createdBody", {
+            name: formData.name,
+            plan: plans.find((p) => p.id === formData.planId)?.name ?? "",
+          }),
         });
         router.push("/super-admin/organizations");
       } else {
-        toast.error("Failed to create organization", {
-          description: result.error.message,
+        toast.error(t("createFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
     });
@@ -119,18 +126,18 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
           onClick={() => router.push("/super-admin/organizations")}
           disabled={isPending}
         >
-          Cancel
+          {tActions("cancel")}
         </Button>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 me-2 animate-spin" />
-              Creating...
+              {t("submitting")}
             </>
           ) : (
             <>
               <Building2 className="h-4 w-4 me-2" />
-              Create Organization
+              {t("submit")}
             </>
           )}
         </Button>

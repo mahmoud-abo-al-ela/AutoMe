@@ -141,16 +141,8 @@ export default async function AnalyticsPage() {
       <AnalyticsCharts monthlyData={monthlyData} />
       <AiUsagePanel />
       <div className="grid gap-6 lg:grid-cols-2">
-        <TopOrganizations
-          title="Top by Listings"
-          organizations={topByListings}
-          metric="cars"
-        />
-        <TopOrganizations
-          title="Top by Test Drives"
-          organizations={topByTestDrives}
-          metric="testDrives"
-        />
+        <TopOrganizations organizations={topByListings} metric="cars" />
+        <TopOrganizations organizations={topByTestDrives} metric="testDrives" />
       </div>
     </div>
   );

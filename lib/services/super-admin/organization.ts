@@ -34,7 +34,9 @@ export async function createOrganization(data: CreateOrganizationInput) {
   const existingOrg = await orgRepo.findOrganizationBySlug(slug);
 
   if (existingOrg) {
-    throw new ConflictError("An organization with this slug already exists");
+    throw new ConflictError("An organization with this slug already exists", {
+      key: "errors.superAdmin.slugTaken",
+    });
   }
 
   // Get the plan
@@ -99,7 +101,9 @@ export async function createOrganization(data: CreateOrganizationInput) {
         emailError instanceof Error ? emailError.message : String(emailError);
       if (message.includes("EmailJS")) {
         // Operational, so staff see why: the org exists and only the email is missing.
-        throw new AppError(`Organization created but email failed: ${message}`, 502, "EMAIL_DELIVERY_FAILED");
+        throw new AppError(`Organization created but email failed: ${message}`, 502, "EMAIL_DELIVERY_FAILED", {
+          key: "errors.superAdmin.orgEmailFailed",
+        });
       }
     }
   }

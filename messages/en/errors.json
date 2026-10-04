@@ -91,5 +91,15 @@
     "slugTaken": "That dealership address is already taken. Please choose another name.",
     "alreadyOwner": "You already own a dealership.",
     "sessionExpired": "Your sign-up details have expired. Please go through the steps again."
+  },
+  "superAdmin": {
+    "slugTaken": "An organization with this slug already exists.",
+    "orgEmailFailed": "The organization was created, but the owner email couldn’t be sent.",
+    "planTypeExists": "A plan of this type already exists.",
+    "planHasSubscriptions": "This plan still has active subscriptions ({count}). Move them to another plan before deleting it.",
+    "planHasPayments": "This plan has been paid for ({count} payments), so it can’t be deleted. Deactivate it instead.",
+    "cannotDemoteSelf": "You can’t remove your own admin role.",
+    "reasonTooShort": "The reason must be at least {min} characters.",
+    "targetNotMember": "That user isn’t a member of this organization."
   }
 }

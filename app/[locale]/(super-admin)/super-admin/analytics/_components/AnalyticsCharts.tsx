@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Card,
   CardContent,
@@ -32,39 +34,39 @@ export type AnalyticsMonth = {
   testDrives: number;
 };
 
-const chartConfig = {
-  organizations: {
-    label: "Organizations",
-    color: "hsl(var(--chart-1))",
-  },
-  users: {
-    label: "Users",
-    color: "hsl(var(--chart-2))",
-  },
-  cars: {
-    label: "Cars",
-    color: "hsl(var(--chart-3))",
-  },
-  testDrives: {
-    label: "Test Drives",
-    color: "hsl(var(--chart-4))",
-  },
-};
+/** Series colors; the labels are added per render, in the reader's language. */
+const SERIES_COLORS = {
+  organizations: "hsl(var(--chart-1))",
+  users: "hsl(var(--chart-2))",
+  cars: "hsl(var(--chart-3))",
+  testDrives: "hsl(var(--chart-4))",
+} as const;
 
 export default function AnalyticsCharts({
   monthlyData,
 }: {
   monthlyData: AnalyticsMonth[];
 }) {
+  const t = useTranslations("superAdmin.analytics.charts");
+  const { number } = useFormatters();
+  const chartConfig = Object.fromEntries(
+    (Object.keys(SERIES_COLORS) as (keyof typeof SERIES_COLORS)[]).map((key) => [
+      key,
+      { label: t(`series.${key}`), color: SERIES_COLORS[key] },
+    ])
+  );
+  // Axis ticks are formatted, not passed through: recharts prints a raw number,
+  // which is Western digits beside every other figure on an Arabic page. The
+  // axis *orientation* stays physical (see the i18n skill).
+  const tick = (value: number) => number(value);
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Growth Trend */}
       <Card>
         <CardHeader>
-          <CardTitle>Platform Growth</CardTitle>
-          <CardDescription>
-            New organizations and users over the last 6 months
-          </CardDescription>
+          <CardTitle>{t("growthTitle")}</CardTitle>
+          <CardDescription>{t("growthSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
@@ -72,7 +74,7 @@ export default function AnalyticsCharts({
               <AreaChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis />
+                <YAxis tickFormatter={tick} allowDecimals={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area
                   type="monotone"
@@ -99,10 +101,8 @@ export default function AnalyticsCharts({
       {/* Activity Trend */}
       <Card>
         <CardHeader>
-          <CardTitle>Platform Activity</CardTitle>
-          <CardDescription>
-            Car listings and test drive bookings over time
-          </CardDescription>
+          <CardTitle>{t("activityTitle")}</CardTitle>
+          <CardDescription>{t("activitySubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
@@ -110,7 +110,7 @@ export default function AnalyticsCharts({
               <BarChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis />
+                <YAxis tickFormatter={tick} allowDecimals={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="cars"

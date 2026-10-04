@@ -1,9 +1,11 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useActionError } from "@/hooks/use-action-error";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { LogOut, Clock, Building2, Loader2 } from "lucide-react";
+import { LogOut, Clock, Building2, Loader2, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,14 +33,15 @@ export default function ActiveSessions({
 }: {
   sessions: ImpersonationSessionRow[];
 }) {
-  const { relativeToNow } = useFormatters();
+  const t = useTranslations("superAdmin.impersonation.active");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
+  const { relativeToNow, number } = useFormatters();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [endingSession, setEndingSession] = useState<string | null>(null);
 
-  // targetUserName is nullable because User.name is; it goes straight into the
-  // toast copy, so it is left as-is rather than defaulted to preserve the
-  // existing text exactly.
+  // targetUserName is nullable because User.name is.
   const handleEndSession = async (
     sessionId: string,
     targetUserName: string | null
@@ -47,20 +50,22 @@ export default function ActiveSessions({
     try {
       const result = await endImpersonation(sessionId);
       if (result.success) {
-        toast.success("Impersonation session ended", {
-          description: `Session as ${targetUserName} has been terminated.`,
+        toast.success(t("ended"), {
+          description: t("endedBody", {
+            name: targetUserName ?? tCommon("unknown"),
+          }),
         });
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to end session", {
-          description: result.error.message,
+        toast.error(t("endFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setEndingSession(null);
@@ -71,15 +76,15 @@ export default function ActiveSessions({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Active Sessions</span>
+          <span>{t("title")}</span>
           <Badge variant={sessions.length > 0 ? "destructive" : "secondary"}>
-            {sessions.length} Active
+            {t("badge", { value: number(sessions.length) })}
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <EmptyState variant="inline" icon={Shield} title="No active impersonation sessions" />
+          <EmptyState variant="inline" icon={Shield} title={t("empty")} />
         ) : (
           <div className="space-y-4">
             {sessions.map((session) => (
@@ -109,9 +114,9 @@ export default function ActiveSessions({
                     </Avatar>
                   </div>
                   <div>
-                    <div className="font-medium">
-                      {session.superAdmin.name}{" "}
-                      <span className="text-muted-foreground">→</span>{" "}
+                    <div className="font-medium flex items-center gap-1.5">
+                      {session.superAdmin.name}
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground rtl:rotate-180" />
                       {session.targetUser.name}
                     </div>
                     <div className="text-sm text-muted-foreground flex items-center gap-2">
@@ -119,8 +124,9 @@ export default function ActiveSessions({
                       {session.organization.name}
                       <span className="text-muted-foreground">•</span>
                       <Clock className="h-3 w-3" />
-                      Started{" "}
-                      {relativeToNow(new Date(session.startedAt))}
+                      {t("started", {
+                        time: relativeToNow(new Date(session.startedAt)),
+                      })}
                     </div>
                   </div>
                 </div>
@@ -136,12 +142,12 @@ export default function ActiveSessions({
                   (isPending && endingSession === session.id) ? (
                     <>
                       <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                      Ending...
+                      {t("ending")}
                     </>
                   ) : (
                     <>
-                      <LogOut className="h-4 w-4 me-2" />
-                      End Session
+                      <LogOut className="h-4 w-4 me-2 rtl:rotate-180" />
+                      {t("end")}
                     </>
                   )}
                 </Button>

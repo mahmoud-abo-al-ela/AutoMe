@@ -717,7 +717,8 @@
       "ACTIVE": "نشط",
       "TRIALING": "تجريبي",
       "PAST_DUE": "متأخر السداد",
-      "CANCELED": "ملغى"
+      "CANCELED": "ملغى",
+      "PENDING": "قيد الانتظار"
     },
     "current": {
       "title": "الباقة الحالية",

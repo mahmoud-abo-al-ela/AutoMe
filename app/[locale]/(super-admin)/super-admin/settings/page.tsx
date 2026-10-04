@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 import SettingsHeader from "./_components/SettingsHeader";
 import GeneralSettings from "./_components/GeneralSettings";
 import SecuritySettings from "./_components/SecuritySettings";
@@ -32,6 +32,7 @@ async function getPlatformSettings() {
 
 export default async function SettingsPage() {
   const settings = await getPlatformSettings();
+  const t = await getTranslations("superAdmin.settings.tabs");
 
   return (
     <div className="space-y-6">
@@ -39,9 +40,9 @@ export default async function SettingsPage() {
 
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="general">{t("general")}</TabsTrigger>
+          <TabsTrigger value="security">{t("security")}</TabsTrigger>
+          <TabsTrigger value="email">{t("email")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">

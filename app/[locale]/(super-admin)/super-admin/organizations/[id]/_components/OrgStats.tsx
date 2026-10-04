@@ -1,25 +1,34 @@
 import { Car, Users, Calendar } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatNumber } from "@/lib/utils/number";
+import type { Locale } from "@/i18n/routing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrganizationDetail } from "./OrgDetailsHeader";
 
 export default function OrgStats({ org }: { org: OrganizationDetail }) {
+  const t = useTranslations("superAdmin.organizations.details.stats");
+  const locale = useLocale() as Locale;
+
   const stats = [
     {
-      title: "Total Cars",
+      key: "cars",
+      title: t("cars"),
       value: org._count.cars,
       icon: Car,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
     {
-      title: "Team Members",
+      key: "members",
+      title: t("members"),
       value: org.memberships.length,
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
     {
-      title: "Test Drives",
+      key: "testDrives",
+      title: t("testDrives"),
       value: org._count.testDrives,
       icon: Calendar,
       color: "text-orange-600",
@@ -30,7 +39,7 @@ export default function OrgStats({ org }: { org: OrganizationDetail }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <Card key={stat.title}>
+        <Card key={stat.key}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.title}
@@ -40,7 +49,9 @@ export default function OrgStats({ org }: { org: OrganizationDetail }) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(stat.value, locale)}
+            </div>
           </CardContent>
         </Card>
       ))}

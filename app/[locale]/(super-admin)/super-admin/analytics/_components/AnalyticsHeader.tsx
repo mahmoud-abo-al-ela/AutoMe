@@ -1,15 +1,16 @@
 import { BarChart3 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function AnalyticsHeader() {
+  const t = useTranslations("superAdmin.analytics");
+
   return (
     <div>
       <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
         <BarChart3 className="h-8 w-8" />
-        Platform Analytics
+        {t("title")}
       </h1>
-      <p className="text-muted-foreground">
-        Monitor platform performance and growth metrics
-      </p>
+      <p className="text-muted-foreground">{t("subtitle")}</p>
     </div>
   );
 }

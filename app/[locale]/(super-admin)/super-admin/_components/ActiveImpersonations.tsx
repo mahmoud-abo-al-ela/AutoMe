@@ -1,10 +1,11 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { formatRelativeToNow } from "@/lib/utils/datetime";
+import { formatNumber } from "@/lib/utils/number";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { UserCog, ArrowRight, Clock, AlertCircle } from "lucide-react";
 import {
   getActiveImpersonationCount,
@@ -17,6 +18,8 @@ export default async function ActiveImpersonations() {
   const locale = (await getLocale()) as Locale;
   const relativeToNow = (value: Date | string | number) =>
     formatRelativeToNow(value, locale);
+  const t = await getTranslations("superAdmin.overview.activeImpersonations");
+  const tCommon = await getTranslations("superAdmin.common");
   const activeCount = await getActiveImpersonationCount();
   const { sessions } = await getImpersonationSessions({
     filters: { activeOnly: true },
@@ -29,18 +32,22 @@ export default async function ActiveImpersonations() {
         <div>
           <CardTitle className="text-lg flex items-center gap-2">
             <UserCog className="h-5 w-5 text-muted-foreground" />
-            Active Impersonations
+            {t("title")}
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Currently active admin impersonation sessions
+            {t("subtitle")}
           </p>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/super-admin/impersonation">
-            View All
-            <ArrowRight className="h-4 w-4 ms-1" />
-          </Link>
-        </Button>
+        {/* Styles on the Link, not <Button asChild>: in a server component
+            Radix Slot 1.2.2 can receive the link as a lazy element and render
+            nothing. */}
+        <Link
+          href="/super-admin/impersonation"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          {tCommon("viewAll")}
+          <ArrowRight className="h-4 w-4 ms-1 rtl:rotate-180" />
+        </Link>
       </CardHeader>
       <CardContent>
         {activeCount > 0 ? (
@@ -49,8 +56,10 @@ export default async function ActiveImpersonations() {
             <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               <span className="text-sm text-yellow-700 dark:text-yellow-300">
-                {activeCount} active impersonation{" "}
-                {activeCount === 1 ? "session" : "sessions"}
+                {t("count", {
+                  count: activeCount,
+                  value: formatNumber(activeCount, locale),
+                })}
               </span>
             </div>
 
@@ -64,16 +73,16 @@ export default async function ActiveImpersonations() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
-                        {session.superAdmin?.name || "Unknown Admin"}
+                        {session.superAdmin?.name || tCommon("unknown")}
                       </span>
-                      <span className="text-muted-foreground text-xs">→</span>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground rtl:rotate-180" />
                       <span className="text-sm">
-                        {session.targetUser?.name || "Unknown User"}
+                        {session.targetUser?.name || tCommon("unknown")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="secondary" className="text-xs">
-                        {session.targetOrganization?.name || "Unknown Org"}
+                        {session.targetOrganization?.name || tCommon("unknown")}
                       </Badge>
                       <span>·</span>
                       <span className="flex items-center gap-1">
@@ -92,7 +101,7 @@ export default async function ActiveImpersonations() {
               <UserCog className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <p className="text-sm text-muted-foreground">
-              No active impersonation sessions
+              {t("empty")}
             </p>
           </div>
         )}

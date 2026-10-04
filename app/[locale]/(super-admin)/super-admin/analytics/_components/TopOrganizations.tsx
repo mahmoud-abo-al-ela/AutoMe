@@ -1,4 +1,7 @@
 import { Car, Calendar, Building2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { formatNumber } from "@/lib/utils/number";
+import type { Locale } from "@/i18n/routing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Prisma } from "@/lib/generated/prisma";
@@ -12,14 +15,17 @@ export type TopOrganization = Prisma.OrganizationGetPayload<{
 }>;
 
 export default function TopOrganizations({
-  title,
   organizations,
   metric,
 }: {
-  title: string;
   organizations: TopOrganization[];
   metric: "cars" | "testDrives";
 }) {
+  const t = useTranslations("superAdmin.analytics.top");
+  const tCommon = useTranslations("superAdmin.common");
+  const locale = useLocale() as Locale;
+  const number = (value: number) => formatNumber(value, locale);
+
   return (
     <Card>
       <CardHeader>
@@ -29,7 +35,7 @@ export default function TopOrganizations({
           ) : (
             <Calendar className="h-5 w-5" />
           )}
-          {title}
+          {metric === "cars" ? t("byListings") : t("byTestDrives")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -41,29 +47,31 @@ export default function TopOrganizations({
             >
               <div className="flex items-center gap-3">
                 <span className="text-lg font-bold text-muted-foreground w-6">
-                  #{index + 1}
+                  {t("rank", { value: number(index + 1) })}
                 </span>
                 <div>
                   <div className="font-medium">{org.name}</div>
                   <div className="text-sm text-muted-foreground flex items-center gap-1">
                     <Building2 className="h-3 w-3" />
-                    {org.slug}
+                    <span dir="ltr">{org.slug}</span>
                   </div>
                 </div>
               </div>
               <div className="text-end">
                 <div className="text-lg font-bold">
-                  {metric === "cars" ? org._count.cars : org._count.testDrives}
+                  {number(
+                    metric === "cars" ? org._count.cars : org._count.testDrives
+                  )}
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {org.subscription?.plan?.name || "No Plan"}
+                  {org.subscription?.plan?.name || tCommon("noPlan")}
                 </Badge>
               </div>
             </div>
           ))}
           {organizations.length === 0 && (
             <p className="text-center text-muted-foreground py-4">
-              No data available
+              {t("empty")}
             </p>
           )}
         </div>

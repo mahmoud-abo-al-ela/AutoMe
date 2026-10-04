@@ -1,8 +1,9 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { differenceInMinutes } from "date-fns";
-import { Clock, Building2, CheckCircle, History } from "lucide-react";
+import { Building2, CheckCircle, History, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,15 +15,16 @@ export default function SessionHistory({
 }: {
   sessions: ImpersonationSessionRow[];
 }) {
-  const { relativeToNow } = useFormatters();
+  const t = useTranslations("superAdmin.impersonation.history");
+  const { relativeToNow, number } = useFormatters();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Session History</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <EmptyState variant="inline" icon={History} title="No impersonation history" />
+          <EmptyState variant="inline" icon={History} title={t("empty")} />
         ) : (
           <div className="space-y-3">
             {sessions.map((session) => {
@@ -61,8 +63,10 @@ export default function SessionHistory({
                       </Avatar>
                     </div>
                     <div>
-                      <div className="text-sm font-medium">
-                        {session.superAdmin.name} → {session.targetUser.name}
+                      <div className="text-sm font-medium flex items-center gap-1.5">
+                        {session.superAdmin.name}
+                        <ArrowRight className="h-3 w-3 text-muted-foreground rtl:rotate-180" />
+                        {session.targetUser.name}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2">
                         <Building2 className="h-3 w-3" />
@@ -76,7 +80,11 @@ export default function SessionHistory({
                       className="flex items-center gap-1"
                     >
                       <CheckCircle className="h-3 w-3 text-green-500" />
-                      {duration} min
+                      {number(duration, {
+                        style: "unit",
+                        unit: "minute",
+                        unitDisplay: "long",
+                      })}
                     </Badge>
                     <div className="text-xs text-muted-foreground mt-1">
                       {relativeToNow(new Date(session.endedAt!))}

@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { Loader2, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePlanForm } from "./usePlanForm";
@@ -36,6 +37,10 @@ export default function PlanFormDialog({
         handleFeatureChange,
         getSubmitData,
     } = usePlanForm({ mode, plan, open });
+    const t = useTranslations("superAdmin.plans.form");
+    const tCommon = useTranslations("superAdmin.common");
+    const tActions = useTranslations("common.actions");
+    const planName = plan?.name ?? "";
 
     const handleSubmit = () => {
         onSubmit(getSubmitData());
@@ -45,11 +50,13 @@ export default function PlanFormDialog({
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{mode === "create" ? "Create New Plan" : `Edit ${plan?.name}`}</DialogTitle>
+                    <DialogTitle>
+                        {mode === "create" ? t("createTitle") : t("editTitle", { name: planName })}
+                    </DialogTitle>
                     <DialogDescription>
                         {mode === "create"
-                            ? "Add a new pricing plan to your platform"
-                            : `Update pricing and limits for ${plan?.name}`}
+                            ? t("createDescription")
+                            : t("editDescription", { name: planName })}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -66,18 +73,18 @@ export default function PlanFormDialog({
 
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose} disabled={loading || isPending} className="cursor-pointer">
-                        Cancel
+                        {tActions("cancel")}
                     </Button>
                     <Button onClick={handleSubmit} disabled={loading || isPending} className="cursor-pointer">
                         {loading || isPending ? (
                             <>
                                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                                {mode === "create" ? "Creating..." : "Saving..."}
+                                {mode === "create" ? t("creating") : tCommon("saving")}
                             </>
                         ) : (
                             <>
                                 {mode === "create" && <Plus className="h-4 w-4 me-2" />}
-                                {mode === "create" ? "Create Plan" : "Save Changes"}
+                                {mode === "create" ? t("create") : tCommon("saveChanges")}
                             </>
                         )}
                     </Button>

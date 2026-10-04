@@ -3,13 +3,18 @@ import {
   Users,
   Car,
   Calendar,
-  TrendingUp,
   CreditCard,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatNumber } from "@/lib/utils/number";
+import type { Locale } from "@/i18n/routing";
 
-/** One row of the "active subscriptions by plan" breakdown built in page.tsx. */
-export type SubscriptionBreakdownItem = { plan: string; count: number };
+/**
+ * One row of the "active subscriptions by plan" breakdown built in page.tsx.
+ * `plan` is null when the subscription points at a plan that no longer exists.
+ */
+export type SubscriptionBreakdownItem = { plan: string | null; count: number };
 
 export default function PlatformStats({
   totalOrganizations,
@@ -26,31 +31,42 @@ export default function PlatformStats({
   totalTestDrives: number;
   subscriptionBreakdown: SubscriptionBreakdownItem[];
 }) {
+  const t = useTranslations("superAdmin.overview");
+  const tCommon = useTranslations("superAdmin.common");
+  const locale = useLocale() as Locale;
+  const number = (value: number) => formatNumber(value, locale);
+
   const stats = [
     {
-      title: "Total Organizations",
+      key: "organizations",
+      title: t("stats.organizations"),
       value: totalOrganizations,
-      subtitle: `${activeOrganizations} active`,
+      subtitle: t("stats.organizationsActive", {
+        value: number(activeOrganizations),
+      }),
       icon: Building2,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
     },
     {
-      title: "Total Users",
+      key: "users",
+      title: t("stats.users"),
       value: totalUsers,
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
     {
-      title: "Total Cars Listed",
+      key: "cars",
+      title: t("stats.cars"),
       value: totalCars,
       icon: Car,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
     {
-      title: "Total Test Drives",
+      key: "testDrives",
+      title: t("stats.testDrives"),
       value: totalTestDrives,
       icon: Calendar,
       color: "text-orange-600",
@@ -63,7 +79,7 @@ export default function PlatformStats({
       {/* Main Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className="hover:shadow-md transition-shadow">
+          <Card key={stat.key} className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
@@ -73,9 +89,7 @@ export default function PlatformStats({
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {stat.value.toLocaleString()}
-              </div>
+              <div className="text-2xl font-bold">{number(stat.value)}</div>
               {stat.subtitle && (
                 <p className="text-xs text-muted-foreground mt-1">
                   {stat.subtitle}
@@ -91,27 +105,32 @@ export default function PlatformStats({
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-muted-foreground" />
-            Active Subscriptions by Plan
+            {t("subscriptions.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
             {subscriptionBreakdown.length > 0 ? (
-              subscriptionBreakdown.map((item) => (
+              subscriptionBreakdown.map((item, index) => (
                 <div
-                  key={item.plan}
+                  key={item.plan ?? `unknown-${index}`}
                   className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg"
                 >
-                  <span className="font-medium">{item.plan}</span>
+                  <span className="font-medium">
+                    {item.plan ?? tCommon("unknown")}
+                  </span>
                   <span className="text-muted-foreground">·</span>
                   <span className="text-sm text-muted-foreground">
-                    {item.count} {item.count === 1 ? "org" : "orgs"}
+                    {t("subscriptions.orgCount", {
+                      count: item.count,
+                      value: number(item.count),
+                    })}
                   </span>
                 </div>
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                No active subscriptions
+                {t("subscriptions.empty")}
               </p>
             )}
           </div>

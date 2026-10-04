@@ -1,8 +1,9 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { useRouter } from "@/i18n/navigation";
-import { ArrowLeft, Mail, Shield, UserCog, User, Calendar } from "lucide-react";
+import { ArrowLeft, Mail, Shield, User, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,18 +47,15 @@ export type SuperAdminUserDetail = Prisma.UserGetPayload<{
 const roleConfig: Record<
   UserRole,
   {
-    label: string;
     icon: LucideIcon;
     variant: React.ComponentProps<typeof Badge>["variant"];
   }
 > = {
   ADMIN: {
-    label: "Admin",
     icon: Shield,
     variant: "destructive",
   },
   USER: {
-    label: "User",
     icon: User,
     variant: "secondary",
   },
@@ -68,6 +66,7 @@ export default function UserDetailsHeader({
 }: {
   user: SuperAdminUserDetail;
 }) {
+  const t = useTranslations("superAdmin.users");
   const { date: fmtDate } = useFormatters();
   const router = useRouter();
   const role = roleConfig[user.role];
@@ -81,8 +80,8 @@ export default function UserDetailsHeader({
         onClick={() => router.back()}
         className="gap-2"
       >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Users
+        <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+        {t("details.back")}
       </Button>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -102,11 +101,11 @@ export default function UserDetailsHeader({
             <div className="flex items-center gap-2 mt-1">
               <Badge variant={role.variant} className="flex items-center gap-1">
                 <RoleIcon className="h-3 w-3" />
-                {role.label}
+                {t(`roles.${user.role}`)}
               </Badge>
               <span className="text-sm text-muted-foreground flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                Joined {fmtDate(new Date(user.createdAt))}
+                {t("details.joined", { date: fmtDate(new Date(user.createdAt)) })}
               </span>
             </div>
           </div>

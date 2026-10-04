@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Save, Mail, Send } from "lucide-react";
 import {
   Card,
@@ -28,6 +29,8 @@ export default function EmailSettings({
 }: {
   settings: EmailSettingsValues;
 }) {
+  const t = useTranslations("superAdmin.settings.email");
+  const tCommon = useTranslations("superAdmin.common");
   const [formData, setFormData] = useState(settings);
   const [loading, setLoading] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
@@ -35,14 +38,14 @@ export default function EmailSettings({
   const handleSave = async () => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1000));
-    toast.success("Email settings saved");
+    toast.success(t("saved"));
     setLoading(false);
   };
 
   const handleTestEmail = async () => {
     setTestLoading(true);
     await new Promise((r) => setTimeout(r, 2000));
-    toast.success("Test email sent successfully");
+    toast.success(t("testSent"));
     setTestLoading(false);
   };
 
@@ -51,16 +54,14 @@ export default function EmailSettings({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
-          Email Settings
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          Configure email sending and notification settings
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="fromName">From Name</Label>
+            <Label htmlFor="fromName">{t("fromName")}</Label>
             <Input
               id="fromName"
               value={formData.fromName}
@@ -70,7 +71,7 @@ export default function EmailSettings({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="fromEmail">From Email</Label>
+            <Label htmlFor="fromEmail">{t("fromEmail")}</Label>
             <Input
               id="fromEmail"
               type="email"
@@ -83,16 +84,15 @@ export default function EmailSettings({
         </div>
 
         <div className="space-y-4">
-          <h4 className="font-medium">Email Notifications</h4>
+          <h4 className="font-medium">{t("notifications")}</h4>
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="space-y-0.5">
-              <Label>Welcome Email</Label>
-              <p className="text-sm text-muted-foreground">
-                Send welcome email to new organization owners
-              </p>
+              <Label htmlFor="welcomeEmail">{t("welcome")}</Label>
+              <p className="text-sm text-muted-foreground">{t("welcomeHelp")}</p>
             </div>
             <Switch
+              id="welcomeEmail"
               checked={formData.welcomeEmailEnabled}
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, welcomeEmailEnabled: checked })
@@ -102,12 +102,11 @@ export default function EmailSettings({
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="space-y-0.5">
-              <Label>Test Drive Reminders</Label>
-              <p className="text-sm text-muted-foreground">
-                Send reminder emails before scheduled test drives
-              </p>
+              <Label htmlFor="testDriveReminders">{t("reminders")}</Label>
+              <p className="text-sm text-muted-foreground">{t("remindersHelp")}</p>
             </div>
             <Switch
+              id="testDriveReminders"
               checked={formData.testDriveReminderEnabled}
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, testDriveReminderEnabled: checked })
@@ -123,11 +122,11 @@ export default function EmailSettings({
             disabled={testLoading}
           >
             <Send className="h-4 w-4 me-2" />
-            {testLoading ? "Sending..." : "Send Test Email"}
+            {testLoading ? t("sending") : t("sendTest")}
           </Button>
           <Button onClick={handleSave} disabled={loading}>
             <Save className="h-4 w-4 me-2" />
-            {loading ? "Saving..." : "Save Changes"}
+            {loading ? tCommon("saving") : tCommon("saveChanges")}
           </Button>
         </div>
       </CardContent>

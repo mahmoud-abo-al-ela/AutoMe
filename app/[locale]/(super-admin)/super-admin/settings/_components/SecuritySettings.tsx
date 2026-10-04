@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Save, Shield, Clock, Lock } from "lucide-react";
 import {
   Card,
@@ -30,13 +31,15 @@ export default function SecuritySettings({
 }: {
   settings: SecuritySettingsValues;
 }) {
+  const t = useTranslations("superAdmin.settings.security");
+  const tCommon = useTranslations("superAdmin.common");
   const [formData, setFormData] = useState(settings);
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1000));
-    toast.success("Security settings saved");
+    toast.success(t("saved"));
     setLoading(false);
   };
 
@@ -45,16 +48,14 @@ export default function SecuritySettings({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          Security Settings
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          Configure security policies and authentication settings
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="maxLoginAttempts">Max Login Attempts</Label>
+            <Label htmlFor="maxLoginAttempts">{t("maxLoginAttempts")}</Label>
             <Input
               id="maxLoginAttempts"
               type="number"
@@ -67,11 +68,11 @@ export default function SecuritySettings({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Number of failed attempts before account lockout
+              {t("maxLoginAttemptsHelp")}
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sessionTimeout">Session Timeout (hours)</Label>
+            <Label htmlFor="sessionTimeout">{t("sessionTimeout")}</Label>
             <Input
               id="sessionTimeout"
               type="number"
@@ -84,13 +85,13 @@ export default function SecuritySettings({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Inactivity timeout for user sessions
+              {t("sessionTimeoutHelp")}
             </p>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="auditRetention">Audit Log Retention (days)</Label>
+          <Label htmlFor="auditRetention">{t("retention")}</Label>
           <Input
             id="auditRetention"
             type="number"
@@ -103,22 +104,19 @@ export default function SecuritySettings({
               })
             }
           />
-          <p className="text-xs text-muted-foreground">
-            How long to keep audit logs before automatic deletion
-          </p>
+          <p className="text-xs text-muted-foreground">{t("retentionHelp")}</p>
         </div>
 
         <div className="flex items-center justify-between p-4 border rounded-lg">
           <div className="space-y-0.5">
-            <Label className="flex items-center gap-2">
+            <Label htmlFor="requireMFA" className="flex items-center gap-2">
               <Lock className="h-4 w-4" />
-              Require MFA for Admins
+              {t("mfa")}
             </Label>
-            <p className="text-sm text-muted-foreground">
-              Require multi-factor authentication for all admin accounts
-            </p>
+            <p className="text-sm text-muted-foreground">{t("mfaHelp")}</p>
           </div>
           <Switch
+            id="requireMFA"
             checked={formData.requireMFA}
             onCheckedChange={(checked) =>
               setFormData({ ...formData, requireMFA: checked })
@@ -129,7 +127,7 @@ export default function SecuritySettings({
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={loading}>
             <Save className="h-4 w-4 me-2" />
-            {loading ? "Saving..." : "Save Changes"}
+            {loading ? tCommon("saving") : tCommon("saveChanges")}
           </Button>
         </div>
       </CardContent>

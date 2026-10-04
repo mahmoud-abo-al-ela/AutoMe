@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Menu, X, Shield, LogOut } from "lucide-react";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import type { CurrentUser } from "@/lib/checkUser";
 
 export default function SuperAdminMobileSidebar({
@@ -17,6 +19,7 @@ export default function SuperAdminMobileSidebar({
   pathname: string;
   user: CurrentUser;
 }) {
+  const t = useTranslations("superAdmin.nav");
   const [open, setOpen] = useState(false);
 
   return (
@@ -28,7 +31,7 @@ export default function SuperAdminMobileSidebar({
           className="h-10 w-10 p-0 hover:bg-sidebar-accent"
         >
           <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle menu</span>
+          <span className="sr-only">{t("openMenu")}</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72 p-0 bg-sidebar">
@@ -39,7 +42,7 @@ export default function SuperAdminMobileSidebar({
               <Shield className="h-5 w-5 text-white" />
             </div>
             <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
-              Super Admin
+              {t("brand")}
             </span>
           </div>
           <Button
@@ -47,6 +50,7 @@ export default function SuperAdminMobileSidebar({
             size="sm"
             className="h-8 w-8 p-0"
             onClick={() => setOpen(false)}
+            aria-label={t("closeMenu")}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -82,7 +86,7 @@ export default function SuperAdminMobileSidebar({
                     )}
                   />
                 )}
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </Link>
             );
           })}
@@ -107,13 +111,17 @@ export default function SuperAdminMobileSidebar({
             </div>
           )}
 
+          <LanguageSwitcher
+            onSwitch={() => setOpen(false)}
+            className="w-full h-auto justify-start px-4 py-3 gap-3 text-sidebar-foreground hover:bg-sidebar-accent/60 rounded-lg"
+          />
           <Link
             href="/"
             onClick={() => setOpen(false)}
             className="flex items-center px-4 py-3 text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 rounded-lg transition-all duration-200"
           >
-            <LogOut className="h-5 w-5 me-3 rotate-180" />
-            <span>Back to Site</span>
+            <LogOut className="h-5 w-5 me-3 rotate-180 rtl:rotate-0" />
+            <span>{t("backToSite")}</span>
           </Link>
         </div>
       </SheetContent>

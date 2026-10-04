@@ -1,6 +1,7 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Mail, Building2 } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -9,18 +10,12 @@ import UserActions from "./UserActions";
 import type { UserRole } from "@/lib/generated/prisma";
 import type { SuperAdminUserRow } from "./UsersTable";
 
-const roleConfig: Record<
+const roleVariant: Record<
   UserRole,
-  { label: string; variant: React.ComponentProps<typeof Badge>["variant"] }
+  React.ComponentProps<typeof Badge>["variant"]
 > = {
-  ADMIN: {
-    label: "Admin",
-    variant: "destructive",
-  },
-  USER: {
-    label: "User",
-    variant: "secondary",
-  },
+  ADMIN: "destructive",
+  USER: "secondary",
 };
 
 export default function UserRow({
@@ -30,8 +25,9 @@ export default function UserRow({
   user: SuperAdminUserRow;
   onChangeRole: (user: SuperAdminUserRow) => void;
 }) {
-  const { relativeToNow } = useFormatters();
-  const role = roleConfig[user.role];
+  const t = useTranslations("superAdmin.users");
+  const tRoles = useTranslations("org.settings.team.roles");
+  const { relativeToNow, number } = useFormatters();
 
   return (
     <TableRow>
@@ -53,8 +49,11 @@ export default function UserRow({
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant={role.variant} className="flex items-center gap-1 w-fit">
-          {role.label}
+        <Badge
+          variant={roleVariant[user.role]}
+          className="flex items-center gap-1 w-fit"
+        >
+          {t(`roles.${user.role}`)}
         </Badge>
       </TableCell>
       <TableCell>
@@ -65,27 +64,37 @@ export default function UserRow({
                 <Building2 className="h-3 w-3 text-muted-foreground" />
                 <span>{m.organization.name}</span>
                 <Badge variant="outline" className="text-xs ms-1">
-                  {m.role}
+                  {tRoles(m.role)}
                 </Badge>
               </div>
             ))}
             {user.memberships.length > 2 && (
               <span className="text-xs text-muted-foreground">
-                +{user.memberships.length - 2} more
+                {t("moreOrganizations", {
+                  value: number(user.memberships.length - 2),
+                })}
               </span>
             )}
           </div>
         ) : (
           <span className="text-muted-foreground text-sm">
-            No organizations
+            {t("noOrganizations")}
           </span>
         )}
       </TableCell>
       <TableCell>
         <div className="text-sm">
-          <div>{user._count.testDrives} test drives</div>
+          <div>
+            {t("testDrives", {
+              count: user._count.testDrives,
+              value: number(user._count.testDrives),
+            })}
+          </div>
           <div className="text-muted-foreground">
-            {user._count.savedCars} saved
+            {t("savedCars", {
+              count: user._count.savedCars,
+              value: number(user._count.savedCars),
+            })}
           </div>
         </div>
       </TableCell>

@@ -1,0 +1,520 @@
+{
+  "meta": {
+    "title": "Super Admin",
+    "description": "Platform administration dashboard"
+  },
+  "nav": {
+    "brand": "Super Admin",
+    "overview": "Overview",
+    "organizations": "Organizations",
+    "users": "All Users",
+    "plans": "Plans & Pricing",
+    "analytics": "Analytics",
+    "auditLogs": "Audit Logs",
+    "impersonation": "Impersonation",
+    "settings": "Platform Settings",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "backToSite": "Back to site"
+  },
+  "common": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "noPlan": "No plan",
+    "viewAll": "View all",
+    "view": "View",
+    "viewDetails": "View details",
+    "actions": "Actions",
+    "search": "Search",
+    "unknown": "Unknown",
+    "notAvailable": "N/A",
+    "platform": "Platform",
+    "previous": "Previous",
+    "next": "Next",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "deleting": "Deleting…",
+    "delete": "Delete",
+    "perMonth": "{amount}/month",
+    "planOption": "{name} – {amount}/mo",
+    "showing": "Showing {from}–{to} of {total}",
+    "errorTitle": "Something went wrong",
+    "errorBody": "Please try again later.",
+    "warning": "Warning:",
+    "irreversible": "This action cannot be undone.",
+    "columns": {
+      "organization": "Organization",
+      "plan": "Plan",
+      "cars": "Cars",
+      "members": "Members",
+      "testDrives": "Test drives",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    }
+  },
+  "overview": {
+    "title": "Platform Overview",
+    "subtitle": "Monitor and manage the AutoMe platform",
+    "stats": {
+      "organizations": "Total organizations",
+      "organizationsActive": "{value} active",
+      "users": "Total users",
+      "cars": "Total cars listed",
+      "testDrives": "Total test drives"
+    },
+    "subscriptions": {
+      "title": "Active subscriptions by plan",
+      "orgCount": "{count, plural, one {{value} organization} other {{value} organizations}}",
+      "empty": "No active subscriptions"
+    },
+    "growth": {
+      "title": "Platform growth",
+      "subtitle": "New organizations, users, and cars over the last 6 months",
+      "series": {
+        "organizations": "Organizations",
+        "users": "Users",
+        "cars": "Cars"
+      }
+    },
+    "recentOrganizations": {
+      "title": "Recent organizations",
+      "subtitle": "Latest organizations added to the platform",
+      "empty": "No organizations yet"
+    },
+    "activeImpersonations": {
+      "title": "Active impersonations",
+      "subtitle": "Admin impersonation sessions in progress",
+      "count": "{count, plural, one {{value} active impersonation session} other {{value} active impersonation sessions}}",
+      "empty": "No active impersonation sessions"
+    }
+  },
+  "organizations": {
+    "title": "Organizations",
+    "subtitle": "Manage all organizations on the platform",
+    "create": "Create organization",
+    "searchPlaceholder": "Search organizations…",
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "plan": "Plan",
+      "allPlans": "All plans"
+    },
+    "empty": "No organizations found",
+    "actions": {
+      "impersonate": "Impersonate",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "suspending": "Suspending…",
+      "activating": "Activating…"
+    },
+    "toasts": {
+      "suspended": "Organization suspended",
+      "suspendedBody": "{name} has been suspended.",
+      "activated": "Organization activated",
+      "activatedBody": "{name} has been activated.",
+      "statusFailed": "Couldn’t update the status",
+      "deleted": "Organization deleted",
+      "deletedBody": "{name} has been deleted.",
+      "deleteFailed": "Couldn’t delete the organization"
+    },
+    "delete": {
+      "title": "Delete organization",
+      "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+      "dataWarning": "This organization has {cars} and {members}. All of its data will be permanently removed.",
+      "allDataWarning": "All associated data — cars, test drives, conversations and team memberships — will be permanently removed.",
+      "cars": "{count, plural, one {{value} car} other {{value} cars}}",
+      "members": "{count, plural, one {{value} member} other {{value} members}}",
+      "submit": "Delete organization"
+    },
+    "impersonate": {
+      "title": "Impersonate user",
+      "description": "Access <strong>{name}</strong> as a specific user. Everything you do will be logged.",
+      "auditTitle": "Audit trail",
+      "auditBody": "Every action taken during impersonation is logged under your identity.",
+      "userLabel": "Impersonate as",
+      "loadingMembers": "Loading members…",
+      "userPlaceholder": "Select a user",
+      "reasonLabel": "Reason for impersonation",
+      "reasonPlaceholder": "e.g. Investigating reported issue #123, customer support request…",
+      "reasonHelp": "This reason is recorded in the audit log.",
+      "missingFields": "Select a user and give a reason",
+      "started": "Impersonation started",
+      "starting": "Starting…",
+      "submit": "Start impersonation"
+    },
+    "details": {
+      "back": "Back to organizations",
+      "stats": {
+        "cars": "Total cars",
+        "members": "Team members",
+        "testDrives": "Test drives"
+      },
+      "members": "Team members ({value})",
+      "activity": "Recent activity",
+      "activityEmpty": "No activity recorded",
+      "subscription": {
+        "title": "Subscription",
+        "periodStart": "Period start",
+        "periodEnd": "Period end",
+        "changePlan": "Change plan",
+        "selectPlan": "Select a plan",
+        "update": "Update plan",
+        "updating": "Updating…",
+        "none": "No subscription",
+        "assignPlaceholder": "Assign a plan",
+        "assign": "Assign plan",
+        "assigning": "Assigning…",
+        "updated": "Plan updated",
+        "updatedBody": "The subscription is now on {plan}.",
+        "updateFailed": "Couldn’t update the plan"
+      }
+    },
+    "form": {
+      "title": "Create organization",
+      "subtitle": "Set up a new organization on the platform",
+      "back": "Back to organizations",
+      "basic": {
+        "title": "Basic information",
+        "description": "The organization’s basic details",
+        "name": "Organization name *",
+        "namePlaceholder": "Nile Motors",
+        "slug": "Slug (URL)",
+        "slugHelp": "Generated from the name. Must be unique.",
+        "description": "Description",
+        "descriptionPlaceholder": "A brief description of the organization…"
+      },
+      "contact": {
+        "title": "Contact information",
+        "description": "How to reach the organization",
+        "email": "Email",
+        "phone": "Phone",
+        "website": "Website",
+        "address": "Address",
+        "addressPlaceholder": "15 Tahrir St, Dokki, Giza"
+      },
+      "plan": {
+        "title": "Subscription plan",
+        "description": "Choose the plan for this organization",
+        "label": "Plan *",
+        "placeholder": "Select a plan",
+        "features": "{name} plan includes:"
+      },
+      "owner": {
+        "title": "Owner",
+        "description": "Optionally assign an owner to this organization",
+        "email": "Owner email (optional)",
+        "help": "If this email belongs to an existing user, they become the organization’s owner."
+      },
+      "nameRequired": "Organization name is required",
+      "planRequired": "Select a plan",
+      "created": "Organization created",
+      "createdBody": "{name} has been created on the {plan} plan.",
+      "createFailed": "Couldn’t create the organization",
+      "submit": "Create organization",
+      "submitting": "Creating…"
+    }
+  },
+  "users": {
+    "title": "All Users",
+    "subtitle": "Manage all platform users across organizations",
+    "stats": {
+      "total": "Total users",
+      "admins": "Platform admins",
+      "regular": "Regular users"
+    },
+    "searchPlaceholder": "Search by name or email…",
+    "filters": {
+      "role": "Filter by role",
+      "allRoles": "All roles",
+      "users": "Users",
+      "admins": "Admins"
+    },
+    "roles": {
+      "ADMIN": "Admin",
+      "USER": "User"
+    },
+    "columns": {
+      "user": "User",
+      "role": "Role",
+      "organizations": "Organizations",
+      "activity": "Activity",
+      "joined": "Joined"
+    },
+    "empty": "No users found",
+    "noOrganizations": "No organizations",
+    "moreOrganizations": "+{value} more",
+    "testDrives": "{count, plural, one {{value} test drive} other {{value} test drives}}",
+    "savedCars": "{count, plural, one {{value} saved} other {{value} saved}}",
+    "actions": {
+      "label": "Actions",
+      "changeRole": "Change role"
+    },
+    "changeRole": {
+      "title": "Change user role",
+      "description": "Update the role for {name}. This changes their platform-wide permissions.",
+      "placeholder": "Select a role",
+      "submit": "Update role",
+      "submitting": "Updating…",
+      "updated": "Role changed to {role}",
+      "updatedBody": "{name}’s role has been updated.",
+      "failed": "Couldn’t update the role"
+    },
+    "pagination": "Showing {from}–{to} of {total} users",
+    "details": {
+      "back": "Back to users",
+      "joined": "Joined {date}",
+      "organizations": "Organizations",
+      "organizationsEmpty": "Not a member of any organization",
+      "activity": "Activity",
+      "tabs": {
+        "audit": "Audit log",
+        "testDrives": "Test drives"
+      },
+      "activityEmpty": "No activity recorded",
+      "testDrivesEmpty": "No test drives booked",
+      "unknownTime": "Unknown time"
+    }
+  },
+  "plans": {
+    "title": "Plans & Pricing",
+    "subtitle": "Manage subscription plans and pricing tiers",
+    "stats": {
+      "mrr": "Monthly recurring revenue",
+      "active": "Active subscriptions",
+      "trial": "Trial subscriptions",
+      "churned": "Churned"
+    },
+    "card": {
+      "edit": "Edit plan",
+      "delete": "Delete plan",
+      "orYearly": "or {amount}/year (save {percent})",
+      "features": "Features",
+      "activeSubscriptions": "{count, plural, one {{value} active subscription} other {{value} active subscriptions}}"
+    },
+    "add": {
+      "title": "Add new plan",
+      "body": "Create a new pricing plan for the platform",
+      "allExist": "All plan types already exist",
+      "allExistBody": "There can be one plan of each type (Starter, Pro, Enterprise)."
+    },
+    "toasts": {
+      "missingFields": "Fill in all required fields",
+      "created": "Plan created",
+      "createdBody": "The {name} plan has been created.",
+      "createFailed": "Couldn’t create the plan",
+      "updated": "Plan updated",
+      "updatedBody": "The {name} plan has been updated.",
+      "updateFailed": "Couldn’t update the plan",
+      "deleted": "Plan deleted",
+      "deletedBody": "{name} has been deleted.",
+      "deleteFailed": "Couldn’t delete the plan"
+    },
+    "delete": {
+      "title": "Delete the {name} plan?",
+      "body": "This permanently deletes the <strong>{name}</strong> plan. It cannot be undone.",
+      "activeWarning": "This plan has {count}. It can’t be deleted until every subscriber has moved to another plan.",
+      "activeCount": "{count, plural, one {{value} active subscription} other {{value} active subscriptions}}",
+      "submit": "Delete plan"
+    },
+    "form": {
+      "createTitle": "Create new plan",
+      "createDescription": "Add a new pricing plan to the platform",
+      "editTitle": "Edit {name}",
+      "editDescription": "Update pricing and limits for {name}",
+      "create": "Create plan",
+      "creating": "Creating…",
+      "tabs": {
+        "basic": "Basic info",
+        "limits": "Limits",
+        "features": "Features"
+      },
+      "name": "Plan name",
+      "namePlaceholder": "e.g. Business",
+      "type": "Plan type",
+      "typePlaceholder": "Select type",
+      "monthlyPrice": "Monthly price (EGP)",
+      "yearlyPrice": "Yearly price (EGP)",
+      "maxCars": "Max cars (-1 = unlimited)",
+      "maxMembers": "Max members (-1 = unlimited)",
+      "maxImages": "Max images per car",
+      "retention": "Audit log retention (days)",
+      "retentionPlaceholder": "Leave empty for unlimited",
+      "trialDays": "Free trial (days)",
+      "trialPlaceholder": "0 for no trial",
+      "trialHelp": "New dealerships on this plan start right away without paying; the first payment is due before the trial ends.",
+      "aiProcessing": "AI-powered car analysis",
+      "aiLimit": "AI calls per month (-1 = unlimited)",
+      "aiLimitZero": "A limit of 0 blocks every AI call, so the feature is on but unusable.",
+      "aiAssistant": "AI answers to buyers’ questions (unlimited)",
+      "chat": "Live chat support",
+      "prioritySupport": "Priority support"
+    }
+  },
+  "analytics": {
+    "title": "Platform Analytics",
+    "subtitle": "Monitor platform performance and growth",
+    "growth": {
+      "organizations": "Organizations this month",
+      "users": "Users this month",
+      "cars": "Cars listed this month",
+      "vsLastMonth": "vs last month ({value})"
+    },
+    "charts": {
+      "growthTitle": "Platform growth",
+      "growthSubtitle": "New organizations and users over the last 6 months",
+      "activityTitle": "Platform activity",
+      "activitySubtitle": "Car listings and test drive bookings over time",
+      "series": {
+        "organizations": "Organizations",
+        "users": "Users",
+        "cars": "Cars",
+        "testDrives": "Test drives"
+      }
+    },
+    "top": {
+      "byListings": "Top by listings",
+      "byTestDrives": "Top by test drives",
+      "rank": "#{value}",
+      "empty": "No data available"
+    },
+    "ai": {
+      "title": "AI usage — last {days} days",
+      "empty": "No AI calls recorded in this window.",
+      "calls": "{count, plural, one {{value} call} other {{value} calls}}",
+      "success": "{value} success",
+      "byFeature": "By feature",
+      "byModel": "By model",
+      "failures": "Failures by cause",
+      "columns": {
+        "feature": "Feature",
+        "model": "Model",
+        "calls": "Calls",
+        "success": "Success",
+        "tokensIn": "Tokens in",
+        "tokensOut": "Tokens out",
+        "p50": "p50",
+        "p95": "p95"
+      }
+    }
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "subtitle": "Track all platform activity and changes",
+    "export": "Export logs",
+    "searchPlaceholder": "Search by user email or entity ID…",
+    "filters": {
+      "action": "Filter by action",
+      "allActions": "All actions",
+      "entity": "Filter by entity",
+      "allEntities": "All entities"
+    },
+    "columns": {
+      "timestamp": "Timestamp",
+      "user": "User",
+      "action": "Action",
+      "entity": "Entity",
+      "organization": "Organization",
+      "details": "Details"
+    },
+    "empty": "No audit logs found",
+    "viewDetails": "View details",
+    "pagination": "Showing {from}–{to} of {total} logs",
+    "details": {
+      "title": "Audit log details",
+      "action": "Action",
+      "entityType": "Entity type",
+      "entityId": "Entity ID",
+      "timestamp": "Timestamp",
+      "ipAddress": "IP address",
+      "userAgent": "User agent",
+      "metadata": "Metadata",
+      "before": "Before",
+      "after": "After"
+    }
+  },
+  "impersonation": {
+    "title": "Impersonation",
+    "subtitle": "View organizations as their owners for support and debugging",
+    "activeAlert": "{count, plural, one {There is {value} active impersonation session.} other {There are {value} active impersonation sessions.}} Every action taken during impersonation is logged.",
+    "active": {
+      "title": "Active sessions",
+      "badge": "{value} active",
+      "empty": "No active impersonation sessions",
+      "started": "Started {time}",
+      "end": "End session",
+      "ending": "Ending…",
+      "ended": "Impersonation session ended",
+      "endedBody": "The session as {name} has been ended.",
+      "endFailed": "Couldn’t end the session"
+    },
+    "history": {
+      "title": "Recent sessions",
+      "empty": "No impersonation history"
+    },
+    "quick": {
+      "title": "Quick impersonate",
+      "searchPlaceholder": "Search organizations…",
+      "noOwner": "No owner",
+      "empty": "No organizations found",
+      "showing": "Showing {shown} of {total} results",
+      "loading": "Loading…",
+      "cannot": "Can’t impersonate",
+      "cannotBody": "This organization has no owner to impersonate.",
+      "started": "Impersonation started",
+      "startedBody": "Now viewing {org} as {name}.",
+      "failed": "Couldn’t start impersonation"
+    }
+  },
+  "settings": {
+    "title": "Platform Settings",
+    "subtitle": "Configure global platform settings and defaults",
+    "tabs": {
+      "general": "General",
+      "security": "Security",
+      "email": "Email"
+    },
+    "general": {
+      "title": "General settings",
+      "description": "Basic platform settings and branding",
+      "platformName": "Platform name",
+      "supportEmail": "Support email",
+      "trialDays": "Default trial period (days)",
+      "trialDaysHelp": "Length of a new organization’s trial",
+      "maintenance": "Maintenance mode",
+      "maintenanceHelp": "Temporarily block access for everyone except super admins",
+      "maintenanceOn": "Maintenance mode is on. Regular users can’t access the platform.",
+      "saved": "Settings saved"
+    },
+    "security": {
+      "title": "Security settings",
+      "description": "Security policies and authentication settings",
+      "maxLoginAttempts": "Max login attempts",
+      "maxLoginAttemptsHelp": "Failed attempts before an account is locked",
+      "sessionTimeout": "Session timeout (hours)",
+      "sessionTimeoutHelp": "How long an idle session stays signed in",
+      "retention": "Audit log retention (days)",
+      "retentionHelp": "How long audit logs are kept before they are deleted",
+      "mfa": "Require MFA for admins",
+      "mfaHelp": "Require multi-factor authentication on every admin account",
+      "saved": "Security settings saved"
+    },
+    "email": {
+      "title": "Email settings",
+      "description": "Email sending and notification settings",
+      "fromName": "From name",
+      "fromEmail": "From email",
+      "notifications": "Email notifications",
+      "welcome": "Welcome email",
+      "welcomeHelp": "Send a welcome email to new organization owners",
+      "reminders": "Test drive reminders",
+      "remindersHelp": "Send reminder emails before scheduled test drives",
+      "sendTest": "Send test email",
+      "sending": "Sending…",
+      "testSent": "Test email sent",
+      "saved": "Email settings saved"
+    }
+  }
+}

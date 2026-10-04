@@ -1,6 +1,8 @@
 "use client";
 
 import { FileText } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Label } from "@/components/ui/label";
 import {
   Card,
@@ -29,6 +31,11 @@ export default function PlanSection({
   plans: Plan[];
   onPlanChange: (planId: string) => void;
 }) {
+  const t = useTranslations("superAdmin.organizations.form.plan");
+  const tCommon = useTranslations("superAdmin.common");
+  // Limit copy is shared with the public pricing cards.
+  const tFeatures = useTranslations("plans.features");
+  const { number, locale } = useFormatters();
   const selectedPlan = plans.find((p) => p.id === formData.planId);
 
   return (
@@ -36,29 +43,25 @@ export default function PlanSection({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Subscription Plan
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          Select the subscription plan for this organization
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="planId">Plan *</Label>
+            <Label htmlFor="planId">{t("label")}</Label>
             <Select value={formData.planId} onValueChange={onPlanChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a plan" />
+              <SelectTrigger id="planId">
+                <SelectValue placeholder={t("placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 {plans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{plan.name}</span>
-                      <span className="text-muted-foreground">
-                        - {formatPlanAmount(plan.monthlyPrice)}/mo
-                      </span>
-                    </div>
+                    {tCommon("planOption", {
+                      name: plan.name,
+                      amount: formatPlanAmount(plan.monthlyPrice, locale),
+                    })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -69,12 +72,28 @@ export default function PlanSection({
             <div className="p-4 bg-muted rounded-lg">
               <div className="space-y-2 text-sm">
                 <p className="font-medium">
-                  {selectedPlan.name} Plan Features:
+                  {t("features", { name: selectedPlan.name })}
                 </p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>• Up to {selectedPlan.maxCars} cars</li>
-                  <li>• Up to {selectedPlan.maxMembers} team members</li>
-                  <li>• {selectedPlan.maxImagesPerCar} images per car</li>
+                <ul className="list-disc space-y-1 ps-5 text-muted-foreground">
+                  <li>
+                    {selectedPlan.maxCars === -1
+                      ? tFeatures("carListingsUnlimited")
+                      : tFeatures("carListings", {
+                          value: number(selectedPlan.maxCars),
+                        })}
+                  </li>
+                  <li>
+                    {selectedPlan.maxMembers === -1
+                      ? tFeatures("teamMembersUnlimited")
+                      : tFeatures("teamMembers", {
+                          value: number(selectedPlan.maxMembers),
+                        })}
+                  </li>
+                  <li>
+                    {tFeatures("imagesPerCar", {
+                      value: number(selectedPlan.maxImagesPerCar),
+                    })}
+                  </li>
                 </ul>
               </div>
             </div>

@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { Shield, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { Shield, LogOut, ChevronLeft } from "lucide-react";
+import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +22,8 @@ export default function SuperAdminDesktopSidebar({
   pathname: string;
   user: CurrentUser;
 }) {
+  const t = useTranslations("superAdmin.nav");
+
   return (
     <aside
       className={cn(
@@ -35,7 +39,7 @@ export default function SuperAdminDesktopSidebar({
               <Shield className="h-5 w-5 text-white" />
             </div>
             <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
-              Super Admin
+              {t("brand")}
             </span>
           </div>
         )}
@@ -47,13 +51,16 @@ export default function SuperAdminDesktopSidebar({
             collapsed && "mx-auto"
           )}
           onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
         >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-          ) : (
-            <ChevronLeft className="h-4 w-4 transition-transform duration-200" />
-          )}
+          {/* Points toward the edge the sidebar folds into: the start edge,
+              which is the right-hand one in Arabic. */}
+          <ChevronLeft
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              collapsed ? "rotate-180 rtl:rotate-0" : "rtl:rotate-180"
+            )}
+          />
         </Button>
       </div>
 
@@ -78,9 +85,9 @@ export default function SuperAdminDesktopSidebar({
                   collapsed ? "justify-center px-3 py-3" : "px-4 py-3",
                   isActive
                     ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium shadow-sm"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground hover:translate-x-1"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground ltr:hover:translate-x-1 rtl:hover:-translate-x-1"
                 )}
-                title={collapsed ? item.label : ""}
+                title={collapsed ? t(item.labelKey) : ""}
               >
                 {ItemIcon && (
                   <ItemIcon
@@ -95,7 +102,7 @@ export default function SuperAdminDesktopSidebar({
                 )}
                 {!collapsed && (
                   <span className="font-medium transition-all duration-200">
-                    {item.label}
+                    {t(item.labelKey)}
                   </span>
                 )}
 
@@ -108,7 +115,7 @@ export default function SuperAdminDesktopSidebar({
               {/* Tooltip for collapsed state */}
               {collapsed && (
                 <div className="absolute start-full ms-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                  {item.label}
+                  {t(item.labelKey)}
                 </div>
               )}
             </div>
@@ -136,6 +143,14 @@ export default function SuperAdminDesktopSidebar({
           </div>
         )}
 
+        <LanguageSwitcher
+          showLabel={!collapsed}
+          className={cn(
+            "w-full h-auto text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg",
+            collapsed ? "justify-center px-3 py-3" : "justify-start px-4 py-3 gap-3"
+          )}
+        />
+
         {/* Back to Site link */}
         <Link
           href="/"
@@ -143,16 +158,16 @@ export default function SuperAdminDesktopSidebar({
             "flex items-center text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground rounded-lg transition-all duration-200 group",
             collapsed ? "justify-center px-3 py-3" : "px-4 py-3"
           )}
-          title={collapsed ? "Back to Site" : ""}
+          title={collapsed ? t("backToSite") : ""}
         >
           <LogOut
             className={cn(
-              "h-5 w-5 rotate-180 transition-all duration-200",
+              "h-5 w-5 rotate-180 rtl:rotate-0 transition-all duration-200",
               collapsed ? "mx-0" : "me-3",
               "group-hover:scale-105"
             )}
           />
-          {!collapsed && <span className="font-medium">Back to Site</span>}
+          {!collapsed && <span className="font-medium">{t("backToSite")}</span>}
         </Link>
       </div>
     </aside>

@@ -1,6 +1,8 @@
 ﻿"use client";
 
+import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { planKeyFor } from "@/components/Pricing/pricing-plans";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -37,20 +39,27 @@ export default function PlanFormTabs({
     value: PlanFeatures[K]
   ) => void;
 }) {
+  const t = useTranslations("superAdmin.plans.form");
+  const tPlans = useTranslations("plans.plans");
+  const typeLabel = (type: PlanType) => {
+    const key = planKeyFor(type);
+    return key ? tPlans(`${key}.name`) : type;
+  };
+
   return (
     <Tabs defaultValue="basic" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="basic">Basic Info</TabsTrigger>
-        <TabsTrigger value="limits">Limits</TabsTrigger>
-        <TabsTrigger value="features">Features</TabsTrigger>
+        <TabsTrigger value="basic">{t("tabs.basic")}</TabsTrigger>
+        <TabsTrigger value="limits">{t("tabs.limits")}</TabsTrigger>
+        <TabsTrigger value="features">{t("tabs.features")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="basic" className="space-y-4">
         <div className="grid gap-2">
-          <Label htmlFor="name">Plan Name</Label>
+          <Label htmlFor="name">{t("name")}</Label>
           <Input
             id="name"
-            placeholder="e.g., Business"
+            placeholder={t("namePlaceholder")}
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
@@ -58,16 +67,16 @@ export default function PlanFormTabs({
 
         {mode === "create" && (
           <div className="grid gap-2">
-            <Label htmlFor="type">Plan Type</Label>
+            <Label htmlFor="type">{t("type")}</Label>
             {/* Radix Select hands back a plain string; the only items rendered
                 below are availableTypes, so the value is always a PlanType. */}
             <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value as PlanType })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+              <SelectTrigger id="type">
+                <SelectValue placeholder={t("typePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {availableTypes.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                  <SelectItem key={type} value={type}>{typeLabel(type)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -76,7 +85,7 @@ export default function PlanFormTabs({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="monthlyPrice">Monthly Price (EGP)</Label>
+            <Label htmlFor="monthlyPrice">{t("monthlyPrice")}</Label>
             <Input
               id="monthlyPrice"
               type="number"
@@ -92,7 +101,7 @@ export default function PlanFormTabs({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="yearlyPrice">Yearly Price (EGP)</Label>
+            <Label htmlFor="yearlyPrice">{t("yearlyPrice")}</Label>
             <Input
               id="yearlyPrice"
               type="number"
@@ -113,7 +122,7 @@ export default function PlanFormTabs({
       <TabsContent value="limits" className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="maxCars">Max Cars (-1 = unlimited)</Label>
+            <Label htmlFor="maxCars">{t("maxCars")}</Label>
             <Input
               id="maxCars"
               type="number"
@@ -128,7 +137,7 @@ export default function PlanFormTabs({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="maxMembers">Max Members (-1 = unlimited)</Label>
+            <Label htmlFor="maxMembers">{t("maxMembers")}</Label>
             <Input
               id="maxMembers"
               type="number"
@@ -145,7 +154,7 @@ export default function PlanFormTabs({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="maxImagesPerCar">Max Images Per Car</Label>
+            <Label htmlFor="maxImagesPerCar">{t("maxImages")}</Label>
             <Input
               id="maxImagesPerCar"
               type="number"
@@ -160,11 +169,11 @@ export default function PlanFormTabs({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="auditLogRetentionDays">Audit Log Retention (days)</Label>
+            <Label htmlFor="auditLogRetentionDays">{t("retention")}</Label>
             <Input
               id="auditLogRetentionDays"
               type="number"
-              placeholder="Leave empty for unlimited"
+              placeholder={t("retentionPlaceholder")}
               value={inputValues.auditLogRetentionDays}
               onChange={(e) => setInputValues({ ...inputValues, auditLogRetentionDays: e.target.value })}
               onBlur={(e) => {
@@ -175,12 +184,12 @@ export default function PlanFormTabs({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="trialDays">Free Trial (days)</Label>
+            <Label htmlFor="trialDays">{t("trialDays")}</Label>
             <Input
               id="trialDays"
               type="number"
               min={0}
-              placeholder="0 for no trial"
+              placeholder={t("trialPlaceholder")}
               value={inputValues.trialDays}
               onChange={(e) => setInputValues({ ...inputValues, trialDays: e.target.value })}
               onBlur={(e) => {
@@ -190,10 +199,7 @@ export default function PlanFormTabs({
                 setInputValues({ ...inputValues, trialDays: safe === 0 ? "" : safe.toString() });
               }}
             />
-            <p className="text-xs text-muted-foreground">
-              New dealerships on this plan start it at once with no payment; the
-              first payment is asked for before the trial ends.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("trialHelp")}</p>
           </div>
         </div>
       </TabsContent>
@@ -213,11 +219,11 @@ export default function PlanFormTabs({
                 handleFeatureChange("aiProcessing", { ...features.aiProcessing, enabled: checked as boolean })
               }
             />
-            <Label htmlFor="aiProcessing" className="cursor-pointer">AI-Powered Car Analysis</Label>
+            <Label htmlFor="aiProcessing" className="cursor-pointer">{t("aiProcessing")}</Label>
           </div>
           {features.aiProcessing?.enabled && (
             <div className="grid gap-2 ps-6">
-              <Label htmlFor="aiProcessingLimit">AI calls per month (-1 = unlimited)</Label>
+              <Label htmlFor="aiProcessingLimit">{t("aiLimit")}</Label>
               <Input
                 id="aiProcessingLimit"
                 type="number"
@@ -227,9 +233,7 @@ export default function PlanFormTabs({
                 onChange={(e) => setInputValues({ ...inputValues, aiProcessingLimit: e.target.value })}
               />
               {parseAiLimit(inputValues.aiProcessingLimit) === 0 && (
-                <p className="text-xs text-destructive">
-                  A limit of 0 blocks every AI call, so the feature is on but unusable.
-                </p>
+                <p className="text-xs text-destructive">{t("aiLimitZero")}</p>
               )}
             </div>
           )}
@@ -241,7 +245,7 @@ export default function PlanFormTabs({
                 handleFeatureChange("aiAssistant", { ...features.aiAssistant, enabled: checked as boolean })
               }
             />
-            <Label htmlFor="aiAssistant" className="cursor-pointer">AI Answers to Buyers&apos; Questions (unlimited)</Label>
+            <Label htmlFor="aiAssistant" className="cursor-pointer">{t("aiAssistant")}</Label>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -249,7 +253,7 @@ export default function PlanFormTabs({
               checked={features.chat || false}
               onCheckedChange={(checked) => handleFeatureChange("chat", checked as boolean)}
             />
-            <Label htmlFor="chat" className="cursor-pointer">Live Chat Support</Label>
+            <Label htmlFor="chat" className="cursor-pointer">{t("chat")}</Label>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -257,7 +261,7 @@ export default function PlanFormTabs({
               checked={features.prioritySupport || false}
               onCheckedChange={(checked) => handleFeatureChange("prioritySupport", checked as boolean)}
             />
-            <Label htmlFor="prioritySupport" className="cursor-pointer">Priority Support</Label>
+            <Label htmlFor="prioritySupport" className="cursor-pointer">{t("prioritySupport")}</Label>
           </div>
         </div>
       </TabsContent>

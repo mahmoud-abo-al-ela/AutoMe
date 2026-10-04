@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import {
 import { AlertCircle, UserCog, Loader2 } from "lucide-react";
 import { startImpersonationAction } from "@/actions/impersonation";
 import { toast } from "sonner";
+import { useActionError } from "@/hooks/use-action-error";
 import { Prisma } from "@/lib/generated/prisma";
 import type { OrganizationRowData } from "./OrganizationsTable";
 
@@ -45,7 +46,12 @@ export default function ImpersonateModal({
   organization: OrganizationRowData;
   onClose: () => void;
 }) {
-  const router = useRouter();
+  const t = useTranslations("superAdmin.organizations.impersonate");
+  const tCommon = useTranslations("superAdmin.common");
+  const tActions = useTranslations("common.actions");
+  const tRoles = useTranslations("org.settings.team.roles");
+  const locale = useLocale();
+  const actionError = useActionError();
   const [members, setMembers] = useState<OrgMemberOption[]>([]);
   const [selectedMember, setSelectedMember] = useState("");
   const [reason, setReason] = useState("");
@@ -82,7 +88,7 @@ export default function ImpersonateModal({
 
   const handleImpersonate = async () => {
     if (!selectedMember || !reason.trim()) {
-      toast.error("Please select a user and provide a reason");
+      toast.error(t("missingFields"));
       return;
     }
 
@@ -95,14 +101,16 @@ export default function ImpersonateModal({
       });
 
       if (result.success) {
-        toast.success("Impersonation started");
-        // Redirect to the organization's dashboard page
-        window.location.href = `/org/${organization.slug}/dashboard`;
+        toast.success(t("started"));
+        // A full navigation, so the dashboard loads with the impersonation
+        // cookie. The locale is spelled out: without it the request lands on
+        // the default locale, not the one the admin is reading.
+        window.location.href = `/${locale}/org/${organization.slug}/dashboard`;
       } else {
-        toast.error(result.error.message);
+        toast.error(actionError(result.error, tCommon("errorBody")));
       }
     } catch (error) {
-      toast.error("An error occurred");
+      toast.error(tCommon("errorTitle"));
       console.error(error);
     } finally {
       setLoading(false);
@@ -115,11 +123,13 @@ export default function ImpersonateModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserCog className="h-5 w-5 text-purple-600" />
-            Impersonate User
+            {t("title")}
           </DialogTitle>
           <DialogDescription>
-            Access <strong>{organization.name}</strong> as a specific user. All
-            actions will be logged.
+            {t.rich("description", {
+              name: organization.name,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -128,26 +138,23 @@ export default function ImpersonateModal({
           <div className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
             <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-yellow-700 dark:text-yellow-300">
-              <p className="font-medium">Audit Trail Warning</p>
-              <p className="mt-1">
-                All actions performed during impersonation will be logged with
-                your identity.
-              </p>
+              <p className="font-medium">{t("auditTitle")}</p>
+              <p className="mt-1">{t("auditBody")}</p>
             </div>
           </div>
 
           {/* User Selection */}
           <div className="space-y-2">
-            <Label htmlFor="user">Impersonate As</Label>
+            <Label htmlFor="user">{t("userLabel")}</Label>
             {loadingMembers ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading members...
+                {t("loadingMembers")}
               </div>
             ) : (
               <Select value={selectedMember} onValueChange={setSelectedMember}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a user" />
+                <SelectTrigger id="user">
+                  <SelectValue placeholder={t("userPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {members.map((member) => (
@@ -155,7 +162,7 @@ export default function ImpersonateModal({
                       <div className="flex items-center gap-2">
                         <span>{member.user?.name || member.user?.email}</span>
                         <span className="text-xs text-muted-foreground">
-                          ({member.role})
+                          ({tRoles(member.role)})
                         </span>
                       </div>
                     </SelectItem>
@@ -167,23 +174,23 @@ export default function ImpersonateModal({
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason for Impersonation *</Label>
+            <Label htmlFor="reason">{t("reasonLabel")} *</Label>
             <Textarea
               id="reason"
-              placeholder="e.g., Investigating reported issue #123, Customer support request..."
+              placeholder={t("reasonPlaceholder")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              This reason will be recorded in the audit log.
+              {t("reasonHelp")}
             </p>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+            {tActions("cancel")}
           </Button>
           <Button
             onClick={handleImpersonate}
@@ -193,12 +200,12 @@ export default function ImpersonateModal({
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                Starting...
+                {t("starting")}
               </>
             ) : (
               <>
                 <UserCog className="h-4 w-4 me-2" />
-                Start Impersonation
+                {t("submit")}
               </>
             )}
           </Button>

@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { updatePlan, createPlan, deletePlan } from "@/actions/super-admin";
@@ -22,6 +24,9 @@ export type PlanWithUsage = Prisma.PlanGetPayload<{
 }> & { activeSubscriptions: number };
 
 export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
+  const t = useTranslations("superAdmin.plans");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editDialog, setEditDialog] = useState<{
@@ -40,7 +45,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
   const existingTypes = plans.map((p) => p.type);
   const availableTypes = (
     ["STARTER", "PRO", "ENTERPRISE"] satisfies PlanType[]
-  ).filter((t) => !existingTypes.includes(t));
+  ).filter((type) => !existingTypes.includes(type));
 
   const openEditDialog = (plan: PlanWithUsage) => {
     setEditDialog({ open: true, plan });
@@ -52,7 +57,7 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
 
   const handleCreate = async (formData: PlanFormSubmitData) => {
     if (!formData.name || !formData.type) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("toasts.missingFields"));
       return;
     }
 
@@ -63,21 +68,21 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
       const result = await createPlan(formData as PlanFormInput);
 
       if (result.success) {
-        toast.success("Plan created successfully", {
-          description: `${formData.name} plan has been created.`,
+        toast.success(t("toasts.created"), {
+          description: t("toasts.createdBody", { name: formData.name }),
         });
         setCreateDialog(false);
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to create plan", {
-          description: result.error.message,
+        toast.error(t("toasts.createFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setLoading(false);
@@ -94,21 +99,21 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
       const result = await updatePlan(editDialog.plan.id, formData as PlanFormInput);
 
       if (result.success) {
-        toast.success("Plan updated successfully", {
-          description: `${formData.name} plan has been updated.`,
+        toast.success(t("toasts.updated"), {
+          description: t("toasts.updatedBody", { name: formData.name }),
         });
         setEditDialog({ open: false, plan: null });
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to update plan", {
-          description: result.error.message,
+        toast.error(t("toasts.updateFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setLoading(false);
@@ -123,21 +128,21 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
       const result = await deletePlan(deleteDialog.plan.id);
 
       if (result.success) {
-        toast.success("Plan deleted successfully", {
-          description: `${deleteDialog.plan.name} has been deleted.`,
+        toast.success(t("toasts.deleted"), {
+          description: t("toasts.deletedBody", { name: deleteDialog.plan.name }),
         });
         setDeleteDialog({ open: false, plan: null });
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to delete plan", {
-          description: result.error.message,
+        toast.error(t("toasts.deleteFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setDeleteLoading(false);
@@ -147,9 +152,8 @@ export default function PlansGrid({ plans }: { plans: PlanWithUsage[] }) {
 
   const handleAddPlanClick = () => {
     if (availableTypes.length === 0) {
-      toast.error("All plan types already exist", {
-        description:
-          "You can only have one plan of each type (Starter, Pro, Enterprise).",
+      toast.error(t("add.allExist"), {
+        description: t("add.allExistBody"),
       });
       return;
     }

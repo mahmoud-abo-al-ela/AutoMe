@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Shield } from "lucide-react";
 import SuperAdminDesktopSidebar from "./SuperAdminDesktopSidebar";
@@ -8,6 +9,7 @@ import SuperAdminMobileSidebar from "./SuperAdminMobileSidebar";
 import type { CurrentUser } from "@/lib/checkUser";
 
 export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
+  const t = useTranslations("superAdmin.nav");
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -65,7 +67,7 @@ export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
               <Shield className="h-5 w-5 text-white" />
             </div>
             <span className="font-bold text-lg text-sidebar-foreground">
-              Super Admin
+              {t("brand")}
             </span>
           </div>
         </div>

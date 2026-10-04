@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useActionError } from "@/hooks/use-action-error";
 import {
   ArrowLeft,
   ExternalLink,
@@ -54,6 +56,11 @@ export type OrganizationDetail = Prisma.OrganizationGetPayload<{
 }>;
 
 export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
+  const t = useTranslations("superAdmin.organizations");
+  const tCommon = useTranslations("superAdmin.common");
+  const tActions = useTranslations("common.actions");
+  const actionError = useActionError();
+  const locale = useLocale();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [statusLoading, setStatusLoading] = useState(false);
@@ -66,23 +73,24 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
       const result = await updateOrganizationStatus(org.id, !org.isActive);
       if (result.success) {
         toast.success(
-          org.isActive ? "Organization suspended" : "Organization activated",
+          org.isActive ? t("toasts.suspended") : t("toasts.activated"),
           {
-            description: `${org.name} has been ${org.isActive ? "suspended" : "activated"
-              } successfully.`,
+            description: org.isActive
+              ? t("toasts.suspendedBody", { name: org.name })
+              : t("toasts.activatedBody", { name: org.name }),
           }
         );
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to update status", {
-          description: result.error.message,
+        toast.error(t("toasts.statusFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setStatusLoading(false);
@@ -94,18 +102,18 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
     try {
       const result = await deleteOrganization(org.id);
       if (result.success) {
-        toast.success("Organization deleted", {
-          description: `${org.name} has been deleted successfully.`,
+        toast.success(t("toasts.deleted"), {
+          description: t("toasts.deletedBody", { name: org.name }),
         });
         router.push("/super-admin/organizations");
       } else {
-        toast.error("Failed to delete organization", {
-          description: result.error.message,
+        toast.error(t("toasts.deleteFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setDeleteLoading(false);
@@ -121,8 +129,8 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
         onClick={() => router.back()}
         className="gap-2"
       >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Organizations
+        <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+        {t("details.back")}
       </Button>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -134,16 +142,19 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight">{org.name}</h1>
               <Badge variant={org.isActive ? "default" : "secondary"}>
-                {org.isActive ? "Active" : "Inactive"}
+                {org.isActive ? tCommon("active") : tCommon("inactive")}
               </Badge>
             </div>
+            {/* A plain <a> for the new tab, so the locale is written into the
+                href by hand — without it the dashboard opens in the default
+                locale rather than the one the admin is reading. */}
             <a
-              href={`/org/${org.slug}`}
+              href={`/${locale}/org/${org.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary flex items-center gap-1"
             >
-              /org/{org.slug}
+              <span dir="ltr">/org/{org.slug}</span>
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
@@ -158,17 +169,19 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
             {statusLoading || isPending ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                {org.isActive ? "Suspending..." : "Activating..."}
+                {org.isActive
+                  ? t("actions.suspending")
+                  : t("actions.activating")}
               </>
             ) : org.isActive ? (
               <>
                 <Pause className="h-4 w-4 me-2" />
-                Suspend
+                {t("actions.suspend")}
               </>
             ) : (
               <>
                 <Play className="h-4 w-4 me-2" />
-                Activate
+                {t("actions.activate")}
               </>
             )}
           </Button>
@@ -180,12 +193,12 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
             {deleteLoading ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                Deleting...
+                {tCommon("deleting")}
               </>
             ) : (
               <>
                 <Trash2 className="h-4 w-4 me-2" />
-                Delete
+                {tCommon("delete")}
               </>
             )}
           </Button>
@@ -201,19 +214,21 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Delete Organization
+              {t("delete.title")}
             </DialogTitle>
             <DialogDescription asChild>
               <div>
                 <p>
-                  Are you sure you want to delete{" "}
-                  <span className="font-semibold">{org.name}</span>? This action
-                  cannot be undone.
+                  {t.rich("delete.confirm", {
+                    name: org.name,
+                    strong: (chunks) => (
+                      <span className="font-semibold">{chunks}</span>
+                    ),
+                  })}
                 </p>
                 <div className="mt-2 p-2 bg-destructive/10 rounded-md text-destructive">
-                  <strong>Warning:</strong> All associated data including cars,
-                  test drives, conversations, and team memberships will be
-                  permanently removed.
+                  <strong>{tCommon("warning")}</strong>{" "}
+                  {t("delete.allDataWarning")}
                 </div>
               </div>
             </DialogDescription>
@@ -224,7 +239,7 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
               onClick={() => setDeleteDialogOpen(false)}
               disabled={deleteLoading}
             >
-              Cancel
+              {tActions("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -234,10 +249,10 @@ export default function OrgDetailsHeader({ org }: { org: OrganizationDetail }) {
               {deleteLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                  Deleting...
+                  {tCommon("deleting")}
                 </>
               ) : (
-                "Delete Organization"
+                t("delete.submit")
               )}
             </Button>
           </DialogFooter>

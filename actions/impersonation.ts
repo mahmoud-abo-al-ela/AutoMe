@@ -31,7 +31,8 @@ export const startImpersonationAction = withErrorHandling(
     if (!reason || reason.trim().length < 10) {
       throw new ValidationError(
         "Reason must be at least 10 characters",
-        "reason"
+        "reason",
+        { key: "errors.superAdmin.reasonTooShort", params: { min: 10 } }
       );
     }
 

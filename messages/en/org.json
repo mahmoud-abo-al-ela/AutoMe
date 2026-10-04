@@ -717,7 +717,8 @@
       "ACTIVE": "Active",
       "TRIALING": "Trial",
       "PAST_DUE": "Past Due",
-      "CANCELED": "Canceled"
+      "CANCELED": "Canceled",
+      "PENDING": "Pending"
     },
     "current": {
       "title": "Current Plan",
