@@ -16,7 +16,7 @@ Dealerships subscribe, showcase their new and used cars on a branded storefront,
 [![Paymob](https://img.shields.io/badge/Billing-Paymob-0b5fff)](https://paymob.com)
 [![Vitest](https://img.shields.io/badge/tests-Vitest_%2B_live_AI_evals-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev)
 
-[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd) • [Deployment](#deployment)
+[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd)
 
 </div>
 
@@ -249,16 +249,3 @@ flowchart LR
 - **No real secrets.** Both jobs run on placeholder credentials that cannot reach a real service; the only secret is a Clerk *development* key the build needs to validate its format.
 
 Delivery is to Vercel. Database migrations are applied to production as a deliberate step before the code that needs them ships — never implicitly during a build.
-
-## Deployment
-
-Built for [Vercel](https://vercel.com).
-
-> [!IMPORTANT]
-> Apply migrations to the production database (`pnpm prisma migrate deploy`) **before** deploying code that depends on them.
-
-- Enable **Fluid compute** — the AI routes declare `maxDuration = 300` to outlast provider queues.
-- Set Paymob's transaction callback to `https://<your-domain>/api/webhooks/paymob` (each checkout also names it). It must be public HTTPS, which Paymob cannot reach on localhost: test payments against a preview deployment. (Locally, the payment success pages still confirm a payment by asking Paymob directly.) Point Clerk's webhook at `/api/webhooks/clerk`.
-- Set `CRON_SECRET`: `vercel.json` runs `/api/cron/billing-renewals` daily at 05:00 UTC (07:00–08:00 Cairo). Plan prices are edited in EGP in the super-admin plan editor.
-- Add a wildcard domain (`*.your-domain`) so dealership storefronts resolve.
-- Run `POST /api/cron/backfill-image-alts` (with `CRON_SECRET`) until it reports nothing remaining, to describe photos of cars listed before photo descriptions existed.
