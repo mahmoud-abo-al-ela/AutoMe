@@ -6,9 +6,8 @@ import { usePathname } from "@/i18n/navigation";
 import { Shield } from "lucide-react";
 import SuperAdminDesktopSidebar from "./SuperAdminDesktopSidebar";
 import SuperAdminMobileSidebar from "./SuperAdminMobileSidebar";
-import type { CurrentUser } from "@/lib/checkUser";
 
-export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
+export default function SuperAdminSidebar() {
   const t = useTranslations("superAdmin.nav");
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -61,7 +60,7 @@ export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 start-0 end-0 h-16 bg-sidebar border-b border-sidebar-border z-40 flex items-center justify-between px-4">
         <div className="flex items-center">
-          <SuperAdminMobileSidebar pathname={pathname} user={user} />
+          <SuperAdminMobileSidebar pathname={pathname} />
           <div className="flex items-center gap-2 ms-4">
             <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
@@ -78,7 +77,6 @@ export default function SuperAdminSidebar({ user }: { user: CurrentUser }) {
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         pathname={pathname}
-        user={user}
       />
     </>
   );

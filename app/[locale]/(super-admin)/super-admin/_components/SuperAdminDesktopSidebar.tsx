@@ -7,20 +7,16 @@ import { Shield, LogOut, ChevronLeft } from "lucide-react";
 import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Dispatch, SetStateAction } from "react";
-import type { CurrentUser } from "@/lib/checkUser";
 
 export default function SuperAdminDesktopSidebar({
   collapsed,
   setCollapsed,
   pathname,
-  user,
 }: {
   collapsed: boolean;
   setCollapsed: Dispatch<SetStateAction<boolean>>;
   pathname: string;
-  user: CurrentUser;
 }) {
   const t = useTranslations("superAdmin.nav");
 
@@ -123,26 +119,8 @@ export default function SuperAdminDesktopSidebar({
         })}
       </nav>
 
-      {/* User info & Footer */}
+      {/* Footer */}
       <div className="p-3 border-t border-sidebar-border space-y-2">
-        {/* User info */}
-        {!collapsed && user && (
-          <div className="px-2 py-2 flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.imageUrl ?? undefined} alt={user.name ?? ""} />
-              <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">
-                {user.name?.charAt(0) || "SA"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {user.email}
-              </p>
-            </div>
-          </div>
-        )}
-
         <LanguageSwitcher
           showLabel={!collapsed}
           className={cn(

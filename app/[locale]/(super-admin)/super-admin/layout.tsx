@@ -43,7 +43,7 @@ export default async function SuperAdminLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <Toaster position="top-right" richColors />
-      <SuperAdminSidebar user={user} />
+      <SuperAdminSidebar />
       <main
         className="flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0"
         // The sidebar is pinned to the inline-start edge, which is the

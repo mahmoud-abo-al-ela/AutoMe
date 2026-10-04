@@ -8,16 +8,12 @@ import { Menu, X, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
-import type { CurrentUser } from "@/lib/checkUser";
 
 export default function SuperAdminMobileSidebar({
   pathname,
-  user,
 }: {
   pathname: string;
-  user: CurrentUser;
 }) {
   const t = useTranslations("superAdmin.nav");
   const [open, setOpen] = useState(false);
@@ -92,25 +88,8 @@ export default function SuperAdminMobileSidebar({
           })}
         </nav>
 
-        {/* User info & Footer */}
+        {/* Footer */}
         <div className="p-3 border-t border-sidebar-border space-y-2 mt-auto">
-          {user && (
-            <div className="px-2 py-2 flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.imageUrl ?? undefined} alt={user.name ?? ""} />
-                <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">
-                  {user.name?.charAt(0) || "SA"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-          )}
-
           <LanguageSwitcher
             onSwitch={() => setOpen(false)}
             className="w-full h-auto justify-start px-4 py-3 gap-3 text-sidebar-foreground hover:bg-sidebar-accent/60 rounded-lg"
