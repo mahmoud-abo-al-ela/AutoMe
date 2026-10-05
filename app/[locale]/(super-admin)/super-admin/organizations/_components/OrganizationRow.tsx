@@ -1,6 +1,9 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { tenantHost } from "@/lib/utils/tenant-host";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Car, Users, Calendar, ExternalLink } from "lucide-react";
@@ -23,7 +26,9 @@ export default function OrganizationRow({
   actionLoading: string | null;
   isPending: boolean;
 }) {
-  const { relativeToNow } = useFormatters();
+  const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
+  const { relativeToNow, number } = useFormatters();
 
   const getPlanBadgeColor = (planType: PlanType | undefined) => {
     switch (planType) {
@@ -47,7 +52,7 @@ export default function OrganizationRow({
           <div>
             <p className="font-medium">{org.name}</p>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span>{org.slug}.localhost</span>
+              <span dir="ltr">{tenantHost(org.slug)}</span>
               <ExternalLink className="h-3 w-3" />
             </div>
           </div>
@@ -58,30 +63,32 @@ export default function OrganizationRow({
           variant="secondary"
           className={getPlanBadgeColor(org.subscription?.plan?.type)}
         >
-          {org.subscription?.plan?.name || "No Plan"}
+          {org.subscription?.plan
+            ? planDisplayName(tPlans, org.subscription.plan)
+            : tCommon("noPlan")}
         </Badge>
       </TableCell>
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-1">
           <Car className="h-4 w-4 text-muted-foreground" />
-          <span>{org._count.cars}</span>
+          <span>{number(org._count.cars)}</span>
         </div>
       </TableCell>
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-1">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span>{org._count.memberships}</span>
+          <span>{number(org._count.memberships)}</span>
         </div>
       </TableCell>
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-1">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>{org._count.testDrives}</span>
+          <span>{number(org._count.testDrives)}</span>
         </div>
       </TableCell>
       <TableCell>
         <Badge variant={org.isActive ? "default" : "secondary"}>
-          {org.isActive ? "Active" : "Inactive"}
+          {org.isActive ? tCommon("active") : tCommon("inactive")}
         </Badge>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">

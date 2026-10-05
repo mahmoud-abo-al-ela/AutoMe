@@ -7,6 +7,7 @@ import { getCars, deleteCar, updateCar } from "@/actions/cars";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useActionError } from "@/hooks/use-action-error";
 import type { SerializedCar } from "@/lib/utils/serializers";
 
 /** The car-row fields this list reads. */
@@ -14,13 +15,10 @@ type AdminCar = SerializedCar;
 
 type CarUpdates = { status?: string; featured?: boolean };
 
-/** Message from a caught unknown, for the toast descriptions below. */
-function messageOf(error: unknown): string | undefined {
-    return error instanceof Error ? error.message : undefined;
-}
-
 export const useAdminCarsList = () => {
     const t = useTranslations("org.cars.toasts");
+    const tError = useTranslations("org.cars.error");
+    const actionError = useActionError();
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -35,7 +33,7 @@ export const useAdminCarsList = () => {
         data: fetchedCars,
         isLoading,
         isFetching,
-        error: fetchCarsError,
+        error: fetchThrew,
         refetch: fetchCarsFn,
     } = useQuery({
         queryKey: queryKeys.cars.list({ search: debouncedSearch, status: statusFilter.toLowerCase(), page: currentPage, pageSize }),
@@ -44,6 +42,16 @@ export const useAdminCarsList = () => {
     });
 
     const isFetchingCars = isLoading || isFetching;
+
+    // Reader-facing text, or null when the list loaded. A failed response is
+    // an error too — it used to fall through as an empty inventory. A thrown
+    // one carries nothing translatable (the network, or Next's own English),
+    // so it gets the generic line.
+    const fetchCarsError: string | null = fetchThrew
+        ? tError("body")
+        : fetchedCars && !fetchedCars.success
+            ? actionError(fetchedCars.error, tError("body"))
+            : null;
 
     const {
         isPending: deleteCarLoading,
@@ -132,14 +140,13 @@ export const useAdminCarsList = () => {
                     description: t("deletedBody"),
                 });
             } else {
-                // The thrown message is developer-facing; the catch below shows
-                // it when there is one and falls back to the translated line
-                // otherwise, matching resolveActionError's order.
-                throw new Error(response.error.message || "Delete operation failed");
+                toast.error(t("deleteFailed"), {
+                    description: actionError(response.error, t("deleteFailedBody")),
+                });
             }
-        } catch (error) {
+        } catch {
             toast.error(t("deleteFailed"), {
-                description: messageOf(error) || t("deleteFailedBody"),
+                description: t("deleteFailedBody"),
             });
         } finally {
             setDeleteDialogOpen(false);
@@ -162,11 +169,13 @@ export const useAdminCarsList = () => {
                     description: t("updatedBody"),
                 });
             } else {
-                throw new Error(response.error.message || "Update operation failed");
+                toast.error(t("updateFailed"), {
+                    description: actionError(response.error, t("updateFailedBody")),
+                });
             }
-        } catch (error) {
+        } catch {
             toast.error(t("updateFailed"), {
-                description: messageOf(error) || t("updateFailedBody"),
+                description: t("updateFailedBody"),
             });
         }
     };

@@ -84,13 +84,16 @@
     },
     "slug": {
       "prefix": "Your site will be",
+      "label": "Web address",
       "checking": "Checking",
       "available": "Available",
-      "taken": "Taken — try another name"
+      "taken": "Taken — try another address"
     },
     "hints": {
-      "checking": "Checking name availability…",
-      "taken": "Choose an available dealership name"
+      "checking": "Checking the address…",
+      "taken": "That web address is taken — edit it above",
+      "slugNeeded": "Type your web address in English letters, e.g. nile-motors",
+      "slugInvalid": "Use {min}–{max} English letters or numbers, with single hyphens between words"
     },
     "validation": {
       "nameRequired": "Dealership name is required",

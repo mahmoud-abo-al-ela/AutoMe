@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as planService from "@/lib/services/super-admin/plan";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -26,7 +26,7 @@ export const updatePlan = withSuperAdmin(
     },
   });
 
-  revalidatePath("/super-admin/plans");
+  revalidateLocalized("/super-admin/plans");
   return createSuccessResponse({ plan });
 });
 
@@ -47,7 +47,7 @@ export const createPlan = withSuperAdmin(async (admin, data: PlanFormInput) => {
     },
   });
 
-  revalidatePath("/super-admin/plans");
+  revalidateLocalized("/super-admin/plans");
   return createSuccessResponse({ plan });
 });
 
@@ -68,6 +68,6 @@ export const deletePlan = withSuperAdmin(async (admin, planId: string) => {
     },
   });
 
-  revalidatePath("/super-admin/plans");
+  revalidateLocalized("/super-admin/plans");
   return createSuccessResponse(null, "Plan deleted");
 });

@@ -39,7 +39,9 @@ export default function FeatureComparisonTable({
   // identity and must not change with the reader's language.
   const allFeatures = getAllFeatureKeys(plans);
   const featureParams = (feature: (typeof allFeatures)[number]) =>
-    feature.params ? { value: number(feature.params.count) } : undefined;
+    feature.params
+      ? { count: feature.params.count, value: number(feature.params.count) }
+      : undefined;
 
   const priceLabel = (plan: BillingPlan) => {
     const amount =

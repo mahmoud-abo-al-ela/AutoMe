@@ -1,12 +1,9 @@
-import {
-  Banknote,
-  TrendingUp,
-  CheckCircle,
-  XCircle,
-  Clock,
-} from "lucide-react";
+import { Banknote, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPlanAmount } from "@/lib/utils/currency";
+import { formatNumber } from "@/lib/utils/number";
+import type { Locale } from "@/i18n/routing";
 
 export default function SubscriptionStats({
   stats,
@@ -17,33 +14,41 @@ export default function SubscriptionStats({
   /** Monthly recurring revenue, in minor units. */
   mrr: number;
 }) {
-  const totalSubscriptions = Object.values(stats).reduce((a, b) => a + b, 0);
+  const t = useTranslations("superAdmin.plans.stats");
+  const locale = useLocale() as Locale;
+  const count = (value: number) => formatNumber(value, locale);
 
   const statCards = [
     {
-      title: "Monthly Recurring Revenue",
-      value: formatPlanAmount(mrr),
+      key: "mrr",
+      title: t("mrr"),
+      value: formatPlanAmount(mrr, locale),
       icon: Banknote,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
     {
-      title: "Active Subscriptions",
-      value: stats.ACTIVE || 0,
+      key: "active",
+      title: t("active"),
+      value: count(stats.ACTIVE || 0),
       icon: CheckCircle,
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
     {
-      title: "Trial Subscriptions",
-      value: stats.TRIALING || 0,
+      key: "trial",
+      title: t("trial"),
+      value: count(stats.TRIALING || 0),
       icon: Clock,
       color: "text-yellow-600",
       bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
     },
     {
-      title: "Churned",
-      value: (stats.CANCELLED || 0) + (stats.EXPIRED || 0),
+      key: "churned",
+      title: t("churned"),
+      // SubscriptionStatus spells it CANCELED and has no EXPIRED; this read
+      // CANCELLED + EXPIRED, so the card always showed 0.
+      value: count(stats.CANCELED || 0),
       icon: XCircle,
       color: "text-red-600",
       bgColor: "bg-red-100 dark:bg-red-900/30",
@@ -53,7 +58,7 @@ export default function SubscriptionStats({
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statCards.map((stat) => (
-        <Card key={stat.title}>
+        <Card key={stat.key}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.title}

@@ -2,6 +2,7 @@
 
 import { X, FilterX } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,6 +27,7 @@ export const ActiveFilterChips = ({
   onClear,
   className,
 }: ActiveFilterChipsProps) => {
+  const t = useTranslations("common.filters");
   if (!filters || filters.length === 0) return null;
 
   return (
@@ -38,7 +40,7 @@ export const ActiveFilterChips = ({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.15 }}
           onClick={() => onClear(filter.type)}
-          aria-label={`Remove filter ${filter.label}`}
+          aria-label={t("remove", { label: filter.label })}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span>{filter.label}</span>
@@ -53,7 +55,7 @@ export const ActiveFilterChips = ({
           className="ms-1 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <FilterX className="h-3.5 w-3.5" />
-          Clear all
+          {t("clearAll")}
         </button>
       )}
     </div>

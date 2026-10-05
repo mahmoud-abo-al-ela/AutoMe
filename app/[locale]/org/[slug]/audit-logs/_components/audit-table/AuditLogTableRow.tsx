@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, Settings } from "lucide-react";
 import { useFormatters } from "@/hooks/use-formatters";
 import { ACTION_COLORS, ENTITY_ICONS } from "./constants";
-import { useAuditLabels } from "../../_lib/use-audit-labels";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
 import type { AuditLogWithUser } from "../../_lib/audit-types";
 
 interface AuditLogTableRowProps {

@@ -325,7 +325,7 @@ export default function PlanComparison({
                       <Check className="h-3 w-3 text-green-600" />
                       {tPlans(
                         `features.${f.key}`,
-                        f.params ? { value: number(f.params.count) } : undefined
+                        f.params ? { count: f.params.count, value: number(f.params.count) } : undefined
                       )}
                     </li>
                   ))}

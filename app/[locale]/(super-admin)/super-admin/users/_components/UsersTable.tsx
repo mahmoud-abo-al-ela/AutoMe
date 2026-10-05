@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 import { useRouter } from "@/i18n/navigation";
 import {
   Table,
@@ -18,15 +20,6 @@ import UsersPagination from "./UsersPagination";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Users } from "lucide-react";
 import { Prisma, type UserRole } from "@/lib/generated/prisma";
-
-const roleConfig: Record<UserRole, { label: string }> = {
-  ADMIN: {
-    label: "Admin",
-  },
-  USER: {
-    label: "User",
-  },
-};
 
 /** A user row as page.tsx selects it, with memberships and activity counts. */
 export type SuperAdminUserRow = Prisma.UserGetPayload<{
@@ -54,6 +47,9 @@ export default function UsersTable({
   users: SuperAdminUserRow[];
   pagination: UsersPagination;
 }) {
+  const t = useTranslations("superAdmin.users");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [roleDialog, setRoleDialog] = useState<{
@@ -82,21 +78,26 @@ export default function UsersTable({
     try {
       const result = await updateUserRole(roleDialog.user.id, newRole);
       if (result.success) {
-        toast.success(`Role updated to ${roleConfig[newRole].label}`, {
-          description: `${roleDialog.user.name}'s role has been changed successfully.`,
-        });
+        toast.success(
+          t("changeRole.updated", { role: t(`roles.${newRole}`) }),
+          {
+            description: t("changeRole.updatedBody", {
+              name: roleDialog.user.name ?? roleDialog.user.email ?? "",
+            }),
+          }
+        );
         setRoleDialog({ open: false, user: null });
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to update role", {
-          description: result.error.message,
+        toast.error(t("changeRole.failed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setLoading(false);
@@ -109,19 +110,21 @@ export default function UsersTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Organizations</TableHead>
-              <TableHead>Activity</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead>{t("columns.user")}</TableHead>
+              <TableHead>{t("columns.role")}</TableHead>
+              <TableHead>{t("columns.organizations")}</TableHead>
+              <TableHead>{t("columns.activity")}</TableHead>
+              <TableHead>{t("columns.joined")}</TableHead>
+              <TableHead className="w-[50px]">
+                <span className="sr-only">{tCommon("actions")}</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-48 p-0">
-                  <EmptyState variant="inline" icon={Users} title="No users found" />
+                  <EmptyState variant="inline" icon={Users} title={t("empty")} />
                 </TableCell>
               </TableRow>
             ) : (

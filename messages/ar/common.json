@@ -41,6 +41,22 @@
     "nextShort": "التالي",
     "morePages": "المزيد من الصفحات"
   },
+  "filters": {
+    "search": "بحث…",
+    "noOptions": "لا توجد خيارات متاحة",
+    "noMatches": "لا توجد نتائج مطابقة",
+    "showMore": "+{count} أخرى",
+    "showLess": "عرض أقل",
+    "clearAll": "مسح الكل",
+    "remove": "إزالة عامل التصفية {label}",
+    "noRangeData": "لا توجد بيانات مخزون"
+  },
+  "carousel": {
+    "carousel": "عرض متتالٍ",
+    "slide": "شريحة",
+    "previous": "الشريحة السابقة",
+    "next": "الشريحة التالية"
+  },
   "carActions": {
     "addToFavorites": "أضف إلى المفضلة",
     "removeFromFavorites": "إزالة من المفضلة",

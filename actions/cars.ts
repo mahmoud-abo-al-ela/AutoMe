@@ -1,6 +1,6 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import { after } from "next/server";
 import * as carService from "@/lib/services/car";
 import { coachListing, translateListing, type ListingText, type ListingToCoach } from "@/lib/services/ai";
@@ -143,7 +143,7 @@ export const addCar = withOrgAuth(
         describePhotosAfterSave(ctx, car.id);
       }
 
-      revalidatePath(`/org/${ctx.organization.slug}/cars`);
+      revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
       return createSuccessResponse({ ...car, translation }, "Car added successfully");
     }
   )
@@ -174,7 +174,7 @@ export const getCars = withOrgAuth(
 export const deleteCar = withOrgAuth(async (ctx, carId: string) => {
   await carService.deleteCar(carId, ctx.userId, ctx.organization.id);
 
-  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse(null, "Car deleted successfully");
 });
 
@@ -192,7 +192,7 @@ export const updateCar = withOrgAuth(
 
   const updatedCar = await carService.updateCar(carId, validatedUpdate, ctx.userId, ctx.organization.id);
 
-  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse(updatedCar, "Car updated successfully");
 });
 
@@ -238,7 +238,7 @@ export const updateCarFull = withOrgAuth(
   // Also after an edit: new photos need describing, removed ones pruning.
   describePhotosAfterSave(ctx, carId);
 
-  revalidatePath(`/org/${ctx.organization.slug}/cars`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse({ ...updatedCar, translation }, "Car updated successfully");
 });
 

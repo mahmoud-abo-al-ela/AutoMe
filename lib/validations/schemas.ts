@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { isDateString } from "@/lib/utils/date-only";
+import { isValidSlug } from "@/lib/utils/slug";
 
 /**
  * The per-language title and description columns, shared by the create and
@@ -131,7 +132,7 @@ export const updateCarFullSchema = z.object({
 
 export const organizationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  slug: z.string().min(3, "Slug must be at least 3 characters").max(50).regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  slug: z.string().refine(isValidSlug, "Slug must be 3–50 lowercase letters or numbers, with single hyphens between words"),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),

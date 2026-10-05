@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -39,24 +40,26 @@ export default function ChangeRoleDialog({
   loading: boolean;
   isPending: boolean;
 }) {
+  const t = useTranslations("superAdmin.users");
+  const tActions = useTranslations("common.actions");
+
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change User Role</DialogTitle>
+          <DialogTitle>{t("changeRole.title")}</DialogTitle>
           <DialogDescription>
-            Update the role for {user?.name}. This will affect their
-            platform-wide permissions.
+            {t("changeRole.description", { name: user?.name ?? "" })}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <Select value={currentRole} onValueChange={onRoleChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a role" />
+            <SelectTrigger aria-label={t("changeRole.placeholder")}>
+              <SelectValue placeholder={t("changeRole.placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="USER">User</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
+              <SelectItem value="USER">{t("roles.USER")}</SelectItem>
+              <SelectItem value="ADMIN">{t("roles.ADMIN")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -66,16 +69,16 @@ export default function ChangeRoleDialog({
             onClick={onClose}
             disabled={loading || isPending}
           >
-            Cancel
+            {tActions("cancel")}
           </Button>
           <Button onClick={onConfirm} disabled={loading || isPending}>
             {loading || isPending ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                Updating...
+                {t("changeRole.submitting")}
               </>
             ) : (
-              "Update Role"
+              t("changeRole.submit")
             )}
           </Button>
         </DialogFooter>

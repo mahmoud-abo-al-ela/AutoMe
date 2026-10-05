@@ -37,7 +37,9 @@ export async function validateTargetMembership(
   });
 
   if (!targetMembership) {
-    throw new AuthorizationError("Target user does not have access to this organization");
+    throw new AuthorizationError("Target user does not have access to this organization", {
+      key: "errors.superAdmin.targetNotMember",
+    });
   }
 
   return targetMembership;

@@ -13,28 +13,27 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
 
 export default function EditCarPage() {
   const t = useTranslations("org.carForm.edit");
   const tPage = useTranslations("org.carForm.modePage");
+  const actionError = useActionError();
   const params = useParams();
   const carId = Array.isArray(params.carId) ? params.carId[0] : params.carId;
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
   // The car list, not the browser's previous page, which may be anywhere.
   const carsHref = `/org/${slug}/cars`;
 
-  const { data: car, isLoading, error } = useQuery({
+  // The response is kept whole rather than thrown on failure: a thrown Error
+  // carries only the English message, and the envelope carries the key.
+  const { data: response, isLoading, error } = useQuery({
     queryKey: queryKeys.cars.detail(carId ?? ""),
-    queryFn: async () => {
-      // `enabled` below keeps this from running without an id.
-      const response = await getCarForEdit(carId!);
-      if (!response?.success) {
-        throw new Error(response?.error?.message || "Failed to fetch car data");
-      }
-      return response.data;
-    },
+    // `enabled` below keeps this from running without an id.
+    queryFn: () => getCarForEdit(carId!),
     enabled: !!carId,
   });
+  const car = response?.success ? response.data : null;
 
   if (isLoading) {
     return (
@@ -60,7 +59,11 @@ export default function EditCarPage() {
     return (
       <div className="p-6 text-center">
         <h2 className="text-xl font-bold text-red-600 mb-2">{t("errorTitle")}</h2>
-        <p className="text-gray-600 mb-4">{error?.message || t("errorBody")}</p>
+        <p className="text-gray-600 mb-4">
+          {response && !response.success && !error
+            ? actionError(response.error, t("errorBody"))
+            : t("errorBody")}
+        </p>
         <Button asChild>
           <Link href={carsHref}>{tPage("goBack")}</Link>
         </Button>

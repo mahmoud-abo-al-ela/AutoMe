@@ -1,4 +1,10 @@
+"use client";
+
+// A client component: useFormatters lives in a client module, and calling it
+// from a server component throws rather than formatting.
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Building2, ArrowRight, Car, Users } from "lucide-react";
-import { Prisma, PlanType } from "@/lib/generated/prisma";
+import type { Prisma, PlanType } from "@/lib/generated/prisma";
 
 /** The organization rows page.tsx loads for this table, with their joins. */
 export type RecentOrganization = Prisma.OrganizationGetPayload<{
@@ -27,7 +33,10 @@ export default function RecentOrganizations({
 }: {
   organizations: RecentOrganization[];
 }) {
-  const { relativeToNow } = useFormatters();
+  const t = useTranslations("superAdmin.overview.recentOrganizations");
+  const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
+  const { relativeToNow, number } = useFormatters();
 
   const getPlanBadgeColor = (planType: PlanType | undefined) => {
     switch (planType) {
@@ -47,16 +56,16 @@ export default function RecentOrganizations({
         <div>
           <CardTitle className="text-lg flex items-center gap-2">
             <Building2 className="h-5 w-5 text-muted-foreground" />
-            Recent Organizations
+            {t("title")}
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Latest organizations added to the platform
+            {t("subtitle")}
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
           <Link href="/super-admin/organizations">
-            View All
-            <ArrowRight className="h-4 w-4 ms-1" />
+            {tCommon("viewAll")}
+            <ArrowRight className="h-4 w-4 ms-1 rtl:rotate-180" />
           </Link>
         </Button>
       </CardHeader>
@@ -64,12 +73,12 @@ export default function RecentOrganizations({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Organization</TableHead>
-              <TableHead>Plan</TableHead>
-              <TableHead className="text-center">Cars</TableHead>
-              <TableHead className="text-center">Members</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>{tCommon("columns.organization")}</TableHead>
+              <TableHead>{tCommon("columns.plan")}</TableHead>
+              <TableHead className="text-center">{tCommon("columns.cars")}</TableHead>
+              <TableHead className="text-center">{tCommon("columns.members")}</TableHead>
+              <TableHead>{tCommon("columns.status")}</TableHead>
+              <TableHead>{tCommon("columns.created")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -96,24 +105,26 @@ export default function RecentOrganizations({
                         org.subscription?.plan?.type
                       )}
                     >
-                      {org.subscription?.plan?.name || "No Plan"}
+                      {org.subscription?.plan
+                        ? planDisplayName(tPlans, org.subscription.plan)
+                        : tCommon("noPlan")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
                       <Car className="h-3 w-3 text-muted-foreground" />
-                      <span>{org._count.cars}</span>
+                      <span>{number(org._count.cars)}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
                       <Users className="h-3 w-3 text-muted-foreground" />
-                      <span>{org._count.memberships}</span>
+                      <span>{number(org._count.memberships)}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={org.isActive ? "default" : "secondary"}>
-                      {org.isActive ? "Active" : "Inactive"}
+                      {org.isActive ? tCommon("active") : tCommon("inactive")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
@@ -127,7 +138,7 @@ export default function RecentOrganizations({
                   colSpan={6}
                   className="text-center py-8 text-muted-foreground"
                 >
-                  No organizations yet
+                  {t("empty")}
                 </TableCell>
               </TableRow>
             )}

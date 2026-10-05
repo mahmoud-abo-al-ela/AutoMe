@@ -13,13 +13,15 @@ import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { NotFoundError } from "@/lib/utils/errors";
+import { isValidSlug } from "@/lib/utils/slug";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { organizationSchema } from "@/lib/validations/schemas";
 import type { OrganizationInput } from "@/lib/validations/schemas";
 import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
 
 export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
-  if (!slug || slug.length < 3) {
+  // Not worth a query for something the create step would refuse anyway.
+  if (!isValidSlug(slug)) {
     return createSuccessResponse({ available: false });
   }
 

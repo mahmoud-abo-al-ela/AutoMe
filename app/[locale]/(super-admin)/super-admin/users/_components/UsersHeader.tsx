@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
-import { Users, Shield, UserCog, Search } from "lucide-react";
+import { Users, Shield, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +22,8 @@ export default function UsersHeader({
   /** Count of users per UserRole, keyed by role name, as built in page.tsx. */
   roleStats: Record<string, number>;
 }) {
+  const t = useTranslations("superAdmin.users");
+  const { number } = useFormatters();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -51,21 +55,24 @@ export default function UsersHeader({
 
   const stats = [
     {
-      title: "Total Users",
+      key: "total",
+      title: t("stats.total"),
       value: totalUsers,
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
     {
-      title: "Platform Admins",
+      key: "admins",
+      title: t("stats.admins"),
       value: roleStats.ADMIN || 0,
       icon: Shield,
       color: "text-red-600",
       bgColor: "bg-red-100 dark:bg-red-900/30",
     },
     {
-      title: "Regular Users",
+      key: "regular",
+      title: t("stats.regular"),
       value: roleStats.USER || 0,
       icon: Users,
       color: "text-green-600",
@@ -76,16 +83,14 @@ export default function UsersHeader({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">All Users</h1>
-        <p className="text-muted-foreground">
-          Manage all platform users across organizations
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title}>
+          <Card key={stat.key}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
@@ -95,7 +100,7 @@ export default function UsersHeader({
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className="text-2xl font-bold">{number(stat.value)}</div>
             </CardContent>
           </Card>
         ))}
@@ -107,7 +112,8 @@ export default function UsersHeader({
           <div className="relative">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or email..."
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="ps-10"
@@ -119,12 +125,12 @@ export default function UsersHeader({
           onValueChange={handleRoleFilter}
         >
           <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="Filter by role" />
+            <SelectValue placeholder={t("filters.role")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="USER">Users</SelectItem>
-            <SelectItem value="ADMIN">Admins</SelectItem>
+            <SelectItem value="all">{t("filters.allRoles")}</SelectItem>
+            <SelectItem value="USER">{t("filters.users")}</SelectItem>
+            <SelectItem value="ADMIN">{t("filters.admins")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

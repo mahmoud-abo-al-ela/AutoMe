@@ -18,7 +18,9 @@ export async function updateUserRole(
 
   // Prevent removing your own admin role
   if (userId === adminId && newRole !== "ADMIN") {
-    throw new ValidationError("Cannot remove your own Admin role", "role");
+    throw new ValidationError("Cannot remove your own Admin role", "role", {
+      key: "errors.superAdmin.cannotDemoteSelf",
+    });
   }
 
   return userRepo.updateUserRole(userId, newRole);

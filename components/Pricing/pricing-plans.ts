@@ -53,6 +53,20 @@ export function planKeyFor(type?: string | null): PlanKey | null {
   return PLAN_KEY_BY_TYPE[type as keyof typeof PLAN_KEY_BY_TYPE] ?? null;
 }
 
+/**
+ * A plan's name in the reader's language: the shared copy for a known type,
+ * the stored name otherwise ("fall back, never blank"). `t` is scoped to the
+ * `plans` namespace; a plain function so server and client components can
+ * both call it.
+ */
+export function planDisplayName(
+  t: (key: `plans.${PlanKey}.name`) => string,
+  plan: { type?: string | null; name: string }
+): string {
+  const key = planKeyFor(plan.type);
+  return key ? t(`plans.${key}.name`) : plan.name;
+}
+
 /** A Plan row as it arrives from the server, before mapDbPlanToUi reshapes it. */
 export type DbPlan = {
   type?: string | null;

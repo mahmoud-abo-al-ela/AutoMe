@@ -1,6 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
+import { useFormatters } from "@/hooks/use-formatters";
+import {
+  isValidSlug,
+  normalizeSlugInput,
+  slugFromName,
+  SLUG_MAX_LENGTH,
+  SLUG_MIN_LENGTH,
+} from "@/lib/utils/slug";
 import { useRouter } from "@/i18n/navigation";
 import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +21,7 @@ import ContactInfoSection from "./ContactInfoSection";
 import PlanSection from "./PlanSection";
 import OwnerSection from "./OwnerSection";
 import type { Plan } from "@/lib/generated/prisma";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 /** The fields the create-organization form collects. All are strings, since
  * they come straight from text inputs and a plan Select. */
@@ -35,7 +46,15 @@ export type CreateOrganizationSectionProps = {
 };
 
 export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
+  const t = useTranslations("superAdmin.organizations.form");
+  const tActions = useTranslations("common.actions");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
+  const { number } = useFormatters();
+  const tPlans = useTranslations("plans");
   const router = useRouter();
+  // The slug follows the name until the admin types one.
+  const [slugEdited, setSlugEdited] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<CreateOrganizationFormData>({
     name: "",
@@ -53,28 +72,42 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Auto-generate slug from name
-    if (name === "name") {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-      setFormData((prev) => ({ ...prev, slug }));
+    if (name === "slug") {
+      setSlugEdited(true);
+      setFormData((prev) => ({ ...prev, slug: normalizeSlugInput(value) }));
+      return;
     }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      // Suggested from the name's Latin letters; an all-Arabic name suggests
+      // nothing and the slug has to be typed. See lib/utils/slug.
+      ...(name === "name" && !slugEdited ? { slug: slugFromName(value) } : {}),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error("Organization name is required");
+      toast.error(t("nameRequired"));
+      return;
+    }
+
+    if (!isValidSlug(formData.slug)) {
+      toast.error(
+        t("slugInvalid", {
+          min: number(SLUG_MIN_LENGTH),
+          max: number(SLUG_MAX_LENGTH),
+        })
+      );
       return;
     }
 
     if (!formData.planId) {
-      toast.error("Please select a plan");
+      toast.error(t("planRequired"));
       return;
     }
 
@@ -82,15 +115,19 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
       const result = await createOrganization(formData);
 
       if (result.success) {
-        toast.success("Organization created successfully", {
-          description: `${formData.name} has been created with the ${
-            plans.find((p) => p.id === formData.planId)?.name
-          } plan.`,
+        toast.success(t("created"), {
+          description: t("createdBody", {
+            name: formData.name,
+            plan: (() => {
+              const chosen = plans.find((p) => p.id === formData.planId);
+              return chosen ? planDisplayName(tPlans, chosen) : "";
+            })(),
+          }),
         });
         router.push("/super-admin/organizations");
       } else {
-        toast.error("Failed to create organization", {
-          description: result.error.message,
+        toast.error(t("createFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
     });
@@ -119,18 +156,18 @@ export default function CreateOrganizationForm({ plans }: { plans: Plan[] }) {
           onClick={() => router.push("/super-admin/organizations")}
           disabled={isPending}
         >
-          Cancel
+          {tActions("cancel")}
         </Button>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 me-2 animate-spin" />
-              Creating...
+              {t("submitting")}
             </>
           ) : (
             <>
               <Building2 className="h-4 w-4 me-2" />
-              Create Organization
+              {t("submit")}
             </>
           )}
         </Button>

@@ -10,6 +10,8 @@ import {
   getInputFields,
 } from "./org-details";
 import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { SLUG_MAX_LENGTH, SLUG_MIN_LENGTH } from "@/lib/utils/slug";
 import type {
   OnboardingFormData,
   UpdateFormData,
@@ -25,12 +27,14 @@ export default function Step1OrgDetails({
   onNext: () => void;
 }) {
   const t = useTranslations("onboarding.orgDetails.hints");
+  const { number } = useFormatters();
   const {
     register,
     handleSubmit,
     errors,
     slugStatus,
-    generatedSlug,
+    slug,
+    onSlugChange,
     onSubmit,
     isDisabled,
     watchedName,
@@ -65,7 +69,14 @@ export default function Step1OrgDetails({
           register={register}
           errors={errors}
           bare
-          footerSlot={<SlugPreview slug={generatedSlug} status={slugStatus} />}
+          footerSlot={
+            <SlugPreview
+              slug={slug}
+              status={slugStatus}
+              onChange={onSlugChange}
+              visible={Boolean(watchedName?.trim() || slug)}
+            />
+          }
         />
         <LogoUpload value={logo} onChange={setLogo} error={logoError} compact />
 
@@ -91,7 +102,14 @@ export default function Step1OrgDetails({
             ? t("checking")
             : slugStatus === "taken"
               ? t("taken")
-              : null
+              : slugStatus === "invalid"
+                ? t("slugInvalid", {
+                    min: number(SLUG_MIN_LENGTH),
+                    max: number(SLUG_MAX_LENGTH),
+                  })
+                : watchedName?.trim() && !slug
+                  ? t("slugNeeded")
+                  : null
         }
       />
     </form>

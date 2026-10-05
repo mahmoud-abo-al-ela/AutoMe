@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { checkUser, isSuperAdmin } from "@/lib/checkUser";
+import { getTranslations } from "next-intl/server";
+import { checkUser } from "@/lib/checkUser";
+import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
 import SuperAdminSidebar from "./_components/SuperAdminSidebar";
@@ -10,10 +12,16 @@ import SuperAdminSidebar from "./_components/SuperAdminSidebar";
 // build time and the DB calls fail wherever no live database is reachable (CI).
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Super Admin",
-  description: "Platform administration dashboard",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "superAdmin.meta" });
+
+  return { title: t("title"), description: t("description") };
+}
 
 export default async function SuperAdminLayout({
   children,
@@ -35,10 +43,13 @@ export default async function SuperAdminLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <Toaster position="top-right" richColors />
-      <SuperAdminSidebar user={user} />
+      <SuperAdminSidebar />
       <main
         className="flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0"
-        style={{ paddingLeft: "var(--sidebar-width, 0)" }}
+        // The sidebar is pinned to the inline-start edge, which is the
+        // right-hand one in Arabic; a physical paddingLeft put the content
+        // underneath it there.
+        style={{ paddingInlineStart: "var(--sidebar-width, 0)" }}
       >
         {/* Mobile header spacer */}
         <div className="md:hidden h-16" />

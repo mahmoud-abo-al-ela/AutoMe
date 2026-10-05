@@ -24,7 +24,7 @@ import {
 import { useState, useEffect, useTransition } from "react";
 import type { DateRange } from "react-day-picker";
 import type { AuditLogFilters } from "../_lib/audit-types";
-import { useAuditLabels } from "../_lib/use-audit-labels";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
 import type { AuditAction, EntityType } from "@/lib/generated/prisma";
 
 // Typed against the Prisma enums, so an option that no action can ever carry

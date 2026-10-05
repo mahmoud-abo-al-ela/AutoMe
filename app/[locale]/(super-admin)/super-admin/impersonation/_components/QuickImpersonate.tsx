@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Search, ExternalLink, Building2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,7 +30,11 @@ export default function QuickImpersonate({
 }: {
   organizations: ImpersonatableOrganization[];
 }) {
-  const router = useRouter();
+  const t = useTranslations("superAdmin.impersonation.quick");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
+  const { number } = useFormatters();
+  const locale = useLocale();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -40,8 +46,8 @@ export default function QuickImpersonate({
 
   const handleImpersonate = async (org: ImpersonatableOrganization) => {
     if (!org.owner) {
-      toast.error("Cannot impersonate", {
-        description: "This organization has no owner to impersonate.",
+      toast.error(t("cannot"), {
+        description: t("cannotBody"),
       });
       return;
     }
@@ -50,19 +56,24 @@ export default function QuickImpersonate({
     try {
       const result = await startImpersonation(org.id, org.owner.id);
       if (result.success) {
-        toast.success(`Impersonation started`, {
-          description: `Now viewing as ${org.owner.name} in ${org.name}.`,
+        toast.success(t("started"), {
+          description: t("startedBody", {
+            name: org.owner.name ?? org.owner.email ?? "",
+            org: org.name,
+          }),
         });
-        // Redirect to the org's dashboard page
-        window.location.href = `/org/${org.slug}/dashboard`;
+        // A full navigation, so the dashboard loads with the impersonation
+        // cookie. The locale is spelled out: without it the request lands on
+        // the default locale, not the one the admin is reading.
+        window.location.href = `/${locale}/org/${org.slug}/dashboard`;
       } else {
-        toast.error("Failed to start impersonation", {
-          description: result.error.message,
+        toast.error(t("failed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setLoading(null);
@@ -72,13 +83,14 @@ export default function QuickImpersonate({
   return (
     <Card className="sticky top-6">
       <CardHeader>
-        <CardTitle>Quick Impersonate</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search organizations..."
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="ps-10"
@@ -98,7 +110,7 @@ export default function QuickImpersonate({
                 <div>
                   <div className="font-medium text-sm">{org.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {org.owner ? org.owner.email : "No owner"}
+                    {org.owner ? org.owner.email : t("noOwner")}
                   </div>
                 </div>
               </div>
@@ -111,12 +123,12 @@ export default function QuickImpersonate({
                 {loading === org.id ? (
                   <>
                     <Loader2 className="h-3 w-3 me-1 animate-spin" />
-                    Loading...
+                    {t("loading")}
                   </>
                 ) : (
                   <>
                     <ExternalLink className="h-3 w-3 me-1" />
-                    View
+                    {tCommon("view")}
                   </>
                 )}
               </Button>
@@ -124,12 +136,15 @@ export default function QuickImpersonate({
           ))}
 
           {filteredOrgs.length === 0 && (
-            <EmptyState variant="filtered" title="No organizations found" />
+            <EmptyState variant="filtered" title={t("empty")} />
           )}
 
           {filteredOrgs.length > 10 && (
             <p className="text-center text-xs text-muted-foreground">
-              Showing 10 of {filteredOrgs.length} results
+              {t("showing", {
+                shown: number(10),
+                total: number(filteredOrgs.length),
+              })}
             </p>
           )}
         </div>

@@ -95,7 +95,11 @@ export function QuestionCard({ question, isPending, onAnswer, onDismiss, onReope
             onChange={(event) => setAnswer(event.target.value)}
             maxLength={MAX_ANSWER}
             rows={3}
-            dir="auto"
+            // "auto" only once there is text: an empty field has nothing to judge by
+            // (the placeholder does not count), so "auto" fell back to LTR and the
+            // Arabic page showed its placeholder and caret on the left. Empty, it
+            // follows the page; typed, it follows the text.
+            dir={answer ? "auto" : undefined}
             placeholder={t("answerPlaceholder")}
             aria-label={t("answerLabel")}
           />

@@ -1,67 +1,21 @@
+"use client";
+
+// A client component: useFormatters and useAuditLabels live in client
+// modules, and calling them from a server component throws.
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
-import {
-  FileText,
-  Plus,
-  Pencil,
-  Trash2,
-  Eye,
-  LogIn,
-  LogOut,
-} from "lucide-react";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
+import { FileText, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/common/EmptyState";
-import { Prisma } from "@/lib/generated/prisma";
-
-// Helper to get action category from detailed action name
-const getActionCategory = (action: string) => {
-  if (action.includes("CREATED") || action.includes("INVITED")) return "CREATE";
-  if (
-    action.includes("UPDATED") ||
-    action.includes("CHANGED") ||
-    action.includes("TOGGLED") ||
-    action.includes("UPGRADED") ||
-    action.includes("DOWNGRADED") ||
-    action.includes("RENEWED") ||
-    action.includes("CONFIRMED") ||
-    action.includes("COMPLETED") ||
-    action.includes("ACTIVATED") ||
-    action.includes("ACCEPTED")
-  )
-    return "UPDATE";
-  if (
-    action.includes("DELETED") ||
-    action.includes("REMOVED") ||
-    action.includes("CANCELED") ||
-    action.includes("SUSPENDED")
-  )
-    return "DELETE";
-  if (action.includes("STARTED") || action.includes("SENT")) return "LOGIN";
-  if (action.includes("ENDED")) return "LOGOUT";
-  return "VIEW";
-};
-
-const actionIcons = {
-  CREATE: Plus,
-  UPDATE: Pencil,
-  DELETE: Trash2,
-  VIEW: Eye,
-  LOGIN: LogIn,
-  LOGOUT: LogOut,
-};
-
-const actionColors = {
-  CREATE:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  UPDATE: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  DELETE: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  VIEW: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-  LOGIN:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  LOGOUT:
-    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-};
+import {
+  getActionCategory,
+  actionIcons,
+  actionColors,
+} from "../../../audit-logs/_components/audit-log-actions";
+import type { Prisma } from "@/lib/generated/prisma";
 
 /** An audit log row as page.tsx loads it for this organization. */
 export type OrgActivityLog = Prisma.AuditLogGetPayload<{
@@ -73,18 +27,22 @@ export default function OrgActivity({
 }: {
   activity: OrgActivityLog[];
 }) {
+  const t = useTranslations("superAdmin.organizations.details");
+  const tCommon = useTranslations("superAdmin.common");
   const { relativeToNow } = useFormatters();
+  const labels = useAuditLabels();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Recent Activity
+          {t("activity")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {activity.length === 0 ? (
-          <EmptyState variant="inline" icon={FileText} title="No activity recorded" />
+          <EmptyState variant="inline" icon={FileText} title={t("activityEmpty")} />
         ) : (
           <div className="space-y-3">
             {activity.map((log) => {
@@ -108,7 +66,7 @@ export default function OrgActivity({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-sm">
-                        {log.user?.name || "Unknown"}
+                        {log.user?.name || tCommon("unknown")}
                       </span>
                       <Badge
                         className={`flex items-center gap-1 text-xs ${
@@ -116,10 +74,10 @@ export default function OrgActivity({
                         }`}
                       >
                         <ActionIcon className="h-3 w-3" />
-                        {log.action.replace(/_/g, " ")}
+                        {labels.action(log.action)}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {log.entityType}
+                        {labels.entity(log.entityType)}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">

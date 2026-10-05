@@ -6,61 +6,57 @@ import {
   BarChart3,
   FileText,
   UserCog,
-  Settings,
 } from "lucide-react";
 
 /**
- * Super Admin sidebar navigation configuration
+ * Super Admin sidebar navigation configuration.
+ *
+ * `labelKey` resolves against `superAdmin.nav`: a key rather than a label,
+ * because the sidebars render in whichever locale the reader chose.
  */
 export const superAdminSidebarItems = [
   {
     name: "overview",
-    label: "Overview",
+    labelKey: "overview",
     icon: LayoutDashboard,
     path: "/super-admin",
   },
   {
     name: "organizations",
-    label: "Organizations",
+    labelKey: "organizations",
     icon: Building2,
     path: "/super-admin/organizations",
   },
   {
     name: "users",
-    label: "All Users",
+    labelKey: "users",
     icon: Users,
     path: "/super-admin/users",
   },
   {
     name: "plans",
-    label: "Plans & Pricing",
+    labelKey: "plans",
     icon: CreditCard,
     path: "/super-admin/plans",
   },
   {
     name: "analytics",
-    label: "Analytics",
+    labelKey: "analytics",
     icon: BarChart3,
     path: "/super-admin/analytics",
   },
   {
     name: "audit-logs",
-    label: "Audit Logs",
+    labelKey: "auditLogs",
     icon: FileText,
     path: "/super-admin/audit-logs",
   },
   {
     name: "impersonation",
-    label: "Impersonation",
+    labelKey: "impersonation",
     icon: UserCog,
     path: "/super-admin/impersonation",
   },
-  {
-    name: "settings",
-    label: "Platform Settings",
-    icon: Settings,
-    path: "/super-admin/settings",
-  },
-];
+] as const;
 
 export default superAdminSidebarItems;

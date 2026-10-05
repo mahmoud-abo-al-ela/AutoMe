@@ -480,6 +480,10 @@
       "filtered": "Try adjusting your search or filters.",
       "body": "Test drive requests appear here once customers start booking."
     },
+    "error": {
+      "title": "Couldn’t load test drives",
+      "body": "Something went wrong while loading your test drive requests."
+    },
     "modal": {
       "title": "Test Drive Details",
       "description": "Everything recorded for this test drive request",
@@ -713,7 +717,8 @@
       "ACTIVE": "Active",
       "TRIALING": "Trial",
       "PAST_DUE": "Past Due",
-      "CANCELED": "Canceled"
+      "CANCELED": "Canceled",
+      "PENDING": "Pending"
     },
     "current": {
       "title": "Current Plan",

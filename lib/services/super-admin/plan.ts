@@ -57,7 +57,9 @@ export async function createPlan(data: PlanFormInput) {
   const existingPlan = await planRepo.findPlanByType(data.type);
 
   if (existingPlan) {
-    throw new ConflictError(`A ${data.type} plan already exists`);
+    throw new ConflictError(`A ${data.type} plan already exists`, {
+      key: "errors.superAdmin.planTypeExists",
+    });
   }
 
   const planData: Prisma.PlanUncheckedCreateInput = {
@@ -86,14 +88,22 @@ export async function deletePlan(planId: string) {
 
   if (plan._count.subscriptions > 0) {
     throw new ConflictError(
-      `Cannot delete plan with ${plan._count.subscriptions} active subscription(s). Please migrate subscribers first.`
+      `Cannot delete plan with ${plan._count.subscriptions} active subscription(s). Please migrate subscribers first.`,
+      {
+        key: "errors.superAdmin.planHasSubscriptions",
+        params: { count: plan._count.subscriptions },
+      }
     );
   }
 
   // Payments keep their plan as a financial record (Payment.planId is RESTRICT).
   if (plan._count.payments > 0) {
     throw new ConflictError(
-      `Cannot delete a plan that has been paid for (${plan._count.payments} payment(s)). Deactivate it instead.`
+      `Cannot delete a plan that has been paid for (${plan._count.payments} payment(s)). Deactivate it instead.`,
+      {
+        key: "errors.superAdmin.planHasPayments",
+        params: { count: plan._count.payments },
+      }
     );
   }
 

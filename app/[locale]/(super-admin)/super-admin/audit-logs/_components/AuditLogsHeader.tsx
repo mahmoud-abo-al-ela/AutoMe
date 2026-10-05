@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { FileText, Search, Download } from "lucide-react";
@@ -21,6 +23,8 @@ export default function AuditLogsHeader({
   actions: string[];
   entities: string[];
 }) {
+  const t = useTranslations("superAdmin.auditLogs");
+  const labels = useAuditLabels();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -54,15 +58,13 @@ export default function AuditLogsHeader({
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <FileText className="h-8 w-8" />
-            Audit Logs
+            {t("title")}
           </h1>
-          <p className="text-muted-foreground">
-            Track all platform activities and changes
-          </p>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button variant="outline">
           <Download className="h-4 w-4 me-2" />
-          Export Logs
+          {t("export")}
         </Button>
       </div>
 
@@ -72,7 +74,8 @@ export default function AuditLogsHeader({
           <div className="relative">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by user email, entity ID..."
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="ps-10"
@@ -84,13 +87,13 @@ export default function AuditLogsHeader({
           onValueChange={(value) => handleFilter("action", value)}
         >
           <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="Filter by action" />
+            <SelectValue placeholder={t("filters.action")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Actions</SelectItem>
+            <SelectItem value="all">{t("filters.allActions")}</SelectItem>
             {actions.map((action) => (
               <SelectItem key={action} value={action}>
-                {action}
+                {labels.action(action)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -100,13 +103,13 @@ export default function AuditLogsHeader({
           onValueChange={(value) => handleFilter("entity", value)}
         >
           <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="Filter by entity" />
+            <SelectValue placeholder={t("filters.entity")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Entities</SelectItem>
+            <SelectItem value="all">{t("filters.allEntities")}</SelectItem>
             {entities.map((entity) => (
               <SelectItem key={entity} value={entity}>
-                {entity}
+                {labels.entity(entity)}
               </SelectItem>
             ))}
           </SelectContent>

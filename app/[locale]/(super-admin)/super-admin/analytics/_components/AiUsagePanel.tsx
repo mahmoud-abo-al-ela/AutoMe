@@ -3,8 +3,11 @@ import {
   getUsageByModel,
   getFailuresByCode,
 } from "@/lib/repositories/ai-usage";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatNumber } from "@/lib/utils/number";
+import type { Locale } from "@/i18n/routing";
 
 /**
  * What the AI actually did, and how often it failed.
@@ -14,29 +17,51 @@ import { Badge } from "@/components/ui/badge";
  * commented "per-feature reporting" that no query ever used. This is that
  * reader.
  *
- * Super-admin is deliberately untranslated (decided 2026-09-22), so the copy
- * here is English by design rather than by omission.
+ * Feature names, model ids and error codes are identifiers, not copy, so they
+ * stay as stored in either language.
  */
 
 const WINDOW_DAYS = 30;
 
-/** Micro-USD is the storage unit; nobody reads a budget in millionths. */
-function formatCost(microUsd: number): string {
-  if (microUsd === 0) return "$0.00";
-  return `$${(microUsd / 1_000_000).toFixed(2)}`;
+/**
+ * Micro-USD is the storage unit; nobody reads a budget in millionths. Dollars,
+ * not EGP: this is what the AI provider bills, not anything a dealer pays.
+ */
+function formatCost(microUsd: number, locale: Locale): string {
+  return formatNumber(microUsd / 1_000_000, locale, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
-function formatLatency(ms: number): string {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
+function formatLatency(ms: number, locale: Locale): string {
+  return ms >= 1000
+    ? formatNumber(ms / 1000, locale, {
+        style: "unit",
+        unit: "second",
+        unitDisplay: "narrow",
+        maximumFractionDigits: 1,
+      })
+    : formatNumber(ms, locale, {
+        style: "unit",
+        unit: "millisecond",
+        unitDisplay: "narrow",
+      });
 }
 
-function successRate(calls: number, failures: number): string {
+function successRate(calls: number, failures: number, locale: Locale): string {
   if (calls === 0) return "—";
-  return `${Math.round(((calls - failures) / calls) * 100)}%`;
+  return formatNumber((calls - failures) / calls, locale, { style: "percent" });
 }
 
 export default async function AiUsagePanel() {
   const since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60_000);
+  const locale = (await getLocale()) as Locale;
+  const t = await getTranslations("superAdmin.analytics.ai");
+  const number = (value: number) => formatNumber(value, locale);
+  const title = t("title", { days: number(WINDOW_DAYS) });
 
   const [byFeature, byModel, failures] = await Promise.all([
     getUsageByFeature(since),
@@ -52,10 +77,10 @@ export default async function AiUsagePanel() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>AI usage — last {WINDOW_DAYS} days</CardTitle>
+          <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          No AI calls recorded in this window.
+          {t("empty")}
         </CardContent>
       </Card>
     );
@@ -64,44 +89,48 @@ export default async function AiUsagePanel() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
-        <CardTitle>AI usage — last {WINDOW_DAYS} days</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <div className="flex items-center gap-2 text-sm">
-          <Badge variant="secondary">{totalCalls} calls</Badge>
+          <Badge variant="secondary">
+            {t("calls", { count: totalCalls, value: number(totalCalls) })}
+          </Badge>
           <Badge variant={totalFailures > 0 ? "destructive" : "secondary"}>
-            {successRate(totalCalls, totalFailures)} success
+            {t("success", {
+              value: successRate(totalCalls, totalFailures, locale),
+            })}
           </Badge>
           {/* Zero on the free tier, and honestly zero rather than estimated. */}
-          <Badge variant="outline">{formatCost(totalCost)}</Badge>
+          <Badge variant="outline">{formatCost(totalCost, locale)}</Badge>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <section>
-          <h4 className="mb-2 text-sm font-semibold">By feature</h4>
+          <h4 className="mb-2 text-sm font-semibold">{t("byFeature")}</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-muted-foreground">
                 <tr className="border-b">
-                  <th className="py-2 text-start font-medium">Feature</th>
-                  <th className="py-2 text-end font-medium">Calls</th>
-                  <th className="py-2 text-end font-medium">Success</th>
-                  <th className="py-2 text-end font-medium">Tokens in</th>
-                  <th className="py-2 text-end font-medium">Tokens out</th>
+                  <th className="py-2 text-start font-medium">{t("columns.feature")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.calls")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.success")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.tokensIn")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.tokensOut")}</th>
                 </tr>
               </thead>
               <tbody>
                 {byFeature.map((row) => (
                   <tr key={row.feature} className="border-b last:border-0">
                     <td className="py-2 font-mono text-xs">{row.feature}</td>
-                    <td className="py-2 text-end">{row.calls}</td>
+                    <td className="py-2 text-end">{number(row.calls)}</td>
                     <td className="py-2 text-end">
-                      {successRate(row.calls, row.failures)}
+                      {successRate(row.calls, row.failures, locale)}
                     </td>
-                    <td className="py-2 text-end">{row.inputTokens}</td>
+                    <td className="py-2 text-end">{number(row.inputTokens)}</td>
                     {/* Thinking tokens bill at the output rate, so they belong
                         in the same column rather than looking free. */}
                     <td className="py-2 text-end">
-                      {row.outputTokens + row.thinkingTokens}
+                      {number(row.outputTokens + row.thinkingTokens)}
                     </td>
                   </tr>
                 ))}
@@ -111,33 +140,33 @@ export default async function AiUsagePanel() {
         </section>
 
         <section>
-          <h4 className="mb-2 text-sm font-semibold">By model</h4>
+          <h4 className="mb-2 text-sm font-semibold">{t("byModel")}</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-muted-foreground">
                 <tr className="border-b">
-                  <th className="py-2 text-start font-medium">Model</th>
-                  <th className="py-2 text-end font-medium">Calls</th>
-                  <th className="py-2 text-end font-medium">Success</th>
-                  <th className="py-2 text-end font-medium">p50</th>
-                  <th className="py-2 text-end font-medium">p95</th>
+                  <th className="py-2 text-start font-medium">{t("columns.model")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.calls")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.success")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.p50")}</th>
+                  <th className="py-2 text-end font-medium">{t("columns.p95")}</th>
                 </tr>
               </thead>
               <tbody>
                 {byModel.map((row) => (
                   <tr key={row.model} className="border-b last:border-0">
                     <td className="py-2 font-mono text-xs">{row.model}</td>
-                    <td className="py-2 text-end">{row.calls}</td>
+                    <td className="py-2 text-end">{number(row.calls)}</td>
                     <td className="py-2 text-end">
-                      {successRate(row.calls, row.failures)}
+                      {successRate(row.calls, row.failures, locale)}
                     </td>
                     <td className="py-2 text-end">
-                      {formatLatency(row.p50LatencyMs)}
+                      {formatLatency(row.p50LatencyMs, locale)}
                     </td>
                     {/* The number that matters: the free tier's tail is what
                         exhausts the request budget, and a mean hides it. */}
                     <td className="py-2 text-end">
-                      {formatLatency(row.p95LatencyMs)}
+                      {formatLatency(row.p95LatencyMs, locale)}
                     </td>
                   </tr>
                 ))}
@@ -148,14 +177,14 @@ export default async function AiUsagePanel() {
 
         {failures.length > 0 && (
           <section>
-            <h4 className="mb-2 text-sm font-semibold">Failures by cause</h4>
+            <h4 className="mb-2 text-sm font-semibold">{t("failures")}</h4>
             {/* This is the view that separates "the provider is saturated"
                 from "our schema stopped matching the model", which look
                 identical in a success rate. */}
             <div className="flex flex-wrap gap-2">
               {failures.map((row) => (
                 <Badge key={row.errorCode} variant="outline" className="font-mono">
-                  {row.errorCode} × {row.count}
+                  {row.errorCode} × {number(row.count)}
                 </Badge>
               ))}
             </div>

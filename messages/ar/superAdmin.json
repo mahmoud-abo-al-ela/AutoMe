@@ -1,0 +1,472 @@
+{
+  "meta": {
+    "title": "الإدارة العليا",
+    "description": "لوحة إدارة المنصة"
+  },
+  "nav": {
+    "brand": "الإدارة العليا",
+    "overview": "نظرة عامة",
+    "organizations": "المعارض",
+    "users": "كل المستخدمين",
+    "plans": "الباقات والأسعار",
+    "analytics": "التحليلات",
+    "auditLogs": "سجل النشاط",
+    "impersonation": "انتحال الهوية",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "collapseSidebar": "طي القائمة الجانبية",
+    "expandSidebar": "توسيع القائمة الجانبية",
+    "backToSite": "العودة إلى الموقع"
+  },
+  "common": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "noPlan": "بدون باقة",
+    "viewAll": "عرض الكل",
+    "view": "عرض",
+    "viewDetails": "عرض التفاصيل",
+    "actions": "الإجراءات",
+    "search": "بحث",
+    "unknown": "غير معروف",
+    "notAvailable": "غير متاح",
+    "platform": "المنصة",
+    "previous": "السابق",
+    "next": "التالي",
+    "saving": "جارٍ الحفظ…",
+    "saveChanges": "حفظ التغييرات",
+    "deleting": "جارٍ الحذف…",
+    "delete": "حذف",
+    "perMonth": "{amount} شهريًا",
+    "planOption": "{name} – {amount} شهريًا",
+    "showing": "عرض {from}–{to} من {total}",
+    "errorTitle": "حدث خطأ ما",
+    "errorBody": "يُرجى المحاولة مرة أخرى لاحقًا.",
+    "warning": "تحذير:",
+    "irreversible": "لا يمكن التراجع عن هذا الإجراء.",
+    "columns": {
+      "organization": "المعرض",
+      "plan": "الباقة",
+      "cars": "السيارات",
+      "members": "الأعضاء",
+      "testDrives": "القيادات التجريبية",
+      "status": "الحالة",
+      "created": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    }
+  },
+  "overview": {
+    "title": "نظرة عامة على المنصة",
+    "subtitle": "متابعة منصة AutoMe وإدارتها",
+    "stats": {
+      "organizations": "إجمالي المعارض",
+      "organizationsActive": "{value} نشط",
+      "users": "إجمالي المستخدمين",
+      "cars": "إجمالي السيارات المعروضة",
+      "testDrives": "إجمالي القيادات التجريبية"
+    },
+    "subscriptions": {
+      "title": "الاشتراكات النشطة حسب الباقة",
+      "orgCount": "{count, plural, zero {{value} معرض} one {معرض واحد} two {معرضان} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
+      "empty": "لا توجد اشتراكات نشطة"
+    },
+    "growth": {
+      "title": "نمو المنصة",
+      "subtitle": "المعارض والمستخدمون والسيارات الجديدة خلال آخر ستة أشهر",
+      "series": {
+        "organizations": "المعارض",
+        "users": "المستخدمون",
+        "cars": "السيارات"
+      }
+    },
+    "recentOrganizations": {
+      "title": "أحدث المعارض",
+      "subtitle": "آخر المعارض المضافة إلى المنصة",
+      "empty": "لا توجد معارض بعد"
+    },
+    "activeImpersonations": {
+      "title": "جلسات انتحال الهوية النشطة",
+      "subtitle": "جلسات انتحال الهوية الجارية للمسؤولين",
+      "count": "{count, plural, zero {لا توجد جلسات انتحال هوية نشطة} one {جلسة انتحال هوية نشطة واحدة} two {جلستا انتحال هوية نشطتان} few {{value} جلسات انتحال هوية نشطة} many {{value} جلسة انتحال هوية نشطة} other {{value} جلسة انتحال هوية نشطة}}",
+      "empty": "لا توجد جلسات انتحال هوية نشطة"
+    }
+  },
+  "organizations": {
+    "title": "المعارض",
+    "subtitle": "إدارة كل المعارض على المنصة",
+    "create": "إنشاء معرض",
+    "searchPlaceholder": "ابحث في المعارض…",
+    "filters": {
+      "status": "الحالة",
+      "allStatuses": "كل الحالات",
+      "plan": "الباقة",
+      "allPlans": "كل الباقات"
+    },
+    "empty": "لم يتم العثور على معارض",
+    "actions": {
+      "impersonate": "انتحال الهوية",
+      "suspend": "إيقاف",
+      "activate": "تفعيل",
+      "suspending": "جارٍ الإيقاف…",
+      "activating": "جارٍ التفعيل…"
+    },
+    "toasts": {
+      "suspended": "تم إيقاف المعرض",
+      "suspendedBody": "تم إيقاف {name}.",
+      "activated": "تم تفعيل المعرض",
+      "activatedBody": "تم تفعيل {name}.",
+      "statusFailed": "تعذّر تحديث الحالة",
+      "deleted": "تم حذف المعرض",
+      "deletedBody": "تم حذف {name}.",
+      "deleteFailed": "تعذّر حذف المعرض"
+    },
+    "delete": {
+      "title": "حذف المعرض",
+      "confirm": "هل أنت متأكد من حذف <strong>{name}</strong>؟ لا يمكن التراجع عن هذا الإجراء.",
+      "dataWarning": "يضم هذا المعرض {cars} و{members}. سيتم حذف كل بياناته نهائيًا.",
+      "allDataWarning": "سيتم حذف كل البيانات المرتبطة نهائيًا — السيارات والقيادات التجريبية والمحادثات وعضويات الفريق.",
+      "cars": "{count, plural, zero {{value} سيارة} one {سيارة واحدة} two {سيارتين} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
+      "members": "{count, plural, zero {{value} عضو} one {عضوًا واحدًا} two {عضوين} few {{value} أعضاء} many {{value} عضوًا} other {{value} عضو}}",
+      "submit": "حذف المعرض"
+    },
+    "impersonate": {
+      "title": "انتحال هوية مستخدم",
+      "description": "ادخل إلى <strong>{name}</strong> بصفة مستخدم محدد. سيتم تسجيل كل ما تفعله.",
+      "auditTitle": "سجل التدقيق",
+      "auditBody": "كل إجراء يتم أثناء انتحال الهوية يُسجَّل باسمك.",
+      "userLabel": "انتحال هوية",
+      "loadingMembers": "جارٍ تحميل الأعضاء…",
+      "userPlaceholder": "اختر مستخدمًا",
+      "reasonLabel": "سبب انتحال الهوية",
+      "reasonPlaceholder": "مثال: التحقق من المشكلة المُبلَّغ عنها رقم ١٢٣، طلب دعم من عميل…",
+      "reasonHelp": "يُسجَّل هذا السبب في سجل النشاط.",
+      "missingFields": "اختر مستخدمًا واكتب السبب",
+      "started": "بدأ انتحال الهوية",
+      "starting": "جارٍ البدء…",
+      "submit": "بدء انتحال الهوية"
+    },
+    "details": {
+      "back": "العودة إلى المعارض",
+      "stats": {
+        "cars": "إجمالي السيارات",
+        "members": "أعضاء الفريق",
+        "testDrives": "القيادات التجريبية"
+      },
+      "members": "أعضاء الفريق ({value})",
+      "activity": "أحدث النشاط",
+      "activityEmpty": "لا يوجد نشاط مسجّل",
+      "subscription": {
+        "title": "الاشتراك",
+        "periodStart": "بداية الفترة",
+        "periodEnd": "نهاية الفترة",
+        "changePlan": "تغيير الباقة",
+        "selectPlan": "اختر باقة",
+        "update": "تحديث الباقة",
+        "updating": "جارٍ التحديث…",
+        "none": "لا يوجد اشتراك",
+        "assignPlaceholder": "تعيين باقة",
+        "assign": "تعيين الباقة",
+        "assigning": "جارٍ التعيين…",
+        "updated": "تم تحديث الباقة",
+        "updatedBody": "أصبح الاشتراك على باقة {plan}.",
+        "updateFailed": "تعذّر تحديث الباقة"
+      }
+    },
+    "form": {
+      "title": "إنشاء معرض",
+      "subtitle": "إعداد معرض جديد على المنصة",
+      "back": "العودة إلى المعارض",
+      "basic": {
+        "title": "المعلومات الأساسية",
+        "subtitle": "البيانات الأساسية للمعرض",
+        "name": "اسم المعرض *",
+        "namePlaceholder": "معرض النيل للسيارات",
+        "slug": "المعرّف (الرابط)",
+        "slugHelp": "يُقترح من الحروف الإنجليزية في الاسم — اكتبه بنفسك إذا كان الاسم بالعربية. يجب ألا يتكرر.",
+        "description": "الوصف",
+        "descriptionPlaceholder": "وصف مختصر للمعرض…"
+      },
+      "contact": {
+        "title": "بيانات التواصل",
+        "description": "طرق التواصل مع المعرض",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "website": "الموقع الإلكتروني",
+        "address": "العنوان",
+        "addressPlaceholder": "١٥ شارع التحرير، الدقي، الجيزة"
+      },
+      "plan": {
+        "title": "باقة الاشتراك",
+        "description": "اختر باقة هذا المعرض",
+        "label": "الباقة *",
+        "placeholder": "اختر باقة",
+        "features": "تشمل باقة {name}:"
+      },
+      "owner": {
+        "title": "المالك",
+        "description": "يمكنك تعيين مالك لهذا المعرض (اختياري)",
+        "email": "بريد المالك (اختياري)",
+        "help": "إذا كان هذا البريد لمستخدم موجود، يصبح مالك المعرض."
+      },
+      "nameRequired": "اسم المعرض مطلوب",
+      "planRequired": "اختر باقة",
+      "slugInvalid": "يحتاج المعرّف إلى {min} إلى {max} حرفًا إنجليزيًا أو رقمًا، مع شرطة واحدة بين الكلمات",
+      "created": "تم إنشاء المعرض",
+      "createdBody": "تم إنشاء {name} على باقة {plan}.",
+      "createFailed": "تعذّر إنشاء المعرض",
+      "submit": "إنشاء المعرض",
+      "submitting": "جارٍ الإنشاء…"
+    }
+  },
+  "users": {
+    "title": "كل المستخدمين",
+    "subtitle": "إدارة كل مستخدمي المنصة في جميع المعارض",
+    "stats": {
+      "total": "إجمالي المستخدمين",
+      "admins": "مسؤولو المنصة",
+      "regular": "المستخدمون العاديون"
+    },
+    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
+    "filters": {
+      "role": "التصفية حسب الدور",
+      "allRoles": "كل الأدوار",
+      "users": "المستخدمون",
+      "admins": "المسؤولون"
+    },
+    "roles": {
+      "ADMIN": "مسؤول",
+      "USER": "مستخدم"
+    },
+    "columns": {
+      "user": "المستخدم",
+      "role": "الدور",
+      "organizations": "المعارض",
+      "activity": "النشاط",
+      "joined": "تاريخ الانضمام"
+    },
+    "empty": "لم يتم العثور على مستخدمين",
+    "noOrganizations": "لا توجد معارض",
+    "moreOrganizations": "+{value} أخرى",
+    "testDrives": "{count, plural, zero {{value} قيادة تجريبية} one {قيادة تجريبية واحدة} two {قيادتان تجريبيتان} few {{value} قيادات تجريبية} many {{value} قيادة تجريبية} other {{value} قيادة تجريبية}}",
+    "savedCars": "{count, plural, zero {{value} محفوظة} one {سيارة محفوظة واحدة} two {سيارتان محفوظتان} few {{value} سيارات محفوظة} many {{value} سيارة محفوظة} other {{value} سيارة محفوظة}}",
+    "actions": {
+      "label": "الإجراءات",
+      "changeRole": "تغيير الدور"
+    },
+    "changeRole": {
+      "title": "تغيير دور المستخدم",
+      "description": "حدّث دور {name}. سيغيّر ذلك صلاحياته على مستوى المنصة.",
+      "placeholder": "اختر دورًا",
+      "submit": "تحديث الدور",
+      "submitting": "جارٍ التحديث…",
+      "updated": "تم تغيير الدور إلى {role}",
+      "updatedBody": "تم تحديث دور {name}.",
+      "failed": "تعذّر تحديث الدور"
+    },
+    "pagination": "عرض {from}–{to} من {total}",
+    "details": {
+      "back": "العودة إلى المستخدمين",
+      "joined": "انضم في {date}",
+      "organizations": "المعارض",
+      "organizationsEmpty": "ليس عضوًا في أي معرض",
+      "activity": "النشاط",
+      "tabs": {
+        "audit": "سجل النشاط",
+        "testDrives": "القيادات التجريبية"
+      },
+      "activityEmpty": "لا يوجد نشاط مسجّل",
+      "testDrivesEmpty": "لا توجد قيادات تجريبية محجوزة",
+      "unknownTime": "وقت غير معروف"
+    }
+  },
+  "plans": {
+    "title": "الباقات والأسعار",
+    "subtitle": "إدارة باقات الاشتراك ومستويات الأسعار",
+    "stats": {
+      "mrr": "الإيراد الشهري المتكرر",
+      "active": "الاشتراكات النشطة",
+      "trial": "الاشتراكات التجريبية",
+      "churned": "الاشتراكات الملغاة"
+    },
+    "card": {
+      "edit": "تعديل الباقة",
+      "delete": "حذف الباقة",
+      "orYearly": "أو {amount} سنويًا (توفير {percent})",
+      "features": "المزايا",
+      "activeSubscriptions": "{count, plural, zero {{value} اشتراك نشط} one {اشتراك نشط واحد} two {اشتراكان نشطان} few {{value} اشتراكات نشطة} many {{value} اشتراكًا نشطًا} other {{value} اشتراك نشط}}"
+    },
+    "add": {
+      "title": "إضافة باقة جديدة",
+      "body": "أنشئ باقة أسعار جديدة للمنصة",
+      "allExist": "كل أنواع الباقات موجودة بالفعل",
+      "allExistBody": "يمكن وجود باقة واحدة فقط من كل نوع (المبتدئة، الاحترافية، المؤسسات)."
+    },
+    "toasts": {
+      "missingFields": "املأ كل الحقول المطلوبة",
+      "created": "تم إنشاء الباقة",
+      "createdBody": "تم إنشاء باقة {name}.",
+      "createFailed": "تعذّر إنشاء الباقة",
+      "updated": "تم تحديث الباقة",
+      "updatedBody": "تم تحديث باقة {name}.",
+      "updateFailed": "تعذّر تحديث الباقة",
+      "deleted": "تم حذف الباقة",
+      "deletedBody": "تم حذف {name}.",
+      "deleteFailed": "تعذّر حذف الباقة"
+    },
+    "delete": {
+      "title": "حذف باقة {name}؟",
+      "body": "سيتم حذف باقة <strong>{name}</strong> نهائيًا، ولا يمكن التراجع عن ذلك.",
+      "activeWarning": "على هذه الباقة {count}. لا يمكن حذفها قبل نقل كل المشتركين إلى باقة أخرى.",
+      "activeCount": "{count, plural, zero {{value} اشتراك نشط} one {اشتراك نشط واحد} two {اشتراكان نشطان} few {{value} اشتراكات نشطة} many {{value} اشتراكًا نشطًا} other {{value} اشتراك نشط}}",
+      "submit": "حذف الباقة"
+    },
+    "form": {
+      "createTitle": "إنشاء باقة جديدة",
+      "createDescription": "أضف باقة أسعار جديدة إلى المنصة",
+      "editTitle": "تعديل {name}",
+      "editDescription": "حدّث أسعار باقة {name} وحدودها",
+      "create": "إنشاء الباقة",
+      "creating": "جارٍ الإنشاء…",
+      "tabs": {
+        "basic": "المعلومات الأساسية",
+        "limits": "الحدود",
+        "features": "المزايا"
+      },
+      "name": "اسم الباقة",
+      "namePlaceholder": "مثال: الأعمال",
+      "type": "نوع الباقة",
+      "typePlaceholder": "اختر النوع",
+      "monthlyPrice": "السعر الشهري (ج.م)",
+      "yearlyPrice": "السعر السنوي (ج.م)",
+      "pricePlaceholder": "مثال: {value}",
+      "maxCars": "الحد الأقصى للسيارات (‎-1 = بلا حدود)",
+      "maxMembers": "الحد الأقصى للأعضاء (‎-1 = بلا حدود)",
+      "maxImages": "الحد الأقصى للصور لكل سيارة",
+      "retention": "مدة الاحتفاظ بسجل النشاط (بالأيام)",
+      "retentionPlaceholder": "اتركه فارغًا لمدة غير محدودة",
+      "trialDays": "الفترة التجريبية المجانية (بالأيام)",
+      "trialPlaceholder": "0 لعدم وجود فترة تجريبية",
+      "trialHelp": "تبدأ المعارض الجديدة على هذه الباقة فورًا دون دفع، ويُطلب أول دفع قبل انتهاء الفترة التجريبية.",
+      "aiProcessing": "تحليل السيارات بالذكاء الاصطناعي",
+      "aiLimit": "عدد طلبات الذكاء الاصطناعي شهريًا (‎-1 = بلا حدود)",
+      "aiLimitZero": "الحد 0 يمنع كل طلبات الذكاء الاصطناعي، فتكون الميزة مفعّلة لكنها غير قابلة للاستخدام.",
+      "aiAssistant": "ردود ذكية على أسئلة المشترين (بلا حدود)",
+      "chat": "دعم المحادثة المباشرة",
+      "prioritySupport": "دعم ذو أولوية"
+    }
+  },
+  "analytics": {
+    "title": "تحليلات المنصة",
+    "subtitle": "متابعة أداء المنصة ونموها",
+    "growth": {
+      "organizations": "المعارض هذا الشهر",
+      "users": "المستخدمون هذا الشهر",
+      "cars": "السيارات المعروضة هذا الشهر",
+      "vsLastMonth": "مقارنة بالشهر الماضي ({value})"
+    },
+    "charts": {
+      "growthTitle": "نمو المنصة",
+      "growthSubtitle": "المعارض والمستخدمون الجدد خلال آخر ستة أشهر",
+      "activityTitle": "نشاط المنصة",
+      "activitySubtitle": "إعلانات السيارات وحجوزات القيادة التجريبية بمرور الوقت",
+      "series": {
+        "organizations": "المعارض",
+        "users": "المستخدمون",
+        "cars": "السيارات",
+        "testDrives": "القيادات التجريبية"
+      }
+    },
+    "top": {
+      "byListings": "الأعلى في الإعلانات",
+      "byTestDrives": "الأعلى في القيادات التجريبية",
+      "rank": "#{value}",
+      "empty": "لا توجد بيانات"
+    },
+    "ai": {
+      "title": "استخدام الذكاء الاصطناعي — آخر {days} يومًا",
+      "empty": "لم تُسجَّل أي طلبات للذكاء الاصطناعي في هذه الفترة.",
+      "calls": "{count, plural, zero {{value} طلب} one {طلب واحد} two {طلبان} few {{value} طلبات} many {{value} طلبًا} other {{value} طلب}}",
+      "success": "نجاح {value}",
+      "byFeature": "حسب الميزة",
+      "byModel": "حسب النموذج",
+      "failures": "الأخطاء حسب السبب",
+      "columns": {
+        "feature": "الميزة",
+        "model": "النموذج",
+        "calls": "الطلبات",
+        "success": "النجاح",
+        "tokensIn": "رموز الإدخال",
+        "tokensOut": "رموز الإخراج",
+        "p50": "p50",
+        "p95": "p95"
+      }
+    }
+  },
+  "auditLogs": {
+    "title": "سجل النشاط",
+    "subtitle": "تتبّع كل نشاط وتغيير على المنصة",
+    "export": "تصدير السجل",
+    "searchPlaceholder": "ابحث ببريد المستخدم أو معرّف العنصر…",
+    "filters": {
+      "action": "التصفية حسب الإجراء",
+      "allActions": "كل الإجراءات",
+      "entity": "التصفية حسب العنصر",
+      "allEntities": "كل العناصر"
+    },
+    "columns": {
+      "timestamp": "الوقت",
+      "user": "المستخدم",
+      "action": "الإجراء",
+      "entity": "العنصر",
+      "organization": "المعرض",
+      "details": "التفاصيل"
+    },
+    "empty": "لم يتم العثور على سجلات",
+    "viewDetails": "عرض التفاصيل",
+    "pagination": "عرض {from}–{to} من {total}",
+    "details": {
+      "title": "تفاصيل السجل",
+      "action": "الإجراء",
+      "entityType": "نوع العنصر",
+      "entityId": "معرّف العنصر",
+      "timestamp": "الوقت",
+      "ipAddress": "عنوان IP",
+      "userAgent": "المتصفح",
+      "metadata": "بيانات إضافية",
+      "before": "قبل",
+      "after": "بعد"
+    }
+  },
+  "impersonation": {
+    "title": "انتحال الهوية",
+    "subtitle": "تصفّح المعارض بصفة مالكيها لأغراض الدعم وتتبّع الأخطاء",
+    "activeAlert": "{count, plural, zero {لا توجد جلسات انتحال هوية نشطة.} one {توجد جلسة انتحال هوية نشطة واحدة.} two {توجد جلستا انتحال هوية نشطتان.} few {توجد {value} جلسات انتحال هوية نشطة.} many {توجد {value} جلسة انتحال هوية نشطة.} other {توجد {value} جلسة انتحال هوية نشطة.}} كل إجراء يتم أثناء انتحال الهوية يُسجَّل.",
+    "active": {
+      "title": "الجلسات النشطة",
+      "badge": "{value} نشطة",
+      "empty": "لا توجد جلسات انتحال هوية نشطة",
+      "started": "بدأت {time}",
+      "end": "إنهاء الجلسة",
+      "ending": "جارٍ الإنهاء…",
+      "ended": "انتهت جلسة انتحال الهوية",
+      "endedBody": "تم إنهاء الجلسة بصفة {name}.",
+      "endFailed": "تعذّر إنهاء الجلسة"
+    },
+    "history": {
+      "title": "أحدث الجلسات",
+      "empty": "لا يوجد سجل لانتحال الهوية"
+    },
+    "quick": {
+      "title": "انتحال سريع",
+      "searchPlaceholder": "ابحث في المعارض…",
+      "noOwner": "بدون مالك",
+      "empty": "لم يتم العثور على معارض",
+      "showing": "عرض {shown} من {total}",
+      "loading": "جارٍ التحميل…",
+      "cannot": "لا يمكن انتحال الهوية",
+      "cannotBody": "لا يوجد مالك لهذا المعرض لانتحال هويته.",
+      "started": "بدأ انتحال الهوية",
+      "startedBody": "أنت الآن تتصفّح {org} بصفة {name}.",
+      "failed": "تعذّر بدء انتحال الهوية"
+    }
+  }
+}

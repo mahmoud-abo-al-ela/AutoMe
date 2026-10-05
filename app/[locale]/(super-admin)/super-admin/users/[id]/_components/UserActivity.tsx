@@ -1,4 +1,10 @@
+"use client";
+
+// A client component: useFormatters and useAuditLabels live in client
+// modules, and calling them from a server component throws.
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
+import { useAuditLabels } from "@/hooks/use-audit-labels";
 import { FileText, Calendar, Car } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,22 +20,26 @@ export default function UserActivity({
   activity: AuditLog[];
   testDrives: SuperAdminUserDetail["testDrives"];
 }) {
-  const { date: fmtDate, relativeToNow } = useFormatters();
+  const t = useTranslations("superAdmin.users.details");
+  const tStatus = useTranslations("testDrive.status");
+  const { date: fmtDate, relativeToNow, clockTime, number } = useFormatters();
+  const labels = useAuditLabels();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Activity</CardTitle>
+        <CardTitle>{t("activity")}</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="audit" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="audit">Audit Log</TabsTrigger>
-            <TabsTrigger value="testdrives">Test Drives</TabsTrigger>
+            <TabsTrigger value="audit">{t("tabs.audit")}</TabsTrigger>
+            <TabsTrigger value="testdrives">{t("tabs.testDrives")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="audit">
             {activity.length === 0 ? (
-              <EmptyState variant="inline" icon={FileText} title="No activity recorded" />
+              <EmptyState variant="inline" icon={FileText} title={t("activityEmpty")} />
             ) : (
               <div className="space-y-3">
                 {activity.map((log) => (
@@ -43,16 +53,16 @@ export default function UserActivity({
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
-                          {log.action}
+                          {labels.action(log.action)}
                         </Badge>
                         <span className="text-sm font-medium">
-                          {log.entityType}
+                          {labels.entity(log.entityType)}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {log.createdAt
                           ? relativeToNow(new Date(log.createdAt))
-                          : "Unknown time"}
+                          : t("unknownTime")}
                       </p>
                     </div>
                   </div>
@@ -63,7 +73,7 @@ export default function UserActivity({
 
           <TabsContent value="testdrives">
             {testDrives.length === 0 ? (
-              <EmptyState variant="inline" icon={Car} title="No test drives booked" />
+              <EmptyState variant="inline" icon={Car} title={t("testDrivesEmpty")} />
             ) : (
               <div className="space-y-3">
                 {testDrives.map((td) => (
@@ -77,12 +87,13 @@ export default function UserActivity({
                       </div>
                       <div>
                         <div className="font-medium text-sm">
-                          {td.car.year} {td.car.make} {td.car.model}
+                          {number(td.car.year, { useGrouping: false })} {td.car.make}{" "}
+                          {td.car.model}
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {fmtDate(new Date(td.date))}
-                          {td.startTime ? ` · ${td.startTime}` : ""}
+                          {td.startTime ? ` · ${clockTime(td.startTime)}` : ""}
                         </div>
                       </div>
                     </div>
@@ -95,7 +106,7 @@ export default function UserActivity({
                           : "secondary"
                       }
                     >
-                      {td.status}
+                      {tStatus(td.status)}
                     </Badge>
                   </div>
                 ))}

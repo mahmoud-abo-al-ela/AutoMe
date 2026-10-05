@@ -1,6 +1,8 @@
 "use client";
-import { useFormatters } from "@/hooks/use-formatters";
 
+import { useTranslations } from "next-intl";
+import { useFormatters } from "@/hooks/use-formatters";
+import { useActionError } from "@/hooks/use-action-error";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { CreditCard, Calendar, Check, Loader2 } from "lucide-react";
@@ -19,6 +21,7 @@ import { changeOrganizationPlan } from "@/actions/super-admin";
 import type { Plan } from "@/lib/generated/prisma";
 import type { OrganizationDetail } from "./OrgDetailsHeader";
 import { formatPlanAmount } from "@/lib/utils/currency";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 export default function OrgSubscription({
   subscription,
@@ -29,7 +32,16 @@ export default function OrgSubscription({
   plans: Plan[];
   orgId: string;
 }) {
-  const { date: fmtDate } = useFormatters();
+  const t = useTranslations("superAdmin.organizations.details.subscription");
+  const tCommon = useTranslations("superAdmin.common");
+  const tStatus = useTranslations("org.billing.status");
+  const tPlans = useTranslations("plans");
+  const planName = (plan: Plan) => planDisplayName(tPlans, plan);
+  const actionError = useActionError();
+  const { date: fmtDate, locale } = useFormatters();
+  const amount = (minor: number) => formatPlanAmount(minor, locale);
+  const planOption = (plan: Plan) =>
+    tCommon("planOption", { name: planName(plan), amount: amount(plan.monthlyPrice) });
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedPlan, setSelectedPlan] = useState(subscription?.planId || "");
@@ -43,22 +55,22 @@ export default function OrgSubscription({
       const result = await changeOrganizationPlan(orgId, selectedPlan);
       const newPlan = plans.find((p) => p.id === selectedPlan);
       if (result.success) {
-        toast.success("Plan updated successfully", {
-          description: `Subscription changed to ${
-            newPlan?.name || "new plan"
-          }.`,
+        toast.success(t("updated"), {
+          description: newPlan
+            ? t("updatedBody", { plan: planName(newPlan) })
+            : undefined,
         });
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to update plan", {
-          description: result.error.message,
+        toast.error(t("updateFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setLoading(false);
@@ -72,7 +84,7 @@ export default function OrgSubscription({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
-          Subscription
+          {t("title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -80,7 +92,9 @@ export default function OrgSubscription({
           <>
             <div className="p-4 border rounded-lg bg-muted/50">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold">{currentPlan?.name}</span>
+                <span className="text-lg font-bold">
+                  {currentPlan ? planName(currentPlan) : null}
+                </span>
                 <Badge
                   variant={
                     subscription.status === "ACTIVE"
@@ -90,48 +104,50 @@ export default function OrgSubscription({
                       : "destructive"
                   }
                 >
-                  {subscription.status}
+                  {tStatus(subscription.status)}
                 </Badge>
               </div>
               <div className="text-2xl font-bold">
-                {formatPlanAmount(currentPlan?.monthlyPrice ?? 0)}
-                <span className="text-sm font-normal text-muted-foreground">
-                  /month
-                </span>
+                {tCommon("perMonth", {
+                  amount: amount(currentPlan?.monthlyPrice ?? 0),
+                })}
               </div>
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Period Start</span>
+                <span className="text-muted-foreground">{t("periodStart")}</span>
                 <span>
                   {subscription.currentPeriodStart
                     ? fmtDate(new Date(subscription.currentPeriodStart))
-                    : "N/A"}
+                    : tCommon("notAvailable")}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Period End</span>
+                <span className="text-muted-foreground">{t("periodEnd")}</span>
                 <span>
                   {subscription.currentPeriodEnd
                     ? fmtDate(new Date(subscription.currentPeriodEnd))
-                    : "N/A"}
+                    : tCommon("notAvailable")}
                 </span>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <label className="text-sm font-medium mb-2 block">
-                Change Plan
+              <label
+                htmlFor="changePlan"
+                className="text-sm font-medium mb-2 block"
+              >
+                {t("changePlan")}
               </label>
               <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a plan" />
+                <SelectTrigger id="changePlan">
+                  <SelectValue placeholder={t("selectPlan")} />
                 </SelectTrigger>
                 <SelectContent>
                   {plans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.id}>
-                      {plan.name} - {formatPlanAmount(plan.monthlyPrice)}/mo
+                      {planOption(plan)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -146,25 +162,25 @@ export default function OrgSubscription({
                 {loading || isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                    Updating...
+                    {t("updating")}
                   </>
                 ) : (
-                  "Update Plan"
+                  t("update")
                 )}
               </Button>
             </div>
           </>
         ) : (
           <div className="text-center py-4">
-            <p className="text-muted-foreground mb-4">No subscription</p>
+            <p className="text-muted-foreground mb-4">{t("none")}</p>
             <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-              <SelectTrigger>
-                <SelectValue placeholder="Assign a plan" />
+              <SelectTrigger aria-label={t("assignPlaceholder")}>
+                <SelectValue placeholder={t("assignPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {plans.map((plan) => (
                   <SelectItem key={plan.id} value={plan.id}>
-                    {plan.name} - {formatPlanAmount(plan.monthlyPrice)}/mo
+                    {planOption(plan)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -177,12 +193,12 @@ export default function OrgSubscription({
               {loading || isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                  Assigning...
+                  {t("assigning")}
                 </>
               ) : (
                 <>
                   <Check className="h-4 w-4 me-2" />
-                  Assign Plan
+                  {t("assign")}
                 </>
               )}
             </Button>

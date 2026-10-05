@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Plus, Search, Filter } from "lucide-react";
@@ -15,8 +16,12 @@ import {
 } from "@/components/ui/select";
 import { Link } from "@/i18n/navigation";
 import type { Plan } from "@/lib/generated/prisma";
+import { planDisplayName } from "@/components/Pricing/pricing-plans";
 
 export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
+  const t = useTranslations("superAdmin.organizations");
+  const tCommon = useTranslations("superAdmin.common");
+  const tPlans = useTranslations("plans");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -49,15 +54,13 @@ export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
       {/* Title and Create Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Organizations</h1>
-          <p className="text-muted-foreground">
-            Manage all organizations on the platform
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button asChild>
           <Link href="/super-admin/organizations/create">
             <Plus className="h-4 w-4 me-2" />
-            Create Organization
+            {t("create")}
           </Link>
         </Button>
       </div>
@@ -69,14 +72,15 @@ export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
           <div className="relative flex-1">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search organizations..."
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="ps-9"
             />
           </div>
           <Button type="submit" variant="secondary">
-            Search
+            {tCommon("search")}
           </Button>
         </form>
 
@@ -87,12 +91,12 @@ export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
         >
           <SelectTrigger className="w-[150px]">
             <Filter className="h-4 w-4 me-2" />
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("filters.status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
+            <SelectItem value="active">{tCommon("active")}</SelectItem>
+            <SelectItem value="inactive">{tCommon("inactive")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -102,13 +106,13 @@ export default function OrganizationsHeader({ plans }: { plans: Plan[] }) {
           onValueChange={(value) => handleFilterChange("plan", value)}
         >
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Plan" />
+            <SelectValue placeholder={t("filters.plan")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Plans</SelectItem>
+            <SelectItem value="all">{t("filters.allPlans")}</SelectItem>
             {plans.map((plan) => (
               <SelectItem key={plan.id} value={plan.type}>
-                {plan.name}
+                {planDisplayName(tPlans, plan)}
               </SelectItem>
             ))}
           </SelectContent>

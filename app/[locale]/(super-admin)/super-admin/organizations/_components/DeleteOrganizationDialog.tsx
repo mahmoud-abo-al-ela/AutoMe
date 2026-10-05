@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { useFormatters } from "@/hooks/use-formatters";
 import type { OrganizationRowData } from "./OrganizationsTable";
 
 export default function DeleteOrganizationDialog({
@@ -25,6 +27,14 @@ export default function DeleteOrganizationDialog({
   onConfirm: () => void | Promise<void>;
   isDeleting: boolean;
 }) {
+  const t = useTranslations("superAdmin.organizations.delete");
+  const tCommon = useTranslations("superAdmin.common");
+  const tActions = useTranslations("common.actions");
+  const { number } = useFormatters();
+
+  const cars = org?._count?.cars ?? 0;
+  const members = org?._count?.memberships ?? 0;
+
   const handleConfirm = async () => {
     await onConfirm();
   };
@@ -38,22 +48,28 @@ export default function DeleteOrganizationDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Organization
+            {t("title")}
           </DialogTitle>
           <DialogDescription asChild>
             <div>
               <p>
-                Are you sure you want to delete{" "}
-                <span className="font-semibold">{org?.name}</span>? This action
-                cannot be undone.
+                {t.rich("confirm", {
+                  name: org?.name ?? "",
+                  strong: (chunks) => (
+                    <span className="font-semibold">{chunks}</span>
+                  ),
+                })}
               </p>
-              {((org?._count?.cars ?? 0) > 0 ||
-                (org?._count?.memberships ?? 0) > 0) && (
+              {(cars > 0 || members > 0) && (
                 <div className="mt-2 p-2 bg-destructive/10 rounded-md text-destructive">
-                  <strong>Warning:</strong> This organization has{" "}
-                  {org?._count?.cars || 0} cars and{" "}
-                  {org?._count?.memberships || 0} members. All data will be
-                  permanently removed.
+                  <strong>{tCommon("warning")}</strong>{" "}
+                  {t("dataWarning", {
+                    cars: t("cars", { count: cars, value: number(cars) }),
+                    members: t("members", {
+                      count: members,
+                      value: number(members),
+                    }),
+                  })}
                 </div>
               )}
             </div>
@@ -61,7 +77,7 @@ export default function DeleteOrganizationDialog({
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isDeleting}>
-            Cancel
+            {tActions("cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -71,10 +87,10 @@ export default function DeleteOrganizationDialog({
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
-                Deleting...
+                {tCommon("deleting")}
               </>
             ) : (
-              "Delete Organization"
+              t("submit")
             )}
           </Button>
         </DialogFooter>

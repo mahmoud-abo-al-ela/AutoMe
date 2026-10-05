@@ -6,21 +6,16 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
 const ErrorState = ({
-  error,
+  message,
   onRetry,
 }: {
-  // The render below handles an Error, a bare string, or nothing — the query
-  // layer has produced all three.
-  error: Error | string | null | undefined;
+  // Already resolved for the reader by the list hook — never an Error's own
+  // message, which is developer-facing English.
+  message: string;
   onRetry: () => void;
 }) => {
   const t = useTranslations("org.cars.error");
   const tCommon = useTranslations("common.actions");
-
-  // A thrown Error carries a developer-facing English message. It is shown
-  // when there is one, on the same reasoning as resolveActionError: a slightly
-  // English sentence beats a blank while those throw sites are migrated.
-  const detail = typeof error === "string" ? error : error?.message;
 
   return (
     <div className="flex flex-col items-center justify-center py-8 sm:py-12 px-4 text-center">
@@ -29,7 +24,7 @@ const ErrorState = ({
         {t("title")}
       </h3>
       <p className="text-sm sm:text-base text-gray-500 mb-4 max-w-md">
-        {detail || t("body")}
+        {message}
       </p>
       <Button onClick={onRetry} className="mb-2 text-sm">
         <RefreshCw className="me-2 h-3 w-3 sm:h-4 sm:w-4" />

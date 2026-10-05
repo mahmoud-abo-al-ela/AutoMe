@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,24 +37,27 @@ export default function OrganizationActions({
   actionLoading: string | null;
   isPending: boolean;
 }) {
+  const t = useTranslations("superAdmin.organizations.actions");
+  const tCommon = useTranslations("superAdmin.common");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Actions</span>
+          <span className="sr-only">{tCommon("actions")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
           <Link href={`/super-admin/organizations/${org.id}`}>
             <Eye className="h-4 w-4 me-2" />
-            View Details
+            {tCommon("viewDetails")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onImpersonate(org)}>
           <UserCog className="h-4 w-4 me-2" />
-          Impersonate
+          {t("impersonate")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -63,17 +67,17 @@ export default function OrganizationActions({
           {actionLoading === `status-${org.id}` ? (
             <>
               <Loader2 className="h-4 w-4 me-2 animate-spin" />
-              {org.isActive ? "Suspending..." : "Activating..."}
+              {org.isActive ? t("suspending") : t("activating")}
             </>
           ) : org.isActive ? (
             <>
               <Pause className="h-4 w-4 me-2" />
-              Suspend
+              {t("suspend")}
             </>
           ) : (
             <>
               <Play className="h-4 w-4 me-2" />
-              Activate
+              {t("activate")}
             </>
           )}
         </DropdownMenuItem>
@@ -83,7 +87,7 @@ export default function OrganizationActions({
           onClick={() => onDelete(org)}
         >
           <Trash2 className="h-4 w-4 me-2" />
-          Delete
+          {tCommon("delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

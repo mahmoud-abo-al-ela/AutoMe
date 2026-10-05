@@ -32,7 +32,9 @@ export const clerkAppearance = {
     fontFamilyButtons: "inherit",
   },
   elements: {
-    rootBox: "w-full max-w-[440px]",
+    // Important like the rest: without it Clerk's own width won, each card
+    // shrank to its content, and sign-in came out narrower than sign-up.
+    rootBox: "!w-full !max-w-[440px]",
     cardBox: "!w-full !rounded-sheet !border !border-border !shadow-float",
     card: "!border-0 !shadow-none !px-6 !py-8 sm:!px-8",
     headerTitle: "!text-h2 !font-extrabold",

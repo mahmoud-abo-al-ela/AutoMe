@@ -1,5 +1,5 @@
 import { db } from "@/lib/prisma";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { formatDate } from "@/lib/utils/datetime";
 import PlatformStats from "./_components/PlatformStats";
@@ -56,7 +56,10 @@ async function getPlatformStats() {
   const planMap = Object.fromEntries(plans.map((p) => [p.id, p]));
 
   const subscriptionBreakdown = subscriptionsByPlan.map((s) => ({
-    plan: planMap[s.planId]?.name || "Unknown",
+    // null when the plan row is gone; the card names it in the reader's language.
+    plan: planMap[s.planId]
+      ? { type: planMap[s.planId].type, name: planMap[s.planId].name }
+      : null,
     count: s._count.id,
   }));
 
@@ -130,15 +133,14 @@ async function getMonthlyGrowth() {
 
 export default async function SuperAdminDashboard() {
   const stats = await getPlatformStats();
+  const t = await getTranslations("superAdmin.overview");
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Platform Overview</h1>
-        <p className="text-muted-foreground">
-          Monitor and manage the AutoMe SaaS platform
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Stats Cards */}

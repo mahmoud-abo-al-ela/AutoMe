@@ -90,7 +90,7 @@ const PopularCars = ({ cars }: { cars: PopularCar[] }) => {
               
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
-                  {car.year} {car.make} {car.model}
+                  {number(car.year, { useGrouping: false })} {car.make} {car.model}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-xs text-muted-foreground font-mono">

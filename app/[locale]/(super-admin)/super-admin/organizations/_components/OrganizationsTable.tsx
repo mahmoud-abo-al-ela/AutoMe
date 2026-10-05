@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { useActionError } from "@/hooks/use-action-error";
+import { useFormatters } from "@/hooks/use-formatters";
 import { useRouter } from "@/i18n/navigation";
 import {
   Table,
@@ -53,6 +56,10 @@ export default function OrganizationsTable({
   organizations: OrganizationRowData[];
   pagination: OrganizationsPagination;
 }) {
+  const t = useTranslations("superAdmin.organizations");
+  const tCommon = useTranslations("superAdmin.common");
+  const actionError = useActionError();
+  const { number } = useFormatters();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [impersonateOrg, setImpersonateOrg] =
@@ -70,24 +77,24 @@ export default function OrganizationsTable({
       const result = await updateOrganizationStatus(org.id, !org.isActive);
       if (result.success) {
         toast.success(
-          org.isActive ? "Organization suspended" : "Organization activated",
+          org.isActive ? t("toasts.suspended") : t("toasts.activated"),
           {
-            description: `${org.name} has been ${
-              org.isActive ? "suspended" : "activated"
-            }.`,
+            description: org.isActive
+              ? t("toasts.suspendedBody", { name: org.name })
+              : t("toasts.activatedBody", { name: org.name }),
           }
         );
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to update status", {
-          description: result.error.message,
+        toast.error(t("toasts.statusFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setActionLoading(null);
@@ -105,20 +112,20 @@ export default function OrganizationsTable({
     try {
       const result = await deleteOrganization(deleteDialog.org.id);
       if (result.success) {
-        toast.success("Organization deleted", {
-          description: `${deleteDialog.org.name} has been deleted.`,
+        toast.success(t("toasts.deleted"), {
+          description: t("toasts.deletedBody", { name: deleteDialog.org.name }),
         });
         startTransition(() => {
           router.refresh();
         });
       } else {
-        toast.error("Failed to delete organization", {
-          description: result.error.message,
+        toast.error(t("toasts.deleteFailed"), {
+          description: actionError(result.error, tCommon("errorBody")),
         });
       }
-    } catch (error) {
-      toast.error("An error occurred", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(tCommon("errorTitle"), {
+        description: tCommon("errorBody"),
       });
     } finally {
       setActionLoading(null);
@@ -139,14 +146,14 @@ export default function OrganizationsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Organization</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead className="text-center">Cars</TableHead>
-                <TableHead className="text-center">Members</TableHead>
-                <TableHead className="text-center">Test Drives</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-end">Actions</TableHead>
+                <TableHead>{tCommon("columns.organization")}</TableHead>
+                <TableHead>{tCommon("columns.plan")}</TableHead>
+                <TableHead className="text-center">{tCommon("columns.cars")}</TableHead>
+                <TableHead className="text-center">{tCommon("columns.members")}</TableHead>
+                <TableHead className="text-center">{tCommon("columns.testDrives")}</TableHead>
+                <TableHead>{tCommon("columns.status")}</TableHead>
+                <TableHead>{tCommon("columns.created")}</TableHead>
+                <TableHead className="text-end">{tCommon("columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -165,7 +172,7 @@ export default function OrganizationsTable({
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} className="h-48 p-0">
-                    <EmptyState variant="inline" icon={Building2} title="No organizations found" />
+                    <EmptyState variant="inline" icon={Building2} title={t("empty")} />
                   </TableCell>
                 </TableRow>
               )}
@@ -197,7 +204,7 @@ export default function OrganizationsTable({
                   isActive={pagination.page === i + 1}
                   className="cursor-pointer"
                 >
-                  {i + 1}
+                  {number(i + 1)}
                 </PaginationLink>
               </PaginationItem>
             ))}

@@ -41,6 +41,22 @@
     "nextShort": "Next",
     "morePages": "More pages"
   },
+  "filters": {
+    "search": "Search…",
+    "noOptions": "No options available",
+    "noMatches": "No matches",
+    "showMore": "+{count} more",
+    "showLess": "Show less",
+    "clearAll": "Clear all",
+    "remove": "Remove filter {label}",
+    "noRangeData": "No inventory data"
+  },
+  "carousel": {
+    "carousel": "carousel",
+    "slide": "slide",
+    "previous": "Previous slide",
+    "next": "Next slide"
+  },
   "carActions": {
     "addToFavorites": "Add to favorites",
     "removeFromFavorites": "Remove from favorites",

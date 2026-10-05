@@ -93,7 +93,7 @@ export const CarsListPresenter = ({
 
                 <CardContent className="p-0 relative">
                     {fetchCarsError ? (
-                        <ErrorState error={fetchCarsError} onRetry={handlers.handleRefresh} />
+                        <ErrorState message={fetchCarsError} onRetry={handlers.handleRefresh} />
                     ) : (
                         <>
                             {/* Desktop Table View */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { CreateOrganizationSectionProps } from "./CreateOrganizationForm";
 import { Mail, Phone, Globe, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,25 +18,27 @@ export default function ContactInfoSection({
   formData,
   onChange,
 }: CreateOrganizationSectionProps) {
+  const t = useTranslations("superAdmin.organizations.form.contact");
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
-          Contact Information
+          {t("title")}
         </CardTitle>
-        <CardDescription>Organization contact details</CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("email")}</Label>
           <div className="relative">
             <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="contact@acme-auto.com"
+              placeholder="contact@nile-motors.com"
               value={formData.email}
               onChange={onChange}
               className="ps-10"
@@ -44,7 +47,7 @@ export default function ContactInfoSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{t("phone")}</Label>
           <div className="relative">
             <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -60,14 +63,14 @@ export default function ContactInfoSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="website">Website</Label>
+          <Label htmlFor="website">{t("website")}</Label>
           <div className="relative">
             <Globe className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="website"
               name="website"
               type="url"
-              placeholder="https://www.acme-auto.com"
+              placeholder="https://www.nile-motors.com"
               value={formData.website}
               onChange={onChange}
               className="ps-10"
@@ -76,13 +79,13 @@ export default function ContactInfoSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
+          <Label htmlFor="address">{t("address")}</Label>
           <div className="relative">
             <MapPin className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
             <Textarea
               id="address"
               name="address"
-              placeholder="123 Main Street, City, State, ZIP"
+              placeholder={t("addressPlaceholder")}
               value={formData.address}
               onChange={onChange}
               className="ps-10"

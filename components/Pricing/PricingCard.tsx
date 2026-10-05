@@ -32,7 +32,9 @@ export default function PricingCard({
   // rather than left to ICU, which would use the bare `ar` tag and render
   // Western digits against the Eastern ones everywhere else on the card.
   const featureParams = (feature: UiPlan["features"][number]) =>
-    feature.params ? { value: fmt.number(feature.params.count) } : undefined;
+    feature.params
+      ? { count: feature.params.count, value: fmt.number(feature.params.count) }
+      : undefined;
   const Icon = plan.icon;
   const price = formatPlanPrice(plan, billingPeriod, fmt.locale);
   const periodKey = planPeriodKey(plan, billingPeriod);
