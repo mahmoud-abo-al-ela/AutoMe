@@ -22,10 +22,10 @@ import { NotFoundError } from "@/lib/utils/errors";
 const PAGE_SIZE = 20;
 
 export const getBuyerQuestions = withOrgAuth(async (ctx, input: unknown) => {
-  const { status, page } = validateAction(buyerQuestionListSchema, input);
+  const { view, page } = validateAction(buyerQuestionListSchema, input);
   const [{ questions, total }, counts] = await Promise.all([
-    buyerQuestionRepository.findBuyerQuestions(ctx.organization.id, status, page, PAGE_SIZE),
-    buyerQuestionRepository.countBuyerQuestionsByStatus(ctx.organization.id),
+    buyerQuestionRepository.findBuyerQuestions(ctx.organization.id, view, page, PAGE_SIZE),
+    buyerQuestionRepository.countBuyerQuestionsByView(ctx.organization.id),
   ]);
 
   return createSuccessResponse({

@@ -13,8 +13,7 @@ import { queryKeys } from "@/lib/query-client";
 import { useActionError } from "@/hooks/use-action-error";
 import type { ActionError } from "@/lib/utils/error-messages";
 import type { ActionResponse } from "@/lib/utils/response";
-
-export type BuyerQuestionTab = "OPEN" | "ANSWERED" | "DISMISSED";
+import type { BuyerQuestionView } from "@/lib/validations/schemas";
 
 /** An action's payload, or its typed error thrown for the mutation to catch. */
 function unwrap<T>(response: ActionResponse<T>): T {
@@ -23,18 +22,18 @@ function unwrap<T>(response: ActionResponse<T>): T {
 }
 
 /**
- * The dealer's buyer-question inbox: one status tab at a time, most-asked
- * first. Every write invalidates the whole inbox, because answering moves a
- * question between tabs and changes every tab's count.
+ * The dealer's buyer-question inbox: one view at a time, most-asked first.
+ * Every write invalidates the whole inbox, because answering moves a
+ * question between views and changes every view's count.
  */
 export function useBuyerQuestions() {
   const t = useTranslations("org.buyerQuestions.toasts");
   const actionError = useActionError();
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState<BuyerQuestionTab>("OPEN");
+  const [view, setView] = useState<BuyerQuestionView>("OPEN");
   const [page, setPage] = useState(1);
 
-  const params = { status, page };
+  const params = { view, page };
   const query = useQuery({
     queryKey: queryKeys.buyerQuestions.list(params),
     queryFn: () => getBuyerQuestions(params),
@@ -73,23 +72,24 @@ export function useBuyerQuestions() {
       : undefined;
 
   return {
-    status,
+    view,
     questions: data?.questions ?? [],
-    counts: data?.counts ?? { OPEN: 0, ANSWERED: 0, DISMISSED: 0 },
+    counts: data?.counts ?? null,
     pagination: data?.pagination ?? { page, limit: 20, total: 0, totalPages: 0 },
     isLoading: query.isLoading,
     isError,
     pendingId,
+    retry: () => void query.refetch(),
     handlers: {
-      selectTab: (tab: BuyerQuestionTab) => {
-        setStatus(tab);
+      selectView: (next: BuyerQuestionView) => {
+        setView(next);
         setPage(1);
       },
       setPage,
       answer: (input: { id: string; answer: string; appliesToAllCars: boolean }) =>
         answer.mutateAsync(input),
-      dismiss: (id: string) => changeStatus.mutate({ id, status: "DISMISSED" }),
-      reopen: (id: string) => changeStatus.mutate({ id, status: "OPEN" }),
+      dismiss: (id: string) => changeStatus.mutateAsync({ id, status: "DISMISSED" }),
+      reopen: (id: string) => changeStatus.mutateAsync({ id, status: "OPEN" }),
     },
   };
 }
