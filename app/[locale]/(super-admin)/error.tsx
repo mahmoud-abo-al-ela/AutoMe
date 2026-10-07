@@ -2,43 +2,46 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ErrorScreen, RoadBarrier } from "@/components/brand/ErrorScreen";
 
-export default function GlobalError({
+/**
+ * A super-admin page that failed to render: the same screen and copy as the
+ * rest of the product. The brand's buttons live in the site theme, so this
+ * page turns it on for as long as it shows.
+ */
+export default function SuperAdminError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  // The same copy as the dealer dashboard's error page.
-  const t = useTranslations("org.error");
+  const t = useTranslations("common.errorPage");
 
   useEffect(() => {
-    console.error("Global Error:", error);
+    console.error("Super-admin error:", error);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-          <AlertTriangle className="h-8 w-8 text-red-600" />
-        </div>
-        
-        <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-        <p className="text-gray-500">{t("body")}</p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Button onClick={() => reset()} variant="default" className="w-full sm:w-auto">
-            {t("retry")}
-          </Button>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href="/">{t("home")}</Link>
-          </Button>
-        </div>
-      </div>
+    <div data-theme="site" className="flex flex-1 flex-col">
+      <ErrorScreen
+        art={<RoadBarrier />}
+        title={t("title")}
+        body={t("body")}
+        reference={error.digest ? t("reference", { digest: error.digest }) : undefined}
+        actions={
+          <>
+            <Button variant="marker" size="xl" onClick={() => reset()}>
+              {t("retry")}
+            </Button>
+            <Link href="/" className={buttonVariants({ variant: "outline-strong", size: "xl" })}>
+              {t("home")}
+            </Link>
+          </>
+        }
+      />
     </div>
   );
 }
