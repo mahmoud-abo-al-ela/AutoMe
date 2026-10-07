@@ -1,194 +1,63 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
-
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Receipt, ArrowUpCircle, ArrowDownCircle, XCircle, RefreshCw, PlusCircle, Loader2 } from "lucide-react";
 import { getBillingHistory } from "@/actions/billing";
-import { EmptyState } from "@/components/common/EmptyState";
-import type { LucideIcon } from "lucide-react";
+import { SectionPanel } from "../../_components/SectionPanel";
 
-// Keyed by AuditAction, but only the subscription actions are listed; the
-// lookups below fall back for anything else the history can contain.
-const actionIcons: Record<string, LucideIcon> = {
-  SUBSCRIPTION_CREATED: PlusCircle,
-  SUBSCRIPTION_UPGRADED: ArrowUpCircle,
-  SUBSCRIPTION_DOWNGRADED: ArrowDownCircle,
-  SUBSCRIPTION_CANCELED: XCircle,
-  SUBSCRIPTION_RENEWED: RefreshCw,
-};
+/** One audit-log-derived row of the plan history, as the action returns it. */
+type BillingHistoryEntry = Extract<Awaited<ReturnType<typeof getBillingHistory>>, { success: true }>["data"]["history"][number];
 
-const actionColors: Record<string, string> = {
-  SUBSCRIPTION_CREATED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  SUBSCRIPTION_UPGRADED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  SUBSCRIPTION_DOWNGRADED: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-  SUBSCRIPTION_CANCELED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  SUBSCRIPTION_RENEWED: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-};
-
-/** One audit-log-derived row of the billing history, as the action returns it. */
-type BillingHistoryEntry = Extract<
-  Awaited<ReturnType<typeof getBillingHistory>>,
-  { success: true }
->["data"]["history"][number];
-
-export default function BillingHistory({
-  organizationId,
-}: {
-  organizationId: string;
-}) {
-  const [billingHistory, setBillingHistory] = useState<BillingHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+/**
+ * When the plan changed — created, upgraded, moved down, ended, renewed — and
+ * who did it. The server's own description is left out: it is English-only,
+ * and the event's translated name already says what happened.
+ */
+export default function BillingHistory({ organizationId }: { organizationId: string }) {
+  const t = useTranslations("org.billing.history");
+  const { dateTime } = useFormatters();
+  const [history, setHistory] = useState<BillingHistoryEntry[] | null>(null);
   // A flag, not the server's message: that arrives in English, and the reader
   // is told the same translated thing whatever the cause.
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    async function fetchBillingHistory() {
-      try {
-        const result = await getBillingHistory(organizationId);
-        if (!result.success) {
-          setFailed(true);
-          return;
-        }
-        setBillingHistory(result.data.history || []);
-      } catch {
-        setFailed(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchBillingHistory();
+    getBillingHistory(organizationId)
+      .then((result) => (result.success ? setHistory(result.data.history || []) : setFailed(true)))
+      .catch(() => setFailed(true));
   }, [organizationId]);
-
-  const t = useTranslations("org.billing.history");
-  const { dateTime } = useFormatters();
-  const formatDate = (date: Date | string) => {
-    return dateTime(date);
-  };
 
   // The audit action is the message key. An action with no message falls back
   // to the raw enum rather than rendering blank — it is at least identifiable.
-  const formatActionLabel = (action: string) =>
-    t.has(`events.${action}`) ? t(`events.${action}`) : action;
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5" />
-            {t("title")}
-          </CardTitle>
-          <CardDescription>{t("subtitle")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (failed) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5" />
-            {t("title")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            {t("loadFailed")}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const label = (action: string) => (t.has(`events.${action}`) ? t(`events.${action}`) : action);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Receipt className="h-5 w-5" />
-          {t("title")}
-        </CardTitle>
-        <CardDescription>{t("subtitle")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {billingHistory.length === 0 ? (
-          <EmptyState variant="inline" icon={Receipt} title={t("emptyTitle")} />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("date")}</TableHead>
-                <TableHead>{t("event")}</TableHead>
-                <TableHead>{t("description")}</TableHead>
-                <TableHead>{t("by")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {billingHistory.map((event) => {
-                const Icon = actionIcons[event.action] || Receipt;
-                return (
-                  <TableRow key={event.id}>
-                    <TableCell className="font-medium">
-                      {formatDate(event.date)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={actionColors[event.action] || "bg-gray-100 text-gray-800"}>
-                        <Icon className="h-3 w-3 me-1" />
-                        {formatActionLabel(event.action)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{event.description}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {event.actor}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-
-        <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-          <p>
-            {t.rich("needHelp", {
-              link: (chunks) => (
-                <a
-                  href="mailto:billing@autome.com"
-                  className="text-primary hover:underline"
-                >
-                  {chunks}
-                </a>
-              ),
-            })}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+    <SectionPanel title={t("title")}>
+      {failed ? (
+        <p role="alert" className="text-caption">{t("loadFailed")}</p>
+      ) : history === null ? (
+        <ul aria-busy className="flex flex-col gap-3">
+          {[0, 1].map((i) => (
+            <li key={i} className="flex flex-col gap-1.5">
+              <span className="skeleton-shimmer h-4 w-1/3 rounded" />
+              <span className="skeleton-shimmer h-3 w-1/2 rounded" />
+            </li>
+          ))}
+        </ul>
+      ) : history.length === 0 ? (
+        <p className="text-caption text-muted-foreground">{t("emptyTitle")}</p>
+      ) : (
+        <ul className="flex flex-col divide-y divide-border">
+          {history.map((event) => (
+            <li key={event.id} className="grid gap-x-4 gap-y-0.5 py-3 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_auto]">
+              <span className="font-semibold">{label(event.action)}</span>
+              <span className="text-caption text-muted-foreground sm:text-end">{dateTime(event.date)}</span>
+              {event.actor && <span className="text-micro text-muted-foreground sm:col-span-2">{t("byWho", { name: event.actor })}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </SectionPanel>
   );
 }

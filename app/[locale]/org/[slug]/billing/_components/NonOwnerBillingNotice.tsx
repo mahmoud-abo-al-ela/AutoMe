@@ -1,14 +1,11 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent } from "@/components/ui/card";
-import { ShieldAlert, Mail, User } from "lucide-react";
+import { Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 /**
- * Notice displayed to non-owner members on the billing page.
- * Shows a clear message that billing management requires owner access,
- * and provides the owner's contact information.
+ * For members: they can see the plan and what it covers, but only an owner
+ * changes it or pays — so the notice says who to ask, with their email.
  */
 export default function NonOwnerBillingNotice({
   ownerName,
@@ -17,46 +14,24 @@ export default function NonOwnerBillingNotice({
   ownerName: string | null | undefined;
   ownerEmail: string | null | undefined;
 }) {
-    const t = useTranslations("org.billing.nonOwner");
+  const t = useTranslations("org.billing.nonOwner");
 
-    return (
-        <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800">
-            <ShieldAlert className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800 dark:text-blue-400">
-                {t("title")}
-            </AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
-                <p>{t("body")}</p>
-
-                {(ownerName || ownerEmail) && (
-                    <Card className="mt-3 bg-white/60 dark:bg-gray-900/40 border-blue-200 dark:border-blue-800">
-                        <CardContent className="py-3 px-4">
-                            <p className="text-xs font-medium text-blue-800 dark:text-blue-400 mb-2">
-                                {t("ownerLabel")}
-                            </p>
-                            <div className="flex flex-col gap-1">
-                                {ownerName && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <User className="h-3.5 w-3.5 text-blue-500" />
-                                        <span>{ownerName}</span>
-                                    </div>
-                                )}
-                                {ownerEmail && (
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Mail className="h-3.5 w-3.5 text-blue-500" />
-                                        <a
-                                            href={`mailto:${ownerEmail}?subject=Billing%20Request`}
-                                            className="text-blue-600 dark:text-blue-400 hover:underline"
-                                        >
-                                            {ownerEmail}
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-            </AlertDescription>
-        </Alert>
-    );
+  return (
+    <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-2xl border border-border bg-card px-4 py-3 text-caption">
+      <Lock aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+      <span>{t("body")}</span>
+      {(ownerName || ownerEmail) && (
+        <span className="text-muted-foreground">
+          {t("ask")}{" "}
+          {ownerEmail ? (
+            <a href={`mailto:${ownerEmail}`} className="font-semibold text-[#1d4e9e] underline-offset-2 hover:underline">
+              <bdi>{ownerName || ownerEmail}</bdi>
+            </a>
+          ) : (
+            <bdi className="font-semibold text-foreground">{ownerName}</bdi>
+          )}
+        </span>
+      )}
+    </p>
+  );
 }
