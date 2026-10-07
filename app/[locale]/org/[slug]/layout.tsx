@@ -12,14 +12,15 @@ import { checkUser } from "@/lib/checkUser";
 import { getOrganizationBySlug, getUserMembership } from "@/lib/getOrganization";
 import { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
 import BackToTop from "@/components/BackToTop";
-import { Toaster } from "sonner";
 import { Suspense } from "react";
-import Loading from "@/components/Loading";
+import { RoadLoader } from "@/components/brand";
+import { alexandria } from "@/components/brand/site-font";
+import { SiteToaster } from "@/components/brand/SiteToaster";
 import { notFound } from "next/navigation";
 import { redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getLocale, getTranslations } from "next-intl/server";
-import AdminSidebar from "./_components/AdminSidebar";
+import { OrgTopBar } from "./_components/OrgTopBar";
 import ImpersonationBanner from "./_components/ImpersonationBanner";
 
 // The route params as Next generates them for the layout validator: it
@@ -54,7 +55,7 @@ export default async function OrganizationLayout({
 }: OrgParams & { children: React.ReactNode }) {
     const { slug } = await params;
     const user = await checkUser();
-    const locale = await getLocale();
+    const locale = (await getLocale()) as Locale;
 
     if (!user) {
         redirect({ href: "/sign-in", locale });
@@ -80,36 +81,26 @@ export default async function OrganizationLayout({
         notFound();
     }
 
+    // The public site's theme (palette, Alexandria), with the dashboard's own
+    // chart colours (globals.css: data-surface="work"). The navigation is one
+    // bar across the top (OrgTopBar), so the work area keeps the full width.
     return (
-        <div className="flex min-h-screen bg-background">
-            <Toaster position="top-right" richColors />
-            <AdminSidebar organization={organization} userRole={membership?.role} />
-            <main
-                className="flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0"
-                // The sidebar is pinned to the inline-start edge, which is the
-                // right-hand one in Arabic; a physical paddingLeft put the
-                // content underneath it there.
-                style={{ paddingInlineStart: "var(--sidebar-width, 0)" }}
-            >
-                {isImpersonating && impersonationSession && (
-                    <ImpersonationBanner
-                        session={impersonationSession}
-                        organization={organization}
-                    />
-                )}
-                <div className="md:hidden h-16" />
-                <div className="p-4 md:p-6 animate-in fade-in duration-500 flex-1 min-h-0">
-                    <Suspense
-                        fallback={
-                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                                <Loading />
-                            </div>
-                        }
-                    >
-                        {children}
-                    </Suspense>
-                </div>
+        <div
+            data-theme="site"
+            data-surface="work"
+            className={`${alexandria.variable} flex min-h-screen flex-col bg-background text-foreground`}
+        >
+            <OrgTopBar organization={organization} userRole={membership?.role} />
+            {isImpersonating && impersonationSession && (
+                <ImpersonationBanner
+                    session={impersonationSession}
+                    organization={organization}
+                />
+            )}
+            <main className="mx-auto flex w-full max-w-[1760px] flex-1 flex-col px-4 pb-16 pt-6 sm:px-6 md:px-8 md:pt-10">
+                <Suspense fallback={<RoadLoader />}>{children}</Suspense>
             </main>
+            <SiteToaster locale={locale} position="top-right" />
             <BackToTop />
         </div>
     );

@@ -302,6 +302,19 @@ export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
  * Bounded like the car schema so a crafted request cannot send the model an
  * arbitrarily large prompt.
  */
+/**
+ * A price being typed into the car editor, to place it among similar cars.
+ * `carId` is the car being edited, so it is not compared with itself.
+ */
+export const priceComparisonSchema = z.object({
+  carId: z.string().max(64).optional(),
+  make: z.string().trim().min(1).max(50),
+  model: z.string().trim().min(1).max(50),
+  bodyType: z.string().max(50),
+  year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
+  price: z.coerce.number().positive().max(1_000_000_000),
+});
+
 export const listingReviewSchema = z.object({
   year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
   make: z.string().max(50),
@@ -364,8 +377,15 @@ export const chatTranslationRequestSchema = z.object({
 
 // ============ BUYER QUESTIONS (dealer inbox) ============
 
+/**
+ * The inbox's views: the three statuses, plus "For every car" — the answered
+ * questions the dealer marked as true of every car they sell.
+ */
+export const BUYER_QUESTION_VIEWS = ["OPEN", "ANSWERED", "ALL_CARS", "DISMISSED"] as const;
+export type BuyerQuestionView = (typeof BUYER_QUESTION_VIEWS)[number];
+
 export const buyerQuestionListSchema = z.object({
-  status: z.enum(["OPEN", "ANSWERED", "DISMISSED"]),
+  view: z.enum(BUYER_QUESTION_VIEWS),
   page: z.coerce.number().int().min(1).max(1000).default(1),
 });
 
@@ -382,4 +402,54 @@ export const answerBuyerQuestionSchema = z.object({
 export const buyerQuestionStatusSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(["OPEN", "DISMISSED"]),
+});
+
+/** The Insights page's period, in days: the three the period picker offers. */
+/**
+ * The dealer's Cars table: one status view, the search and filters, the
+ * column it is sorted by, and the page. "Needs attention" is not here — it is
+ * a list of its own (getCarsNeedingAttention), not a filter of this one.
+ */
+export const INVENTORY_VIEWS = ["all", "available", "unavailable", "sold"] as const;
+export const INVENTORY_SORTS = ["listed", "price", "saves", "drives"] as const;
+export const INVENTORY_PAGE_SIZE = 20;
+export const inventorySchema = z.object({
+  view: z.enum(INVENTORY_VIEWS).default("all"),
+  search: z.string().trim().max(100).optional(),
+  bodyType: z.string().trim().max(40).optional(),
+  minYear: z.coerce.number().int().min(1900).max(2100).optional(),
+  featured: z.boolean().optional(),
+  sort: z.enum(INVENTORY_SORTS).default("listed"),
+  dir: z.enum(["asc", "desc"]).default("desc"),
+  page: z.coerce.number().int().min(1).default(1),
+});
+export type InventoryInput = z.infer<typeof inventorySchema>;
+
+/** Several of the dealer's cars changed at once from the Cars table: a status, featured, or both. */
+export const bulkCarUpdateSchema = z
+  .object({
+    carIds: z.array(z.string().min(1).max(64)).min(1).max(100),
+    status: carStatus,
+    featured: z.boolean().optional(),
+  })
+  .refine((value) => value.status !== undefined || value.featured !== undefined, { message: "Nothing to change" });
+
+/** A month of the Test drives calendar ("2026-10") and one of its days ("2026-10-07"). */
+export const scheduleMonthSchema = z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) });
+export const scheduleDaySchema = z.object({
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .refine((value) => !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().startsWith(value)),
+});
+
+/** A conversation's buyer (their user id, which is also their Stream id) and the car it is about. */
+export const dealContextSchema = z.object({
+  buyerId: z.string().min(1).max(64),
+  carId: z.string().min(1).max(64).nullish(),
+});
+
+export const INSIGHT_PERIODS = [7, 30, 90] as const;
+export const insightsSchema = z.object({
+  days: z.coerce.number().refine((value) => (INSIGHT_PERIODS as readonly number[]).includes(value)),
 });

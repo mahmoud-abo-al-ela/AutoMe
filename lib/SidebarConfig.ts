@@ -1,6 +1,6 @@
-// `as const` so `icon` narrows to a literal union rather than string. The two
-// org sidebars index their icon maps with it, so a config entry naming an icon
-// they do not provide becomes a compile error instead of undefined at runtime.
+// `as const` so `icon` narrows to a literal union rather than string. (The
+// dashboard is a top bar now and shows labels only; `icon` is kept for a
+// compact view.)
 //
 // `labelKey` resolves against the `org.nav` namespace. It is a key rather than
 // a label because this config is imported by client components that render in
@@ -11,6 +11,12 @@ export const sidebarItems = [
     labelKey: "dashboard",
     icon: "LayoutDashboard",
     path: "/dashboard",
+  },
+  {
+    name: "requests",
+    labelKey: "requests",
+    icon: "Inbox",
+    path: "/requests",
   },
   {
     name: "cars",
@@ -30,6 +36,12 @@ export const sidebarItems = [
     icon: "MessageSquare",
     path: "/messages",
     showUnreadBadge: true,
+  },
+  {
+    name: "insights",
+    labelKey: "insights",
+    icon: "BarChart3",
+    path: "/insights",
   },
   {
     name: "questions",

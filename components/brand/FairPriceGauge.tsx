@@ -3,13 +3,12 @@
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
+import { FAIR_BAND, priceVerdict, type PriceVerdict } from "@/lib/utils/price-verdict";
+
+export { priceVerdict, type PriceVerdict };
 
 /** The gauge spans ±SCALE % around the median; anything further pins to the end. */
 const SCALE = 20;
-/** Within ±FAIR_BAND % of the median reads as a fair price. */
-const FAIR_BAND = 5;
-
-export type PriceVerdict = "below" | "fair" | "above" | "unknown";
 
 /**
  * How a listing price sits against comparable listings. `percent` is this
@@ -25,12 +24,6 @@ export interface MarketPositionProps {
   median?: number;
 }
 
-export function priceVerdict(percent: number | null): PriceVerdict {
-  if (percent == null) return "unknown";
-  if (percent <= -FAIR_BAND) return "below";
-  if (percent >= FAIR_BAND) return "above";
-  return "fair";
-}
 
 const VERDICT_TEXT = {
   below: "text-price-below",

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { isDashboardPath } from "@/lib/org/client";
+import { isSuperAdminPath } from "@/lib/org/client";
 import Loading from "./Loading";
 
 type LoadingContextValue = {
@@ -28,8 +28,9 @@ export default function LoadingProvider({
   // browser's load event plus 800ms. The public site does not take it: its
   // pages are server-rendered and readable at once, and its real waits show
   // the road loader (app/[locale]/loading.tsx and the route loading files).
-  // The dashboards keep it unchanged.
-  const showsSplash = isDashboardPath(usePathname());
+  // The dealer dashboard is on the site theme now and does the same; only
+  // the super-admin keeps the splash.
+  const showsSplash = isSuperAdminPath(usePathname());
 
   useEffect(() => {
     // Check if document is fully loaded

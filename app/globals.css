@@ -227,8 +227,8 @@
    Scoped with :has() on the root rather than on the (site) layout's wrapper:
    Radix portals (selects, dialogs, sheets) and Sonner toasts render into
    <body>, outside any wrapper, and would otherwise fall back to the dashboard
-   palette. The dashboards never render [data-theme="site"], so nothing here
-   reaches them.
+   palette. The super-admin never renders [data-theme="site"], so nothing here
+   reaches it; the dealer dashboard does (with data-surface="work", below).
 
    The shadcn names are kept, so every existing `bg-primary` / `text-muted-
    foreground` on the site picks the new palette up without an edit:
@@ -298,6 +298,22 @@
   --text-h3--line-height: 1.4;
   /* 13px floor in both languages (Arabic already had it). */
   --text-micro: 0.8125rem;
+}
+
+/* ---------------------------------------------------------------------------
+   The dealer dashboard (app/[locale]/org) is on the site theme too, with
+   data-surface="work" adding what only it has: charts, in the brand colours
+   instead of shadcn's defaults.
+   --------------------------------------------------------------------------- */
+:root:has([data-surface="work"]) {
+  /* Checked with the dataviz skill's validator on the limestone card: marker
+     yellow fails as a chart mark (1.5:1), so the second series is a deep amber.
+     Text beside a mark wears text tokens, never these. */
+  --chart-1: #1d4e9e; /* plate */
+  --chart-2: #a87200; /* amber */
+  --chart-3: #0e8a62; /* green */
+  --chart-4: #c2452d; /* brick */
+  --chart-5: #8c8170; /* limestone/600 */
 }
 
 /* Custom sidebar enhancements */
@@ -963,4 +979,76 @@
 .str-chat__message-text-inner li {
   unicode-bidi: plaintext;
   text-align: start;
+}
+
+/*
+ * Messages as a sales desk (canvas: Messages round 1, 2 · Sales desk):
+ * Stream's chat dressed in the brand, inside the desk only — the buyer's
+ * inbox and the floating car chat keep their own look. The buyer writes in
+ * white bubbles with a hairline, the dealership answers in asphalt; no
+ * avatars (the header says who), a small centred day, the box with a strong
+ * border and the marker-yellow Send. Which side each sits on is the rule
+ * above (Chat sides), unchanged.
+ */
+.sales-desk .str-chat,
+.sales-desk .str-chat__theme-light {
+  --str-chat__message-list-background-color: #fbf8f2;
+  --str-chat__message-bubble-background-color: #ffffff;
+  --str-chat__message-bubble-color: var(--foreground);
+  --str-chat__message-bubble-border-radius: 16px;
+  --str-chat__message-bubble-border-block-start: 1px solid var(--border);
+  --str-chat__message-bubble-border-block-end: 1px solid var(--border);
+  --str-chat__message-bubble-border-inline-start: 1px solid var(--border);
+  --str-chat__message-bubble-border-inline-end: 1px solid var(--border);
+  --str-chat__own-message-bubble-background-color: var(--inverse);
+  --str-chat__own-message-bubble-color: var(--inverse-foreground);
+  --str-chat__date-separator-line-color: transparent;
+  --str-chat__date-separator-color: var(--muted-foreground);
+  --str-chat__message-input-background-color: var(--card);
+}
+.sales-desk .str-chat__message--me .str-chat__message-bubble {
+  border-color: var(--inverse);
+}
+.sales-desk .str-chat__message--me .str-chat__message-bubble a {
+  color: #a9c9ec;
+}
+.sales-desk .str-chat__message-text {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+/* Who wrote it is the header's job; the row keeps only its time. */
+.sales-desk .str-chat__li .str-chat__avatar,
+.sales-desk .str-chat__message-simple-name {
+  display: none;
+}
+.sales-desk .str-chat__message {
+  column-gap: 0;
+}
+.sales-desk .str-chat__message-metadata {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.sales-desk .str-chat__date-separator-line {
+  display: none;
+}
+.sales-desk .str-chat__date-separator {
+  justify-content: center;
+  padding-block: 0.5rem;
+  font-size: 0.75rem;
+}
+.sales-desk .str-chat__message-input {
+  padding: 0.625rem 1rem 1rem;
+  border-top: 0;
+  background: var(--card);
+  align-items: flex-end;
+  gap: 0.625rem;
+}
+.sales-desk .str-chat__message-textarea-container {
+  min-height: 3rem;
+  border: 1px solid #8c8170;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.sales-desk .str-chat__message-textarea-container:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
 }

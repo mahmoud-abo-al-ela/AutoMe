@@ -1,4 +1,3 @@
-import { Alexandria } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import MainHeader from "@/components/Header/MainHeader";
 import BottomTabBar from "@/components/Header/BottomTabBar";
@@ -6,25 +5,12 @@ import Footer from "@/components/Footer";
 import { checkUser } from "@/lib/checkUser";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import BackToTop from "@/components/BackToTop";
-import { Toaster } from "sonner";
 import { Suspense } from "react";
 import { DealerPitchProvider, RoadLoader, SiteBrandProvider } from "@/components/brand";
+import { alexandria } from "@/components/brand/site-font";
+import { SiteToaster } from "@/components/brand/SiteToaster";
 import { showsDealerPitch } from "@/lib/org/client";
-import { localeDirection, type Locale } from "@/i18n/routing";
-
-// The public site's face. Drawn by Egyptian type designer Mohamed Gaber with
-// Arabic and Latin in one family, so a mixed title ("Kia Cerato ٢٠١٩") sits on
-// one baseline at one weight — no per-script fallback to tune. Variable, so
-// Black (display) through Regular (body) is one file.
-//
-// Loaded here rather than in the locale layout so the dashboards don't pay
-// for it. globals.css names the family directly, for the reason documented
-// on --font-sans there.
-const alexandria = Alexandria({
-  subsets: ["arabic", "latin"],
-  variable: "--font-alexandria",
-  display: "swap",
-});
+import type { Locale } from "@/i18n/routing";
 
 export default async function SiteLayout({
   children,
@@ -85,25 +71,8 @@ export default async function SiteLayout({
           <Footer user={user} organization={organization} />
           <BottomTabBar user={user} organizationSlug={organization?.slug} organization={organization} />
           <BackToTop />
-          <Toaster
-            position="bottom-right"
-            dir={localeDirection[locale]}
-            // Phones: above the bottom tab bar (84px incl. safe area).
-            mobileOffset={{ bottom: 96 }}
-            toastOptions={{
-              // Figma: Toast. Asphalt, one action, icon + words.
-              classNames: {
-                toast:
-                  "!rounded-control !border-0 !bg-inverse !text-inverse-foreground !shadow-float !font-sans",
-                description: "!text-inverse-foreground/75",
-                actionButton: "!bg-transparent !text-marker !font-semibold",
-                cancelButton: "!bg-transparent !text-inverse-foreground/70",
-                success: "[&_[data-icon]]:!text-marker",
-                error: "[&_[data-icon]]:!text-[#ff8c7a]",
-                info: "[&_[data-icon]]:!text-marker",
-              },
-            }}
-          />
+          {/* Phones: above the bottom tab bar (84px incl. safe area). */}
+          <SiteToaster locale={locale} mobileOffset={{ bottom: 96 }} />
         </div>
       </DealerPitchProvider>
     </SiteBrandProvider>

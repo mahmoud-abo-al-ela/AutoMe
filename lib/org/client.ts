@@ -15,18 +15,6 @@ export function getOrgSlugFromPath(pathname: string): string | null {
 }
 
 /**
- * Whether a path is a dashboard — a dealership's /org/… or the super-admin —
- * rather than the public site, with or without the locale prefix. Public
- * routes and dashboards share the locale layout and its loading boundary, and
- * these decide which loader each gets.
- */
-export function isDashboardPath(pathname: string): boolean {
-  const segments = pathname.split("/").filter(Boolean);
-  const start = (routing.locales as readonly string[]).includes(segments[0]) ? 1 : 0;
-  return segments[start] === "org" || segments[start] === "super-admin";
-}
-
-/**
  * Whether the dealer pitch — the "For dealers" links and the home page's
  * dealer band — is for this visitor. Not on a dealership's own storefront,
  * and not for anyone already in a dealership (their plan and billing are in
@@ -39,4 +27,16 @@ export function showsDealerPitch(
   if (onSubdomain) return false;
   if (!user) return true;
   return user.role !== "ADMIN" && (user.memberships?.length ?? 0) === 0;
+}
+
+/**
+ * Whether a path is the super-admin, with or without the locale prefix. The
+ * one dashboard still on the original theme: the dealer dashboard moved to
+ * the site's (work mode), so it takes the site's loader rather than the old
+ * splash.
+ */
+export function isSuperAdminPath(pathname: string): boolean {
+  const segments = pathname.split("/").filter(Boolean);
+  const start = (routing.locales as readonly string[]).includes(segments[0]) ? 1 : 0;
+  return segments[start] === "super-admin";
 }

@@ -56,40 +56,29 @@ export default function ImpersonationBanner({
     }
   };
 
+  // A band at the top of the work area rather than a fixed overlay, which
+  // covered the top of every page. Marker yellow with hazard stripes: a state
+  // to notice, not a decoration.
   return (
-    <div className="fixed top-0 start-0 end-0 z-50 bg-yellow-500 text-yellow-900">
-      <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <AlertCircle className="h-4 w-4" />
-          <span className="text-sm font-medium">
+    <div role="status" className="relative isolate overflow-hidden border-b-2 border-border-strong bg-marker text-marker-foreground">
+      <div aria-hidden className="hazard-stripes absolute inset-0 -z-10 opacity-60" />
+      <div className="mx-auto flex w-full max-w-[1760px] flex-wrap items-center justify-between gap-3 px-4 py-2.5 sm:px-6 md:px-8">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          <AlertCircle aria-hidden className="size-4 shrink-0" />
+          <span className="text-caption font-medium">
             {t.rich(organization ? "viewingAsIn" : "viewingAs", {
               name: session?.targetUser?.name || t("unknownUser"),
               org: organization?.name,
               b: (chunks) => <strong>{chunks}</strong>,
             })}
           </span>
-          <span className="text-xs opacity-75">
+          <span className="text-micro opacity-75">
             {t("superAdmin", { name: session?.superAdmin?.name ?? "" })}
           </span>
         </div>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={handleEndImpersonation}
-          disabled={ending}
-          className="bg-yellow-100 hover:bg-yellow-200 text-yellow-900"
-        >
-          {ending ? (
-            <>
-              <Loader2 className="h-3 w-3 me-1 animate-spin" />
-              {t("ending")}
-            </>
-          ) : (
-            <>
-              <LogOut className="h-3 w-3 me-1" />
-              {t("exit")}
-            </>
-          )}
+        <Button size="control" variant="inverse" onClick={handleEndImpersonation} disabled={ending} className="h-9">
+          {ending ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <LogOut aria-hidden className="size-4" />}
+          {ending ? t("ending") : t("exit")}
         </Button>
       </div>
     </div>
