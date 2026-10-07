@@ -5,7 +5,7 @@ export { DealershipWorkingHours } from "./DealershipWorkingHours";
 export { DealershipCarsSection } from "./DealershipCarsSection";
 export { DealershipErrorState } from "./DealershipErrorState";
 export { DealershipDetailPresenter } from "./DealershipDetailPresenter";
-export { OpenStatusBadge } from "./OpenStatusBadge";
+export { OpenStatusBadge } from "@/components/dealership/OpenStatusBadge";
 export { ShareDealershipButton } from "./ShareDealershipButton";
 export { DealershipTabs } from "./DealershipTabs";
 export { DealershipInventoryFilters } from "./DealershipInventoryFilters";

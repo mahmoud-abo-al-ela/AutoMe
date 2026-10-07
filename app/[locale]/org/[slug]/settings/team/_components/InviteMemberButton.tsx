@@ -80,8 +80,8 @@ export default function InviteMemberButton({
 
   if (!canAdd) {
     return (
-      <Button disabled variant="outline" size="sm">
-        <UserPlus className="h-4 w-4 me-2" />
+      <Button disabled variant="outline-strong" size="control" className="h-11">
+        <UserPlus aria-hidden />
         {t("limitReached")}
       </Button>
     );
@@ -90,8 +90,8 @@ export default function InviteMemberButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="cursor-pointer">
-          <UserPlus className="h-4 w-4 me-2" />
+        <Button variant="inverse" size="control" className="h-11">
+          <UserPlus aria-hidden />
           {t("cta")}
         </Button>
       </DialogTrigger>
@@ -130,10 +130,10 @@ export default function InviteMemberButton({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">
+          <Button variant="outline-strong" size="control" className="h-11 border bg-field" onClick={() => setOpen(false)}>
             {tCommon("cancel")}
           </Button>
-          <Button onClick={handleInvite} disabled={loading} className="cursor-pointer">
+          <Button variant="inverse" size="control" className="h-11" onClick={handleInvite} disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
