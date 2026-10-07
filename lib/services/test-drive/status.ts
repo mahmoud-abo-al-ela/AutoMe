@@ -1,6 +1,7 @@
 // Test drive status and listing service functions
 import * as testDriveRepository from "@/lib/repositories/test-drive";
 import * as userRepository from "@/lib/repositories/user";
+import { auditHelpers } from "@/lib/services/audit/audit";
 import {
   AuthenticationError,
   NotFoundError,
@@ -119,7 +120,20 @@ export async function updateTestDriveStatus(
     throw new ValidationError(`Invalid status: ${status}`, "status");
   }
 
-  return await testDriveRepository.updateTestDrive(testDriveId, {
+  const updated = await testDriveRepository.updateTestDrive(testDriveId, {
     status: status.toUpperCase(),
   });
+  await auditHelpers.logTestDriveStatusChanged(
+    {
+      id: testDrive.id,
+      organizationId: testDrive.organizationId,
+      carId: testDrive.carId,
+      date: testDrive.date,
+      startTime: testDrive.startTime,
+      status: status.toUpperCase(),
+    },
+    testDrive.status,
+    { id: user.id, email: user.email },
+  );
+  return updated;
 }

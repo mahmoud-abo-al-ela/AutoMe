@@ -13,6 +13,7 @@ import * as testDriveLogs from "./test-drive";
 import * as membershipLogs from "./membership";
 import * as subscriptionLogs from "./subscription";
 import * as impersonationLogs from "./impersonation";
+import * as settingsLogs from "./settings";
 
 /**
  * Audit log service for tracking all actions in the system
@@ -102,6 +103,7 @@ export const auditHelpers = {
   ...membershipLogs,
   ...subscriptionLogs,
   ...impersonationLogs,
+  ...settingsLogs,
 };
 
 export { getAuditLogs, getAllAuditLogs, cleanupExpiredAuditLogs };

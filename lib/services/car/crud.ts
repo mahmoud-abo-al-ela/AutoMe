@@ -6,9 +6,13 @@ import * as storageService from "@/lib/services/storage";
 import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
+import { auditHelpers } from "@/lib/services/audit/audit";
 import type { CarStatus } from "@/lib/generated/prisma";
 import { licenseMonthToDate } from "@/lib/utils/car-disclosures";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
+
+/** Who the Activity page credits with a change: the database user. */
+const actorOf = (user: { id?: string | null; email?: string | null }) => ({ id: user.id, email: user.email });
 
 /** Either status spelling to the DB enum; a missing status is AVAILABLE. */
 function toCarStatus(status: string | null | undefined): CarStatus {
@@ -100,6 +104,7 @@ export async function createCar(
     images: imageUrls,
   });
 
+  await auditHelpers.logCarCreated({ ...car, organizationId }, actorOf(user));
   return car;
 }
 
@@ -131,7 +136,39 @@ export async function updateCar(
   // stays absent (this is a partial update), rather than becoming AVAILABLE.
   const dataToUpdate: UpdateCarInput = { ...updateData };
 
-  return await carRepository.updateCar(carId, dataToUpdate);
+  const updated = await carRepository.updateCar(carId, dataToUpdate);
+  await auditHelpers.logCarChanged(existingCar, { ...existingCar, ...dataToUpdate }, actorOf(user));
+  return updated;
+}
+
+/**
+ * Change the status or featured flag of several of the organization's cars at
+ * once, from the Cars table's selection. The repository scopes the write by
+ * organization, so a foreign id is skipped rather than trusted; returns how
+ * many cars changed.
+ */
+export async function updateCars(
+  carIds: string[],
+  updateData: UpdateCarInput,
+  userId: string,
+  organizationId: string
+) {
+  const user = await userRepository.findUserByClerkIdWithMemberships(userId);
+  if (!user) {
+    throw new AuthenticationError("User not found");
+  }
+  const isMember = user.memberships?.some((m) => m.organizationId === organizationId);
+  if (!isMember && user.role !== "ADMIN") {
+    throw new AuthorizationError("You don't have access to these cars");
+  }
+
+  const before = await carRepository.findCarsByIds(carIds, organizationId);
+  const changed = await carRepository.updateManyCars(carIds, organizationId, { ...updateData });
+  // One entry per car, so each car's history shows it.
+  await Promise.all(
+    before.flatMap((car) => (car ? [auditHelpers.logCarChanged(car, { ...car, ...updateData }, actorOf(user))] : [])),
+  );
+  return changed;
 }
 
 /**
@@ -158,6 +195,7 @@ export async function deleteCar(
   }
 
   await carRepository.deleteCarById(carId);
+  await auditHelpers.logCarDeleted(car, actorOf(user));
 
   if (car.images && car.images.length > 0) {
     await storageService.deleteCarImages(car.images);
@@ -189,7 +227,9 @@ export async function toggleFeatured(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  return await carRepository.updateCar(carId, { featured: !car.featured });
+  const updated = await carRepository.updateCar(carId, { featured: !car.featured });
+  await auditHelpers.logCarChanged(car, { ...car, featured: !car.featured }, actorOf(user));
+  return updated;
 }
 
 /**
@@ -269,5 +309,19 @@ export async function updateCarFull(
     images: finalImages,
   });
 
+  await auditHelpers.logCarChanged(
+    existingCar,
+    {
+      ...existingCar,
+      make: carData.make,
+      model: carData.model,
+      year: carData.year,
+      price: carData.price,
+      mileage: carData.mileage,
+      status,
+      featured: carData.featured,
+    },
+    actorOf(user),
+  );
   return updatedCar;
 }
