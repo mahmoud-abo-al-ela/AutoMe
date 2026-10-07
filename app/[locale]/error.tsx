@@ -2,13 +2,18 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ErrorScreen, RoadBarrier } from "@/components/brand/ErrorScreen";
 
 // Named for what it is: the root route's error boundary. `global-error.tsx`
 // beside it is the one that replaces the whole document, and both were called
 // GlobalError.
+//
+// It also catches what a layout below it throws — the dealer dashboard's
+// layout included, whose own error page cannot. So inside the dashboard the
+// way out is the dashboard, not the public home page.
 export default function RootRouteError({
   error,
   reset,
@@ -16,32 +21,32 @@ export default function RootRouteError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("common.errorPage");
+  const pathname = usePathname();
+  const dashboard = pathname.match(/^\/org\/([^/]+)/)?.[1];
+
   useEffect(() => {
     console.error("Global Error:", error);
     Sentry.captureException(error);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-          <AlertTriangle className="h-8 w-8 text-red-600" />
-        </div>
-        
-        <h1 className="text-3xl font-bold text-gray-900">Something went wrong</h1>
-        <p className="text-gray-500">
-          We apologize for the inconvenience. An unexpected error has occurred.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Button onClick={() => reset()} variant="default" className="w-full sm:w-auto">
-            Try again
+    <ErrorScreen
+      fullPage
+      art={<RoadBarrier />}
+      title={t("title")}
+      body={dashboard ? t("bodyDashboard") : t("body")}
+      reference={error.digest ? t("reference", { digest: error.digest }) : undefined}
+      actions={
+        <>
+          <Button variant="marker" size="xl" onClick={() => reset()}>
+            {t("retry")}
           </Button>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href="/">Go back home</Link>
-          </Button>
-        </div>
-      </div>
-    </div>
+          <Link href={dashboard ? `/org/${dashboard}/dashboard` : "/"} className={buttonVariants({ variant: "outline-strong", size: "xl" })}>
+            {dashboard ? t("dashboard") : t("home")}
+          </Link>
+        </>
+      }
+    />
   );
 }

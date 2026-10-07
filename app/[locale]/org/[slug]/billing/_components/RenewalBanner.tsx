@@ -2,11 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { AlertTriangle, Clock, CreditCard, Loader2 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useFormatters } from "@/hooks/use-formatters";
 import { planKeyFor } from "@/components/Pricing/pricing-plans";
 import { formatPlanAmount } from "@/lib/utils/currency";
+import { cn } from "@/lib/utils";
 import { useBillingActions } from "./use-billing-actions";
 import type { BillingPaidAhead, BillingRenewal, BillingSubscription } from "./_lib/billing-types";
 
@@ -47,21 +47,7 @@ export default function RenewalBanner({
   const end = subscription.currentPeriodEnd ? date(subscription.currentPeriodEnd, { month: "long" }) : "";
   const days = Math.max(renewal.daysLeft, 0);
 
-  const tone = pastDue
-    ? {
-        box: "border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800",
-        title: "text-red-800 dark:text-red-400",
-        body: "text-red-700 dark:text-red-300",
-        Icon: AlertTriangle,
-        icon: "text-red-600",
-      }
-    : {
-        box: "border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700",
-        title: "text-amber-800 dark:text-amber-400",
-        body: "text-amber-700 dark:text-amber-300",
-        Icon: Clock,
-        icon: "text-amber-600",
-      };
+  const Icon = pastDue ? AlertTriangle : Clock;
 
   const title = pastDue
     ? t("pastDueTitle")
@@ -75,28 +61,25 @@ export default function RenewalBanner({
       : t("dueBody", { amount, period: renewal.billingPeriod });
 
   return (
-    <Alert className={tone.box}>
-      <tone.Icon className={`h-4 w-4 ${tone.icon}`} />
-      <AlertTitle className={`font-semibold ${tone.title}`}>{title}</AlertTitle>
-      <AlertDescription className={tone.body}>
-        <p>{body}</p>
-        {isOwner && (
-          <Button
-            size="sm"
-            variant={pastDue ? "destructive" : "default"}
-            className="mt-2 cursor-pointer"
-            onClick={payNow}
-            disabled={busy !== null}
-          >
-            {busy === "pay" ? (
-              <Loader2 className="h-4 w-4 me-2 animate-spin" />
-            ) : (
-              <CreditCard className="h-4 w-4 me-2" />
-            )}
-            {trialing || pastDue ? t("payNow") : t("renewNow")}
-          </Button>
-        )}
-      </AlertDescription>
-    </Alert>
+    <section
+      aria-live="polite"
+      className={cn(
+        "flex flex-col gap-3 rounded-[20px] border-2 p-4 sm:flex-row sm:items-center sm:gap-5 sm:px-5",
+        pastDue ? "border-destructive bg-destructive-soft" : "border-border-strong bg-[#fff8dd]",
+      )}
+    >
+      <Icon aria-hidden className={cn("size-6 shrink-0", pastDue ? "text-destructive" : "text-[#8a5e00]")} />
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <h2 className={cn("text-body font-extrabold", pastDue && "text-destructive")}>{title}</h2>
+        <p className="text-caption">{body}</p>
+      </div>
+      {isOwner && (
+        // The page's one marker-yellow action, when there is money to pay.
+        <Button variant="marker" size="control" className="h-11 shrink-0" onClick={payNow} disabled={busy !== null}>
+          {busy === "pay" ? <Loader2 aria-hidden className="animate-spin" /> : <CreditCard aria-hidden />}
+          {trialing || pastDue ? t("payNow") : t("renewNow")}
+        </Button>
+      )}
+    </section>
   );
 }

@@ -1,39 +1,29 @@
-import { SkeletonPageHeader, SkeletonFilterBar, SkeletonTable } from "@/components/common/Skeletons";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LedgerSkeleton } from "./_components/ledger/CarsLedger";
 
+/**
+ * The Cars page while it loads, in the page's own shape: title, views,
+ * toolbar, and the table's frame with the same skeleton rows the table uses,
+ * so the page fills in rather than swapping one placeholder for another.
+ */
 export default function CarsLoading() {
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <SkeletonPageHeader className="mb-6 sm:mb-8" />
-      
-      <SkeletonFilterBar />
-      
-      <div className="flex flex-wrap gap-3 mb-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-6 w-24 rounded-full" />
+    <div aria-busy className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2 border-b border-border pb-5">
+        <span className="skeleton-shimmer h-10 w-40 rounded" />
+        <span className="skeleton-shimmer h-4 w-56 rounded" />
+      </div>
+      <div className="flex gap-2 overflow-hidden">
+        {[72, 96, 140, 88, 76].map((width, i) => (
+          <span key={i} className="skeleton-shimmer h-11 shrink-0 rounded-full" style={{ width }} />
         ))}
       </div>
-      
-      <div className="hidden md:block">
-        <SkeletonTable columns={6} rows={5} />
+      <div className="flex flex-wrap items-end gap-3">
+        <span className="skeleton-shimmer h-11 w-full rounded-control sm:max-w-md" />
+        <span className="skeleton-shimmer h-11 w-28 rounded-control" />
+        <span className="skeleton-shimmer ms-auto hidden h-11 w-32 rounded-control sm:block" />
       </div>
-      
-      <div className="md:hidden space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="bg-card border rounded-xl p-4 space-y-4">
-            <div className="flex gap-4">
-              <Skeleton className="h-16 w-24 rounded-md" />
-              <div className="space-y-2 flex-1">
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-6 w-16 rounded-full" />
-              <Skeleton className="h-6 w-20 rounded-full" />
-            </div>
-          </div>
-        ))}
+      <div className="overflow-hidden rounded-sheet border border-border bg-card">
+        <LedgerSkeleton />
       </div>
     </div>
   );

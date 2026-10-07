@@ -6,14 +6,7 @@ import {
 import { notFound } from "next/navigation";
 import { db } from "@/lib/prisma";
 import { getBillingData } from "@/lib/services/billing";
-import BillingHeader from "./_components/BillingHeader";
-import RenewalBanner from "./_components/RenewalBanner";
-import CurrentPlan from "./_components/CurrentPlan";
-import LastPayment from "./_components/LastPayment";
-import PlanComparison from "./_components/PlanComparison";
-import BillingHistory from "./_components/BillingHistory";
-import PaymentHistory from "./_components/PaymentHistory";
-import NonOwnerBillingNotice from "./_components/NonOwnerBillingNotice";
+import { BillingView } from "./_components/BillingView";
 
 /**
  * Get the organization owner's name and email for non-owner contact info
@@ -64,48 +57,17 @@ export default async function BillingPage({
     : null;
 
   return (
-    <div className="space-y-8">
-      <BillingHeader />
-
-      {/* Non-owner notice */}
-      {!isOwner && (
-        <NonOwnerBillingNotice
-          ownerName={owner?.name}
-          ownerEmail={owner?.email}
-        />
-      )}
-
-      <RenewalBanner
-        subscription={subscription}
-        renewal={renewal}
-        paidAhead={paidAhead}
-        isOwner={isOwner}
-        organizationId={organization.id}
-      />
-
-      <CurrentPlan
-        subscription={subscription}
-        paidAhead={paidAhead}
-        usage={usage}
-        isOwner={isOwner}
-        organizationId={organization.id}
-      />
-
-      {isOwner && <LastPayment payment={lastPayment} />}
-
-      {isOwner && (
-        <PlanComparison
-          plans={plans}
-          subscription={subscription}
-          paidAhead={paidAhead}
-          isOwner={isOwner}
-          organizationId={organization.id}
-        />
-      )}
-
-      {isOwner && <PaymentHistory payments={payments} />}
-
-      {isOwner && <BillingHistory organizationId={organization.id} />}
-    </div>
+    <BillingView
+      plans={plans}
+      subscription={subscription}
+      paidAhead={paidAhead}
+      renewal={renewal}
+      usage={usage}
+      payments={payments}
+      lastPayment={lastPayment}
+      isOwner={isOwner}
+      owner={owner}
+      organizationId={organization.id}
+    />
   );
 }

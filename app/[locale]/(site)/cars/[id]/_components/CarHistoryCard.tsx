@@ -1,22 +1,21 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { CheckCircle2, ClipboardList, MinusCircle } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useFormatters } from "@/hooks/use-formatters";
+import { statedDisclosures, type CarDisclosures, type DealershipTerms } from "@/lib/utils/car-disclosures";
 import {
-  DEALERSHIP_TERM_FLAGS,
-  statedDisclosures,
-  type CarDisclosures,
-  type DealershipTerms,
-} from "@/lib/utils/car-disclosures";
+  DealershipTermsList,
+  DisclosureList,
+  hasStatedTerms,
+  type DisclosureLine,
+} from "@/components/dealership/DealershipTermsList";
 
 type Props = {
   car: Partial<CarDisclosures>;
   terms: Partial<DealershipTerms> | undefined;
 };
-
-type Line = { key: string; text: string; positive: boolean };
 
 /**
  * The car's history and the dealership's terms — only what the dealer stated.
@@ -28,7 +27,7 @@ const CarHistoryCard = ({ car, terms = {} }: Props) => {
   const fmt = useFormatters();
   const stated = statedDisclosures(car);
 
-  const carLines: Line[] = [];
+  const carLines: DisclosureLine[] = [];
   if (stated.originalPaint !== undefined) {
     carLines.push({ key: "paint", text: t(stated.originalPaint ? "originalPaint" : "repainted"), positive: !!stated.originalPaint });
   }
@@ -59,26 +58,9 @@ const CarHistoryCard = ({ car, terms = {} }: Props) => {
     carLines.push({ key: "license", text: t("licensedUntil", { month }), positive: true });
   }
 
-  const termLines: Line[] = DEALERSHIP_TERM_FLAGS.filter((flag) => typeof terms[flag] === "boolean").map(
-    (flag) => ({ key: flag, text: t(`terms.${flag}.${terms[flag] ? "yes" : "no"}`), positive: !!terms[flag] })
-  );
+  const showTerms = hasStatedTerms(terms);
 
-  if (carLines.length === 0 && termLines.length === 0) return null;
-
-  const list = (lines: Line[]) => (
-    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {lines.map((line) => (
-        <li key={line.key} className="flex items-start gap-2 text-sm text-muted-foreground">
-          {line.positive ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
-          ) : (
-            <MinusCircle className="mt-0.5 h-4 w-4 shrink-0 text-foreground" aria-hidden />
-          )}
-          {line.text}
-        </li>
-      ))}
-    </ul>
-  );
+  if (carLines.length === 0 && !showTerms) return null;
 
   return (
     <Card className=" border-0 bg-card p-0">
@@ -90,18 +72,12 @@ const CarHistoryCard = ({ car, terms = {} }: Props) => {
           <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">{t("title")}</h3>
         </div>
 
-        {carLines.length > 0 && list(carLines)}
+        {carLines.length > 0 && <DisclosureList lines={carLines} />}
 
-        {termLines.length > 0 && (
+        {showTerms && (
           <div className="space-y-2 border-t pt-4">
             <h4 className="text-sm font-semibold text-foreground">{t("dealershipTerms")}</h4>
-            {list(termLines)}
-            {terms.financingNote && (
-              // The dealer's own words, in whatever language they wrote them.
-              <p dir="auto" className="text-sm text-muted-foreground">
-                {terms.financingNote}
-              </p>
-            )}
+            <DealershipTermsList terms={terms} />
           </div>
         )}
 

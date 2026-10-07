@@ -8,7 +8,7 @@ vi.mock("@/lib/services/super-admin/auth", () => ({ requireSuperAdmin: vi.fn() }
 
 const repo = vi.hoisted(() => ({
   findBuyerQuestions: vi.fn(),
-  countBuyerQuestionsByStatus: vi.fn(),
+  countBuyerQuestionsByView: vi.fn(),
   answerBuyerQuestion: vi.fn(),
   setBuyerQuestionStatus: vi.fn(),
 }));
@@ -39,9 +39,9 @@ beforeEach(() => {
 describe("buyer question actions", () => {
   it("lists the caller's own organization only, whatever the client sends", async () => {
     repo.findBuyerQuestions.mockResolvedValue({ questions: [], total: 45 });
-    repo.countBuyerQuestionsByStatus.mockResolvedValue({ OPEN: 45, ANSWERED: 0, DISMISSED: 0 });
+    repo.countBuyerQuestionsByView.mockResolvedValue({ OPEN: 45, ANSWERED: 0, ALL_CARS: 0, DISMISSED: 0 });
 
-    const response = await getBuyerQuestions({ status: "OPEN", page: 2, organizationId: "org-evil" });
+    const response = await getBuyerQuestions({ view: "OPEN", page: 2, organizationId: "org-evil" });
 
     expect(repo.findBuyerQuestions).toHaveBeenCalledWith("org-1", "OPEN", 2, 20);
     expect(response).toMatchObject({

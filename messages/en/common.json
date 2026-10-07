@@ -84,5 +84,21 @@
     "medianFor": "Median {median} across {comparables} on AutoMe",
     "gaugeLabel": "Price compared with similar cars on AutoMe: {verdict}",
     "unknownDetail": "Fewer than 3 similar cars are on sale right now, so there is no fair median to compare this price with yet."
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "This page couldn’t load just now. Nothing you saved is lost. Try again, or go back to the home page.",
+    "bodyDashboard": "This page couldn’t load just now. Nothing you saved is lost. Try again, or go back to your dashboard.",
+    "bodySection": "This part of the page couldn’t load. Nothing you saved is lost.",
+    "retry": "Try again",
+    "home": "Back to home",
+    "dashboard": "Back to dashboard",
+    "reference": "If it keeps happening, quote this reference: {digest}",
+    "notFound": {
+      "title": "We can’t find that page",
+      "body": "The link may be old, or the page may have moved. Check the address, or carry on from here.",
+      "back": "Go back",
+      "home": "Back to home"
+    }
   }
 }

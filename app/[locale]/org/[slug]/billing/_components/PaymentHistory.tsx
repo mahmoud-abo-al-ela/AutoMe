@@ -1,29 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { FileText, Receipt } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { EmptyState } from "@/components/common/EmptyState";
 import { planKeyFor } from "@/components/Pricing/pricing-plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { formatPlanAmount } from "@/lib/utils/currency";
+import { cn } from "@/lib/utils";
+import { SectionPanel } from "../../_components/SectionPanel";
 import type { BillingPayment } from "./_lib/billing-types";
 
+/** The few most recent payments show; the rest open on request. */
+const SHOWN = 4;
+
 const STATUS_STYLES: Record<BillingPayment["status"], string> = {
-  PAID: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  FAILED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  REFUNDED: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400",
-  PENDING: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-  EXPIRED: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500",
+  PAID: "bg-positive-soft text-positive",
+  FAILED: "bg-destructive-soft text-destructive",
+  REFUNDED: "bg-muted text-muted-foreground",
+  PENDING: "bg-[#fff1c2] text-[#8a5e00]",
+  EXPIRED: "bg-muted text-muted-foreground",
 };
 
 /** The dealership's payments to AutoMe, newest first: paid, failed and refunded. */
 export default function PaymentHistory({ payments }: { payments: BillingPayment[] }) {
   const t = useTranslations("org.billing.payments");
   const tPlans = useTranslations("plans");
-  const { date, locale } = useFormatters();
+  const { date, number, locale } = useFormatters();
+  const [all, setAll] = useState(false);
+  const shown = all ? payments : payments.slice(0, SHOWN);
 
   const planName = (plan: BillingPayment["plan"]) => {
     const key = planKeyFor(plan.type);
@@ -31,56 +34,48 @@ export default function PaymentHistory({ payments }: { payments: BillingPayment[
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          {t("title")}
-        </CardTitle>
-        <CardDescription>{t("subtitle")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {payments.length === 0 ? (
-          <EmptyState variant="inline" icon={Receipt} title={t("emptyTitle")} description={t("emptyBody")} />
-        ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("date")}</TableHead>
-                  <TableHead>{t("description")}</TableHead>
-                  <TableHead>{t("amount")}</TableHead>
-                  <TableHead>{t("status")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="whitespace-nowrap">{date(payment.paidAt ?? payment.createdAt)}</TableCell>
-                    <TableCell>
-                      {t(`purposes.${payment.purpose}`, {
-                        plan: planName(payment.plan),
-                        period: payment.billingPeriod,
-                      })}
-                      {payment.status === "PAID" && payment.periodStart && payment.periodEnd && (
-                        <span className="block text-xs text-muted-foreground">
-                          {t("period", { start: date(payment.periodStart), end: date(payment.periodEnd) })}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-nowrap">
-                      {formatPlanAmount(payment.amountCents, locale)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={STATUS_STYLES[payment.status]}>{t(`statuses.${payment.status}`)}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <SectionPanel title={t("title")}>
+      {payments.length === 0 ? (
+        <p className="text-caption text-muted-foreground">{t("emptyBody")}</p>
+      ) : (
+        <>
+          <ul className="flex flex-col divide-y divide-border">
+            {shown.map((payment) => (
+              <li key={payment.id} className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-body">
+                    {t(`purposes.${payment.purpose}`, { plan: planName(payment.plan), period: payment.billingPeriod })}
+                  </span>
+                  {/* A paid period says what was bought; anything else, when it was tried. */}
+                  <span className="text-caption text-muted-foreground">
+                    {payment.status === "PAID" && payment.periodStart && payment.periodEnd
+                      ? t("period", { start: date(payment.periodStart), end: date(payment.periodEnd) })
+                      : date(payment.paidAt ?? payment.createdAt, { month: "long" })}
+                  </span>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <b className={cn("font-semibold tabular-nums", payment.status !== "PAID" && "text-muted-foreground")}>
+                    {formatPlanAmount(payment.amountCents, locale)}
+                  </b>
+                  <span className={cn("rounded-full px-2 py-px text-micro font-bold", STATUS_STYLES[payment.status])}>
+                    {t(`statuses.${payment.status}`)}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {payments.length > SHOWN && (
+            <button
+              type="button"
+              onClick={() => setAll(!all)}
+              aria-expanded={all}
+              className="mt-3 inline-flex min-h-11 cursor-pointer items-center text-caption font-semibold text-[#1d4e9e] underline-offset-2 hover:underline"
+            >
+              {all ? t("showFewer") : t("showAll", { count: payments.length, value: number(payments.length) })}
+            </button>
+          )}
+        </>
+      )}
+    </SectionPanel>
   );
 }

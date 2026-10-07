@@ -20,7 +20,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { OpenStatusBadge } from "./OpenStatusBadge";
+import { OpenStatusBadge } from "@/components/dealership/OpenStatusBadge";
 import { ShareDealershipButton } from "./ShareDealershipButton";
 import type { DealershipDetail } from "../_lib/detail-types";
 import { telHref } from "@/lib/utils/phone";

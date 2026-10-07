@@ -1,91 +1,45 @@
-import { Building2, Clock, Handshake, Mail, Users } from "lucide-react";
-import React from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import SharedSettingCard, {
-  type SettingsPageLink,
-} from "./_components/SharedSettingCard";
+import { getDealershipInfo, getDealershipTerms, getOrganizationProfile } from "@/actions/settings";
+import { canEditSettings } from "./_lib/can-edit";
+import { StorefrontEditor } from "./_components/storefront/StorefrontEditor";
+import { hoursFromStored, profileFromStored, termsFromStored } from "./_components/storefront/storefront-state";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "org.settings.meta" });
-
   return { title: t("title"), description: t("description") };
 }
 
-const SettingsPage = async ({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) => {
+/** Settings' first tab: the storefront — profile, opening hours and terms — beside its preview. */
+export default async function SettingsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const t = await getTranslations("org.settings");
+  const [profile, hours, terms, canEdit] = await Promise.all([
+    getOrganizationProfile(),
+    getDealershipInfo(),
+    getDealershipTerms(),
+    canEditSettings(slug),
+  ]);
 
-  const settingsPages: SettingsPageLink[] = [
-    {
-      key: "profile",
-      title: t("cards.profile.title"),
-      description: t("cards.profile.description"),
-      icon: Building2,
-      path: `/org/${slug}/settings/profile`,
-      color: "bg-purple-50 text-purple-600",
-    },
-    {
-      key: "workingHours",
-      title: t("cards.workingHours.title"),
-      description: t("cards.workingHours.description"),
-      icon: Clock,
-      path: `/org/${slug}/settings/working-hours`,
-      color: "bg-blue-50 text-blue-600",
-    },
-    {
-      key: "terms",
-      title: t("cards.terms.title"),
-      description: t("cards.terms.description"),
-      icon: Handshake,
-      path: `/org/${slug}/settings/terms`,
-      color: "bg-emerald-50 text-emerald-600",
-    },
-    {
-      key: "weeklySummary",
-      title: t("cards.weeklySummary.title"),
-      description: t("cards.weeklySummary.description"),
-      icon: Mail,
-      path: `/org/${slug}/settings/weekly-summary`,
-      color: "bg-sky-50 text-sky-600",
-    },
-    {
-      key: "team",
-      title: t("cards.team.title"),
-      description: t("cards.team.description"),
-      icon: Users,
-      path: `/org/${slug}/settings/team`,
-      color: "bg-green-50 text-green-600",
-    },
-  ];
+  if (!profile.success || !hours.success || !terms.success) {
+    return (
+      <p role="alert" className="rounded-[20px] border border-border bg-card p-6 text-body">
+        {t("storefront.loadFailed")}
+      </p>
+    );
+  }
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              {t("title")}
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600">
-              {t("subtitle")}
-            </p>
-          </div>
-        </div>
-      </div>
-      <SharedSettingCard settingsPages={settingsPages} cta={t("configure")} />
-    </div>
+    <StorefrontEditor
+      initial={{
+        profile: profileFromStored(profile.data.profile),
+        hours: hoursFromStored(hours.data.workingHours),
+        terms: termsFromStored(terms.data),
+      }}
+      logo={profile.data.profile?.logo ?? null}
+      canEdit={canEdit}
+    />
   );
-};
-
-export default SettingsPage;
+}

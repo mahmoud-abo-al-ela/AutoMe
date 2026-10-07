@@ -43,7 +43,7 @@ type Translate = (
     key: string,
     values?: Record<string, string | number | Date>
 ) => string;
-type FormatNumber = (value: number) => string;
+type FormatNumber = (value: number, options?: Intl.NumberFormatOptions) => string;
 
 /**
  * The form shows the listing text of the dashboard's language only; the other
@@ -75,8 +75,20 @@ const createCarFormSchema = (
     otherLanguageDescribed: boolean,
     maxImages = VALIDATION_RULES.CAR.MAX_IMAGES,
     isEditMode = false
-) =>
-    z.object({
+) => {
+    // An empty number input reaches the schema as NaN (valueAsNumber) or "";
+    // either is the same mistake as an out-of-range value, and says so.
+    const numberField = (message: string) => z.number({ invalid_type_error: message, required_error: message });
+    // Years read as years: "1900", never "1,900".
+    const yearMessage = t("yearInvalid", {
+        min: n(VALIDATION_RULES.CAR.YEAR_MIN, { useGrouping: false }),
+        max: n(VALIDATION_RULES.CAR.YEAR_MAX, { useGrouping: false }),
+    });
+    const priceMessage = t("priceInvalid", { min: n(VALIDATION_RULES.CAR.PRICE_MIN - 1) });
+    const mileageMessage = t("mileageInvalid", { min: n(VALIDATION_RULES.CAR.MILEAGE_MIN) });
+    const seatsMessage = t("seatsInvalid", { min: n(VALIDATION_RULES.CAR.SEATS_MIN), max: n(VALIDATION_RULES.CAR.SEATS_MAX) });
+
+    return z.object({
         // English, generated from make/model/year below; never typed.
         title: z.string().min(1, t("titleRequired")),
         titleAr: z.string().max(200).optional(),
@@ -84,40 +96,17 @@ const createCarFormSchema = (
         descriptionAr: describedIn(t, n, locale === "ar" && !otherLanguageDescribed),
         make: z.string().min(1, t("makeRequired")),
         model: z.string().min(1, t("modelRequired")),
-        year: z
-            .number()
-            .refine(
-                (val) => val >= VALIDATION_RULES.CAR.YEAR_MIN && val <= VALIDATION_RULES.CAR.YEAR_MAX,
-                t("yearInvalid", {
-                    min: n(VALIDATION_RULES.CAR.YEAR_MIN),
-                    max: n(VALIDATION_RULES.CAR.YEAR_MAX),
-                })
-            ),
-        price: z
-            .number()
-            .min(
-                VALIDATION_RULES.CAR.PRICE_MIN,
-                t("priceInvalid", { min: n(VALIDATION_RULES.CAR.PRICE_MIN - 1) })
-            ),
-        mileage: z
-            .number()
-            .min(
-                VALIDATION_RULES.CAR.MILEAGE_MIN,
-                t("mileageInvalid", { min: n(VALIDATION_RULES.CAR.MILEAGE_MIN) })
-            ),
+        year: numberField(yearMessage).refine(
+            (val) => val >= VALIDATION_RULES.CAR.YEAR_MIN && val <= VALIDATION_RULES.CAR.YEAR_MAX,
+            yearMessage
+        ),
+        price: numberField(priceMessage).min(VALIDATION_RULES.CAR.PRICE_MIN, priceMessage),
+        mileage: numberField(mileageMessage).min(VALIDATION_RULES.CAR.MILEAGE_MIN, mileageMessage),
         bodyType: z.string().min(1, t("bodyTypeRequired")),
         fuelType: z.string().min(1, t("fuelTypeRequired")),
         transmission: z.string().min(1, t("transmissionRequired")),
         color: z.string().min(1, t("colorRequired")),
-        seats: z
-            .number()
-            .min(
-                VALIDATION_RULES.CAR.SEATS_MIN,
-                t("seatsInvalid", {
-                    min: n(VALIDATION_RULES.CAR.SEATS_MIN),
-                    max: n(VALIDATION_RULES.CAR.SEATS_MAX),
-                })
-            ),
+        seats: numberField(seatsMessage).min(VALIDATION_RULES.CAR.SEATS_MIN, seatsMessage),
         // Not asked for: a car is where its dealership is. Carried through
         // unchanged so an older car keeps the text it was saved with.
         location: z.string().optional(),
@@ -147,6 +136,7 @@ const createCarFormSchema = (
             .min(VALIDATION_RULES.CAR.MIN_IMAGES, t("imagesRequired"))
             .max(maxImages, t("imagesTooMany", { max: n(maxImages) })),
     });
+};
 
 /** The form's validated shape, inferred from the schema factory. */
 export type CarFormValues = z.infer<ReturnType<typeof createCarFormSchema>>;
@@ -160,14 +150,21 @@ export type CarFormInitialData = Partial<
   Record<keyof CarFormValues, unknown>
 >;
 
-/** Section ids, in order. The labels live in `org.carForm.sections`, keyed by
- * id, so the stepper and the section headings read one source. */
-const formSections = [
-    { id: "basic" },
-    { id: "specs" },
-    { id: "details" },
-    { id: "status" },
-] as const;
+/**
+ * The editor's steps, in order (canvas: Car editor — round 1, B · Guided
+ * steps), and the fields each one asks for. A step's fields are what it
+ * validates before moving on, and where a failed save sends the dealer back
+ * to. The labels live in `org.carForm.editor.steps`, keyed by id.
+ */
+export const CAR_STEPS = ["photos", "car", "history", "publish"] as const;
+export type CarStep = (typeof CAR_STEPS)[number];
+
+const stepFields = (locale: Locale): Record<CarStep, (keyof CarFormValues)[]> => ({
+    photos: ["images"],
+    car: ["make", "model", "year", "title", "mileage", "bodyType", "fuelType", "transmission", "color", "seats", "features", "featuresAr"],
+    history: ["originalPaint", "accidentFree", "ownerCount", "serviceHistory", "licenseValidUntil"],
+    publish: ["price", "priceNegotiable", "titleAr", locale === "ar" ? "descriptionAr" : "description", "status", "featured"],
+});
 
 export const useCarForm = (
     initialData: CarFormInitialData = {},
@@ -175,7 +172,9 @@ export const useCarForm = (
     isEditMode = false,
     carId: string | null = null
 ) => {
-    const [currentSection, setCurrentSection] = useState("basic");
+    const [currentStep, setCurrentStep] = useState<CarStep>("photos");
+    // The furthest step reached: a new car cannot skip ahead of what it has filled in.
+    const [reached, setReached] = useState(isEditMode ? CAR_STEPS.length - 1 : 0);
     const router = useRouter();
     // From the route, not by position in the URL: the path now starts with a
     // locale (/ar/org/<slug>/...), and splitting it took "org" as the slug.
@@ -222,7 +221,7 @@ export const useCarForm = (
             model: initialData.model || "",
             year: initialData.year || "",
             price: initialData.price || "",
-            mileage: initialData.mileage || "",
+            mileage: initialData.mileage || 0, // 0 km to start: a field left alone is valid, not an error.
             bodyType: initialData.bodyType || "",
             fuelType: initialData.fuelType || "",
             transmission: initialData.transmission || "",
@@ -326,64 +325,38 @@ export const useCarForm = (
         }
     }, [initialData, form]);
 
-    const validateSection = async (sectionId: string) => {
-        let isValid = true;
+    const fieldsOf = stepFields(locale);
 
-        if (sectionId === "basic") {
-            const titleValue = form.getValues("title");
-            if (!titleValue || titleValue.trim() === "") {
-                form.setValue("title", "", { shouldValidate: true });
-            }
-            isValid = await form.trigger([
-                "make",
-                "model",
-                "year",
-                "title",
-                "price",
-                "mileage",
-            ]);
-        } else if (sectionId === "specs") {
-            isValid = await form.trigger([
-                "bodyType",
-                "fuelType",
-                "transmission",
-                "color",
-                "seats",
-            ]);
-        } else if (sectionId === "details") {
-            // The description on screen is the dashboard language's one.
-            isValid = await form.trigger([
-                locale === "ar" ? "descriptionAr" : "description",
-                "images",
-            ]);
-        }
-
-        return isValid;
-    };
-
+    /** Check this step, then go on; a step that fails stays put with its errors showing. */
     const handleNext = async () => {
-        const currentIndex = formSections.findIndex((s) => s.id === currentSection);
-
-        if (await validateSection(currentSection)) {
-            if (currentIndex < formSections.length - 1) {
-                setCurrentSection(formSections[currentIndex + 1].id);
-            }
-        } else {
-            toast.error(tForm("validationToastTitle"), {
-                description: tForm("validationToastBody"),
-                className: "text-sm",
-            });
+        const index = CAR_STEPS.indexOf(currentStep);
+        if (!(await form.trigger(fieldsOf[currentStep]))) return false;
+        if (index < CAR_STEPS.length - 1) {
+            setCurrentStep(CAR_STEPS[index + 1]);
+            setReached((current) => Math.max(current, index + 1));
         }
+        return true;
     };
 
     const handlePrevious = () => {
-        const currentIndex = formSections.findIndex((s) => s.id === currentSection);
-        if (currentIndex > 0) {
-            setCurrentSection(formSections[currentIndex - 1].id);
-        }
+        const index = CAR_STEPS.indexOf(currentStep);
+        if (index > 0) setCurrentStep(CAR_STEPS[index - 1]);
     };
 
-    const onSubmit = async (data: CarFormValues) => {
+    /** Jump from the rail: any step when editing, one already reached when adding. */
+    const goTo = (step: CarStep) => {
+        if (CAR_STEPS.indexOf(step) <= reached) setCurrentStep(step);
+    };
+
+    /** A save that fails validation opens the first step holding an error. */
+    const onInvalid = (errors: Partial<Record<keyof CarFormValues, unknown>>) => {
+        const failed = CAR_STEPS.find((step) => fieldsOf[step].some((field) => field in errors));
+        if (failed) setCurrentStep(failed);
+        toast.error(tForm("validationToastTitle"), { description: tForm("validationToastBody") });
+    };
+
+    /** Saves the car; true when it saved, so the caller can let go of its draft. */
+    const onSubmit = async (data: CarFormValues): Promise<boolean> => {
         // Defensive only: the schema already transforms a comma-separated
         // `features` string into an array, so by here it never is one.
         const rawFeatures: unknown = data.features;
@@ -424,26 +397,35 @@ export const useCarForm = (
                 toast.info(tForm("translationSkipped", { other: locale === "ar" ? "en" : "ar" }));
             }
             router.push(`/org/${slug}/cars`);
-        } else {
-            toast.error(
-                actionError(
-                    response?.error,
-                    isEditMode ? tForm("updateFailed") : tForm("addFailed")
-                )
-            );
+            return true;
         }
+        toast.error(
+            actionError(
+                response?.error,
+                isEditMode ? tForm("updateFailed") : tForm("addFailed")
+            )
+        );
+        return false;
     };
 
+    /** Reopen a saved draft on the step it was left at — or a fresh one at the start. */
+    const resume = (step: CarStep, furthest: number) => {
+        setCurrentStep(step);
+        setReached(isEditMode ? CAR_STEPS.length - 1 : furthest);
+    };
 
     return {
         form,
-        currentSection,
-        formSections,
+        currentStep,
+        reached,
         loading,
         handlers: {
             handleNext,
             handlePrevious,
+            goTo,
+            resume,
             onSubmit,
+            onInvalid,
         },
     };
 };

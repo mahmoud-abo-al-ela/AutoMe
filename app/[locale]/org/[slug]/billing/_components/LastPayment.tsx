@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { CreditCard, ShieldCheck, Smartphone } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormatters } from "@/hooks/use-formatters";
+import { SectionPanel } from "../../_components/SectionPanel";
 import type { BillingPayment } from "./_lib/billing-types";
 
 /**
- * How the dealership last paid. There is no card on file to manage: each
- * payment is made on Paymob's page, so this only reports the last one.
+ * How the dealership pays. There is no card on file to manage: each payment
+ * is made on Paymob's page, so this reports how the last one was made.
  */
 export default function LastPayment({ payment }: { payment: BillingPayment | null }) {
   const t = useTranslations("org.billing.payment");
@@ -21,37 +21,26 @@ export default function LastPayment({ payment }: { payment: BillingPayment | nul
   const how = wallet ? t("wallet") : last4 ? t("card", { last4 }) : t("other");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
-          {t("title")}
-        </CardTitle>
-        <CardDescription>{t("subtitle")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-16 items-center justify-center rounded-lg border bg-muted/40">
-              <Icon className="h-6 w-6 text-muted-foreground" />
-            </div>
-            {payment?.paidAt ? (
-              <div>
-                <p className="text-sm font-medium">{how}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("lastPaid", { date: date(payment.paidAt, { month: "long" }) })}
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t("none")}</p>
-            )}
+    <SectionPanel title={t("title")}>
+      <div className="flex flex-col gap-3">
+        {payment?.paidAt ? (
+          <div className="flex items-center gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-control border border-border bg-background">
+              <Icon aria-hidden className="size-5 text-muted-foreground" />
+            </span>
+            <span className="flex flex-col">
+              <span className="font-semibold">{how}</span>
+              <span className="text-caption text-muted-foreground">{t("lastPaid", { date: date(payment.paidAt, { month: "long" }) })}</span>
+            </span>
           </div>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 text-green-600" />
-            {t("securedBy")}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+        ) : (
+          <p className="text-caption text-muted-foreground">{t("none")}</p>
+        )}
+        <p className="flex items-start gap-2 text-caption text-muted-foreground">
+          <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-positive" />
+          {t("subtitle")}
+        </p>
+      </div>
+    </SectionPanel>
   );
 }

@@ -25,7 +25,7 @@ export const updateOrganizationProfile = withOrgAuth(async (ctx, payload: unknow
     ctx.organization.id
   );
 
-  revalidateLocalized(`/org/${ctx.organization.slug}/settings/profile`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings`);
   revalidateLocalized(`/dealerships/${ctx.organization.slug}`);
   revalidateLocalized("/dealerships");
   revalidateLocalized("/cars");
@@ -48,7 +48,7 @@ export const updateDealershipTerms = withOrgAuth(async (ctx, payload: unknown) =
   );
 
   // Shown on every one of the dealership's listings, and cited by the assistant.
-  revalidateLocalized(`/org/${ctx.organization.slug}/settings/terms`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings`);
   revalidateLocalized(`/dealerships/${ctx.organization.slug}`);
   // Every car page shows its dealership's terms.
   revalidateRouteTree("/[locale]/(site)/cars");
@@ -81,7 +81,9 @@ export const updateWorkingHours = withOrgAuth(
   async (ctx, workingHours: WorkingHourInput[]) => {
   await dealershipService.updateWorkingHours(workingHours, ctx.userId, ctx.organization.id);
 
-  revalidateLocalized(`/org/${ctx.organization.slug}/settings/working-hours`);
+  revalidateLocalized(`/org/${ctx.organization.slug}/settings`);
+  // The public page shows the hours and whether the dealership is open now.
+  revalidateLocalized(`/dealerships/${ctx.organization.slug}`);
   revalidateLocalized("/");
 
   return createSuccessResponse(null, "Working hours updated successfully");

@@ -9,6 +9,21 @@ import type {
   OrganizationProfileInput,
 } from "@/lib/validations/schemas";
 import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
+import { auditHelpers } from "@/lib/services/audit/audit";
+
+/** The profile fields the Activity page names when they change. */
+const PROFILE_FIELDS = ["name", "phone", "email", "website", "address", "description", "region", "city"] as const;
+
+/** Opening hours as one value per day — "10:00-21:00" or "closed" — so a change reads day by day. */
+function hoursByDay(rows: { dayOfWeek: string[] | string; openTime?: string | null; closeTime?: string | null; isOpen?: boolean | null }[]) {
+  const days: Record<string, string> = {};
+  for (const row of rows) {
+    for (const day of Array.isArray(row.dayOfWeek) ? row.dayOfWeek : [row.dayOfWeek]) {
+      days[day] = row.isOpen ? `${row.openTime ?? ""}-${row.closeTime ?? ""}` : "closed";
+    }
+  }
+  return days;
+}
 
 async function getAuthorizedUser(
   userId: string,
@@ -53,8 +68,20 @@ export async function updateOrganizationProfile(
   userId: string,
   organizationId: string
 ) {
-  await getAuthorizedUser(userId, organizationId, true);
-  return dealershipRepository.updateOrganizationProfile(organizationId, profileData);
+  const user = await getAuthorizedUser(userId, organizationId, true);
+  const before = await dealershipRepository.findOrganizationProfile(organizationId);
+  const updated = await dealershipRepository.updateOrganizationProfile(organizationId, profileData);
+  const pick = (record: Record<string, unknown> | null | undefined) =>
+    Object.fromEntries(PROFILE_FIELDS.map((field) => [field, record?.[field] || null]));
+  await auditHelpers.logSettingsChanged({
+    action: "ORG_UPDATED",
+    entityType: "ORGANIZATION",
+    organizationId,
+    before: pick(before),
+    after: pick(updated as Record<string, unknown>),
+    actor: { id: user.id, email: user.email },
+  });
+  return updated;
 }
 
 /**
@@ -87,12 +114,22 @@ export async function updateDealershipTerms(
   userId: string,
   organizationId: string
 ) {
-  await getAuthorizedUser(userId, organizationId, true);
-  return dealershipRepository.updateDealershipTerms(organizationId, {
+  const user = await getAuthorizedUser(userId, organizationId, true);
+  const before = await dealershipRepository.findDealershipTerms(organizationId);
+  const updated = await dealershipRepository.updateDealershipTerms(organizationId, {
     ...terms,
     // A note only means something beside "offers financing: yes".
     financingNote: terms.offersFinancing ? terms.financingNote || null : null,
   });
+  await auditHelpers.logSettingsChanged({
+    action: "ORG_SETTINGS_UPDATED",
+    entityType: "ORGANIZATION",
+    organizationId,
+    before: { ...before },
+    after: { ...updated },
+    actor: { id: user.id, email: user.email },
+  });
+  return updated;
 }
 
 /**
@@ -136,5 +173,14 @@ export async function updateWorkingHours(
     throw new AuthorizationError("Only organization owners can update working hours");
   }
 
+  const before = await workingHoursRepository.findWorkingHours(organizationId);
   await workingHoursRepository.updateWorkingHours(organizationId, workingHours);
+  await auditHelpers.logSettingsChanged({
+    action: "WORKING_HOURS_UPDATED",
+    entityType: "WORKING_HOURS",
+    organizationId,
+    before: hoursByDay(before),
+    after: hoursByDay(workingHours),
+    actor: { id: user.id, email: user.email },
+  });
 }

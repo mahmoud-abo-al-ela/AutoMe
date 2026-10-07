@@ -18,7 +18,7 @@
   "results": {
     "sortLabel": "ترتيب النتائج",
     "sortPlaceholder": "الترتيب حسب",
-    "count": "{count, plural, one {عربية واحدة} two {عربيتان} few {{value} عربيات} other {{value} عربية}}"
+    "count": "{count, plural, one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}"
   },
   "sort": {
     "newest": "الأحدث أولًا",
@@ -81,11 +81,11 @@
     "errorTitle": "حدث خطأ ما",
     "errorBody": "تعذّر تحميل السيارات في الوقت الحالي. من فضلك حاول مرة أخرى.",
     "retry": "إعادة المحاولة",
-    "filteredEmptyTitle": "لا توجد عربيات تطابق كل الفلاتر دي",
-    "filteredEmptyBody": "شيل فلتر أو وسّع نطاق السعر — الأرقام جنب كل اختيار بتوضح المتاح.",
+    "filteredEmptyTitle": "لا توجد سيارات تطابق كل هذه الفلاتر",
+    "filteredEmptyBody": "أزل أحد الفلاتر أو وسّع نطاق السعر — توضح الأرقام بجانب كل خيار ما هو متاح.",
     "emptyTitle": "لا توجد سيارات معروضة بعد",
     "emptyBody": "لا توجد سيارات متاحة في الوقت الحالي. من فضلك عاود الزيارة قريبًا.",
-    "browseAll": "تصفح كل العربيات"
+    "browseAll": "تصفح كل السيارات"
   },
   "compare": {
     "selected": "{count, plural, one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}} للمقارنة",
@@ -95,11 +95,11 @@
     "clear": "مسح المقارنة"
   },
   "browse": {
-    "title": "تصفح العربيات"
+    "title": "تصفح السيارات"
   },
   "readout": {
-    "label": "السوق دلوقتي",
-    "live": "{count, plural, one {عربية واحدة معروضة} two {عربيتان معروضتان} few {{value} عربيات معروضة} other {{value} عربية معروضة}}",
+    "label": "السوق الآن",
+    "live": "{count, plural, one {سيارة واحدة معروضة} two {سيارتان معروضتان} few {{value} سيارات معروضة} many {{value} سيارة معروضة} other {{value} سيارة معروضة}}",
     "median": "متوسط السعر {price}",
     "dealers": "{count, plural, one {معرض واحد} two {معرضان} few {{value} معارض} other {{value} معرض}}",
     "cities": "{count, plural, one {مدينة واحدة} two {مدينتان} few {{value} مدن} other {{value} مدينة}}",
@@ -115,6 +115,6 @@
     "fuel": "الوقود",
     "gearbox": "ناقل الحركة",
     "body": "الهيكل",
-    "viewCar": "عرض العربية"
+    "viewCar": "عرض السيارة"
   }
 }

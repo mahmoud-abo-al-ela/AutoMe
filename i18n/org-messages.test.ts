@@ -10,7 +10,6 @@ import arOnboarding from "@/messages/ar/onboarding.json";
 import enPlans from "@/messages/en/plans.json";
 import arPlans from "@/messages/ar/plans.json";
 import { planFeatureKeys } from "@/components/Pricing/pricing-plans";
-import { getAllFeatureKeys } from "@/app/[locale]/org/[slug]/billing/_components/_lib/plan-display";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import {
   BODY_TYPES,
@@ -53,16 +52,15 @@ describe("org messages", () => {
     // bracket direction is the renderer's job.
     const NOT_LANGUAGE = new Set([
       "settings.team.invite.emailPlaceholder",
-      "billing.current.defaultPlan",
-      "billing.plans.priceWithPeriod",
       "billing.payments.period",
-      "dashboard.funnel.share",
-      "dashboard.inventory.legend",
-      "cars.pagination.showingShort",
-      "carForm.form.step",
-      "testDrives.table.timeRange",
-      "auditLogs.retention.withPlan",
-      "auditLogs.filters.dateRange",
+      "dashboard.today.helloNoName",
+      // The mark on fields the AI filled reads "AI" in both languages, as the
+      // rest of the Arabic interface writes it; and a product's own name.
+      "carForm.editor.ai.chip",
+      "carForm.editor.features.suggestions.7",
+      // The brand name, and the fallback sentence for an unknown action, which is only placeholders.
+      "auditLogs.system",
+      "auditLogs.sentences.other",
       // Sample Arabic text shown inside the Arabic-only listing fields. The
       // placeholder demonstrates what to type, so it is Arabic regardless of
       // which language the dealer runs the dashboard in — identical in both
@@ -127,20 +125,20 @@ describe("dashboard messages cover every series the charts render", () => {
   // The chart configs name their series by key. A series added to a chart
   // without its label renders the raw key in the legend, which no type check
   // catches.
-  it.each(["en", "ar"] as const)("names every overview series in %s", (locale) => {
+  it.each(["en", "ar"] as const)("names every test-drive series in %s", (locale) => {
     const messages = locale === "en" ? enOrg : arOrg;
 
-    for (const series of ["users", "cars", "testDrives"]) {
-      expect(at(messages, `dashboard.overview.series.${series}`)).toBeTruthy();
+    for (const series of ["requested", "completed"]) {
+      expect(at(messages, `dashboard.today.chart.${series}`)).toBeTruthy();
     }
   });
 
-  it.each(["en", "ar"] as const)("names every time range in %s", (locale) => {
+  it.each(["en", "ar"] as const)("names every Insights period, funnel step and stock status in %s", (locale) => {
     const messages = locale === "en" ? enOrg : arOrg;
 
-    for (const range of ["last7", "last14", "last30", "last90"]) {
-      expect(at(messages, `dashboard.ranges.${range}`)).toBeTruthy();
-    }
+    for (const period of ["d7", "d30", "d90"]) expect(at(messages, `insights.period.${period}`)).toBeTruthy();
+    for (const step of ["saved", "requested", "drove"]) expect(at(messages, `insights.funnel.${step}`)).toBeTruthy();
+    for (const status of ["AVAILABLE", "SOLD", "UNAVAILABLE"]) expect(at(messages, `insights.stock.${status}`)).toBeTruthy();
   });
 
   it.each(["en", "ar"] as const)("names every car status in %s", (locale) => {
@@ -336,16 +334,5 @@ describe("billing reads the shared plan source", () => {
     expect(assistant({ enabled: true, limit: 20 })).toEqual({ key: "aiAssistantUnlimited", included: true });
     expect(assistant({ enabled: true })).toEqual({ key: "aiAssistantUnlimited", included: true });
     expect(assistant({ enabled: false })).toEqual({ key: "aiAssistant", included: false });
-  });
-
-  it("gives the comparison table one row per feature key", () => {
-    // Rows used to be keyed by the rendered name, so the row set changed with
-    // the reader's language.
-    const rows = getAllFeatureKeys(PLANS);
-    const keys = rows.map((row) => row.key);
-
-    expect(new Set(keys).size).toBe(keys.length);
-    expect(keys).toContain("carListings");
-    expect(keys).toContain("aiProcessing");
   });
 });

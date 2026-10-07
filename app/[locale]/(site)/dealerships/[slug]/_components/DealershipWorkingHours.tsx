@@ -5,7 +5,7 @@ import { Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { TimeRange } from "@/components/common/TimeRange";
-import { useOpenStatusMessage } from "./OpenStatusBadge";
+import { useOpenStatusMessage } from "@/components/dealership/OpenStatusBadge";
 import { getOpenStatus } from "@/lib/utils/open-status";
 import { cairoNow } from "@/lib/utils/datetime";
 import type { DayOfWeek } from "@/lib/generated/prisma";
