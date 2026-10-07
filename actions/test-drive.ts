@@ -15,6 +15,7 @@ import {
 import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 import { isDateString } from "@/lib/utils/date-only";
 import { displayNameFor } from "@/lib/utils/userHelpers";
+import { cairoNow } from "@/lib/utils/datetime";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
 import { db } from "@/lib/prisma";
@@ -217,7 +218,14 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
     });
 
     const recipient = fullTestDrive?.user?.email;
-    if (fullTestDrive && fullTestDrive.user && recipient) {
+    // Cancelling a drive whose time has already passed is the dealer recording
+    // that the buyer never came — not news for the buyer, so no email.
+    const now = cairoNow();
+    const slotDate = fullTestDrive?.date.toISOString().slice(0, 10) ?? "";
+    const alreadyOver =
+      !!fullTestDrive && (slotDate < now.date || (slotDate === now.date && fullTestDrive.endTime <= now.time));
+    const tellBuyer = !(status === "CANCELLED" && alreadyOver);
+    if (fullTestDrive && fullTestDrive.user && recipient && tellBuyer) {
       const car = fullTestDrive.car;
       const user = fullTestDrive.user;
       sendTestDriveStatusUpdateEmail({
