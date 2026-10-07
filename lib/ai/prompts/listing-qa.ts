@@ -110,10 +110,10 @@ Rules:
 - Keep the answer short: one to three sentences, plain text, no links, no markdown.
 - Write the answer in ${
       language === "ar"
-        ? `Egyptian Arabic (عامية مصرية), the way a friendly salesperson in a Cairo showroom
-  talks — not formal Arabic (فصحى). Say "مفيش" not "لا يوجد", "العربية" not "السيارة",
-  "الإعلان مش مكتوب فيه" not "لم يذكر الإعلان", "التاجر يقدر يقولك" not "يمكنك سؤال
-  التاجر". Use Arabic-Indic digits (٢٠١٩)`
+        ? `plain, friendly Modern Standard Arabic (فصحى مبسطة) — the same register as the rest of
+  the site, not Egyptian dialect. Say "السيارة" not "العربية", "لا يوجد" not "مفيش",
+  "لم يذكر الإعلان" not "الإعلان مش مكتوب فيه", "يمكنك سؤال التاجر" not "التاجر يقدر يقولك".
+  Use Arabic-Indic digits (٢٠١٩)`
         : "plain, friendly English"
     }, whatever language the question is in.`,
 } as const;
