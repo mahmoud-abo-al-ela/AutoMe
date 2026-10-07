@@ -7,6 +7,7 @@ import { coachListing, translateListing, type ListingText, type ListingToCoach }
 import { reviewListing, type ListingIssueCode } from "@/lib/services/car/listing-quality";
 import { aiCallerFor } from "@/lib/ai/caller";
 import { refreshImageAlts } from "@/lib/services/car/image-alts";
+import { marketPricesFor, toMarketPosition } from "@/lib/services/car/market-price";
 import { claimAiUsageForCar } from "@/lib/services/car/ai-allowance";
 import {
   applyTranslation,
@@ -22,6 +23,7 @@ import { validateAction } from "@/lib/middleware/with-validation";
 import {
   carSchema,
   listingReviewSchema,
+  priceComparisonSchema,
   updateCarSchema,
   updateCarFullSchema,
 } from "@/lib/validations/schemas";
@@ -149,28 +151,6 @@ export const addCar = withOrgAuth(
   )
 );
 
-export const getCars = withOrgAuth(
-  async (
-    ctx,
-    search: string = "",
-    status: string = "all",
-    page: number = 1,
-    limit: number = 10
-  ) => {
-  const filters = {
-    search: search || undefined,
-    status: status === "all" ? undefined : status.toUpperCase(),
-    onlyAvailable: false,
-  };
-
-  const result = await carService.getCars(filters, { page, limit }, ctx.userId, ctx.organization.id);
-
-  return createSuccessResponse({
-    data: result.cars,
-    pagination: result.pagination,
-  });
-});
-
 export const deleteCar = withOrgAuth(async (ctx, carId: string) => {
   await carService.deleteCar(carId, ctx.userId, ctx.organization.id);
 
@@ -297,4 +277,15 @@ export const reviewListingQuality = withOrgAuth(async (ctx, input: unknown) => {
       advice: adviceByCode[issue.code] ?? null,
     })),
   });
+});
+
+/**
+ * Where a price being typed into the editor sits among similar cars on
+ * AutoMe — the public fair-price gauge's own comparison, so the editor and
+ * the listing never disagree. null when too few similar cars are on sale.
+ */
+export const comparePrice = withOrgAuth(async (_ctx, input: unknown) => {
+  const { carId, ...car } = validateAction(priceComparisonSchema, input);
+  const prices = await marketPricesFor({ id: carId ?? "", priceCurrency: "EGP", ...car });
+  return createSuccessResponse(prices ? toMarketPosition(prices) : null);
 });
