@@ -11,6 +11,10 @@ const alias = { "@": root };
 // `jsdom`. Split into two projects so each gets the right environment without a
 // per-file pragma. DB-backed suites still run in `node` and gate themselves on
 // TEST_DATABASE_URL (see test/db.js).
+// tsconfig keeps "jsx": "preserve" for Next; a .test.tsx needs the transform
+// done here instead, with React's automatic runtime as the app uses.
+const oxc = { jsx: { runtime: "automatic" } };
+
 const sharedExclude = [
   "node_modules/**",
   ".next/**",
@@ -24,6 +28,7 @@ export default defineConfig({
     projects: [
       {
         resolve: { alias },
+        oxc,
         test: {
           name: "node",
           environment: "node",
@@ -39,6 +44,7 @@ export default defineConfig({
       },
       {
         resolve: { alias },
+        oxc,
         test: {
           name: "jsdom",
           environment: "jsdom",

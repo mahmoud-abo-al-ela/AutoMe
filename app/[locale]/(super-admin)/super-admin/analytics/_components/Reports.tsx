@@ -9,18 +9,11 @@ import { findGovernorate } from "@/lib/locations/data";
 import { cn } from "@/lib/utils";
 import { STALE_AFTER_DAYS, type AnalyticsPeriod } from "@/lib/services/super-admin/analytics-options";
 import type { AnalyticsData } from "@/lib/services/super-admin/analytics";
-import { Bars, Change, Panel, Stat } from "./report-parts";
+import { AssistantQuality } from "./AssistantQuality";
+import { Bars, Change, Panel, Stat, link, td, th, usePercent } from "./report-parts";
 
 type Of<R extends AnalyticsData["report"]> = Extract<AnalyticsData, { report: R }>;
 
-const th = "px-3 py-3 text-center font-semibold first:ps-5 first:text-start";
-const td = "px-3 py-3 text-center tabular-nums first:ps-5 first:text-start";
-const link = "font-semibold text-[#1d4e9e] underline-offset-2 hover:underline";
-
-function usePercent() {
-  const fmt = useFormatters();
-  return (part: number, whole: number) => (whole > 0 ? fmt.number(part / whole, { style: "percent", maximumFractionDigits: 0 }) : "—");
-}
 
 function useRegionName() {
   const locale = useLocale();
@@ -358,6 +351,8 @@ export function AiReport({ data }: { data: Of<"ai"> }) {
           />
         </Panel>
       </div>
+
+      <AssistantQuality data={data.assistant} />
     </div>
   );
 }

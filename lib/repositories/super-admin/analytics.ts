@@ -1,5 +1,5 @@
 import { db } from "@/lib/prisma";
-import type { Prisma, TestDriveStatus } from "@/lib/generated/prisma";
+import type { AssistantOutcome, Prisma, TestDriveStatus } from "@/lib/generated/prisma";
 
 /**
  * Data access for the super-admin Analytics page. Every count takes a window
@@ -185,3 +185,66 @@ export async function findAiLatency(w: Window) {
   `;
   return { p50: row?.p50 == null ? null : Math.round(row.p50), p95: row?.p95 == null ? null : Math.round(row.p95) };
 }
+
+// ---------- The listing assistant's quality ----------
+// Every reply is an AssistantAnswer row, so these are counts, not estimates.
+// Ratings are counted against the window the answer was given in.
+
+/** Replies in the window, by what the assistant did. */
+export async function countAssistantReplies(w: Window) {
+  const rows = await db.assistantAnswer.groupBy({ by: ["outcome"], where: { createdAt: inWindow(w) }, _count: { _all: true } });
+  const count = (outcome: AssistantOutcome) => rows.find((row) => row.outcome === outcome)?._count._all ?? 0;
+  return { answered: count("ANSWERED"), declined: count("DECLINED"), offTopic: count("OFF_TOPIC") };
+}
+
+/** How buyers rated the window's answers. */
+export async function countAssistantRatings(w: Window) {
+  const rows = await db.assistantAnswer.groupBy({
+    by: ["helpful"],
+    where: { createdAt: inWindow(w), outcome: "ANSWERED", helpful: { not: null } },
+    _count: { _all: true },
+  });
+  const count = (helpful: boolean) => rows.find((row) => row.helpful === helpful)?._count._all ?? 0;
+  return { helpful: count(true), unhelpful: count(false) };
+}
+
+/**
+ * The window's answers by the model and prompt version that wrote them, with
+ * their ratings — what tells a prompt change or a fallback model apart. Rows
+ * from before provenance was kept have neither, and group together.
+ */
+export async function findAssistantQualityByModel(w: Window) {
+  const rows = await db.assistantAnswer.groupBy({
+    by: ["model", "promptVersion", "helpful"],
+    where: { createdAt: inWindow(w), outcome: "ANSWERED" },
+    _count: { _all: true },
+  });
+  const groups = new Map<string, { model: string | null; promptVersion: string | null; answers: number; rated: number; helpful: number }>();
+  for (const row of rows) {
+    const key = `${row.model}\0${row.promptVersion}`;
+    const group = groups.get(key) ?? { model: row.model, promptVersion: row.promptVersion, answers: 0, rated: 0, helpful: 0 };
+    group.answers += row._count._all;
+    if (row.helpful !== null) group.rated += row._count._all;
+    if (row.helpful === true) group.helpful += row._count._all;
+    groups.set(key, group);
+  }
+  return [...groups.values()].sort((a, b) => b.answers - a.answers);
+}
+
+/** The latest answers buyers marked unhelpful, with what wrote them. */
+export const findUnhelpfulAnswers = (w: Window, take: number) =>
+  db.assistantAnswer.findMany({
+    where: { createdAt: inWindow(w), outcome: "ANSWERED", helpful: false },
+    orderBy: { ratedAt: "desc" },
+    take,
+    select: {
+      id: true,
+      carId: true,
+      question: true,
+      answer: true,
+      model: true,
+      promptVersion: true,
+      ratedAt: true,
+      organization: { select: { name: true } },
+    },
+  });
