@@ -5,3 +5,4 @@ export * from "./queries";
 export * from "./mutations";
 export * from "./terms";
 export * from "./email-preferences";
+export * from "./profile-text";

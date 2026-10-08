@@ -19,6 +19,13 @@ export type DealershipCarFilterOptions = PayloadOf<
   ReturnType<typeof getDealershipCarFilters>
 >;
 
+/** The page's three tabs; also the `?tab=` value, so a tab can be linked to. */
+export const DEALERSHIP_TABS = ["cars", "reviews", "about"] as const;
+export type DealershipTab = (typeof DEALERSHIP_TABS)[number];
+
+/** Cars per page: three rows of the three-up grid. */
+export const DEALERSHIP_CARS_PER_PAGE = 9;
+
 /** The inventory filter state the detail page keeps in React state. */
 export interface DealershipInventoryFilterState {
   search?: string;

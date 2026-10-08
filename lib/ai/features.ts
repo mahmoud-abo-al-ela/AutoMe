@@ -14,6 +14,15 @@ export const AI_FEATURES = {
    * and search, not the dealer, who never asked for it.
    */
   carImageAltText: "carImageAltText",
+  /**
+   * A dealership's own words — description and address — in the language the
+   * dealer did not write them in, after a profile save (or on the storefront's
+   * first view, for text saved before this existed). Metered and deliberately
+   * billed to no one: a short paragraph and an address per dealership that
+   * rarely change, written for buyers — billing it would leave free-plan
+   * storefronts in one language. Runs at low priority.
+   */
+  dealershipProfileTranslation: "dealershipProfileTranslation",
   /** On-demand advice for what the listing-quality rules flagged. Billed. */
   listingQualityCoach: "listingQualityCoach",
   /**

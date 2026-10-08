@@ -9,6 +9,7 @@ import { usePlaceNames } from "@/hooks/use-place-names";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { Link } from "@/i18n/navigation";
 import { getOpenStatus } from "@/lib/utils/open-status";
+import { resolveDealershipText, textDirection } from "@/lib/utils/dealership-text";
 import type { DealershipListItem } from "../_lib/dealership-types";
 
 const initialsOf = (name: string) =>
@@ -26,7 +27,7 @@ const initialsOf = (name: string) =>
  * identical blue building icon every logo-less dealer used to share.
  */
 const DealershipCard = ({ dealership, index = 0 }: { dealership: DealershipListItem; index?: number }) => {
-  const { name, slug, logo, address, city, averageRating, totalReviews, carCount, brands = [], priceFrom, workingHours } =
+  const { name, slug, logo, city, averageRating, totalReviews, carCount, brands = [], priceFrom, workingHours } =
     dealership;
 
   const t = useTranslations("dealerships.card");
@@ -37,7 +38,10 @@ const DealershipCard = ({ dealership, index = 0 }: { dealership: DealershipListI
 
   const openStatus = workingHours?.length ? getOpenStatus(workingHours) : null;
   const showLogo = logo && !imgError;
-  const where = city ? place.city(city) : address;
+  // The city from the place table; failing that, the dealer's address in the
+  // reader's language (lib/utils/dealership-text).
+  const address = city ? null : resolveDealershipText(dealership, "address", fmt.locale);
+  const where = city ? place.city(city) : address?.text;
 
   return (
     <Link
@@ -82,7 +86,9 @@ const DealershipCard = ({ dealership, index = 0 }: { dealership: DealershipListI
               {where && (
                 <span className="inline-flex items-center gap-1">
                   <MapPin aria-hidden className="size-3.5 shrink-0" />
-                  <span className="line-clamp-1">{where}</span>
+                  <span className="line-clamp-1" {...(address ? textDirection(address) : {})}>
+                    {where}
+                  </span>
                 </span>
               )}
               {openStatus?.isOpen && (

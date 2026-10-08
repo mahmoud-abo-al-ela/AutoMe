@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getDealerships } from "@/actions/dealerships";
 import { parseFiltersFromSearch } from "@/hooks/dealerships-url";
 import ClientPage from "./ClientPage";
-import { DealershipsPageSkeleton } from "./_components/DealershipsPageSkeleton";
+import { DealershipsPageSkeleton } from "../_components/DealershipsPageSkeleton";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";

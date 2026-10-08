@@ -39,6 +39,8 @@ interface DealershipListRow {
     logo: string | null;
     description: string | null;
     address: string | null;
+    addressEn?: string | null;
+    addressAr?: string | null;
     city: string | null;
     region: string | null;
     country: string | null;
@@ -103,6 +105,9 @@ export async function getDealerships(
             logo: dealership.logo,
             description: dealership.description,
             address: dealership.address,
+            // Shown when there is no city (lib/utils/dealership-text resolves it).
+            addressEn: dealership.addressEn ?? null,
+            addressAr: dealership.addressAr ?? null,
             city: dealership.city,
             region: dealership.region,
             country: dealership.country,

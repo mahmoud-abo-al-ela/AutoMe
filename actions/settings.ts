@@ -1,5 +1,7 @@
 "use server";
+import { after } from "next/server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
+import { aiCallerFor } from "@/lib/ai/caller";
 import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as dealershipService from "@/lib/services/dealership";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -24,6 +26,11 @@ export const updateOrganizationProfile = withOrgAuth(async (ctx, payload: unknow
     ctx.userId,
     ctx.organization.id
   );
+
+  // The description and address in the other language, once the save has answered: the
+  // dealer does not wait on the model, and a failure only delays it.
+  const caller = { ...aiCallerFor(ctx), priority: "low" as const };
+  after(() => dealershipService.syncDealershipProfileText(ctx.organization.id, caller));
 
   revalidateLocalized(`/org/${ctx.organization.slug}/settings`);
   revalidateLocalized(`/dealerships/${ctx.organization.slug}`);

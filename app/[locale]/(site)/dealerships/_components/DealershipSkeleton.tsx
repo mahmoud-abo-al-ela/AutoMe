@@ -1,5 +1,4 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
 
 export function DealershipCardSkeleton() {
     return (
@@ -36,94 +35,48 @@ export function DealershipGridSkeleton({ count = 8 }) {
     );
 }
 
+/**
+ * The dealership page while the server renders it: the identity row, the
+ * visit card beside the tabs (above them on phones), and a grid of cars —
+ * the same shapes the page lands in.
+ */
 export function DealershipDetailSkeleton() {
     return (
-        <div className="mx-auto w-full max-w-[1360px] space-y-6 px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">
-            {/* Breadcrumb skeleton */}
-            <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-12" />
-                <Skeleton className="h-4 w-3" />
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-3" />
-                <Skeleton className="h-4 w-32" />
-            </div>
-
-            {/* Hero Header skeleton */}
-            <div className="rounded-control border border-border p-6 sm:p-8 lg:p-10">
-                <div className="flex flex-col sm:flex-row gap-6 lg:gap-8">
-                    {/* Logo */}
-                    <Skeleton className="h-28 w-28 sm:h-36 sm:w-36 lg:h-40 lg:w-40 rounded-control flex-shrink-0" />
-
-                    <div className="flex-1 space-y-4">
-                        {/* Name + verified badge */}
-                        <Skeleton className="h-9 w-64" />
-
-                        {/* Rating + open status */}
-                        <div className="flex items-center gap-3">
-                            <Skeleton className="h-5 w-36" />
-                            <Skeleton className="h-6 w-28 rounded-full" />
-                        </div>
-
-                        {/* Description */}
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-4/5" />
-                        </div>
-
-                        {/* Quick action buttons */}
-                        <div className="flex items-center gap-2">
-                            <Skeleton className="h-8 w-20 rounded-md" />
-                            <Skeleton className="h-8 w-20 rounded-md" />
-                            <Skeleton className="h-8 w-24 rounded-md" />
-                            <Skeleton className="h-8 w-28 rounded-md" />
-                            <Skeleton className="h-8 w-20 rounded-md" />
-                        </div>
-                    </div>
+        <div aria-hidden className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-4 sm:px-6 md:pt-6 xl:px-0">
+            <Skeleton className="mb-5 hidden h-4 w-56 md:block" />
+            <div className="flex items-center gap-4 sm:gap-6">
+                <Skeleton className="size-16 shrink-0 rounded-[16px] sm:size-24 sm:rounded-[20px]" />
+                <div className="flex flex-1 flex-col gap-2.5">
+                    <Skeleton className="h-9 w-2/3 max-w-md" />
+                    <Skeleton className="h-4 w-full max-w-sm" />
                 </div>
             </div>
-
-            {/* Stats bar skeleton */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {Array.from({ length: 3 }).map((_, index) => (
-                    <Card key={index}>
-                        <CardContent className="p-5 sm:p-6">
-                            <div className="flex items-center gap-3">
-                                <Skeleton className="h-11 w-11 rounded-control" />
-                                <div className="space-y-2">
-                                    <Skeleton className="h-7 w-16" />
-                                    <Skeleton className="h-4 w-24" />
+            <Skeleton className="mt-4 h-4 w-full max-w-2xl" />
+            <div className="mt-6 grid items-start gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
+                <div className="flex flex-col gap-3 rounded-[20px] border border-border bg-card p-5 sm:p-6 lg:col-start-2 lg:row-start-1">
+                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-12 w-full rounded-control" />
+                    <div className="grid grid-cols-2 gap-2.5">
+                        <Skeleton className="h-12 rounded-control" />
+                        <Skeleton className="h-12 rounded-control" />
+                    </div>
+                </div>
+                <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+                    <div className="mb-6 flex gap-6 border-b border-border pb-3">
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-6 w-20" />
+                        <Skeleton className="h-6 w-16" />
+                    </div>
+                    <Skeleton className="mb-5 h-12 w-full rounded-control" />
+                    <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <div key={index} className="overflow-hidden rounded-[16px] border border-border bg-card">
+                                <Skeleton className="aspect-[4/3] w-full rounded-none" />
+                                <div className="flex flex-col gap-2 p-4">
+                                    <Skeleton className="h-4 w-3/4" />
+                                    <Skeleton className="h-3 w-1/2" />
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            {/* Tabs skeleton */}
-            <div className="space-y-6">
-                {/* Tab triggers */}
-                <div className="flex items-center gap-1 p-1 rounded-control bg-muted/60 w-fit">
-                    <Skeleton className="h-10 w-32 rounded-lg" />
-                    <Skeleton className="h-10 w-28 rounded-lg" />
-                    <Skeleton className="h-10 w-24 rounded-lg" />
-                </div>
-
-                {/* Tab content - car grid */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <Skeleton className="h-7 w-48" />
-                        <Skeleton className="h-9 w-72 rounded-md" />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <Card key={index} className="overflow-hidden">
-                                <Skeleton className="h-48 w-full" />
-                                <CardContent className="pt-4 space-y-2">
-                                    <Skeleton className="h-5 w-3/4" />
-                                    <Skeleton className="h-4 w-1/2" />
-                                    <Skeleton className="h-4 w-full" />
-                                </CardContent>
-                            </Card>
                         ))}
                     </div>
                 </div>

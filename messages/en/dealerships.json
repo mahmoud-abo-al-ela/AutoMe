@@ -109,7 +109,7 @@
     "memberSinceUnknown": "Not available"
   },
   "tabs": {
-    "inventory": "Inventory",
+    "inventory": "Cars",
     "reviews": "Reviews",
     "about": "About",
     "customerReviews": "Customer Reviews ({count})",
@@ -156,7 +156,8 @@
     "chips": {
       "search": "Search: “{query}”",
       "price": "Price: {min} – {max}"
-    }
+    },
+    "count": "{count, plural, =0 {No cars} one {{value} car} other {{value} cars}}"
   },
   "reviews": {
     "heading": "Reviews ({count})",
@@ -191,5 +192,38 @@
     "home": "Home",
     "dealerships": "Dealerships",
     "label": "Breadcrumb"
+  },
+  "detail": {
+    "reviewCount": "{count, plural, one {{value} review} other {{value} reviews}}",
+    "noReviewsYet": "No reviews yet",
+    "memberSince": "On AutoMe since {date}",
+    "buyingHere": "Buying here",
+    "visit": {
+      "label": "Visit and contact",
+      "message": "Message the dealership",
+      "call": "Call",
+      "directions": "Directions"
+    },
+    "messageDialog": {
+      "title": "Which car is it about?",
+      "body": "Your message reaches {name} with the car attached, so they can answer straight away.",
+      "seeAll": "See all {count, plural, one {{value} car} other {{value} cars}}"
+    },
+    "reviews": {
+      "outOfFive": "{value} out of 5 stars",
+      "boughtHere": "Bought a car here?",
+      "tellOthers": "Tell other buyers how it went.",
+      "whatBuyersSay": "What buyers say"
+    },
+    "about": {
+      "hours": "Opening hours",
+      "contact": "Contact and location",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "getDirections": "Get directions",
+      "noContact": "No contact details yet."
+    }
   }
 }

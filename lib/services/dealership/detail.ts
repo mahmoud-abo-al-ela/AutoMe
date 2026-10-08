@@ -29,7 +29,13 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
         slug: dealership.slug,
         logo: dealership.logo,
         description: dealership.description,
+        // The description and address per language (lib/utils/dealership-text
+        // resolves them).
+        descriptionEn: dealership.descriptionEn,
+        descriptionAr: dealership.descriptionAr,
         address: dealership.address,
+        addressEn: dealership.addressEn,
+        addressAr: dealership.addressAr,
         city: dealership.city,
         region: dealership.region,
         country: dealership.country,
@@ -42,6 +48,12 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
         planType: dealership.subscription?.plan?.type || null,
         planName: dealership.subscription?.plan?.name || null,
         workingHours: formattedWorkingHours,
+        // The standing terms buyers read on every listing (null = not stated).
+        offersFinancing: dealership.offersFinancing,
+        financingNote: dealership.financingNote,
+        acceptsTradeIn: dealership.acceptsTradeIn,
+        allowsInspection: dealership.allowsInspection,
+        offersDelivery: dealership.offersDelivery,
         createdAt: dealership.createdAt,
         updatedAt: dealership.updatedAt,
     };
@@ -99,12 +111,17 @@ export async function getDealershipReviews(
         throw new ValidationError("Organization ID is required", "organizationId");
     }
 
-    const result = await dealershipRepo.findDealershipReviews(
-        organizationId,
-        pagination
-    );
+    const [result, ratingRows] = await Promise.all([
+        dealershipRepo.findDealershipReviews(organizationId, pagination),
+        dealershipRepo.countDealershipReviewsByRating(organizationId),
+    ]);
 
     return {
+        // Five stars first, every rating present (0 when none gave it).
+        ratingCounts: [5, 4, 3, 2, 1].map((rating) => ({
+            rating,
+            count: ratingRows.find((row) => row.rating === rating)?.count ?? 0,
+        })),
         reviews: result.reviews.map((review) => ({
             id: review.id,
             rating: review.rating,

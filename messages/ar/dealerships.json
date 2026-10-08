@@ -156,7 +156,8 @@
     "chips": {
       "search": "البحث: «{query}»",
       "price": "السعر: {min} – {max}"
-    }
+    },
+    "count": "{count, plural, =0 {لا توجد سيارات} one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}"
   },
   "reviews": {
     "heading": "المراجعات ({count})",
@@ -191,5 +192,38 @@
     "home": "الرئيسية",
     "dealerships": "المعارض",
     "label": "مسار التنقل"
+  },
+  "detail": {
+    "reviewCount": "{count, plural, =0 {لا توجد تقييمات} one {تقييم واحد} two {تقييمان} few {{value} تقييمات} many {{value} تقييمًا} other {{value} تقييم}}",
+    "noReviewsYet": "لا توجد تقييمات بعد",
+    "memberSince": "على AutoMe منذ {date}",
+    "buyingHere": "الشراء من هنا",
+    "visit": {
+      "label": "الزيارة والتواصل",
+      "message": "راسل المعرض",
+      "call": "اتصال",
+      "directions": "الاتجاهات"
+    },
+    "messageDialog": {
+      "title": "عن أي سيارة تسأل؟",
+      "body": "تصل رسالتك إلى {name} ومعها السيارة، ليتمكن من الرد مباشرة.",
+      "seeAll": "عرض كل السيارات ({value})"
+    },
+    "reviews": {
+      "outOfFive": "{value} من ٥ نجوم",
+      "boughtHere": "اشتريت سيارة من هنا؟",
+      "tellOthers": "أخبر المشترين الآخرين بتجربتك.",
+      "whatBuyersSay": "آراء المشترين"
+    },
+    "about": {
+      "hours": "ساعات العمل",
+      "contact": "التواصل والموقع",
+      "address": "العنوان",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "website": "الموقع الإلكتروني",
+      "getDirections": "احصل على الاتجاهات",
+      "noContact": "لا توجد بيانات تواصل بعد."
+    }
   }
 }

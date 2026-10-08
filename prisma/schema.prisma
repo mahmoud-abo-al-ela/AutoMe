@@ -144,9 +144,18 @@ model Organization {
   logo        String?
   email       String?
   phone       String?
+  /// The address and description are kept as the dealer wrote them, in
+  /// whichever language. The En/Ar pairs are what the storefront shows per
+  /// locale: the dealer's text in its own language's column, a translation in
+  /// the other, written after a profile save (lib/services/dealership/
+  /// profile-translation; lib/utils/dealership-text resolves them).
   address     String?
+  addressEn   String?
+  addressAr   String?
   website     String?
   description String?
+  descriptionEn String?
+  descriptionAr String?
   isActive    Boolean   @default(true)
 
   // Location fields for platform discovery and filtering.

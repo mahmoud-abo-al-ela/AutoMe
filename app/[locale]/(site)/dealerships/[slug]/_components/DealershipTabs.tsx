@@ -1,129 +1,73 @@
 "use client";
 
-import { Car, MessageSquare, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import { useFormatters } from "@/hooks/use-formatters";
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DealershipCarsSection } from "./DealershipCarsSection";
-import { DealershipWorkingHours } from "./DealershipWorkingHours";
-import { DealershipContactInfo } from "./DealershipContactInfo";
+import { DealershipAbout } from "./DealershipAbout";
 import { DealershipReviews } from "../../_components";
 import type {
     DealershipDetail,
     DealershipInventoryProps,
+    DealershipTab,
 } from "../_lib/detail-types";
 
+const trigger =
+    "relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-body font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:-bottom-px after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong";
+
+/** A count beside a tab's name; hidden at zero rather than showing "0". */
+function Count({ value }: { value: number }) {
+    const fmt = useFormatters();
+    if (value <= 0) return null;
+    return (
+        <span className="rounded-full bg-muted px-2 text-micro font-semibold text-foreground">{fmt.number(value)}</span>
+    );
+}
+
+/** Cars, Reviews and About. The page owns which one is open (`?tab=`). */
 export const DealershipTabs = ({
+    value,
+    onValueChange,
     dealership,
-    cars,
-    carsLoading,
-    carsPagination,
-    onPageChange,
-    defaultTab = "inventory",
-    filters,
-    onFilterChange,
-    availableFilters,
+    ...inventory
 }: DealershipInventoryProps & {
+    value: DealershipTab;
+    onValueChange: (tab: DealershipTab) => void;
     dealership: DealershipDetail;
-    defaultTab?: string;
 }) => {
     const t = useTranslations("dealerships.tabs");
-    const fmt = useFormatters();
 
     return (
-        <Tabs defaultValue={defaultTab} className="w-full">
+        <Tabs value={value} onValueChange={(next) => onValueChange(next as DealershipTab)} className="w-full gap-0">
             <TabsList className="mb-6 h-auto w-full justify-start overflow-x-auto rounded-none border-b border-border bg-transparent p-0 [scrollbar-width:none]">
-                <TabsTrigger
-                    value="inventory"
-                    className="relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-caption font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong"
-                >
-                    <Car className="h-4 w-4" />
-                    <span>{t("inventory")}</span>
-                    {dealership.carCount > 0 && (
-                        <Badge
-                            variant="secondary"
-                            className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full"
-                        >
-                            {fmt.number(dealership.carCount)}
-                        </Badge>
-                    )}
+                <TabsTrigger value="cars" className={trigger}>
+                    {t("inventory")}
+                    <Count value={dealership.carCount} />
                 </TabsTrigger>
-
-                <TabsTrigger
-                    value="reviews"
-                    className="relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-caption font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong"
-                >
-                    <MessageSquare className="h-4 w-4" />
-                    <span>{t("reviews")}</span>
-                    {dealership.totalReviews > 0 && (
-                        <Badge
-                            variant="secondary"
-                            className="ms-1 h-5 min-w-5 px-1.5 text-micro font-semibold rounded-full"
-                        >
-                            {fmt.number(dealership.totalReviews)}
-                        </Badge>
-                    )}
+                <TabsTrigger value="reviews" className={trigger}>
+                    {t("reviews")}
+                    <Count value={dealership.totalReviews} />
                 </TabsTrigger>
-
-                <TabsTrigger
-                    value="about"
-                    className="relative h-12 flex-none gap-2 rounded-none border-0 bg-transparent px-4 text-caption font-semibold text-muted-foreground shadow-none cursor-pointer after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong"
-                >
-                    <Info className="h-4 w-4" />
-                    <span>{t("about")}</span>
+                <TabsTrigger value="about" className={trigger}>
+                    {t("about")}
                 </TabsTrigger>
             </TabsList>
 
-            {/* Inventory Tab */}
-            <TabsContent value="inventory" className="mt-0">
-                <div id="dealership-inventory">
-                    <DealershipCarsSection
-                        cars={cars}
-                        carCount={dealership.carCount}
-                        carsLoading={carsLoading}
-                        carsPagination={carsPagination}
-                        onPageChange={onPageChange}
-                        filters={filters}
-                        onFilterChange={onFilterChange}
-                        availableFilters={availableFilters}
-                    />
-                </div>
+            <TabsContent value="cars" className="mt-0">
+                <DealershipCarsSection carCount={dealership.carCount} {...inventory} />
             </TabsContent>
 
-            {/* Reviews Tab */}
             <TabsContent value="reviews" className="mt-0">
-                <div id="dealership-reviews">
-                    <h2 className="text-2xl font-bold mb-6">
-                        {t("customerReviews", {
-                            count: fmt.number(dealership.totalReviews),
-                        })}
-                    </h2>
-                    <DealershipReviews organizationId={dealership.id} organizationSlug={dealership.slug} />
-                </div>
+                <DealershipReviews
+                    organizationId={dealership.id}
+                    organizationSlug={dealership.slug}
+                    averageRating={dealership.averageRating}
+                    totalReviews={dealership.totalReviews}
+                />
             </TabsContent>
 
-            {/* About Tab */}
             <TabsContent value="about" className="mt-0">
-                <div className="space-y-6">
-                    {/* Working Hours */}
-                    <DealershipWorkingHours
-                        workingHours={dealership.workingHours}
-                    />
-
-                    {/* Contact Information */}
-                    <div className="bg-card rounded-control border border-border p-6">
-                        <h3 className="text-lg font-semibold mb-4">
-                            {t("contactInformation")}
-                        </h3>
-                        <DealershipContactInfo dealership={dealership} />
-                    </div>
-                </div>
+                <DealershipAbout dealership={dealership} />
             </TabsContent>
         </Tabs>
     );

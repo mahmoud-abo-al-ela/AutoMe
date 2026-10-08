@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { ChevronDown } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { buildActiveChips } from "./inventory-filters/filter-utils";
+import { buildActiveChips, FILTER_CHIP, FILTER_CHIP_ACTIVE } from "./inventory-filters/filter-utils";
 import FilterCheckboxPopover from "./inventory-filters/FilterCheckboxPopover";
 import FilterCheckboxGroup from "./inventory-filters/FilterCheckboxGroup";
 import ActiveFilterChips from "./inventory-filters/ActiveFilterChips";
@@ -166,49 +166,27 @@ export const DealershipInventoryFilters = ({
     const maxPriceLimit = availableFilters?.priceRange?.max || 100000;
 
     return (
-        <div className="space-y-4 mb-6">
-            {/* Row 1: Header + Sort */}
-            <div className="flex items-center justify-between gap-4">
-                <h3 className="text-xl font-bold text-foreground">{t("heading")}</h3>
-
-                <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground hidden sm:inline-block">{t("sortBy")}</span>
-                    <Select value={filters.sortBy || "newest"} onValueChange={handleSortChange}>
-                        <SelectTrigger className="h-9 w-[160px] bg-card border border-border rounded-lg text-xs font-medium focus:ring-1 focus:ring-primary focus:border-primary">
-                            <SelectValue placeholder={t("sortPlaceholder")} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card border border-border rounded-control">
-                            {(["newest", "priceAsc", "priceDesc", "year", "mileage"] as const).map(
-                                (value) => (
-                                    <SelectItem key={value} value={value} className="text-xs">
-                                        {t(`sort.${value}`)}
-                                    </SelectItem>
-                                )
-                            )}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-
-            {/* Row 2: Search + Inline Popovers (Desktop) & Trigger Button (Mobile) */}
-            <div className="flex items-center gap-3">
-                {/* Search Bar */}
-                <div className="relative flex-1">
-                    <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col gap-4">
+            {/* Row 1: search, then the filters — popovers on desktop, a sheet on phones */}
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="relative min-w-0 flex-1 md:min-w-[16rem]">
+                    <Search aria-hidden className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        type="text"
+                        type="search"
                         placeholder={t("searchPlaceholder")}
+                        aria-label={t("searchPlaceholder")}
                         value={searchVal}
                         onChange={handleSearchChange}
-                        className="ps-9 pe-9 h-9.5 w-full bg-card border-border rounded-lg text-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
+                        className="h-12 w-full rounded-control border-border bg-field ps-12 pe-12 text-body placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
                     />
                     {searchVal && (
                         <button
+                            type="button"
                             onClick={handleClearSearch}
                             aria-label={t("clearSearch")}
-                            className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground transition-colors"
+                            className="absolute end-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-plate text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         >
-                            <X className="h-4 w-4" />
+                            <X className="size-4" />
                         </button>
                     )}
                 </div>
@@ -217,7 +195,7 @@ export const DealershipInventoryFilters = ({
                 <div className="md:hidden">
                     <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
                         <SheetTrigger asChild>
-                            <Button variant="outline" className="h-9.5 gap-2 px-3 border-border rounded-lg bg-card text-muted-foreground font-medium hover:bg-muted">
+                            <Button variant="outline" className="h-12 gap-2 rounded-control border-border bg-field px-4 font-semibold hover:bg-field hover:border-border-strong">
                                 <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-sm">{t("filters")}</span>
                                 {activeChips.length > 0 && (
@@ -293,10 +271,10 @@ export const DealershipInventoryFilters = ({
                     {/* Price Range Popover */}
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="outline" className={`h-9.5 gap-1.5 px-3 rounded-lg bg-card border-border text-muted-foreground font-medium hover:bg-muted transition-all ${(filters.minPrice || filters.maxPrice) ? 'border-primary/40 bg-primary/5 text-primary hover:bg-primary/10' : ''}`}>
-                                <span className="text-xs">{t("priceRange")}</span>
+                            <Button variant="outline" className={`${FILTER_CHIP} ${(filters.minPrice || filters.maxPrice) ? FILTER_CHIP_ACTIVE : ""}`}>
+                                <span>{t("priceRange")}</span>
                                 {(filters.minPrice || filters.maxPrice) && (
-                                    <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-micro rounded-full">
+                                    <Badge variant="secondary" className="h-5 px-1.5 bg-inverse-foreground text-inverse hover:bg-inverse-foreground font-bold text-micro rounded-full">
                                         {t("set")}
                                     </Badge>
                                 )}
@@ -332,6 +310,28 @@ export const DealershipInventoryFilters = ({
                         <FilterCheckboxPopover label={t("transmission")} field="transmission" options={transmissions} selectedCsv={filters.transmission} onToggle={handleCheckboxToggle} idPrefix="trans" contentWidthClass="w-[180px]" />
                     )}
                 </div>
+            </div>
+
+            {/* Row 2: how many, and the order — the Browse page's count line */}
+            <div className="flex items-center justify-between gap-4">
+                <p role="status" aria-live="polite" className="text-h3 font-semibold max-sm:text-body">
+                    {t("count", { count: totalCars ?? 0, value: fmt.number(totalCars ?? 0) })}
+                </p>
+                <Select value={filters.sortBy || "newest"} onValueChange={handleSortChange}>
+                    <SelectTrigger
+                        aria-label={t("sortBy")}
+                        className="h-10 w-[11rem] cursor-pointer rounded-control border-border bg-field text-caption font-medium"
+                    >
+                        <SelectValue placeholder={t("sortPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {(["newest", "priceAsc", "priceDesc", "year", "mileage"] as const).map((value) => (
+                            <SelectItem key={value} value={value} className="min-h-10 cursor-pointer">
+                                {t(`sort.${value}`)}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Row 3: Active Filter Chips */}

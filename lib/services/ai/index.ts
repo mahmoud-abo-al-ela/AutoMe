@@ -13,3 +13,4 @@ export { answerListingQuestion, type ListingAnswer } from "./answerListingQuesti
 export { translateChatMessage, type ChatSender } from "./translateChatMessage";
 export { moderateChatMessage } from "./moderateChatMessage";
 export { writeWeeklySummary } from "./writeWeeklySummary";
+export { translateDealershipProfile, type DealershipProfileText } from "./translateDealershipProfile";

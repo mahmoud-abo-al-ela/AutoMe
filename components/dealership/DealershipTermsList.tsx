@@ -7,9 +7,9 @@ import { DEALERSHIP_TERM_FLAGS, type DealershipTerms } from "@/lib/utils/car-dis
 export type DisclosureLine = { key: string; text: string; positive: boolean };
 
 /** Stated facts as a ticked list: a tick for a plus, a dash for a plain "no". */
-export function DisclosureList({ lines }: { lines: DisclosureLine[] }) {
+export function DisclosureList({ lines, stacked = false }: { lines: DisclosureLine[]; stacked?: boolean }) {
   return (
-    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <ul className={stacked ? "grid grid-cols-1 gap-2" : "grid grid-cols-1 gap-2 sm:grid-cols-2"}>
       {lines.map((line) => (
         <li key={line.key} className="flex items-start gap-2 text-sm text-muted-foreground">
           {line.positive ? (
@@ -29,7 +29,16 @@ export function DisclosureList({ lines }: { lines: DisclosureLine[] }) {
  * stated. Shared by the car page and the dealer's own settings preview, so the
  * preview is the listing's wording, not a copy of it.
  */
-export function DealershipTermsList({ terms, className }: { terms: Partial<DealershipTerms>; className?: string }) {
+export function DealershipTermsList({
+  terms,
+  stacked,
+  className,
+}: {
+  terms: Partial<DealershipTerms>;
+  /** One column, for a narrow card (the dealership page's visit card). */
+  stacked?: boolean;
+  className?: string;
+}) {
   const t = useTranslations("carDetail.history");
   const lines: DisclosureLine[] = DEALERSHIP_TERM_FLAGS.filter((flag) => typeof terms[flag] === "boolean").map((flag) => ({
     key: flag,
@@ -40,7 +49,7 @@ export function DealershipTermsList({ terms, className }: { terms: Partial<Deale
 
   return (
     <div className={className}>
-      <DisclosureList lines={lines} />
+      <DisclosureList lines={lines} stacked={stacked} />
       {terms.offersFinancing && terms.financingNote && (
         // The dealer's own words, in whatever language they wrote them.
         <p dir="auto" className="mt-2 text-sm text-muted-foreground">

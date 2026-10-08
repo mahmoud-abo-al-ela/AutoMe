@@ -1,61 +1,70 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Star, MessageSquare, PenTool } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { MessageSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useUser } from "@clerk/nextjs";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReviewCard } from "./ReviewCard";
-import ReviewForm from "./ReviewForm";
-import { getDealershipReviews, createDealershipReview } from "@/actions/dealerships";
+import { SiteEmptyState } from "@/components/brand";
+import { StarRating } from "@/components/common/StarRating";
 import { Pagination } from "@/components/common/Pagination";
-import { useUser } from "@clerk/nextjs";
-import { EmptyState } from "@/components/common/EmptyState";
+import { getDealershipReviews } from "@/actions/dealerships";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 import { BuyerAccessNotice, useBuyerAccess } from "@/components/BuyerAccess";
-import type {
-    DealershipReview,
-    ReviewsPagination,
-} from "../_lib/dealership-types";
+import { ReviewCard } from "./ReviewCard";
+import ReviewForm from "./ReviewForm";
+import type { DealershipReview, ReviewsPagination, ReviewRatingCount } from "../_lib/dealership-types";
 
+const PER_PAGE = 10;
+
+/**
+ * The Reviews tab: the average and how the ratings break down (counted over
+ * every review, not just this page), the invitation to write one, then the
+ * reviews. The average and total come from the page's server render; after
+ * a review is posted the page refreshes, so the header's rating follows.
+ */
 const DealershipReviews = ({
     organizationId,
     organizationSlug,
+    averageRating,
+    totalReviews,
 }: {
     organizationId: string;
     organizationSlug?: string;
+    averageRating: number;
+    totalReviews: number;
 }) => {
     const t = useTranslations("dealerships.reviews");
+    const tDetail = useTranslations("dealerships.detail");
     const fmt = useFormatters();
-    const { user, isLoaded } = useUser();
+    const { user } = useUser();
     const router = useRouter();
     const pathname = usePathname();
     const { signInTo } = useAuthRedirects();
     // Reviews come from buyers: not platform staff, and no dealership's team.
     const buyerTarget = { organizationId, organizationSlug };
-    const canReview = useBuyerAccess(buyerTarget).can("review");
+    const access = useBuyerAccess(buyerTarget);
+    const canReview = access.can("review");
+    // The visit card beside this tab already explains staff, a dealer's own
+    // page and impersonation; only "dealers do not review" is news here.
+    const explainHere = access.blocked("review") === "dealerReview";
+
     const [reviews, setReviews] = useState<DealershipReview[]>([]);
-    const [pagination, setPagination] = useState<ReviewsPagination>({
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-    });
+    const [ratingCounts, setRatingCounts] = useState<ReviewRatingCount[]>([]);
+    const [pagination, setPagination] = useState<ReviewsPagination>({ page: 1, limit: PER_PAGE, total: 0, totalPages: 0 });
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
 
-    useEffect(() => {
-        const fetchReviews = async () => {
+    const load = useCallback(
+        async (page: number) => {
             setLoading(true);
             try {
-                const response = await getDealershipReviews(organizationId, {
-                    page: pagination.page,
-                    limit: pagination.limit,
-                });
+                const response = await getDealershipReviews(organizationId, { page, limit: PER_PAGE });
                 if (response.success) {
                     setReviews(response.data.reviews);
+                    setRatingCounts(response.data.ratingCounts);
                     setPagination(response.data.pagination);
                 }
             } catch (error) {
@@ -63,194 +72,103 @@ const DealershipReviews = ({
             } finally {
                 setLoading(false);
             }
-        };
-        fetchReviews();
-        // `pagination.limit` is read but deliberately not a dependency: the
-        // effect replaces the whole pagination object from the response, so
-        // depending on it would refetch whenever the server echoed a limit.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [organizationId, pagination.page]);
+        },
+        [organizationId]
+    );
 
-    const handlePageChange = (newPage: number) => {
-        setPagination((prev) => ({ ...prev, page: newPage }));
-        window.scrollTo({ top: 400, behavior: "smooth" });
-    };
+    useEffect(() => {
+        load(1);
+    }, [load]);
+
+    // Signed out: sign in, then back to this tab.
+    const startReview = () => (user ? setShowForm(true) : router.push(signInTo(`${pathname}?tab=reviews`)));
 
     const handleReviewSubmit = () => {
         setShowForm(false);
-        // Refresh reviews list
-        const fetchReviews = async () => {
-            setLoading(true);
-            try {
-                const response = await getDealershipReviews(organizationId, {
-                    page: 1,
-                    limit: pagination.limit,
-                });
-                if (response.success) {
-                    setReviews(response.data.reviews);
-                    setPagination(response.data.pagination);
-                }
-            } catch (error) {
-                console.error("Error fetching reviews:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchReviews();
+        load(1);
+        router.refresh();
     };
 
-    const calculateRatingDistribution = () => {
-        const distribution: Record<number, number> = {
-            5: 0,
-            4: 0,
-            3: 0,
-            2: 0,
-            1: 0,
-        };
-        reviews.forEach((review) => {
-            const rating = Math.round(review.rating);
-            if (rating >= 1 && rating <= 5) {
-                distribution[rating]++;
-            }
-        });
-        return distribution;
-    };
-
-    const ratingDistribution = calculateRatingDistribution();
-    const totalReviews = reviews.length;
-    const averageRating = fmt.number(
-        totalReviews > 0
-            ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
-            : 0,
-        { minimumFractionDigits: 1, maximumFractionDigits: 1 }
-    );
+    const average = fmt.number(averageRating, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <MessageSquare className="h-6 w-6" />
-                    {t("heading", { count: fmt.number(totalReviews) })}
-                </h2>
-                {user && canReview && (
-                    <Button
-                        onClick={() => setShowForm(!showForm)}
-                        variant={showForm ? "outline" : "default"}
-                        className="gap-2"
-                    >
-                        <PenTool className="h-4 w-4" />
-                        {showForm ? t("cancel") : t("writeReview")}
-                    </Button>
-                )}
-            </div>
+        <div className="flex flex-col gap-6">
+            {explainHere && <BuyerAccessNotice action="review" target={buyerTarget} />}
 
-            <BuyerAccessNotice action="review" target={buyerTarget} />
-
-            {/* Rating Summary */}
             {totalReviews > 0 && (
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Average Rating */}
-                            <div className="text-center">
-                                <p className="text-sm text-muted-foreground mb-2">
-                                    {t("averageRating")}
-                                </p>
-                                <div className="flex items-center justify-center gap-2">
-                                    <Star className="h-8 w-8 fill-marker text-foreground" />
-                                    <span className="text-4xl font-bold">
-                                        {averageRating}
-                                    </span>
-                                </div>
-                            </div>
+                <section className="grid items-center gap-6 rounded-[20px] border border-border bg-card p-5 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)] xl:grid-cols-[auto_minmax(0,1fr)_14rem]">
+                    <div className="flex flex-col gap-1.5">
+                        <p className="text-[3.5rem] font-black leading-none">{average}</p>
+                        <StarRating rating={averageRating} size={18} />
+                        <p className="text-caption text-muted-foreground">
+                            <span className="sr-only">{tDetail("reviews.outOfFive", { value: average })} · </span>
+                            {tDetail("reviewCount", { count: totalReviews, value: fmt.number(totalReviews) })}
+                        </p>
+                    </div>
 
-                            {/* Rating Distribution */}
-                            <div>
-                                <p className="text-sm text-muted-foreground mb-4">
-                                    {t("distribution")}
-                                </p>
-                                <div className="space-y-2">
-                                    {[5, 4, 3, 2, 1].map((rating) => (
-                                        <div key={rating} className="flex items-center gap-3">
-                                            <span className="text-sm w-8 text-end">
-                                                {fmt.number(rating)}★
-                                            </span>
-                                            <div className="flex-1 h-3 bg-border rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-marker transition-all duration-500"
-                                                    style={{
-                                                        width: `${(ratingDistribution[rating] / totalReviews) * 100}%`,
-                                                    }}
-                                                />
-                                            </div>
-                                            <span className="text-sm w-12 text-start">
-                                                {t("distributionRow", {
-                                                    count: fmt.number(ratingDistribution[rating]),
-                                                    percent: fmt.number(
-                                                        Math.round(
-                                                            (ratingDistribution[rating] / totalReviews) * 100
-                                                        )
-                                                    ),
-                                                })}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                    <ul aria-label={t("distribution")} className="flex flex-col gap-2">
+                        {ratingCounts.map(({ rating, count }) => (
+                            <li key={rating} className="grid grid-cols-[2.5rem_minmax(0,1fr)_2rem] items-center gap-3 text-caption">
+                                <span>{fmt.number(rating)} ★</span>
+                                <span aria-hidden className="h-2 overflow-hidden rounded-full bg-muted">
+                                    <span
+                                        className="block h-full rounded-full bg-foreground"
+                                        style={{ width: `${totalReviews ? (count / totalReviews) * 100 : 0}%` }}
+                                    />
+                                </span>
+                                <span className="text-end text-muted-foreground">{fmt.number(count)}</span>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {canReview && (
+                        <div className="flex flex-col items-start gap-2 md:col-span-2 xl:col-span-1">
+                            <p className="font-semibold">{tDetail("reviews.boughtHere")}</p>
+                            <p className="text-caption text-muted-foreground">{tDetail("reviews.tellOthers")}</p>
+                            <Button variant="outline-strong" size="xl" className="mt-1 w-full" onClick={startReview}>
+                                {showForm ? t("cancel") : t("writeReview")}
+                            </Button>
                         </div>
-                    </CardContent>
-                </Card>
+                    )}
+                </section>
             )}
 
-            {/* Review Form */}
-            {showForm && (
-                <ReviewForm
-                    organizationId={organizationId}
-                    onSuccess={handleReviewSubmit}
-                />
-            )}
+            {showForm && <ReviewForm organizationId={organizationId} onSuccess={handleReviewSubmit} />}
 
-            {/* Reviews List */}
             {loading ? (
-                <div className="space-y-4">
+                <div className="flex flex-col gap-3" aria-hidden>
                     {[1, 2, 3].map((i) => (
-                        <div
-                            key={i}
-                            className="h-32 bg-muted rounded-lg animate-pulse"
-                        />
+                        <div key={i} className="h-32 animate-pulse rounded-[20px] bg-muted" />
                     ))}
                 </div>
             ) : reviews.length === 0 ? (
-                <EmptyState
-                    icon={MessageSquare}
-                    title={t("emptyTitle")}
-                    description={t("emptyBody")}
-                    actionLabel={canReview ? t("writeReview") : undefined}
-                    // Signed out: sign in first, then back here. It used to
-                    // open the form, whose submit then failed.
-                    onAction={() => (user ? setShowForm(true) : router.push(signInTo(pathname)))}
-                />
+                !showForm && (
+                    <SiteEmptyState
+                        icon={MessageSquare}
+                        title={t("emptyTitle")}
+                        description={canReview ? t("emptyBody") : undefined}
+                        primary={canReview ? { label: t("writeReview"), onClick: startReview } : undefined}
+                    />
+                )
             ) : (
-                <>
-                    <div className="space-y-4">
+                <section className="flex flex-col gap-3">
+                    <h2 className="text-h3 font-semibold">{tDetail("reviews.whatBuyersSay")}</h2>
+                    <ul className="flex flex-col gap-3">
                         {reviews.map((review) => (
-                            <ReviewCard key={review.id} review={review} />
+                            <li key={review.id}>
+                                <ReviewCard review={review} />
+                            </li>
                         ))}
-                    </div>
-
-                    {/* Pagination */}
+                    </ul>
                     {pagination.totalPages > 1 && (
-                        <div className="flex justify-center mt-6">
-                            <Pagination
-                                currentPage={pagination.page}
-                                totalPages={pagination.totalPages}
-                                onPageChange={handlePageChange}
-                                disabled={loading}
-                            />
-                        </div>
+                        <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.totalPages}
+                            onPageChange={load}
+                            disabled={loading}
+                        />
                     )}
-                </>
+                </section>
             )}
         </div>
     );
