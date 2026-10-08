@@ -70,3 +70,13 @@ describe("modelMix", () => {
     expect(modelMix(run)).toEqual({ "google/flash": 2, "codecraft/gpt": 1 });
   });
 });
+
+describe("advisory judge cases", () => {
+  it("reports a judge case that fails without ever calling it a regression", () => {
+    const run = report([{ id: "listing-qa › [judge] fridayAr", outcome: "fail" }]);
+    const result = compareToBaseline(run, { updatedAt: "", cases: { "listing-qa › [judge] fridayAr": "pass" } });
+
+    expect(result.regressions).toEqual([]);
+    expect(result.advisoryFailures).toEqual(["listing-qa › [judge] fridayAr"]);
+  });
+});

@@ -44,9 +44,18 @@ export interface EvalBaseline {
   cases: Record<string, "pass" | "fail">;
 }
 
+/**
+ * A case a second model judged (see judge.ts). Reported, never a reason to fail
+ * a run: a judge is noisier than an assertion.
+ */
+export const ADVISORY_MARK = "[judge]";
+export const isAdvisory = (id: string) => id.includes(ADVISORY_MARK);
+
 export interface Comparison {
   /** Passed in the baseline, failed now — the only thing that fails a run. */
   regressions: string[];
+  /** Advisory cases that failed this run — what the judge disagreed with. */
+  advisoryFailures: string[];
   /** Failed in the baseline, pass now. */
   fixed: string[];
   /** Conclusive now, absent from the baseline. */
@@ -63,6 +72,7 @@ export function allCases(report: EvalReport): ReportedCase[] {
 export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | null): Comparison {
   const comparison: Comparison = {
     regressions: [],
+    advisoryFailures: [],
     fixed: [],
     added: [],
     inconclusive: [],
@@ -75,9 +85,10 @@ export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | n
       comparison.inconclusive.push(id);
       continue;
     }
+    if (isAdvisory(id) && outcome === "fail") comparison.advisoryFailures.push(id);
     const before = baseline?.cases[id];
     if (!before) comparison.added.push(id);
-    else if (before === "pass" && outcome === "fail") comparison.regressions.push(id);
+    else if (before === "pass" && outcome === "fail" && !isAdvisory(id)) comparison.regressions.push(id);
     else if (before === "fail" && outcome === "pass") comparison.fixed.push(id);
   }
   return comparison;

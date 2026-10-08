@@ -50,6 +50,7 @@ console.info(
     .join(", ") || "none"
 );
 list("REGRESSIONS — passed in the baseline, fail now", result.regressions);
+list("Judge disagreements — advisory, never fail the run", result.advisoryFailures);
 list("Fixed — failed in the baseline, pass now", result.fixed);
 list("New cases", result.added);
 list("Inconclusive — no model answered", result.inconclusive);

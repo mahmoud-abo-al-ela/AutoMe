@@ -9,7 +9,7 @@
 
 import { isProviderId, type ProviderId } from "@/lib/ai/providers";
 
-export type ModelTask = "vision" | "visionFast" | "text" | "textFast";
+export type ModelTask = "vision" | "visionFast" | "text" | "textFast" | "judge";
 
 /** One link in a chain: which API, and which of its models. */
 export interface ChainEntry {
@@ -95,6 +95,18 @@ const DEFAULT_CHAINS: Record<ModelTask, string[]> = {
     "google/gemini-3.7-flash",
     ...GEMMA_FALLBACK,
   ],
+  /**
+   * The evaluation judge (lib/ai/evaluation/judge.ts) — never production.
+   * Led by a stronger model than the ones that write the graded replies
+   * (textFast leads with 3.5-flash-lite, text with gpt-5.5), so no model
+   * grades its own work first; Google-led so a nightly run spends free daily
+   * requests, not CodeCraft's monthly tokens. No Gemma: a weak judge's verdict
+   * is noise, and an unjudged case is only inconclusive.
+   *
+   * 3.6-flash leads because 3.7-flash answered 503 to every one of seven
+   * calibration calls on 2026-10-10; both passed the calibration suite.
+   */
+  judge: ["google/gemini-3.6-flash", "codecraft/gemini-3.7-flash", "google/gemini-3.7-flash"],
 };
 
 /** Replace a task's whole chain without a deploy: comma-separated "provider/model". */
@@ -103,6 +115,7 @@ const CHAIN_ENV_KEYS: Record<ModelTask, string> = {
   visionFast: "AI_MODELS_VISION_FAST",
   textFast: "AI_MODELS_TEXT_FAST",
   text: "AI_MODELS_TEXT",
+  judge: "AI_MODELS_JUDGE",
 };
 
 /**

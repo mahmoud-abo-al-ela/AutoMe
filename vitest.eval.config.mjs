@@ -1,6 +1,12 @@
 import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { config } from "dotenv";
+
+// Before any worker starts: the setup file imports the AI client, and with it
+// Prisma, ahead of each suite's own .env loading — so the ledger needs the
+// variables in place first. In CI there is no .env and this does nothing.
+config({ quiet: true });
 
 /**
  * The real-model evaluation run — the nightly workflow (.github/workflows/
