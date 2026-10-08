@@ -31,7 +31,13 @@ vi.mock("@/lib/repositories/car", () => ({
 }));
 vi.mock("@/lib/repositories/billing", () => ({ findActiveSubscription }));
 vi.mock("@/lib/repositories/ai-usage", () => ({ countOrgAiCarsThisMonth }));
-vi.mock("@/lib/services/ai/answerListingQuestion", () => ({ answerListingQuestion }));
+// Calls are recorded on answerListingQuestion; every reply carries the call that wrote it.
+vi.mock("@/lib/services/ai/answerListingQuestion", () => ({
+  answerListingQuestion: async (...args: unknown[]) => ({
+    meta: { usageId: "usage-1", provider: "google", model: "gemini-test", promptVersion: "v.en", cached: false },
+    ...(await answerListingQuestion(...args)),
+  }),
+}));
 vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion }));
 vi.mock("@/lib/repositories/assistant-answer", () => ({ recordAssistantAnswer, rateAssistantAnswer }));
 
@@ -361,7 +367,26 @@ describe("rating answers", () => {
     expect(await askAboutListing("car-1", "colour?", "en", null)).toMatchObject({ answerId: "answer-1" });
     expect(recordAssistantAnswer).toHaveBeenCalledWith({
       organizationId: "org-dealer", carId: "car-1", question: "What colour is the car?", answer: "White.", locale: "en",
+      outcome: "ANSWERED", aiUsageId: "usage-1", model: "google/gemini-test", promptVersion: "v.en", fieldsUsed: ["color"],
     });
+  });
+
+  it("keeps a decline and an off-topic reply too, so the quality report can count them", async () => {
+    answerListingQuestion.mockResolvedValue({ grounded: false, message: "The listing doesn't say." });
+    await askAboutListing("car-1", "Accidents?", "en", null);
+    answerListingQuestion.mockResolvedValue({ grounded: false, offTopic: true });
+    await askAboutListing("car-1", "Weather?", "en", null);
+
+    expect(recordAssistantAnswer.mock.calls.map(([row]) => [row.outcome, row.answer, row.aiUsageId])).toEqual([
+      ["DECLINED", "The listing doesn't say.", "usage-1"],
+      ["OFF_TOPIC", "", "usage-1"],
+    ]);
+  });
+
+  it("never hands back an id to rate a decline with", async () => {
+    recordAssistantAnswer.mockResolvedValue("decline-1");
+    answerListingQuestion.mockResolvedValue({ grounded: false });
+    expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({ status: "notInListing" });
   });
 
   it("still answers when the answer cannot be kept, just without a rating", async () => {

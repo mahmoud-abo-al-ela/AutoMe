@@ -48,7 +48,8 @@ export async function countWeeklyActivity(organizationId: string, start: Date, e
     db.car.count({ where: { organizationId, status: "AVAILABLE" } }),
     db.testDrive.count({ where: { organizationId, createdAt: inWeek } }),
     db.testDrive.count({ where: { organizationId, status: "PENDING" } }),
-    db.assistantAnswer.count({ where: { organizationId, createdAt: inWeek } }),
+    // Answers only: declines and off-topic replies are kept too, for the quality report.
+    db.assistantAnswer.count({ where: { organizationId, createdAt: inWeek, outcome: "ANSWERED" } }),
     db.assistantAnswer.count({ where: { organizationId, createdAt: inWeek, helpful: true } }),
     db.assistantAnswer.count({ where: { organizationId, createdAt: inWeek, helpful: false } }),
     db.buyerQuestion.count({ where: { organizationId, createdAt: inWeek } }),

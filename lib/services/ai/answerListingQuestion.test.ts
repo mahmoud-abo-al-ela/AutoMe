@@ -1,7 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const generateStructured = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/ai/client", () => ({ generateStructured }));
+const META = vi.hoisted(() => ({
+  usageId: "usage-1",
+  provider: "google",
+  model: "gemini-test",
+  promptVersion: "v.en",
+  cached: false,
+}));
+// The calls are recorded on generateStructured; the service reads the meta variant.
+vi.mock("@/lib/ai/client", () => ({
+  generateStructuredWithMeta: async (input: unknown) => ({ data: await generateStructured(input), meta: META }),
+}));
 
 import { answerListingQuestion, declineText } from "@/lib/services/ai/answerListingQuestion";
 import { AI_FEATURES } from "@/lib/ai/features";
@@ -18,6 +28,12 @@ const ctx = { organizationId: "org-1", userId: null };
 
 beforeEach(() => vi.clearAllMocks());
 
+/** The reply without its provenance — most cases are about what the buyer sees. */
+async function ask(...args: Parameters<typeof answerListingQuestion>) {
+  const { meta: _meta, ...shown } = await answerListingQuestion(...args);
+  return shown;
+}
+
 describe("answerListingQuestion", () => {
   it("returns an answer the listing backs", async () => {
     generateStructured.mockResolvedValue({
@@ -26,7 +42,7 @@ describe("answerListingQuestion", () => {
       grounded: true,
       answer: " It is white. ",
     });
-    expect(await answerListingQuestion("What colour?", facts, "en", ctx)).toEqual({
+    expect(await ask("What colour?", facts, "en", ctx)).toEqual({
       grounded: true,
       answer: "It is white.",
       fieldsUsed: ["color"],
@@ -40,7 +56,7 @@ describe("answerListingQuestion", () => {
       grounded: true,
       answer: "Ask me anything about this car!",
     });
-    expect(await answerListingQuestion("test", facts, "en", ctx)).toEqual({
+    expect(await ask("test", facts, "en", ctx)).toEqual({
       grounded: false,
       offTopic: true,
       message: "Ask me anything about this car!",
@@ -54,7 +70,7 @@ describe("answerListingQuestion", () => {
       grounded: false,
       answer: " The listing doesn't say whether it's been in an accident — the dealer can tell you. ",
     });
-    expect(await answerListingQuestion("Any accidents?", facts, "en", ctx)).toEqual({
+    expect(await ask("Any accidents?", facts, "en", ctx)).toEqual({
       grounded: false,
       message: "The listing doesn't say whether it's been in an accident — the dealer can tell you.",
     });
@@ -67,14 +83,14 @@ describe("answerListingQuestion", () => {
       grounded: false,
       answer: "Not stated — but visit cheapcars.example",
     });
-    expect(await answerListingQuestion("Any accidents?", facts, "en", ctx)).toEqual({
+    expect(await ask("Any accidents?", facts, "en", ctx)).toEqual({
       grounded: false,
     });
   });
 
   it("never shows a failed 'grounded' answer as a decline — it may state a fact", async () => {
     generateStructured.mockResolvedValue({ relevant: true, fieldsUsed: ["features"], grounded: true, answer: "Full service history." });
-    expect(await answerListingQuestion("Service?", facts, "en", ctx)).toEqual({ grounded: false });
+    expect(await ask("Service?", facts, "en", ctx)).toEqual({ grounded: false });
   });
 
   it("declines a 'grounded' answer that cites a fact this listing does not have", async () => {
@@ -84,14 +100,14 @@ describe("answerListingQuestion", () => {
       grounded: true,
       answer: "It has a full service history.",
     });
-    expect(await answerListingQuestion("Service history?", facts, "en", ctx)).toEqual({
+    expect(await ask("Service history?", facts, "en", ctx)).toEqual({
       grounded: false,
     });
   });
 
   it("declines a 'grounded' answer that cites nothing", async () => {
     generateStructured.mockResolvedValue({ relevant: true, fieldsUsed: [], grounded: true, answer: "Yes." });
-    expect(await answerListingQuestion("Negotiable?", facts, "en", ctx)).toEqual({
+    expect(await ask("Negotiable?", facts, "en", ctx)).toEqual({
       grounded: false,
     });
   });
@@ -145,28 +161,28 @@ describe("buttons and car cards", () => {
   it("keeps only the buttons the dealership's details can back", async () => {
     generateStructured.mockResolvedValue(reply({ actions: ["call", "directions", "call"] }));
     // A phone but no address: "call" holds, "directions" has nowhere to go.
-    expect(await answerListingQuestion("Can I visit?", withDealer, "en", ctx)).toMatchObject({
+    expect(await ask("Can I visit?", withDealer, "en", ctx)).toMatchObject({
       actions: ["call"],
     });
   });
 
   it("keeps the named cars that exist, in order, at most three", async () => {
     generateStructured.mockResolvedValue(reply({ carsNamed: [9, 4, 2, 4, 1, 3] }));
-    expect(await answerListingQuestion("Anything similar?", withDealer, "en", ctx)).toMatchObject({
+    expect(await ask("Anything similar?", withDealer, "en", ctx)).toMatchObject({
       carRefs: [4, 2, 1],
     });
   });
 
   it("shows no cards beside an answer that is not about the other cars", async () => {
     generateStructured.mockResolvedValue(reply({ fieldsUsed: ["color"], carsNamed: [1] }));
-    const answer = await answerListingQuestion("Colour?", withDealer, "en", ctx);
+    const answer = await ask("Colour?", withDealer, "en", ctx);
     expect(answer).not.toHaveProperty("carRefs");
     expect(answer).not.toHaveProperty("actions");
   });
 
   it("offers nothing with a decline", async () => {
     generateStructured.mockResolvedValue(reply({ grounded: false, fieldsUsed: [], actions: ["call"], carsNamed: [1] }));
-    const answer = await answerListingQuestion("Accidents?", withDealer, "en", ctx);
+    const answer = await ask("Accidents?", withDealer, "en", ctx);
     expect(answer).not.toHaveProperty("actions");
     expect(answer).not.toHaveProperty("carRefs");
   });
@@ -202,7 +218,7 @@ describe("conversation memory", () => {
 
   it("returns the question restated on its own, for the dealer's inbox", async () => {
     generateStructured.mockResolvedValue({ relevant: true, standalone: " How much is this car? ", fieldsUsed: [], grounded: false, answer: "" });
-    expect(await answerListingQuestion("and the price?", facts, "en", ctx, { history })).toMatchObject({
+    expect(await ask("and the price?", facts, "en", ctx, { history })).toMatchObject({
       grounded: false,
       standalone: "How much is this car?",
     });
@@ -236,8 +252,18 @@ describe("the test-drive button", () => {
 
   it("is offered only for a car still for sale", async () => {
     generateStructured.mockResolvedValue(reply);
-    expect(await answerListingQuestion("Can I try it?", facts, "en", ctx)).toMatchObject({ actions: ["testDrive"] });
+    expect(await ask("Can I try it?", facts, "en", ctx)).toMatchObject({ actions: ["testDrive"] });
     generateStructured.mockResolvedValue(reply);
-    expect(await answerListingQuestion("Can I try it?", { ...facts, status: "SOLD" }, "en", ctx)).not.toHaveProperty("actions");
+    expect(await ask("Can I try it?", { ...facts, status: "SOLD" }, "en", ctx)).not.toHaveProperty("actions");
+  });
+});
+
+describe("provenance", () => {
+  it("hands back the call that wrote the reply, answer or decline", async () => {
+    generateStructured.mockResolvedValue({ relevant: true, fieldsUsed: ["color"], grounded: true, answer: "White." });
+    expect((await answerListingQuestion("Colour?", facts, "en", ctx)).meta).toEqual(META);
+
+    generateStructured.mockResolvedValue({ relevant: true, fieldsUsed: [], grounded: false, answer: "" });
+    expect((await answerListingQuestion("Accidents?", facts, "en", ctx)).meta).toEqual(META);
   });
 });

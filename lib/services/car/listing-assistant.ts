@@ -13,6 +13,7 @@ import { dealershipPlaceName } from "@/lib/locations/names";
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import * as assistantAnswerRepository from "@/lib/repositories/assistant-answer";
 import { questionKey } from "@/lib/utils/question-key";
+import type { AssistantOutcome } from "@/lib/generated/prisma";
 import { NotFoundError, logError } from "@/lib/utils/errors";
 import { licenseMonth, statedDisclosures, statedTerms } from "@/lib/utils/car-disclosures";
 import { parseImageAlts } from "@/lib/utils/image-alts";
@@ -180,6 +181,22 @@ export async function askAboutListing(
     priority: allowance.priority,
   }, { trace, history });
 
+  // Every reply is kept with the call that wrote it — answers so they can be
+  // rated, declines and off-topic replies so the quality report can count them.
+  const keep = (outcome: AssistantOutcome, shown: string, fieldsUsed: string[] = []) =>
+    keepAnswer({
+      organizationId: car.organizationId,
+      carId: car.id,
+      question: (reply.standalone ?? question).slice(0, 300),
+      answer: shown.slice(0, 600),
+      locale,
+      outcome,
+      aiUsageId: reply.meta.usageId,
+      model: `${reply.meta.provider}/${reply.meta.model}`,
+      promptVersion: reply.meta.promptVersion,
+      fieldsUsed,
+    });
+
   if (reply.grounded) {
     trace?.end(`answered: "${reply.answer}"`);
     const actions = (reply.actions ?? []).flatMap((kind) => actionFor(kind, car, organization));
@@ -188,13 +205,7 @@ export async function askAboutListing(
       const row = otherCars?.[ref - 1];
       return row ? [suggestedCar(row, car.priceCurrency)] : [];
     });
-    const answerId = await keepAnswer({
-      organizationId: car.organizationId,
-      carId: car.id,
-      question: (reply.standalone ?? question).slice(0, 300),
-      answer: reply.answer.slice(0, 600),
-      locale,
-    });
+    const answerId = await keep("ANSWERED", reply.answer, reply.fieldsUsed);
     return {
       status: "answered",
       answer: reply.answer,
@@ -206,19 +217,23 @@ export async function askAboutListing(
   // Not a question about the car: the dealer has nothing to answer.
   if (reply.offTopic) {
     trace?.end(`off-topic — not filed for the dealer: "${reply.message ?? "(fixed copy)"}"`);
+    await keep("OFF_TOPIC", reply.message ?? "");
     return reply.message ? { status: "offTopic", message: reply.message } : { status: "offTopic" };
   }
 
   trace?.step("declined → filing the question in the dealer's Buyer Questions inbox");
   // The question as it stands alone: a dealer cannot answer "وبكام؟".
   const asked = reply.standalone ?? question;
-  await recordForDealer({
-    organizationId: car.organizationId,
-    carId: car.id,
-    question: asked,
-    questionKey: questionKey(asked),
-    locale,
-  });
+  await Promise.all([
+    recordForDealer({
+      organizationId: car.organizationId,
+      carId: car.id,
+      question: asked,
+      questionKey: questionKey(asked),
+      locale,
+    }),
+    keep("DECLINED", reply.message ?? ""),
+  ]);
   trace?.end(`declined + "ask the dealer": "${reply.message ?? "(fixed copy)"}"`);
   return reply.message ? { status: "notInListing", message: reply.message } : { status: "notInListing" };
 }
@@ -307,8 +322,8 @@ function suggestedCar(row: OtherCarRow, currency: string): SuggestedCar {
  * buyer's request: they still get "ask the dealer" either way.
  */
 /**
- * Keep the answer so the buyer can rate it. Best effort: without an id the
- * answer is still shown, just without 👍/👎.
+ * Keep a reply — an answer so the buyer can rate it. Best effort: without an
+ * id the reply is still shown, an answer just without 👍/👎.
  */
 async function keepAnswer(input: assistantAnswerRepository.AnswerToKeep): Promise<string | null> {
   try {

@@ -790,8 +790,21 @@ model AssistantAnswer {
   car            Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
 
   question String // the question as it stands alone, at most 300 characters
-  answer   String // what the buyer was shown, at most 600 characters
+  answer   String // what the buyer was shown, at most 600 characters; "" for fixed copy
   locale   String
+
+  // What the assistant did. Declines and off-topic replies are kept too, so
+  // the decline rate is a count, not a guess; only ANSWERED can be rated.
+  outcome AssistantOutcome @default(ANSWERED)
+
+  // Where the reply came from, so a 👎 traces to the call that wrote it. Null
+  // when the ledger row was lost or the reply came from the response cache.
+  // No relation on purpose: AiUsage rows outlive nothing here, and an answer
+  // must survive a ledger cleanup.
+  aiUsageId     String?
+  model         String? // "provider/model" that answered, cache hits included
+  promptVersion String?
+  fieldsUsed    String[] @default([]) // the record keys the answer cited
 
   helpful Boolean? // null until rated; rated once
   ratedAt DateTime?
@@ -800,6 +813,13 @@ model AssistantAnswer {
 
   @@index([organizationId, helpful, createdAt]) // what buyers found unhelpful
   @@index([carId, createdAt]) // pruning per car
+  @@index([createdAt, outcome]) // the platform quality report
+}
+
+enum AssistantOutcome {
+  ANSWERED
+  DECLINED // not in the record; filed in the dealer's inbox
+  OFF_TOPIC // not a question about the car
 }
 
 // One weekly summary email per dealership per week. The row is claimed
