@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { UserButton } from "@clerk/nextjs";
 import { ArrowUpRight, Menu } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Logo } from "@/components/brand";
+import { Logo, useRememberPlateBand } from "@/components/brand";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ const barIcon =
  */
 export function AdminTopBar() {
   const t = useTranslations("superAdmin.nav");
+  useRememberPlateBand("admin");
   const locale = useLocale();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -98,7 +99,7 @@ export function AdminTopBar() {
           href={BASE}
           className="order-2 flex h-16 min-w-0 flex-1 items-center rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker md:flex-none xl:h-[72px]"
         >
-          <Logo variant="admin" className="border-inverse-foreground" />
+          <Logo band="admin" className="border-inverse-foreground" />
           <span className="sr-only">{t("overview")}</span>
         </Link>
 

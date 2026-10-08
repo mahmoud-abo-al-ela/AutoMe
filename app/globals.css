@@ -30,12 +30,20 @@
   --color-brand-accent: var(--brand-accent);
   --color-brand-accent-foreground: var(--brand-accent-foreground);
   /* Public-site tokens. Only defined under the site theme (the
-     [data-theme="site"] block below), so they are inert in the dashboards. */
+     [data-theme="site"] block below), so they are inert in the dashboards —
+     except the plate bands, defined on :root for every surface. */
   --color-marker: var(--marker);
   --color-marker-hover: var(--marker-hover);
   --color-marker-soft: var(--marker-soft);
   --color-marker-foreground: var(--marker-foreground);
   --color-plate-band: var(--plate-band);
+  --color-plate-band-foreground: var(--plate-band-foreground);
+  --color-plate-owner: var(--plate-owner);
+  --color-plate-owner-foreground: var(--plate-owner-foreground);
+  --color-plate-team: var(--plate-team);
+  --color-plate-team-foreground: var(--plate-team-foreground);
+  --color-plate-admin: var(--plate-admin);
+  --color-plate-admin-foreground: var(--plate-admin-foreground);
   --color-field: var(--field);
   --color-inverse: var(--inverse);
   --color-inverse-hover: var(--inverse-hover);
@@ -145,6 +153,21 @@
 }
 
 :root {
+  /* The logo plate's top band (components/brand/Logo), by who is signed in.
+     Egyptian plates colour that band by licence type, and these borrow it:
+     private light blue for buyers, commercial brown for dealership owners,
+     taxi orange for their team, and presidency green for platform admins.
+     A plate is a physical object, so these hold on every surface and in
+     both modes — which is why they live here and not in the site theme. */
+  --plate-band: #a9c9ec; /* plate/200 */
+  --plate-band-foreground: #17181b;
+  --plate-owner: #7a4a26; /* 7.4:1 with white */
+  --plate-owner-foreground: #ffffff;
+  --plate-team: #f08a24; /* 7.1:1 with asphalt */
+  --plate-team-foreground: #17181b;
+  --plate-admin: #1f6f43; /* 6.2:1 with white */
+  --plate-admin-foreground: #ffffff;
+
   --app-font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   --radius: 0.625rem;
@@ -268,7 +291,6 @@
   --marker-hover: #f2b705;
   --marker-soft: #fff1c2;
   --marker-foreground: #17181b;
-  --plate-band: #a9c9ec; /* plate/200 */
 
   --inverse: #17181b;
   --inverse-hover: #2a2b2f;

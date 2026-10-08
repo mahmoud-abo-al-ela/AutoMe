@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { getOrgSlugFromPath, isSuperAdminPath, showsDealerPitch } from "@/lib/org/client";
+import {
+  getOrgSlugFromPath,
+  isSuperAdminPath,
+  parsePlateBand,
+  plateBandFor,
+  plateBandForMemberRole,
+  showsDealerPitch,
+} from "@/lib/org/client";
 
 describe("getOrgSlugFromPath", () => {
   it.each([
@@ -46,5 +53,57 @@ describe("isSuperAdminPath", () => {
 
   it.each(["/en/org/x/dashboard", "/org/x", "/en", "/ar/cars"])("%s is not", (path) => {
     expect(isSuperAdminPath(path)).toBe(false);
+  });
+});
+
+describe("plateBandFor", () => {
+  const member = (role: string, slug: string) => ({ role, organization: { slug } });
+  const owner = { role: "USER", memberships: [member("OWNER", "mo-motors")] };
+  const team = { role: "USER", memberships: [member("MEMBER", "mo-motors")] };
+
+  it("is the plain EGYPT plate for a visitor or a buyer", () => {
+    expect(plateBandFor(null)).toBe("buyer");
+    expect(plateBandFor({ role: "USER", memberships: [] })).toBe("buyer");
+  });
+
+  it("is ADMIN for platform staff, impersonating included", () => {
+    expect(plateBandFor({ role: "ADMIN" })).toBe("admin");
+    // While impersonating, the session user is the dealer.
+    expect(plateBandFor({ ...owner, isImpersonated: true }, "mo-motors")).toBe("admin");
+  });
+
+  it("is the dealership role on the marketplace", () => {
+    expect(plateBandFor(owner)).toBe("owner");
+    expect(plateBandFor(team)).toBe("team");
+  });
+
+  it("prefers OWNER when the user holds both roles somewhere", () => {
+    expect(
+      plateBandFor({ role: "USER", memberships: [member("MEMBER", "a"), member("OWNER", "b")] })
+    ).toBe("owner");
+  });
+
+  it("is their role in this storefront's dealership, and a buyer's in another's", () => {
+    expect(plateBandFor(owner, "mo-motors")).toBe("owner");
+    expect(plateBandFor(team, "mo-motors")).toBe("team");
+    expect(plateBandFor(owner, "nile-cars")).toBe("buyer");
+  });
+});
+
+describe("parsePlateBand", () => {
+  it.each(["buyer", "owner", "team", "admin"])("keeps a known band (%s)", (band) => {
+    expect(parsePlateBand(band)).toBe(band);
+  });
+
+  it.each([undefined, null, "", "ADMIN", "<script>"])("falls back to the plain plate for %s", (value) => {
+    expect(parsePlateBand(value)).toBe("buyer");
+  });
+});
+
+describe("plateBandForMemberRole", () => {
+  it("maps the dashboard role, and no role to admin", () => {
+    expect(plateBandForMemberRole("OWNER")).toBe("owner");
+    expect(plateBandForMemberRole("MEMBER")).toBe("team");
+    expect(plateBandForMemberRole(undefined)).toBe("admin");
   });
 });

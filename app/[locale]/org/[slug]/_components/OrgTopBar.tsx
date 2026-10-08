@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { UserButton } from "@clerk/nextjs";
 import { ChevronDown, Menu, MessageSquare } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Logo } from "@/components/brand";
+import { Logo, useRememberPlateBand } from "@/components/brand";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,7 @@ import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import { OrgUnreadBadge } from "@/components/StreamChat";
 import { sidebarItems } from "@/lib/SidebarConfig";
 import { cn } from "@/lib/utils";
+import { plateBandForMemberRole } from "@/lib/org/client";
 import type { MemberRole, Organization } from "@/lib/generated/prisma";
 
 /** Billing, the audit log and settings are the owner's. A platform admin or
@@ -58,6 +59,8 @@ export function OrgTopBar({
   userRole: MemberRole | undefined;
 }) {
   const t = useTranslations("org.nav");
+  const band = plateBandForMemberRole(userRole);
+  useRememberPlateBand(band);
   const locale = useLocale();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,7 +162,7 @@ export function OrgTopBar({
               />
             </span>
           )}
-          <Logo name={name} className="min-w-0 border-inverse-foreground" />
+          <Logo name={name} band={band} className="min-w-0 border-inverse-foreground" />
           <span className="sr-only">{t("dashboard")}</span>
         </Link>
 
