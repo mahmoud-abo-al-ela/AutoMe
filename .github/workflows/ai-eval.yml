@@ -1,0 +1,136 @@
+name: AI evaluation
+
+# The real-model evaluation suites (lib/ai/evaluation), compared with the
+# committed baseline. Separate from CI: these spend provider quota, so they run
+# on a schedule, not on every push.
+#
+#   Nightly    — Google only. CodeCraft's key is left out, so every chain falls
+#                to Google's models and the run spends only free daily requests.
+#   Saturdays  — the full production chains, CodeCraft included. A full run is
+#                ~100k CodeCraft tokens; nightly it would empty a 950k monthly
+#                allowance in ten days.
+#   On demand  — Actions tab → AI evaluation → Run workflow.
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   AI_EVAL_GEMINI_API_KEY     a key from a SEPARATE Google project, so its free
+#                              daily quota is its own and evals never take
+#                              requests production needs.
+#   AI_EVAL_CODECRAFT_API_KEY  ideally a separate CodeCraft account for the same
+#                              reason; only the Saturday run uses it.
+#
+# A failing run means a regression: a case that passed in the baseline fails
+# now. Cases no model could answer are inconclusive, and [judge] cases are
+# advisory — both are listed in the summary and never fail the run.
+#
+# To accept a run as the new baseline: download its eval-report artifact, then
+#   AI_EVAL_REPORT=eval-report.json pnpm eval:compare --update-baseline
+# and commit lib/ai/evaluation/baseline.json.
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # nightly, Google only
+    - cron: "0 2 * * 6" # Saturday, full production chains
+  workflow_dispatch:
+    inputs:
+      providers:
+        description: "Which providers to spend"
+        type: choice
+        options: [google, all]
+        default: google
+      suite:
+        description: "Only these suites, e.g. lib/ai/evaluation/listing-qa (empty = all)"
+        type: string
+        default: ""
+
+# One run at a time: two would share the same per-minute provider caps.
+concurrency:
+  group: ai-eval
+  cancel-in-progress: false
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    # The suites meter every call, as production does; the ledger needs a
+    # database. Throwaway, like the CI test job's.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: autome_eval
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      AI_EVAL: "1"
+      AI_EVAL_REPORT: eval-report.json
+      GEMINI_API_KEY: ${{ secrets.AI_EVAL_GEMINI_API_KEY }}
+      # Empty means no CodeCraft key, and the chains skip CodeCraft entirely.
+      CODECRAFT_API_KEY: ${{ (github.event.schedule == '0 2 * * 6' || inputs.providers == 'all') && secrets.AI_EVAL_CODECRAFT_API_KEY || '' }}
+      DATABASE_URL: postgresql://postgres@localhost:5432/autome_eval
+      DIRECT_URL: postgresql://postgres@localhost:5432/autome_eval
+      # Module-scope constructors run when the suites import app modules. Same
+      # placeholders as ci.yml — never reach a real service.
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_ROOT_DOMAIN: localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: placeholder
+      SUPABASE_SERVICE_ROLE_KEY: placeholder
+      ARCJET_KEY: ajkey_placeholder
+
+    steps:
+      # Without a key every suite skips, and an empty report would "pass".
+      - name: Require the eval key
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::AI_EVAL_GEMINI_API_KEY is not set — nothing would be evaluated."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma migrate deploy
+
+      # Vitest exits non-zero on any failed case, advisory ones included; the
+      # compare step below is what decides whether the run fails.
+      - name: Run the evaluation suites
+        continue-on-error: true
+        run: pnpm eval ${{ inputs.suite }}
+
+      - name: Compare with the baseline
+        run: |
+          set -o pipefail
+          pnpm --silent eval:compare | tee compare.txt
+          if [ -n "$CODECRAFT_API_KEY" ]; then providers="Google + CodeCraft"; else providers="Google only"; fi
+          {
+            echo '### AI evaluation'
+            echo
+            echo "Providers: $providers"
+            echo
+            echo '```'
+            cat compare.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: eval-report.json
+          if-no-files-found: warn
+          retention-days: 30
