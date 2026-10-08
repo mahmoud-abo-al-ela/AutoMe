@@ -12,17 +12,23 @@ import { cn } from "@/lib/utils";
  *
  * `lg` is the plate on its own as an object (the road loader), with the key
  * shadow the marker buttons use so it sits on the page like a real plate.
+ *
+ * `admin` is the super-admin plate: the band reads ADMIN / إدارة, so
+ * staff always see they are in the platform admin, not a dealership.
  */
 export function Logo({
   name = "AutoMe",
   size = "md",
+  variant = "default",
   className,
 }: {
   name?: string;
   size?: "md" | "lg";
+  variant?: "default" | "admin";
   className?: string;
 }) {
   const lg = size === "lg";
+  const admin = variant === "admin";
   return (
     <span
       aria-hidden
@@ -35,12 +41,13 @@ export function Logo({
       <span
         dir="ltr"
         className={cn(
-          "flex justify-between gap-3 bg-plate-band font-bold leading-[1.6]",
+          "flex justify-between gap-3 font-bold leading-[1.6]",
+          "bg-plate-band",
           lg ? "px-2 text-[10px]" : "px-1.5 text-[8px]"
         )}
       >
-        <span>EGYPT</span>
-        <span>مصر</span>
+        <span>{admin ? "ADMIN" : "EGYPT"}</span>
+        <span>{admin ? "إدارة" : "مصر"}</span>
       </span>
       <span
         className={cn(

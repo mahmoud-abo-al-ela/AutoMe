@@ -5,17 +5,16 @@
   },
   "nav": {
     "brand": "الإدارة العليا",
+    "label": "أقسام الإدارة",
     "overview": "نظرة عامة",
     "organizations": "المعارض",
-    "users": "كل المستخدمين",
-    "plans": "الباقات والأسعار",
+    "users": "المستخدمون",
+    "plans": "الباقات",
+    "impersonation": "جلسات الدعم",
+    "auditLogs": "النشاط",
     "analytics": "التحليلات",
-    "auditLogs": "سجل النشاط",
-    "impersonation": "انتحال الهوية",
     "openMenu": "فتح القائمة",
     "closeMenu": "إغلاق القائمة",
-    "collapseSidebar": "طي القائمة الجانبية",
-    "expandSidebar": "توسيع القائمة الجانبية",
     "backToSite": "العودة إلى الموقع"
   },
   "common": {
@@ -55,39 +54,86 @@
     }
   },
   "overview": {
-    "title": "نظرة عامة على المنصة",
-    "subtitle": "متابعة منصة AutoMe وإدارتها",
-    "stats": {
-      "organizations": "إجمالي المعارض",
-      "organizationsActive": "{value} نشط",
-      "users": "إجمالي المستخدمين",
-      "cars": "إجمالي السيارات المعروضة",
-      "testDrives": "إجمالي القيادات التجريبية"
+    "title": "نظرة عامة",
+    "period": {
+      "label": "الفترة",
+      "d7": "آخر ٧ أيام",
+      "d30": "آخر ٣٠ يومًا",
+      "d90": "آخر ٩٠ يومًا",
+      "d365": "آخر ١٢ شهرًا"
     },
-    "subscriptions": {
-      "title": "الاشتراكات النشطة حسب الباقة",
-      "orgCount": "{count, plural, zero {{value} معرض} one {معرض واحد} two {معرضان} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
-      "empty": "لا توجد اشتراكات نشطة"
+    "compare": {
+      "label": "المقارنة بـ",
+      "previous": "الفترة السابقة",
+      "none": "بلا مقارنة"
     },
-    "growth": {
-      "title": "نمو المنصة",
-      "subtitle": "المعارض والمستخدمون والسيارات الجديدة خلال آخر ستة أشهر",
-      "series": {
-        "organizations": "المعارض",
-        "users": "المستخدمون",
-        "cars": "السيارات"
-      }
+    "metrics": {
+      "label": "الأرقام الرئيسية",
+      "revenue": "الإيرادات المحصلة",
+      "dealerships": "معارض جديدة",
+      "cars": "سيارات أُضيفت",
+      "buyers": "مشترون جدد",
+      "testDrives": "طلبات القيادة التجريبية"
     },
-    "recentOrganizations": {
-      "title": "أحدث المعارض",
-      "subtitle": "آخر المعارض المضافة إلى المنصة",
-      "empty": "لا توجد معارض بعد"
+    "change": {
+      "up": "زيادة {percent}",
+      "down": "انخفاض {percent}",
+      "same": "دون تغيير",
+      "fromZero": "لا شيء في الفترة السابقة",
+      "compared": "مقارنة بالفترة السابقة"
     },
-    "activeImpersonations": {
-      "title": "جلسات انتحال الهوية النشطة",
-      "subtitle": "جلسات انتحال الهوية الجارية للمسؤولين",
-      "count": "{count, plural, zero {لا توجد جلسات انتحال هوية نشطة} one {جلسة انتحال هوية نشطة واحدة} two {جلستا انتحال هوية نشطتان} few {{value} جلسات انتحال هوية نشطة} many {{value} جلسة انتحال هوية نشطة} other {{value} جلسة انتحال هوية نشطة}}",
-      "empty": "لا توجد جلسات انتحال هوية نشطة"
+    "chart": {
+      "hint": "الإجمالي التراكمي، من {from} إلى {to}",
+      "current": "هذه الفترة",
+      "previous": "الفترة السابقة",
+      "label": "{metric}: {value} في هذه الفترة، و{previous} في الفترة السابقة.",
+      "labelAlone": "{metric}: {value} في هذه الفترة."
+    },
+    "plans": {
+      "title": "المعارض حسب الباقة",
+      "total": "الإجمالي: {value}",
+      "status": "مدفوعة: {paying}. في فترة تجربة: {trial}. متأخرة السداد: {overdue}.",
+      "income": "تدرّ الباقات المدفوعة {amount} شهريًا."
+    },
+    "drives": {
+      "title": "القيادة التجريبية",
+      "requested": "مطلوبة",
+      "confirmed": "أكدها المعرض",
+      "completed": "اكتملت",
+      "empty": "لم تُطلب أي قيادة تجريبية في هذه الفترة."
+    },
+    "cars": {
+      "title": "السيارات",
+      "total": "الإجمالي: {value}",
+      "available": "معروضة للبيع",
+      "hidden": "مخفية",
+      "sold": "مباعة",
+      "average": "بمتوسط {value} لكل معرض."
+    },
+    "needs": {
+      "title": "يحتاج إلى متابعة",
+      "none": "لا شيء يحتاج إلى متابعة الآن.",
+      "columns": {
+        "issue": "المسألة",
+        "dealership": "المعرض",
+        "details": "التفاصيل",
+        "action": "الإجراء"
+      },
+      "tags": {
+        "overdue": "سداد متأخر",
+        "trial": "تجربة تنتهي",
+        "support": "جلسة دعم",
+        "new": "بلا سيارات بعد"
+      },
+      "overdue": "{plan}، متأخر منذ {since}. ينتقل إلى الباقة المجانية في {drops}.",
+      "trial": "تنتهي تجربة {plan} في {date}.",
+      "session": "{admin} داخل باسم {person} منذ {minutes, plural, one {دقيقة واحدة} two {دقيقتين} few {{value} دقائق} many {{value} دقيقة} other {{value} دقيقة}}.",
+      "sessionMine": "أنت داخل باسم {person} منذ {minutes, plural, one {دقيقة واحدة} two {دقيقتين} few {{value} دقائق} many {{value} دقيقة} other {{value} دقيقة}}.",
+      "newWithoutCars": "انضم هذا الأسبوع، ولا سيارات معروضة بعد.",
+      "more": "{list} و{value} غيرها",
+      "open": "فتح",
+      "review": "مراجعة",
+      "seeThem": "عرضها"
     }
   },
   "organizations": {
