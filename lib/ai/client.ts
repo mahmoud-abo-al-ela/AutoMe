@@ -528,6 +528,31 @@ export interface AiCallMeta {
   cached: boolean;
 }
 
+/** One answered call, as a listener sees it. */
+export type AiCallRecord = AiCallMeta & { feature: AiFeature };
+
+const callListeners = new Set<(call: AiCallRecord) => void>();
+
+/**
+ * Hear about every answered call. The evaluation suites use it to report which
+ * model answered each case — a fallback answer is a different experiment.
+ * Returns the unsubscribe. A listener that throws never costs the call.
+ */
+export function subscribeAiCalls(listener: (call: AiCallRecord) => void): () => void {
+  callListeners.add(listener);
+  return () => callListeners.delete(listener);
+}
+
+function announce(feature: AiFeature, meta: AiCallMeta) {
+  for (const listener of callListeners) {
+    try {
+      listener({ feature, ...meta });
+    } catch (error) {
+      logError("AI call listener threw; ignoring", error);
+    }
+  }
+}
+
 export async function generateStructured<T>(input: GenerateStructuredInput<T>): Promise<T> {
   return (await generateStructuredWithMeta(input)).data;
 }
@@ -536,13 +561,11 @@ export async function generateStructured<T>(input: GenerateStructuredInput<T>): 
 export async function generateStructuredWithMeta<T>(
   input: GenerateStructuredInput<T>
 ): Promise<{ data: T; meta: AiCallMeta }> {
-  const metaFor = (entry: ChainEntry, usageId: string | null, cached: boolean): AiCallMeta => ({
-    usageId,
-    provider: entry.provider,
-    model: entry.model,
-    promptVersion: input.promptVersion,
-    cached,
-  });
+  const metaFor = (entry: ChainEntry, usageId: string | null, cached: boolean): AiCallMeta => {
+    const meta = { usageId, provider: entry.provider, model: entry.model, promptVersion: input.promptVersion, cached };
+    announce(input.feature, meta);
+    return meta;
+  };
 
   // Only providers with at least one key: an entry can ship before its key does.
   const keyring = new Map<ProviderId, string[]>();

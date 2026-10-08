@@ -26,7 +26,7 @@ vi.mock("@/lib/repositories/ai-usage", () => ({
   countPlatformCallsSince,
 }));
 
-import { generateStructured, generateStructuredWithMeta } from "@/lib/ai/client";
+import { generateStructured, generateStructuredWithMeta, subscribeAiCalls } from "@/lib/ai/client";
 import { modelsFor } from "@/lib/ai/models";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { textPart } from "@/lib/ai/provider/types";
@@ -703,5 +703,31 @@ describe("generateStructuredWithMeta — where a reply came from", () => {
 
     expect(data).toEqual({ make: "Lada", year: 2010 });
     expect(meta.usageId).toBeNull();
+  });
+});
+
+describe("subscribeAiCalls", () => {
+  it("tells a listener which model answered, until it unsubscribes", async () => {
+    const heard: unknown[] = [];
+    const stop = subscribeAiCalls((c) => heard.push(c));
+    generate.mockResolvedValue(ok('{"make":"Jeep","year":2017}'));
+
+    await call();
+    stop();
+    await call();
+
+    expect(heard).toEqual([
+      expect.objectContaining({ feature: AI_FEATURES.carListingFromImage, provider: "google", cached: false }),
+    ]);
+  });
+
+  it("never lets a throwing listener cost the call", async () => {
+    const stop = subscribeAiCalls(() => {
+      throw new Error("listener bug");
+    });
+    generate.mockResolvedValue(ok('{"make":"Saab","year":2009}'));
+
+    await expect(call()).resolves.toEqual({ make: "Saab", year: 2009 });
+    stop();
   });
 });

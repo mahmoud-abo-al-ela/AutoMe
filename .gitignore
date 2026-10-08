@@ -46,3 +46,5 @@ lib/generated/
 
 .agent/
 .claude/
+# AI evaluation run output (pnpm eval)
+eval-report.json
