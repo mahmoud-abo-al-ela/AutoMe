@@ -1,4 +1,10 @@
 // Pure helpers for the dealership inventory filter bar.
+
+/** A filter button: a white pill, like the dealerships list's filters. */
+export const FILTER_CHIP =
+  "h-12 gap-1.5 rounded-full border-border bg-field px-4 font-semibold text-foreground hover:bg-field hover:border-border-strong";
+/** …and once it holds a choice: filled asphalt, as the Browse page marks one. */
+export const FILTER_CHIP_ACTIVE = "border-border-strong bg-inverse text-inverse-foreground hover:bg-inverse-hover";
 import type {
   ActiveFilterChip,
   DealershipCarFilterOptions,

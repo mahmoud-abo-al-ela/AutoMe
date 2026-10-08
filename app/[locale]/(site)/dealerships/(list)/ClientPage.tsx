@@ -1,6 +1,6 @@
 "use client";
 
-import { DealershipsPagePresenter } from "./_components";
+import { DealershipsPagePresenter } from "../_components";
 import { useDealershipsPage } from "@/hooks/use-dealerships-page";
 
 type UseDealershipsPageArgs = Parameters<typeof useDealershipsPage>;

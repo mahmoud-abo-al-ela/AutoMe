@@ -1,111 +1,68 @@
 "use client";
 
-import React from "react";
-import { Car, Search } from "lucide-react";
+import { Car, SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import CarCard from "@/components/CarCard";
-import { Pagination, PaginationInfo } from "@/components/common/Pagination";
-import { DealershipInventoryFilters } from "./DealershipInventoryFilters";
+import { SiteEmptyState } from "@/components/brand";
+import { Pagination } from "@/components/common/Pagination";
 import { LoadingGrid } from "@/components/common/LoadingStates";
+import { DealershipInventoryFilters } from "./DealershipInventoryFilters";
 import type { DealershipInventoryProps } from "../_lib/detail-types";
 
+/** The Cars tab: search and filters, the count and sort, then the grid. */
 export const DealershipCarsSection = ({
     cars,
-    carCount, // original static total count of dealership cars
+    carCount, // every car the dealership has for sale, whatever the filters
     carsLoading,
     carsPagination,
     onPageChange,
     filters,
     onFilterChange,
     availableFilters,
-}: DealershipInventoryProps & { carCount?: number }) => {
+}: DealershipInventoryProps & { carCount: number }) => {
     const t = useTranslations("dealerships.inventory");
-    const totalCarCount = carCount ?? 0;
-    const hasActiveFilters = 
-        filters.search || 
-        filters.minPrice || 
-        filters.maxPrice || 
-        filters.bodyType || 
-        filters.fuelType || 
-        filters.transmission;
+
+    if (carCount === 0) {
+        return <SiteEmptyState icon={Car} title={t("noCarsTitle")} description={t("noCarsBody")} />;
+    }
 
     return (
-        <div className="space-y-6" id="dealership-cars-section">
-            {/* Inline filters bar */}
-            {totalCarCount > 0 && (
-                <DealershipInventoryFilters
-                    filters={filters}
-                    onFilterChange={onFilterChange}
-                    availableFilters={availableFilters}
-                    totalCars={carsPagination.total}
-                    isLoading={carsLoading}
+        <div className="flex flex-col gap-5">
+            <DealershipInventoryFilters
+                filters={filters}
+                onFilterChange={onFilterChange}
+                availableFilters={availableFilters}
+                totalCars={carsPagination.total}
+                isLoading={carsLoading}
+            />
+
+            {carsLoading ? (
+                <LoadingGrid count={6} />
+            ) : cars.length === 0 ? (
+                <SiteEmptyState
+                    icon={SearchX}
+                    title={t("noMatchesTitle")}
+                    description={t("noMatchesBody")}
+                    primary={{ label: t("resetAllFilters"), onClick: () => onFilterChange({ sortBy: "newest" }) }}
                 />
-            )}
-
-            {/* Loading skeleton */}
-            {carsLoading && <LoadingGrid count={6} />}
-
-            {/* Empty state - no cars at all in dealership */}
-            {!carsLoading && totalCarCount === 0 && (
-                <div className="bg-muted/50 rounded-control p-12 text-center border border-border">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/80 mb-4 text-muted-foreground">
-                        <Car className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">
-                        {t("noCarsTitle")}
-                    </h3>
-                    <p className="text-muted-foreground max-w-sm mx-auto">
-                        {t("noCarsBody")}
-                    </p>
-                </div>
-            )}
-
-            {/* Empty state - filters returned no results */}
-            {!carsLoading && totalCarCount > 0 && cars.length === 0 && (
-                <div className="bg-muted/50 rounded-control p-12 text-center border border-border">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/80 mb-4 text-muted-foreground">
-                        <Search className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">
-                        {t("noMatchesTitle")}
-                    </h3>
-                    <p className="text-muted-foreground max-w-sm mx-auto mb-4">
-                        {t("noMatchesBody")}
-                    </p>
-                    <button
-                        onClick={() => onFilterChange({ sortBy: "newest" })}
-                        className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary/95 rounded-lg cursor-pointer transition-colors"
-                    >
-                        {t("resetAllFilters")}
-                    </button>
-                </div>
-            )}
-
-            {/* Car grid */}
-            {!carsLoading && cars.length > 0 && (
+            ) : (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {cars.map((car) => (
-                            <CarCard key={car.id} car={car} />
+                    {/* The Browse grid: two-up on phones, three in the wide column. */}
+                    <ul className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                        {cars.map((car, i) => (
+                            <li key={car.id}>
+                                <CarCard car={car} index={i} />
+                            </li>
                         ))}
-                    </div>
+                    </ul>
 
-                    {/* Pagination */}
                     {carsPagination.totalPages > 1 && (
-                        <div className="mt-8 space-y-4 pt-4 border-t border-border">
-                            <Pagination
-                                currentPage={carsPagination.page}
-                                totalPages={carsPagination.totalPages}
-                                onPageChange={onPageChange}
-                                disabled={carsLoading}
-                            />
-                            <PaginationInfo
-                                currentPage={carsPagination.page}
-                                limit={carsPagination.limit}
-                                total={carsPagination.total}
-                                noun="cars"
-                            />
-                        </div>
+                        <Pagination
+                            currentPage={carsPagination.page}
+                            totalPages={carsPagination.totalPages}
+                            onPageChange={onPageChange}
+                            disabled={carsLoading}
+                        />
                     )}
                 </>
             )}

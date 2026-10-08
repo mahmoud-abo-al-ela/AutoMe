@@ -1,95 +1,133 @@
+import { cache } from "react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { formatNumber } from "@/lib/utils/number";
 import type { Locale } from "@/i18n/routing";
-import { getDealershipBySlug } from "@/actions/dealerships";
-import { DealershipDetailPresenter } from "./_components";
+import * as dealershipService from "@/lib/services/dealership";
+import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
+import {
+    generateBreadcrumbStructuredData,
+    generateDealershipStructuredData,
+    StructuredData,
+} from "@/lib/utils/seo";
+import { DealershipPage } from "./_components/DealershipPage";
+import {
+    DEALERSHIP_CARS_PER_PAGE,
+    DEALERSHIP_TABS,
+    type DealershipCar,
+    type DealershipTab,
+} from "./_lib/detail-types";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ slug: string; locale: string }>;
-}): Promise<Metadata> {
-    const { slug, locale } = await params;
-    const t = await getTranslations({ locale, namespace: "dealerships.meta" });
-
+/**
+ * One lookup per request, shared by the metadata and the page. A missing or
+ * inactive dealership is null (the page answers 404); anything else throws to
+ * the error boundary.
+ */
+const loadDealership = cache(async (slug: string) => {
     try {
-        // `params` is a promise in Next 15. Reading `.slug` off it directly gave
-        // undefined, so every dealership page fell into the catch below and
-        // served the generic fallback title/description/OG tags.
-        const dealership = await getDealershipBySlug(slug);
-
-        if (!dealership.success || !dealership.data) {
-            return {
-                title: t("notFoundTitle"),
-                description: t("notFoundDescription"),
-            };
-        }
-
-        // The payload carries `city`/`region` at the top level; there is no
-        // `location` object, so the two location keywords below were always
-        // undefined and filtered out.
-        const { name, description, city, region, logo, carCount } =
-            dealership.data;
-
-        // The tab title gets the brand from the root title.template; og/twitter
-        // titles do not inherit it, so they spell the brand out themselves.
-        const title = name;
-        const socialTitle = name + " | AutoMe";
-        const desc =
-            description ||
-            t("detailDescription", {
-                name,
-                count: carCount || 0,
-                value: formatNumber(carCount || 0, locale as Locale),
-            });
-
-        const meta = await localizedPageMetadata(`/dealerships/${slug}`, locale as Locale, {
-            title,
-            description: desc,
-        });
-
-        return {
-            ...meta,
-            keywords: [name, t("keywords"), city, region].filter(Boolean).join(", "),
-            openGraph: {
-                ...meta.openGraph,
-                title: socialTitle,
-                description: desc,
-                type: "website",
-                images: [
-                    {
-                        url: logo || "/og-image.jpg",
-                        width: 1200,
-                        height: 630,
-                        alt: `${name} logo`,
-                    },
-                ],
-            },
-            twitter: {
-                card: "summary_large_image",
-                title: socialTitle,
-                description: desc,
-                images: [logo || "/og-image.jpg"],
-            },
-        };
+        return await dealershipService.getDealershipBySlug(slug);
     } catch (error) {
-        console.error("Error generating metadata:", error);
-        return {
-            title: t("fallbackTitle"),
-            description: t("fallbackDescription"),
-        };
+        if (error instanceof NotFoundError || error instanceof ValidationError) return null;
+        throw error;
     }
-}
+});
 
-const DealershipDetailPage = async ({
-    params,
-}: {
+type PageProps = {
     params: Promise<{ slug: string; locale: string }>;
-}) => {
-
-    return <DealershipDetailPresenter />;
+    searchParams: Promise<{ tab?: string | string[] }>;
 };
 
-export default DealershipDetailPage;
+export async function generateMetadata({ params }: Pick<PageProps, "params">): Promise<Metadata> {
+    const { slug, locale } = await params;
+    const t = await getTranslations({ locale, namespace: "dealerships.meta" });
+    const dealership = await loadDealership(slug);
+
+    if (!dealership) {
+        return { title: t("notFoundTitle"), description: t("notFoundDescription") };
+    }
+
+    const { name, description, city, region, logo, carCount } = dealership;
+    // The tab title gets the brand from the root title.template; og/twitter
+    // titles do not inherit it, so they spell the brand out themselves.
+    const socialTitle = name + " | AutoMe";
+    const desc =
+        description ||
+        t("detailDescription", {
+            name,
+            count: carCount || 0,
+            value: formatNumber(carCount || 0, locale as Locale),
+        });
+
+    const meta = await localizedPageMetadata(`/dealerships/${slug}`, locale as Locale, {
+        title: name,
+        description: desc,
+    });
+
+    return {
+        ...meta,
+        keywords: [name, t("keywords"), city, region].filter(Boolean).join(", "),
+        openGraph: {
+            ...meta.openGraph,
+            title: socialTitle,
+            description: desc,
+            type: "website",
+            images: [{ url: logo || "/og-image.jpg", width: 1200, height: 630, alt: `${name} logo` }],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: socialTitle,
+            description: desc,
+            images: [logo || "/og-image.jpg"],
+        },
+    };
+}
+
+/**
+ * A dealership's storefront. Rendered on the server — the dealership, its
+ * first page of cars and the filter options — so the page arrives whole
+ * (and readable by search engines) instead of as a skeleton that fetched
+ * everything after load. Filtering and paging then run in the browser.
+ */
+export default async function DealershipDetailPage({ params, searchParams }: PageProps) {
+    const { slug, locale } = await params;
+    const dealership = await loadDealership(slug);
+    if (!dealership) notFound();
+
+    const [carsResult, filterOptions, t] = await Promise.all([
+        dealershipService.getDealershipCars(
+            dealership.id,
+            { sortBy: "newest" },
+            { page: 1, limit: DEALERSHIP_CARS_PER_PAGE }
+        ),
+        dealershipService.getDealershipCarFilters(dealership.id),
+        getTranslations({ locale, namespace: "dealerships.breadcrumb" }),
+    ]);
+
+    const requestedTab = (await searchParams).tab;
+    const initialTab: DealershipTab = DEALERSHIP_TABS.includes(requestedTab as DealershipTab)
+        ? (requestedTab as DealershipTab)
+        : "cars";
+
+    return (
+        <>
+            <StructuredData data={generateDealershipStructuredData(dealership)} />
+            <StructuredData
+                data={generateBreadcrumbStructuredData([
+                    { name: t("home"), url: "/" },
+                    { name: t("dealerships"), url: "/dealerships" },
+                    { name: dealership.name, url: `/dealerships/${dealership.slug}` },
+                ])}
+            />
+            <DealershipPage
+                dealership={dealership}
+                // The serializer can yield null entries; a card would crash on one.
+                initialCars={carsResult.cars.filter((car): car is DealershipCar => car !== null)}
+                initialPagination={carsResult.pagination}
+                filterOptions={filterOptions}
+                initialTab={initialTab}
+            />
+        </>
+    );
+}

@@ -47,6 +47,19 @@ export async function findDealershipReviews(
 }
 
 /**
+ * How many approved reviews gave each star rating — the breakdown counted
+ * over all of a dealership's reviews, not just the page on screen.
+ */
+export async function countDealershipReviewsByRating(organizationId: string) {
+    const rows = await db.dealershipReview.groupBy({
+        by: ["rating"],
+        where: { organizationId, isApproved: true },
+        _count: { _all: true },
+    });
+    return rows.map((row) => ({ rating: row.rating, count: row._count._all }));
+}
+
+/**
  * Check if user has already reviewed a dealership
  */
 

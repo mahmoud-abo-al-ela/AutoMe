@@ -21,3 +21,4 @@ type ReviewsData =
 
 export type DealershipReview = ReviewsData["reviews"][number];
 export type ReviewsPagination = ReviewsData["pagination"];
+export type ReviewRatingCount = ReviewsData["ratingCounts"][number];

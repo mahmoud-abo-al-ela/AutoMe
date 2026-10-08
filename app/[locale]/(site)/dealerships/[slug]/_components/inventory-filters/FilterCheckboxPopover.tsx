@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { FilterCheckboxProps } from "./FilterCheckboxGroup";
+import { FILTER_CHIP, FILTER_CHIP_ACTIVE } from "./filter-utils";
 
 // contentWidthClass must be a static Tailwind class (e.g. "w-[200px]") so JIT
 // can see it — pass it in from the parent rather than composing it dynamically.
@@ -29,11 +30,11 @@ export default function FilterCheckboxPopover({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={`h-9.5 gap-1.5 px-3 rounded-lg bg-card border-border text-muted-foreground font-medium hover:bg-muted transition-all ${active ? "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10" : ""}`}
+          className={`${FILTER_CHIP} ${active ? FILTER_CHIP_ACTIVE : ""}`}
         >
-          <span className="text-xs">{label}</span>
+          <span>{label}</span>
           {active && (
-            <Badge variant="secondary" className="h-5 px-1.5 bg-primary/10 text-primary hover:bg-primary/15 font-bold text-micro rounded-full">
+            <Badge variant="secondary" className="h-5 px-1.5 bg-inverse-foreground text-inverse hover:bg-inverse-foreground font-bold text-micro rounded-full">
               {selected.length}
             </Badge>
           )}
