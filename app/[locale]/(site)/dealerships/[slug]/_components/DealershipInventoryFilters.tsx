@@ -169,12 +169,7 @@ export const DealershipInventoryFilters = ({
         <div className="space-y-4 mb-6">
             {/* Row 1: Header + Sort */}
             <div className="flex items-center justify-between gap-4">
-                <h3 className="text-xl font-bold text-foreground flex items-baseline gap-2">
-                    {t("heading")}
-                    <span className="text-muted-foreground font-normal text-sm">
-                        {t("matching", { count: fmt.number(totalCars ?? 0) })}
-                    </span>
-                </h3>
+                <h3 className="text-xl font-bold text-foreground">{t("heading")}</h3>
 
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground hidden sm:inline-block">{t("sortBy")}</span>

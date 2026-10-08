@@ -12,9 +12,6 @@
   },
   "hero": {
     "title": "تصفح المعارض",
-    "subtitleFallback": "اعثر على المعرض المناسب لسيارتك القادمة",
-    "subtitle": "استكشف {count, plural, =0 {المعارض} one {معرضًا واحدًا} two {معرضين} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
-    "subtitleWithCities": "استكشف {count, plural, =0 {المعارض} one {معرضًا واحدًا} two {معرضين} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}} في {cityCount, plural, one {مدينة واحدة} two {مدينتين} few {{cityValue} مدن} many {{cityValue} مدينة} other {{cityValue} مدينة}}",
     "searchPlaceholder": "ابحث عن معرض بالاسم أو الموقع…",
     "searchLabel": "البحث في المعارض"
   },
@@ -127,7 +124,6 @@
   },
   "inventory": {
     "heading": "السيارات المتاحة",
-    "matching": "({count} مطابقة)",
     "sortBy": "الترتيب حسب",
     "sortPlaceholder": "طريقة الترتيب",
     "sort": {

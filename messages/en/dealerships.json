@@ -12,9 +12,6 @@
   },
   "hero": {
     "title": "Browse Dealerships",
-    "subtitleFallback": "Find the perfect dealership for your next vehicle",
-    "subtitle": "Explore {count, plural, =0 {dealerships} one {{value} dealership} other {{value} dealerships}}",
-    "subtitleWithCities": "Explore {count, plural, =0 {dealerships} one {{value} dealership} other {{value} dealerships}} across {cityCount, plural, one {{cityValue} city} other {{cityValue} cities}}",
     "searchPlaceholder": "Search dealerships by name or location…",
     "searchLabel": "Search dealerships"
   },
@@ -127,7 +124,6 @@
   },
   "inventory": {
     "heading": "Available Cars",
-    "matching": "({count} matching)",
     "sortBy": "Sort by",
     "sortPlaceholder": "Sort order",
     "sort": {

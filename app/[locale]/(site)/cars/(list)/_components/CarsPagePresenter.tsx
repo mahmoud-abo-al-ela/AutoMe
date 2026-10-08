@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Pagination } from "@/components/common/Pagination";
 import CarCardSkeleton from "@/components/CarCardSkeleton";
-import { SiteEmptyState, type MarketSummary } from "@/components/brand";
+import { SiteEmptyState } from "@/components/brand";
 import type { CarsPageData } from "../_lib/cars-types";
 import { useFormatters } from "@/hooks/use-formatters";
 
@@ -44,8 +44,7 @@ export const CarsPagePresenter = ({
   optionsLoading,
   activeFilters,
   handlers,
-  summary,
-}: CarsPageData & { summary?: MarketSummary | null }) => {
+}: CarsPageData) => {
   const t = useTranslations("cars");
   const fmt = useFormatters();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -162,8 +161,6 @@ export const CarsPagePresenter = ({
         searchQuery={searchValue}
         onSearchChange={handlers.setSearch}
         onClearSearch={() => handlers.setSearch("")}
-        onQuickPick={handlers.applyPatch}
-        summary={summary}
       />
 
       <div className="flex gap-6">

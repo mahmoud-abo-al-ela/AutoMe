@@ -1,4 +1,4 @@
-import { getCars, getMarketSummary } from "@/actions/cars-listing";
+import { getCars } from "@/actions/cars-listing";
 import ClientPage from "./ClientPage";
 import { CarsPageSkeleton } from "./_components/CarsPageSkeleton";
 import { Suspense } from "react";
@@ -76,17 +76,13 @@ export default async function BrowseCarsPage({
     sortBy: one(params.sortBy) || "newest",
   };
 
-  const [initialData, summaryResponse] = await Promise.all([
-    getCars({ ...filters, page, limit: perPage }),
-    getMarketSummary(),
-  ]);
+  const initialData = await getCars({ ...filters, page, limit: perPage });
 
   return (
     <Suspense fallback={<CarsPageSkeleton />}>
       <ClientPage
         initialData={initialData}
         initialState={{ filters, page, perPage }}
-        summary={summaryResponse.success ? summaryResponse.data : null}
       />
     </Suspense>
   );

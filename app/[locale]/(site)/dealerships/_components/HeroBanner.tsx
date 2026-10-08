@@ -2,50 +2,26 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useFormatters } from "@/hooks/use-formatters";
 
 /**
- * Dealerships page header — the same shape as Browse (title, live summary,
- * search) instead of the animated gradient banner it replaces.
+ * Dealerships page header — the same shape as Browse (title, search) instead
+ * of the animated gradient banner it replaces.
  */
 export const HeroBanner = ({
   searchQuery,
   onSearchChange,
   onClearSearch,
-  stats,
 }: {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
-  stats?: { totalDealerships?: number; totalCities?: number } | null;
 }) => {
   const t = useTranslations("dealerships.hero");
   const tCommon = useTranslations("common");
-  const fmt = useFormatters();
-
-  const dealerships = stats?.totalDealerships;
-  const cities = stats?.totalCities;
-
-  // Three separate messages rather than one assembled from fragments: Arabic
-  // pluralises across six forms, and the count and the city clause each need
-  // their own.
-  const subtitle = !dealerships
-    ? t("subtitleFallback")
-    : cities
-      ? t("subtitleWithCities", {
-          count: dealerships,
-          value: fmt.number(dealerships),
-          cityCount: cities,
-          cityValue: fmt.number(cities),
-        })
-      : t("subtitle", { count: dealerships, value: fmt.number(dealerships) });
 
   return (
     <header className="mb-6 flex flex-col gap-5 border-b border-border pb-6 lg:mb-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-h1 font-extrabold">{t("title")}</h1>
-        <p className="text-caption text-muted-foreground">{subtitle}</p>
-      </div>
+      <h1 className="text-h1 font-extrabold">{t("title")}</h1>
 
       <div className="relative w-full lg:max-w-xl">
         <Search aria-hidden className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
