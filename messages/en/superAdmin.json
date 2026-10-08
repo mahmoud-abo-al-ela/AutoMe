@@ -137,58 +137,123 @@
     }
   },
   "organizations": {
-    "title": "Organizations",
-    "subtitle": "Manage all organizations on the platform",
-    "create": "Create organization",
-    "searchPlaceholder": "Search organizations…",
+    "title": "Dealerships",
+    "subtitle": "Every dealership on AutoMe, its plan and how it is doing.",
+    "create": "Add dealership",
+    "export": "Export CSV",
+    "exporting": "Exporting…",
+    "exportFailed": "Couldn’t export the dealerships",
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "active": "Active",
+      "trial": "On a trial",
+      "overdue": "Payment overdue",
+      "noCars": "No cars yet",
+      "suspended": "Suspended"
+    },
+    "searchLabel": "Search dealerships",
+    "searchPlaceholder": "Name, email, phone or web address",
     "filters": {
-      "status": "Status",
-      "allStatuses": "All statuses",
       "plan": "Plan",
-      "allPlans": "All plans"
+      "allPlans": "All plans",
+      "region": "Governorate",
+      "allRegions": "All governorates",
+      "sort": "Sort",
+      "clear": "Clear filters"
     },
-    "empty": "No organizations found",
-    "actions": {
-      "impersonate": "Impersonate",
+    "sorts": {
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "name": "Name",
+      "cars": "Most cars"
+    },
+    "columns": {
+      "selectAll": "Select every dealership on this page",
+      "selectRow": "Select {name}",
+      "dealership": "Dealership",
+      "plan": "Plan",
+      "status": "Status",
+      "cars": "Cars",
+      "team": "Team",
+      "drives": "Test drives, 30 days",
+      "paid": "Paid so far",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "overdue": "Overdue since {date}",
+      "trial": "Trial ends {date}",
+      "canceled": "Plan canceled",
+      "pending": "Payment pending"
+    },
+    "paidNone": "None",
+    "freePlan": "Free plan",
+    "bulk": {
+      "selected": "{count, plural, one {{value} selected} other {{value} selected}}",
       "suspend": "Suspend",
-      "activate": "Activate",
-      "suspending": "Suspending…",
-      "activating": "Activating…"
+      "activate": "Reactivate",
+      "export": "Export",
+      "clear": "Clear selection"
     },
+    "actionsFor": "Actions for {name}",
+    "actions": {
+      "open": "Open",
+      "impersonate": "Start a support session",
+      "publicPage": "Open the public page",
+      "suspend": "Suspend",
+      "activate": "Reactivate",
+      "suspending": "Suspending…",
+      "activating": "Reactivating…",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "label": "Pages",
+      "showing": "Showing {from} to {to} of {total}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "empty": "No dealerships match.",
+    "emptyHint": "Try another view, or clear the search and filters.",
     "toasts": {
-      "suspended": "Organization suspended",
-      "suspendedBody": "{name} has been suspended.",
-      "activated": "Organization activated",
-      "activatedBody": "{name} has been activated.",
-      "statusFailed": "Couldn’t update the status",
-      "deleted": "Organization deleted",
-      "deletedBody": "{name} has been deleted.",
-      "deleteFailed": "Couldn’t delete the organization"
+      "suspended": "Dealership suspended",
+      "suspendedBody": "{name} is suspended and hidden from buyers.",
+      "activated": "Dealership reactivated",
+      "activatedBody": "{name} is active again.",
+      "statusFailed": "Couldn’t change the status",
+      "deleted": "Dealership deleted",
+      "deletedBody": "{name} is deleted.",
+      "deleteFailed": "Couldn’t delete the dealership",
+      "bulkSuspended": "{count, plural, one {{value} dealership suspended} other {{value} dealerships suspended}}",
+      "bulkActivated": "{count, plural, one {{value} dealership reactivated} other {{value} dealerships reactivated}}",
+      "bulkFailed": "Some dealerships couldn’t be changed. Try again."
     },
     "delete": {
-      "title": "Delete organization",
-      "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
-      "dataWarning": "This organization has {cars} and {members}. All of its data will be permanently removed.",
+      "title": "Delete dealership",
+      "confirm": "Delete <strong>{name}</strong>? This can’t be undone.",
+      "dataWarning": "It has {cars} and {members}. All of its data is removed for good.",
       "allDataWarning": "All associated data — cars, test drives, conversations and team memberships — will be permanently removed.",
       "cars": "{count, plural, one {{value} car} other {{value} cars}}",
       "members": "{count, plural, one {{value} member} other {{value} members}}",
-      "submit": "Delete organization"
+      "submit": "Delete dealership"
     },
     "impersonate": {
-      "title": "Impersonate user",
-      "description": "Access <strong>{name}</strong> as a specific user. Everything you do will be logged.",
+      "title": "Start a support session",
+      "description": "Sign in to <strong>{name}</strong> as one of its team. Everything you do is recorded.",
       "auditTitle": "Audit trail",
       "auditBody": "Every action taken during impersonation is logged under your identity.",
-      "userLabel": "Impersonate as",
+      "userLabel": "Sign in as",
       "loadingMembers": "Loading members…",
       "userPlaceholder": "Select a user",
       "reasonLabel": "Reason for impersonation",
       "reasonPlaceholder": "e.g. Investigating reported issue #123, customer support request…",
       "reasonHelp": "This reason is recorded in the audit log.",
       "missingFields": "Select a user and give a reason",
-      "started": "Impersonation started",
+      "started": "Support session started",
       "starting": "Starting…",
-      "submit": "Start impersonation"
+      "submit": "Start the session"
     },
     "details": {
       "back": "Back to organizations",
@@ -261,6 +326,20 @@
       "createFailed": "Couldn’t create the organization",
       "submit": "Create organization",
       "submitting": "Creating…"
+    },
+    "csv": {
+      "slug": "Web address",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "suspendDialog": {
+      "title": "Suspend {name}?",
+      "titleMany": "{count, plural, one {Suspend {value} dealership?} other {Suspend {value} dealerships?}}",
+      "body": "Its storefront and cars are hidden from buyers until you reactivate it.",
+      "bodyMany": "Their storefronts and cars are hidden from buyers until you reactivate them.",
+      "keep": "Keep it active",
+      "keepMany": "Keep them active",
+      "confirm": "Suspend"
     }
   },
   "users": {

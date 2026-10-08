@@ -138,57 +138,122 @@
   },
   "organizations": {
     "title": "المعارض",
-    "subtitle": "إدارة كل المعارض على المنصة",
-    "create": "إنشاء معرض",
-    "searchPlaceholder": "ابحث في المعارض…",
+    "subtitle": "كل معارض AutoMe، وباقة كل منها وحاله.",
+    "create": "إضافة معرض",
+    "export": "تصدير CSV",
+    "exporting": "جارٍ التصدير…",
+    "exportFailed": "تعذّر تصدير المعارض",
+    "views": {
+      "label": "العروض",
+      "all": "الكل",
+      "active": "نشطة",
+      "trial": "في فترة تجربة",
+      "overdue": "سداد متأخر",
+      "noCars": "بلا سيارات بعد",
+      "suspended": "موقوفة"
+    },
+    "searchLabel": "البحث في المعارض",
+    "searchPlaceholder": "الاسم أو البريد أو الهاتف أو عنوان الموقع",
     "filters": {
-      "status": "الحالة",
-      "allStatuses": "كل الحالات",
       "plan": "الباقة",
-      "allPlans": "كل الباقات"
+      "allPlans": "كل الباقات",
+      "region": "المحافظة",
+      "allRegions": "كل المحافظات",
+      "sort": "الترتيب",
+      "clear": "مسح عوامل التصفية"
     },
-    "empty": "لم يتم العثور على معارض",
-    "actions": {
-      "impersonate": "انتحال الهوية",
+    "sorts": {
+      "newest": "الأحدث أولًا",
+      "oldest": "الأقدم أولًا",
+      "name": "الاسم",
+      "cars": "الأكثر سيارات"
+    },
+    "columns": {
+      "selectAll": "تحديد كل المعارض في هذه الصفحة",
+      "selectRow": "تحديد {name}",
+      "dealership": "المعرض",
+      "plan": "الباقة",
+      "status": "الحالة",
+      "cars": "السيارات",
+      "team": "الفريق",
+      "drives": "القيادات التجريبية، ٣٠ يومًا",
+      "paid": "المدفوع حتى الآن",
+      "joined": "الانضمام",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "suspended": "موقوف",
+      "overdue": "متأخر منذ {date}",
+      "trial": "تنتهي التجربة {date}",
+      "canceled": "الباقة ملغاة",
+      "pending": "بانتظار السداد"
+    },
+    "paidNone": "لا شيء",
+    "freePlan": "الباقة المجانية",
+    "bulk": {
+      "selected": "{count, plural, one {معرض واحد محدد} two {معرضان محددان} few {{value} معارض محددة} many {{value} معرضًا محددًا} other {{value} معرض محدد}}",
       "suspend": "إيقاف",
-      "activate": "تفعيل",
-      "suspending": "جارٍ الإيقاف…",
-      "activating": "جارٍ التفعيل…"
+      "activate": "إعادة التفعيل",
+      "export": "تصدير",
+      "clear": "إلغاء التحديد"
     },
+    "actionsFor": "إجراءات {name}",
+    "actions": {
+      "open": "فتح",
+      "impersonate": "بدء جلسة دعم",
+      "publicPage": "فتح الصفحة العامة",
+      "suspend": "إيقاف",
+      "activate": "إعادة التفعيل",
+      "suspending": "جارٍ الإيقاف…",
+      "activating": "جارٍ إعادة التفعيل…",
+      "delete": "حذف"
+    },
+    "pagination": {
+      "label": "الصفحات",
+      "showing": "عرض {from} إلى {to} من {total}",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    },
+    "empty": "لا توجد معارض مطابقة.",
+    "emptyHint": "جرّب عرضًا آخر، أو امسح البحث وعوامل التصفية.",
     "toasts": {
-      "suspended": "تم إيقاف المعرض",
-      "suspendedBody": "تم إيقاف {name}.",
-      "activated": "تم تفعيل المعرض",
-      "activatedBody": "تم تفعيل {name}.",
-      "statusFailed": "تعذّر تحديث الحالة",
-      "deleted": "تم حذف المعرض",
-      "deletedBody": "تم حذف {name}.",
-      "deleteFailed": "تعذّر حذف المعرض"
+      "suspended": "أُوقف المعرض",
+      "suspendedBody": "أُوقف {name} وأصبح مخفيًا عن المشترين.",
+      "activated": "أُعيد تفعيل المعرض",
+      "activatedBody": "عاد {name} نشطًا.",
+      "statusFailed": "تعذّر تغيير الحالة",
+      "deleted": "حُذف المعرض",
+      "deletedBody": "حُذف {name}.",
+      "deleteFailed": "تعذّر حذف المعرض",
+      "bulkSuspended": "{count, plural, one {أُوقف معرض واحد} two {أُوقف معرضان} few {أُوقفت {value} معارض} many {أُوقف {value} معرضًا} other {أُوقف {value} معرض}}",
+      "bulkActivated": "{count, plural, one {أُعيد تفعيل معرض واحد} two {أُعيد تفعيل معرضين} few {أُعيد تفعيل {value} معارض} many {أُعيد تفعيل {value} معرضًا} other {أُعيد تفعيل {value} معرض}}",
+      "bulkFailed": "تعذّر تغيير بعض المعارض. حاول مرة أخرى."
     },
     "delete": {
       "title": "حذف المعرض",
-      "confirm": "هل أنت متأكد من حذف <strong>{name}</strong>؟ لا يمكن التراجع عن هذا الإجراء.",
-      "dataWarning": "يضم هذا المعرض {cars} و{members}. سيتم حذف كل بياناته نهائيًا.",
+      "confirm": "حذف <strong>{name}</strong>؟ لا يمكن التراجع عن ذلك.",
+      "dataWarning": "لديه {cars} و{members}. ستُحذف كل بياناته نهائيًا.",
       "allDataWarning": "سيتم حذف كل البيانات المرتبطة نهائيًا — السيارات والقيادات التجريبية والمحادثات وعضويات الفريق.",
       "cars": "{count, plural, zero {{value} سيارة} one {سيارة واحدة} two {سيارتين} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
       "members": "{count, plural, zero {{value} عضو} one {عضوًا واحدًا} two {عضوين} few {{value} أعضاء} many {{value} عضوًا} other {{value} عضو}}",
       "submit": "حذف المعرض"
     },
     "impersonate": {
-      "title": "انتحال هوية مستخدم",
-      "description": "ادخل إلى <strong>{name}</strong> بصفة مستخدم محدد. سيتم تسجيل كل ما تفعله.",
+      "title": "بدء جلسة دعم",
+      "description": "ادخل إلى <strong>{name}</strong> باسم أحد أعضاء فريقه. يُسجَّل كل ما تفعله.",
       "auditTitle": "سجل التدقيق",
       "auditBody": "كل إجراء يتم أثناء انتحال الهوية يُسجَّل باسمك.",
-      "userLabel": "انتحال هوية",
+      "userLabel": "الدخول باسم",
       "loadingMembers": "جارٍ تحميل الأعضاء…",
       "userPlaceholder": "اختر مستخدمًا",
       "reasonLabel": "سبب انتحال الهوية",
       "reasonPlaceholder": "مثال: التحقق من المشكلة المُبلَّغ عنها رقم ١٢٣، طلب دعم من عميل…",
       "reasonHelp": "يُسجَّل هذا السبب في سجل النشاط.",
       "missingFields": "اختر مستخدمًا واكتب السبب",
-      "started": "بدأ انتحال الهوية",
+      "started": "بدأت جلسة الدعم",
       "starting": "جارٍ البدء…",
-      "submit": "بدء انتحال الهوية"
+      "submit": "بدء الجلسة"
     },
     "details": {
       "back": "العودة إلى المعارض",
@@ -261,6 +326,20 @@
       "createFailed": "تعذّر إنشاء المعرض",
       "submit": "إنشاء المعرض",
       "submitting": "جارٍ الإنشاء…"
+    },
+    "csv": {
+      "slug": "عنوان الموقع",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف"
+    },
+    "suspendDialog": {
+      "title": "إيقاف {name}؟",
+      "titleMany": "{count, plural, one {إيقاف معرض واحد؟} two {إيقاف معرضين؟} few {إيقاف {value} معارض؟} many {إيقاف {value} معرضًا؟} other {إيقاف {value} معرض؟}}",
+      "body": "تُخفى صفحته وسياراته عن المشترين حتى تعيد تفعيله.",
+      "bodyMany": "تُخفى صفحاتها وسياراتها عن المشترين حتى تعيد تفعيلها.",
+      "keep": "إبقاؤه نشطًا",
+      "keepMany": "إبقاؤها نشطة",
+      "confirm": "إيقاف"
     }
   },
   "users": {

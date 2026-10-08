@@ -4,6 +4,8 @@ import { db } from "@/lib/prisma";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as orgService from "@/lib/services/super-admin/organization";
 import * as subscriptionService from "@/lib/services/super-admin/subscription";
+import * as dealershipsService from "@/lib/services/super-admin/dealerships";
+import { parseDealershipQuery } from "@/lib/services/super-admin/dealerships-options";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
 import type { CreateOrganizationInput } from "@/lib/services/super-admin/organization";
@@ -84,6 +86,18 @@ export const deleteOrganization = withSuperAdmin(async (admin, orgId: string) =>
 
   revalidateLocalized("/super-admin/organizations");
   return createSuccessResponse(null, "Organization deleted");
+});
+
+/**
+ * Every dealership the list's current view and filters match, for its CSV.
+ * Takes the list's URL params and reads them through the same parser as the
+ * page, so anything unknown falls back to its default.
+ */
+export const exportDealerships = withSuperAdmin(async (_admin, params: Record<string, string>) => {
+  const rows = await dealershipsService.getDealershipsForExport(
+    parseDealershipQuery(typeof params === "object" && params ? params : {}),
+  );
+  return createSuccessResponse(rows);
 });
 
 /**

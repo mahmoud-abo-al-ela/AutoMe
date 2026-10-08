@@ -25,7 +25,6 @@ import { startImpersonationAction } from "@/actions/impersonation";
 import { toast } from "sonner";
 import { useActionError } from "@/hooks/use-action-error";
 import { Prisma } from "@/lib/generated/prisma";
-import type { OrganizationRowData } from "./OrganizationsTable";
 
 /**
  * A member as /api/super-admin/organizations/[id]/members returns it. That
@@ -43,7 +42,7 @@ export default function ImpersonateModal({
   organization,
   onClose,
 }: {
-  organization: OrganizationRowData;
+  organization: { id: string; name: string; slug: string };
   onClose: () => void;
 }) {
   const t = useTranslations("superAdmin.organizations.impersonate");

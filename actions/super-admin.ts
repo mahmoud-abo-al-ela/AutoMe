@@ -12,4 +12,5 @@ export {
   updateOrganizationStatus,
   deleteOrganization,
   changeOrganizationPlan,
+  exportDealerships,
 } from "./super-admin/organizations";
