@@ -40,9 +40,12 @@ type OrgMemberOption = Prisma.MembershipGetPayload<{
 
 export default function ImpersonateModal({
   organization,
+  userId,
   onClose,
 }: {
   organization: { id: string; name: string; slug: string };
+  /** Who to sign in as, when the admin chose a person; the owner otherwise. */
+  userId?: string;
   onClose: () => void;
 }) {
   const t = useTranslations("superAdmin.organizations.impersonate");
@@ -67,12 +70,12 @@ export default function ImpersonateModal({
         if (response.ok) {
           const data = await response.json();
           setMembers(data.members || []);
-          // Auto-select owner/admin if available
-          const owner = data.members?.find(
-            (m: OrgMemberOption) => m.role === "OWNER"
-          );
-          if (owner) {
-            setSelectedMember(owner.userId);
+          // The person the admin chose, else the owner.
+          const chosen =
+            data.members?.find((m: OrgMemberOption) => m.userId === userId) ??
+            data.members?.find((m: OrgMemberOption) => m.role === "OWNER");
+          if (chosen) {
+            setSelectedMember(chosen.userId);
           }
         }
       } catch (error) {
@@ -83,7 +86,7 @@ export default function ImpersonateModal({
     }
 
     fetchMembers();
-  }, [organization.id]);
+  }, [organization.id, userId]);
 
   const handleImpersonate = async () => {
     if (!selectedMember || !reason.trim()) {

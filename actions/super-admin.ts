@@ -1,8 +1,9 @@
 // Super Admin Actions - Re-exports for backward compatibility
 // All actions are now split into separate files in the super-admin folder
 
-export { updateUserRole } from "./super-admin/users";
-export { updatePlan, createPlan, deletePlan } from "./super-admin/plans";
+export { updateUserRole, exportUsers } from "./super-admin/users";
+export { updatePlanSettings } from "./super-admin/plans";
+export { exportActivity } from "./super-admin/activity";
 export {
   startImpersonation,
   endImpersonation,
@@ -13,4 +14,6 @@ export {
   deleteOrganization,
   changeOrganizationPlan,
   exportDealerships,
+  checkDealershipSlug,
+  checkOwnerEmail,
 } from "./super-admin/organizations";

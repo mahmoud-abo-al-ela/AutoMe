@@ -320,7 +320,9 @@ model AuditLog {
   userId         String?
   user           User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
   userEmail      String?
-  impersonatedBy String? // Super Admin ID if impersonating
+  // During a support session: the member the admin was signed in as (userId
+  // is then the admin). metadata.impersonationSessionId names the session.
+  impersonatedBy String?
 
   // Change tracking
   oldValue Json?

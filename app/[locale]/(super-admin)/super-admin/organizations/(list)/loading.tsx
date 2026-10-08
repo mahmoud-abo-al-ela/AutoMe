@@ -1,6 +1,6 @@
 /**
  * The dealerships list on its way, in its own shape: the header with its two
- * actions, the view tabs, the toolbar, then the table's rows. Shimmer, like
+ * actions, the toolbar with its status dropdown, then the table's rows. Shimmer, like
  * every admin skeleton.
  */
 export default function DealershipsLoading() {
@@ -17,14 +17,9 @@ export default function DealershipsLoading() {
         </div>
       </div>
 
-      <div className="flex gap-4 overflow-hidden border-b border-border pb-3">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <span key={i} className="skeleton-shimmer h-5 w-24 shrink-0 rounded" />
-        ))}
-      </div>
-
       <div className="flex flex-wrap gap-2.5">
         <span className="skeleton-shimmer h-11 w-full max-w-[440px] rounded-control" />
+        <span className="skeleton-shimmer h-11 w-[210px] rounded-control" />
         <span className="skeleton-shimmer h-11 w-40 rounded-control" />
         <span className="skeleton-shimmer h-11 w-48 rounded-control" />
       </div>

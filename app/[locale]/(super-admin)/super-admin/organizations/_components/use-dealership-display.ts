@@ -7,6 +7,11 @@ import { findCity, findGovernorate } from "@/lib/locations/data";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import type { DealershipRow } from "@/lib/services/super-admin/dealerships";
 
+/** The fields each helper reads, so a list row and a single dealership's record both fit. */
+type Placed = Pick<DealershipRow, "city" | "region">;
+type Planned = { plan: { type: string; name: string } | null };
+type Standing = { isActive: boolean; subscription: { status: string; pastDueSince: string | null; periodEnd: string | null } | null };
+
 export type StatusTone = "ok" | "due" | "trial" | "off";
 
 export const STATUS_TONES: Record<StatusTone, string> = {
@@ -27,20 +32,20 @@ export function useDealershipDisplay() {
   const fmt = useFormatters();
   const day = (iso: string) => fmt.date(iso, { year: undefined });
 
-  const place = (row: DealershipRow) => {
+  const place = (row: Placed) => {
     const name = (entry: { en: string; ar: string } | undefined) => (entry ? (fmt.locale === "ar" ? entry.ar : entry.en) : null);
     const city = name(findCity(row.city));
     const governorate = name(findGovernorate(row.region));
     return [city, governorate].filter((part, i, all) => part && all.indexOf(part) === i).join(fmt.locale === "ar" ? "، " : ", ");
   };
 
-  const plan = (row: DealershipRow) => {
+  const plan = (row: Planned) => {
     const key = row.plan ? planKeyFor(row.plan.type) : planKeyFor("STARTER");
     return key ? tPlans(`plans.${key}.name`) : (row.plan?.name ?? "");
   };
 
   /** Suspension first; otherwise what the subscription says. No subscription means the free plan, in good standing. */
-  const status = (row: DealershipRow): { tone: StatusTone; label: string } => {
+  const status = (row: Standing): { tone: StatusTone; label: string } => {
     if (!row.isActive) return { tone: "off", label: t("status.suspended") };
     const sub = row.subscription;
     if (sub?.status === "PAST_DUE") {
@@ -91,7 +96,7 @@ export function useDealershipDisplay() {
         .map(cell)
         .join(","),
     );
-    return "﻿" + [header.map(cell).join(","), ...lines].join("\r\n");
+    return "\uFEFF" + [header.map(cell).join(","), ...lines].join("\r\n");
   };
 
   return { place, plan, status, paid, csv, day };

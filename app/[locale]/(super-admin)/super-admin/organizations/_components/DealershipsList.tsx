@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { deleteOrganization, exportDealerships, updateOrganizationStatus } from "@/actions/super-admin";
 import {
   DEALERSHIPS_PER_PAGE,
-  DEALERSHIP_VIEWS,
   dealershipQueryString,
 } from "@/lib/services/super-admin/dealerships-options";
 import type { DealershipRow, DealershipsPage } from "@/lib/services/super-admin/dealerships";
@@ -59,8 +58,8 @@ function Initials({ name, muted }: { name: string; muted?: boolean }) {
 
 /**
  * The super-admin dealerships list (canvas: Super admin dealerships round 1,
- * "1 · Data table"; page pattern: a list with saved views): views with their
- * counts, then search and filters, then a table with selection for bulk
+ * "1 · Data table"; page pattern: a list with saved views): search, the
+ * status (with how many are in each) and filters, then a table with selection for bulk
  * suspend and export, a menu per row, and pages of ten. On a phone the
  * table becomes a list. Everything that narrows the list lives in the URL.
  */
@@ -210,27 +209,7 @@ export function DealershipsList({ data }: { data: DealershipsPage }) {
         className="mb-0 md:mb-0"
       />
 
-      <nav aria-label={t("views.label")} className="-mb-1 flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {DEALERSHIP_VIEWS.map((view) => {
-          const on = view === query.view;
-          return (
-            <Link
-              key={view}
-              href={`${BASE}${dealershipQueryString({ ...query, view, page: 1 })}`}
-              aria-current={on ? "page" : undefined}
-              className={cn(
-                "flex h-11 shrink-0 items-center gap-2 px-3 text-body transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                on ? "font-semibold text-foreground shadow-[inset_0_-3px_0_var(--foreground)]" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t(`views.${view}`)}
-              <span className="rounded-full bg-muted px-2 text-micro font-semibold leading-5 text-foreground tabular-nums">{n(data.counts[view])}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      <DealershipsToolbar key={dealershipQueryString({ ...query, page: 1 })} query={query} startTransition={startTransition} />
+      <DealershipsToolbar key={dealershipQueryString({ ...query, page: 1 })} query={query} counts={data.counts} startTransition={startTransition} />
 
       <section
         aria-label={t("title")}

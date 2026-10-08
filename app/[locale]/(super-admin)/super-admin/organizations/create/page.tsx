@@ -1,43 +1,25 @@
 import { getTranslations } from "next-intl/server";
-import { db } from "@/lib/prisma";
-import CreateOrganizationForm from "./_components/CreateOrganizationForm";
-import { ArrowLeft } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { OrgPageHeader } from "@/components/dashboard/OrgPageHeader";
+import { getActivePlans } from "@/lib/services/super-admin/dealership-detail";
+import { CreateDealershipForm } from "./_components/CreateDealershipForm";
 
-async function getPlans() {
-  return db.plan.findMany({
-    where: { isActive: true },
-    orderBy: { monthlyPrice: "asc" },
-  });
-}
-
-export default async function CreateOrganizationPage() {
-  const plans = await getPlans();
-  const t = await getTranslations("superAdmin.organizations.form");
+/** Adding a dealership: the three-step form, with the plans to choose from. */
+export default async function CreateDealershipPage() {
+  const [plans, t] = await Promise.all([getActivePlans(), getTranslations("superAdmin.organizations.form")]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        {/* Styles on the Link, not <Button asChild>: in a server component
-            Radix Slot 1.2.2 can receive the link as a lazy element and render
-            nothing. */}
-        <Link
-          href="/super-admin/organizations"
-          aria-label={t("back")}
-          className={buttonVariants({ variant: "ghost", size: "icon" })}
-        >
-          <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
-        </div>
-      </div>
-
-      {/* Form */}
-      <CreateOrganizationForm plans={plans} />
+    <div className="flex flex-col gap-5">
+      <Link
+        href="/super-admin/organizations"
+        className="flex w-fit items-center gap-1.5 rounded-control text-caption text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <ChevronLeft aria-hidden className="size-4 rtl:-scale-x-100" />
+        {t("back")}
+      </Link>
+      <OrgPageHeader title={t("title")} description={t("subtitle")} className="mb-0 md:mb-0" />
+      <CreateDealershipForm plans={plans} />
     </div>
   );
 }

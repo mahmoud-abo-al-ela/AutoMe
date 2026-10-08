@@ -4,70 +4,52 @@ import { db } from "@/lib/prisma";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as planService from "@/lib/services/super-admin/plan";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { planSettingsSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
-import type { PlanFormInput } from "@/lib/services/super-admin/plan";
+import { z } from "zod";
 
 /**
- * Update a plan's pricing and limits
+ * Save one plan's prices, limits and features (plans page, "Edit"). Applies
+ * to every dealership on the plan; a new price from their next payment. The
+ * audit log keeps what each setting was before and after.
  */
-export const updatePlan = withSuperAdmin(
-  async (admin, planId: string, data: PlanFormInput) => {
-  const plan = await planService.updatePlan(planId, data);
+export const updatePlanSettings = withSuperAdmin(async (admin, planId: string, input: unknown) => {
+  const id = validateAction(z.string().trim().min(1).max(64), planId);
+  const settings = validateAction(planSettingsSchema, input);
+  const { before, after } = await planService.updatePlanSettings(id, settings);
 
   await db.auditLog.create({
     data: {
       action: "ORG_UPDATED",
       entityType: "SUBSCRIPTION",
-      entityId: planId,
+      entityId: id,
       userId: admin.id,
       userEmail: admin.email,
-      // The audit column is Prisma JSON; an interface has no index signature.
-      metadata: { ...data },
+      oldValue: {
+        monthlyPrice: before.monthlyPrice,
+        yearlyPrice: before.yearlyPrice,
+        trialDays: before.trialDays,
+        maxCars: before.maxCars,
+        maxMembers: before.maxMembers,
+        maxImagesPerCar: before.maxImagesPerCar,
+        auditLogRetentionDays: before.auditLogRetentionDays,
+        features: before.features ?? {},
+      },
+      newValue: {
+        monthlyPrice: after.monthlyPrice,
+        yearlyPrice: after.yearlyPrice,
+        trialDays: after.trialDays,
+        maxCars: after.maxCars,
+        maxMembers: after.maxMembers,
+        maxImagesPerCar: after.maxImagesPerCar,
+        auditLogRetentionDays: after.auditLogRetentionDays,
+        features: after.features ?? {},
+      },
+      metadata: { planName: after.name, planType: after.type },
     },
   });
 
   revalidateLocalized("/super-admin/plans");
-  return createSuccessResponse({ plan });
-});
-
-/**
- * Create a new plan
- */
-export const createPlan = withSuperAdmin(async (admin, data: PlanFormInput) => {
-  const plan = await planService.createPlan(data);
-
-  await db.auditLog.create({
-    data: {
-      action: "ORG_CREATED",
-      entityType: "SUBSCRIPTION",
-      entityId: plan.id,
-      userId: admin.id,
-      userEmail: admin.email,
-      metadata: { planName: data.name, planType: data.type },
-    },
-  });
-
-  revalidateLocalized("/super-admin/plans");
-  return createSuccessResponse({ plan });
-});
-
-/**
- * Delete a plan (only if no active subscriptions)
- */
-export const deletePlan = withSuperAdmin(async (admin, planId: string) => {
-  const plan = await planService.deletePlan(planId);
-
-  await db.auditLog.create({
-    data: {
-      action: "ORG_DELETED",
-      entityType: "SUBSCRIPTION",
-      entityId: planId,
-      userId: admin.id,
-      userEmail: admin.email,
-      metadata: { planName: plan.name, planType: plan.type },
-    },
-  });
-
-  revalidateLocalized("/super-admin/plans");
-  return createSuccessResponse(null, "Plan deleted");
+  return createSuccessResponse({ planId: id });
 });

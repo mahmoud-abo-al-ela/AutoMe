@@ -144,8 +144,8 @@
     "exporting": "Exporting…",
     "exportFailed": "Couldn’t export the dealerships",
     "views": {
-      "label": "Views",
-      "all": "All",
+      "label": "Status",
+      "all": "All statuses",
       "active": "Active",
       "trial": "On a trial",
       "overdue": "Payment overdue",
@@ -243,11 +243,11 @@
       "title": "Start a support session",
       "description": "Sign in to <strong>{name}</strong> as one of its team. Everything you do is recorded.",
       "auditTitle": "Audit trail",
-      "auditBody": "Every action taken during impersonation is logged under your identity.",
+      "auditBody": "Everything you do during the session is recorded under your name.",
       "userLabel": "Sign in as",
       "loadingMembers": "Loading members…",
       "userPlaceholder": "Select a user",
-      "reasonLabel": "Reason for impersonation",
+      "reasonLabel": "Reason for the session",
       "reasonPlaceholder": "e.g. Investigating reported issue #123, customer support request…",
       "reasonHelp": "This reason is recorded in the audit log.",
       "missingFields": "Select a user and give a reason",
@@ -256,15 +256,137 @@
       "submit": "Start the session"
     },
     "details": {
-      "back": "Back to organizations",
-      "stats": {
-        "cars": "Total cars",
-        "members": "Team members",
-        "testDrives": "Test drives"
+      "back": "Dealerships",
+      "more": "More actions",
+      "planLine": "{plan} plan",
+      "joined": "Joined {date}",
+      "tabs": {
+        "label": "Dealership",
+        "summary": "Summary",
+        "cars": "Cars",
+        "team": "Team",
+        "billing": "Billing",
+        "activity": "Activity"
       },
-      "members": "Team members ({value})",
-      "activity": "Recent activity",
-      "activityEmpty": "No activity recorded",
+      "alert": {
+        "overdueTitle": "Payment overdue since {date}.",
+        "overdueFailed": "The payment of {amount} on {date} failed.",
+        "overdueDrops": "{name} moves to the free plan on {date} if nobody pays.",
+        "overdueDropsSoon": "{name} moves to the free plan if nobody pays.",
+        "trial": "The {plan} trial ends on {date}.",
+        "suspended": "Suspended. Its storefront and cars are hidden from buyers.",
+        "seeBilling": "See billing"
+      },
+      "kpis": {
+        "label": "Numbers",
+        "carsOnSale": "Cars on sale",
+        "carsNote": "of {total}, {hidden} hidden",
+        "drives": "Test drives, 30 days",
+        "drivesNote": "{value} completed",
+        "questions": "Buyer questions, 30 days",
+        "paid": "Paid so far",
+        "paidNote": "{count, plural, one {{value} payment} other {{value} payments}}",
+        "paidNone": "Nothing yet"
+      },
+      "newestCars": "Newest cars",
+      "allCars": "All cars",
+      "recent": "Recent activity",
+      "allActivity": "All activity",
+      "activityEmpty": "Nothing recorded yet.",
+      "plan": {
+        "title": "Plan",
+        "plan": "Plan",
+        "price": "Price",
+        "paidUntil": "Paid until",
+        "trialEnds": "Trial ends",
+        "renewal": "Renewal",
+        "cancels": "Cancels at the end of the period",
+        "monthly": "{plan}, monthly",
+        "yearly": "{plan}, yearly",
+        "perMonth": "{amount} a month",
+        "perYear": "{amount} a year",
+        "free": "Free plan",
+        "cars": "Cars",
+        "team": "Team",
+        "usage": "{used} of {limit}",
+        "change": "Change plan",
+        "usageUnlimited": "{used}, no limit"
+      },
+      "info": {
+        "title": "Details",
+        "owner": "Owner",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "place": "Area",
+        "website": "Website",
+        "rating": "Rating",
+        "ratingValue": "{rating} from {count, plural, one {{value} review} other {{value} reviews}}",
+        "noReviews": "No reviews yet",
+        "notGiven": "Not given"
+      },
+      "cars": {
+        "car": "Car",
+        "price": "Price",
+        "status": "Status",
+        "added": "Added",
+        "empty": "No cars yet.",
+        "showing": "Showing {from} to {to} of {total}",
+        "statusLabel": "Status",
+        "all": "All",
+        "searchLabel": "Search cars",
+        "searchPlaceholder": "Make, model or year",
+        "sortLabel": "Sort",
+        "sorts": {
+          "newest": "Newest first",
+          "interest": "Most interest",
+          "longest": "Listed longest",
+          "price": "Highest price"
+        },
+        "saves": "Saves",
+        "questions": "Questions",
+        "drives": "Test drives",
+        "listed": "Listed",
+        "days": "{count, plural, one {{value} day} other {{value} days}}",
+        "today": "Today",
+        "noMatch": "No cars match.",
+        "clear": "Clear search"
+      },
+      "team": {
+        "person": "Person",
+        "role": "Role",
+        "joined": "Joined",
+        "empty": "No team yet.",
+        "carsAdded": "Cars added",
+        "changes": "Changes, 30 days",
+        "signInAs": "Sign in as {name}",
+        "notSignedIn": "Hasn’t signed in yet",
+        "people": "People",
+        "seats": "Seats",
+        "seatsLine": "{used} of {limit} on {plan}",
+        "invitations": "Invitations",
+        "ownerInvite": "<b>{email}</b> was invited to own the dealership and hasn’t signed up yet.",
+        "memberPending": "<b>{name}</b> was added to the team and hasn’t signed in yet.",
+        "noInvitations": "No open invitations.",
+        "seatsUnlimited": "{used} on {plan}, no limit"
+      },
+      "billing": {
+        "payments": "Payments",
+        "date": "Date",
+        "what": "What for",
+        "amount": "Amount",
+        "method": "Paid with",
+        "result": "Result",
+        "card": "Card ending {last4}",
+        "wallet": "Mobile wallet",
+        "unknownMethod": "Not known",
+        "empty": "No payments yet."
+      },
+      "pagination": {
+        "label": "Pages",
+        "previous": "Previous page",
+        "next": "Next page"
+      },
       "subscription": {
         "title": "Subscription",
         "periodStart": "Period start",
@@ -280,52 +402,106 @@
         "updated": "Plan updated",
         "updatedBody": "The subscription is now on {plan}.",
         "updateFailed": "Couldn’t update the plan"
+      },
+      "plans": {
+        "title": "Plans",
+        "current": "Current plan",
+        "moveTo": "Move to {plan}",
+        "free": "Free",
+        "cars": "Cars: up to {value}",
+        "people": "Team: up to {value}",
+        "photos": "Photos per car: {value}",
+        "unpaid": "Unpaid since {date}. Free plan from {drops}.",
+        "trial": "Trial ends {date}.",
+        "paidUntil": "Paid until {date}.",
+        "cancels": "Cancels on {date}.",
+        "paidSoFar": "{amount} paid so far",
+        "dialogTitle": "Move {name} to {plan}?",
+        "dialogBody": "The change applies now, without a payment. Its billing dates and status stay as they are.",
+        "dialogKeep": "Keep the current plan",
+        "dialogConfirm": "Move to {plan}",
+        "moving": "Moving…",
+        "perMonthPrice": "{amount} a month",
+        "carsUnlimited": "Cars: no limit",
+        "peopleUnlimited": "Team: no limit"
       }
     },
     "form": {
-      "title": "Create organization",
-      "subtitle": "Set up a new organization on the platform",
-      "back": "Back to organizations",
-      "basic": {
-        "title": "Basic information",
-        "subtitle": "The organization’s basic details",
-        "name": "Organization name *",
-        "namePlaceholder": "Nile Motors",
-        "slug": "Slug (URL)",
-        "slugHelp": "Suggested from the name’s English letters — type one if the name is in Arabic. Must be unique.",
-        "description": "Description",
-        "descriptionPlaceholder": "A brief description of the organization…"
+      "title": "Add a dealership",
+      "subtitle": "It goes live as soon as you create it, and the owner gets an email to sign in.",
+      "back": "Dealerships",
+      "steps": {
+        "label": "Steps",
+        "count": "Step {current} of {total}",
+        "dealership": "The dealership",
+        "owner": "Owner and contact",
+        "plan": "Plan and check",
+        "done": "Done",
+        "now": "Current step"
       },
-      "contact": {
-        "title": "Contact information",
-        "description": "How to reach the organization",
-        "email": "Email",
-        "phone": "Phone",
-        "website": "Website",
-        "address": "Address",
-        "addressPlaceholder": "15 Tahrir St, Dokki, Giza"
-      },
+      "optional": "(optional)",
+      "name": "Name",
+      "namePlaceholder": "Nile Motors",
+      "slug": "Web address",
+      "slugHelp": "Suggested from the name’s English letters. Type one if the name is in Arabic.",
+      "slugChecking": "Checking…",
+      "slugAvailable": "Available.",
+      "slugTaken": "Already taken. Try another.",
+      "slugInvalid": "Use {min} to {max} English letters or numbers, with single hyphens between words.",
+      "description": "About the dealership",
+      "descriptionPlaceholder": "What it sells, since when, what it is known for.",
+      "region": "Governorate",
+      "regionPlaceholder": "Choose a governorate",
+      "city": "Area",
+      "cityPlaceholder": "Choose an area",
+      "cityFirst": "Choose the governorate first",
+      "search": "Search",
+      "noResults": "Nothing found",
+      "address": "Street address",
+      "addressPlaceholder": "12 Abbas El Akkad",
+      "ownerEmail": "Owner’s email",
+      "ownerHelp": "They run the dealership and add the team.",
+      "ownerChecking": "Checking…",
+      "ownerExisting": "{name} already has an AutoMe account and becomes the owner right away.",
+      "ownerExistingNoName": "This email already has an AutoMe account. That person becomes the owner right away.",
+      "ownerNew": "No account yet. They get an email to sign up, and become the owner when they do.",
+      "phone": "Phone",
+      "email": "Dealership email",
+      "website": "Website",
       "plan": {
-        "title": "Subscription plan",
-        "description": "Choose the plan for this organization",
-        "label": "Plan *",
-        "placeholder": "Select a plan",
-        "features": "{name} plan includes:"
+        "title": "Which plan?",
+        "hint": "It runs for 30 days without a payment. After that, the owner renews from their dashboard."
       },
-      "owner": {
-        "title": "Owner",
-        "description": "Optionally assign an owner to this organization",
-        "email": "Owner email (optional)",
-        "help": "If this email belongs to an existing user, they become the organization’s owner."
+      "review": {
+        "title": "Check before creating",
+        "name": "Name",
+        "slug": "Web address",
+        "where": "Where",
+        "about": "About",
+        "owner": "Owner",
+        "ownerExisting": "{email}, already on AutoMe",
+        "ownerNew": "{email}, invited to sign up",
+        "contact": "Contact",
+        "change": "Change",
+        "changeLabel": "Change {field}",
+        "none": "Not given"
       },
-      "nameRequired": "Organization name is required",
-      "planRequired": "Select a plan",
-      "slugInvalid": "The slug needs {min}–{max} English letters or numbers, with single hyphens between words",
-      "created": "Organization created",
-      "createdBody": "{name} has been created on the {plan} plan.",
-      "createFailed": "Couldn’t create the organization",
-      "submit": "Create organization",
-      "submitting": "Creating…"
+      "errors": {
+        "name": "Give the dealership a name.",
+        "slug": "Choose a web address.",
+        "region": "Choose a governorate.",
+        "city": "Choose an area.",
+        "owner": "Enter the owner’s email.",
+        "emailFormat": "Enter an email address like name@example.com.",
+        "plan": "Choose a plan."
+      },
+      "next": "Next",
+      "previous": "Back",
+      "submit": "Create dealership",
+      "submitting": "Creating…",
+      "created": "Dealership created",
+      "createdBody": "{name} is live on {plan}.",
+      "createFailed": "Couldn’t create the dealership"
     },
     "csv": {
       "slug": "Web address",
@@ -343,255 +519,550 @@
     }
   },
   "users": {
-    "title": "All Users",
-    "subtitle": "Manage all platform users across organizations",
-    "stats": {
-      "total": "Total users",
+    "title": "Users",
+    "subtitle": "Everyone with an AutoMe account: buyers, dealership teams and AutoMe staff.",
+    "export": "Export CSV",
+    "exporting": "Exporting…",
+    "exportFailed": "Couldn’t export the users",
+    "views": {
+      "label": "Account",
+      "all": "All accounts",
+      "buyers": "Buyers",
+      "teams": "Dealership teams",
       "admins": "Platform admins",
-      "regular": "Regular users"
+      "new": "Joined this month"
     },
-    "searchPlaceholder": "Search by name or email…",
+    "searchLabel": "Search users",
+    "searchPlaceholder": "Name, email or phone",
     "filters": {
-      "role": "Filter by role",
-      "allRoles": "All roles",
-      "users": "Users",
-      "admins": "Admins"
+      "dealership": "Dealership",
+      "anyDealership": "Any dealership",
+      "sort": "Sort",
+      "clear": "Clear filters"
+    },
+    "sorts": {
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "name": "Name",
+      "active": "Most active"
+    },
+    "columns": {
+      "person": "Person",
+      "account": "Account",
+      "dealership": "Dealership",
+      "savedCars": "Saved cars",
+      "testDrives": "Test drives",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "kinds": {
+      "buyer": "Buyer",
+      "owner": "Owner",
+      "member": "Member",
+      "admin": "Platform admin"
+    },
+    "noName": "No name given",
+    "moreDealerships": "+{value} more",
+    "actionsFor": "Actions for {name}",
+    "actions": {
+      "open": "Open",
+      "impersonate": "Start a support session",
+      "makeAdmin": "Make platform admin",
+      "removeAdmin": "Remove admin access"
+    },
+    "roleDialog": {
+      "makeTitle": "Make {name} a platform admin?",
+      "makeBody": "They can see and change every dealership on AutoMe, and start support sessions.",
+      "makeConfirm": "Make platform admin",
+      "removeTitle": "Remove {name}’s admin access?",
+      "removeBody": "They keep their account and any dealership they belong to, but can no longer open the platform admin.",
+      "removeConfirm": "Remove admin access",
+      "keep": "Keep as it is",
+      "saving": "Saving…",
+      "made": "{name} is now a platform admin.",
+      "removed": "{name} is no longer a platform admin.",
+      "failed": "Couldn’t change the access"
+    },
+    "pagination": {
+      "label": "Pages",
+      "showing": "Showing {from} to {to} of {total}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "empty": "No people match.",
+    "emptyHint": "Try another view, or clear the search and filters.",
+    "csv": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone"
     },
     "roles": {
       "ADMIN": "Admin",
       "USER": "User"
     },
-    "columns": {
-      "user": "User",
-      "role": "Role",
-      "organizations": "Organizations",
-      "activity": "Activity",
-      "joined": "Joined"
-    },
-    "empty": "No users found",
-    "noOrganizations": "No organizations",
-    "moreOrganizations": "+{value} more",
-    "testDrives": "{count, plural, one {{value} test drive} other {{value} test drives}}",
-    "savedCars": "{count, plural, one {{value} saved} other {{value} saved}}",
-    "actions": {
-      "label": "Actions",
-      "changeRole": "Change role"
-    },
-    "changeRole": {
-      "title": "Change user role",
-      "description": "Update the role for {name}. This changes their platform-wide permissions.",
-      "placeholder": "Select a role",
-      "submit": "Update role",
-      "submitting": "Updating…",
-      "updated": "Role changed to {role}",
-      "updatedBody": "{name}’s role has been updated.",
-      "failed": "Couldn’t update the role"
-    },
-    "pagination": "Showing {from}–{to} of {total} users",
     "details": {
-      "back": "Back to users",
+      "back": "Users",
       "joined": "Joined {date}",
-      "organizations": "Organizations",
-      "organizationsEmpty": "Not a member of any organization",
-      "activity": "Activity",
+      "more": "More actions",
       "tabs": {
-        "audit": "Audit log",
-        "testDrives": "Test drives"
+        "label": "Person",
+        "summary": "Summary",
+        "dealerships": "Dealerships",
+        "drives": "Test drives",
+        "saved": "Saved cars",
+        "reviews": "Reviews",
+        "sessions": "Support sessions",
+        "activity": "Activity"
       },
-      "activityEmpty": "No activity recorded",
-      "testDrivesEmpty": "No test drives booked",
-      "unknownTime": "Unknown time"
-    }
+      "kpis": {
+        "label": "Numbers",
+        "drives": "Test drives",
+        "upcoming": "{value} coming up",
+        "noneUpcoming": "None coming up",
+        "saved": "Saved cars",
+        "savedAt": "{count, plural, one {at {value} dealership} other {at {value} dealerships}}",
+        "reviews": "Reviews written",
+        "averageRating": "{rating} out of 5 on average",
+        "dealerships": "Dealerships",
+        "carsAdded": "Cars added",
+        "changes": "Changes, 30 days",
+        "sessions": "Support sessions",
+        "openNow": "{value} open now",
+        "noneOpen": "None open"
+      },
+      "seeAll": "See all",
+      "driveStatus": {
+        "PENDING": "Waiting for the dealership",
+        "CONFIRMED": "Confirmed",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "columns": {
+        "car": "Car",
+        "dealership": "Dealership",
+        "when": "When",
+        "status": "Status",
+        "price": "Price",
+        "saved": "Saved",
+        "signedInAs": "Signed in as",
+        "reason": "Reason",
+        "started": "Started",
+        "length": "Length"
+      },
+      "minutes": "{count, plural, one {{value} minute} other {{value} minutes}}",
+      "stillOpen": "Still open",
+      "reviewStars": "{value} out of 5",
+      "reviewPending": "Waiting for approval",
+      "reviewPublished": "Published",
+      "role": {
+        "OWNER": "Owner",
+        "MEMBER": "Member"
+      },
+      "dealershipJoined": "Joined {date}",
+      "dealershipCarsAdded": "Cars added: {value}",
+      "dealershipChanges": "Changes in 30 days: {value}",
+      "openDealership": "Open dealership",
+      "empty": {
+        "drives": "No test drives yet.",
+        "saved": "No saved cars yet.",
+        "reviews": "No reviews yet.",
+        "sessions": "No support sessions yet.",
+        "activity": "Nothing recorded yet.",
+        "dealerships": "Not on any dealership’s team."
+      },
+      "pagination": {
+        "label": "Pages",
+        "previous": "Previous page",
+        "next": "Next page"
+      },
+      "emailLabel": "Email {email}",
+      "callLabel": "Call {phone}"
+    },
+    "notBuyer": "Not a buyer"
   },
   "plans": {
-    "title": "Plans & Pricing",
-    "subtitle": "Manage subscription plans and pricing tiers",
-    "stats": {
-      "mrr": "Monthly recurring revenue",
-      "active": "Active subscriptions",
-      "trial": "Trial subscriptions",
-      "churned": "Churned"
+    "title": "Plans",
+    "subtitle": "What each plan costs and includes, and who is on it. A change applies to every dealership on that plan.",
+    "kpis": {
+      "label": "Billing numbers",
+      "income": "Paid each month",
+      "paying": "Paying",
+      "payingNote": "of {value} dealerships",
+      "trialing": "On a trial",
+      "trialsEnding": "{value} end this week",
+      "noneEnding": "None end this week",
+      "overdue": "Payment overdue",
+      "atRisk": "{amount} a month at risk",
+      "nothingAtRisk": "Nothing at risk"
     },
-    "card": {
-      "edit": "Edit plan",
-      "delete": "Delete plan",
-      "orYearly": "or {amount}/year (save {percent})",
-      "features": "Features",
-      "activeSubscriptions": "{count, plural, one {{value} active subscription} other {{value} active subscriptions}}"
+    "table": {
+      "label": "Plans compared",
+      "dealerships": "{count, plural, one {{value} dealership} other {{value} dealerships}}",
+      "income": "{amount} a month",
+      "nothingIn": "Nothing paid yet",
+      "edit": "Edit",
+      "editPlan": "Edit {plan}"
     },
-    "add": {
-      "title": "Add new plan",
-      "body": "Create a new pricing plan for the platform",
-      "allExist": "All plan types already exist",
-      "allExistBody": "There can be one plan of each type (Starter, Pro, Enterprise)."
+    "rows": {
+      "price": "Price",
+      "yearly": "Paid yearly",
+      "trial": "Free trial",
+      "cars": "Cars",
+      "team": "Team",
+      "photos": "Photos per car",
+      "activity": "Activity kept",
+      "aiListing": "AI listing help a month",
+      "aiAssistant": "AI buyer assistant",
+      "chat": "Chat with buyers",
+      "priority": "Priority support"
     },
-    "toasts": {
-      "missingFields": "Fill in all required fields",
-      "created": "Plan created",
-      "createdBody": "The {name} plan has been created.",
-      "createFailed": "Couldn’t create the plan",
-      "updated": "Plan updated",
-      "updatedBody": "The {name} plan has been updated.",
-      "updateFailed": "Couldn’t update the plan",
-      "deleted": "Plan deleted",
-      "deletedBody": "{name} has been deleted.",
-      "deleteFailed": "Couldn’t delete the plan"
+    "values": {
+      "free": "Free",
+      "perMonth": "{amount} a month",
+      "perYear": "{amount} a year",
+      "perYearSaving": "{amount} a year, saves {percent}",
+      "none": "None",
+      "days": "{count, plural, one {{value} day} other {{value} days}}",
+      "noLimit": "No limit",
+      "always": "Always",
+      "off": "Off",
+      "included": "Included",
+      "notIncluded": "Not included"
     },
-    "delete": {
-      "title": "Delete the {name} plan?",
-      "body": "This permanently deletes the <strong>{name}</strong> plan. It cannot be undone.",
-      "activeWarning": "This plan has {count}. It can’t be deleted until every subscriber has moved to another plan.",
-      "activeCount": "{count, plural, one {{value} active subscription} other {{value} active subscriptions}}",
-      "submit": "Delete plan"
-    },
-    "form": {
-      "createTitle": "Create new plan",
-      "createDescription": "Add a new pricing plan to the platform",
-      "editTitle": "Edit {name}",
-      "editDescription": "Update pricing and limits for {name}",
-      "create": "Create plan",
-      "creating": "Creating…",
-      "tabs": {
-        "basic": "Basic info",
-        "limits": "Limits",
-        "features": "Features"
+    "editor": {
+      "title": "Edit {plan}",
+      "note": "Dealerships on this plan: {value}. A new price applies from their next payment.",
+      "lastChanged": "Last changed {date}",
+      "price": "Price",
+      "limits": "Limits",
+      "included": "Included",
+      "monthly": "Each month (EGP)",
+      "yearly": "Each year (EGP)",
+      "trial": "Free trial (days)",
+      "trialHint": "0 for no trial.",
+      "cars": "Cars",
+      "team": "Team",
+      "photos": "Photos per car",
+      "activity": "Activity kept (days)",
+      "noLimit": "No limit",
+      "always": "Always",
+      "aiListing": "AI listing help",
+      "aiLimit": "Listings a month",
+      "aiAssistant": "AI buyer assistant",
+      "chat": "Chat with buyers",
+      "priority": "Priority support",
+      "errors": {
+        "whole": "Enter a whole number.",
+        "atLeast": "Enter {min} or more.",
+        "atMost": "Enter {max} or less."
       },
-      "name": "Plan name",
-      "namePlaceholder": "e.g. Business",
-      "type": "Plan type",
-      "typePlaceholder": "Select type",
-      "monthlyPrice": "Monthly price (EGP)",
-      "yearlyPrice": "Yearly price (EGP)",
-      "pricePlaceholder": "e.g. {value}",
-      "maxCars": "Max cars (-1 = unlimited)",
-      "maxMembers": "Max members (-1 = unlimited)",
-      "maxImages": "Max images per car",
-      "retention": "Audit log retention (days)",
-      "retentionPlaceholder": "Leave empty for unlimited",
-      "trialDays": "Free trial (days)",
-      "trialPlaceholder": "0 for no trial",
-      "trialHelp": "New dealerships on this plan start right away without paying; the first payment is due before the trial ends.",
-      "aiProcessing": "AI-powered car analysis",
-      "aiLimit": "AI calls per month (-1 = unlimited)",
-      "aiLimitZero": "A limit of 0 blocks every AI call, so the feature is on but unusable.",
-      "aiAssistant": "AI answers to buyers’ questions (unlimited)",
-      "chat": "Live chat support",
-      "prioritySupport": "Priority support"
+      "save": "Save {plan}",
+      "saving": "Saving…",
+      "saved": "{plan} saved",
+      "savedBody": "It applies to every dealership on {plan}.",
+      "failed": "Couldn’t save the plan"
     }
   },
   "analytics": {
-    "title": "Platform Analytics",
-    "subtitle": "Monitor platform performance and growth",
-    "growth": {
-      "organizations": "Organizations this month",
-      "users": "Users this month",
-      "cars": "Cars listed this month",
-      "vsLastMonth": "vs last month ({value})"
+    "title": "Analytics",
+    "subtitle": "How the marketplace is doing: what’s listed, what buyers want, the dealerships, and how AI is used.",
+    "reports": {
+      "label": "Reports",
+      "marketplace": "Marketplace",
+      "dealerships": "Dealerships",
+      "buyers": "Buyers",
+      "ai": "AI"
     },
-    "charts": {
-      "growthTitle": "Platform growth",
-      "growthSubtitle": "New organizations and users over the last 6 months",
-      "activityTitle": "Platform activity",
-      "activitySubtitle": "Car listings and test drive bookings over time",
-      "series": {
-        "organizations": "Organizations",
-        "users": "Users",
-        "cars": "Cars",
-        "testDrives": "Test drives"
-      }
+    "periods": {
+      "7": "7 days",
+      "30": "30 days",
+      "90": "90 days",
+      "365": "12 months",
+      "label": "Period"
     },
-    "top": {
-      "byListings": "Top by listings",
-      "byTestDrives": "Top by test drives",
-      "rank": "#{value}",
-      "empty": "No data available"
+    "before": {
+      "7": "the 7 days before",
+      "30": "the 30 days before",
+      "90": "the 90 days before",
+      "365": "the 12 months before"
+    },
+    "change": {
+      "up": "{value} more than before",
+      "down": "{value} fewer than before",
+      "same": "Same as before",
+      "new": "None before"
+    },
+    "funnel": {
+      "title": "From listing to sale",
+      "note": "In the period, against {before}",
+      "carsLive": "Cars live",
+      "listed": "{count, plural, one {{value} listed in the period} other {{value} listed in the period}}",
+      "saves": "Saved by buyers",
+      "asked": "Test drives asked for",
+      "confirmed": "Confirmed",
+      "driven": "Driven",
+      "sold": "Sold",
+      "ofAsked": "{value} of requests",
+      "ofConfirmed": "{value} of confirmed"
+    },
+    "prices": {
+      "title": "Live cars by price",
+      "note": "EGP",
+      "under500k": "Under 500k",
+      "to1m": "500k – 1M",
+      "to2m": "1M – 2M",
+      "to4m": "2M – 4M",
+      "over4m": "Over 4M"
+    },
+    "makes": {
+      "title": "Most wanted makes",
+      "note": "By test drives asked for",
+      "empty": "No test drives in this period."
+    },
+    "speed": {
+      "title": "Selling speed",
+      "daysToSell": "Median time from listing to sold",
+      "days": "{count, plural, one {{value} day} other {{value} days}}",
+      "faster": "{value} faster than before",
+      "slower": "{value} slower than before",
+      "noSales": "No sales in this period",
+      "unsaved": "Live cars no one saved after {days} days",
+      "unsavedShare": "{value} of live cars",
+      "cancelled": "Test drives cancelled",
+      "cancelledOf": "{count} of {total}"
+    },
+    "dealerships": {
+      "active": "Active",
+      "joined": "Joined in the period",
+      "suspended": "Suspended",
+      "withoutCars": "Active with no live cars",
+      "plans": "Active dealerships by plan",
+      "noPlan": "No plan",
+      "regions": "Active dealerships by governorate",
+      "noRegion": "Not set",
+      "busiest": "Busiest dealerships",
+      "busiestNote": "By test drives asked for in the period",
+      "columns": {
+        "dealership": "Dealership",
+        "governorate": "Governorate",
+        "carsLive": "Cars live",
+        "testDrives": "Test drives",
+        "driven": "Driven",
+        "sold": "Sold"
+      },
+      "empty": "No test drives in this period."
+    },
+    "buyers": {
+      "joined": "New buyers",
+      "saved": "Buyers who saved a car",
+      "askedToDrive": "Buyers who asked for a test drive",
+      "askedAgain": "Asked for more than one",
+      "mostSaved": "Most saved cars",
+      "mostSavedNote": "Times saved in the period",
+      "saves": "{count, plural, one {{value} save} other {{value} saves}}",
+      "bodyTypes": "Most wanted car types",
+      "bodyTypesNote": "By test drives asked for",
+      "empty": "Nothing in this period."
     },
     "ai": {
-      "title": "AI usage — last {days} days",
-      "empty": "No AI calls recorded in this window.",
-      "calls": "{count, plural, one {{value} call} other {{value} calls}}",
-      "success": "{value} success",
-      "byFeature": "By feature",
-      "byModel": "By model",
+      "calls": "AI calls",
+      "succeeded": "Succeeded",
+      "failedOf": "{count} failed",
+      "wait": "Typical wait",
+      "slowest": "Slowest 5% over {value}",
+      "cost": "Provider cost",
+      "features": "By feature",
+      "models": "By model",
       "failures": "Failures by cause",
+      "noFailures": "No failures in this period.",
+      "empty": "No AI calls in this period.",
       "columns": {
         "feature": "Feature",
         "model": "Model",
         "calls": "Calls",
-        "success": "Success",
+        "success": "Succeeded",
         "tokensIn": "Tokens in",
         "tokensOut": "Tokens out",
-        "p50": "p50",
-        "p95": "p95"
+        "typical": "Typical wait",
+        "slowest": "Slowest 5%"
+      },
+      "names": {
+        "carListingFromImage": "Listing from photos",
+        "searchFiltersFromImage": "Search by photo",
+        "searchFiltersFromText": "Search by description",
+        "listingTranslation": "Listing translation",
+        "carImageAltText": "Photo descriptions",
+        "carPhotoGrouping": "Grouping photos by car",
+        "listingQualityCoach": "Listing coach",
+        "listingQA": "Answers to buyers",
+        "chatTranslation": "Chat translation",
+        "chatModeration": "Chat screening",
+        "weeklyDigest": "Weekly summary"
       }
     }
   },
   "auditLogs": {
-    "title": "Audit Logs",
-    "subtitle": "Track all platform activity and changes",
-    "export": "Export logs",
-    "searchPlaceholder": "Search by user email or entity ID…",
+    "title": "Activity",
+    "subtitle": "Every change made on AutoMe, newest first. Open one to see exactly what it was before and after.",
+    "export": "Export CSV",
+    "exporting": "Exporting…",
+    "exportFailed": "Couldn’t export the activity",
+    "searchLabel": "Search activity",
+    "searchPlaceholder": "Person, dealership or record ID",
     "filters": {
-      "action": "Filter by action",
-      "allActions": "All actions",
-      "entity": "Filter by entity",
-      "allEntities": "All entities"
+      "who": "Who",
+      "kind": "Kind",
+      "dealership": "Dealership",
+      "anyDealership": "Any dealership",
+      "searchDealerships": "Search dealerships",
+      "noDealerships": "No dealerships found",
+      "period": "Period",
+      "clear": "Clear filters"
+    },
+    "who": {
+      "all": "Anyone",
+      "staff": "AutoMe staff",
+      "support": "During support sessions",
+      "others": "Dealers and buyers"
+    },
+    "kinds": {
+      "all": "Every kind",
+      "cars": "Cars",
+      "drives": "Test drives",
+      "team": "Team",
+      "plan": "Plans and billing",
+      "dealership": "Dealership details",
+      "accounts": "Accounts",
+      "sessions": "Support sessions"
+    },
+    "periods": {
+      "7": "Last 7 days",
+      "30": "Last 30 days",
+      "90": "Last 90 days",
+      "all": "Any time"
     },
     "columns": {
-      "timestamp": "Timestamp",
-      "user": "User",
-      "action": "Action",
-      "entity": "Entity",
-      "organization": "Organization",
+      "when": "When",
+      "who": "Who",
+      "what": "What happened",
+      "target": "To",
+      "dealership": "Dealership",
+      "source": "By",
       "details": "Details"
     },
-    "empty": "No audit logs found",
-    "viewDetails": "View details",
-    "pagination": "Showing {from}–{to} of {total} logs",
-    "details": {
-      "title": "Audit log details",
-      "action": "Action",
-      "entityType": "Entity type",
-      "entityId": "Entity ID",
-      "timestamp": "Timestamp",
-      "ipAddress": "IP address",
-      "userAgent": "User agent",
-      "metadata": "Metadata",
+    "sources": {
+      "support": "Support session",
+      "staff": "AutoMe staff",
+      "dealer": "Dealer",
+      "buyer": "Buyer",
+      "removed": "Removed account",
+      "system": "Automatic"
+    },
+    "system": "System",
+    "signedInAs": "as {name}",
+    "details": "Details",
+    "hide": "Hide",
+    "detailsFor": "Details of {action}, {time}",
+    "change": {
+      "field": "Field",
       "before": "Before",
       "after": "After"
+    },
+    "reason": "Reason: “{reason}”",
+    "session": "Done during a support session, signed in as <b>{name}</b>.",
+    "seeSessions": "See their support sessions",
+    "device": "{browser} on {system}",
+    "ip": "IP address",
+    "recorded": "Recorded {time}",
+    "pagination": {
+      "label": "Pages",
+      "showing": "Showing {from} to {to} of {total}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "empty": "No activity matches.",
+    "emptyHint": "Try another period, or clear the search and filters.",
+    "csv": {
+      "when": "When",
+      "who": "Who",
+      "signedInAs": "Signed in as",
+      "what": "What happened",
+      "target": "To",
+      "dealership": "Dealership",
+      "source": "By",
+      "changes": "Changes",
+      "ip": "IP address",
+      "device": "Device"
     }
   },
   "impersonation": {
-    "title": "Impersonation",
-    "subtitle": "View organizations as their owners for support and debugging",
-    "activeAlert": "{count, plural, one {There is {value} active impersonation session.} other {There are {value} active impersonation sessions.}} Every action taken during impersonation is logged.",
-    "active": {
-      "title": "Active sessions",
-      "badge": "{value} active",
-      "empty": "No active impersonation sessions",
-      "started": "Started {time}",
-      "end": "End session",
+    "title": "Support sessions",
+    "subtitle": "Every time AutoMe staff signed in as someone at a dealership: why, for how long, and what they changed.",
+    "start": "Start a support session",
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "open": "Open now",
+      "mine": "Mine",
+      "week": "This week"
+    },
+    "searchLabel": "Search support sessions",
+    "searchPlaceholder": "Dealership, person or reason",
+    "filters": {
+      "admin": "Admin",
+      "anyAdmin": "Any admin",
+      "period": "Period",
+      "clear": "Clear filters"
+    },
+    "periods": {
+      "7": "Last 7 days",
+      "30": "Last 30 days",
+      "90": "Last 90 days",
+      "all": "Any time"
+    },
+    "columns": {
+      "started": "Started",
+      "by": "By",
+      "dealership": "Dealership",
+      "signedInAs": "Signed in as",
+      "reason": "Reason",
+      "length": "Length",
+      "changes": "Changes made",
+      "actions": "Actions"
+    },
+    "you": "You",
+    "open": "{length}, open",
+    "hours": "{hours} h {minutes} min",
+    "minutes": "{value} min",
+    "end": "End",
+    "view": "View changes",
+    "endFor": "End the session at {dealership}",
+    "viewFor": "See what changed at {dealership}",
+    "endDialog": {
+      "title": "End this support session?",
+      "body": "{admin} is signed in as {person} at {dealership}. Ending it signs them out of the dealership's dashboard.",
+      "keep": "Keep it open",
+      "confirm": "End session",
       "ending": "Ending…",
-      "ended": "Impersonation session ended",
-      "endedBody": "The session as {name} has been ended.",
-      "endFailed": "Couldn’t end the session"
+      "ended": "Support session ended",
+      "failed": "Couldn’t end the session"
     },
-    "history": {
-      "title": "Recent sessions",
-      "empty": "No impersonation history"
+    "startDialog": {
+      "title": "Start a support session",
+      "body": "Choose the dealership. Next you choose who to sign in as and say why.",
+      "dealership": "Dealership",
+      "choose": "Choose a dealership",
+      "search": "Search dealerships",
+      "none": "No dealerships found",
+      "next": "Next"
     },
-    "quick": {
-      "title": "Quick impersonate",
-      "searchPlaceholder": "Search organizations…",
-      "noOwner": "No owner",
-      "empty": "No organizations found",
-      "showing": "Showing {shown} of {total} results",
-      "loading": "Loading…",
-      "cannot": "Can’t impersonate",
-      "cannotBody": "This organization has no owner to impersonate.",
-      "started": "Impersonation started",
-      "startedBody": "Now viewing {org} as {name}.",
-      "failed": "Couldn’t start impersonation"
-    }
+    "pagination": {
+      "label": "Pages",
+      "showing": "Showing {from} to {to} of {total}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "empty": "No support sessions match.",
+    "emptyHint": "Try another view, or clear the search and filters."
   }
 }

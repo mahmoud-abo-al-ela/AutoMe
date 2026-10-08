@@ -9,12 +9,16 @@ import { parseDealershipQuery } from "@/lib/services/super-admin/dealerships-opt
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
 import { createSuccessResponse } from "@/lib/utils/response";
 import type { CreateOrganizationInput } from "@/lib/services/super-admin/organization";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { createDealershipSchema } from "@/lib/validations/schemas";
+import { z } from "zod";
 
 /**
  * Create a new organization
  */
 export const createOrganization = withSuperAdmin(
-  async (admin, data: CreateOrganizationInput) => {
+  async (admin, input: CreateOrganizationInput) => {
+  const data = validateAction(createDealershipSchema, input);
   const { organization, plan } = await orgService.createOrganization(data);
 
   await db.auditLog.create({
@@ -86,6 +90,23 @@ export const deleteOrganization = withSuperAdmin(async (admin, orgId: string) =>
 
   revalidateLocalized("/super-admin/organizations");
   return createSuccessResponse(null, "Organization deleted");
+});
+
+/**
+ * Whether a web address is free for a new dealership, as the admin types it.
+ */
+export const checkDealershipSlug = withSuperAdmin(async (_admin, slug: string) => {
+  const value = validateAction(z.string().trim().max(60), slug);
+  return createSuccessResponse(await orgService.checkSlug(value));
+});
+
+/**
+ * Whether the owner's email already has an AutoMe account — they become the
+ * owner straight away — or will be invited to sign up.
+ */
+export const checkOwnerEmail = withSuperAdmin(async (_admin, email: string) => {
+  const value = validateAction(z.string().trim().email().max(254), email);
+  return createSuccessResponse(await orgService.findAccountByEmail(value));
 });
 
 /**

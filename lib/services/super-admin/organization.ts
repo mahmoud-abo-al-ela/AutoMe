@@ -23,6 +23,9 @@ export interface CreateOrganizationInput {
   address?: string | null;
   website?: string | null;
   description?: string | null;
+  /** egydata governorate code and city slug — see lib/locations. */
+  region?: string | null;
+  city?: string | null;
   planId: string;
   ownerEmail?: string | null;
 }
@@ -69,6 +72,9 @@ export async function createOrganization(data: CreateOrganizationInput) {
     address: data.address || null,
     website: data.website || null,
     description: data.description || null,
+    region: data.region || null,
+    city: data.city || null,
+    country: "EG",
     isActive: true,
     // Store pending owner email if user doesn't exist yet
     pendingOwnerEmail:
@@ -146,4 +152,17 @@ export async function changeOrganizationPlan(orgId: string, planId: string) {
 
   // This will be handled by subscription service
   return { org, subscriptionId: org.subscription?.id };
+}
+
+/** Whether a web address can be given to a new dealership: well formed and not taken. */
+export async function checkSlug(slug: string) {
+  if (!isValidSlug(slug)) return { valid: false, available: false };
+  const existing = await orgRepo.findOrganizationBySlug(slug);
+  return { valid: true, available: !existing };
+}
+
+/** Whether an email already has an AutoMe account, and whose — so the form can say what happens to the owner. */
+export async function findAccountByEmail(email: string) {
+  const user = await userRepo.findUserByEmail(email.trim().toLowerCase());
+  return user ? { hasAccount: true, name: user.name } : { hasAccount: false, name: null };
 }
