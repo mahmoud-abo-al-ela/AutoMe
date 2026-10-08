@@ -5,17 +5,16 @@
   },
   "nav": {
     "brand": "Super Admin",
+    "label": "Admin sections",
     "overview": "Overview",
-    "organizations": "Organizations",
-    "users": "All Users",
-    "plans": "Plans & Pricing",
+    "organizations": "Dealerships",
+    "users": "Users",
+    "plans": "Plans",
+    "impersonation": "Support sessions",
+    "auditLogs": "Activity",
     "analytics": "Analytics",
-    "auditLogs": "Audit Logs",
-    "impersonation": "Impersonation",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar",
     "backToSite": "Back to site"
   },
   "common": {
@@ -55,39 +54,86 @@
     }
   },
   "overview": {
-    "title": "Platform Overview",
-    "subtitle": "Monitor and manage the AutoMe platform",
-    "stats": {
-      "organizations": "Total organizations",
-      "organizationsActive": "{value} active",
-      "users": "Total users",
-      "cars": "Total cars listed",
-      "testDrives": "Total test drives"
+    "title": "Overview",
+    "period": {
+      "label": "Period",
+      "d7": "Last 7 days",
+      "d30": "Last 30 days",
+      "d90": "Last 90 days",
+      "d365": "Last 12 months"
     },
-    "subscriptions": {
-      "title": "Active subscriptions by plan",
-      "orgCount": "{count, plural, one {{value} organization} other {{value} organizations}}",
-      "empty": "No active subscriptions"
+    "compare": {
+      "label": "Compare to",
+      "previous": "Previous period",
+      "none": "No comparison"
     },
-    "growth": {
-      "title": "Platform growth",
-      "subtitle": "New organizations, users, and cars over the last 6 months",
-      "series": {
-        "organizations": "Organizations",
-        "users": "Users",
-        "cars": "Cars"
-      }
+    "metrics": {
+      "label": "Key numbers",
+      "revenue": "Revenue collected",
+      "dealerships": "New dealerships",
+      "cars": "Cars listed",
+      "buyers": "New buyers",
+      "testDrives": "Test drives requested"
     },
-    "recentOrganizations": {
-      "title": "Recent organizations",
-      "subtitle": "Latest organizations added to the platform",
-      "empty": "No organizations yet"
+    "change": {
+      "up": "Up {percent}",
+      "down": "Down {percent}",
+      "same": "No change",
+      "fromZero": "None the period before",
+      "compared": "compared with the previous period"
     },
-    "activeImpersonations": {
-      "title": "Active impersonations",
-      "subtitle": "Admin impersonation sessions in progress",
-      "count": "{count, plural, one {{value} active impersonation session} other {{value} active impersonation sessions}}",
-      "empty": "No active impersonation sessions"
+    "chart": {
+      "hint": "Running total, {from} to {to}",
+      "current": "This period",
+      "previous": "Previous period",
+      "label": "{metric}: {value} this period, {previous} the period before.",
+      "labelAlone": "{metric}: {value} this period."
+    },
+    "plans": {
+      "title": "Dealerships by plan",
+      "total": "Total: {value}",
+      "status": "Paying: {paying}. On a trial: {trial}. Overdue: {overdue}.",
+      "income": "Paid plans bring in {amount} a month."
+    },
+    "drives": {
+      "title": "Test drives",
+      "requested": "Requested",
+      "confirmed": "Confirmed by the dealership",
+      "completed": "Completed",
+      "empty": "No test drives were requested in this period."
+    },
+    "cars": {
+      "title": "Cars",
+      "total": "Total: {value}",
+      "available": "On sale",
+      "hidden": "Hidden",
+      "sold": "Sold",
+      "average": "An average of {value} per dealership."
+    },
+    "needs": {
+      "title": "Needs attention",
+      "none": "Nothing needs attention right now.",
+      "columns": {
+        "issue": "Issue",
+        "dealership": "Dealership",
+        "details": "Details",
+        "action": "Action"
+      },
+      "tags": {
+        "overdue": "Payment overdue",
+        "trial": "Trial ending",
+        "support": "Support session",
+        "new": "No cars yet"
+      },
+      "overdue": "{plan}, overdue since {since}. Moves to the free plan on {drops}.",
+      "trial": "{plan} trial ends on {date}.",
+      "session": "{admin} is signed in as {person}, {minutes, plural, one {{value} minute} other {{value} minutes}}.",
+      "sessionMine": "You are signed in as {person}, {minutes, plural, one {{value} minute} other {{value} minutes}}.",
+      "newWithoutCars": "Joined this week, no cars listed yet.",
+      "more": "{list} and {value} more",
+      "open": "Open",
+      "review": "Review",
+      "seeThem": "See them"
     }
   },
   "organizations": {

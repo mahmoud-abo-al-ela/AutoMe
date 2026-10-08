@@ -5,7 +5,6 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { DirectionProvider } from "@radix-ui/react-direction";
 import "../globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import LoadingProvider from "@/components/LoadingProvider";
 import { StreamChatProvider } from "@/components/StreamChat";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { routing, localeDirection } from "@/i18n/routing";
@@ -172,11 +171,9 @@ export default async function LocaleLayout({
               popover, dropdown and slider keeps LTR collision logic in Arabic. */}
           <DirectionProvider dir={dir}>
             <NextIntlClientProvider>
-              <LoadingProvider>
-                <QueryProvider>
-                  <StreamChatProvider>{children}</StreamChatProvider>
-                </QueryProvider>
-              </LoadingProvider>
+              <QueryProvider>
+                <StreamChatProvider>{children}</StreamChatProvider>
+              </QueryProvider>
             </NextIntlClientProvider>
           </DirectionProvider>
         </body>

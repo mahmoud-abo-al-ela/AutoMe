@@ -3,13 +3,13 @@ import enSuperAdmin from "@/messages/en/superAdmin.json";
 import arSuperAdmin from "@/messages/ar/superAdmin.json";
 import enOrg from "@/messages/en/org.json";
 import arOrg from "@/messages/ar/org.json";
-import { superAdminSidebarItems } from "@/lib/SuperAdminSidebarConfig";
+import { ADMIN_SECTIONS } from "@/app/[locale]/(super-admin)/super-admin/_components/admin-sections";
 
 /**
  * Message-shape checks for the super-admin dashboard.
  *
  * Staff-only, so a missing key here is seen by few people and fixed late —
- * these catch it at test time instead. `superAdminSidebarItems` is imported
+ * these catch it at test time instead. The top bar's `ADMIN_SECTIONS` is imported
  * rather than restated, so a nav entry added without its label fails here.
  */
 
@@ -94,11 +94,11 @@ describe("super-admin sidebar config and messages agree", () => {
   it.each(["en", "ar"] as const)("labels every nav item in %s", (locale) => {
     const messages = locale === "en" ? enSuperAdmin : arSuperAdmin;
 
-    expect(superAdminSidebarItems.length).toBeGreaterThan(0);
-    for (const item of superAdminSidebarItems) {
+    expect(ADMIN_SECTIONS.length).toBeGreaterThan(0);
+    for (const item of ADMIN_SECTIONS) {
       expect(
-        at(messages, `nav.${item.labelKey}`),
-        `missing nav.${item.labelKey}`
+        at(messages, `nav.${item.key}`),
+        `missing nav.${item.key}`
       ).toBeTruthy();
     }
   });
