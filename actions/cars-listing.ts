@@ -80,7 +80,7 @@ export const getCarsFilters = withErrorHandling(async (filters: CarFilters = {})
 });
 
 export const toggleWishlist = withAuth(async (ctx, carId: string) => {
-  const result = await wishlistService.toggleWishlist(carId, ctx.userId);
+  const result = await wishlistService.toggleWishlist(carId, ctx.userId, ctx.user);
 
   revalidateLocalized("/wishlist");
   revalidateLocalized("/cars");

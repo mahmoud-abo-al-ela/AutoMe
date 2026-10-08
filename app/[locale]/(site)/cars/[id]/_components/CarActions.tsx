@@ -6,6 +6,7 @@ import TestDriveButton from "./TestDriveButton";
 import { StartConversationButton, useChatDock } from "@/components/StreamChat";
 import type { CarDetail } from "../_lib/car-detail-types";
 import { useTranslations } from "next-intl";
+import { BuyerAccessNotice, useBuyerAccess } from "@/components/BuyerAccess";
 
 /**
  * Contact the dealer (the page's one marker-yellow action), book a test
@@ -36,26 +37,32 @@ const CarActions = ({
 }) => {
   const t = useTranslations("carDetail.actions");
   const { openCarChat } = useChatDock();
+  const { can } = useBuyerAccess();
 
   return (
     <div className="flex flex-col gap-3">
-      {isSignedIn ? (
+      {/* Platform staff and the dealer's own team: why not, and where to go instead. */}
+      <BuyerAccessNotice action="message" />
+
+      {can("message") && (isSignedIn ? (
         <StartConversationButton carId={car.id} onChatOpen={openCarChat} variant="marker" size="xl" className="w-full" />
       ) : (
         <Button variant="marker" size="xl" className="w-full" onClick={() => onChatClick?.()}>
           <MessageSquare />
           {t("chatNow")}
         </Button>
-      )}
+      ))}
 
-      <TestDriveButton
-        car={car}
-        testDriveId={testDriveId}
-        isCheckingTestDrive={isCheckingTestDrive}
-        isScheduleLoading={isScheduleLoading}
-        onScheduleTestDrive={onScheduleTestDrive}
-        onViewTestDrive={onViewTestDrive}
-      />
+      {can("testDrive") && (
+        <TestDriveButton
+          car={car}
+          testDriveId={testDriveId}
+          isCheckingTestDrive={isCheckingTestDrive}
+          isScheduleLoading={isScheduleLoading}
+          onScheduleTestDrive={onScheduleTestDrive}
+          onViewTestDrive={onViewTestDrive}
+        />
+      )}
 
       {isInCompare && (
         <Button variant="ghost" size="xl" className="w-full" onClick={onGoToCompare}>

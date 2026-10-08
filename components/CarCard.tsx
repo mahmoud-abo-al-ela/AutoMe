@@ -103,6 +103,7 @@ const CarCard = ({
         )}
         <CarCardActions
           carId={car.id}
+          organizationId={car.organizationId}
           isWishlisted={car.isWishlisted || false}
           onWishlistChange={onWishlistChange}
           isWishlistPage={pathname === "/wishlist"}

@@ -15,6 +15,7 @@ import {
     AuthenticationError,
     NotFoundError,
 } from "@/lib/utils/errors";
+import { assertBuyerAllowed } from "@/lib/auth/assert-buyer";
 
 /**
  * Get Stream Chat token for the current user
@@ -82,6 +83,9 @@ export const startCarConversation = withAuth(async (ctx, carId: string) => {
         throw new NotFoundError("Car");
     }
 
+    // Before any Stream call: a blocked caller must not leave a channel behind.
+    assertBuyerAllowed(ctx.user, car.organizationId, "message");
+
     // Ensure all organization members exist in Stream Chat
     const orgMembers = car.organization.memberships.map(m => m.user);
     await ensureOrgMembersInStream(orgMembers);
@@ -148,6 +152,8 @@ export const startOrganizationConversation = withAuth(
     if (!organization) {
         throw new NotFoundError("Organization");
     }
+
+    assertBuyerAllowed(ctx.user, organization.id, "message");
 
     // Ensure all organization members exist in Stream Chat
     const orgMembers = organization.memberships.map(m => m.user);

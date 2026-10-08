@@ -71,6 +71,30 @@
     "wishlistAdded": "Added to your wishlist",
     "wishlistRemoved": "Removed from your wishlist"
   },
+  "buyerAccess": {
+    "platformAdmin": {
+      "title": "You’re viewing as a platform admin"
+    },
+    "ownListing": {
+      "title": "This is your dealership’s car",
+      "body": "Buyers message you and book test drives from here. You’ll find them in your dashboard."
+    },
+    "ownDealership": {
+      "title": "This is your dealership",
+      "body": "Buyer actions aren’t available on your own dealership’s pages."
+    },
+    "impersonating": {
+      "title": "You’re signed in as a dealer",
+      "body": "Buyer actions are off during a support session."
+    },
+    "dealerReview": {
+      "title": "Reviews come from buyers",
+      "body": "Dealership team members can’t review dealerships, so ratings stay fair."
+    },
+    "openInAdmin": "Open in admin",
+    "manageCar": "Manage this car",
+    "manageDealership": "Go to your dashboard"
+  },
   "time": {
     "togglePeriod": "Switch between AM and PM"
   },

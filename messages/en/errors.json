@@ -69,6 +69,12 @@
     "invalidRating": "Choose a rating from {min} to {max}.",
     "alreadyReviewed": "You’ve already reviewed this dealership."
   },
+  "buyer": {
+    "impersonating": "Buyer actions are off while you’re signed in as a dealer.",
+    "platformAdmin": "Platform admin accounts can’t save cars, message dealers, book test drives or write reviews.",
+    "ownDealership": "This is your dealership’s listing, so buyer actions aren’t available on it.",
+    "dealerReview": "Dealership team members can’t review dealerships."
+  },
   "upload": {
     "tooLarge": "Each image must be {max} MB or smaller.",
     "unsupportedType": "Only JPEG, PNG and WebP images are allowed.",

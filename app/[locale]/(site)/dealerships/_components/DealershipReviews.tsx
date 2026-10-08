@@ -12,15 +12,30 @@ import { getDealershipReviews, createDealershipReview } from "@/actions/dealersh
 import { Pagination } from "@/components/common/Pagination";
 import { useUser } from "@clerk/nextjs";
 import { EmptyState } from "@/components/common/EmptyState";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { useAuthRedirects } from "@/hooks/use-auth-redirects";
+import { BuyerAccessNotice, useBuyerAccess } from "@/components/BuyerAccess";
 import type {
     DealershipReview,
     ReviewsPagination,
 } from "../_lib/dealership-types";
 
-const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
+const DealershipReviews = ({
+    organizationId,
+    organizationSlug,
+}: {
+    organizationId: string;
+    organizationSlug?: string;
+}) => {
     const t = useTranslations("dealerships.reviews");
     const fmt = useFormatters();
     const { user, isLoaded } = useUser();
+    const router = useRouter();
+    const pathname = usePathname();
+    const { signInTo } = useAuthRedirects();
+    // Reviews come from buyers: not platform staff, and no dealership's team.
+    const buyerTarget = { organizationId, organizationSlug };
+    const canReview = useBuyerAccess(buyerTarget).can("review");
     const [reviews, setReviews] = useState<DealershipReview[]>([]);
     const [pagination, setPagination] = useState<ReviewsPagination>({
         page: 1,
@@ -118,7 +133,7 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                     <MessageSquare className="h-6 w-6" />
                     {t("heading", { count: fmt.number(totalReviews) })}
                 </h2>
-                {user && (
+                {user && canReview && (
                     <Button
                         onClick={() => setShowForm(!showForm)}
                         variant={showForm ? "outline" : "default"}
@@ -129,6 +144,8 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                     </Button>
                 )}
             </div>
+
+            <BuyerAccessNotice action="review" target={buyerTarget} />
 
             {/* Rating Summary */}
             {totalReviews > 0 && (
@@ -209,8 +226,10 @@ const DealershipReviews = ({ organizationId }: { organizationId: string }) => {
                     icon={MessageSquare}
                     title={t("emptyTitle")}
                     description={t("emptyBody")}
-                    actionLabel={t("writeReview")}
-                    onAction={() => setShowForm(true)}
+                    actionLabel={canReview ? t("writeReview") : undefined}
+                    // Signed out: sign in first, then back here. It used to
+                    // open the form, whose submit then failed.
+                    onAction={() => (user ? setShowForm(true) : router.push(signInTo(pathname)))}
                 />
             ) : (
                 <>

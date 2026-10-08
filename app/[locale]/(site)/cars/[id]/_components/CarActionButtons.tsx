@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Heart, Share2, Scale } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { useBuyerAccess } from "@/components/BuyerAccess";
 
 /**
  * Save / Compare / Share (Figma: IconButton / Outline) — 44px squares with a
@@ -28,6 +29,7 @@ const CarActionButtons = ({
 }) => {
   const t = useTranslations("carDetail.actions");
   const tCar = useTranslations("common.carActions");
+  const { can } = useBuyerAccess();
   const square = "size-11 rounded-control border border-border bg-field hover:border-border-strong hover:bg-field";
   const pressed = "border-inverse bg-inverse text-inverse-foreground hover:bg-inverse-hover hover:border-inverse";
 
@@ -40,9 +42,12 @@ const CarActionButtons = ({
     </Tooltip>
   );
 
+  // A car saved before saving was blocked keeps its heart, so it can be removed.
+  const showSave = can("save") || isFavorite;
+
   return (
     <div className="flex gap-2">
-      {item(
+      {showSave && item(
         tCar(isFavorite ? "removeFromFavorites" : "addToFavorites"),
         <Button
           variant="ghost"

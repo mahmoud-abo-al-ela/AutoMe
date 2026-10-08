@@ -104,7 +104,7 @@ export const DealershipTabs = ({
                             count: fmt.number(dealership.totalReviews),
                         })}
                     </h2>
-                    <DealershipReviews organizationId={dealership.id} />
+                    <DealershipReviews organizationId={dealership.id} organizationSlug={dealership.slug} />
                 </div>
             </TabsContent>
 

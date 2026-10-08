@@ -13,6 +13,16 @@ export function tenantHost(slug: string): string {
 }
 
 /**
+ * A page on the main domain, in a locale: `https://autome.com/ar/super-admin`.
+ * For links to main-domain-only routes from a dealership's storefront, where a
+ * relative link would stay on the subdomain and be sent back to its home.
+ */
+export function mainSiteUrl(path: string, locale: string): string {
+  const app = new URL(process.env.NEXT_PUBLIC_APP_URL || `https://${ROOT_DOMAIN}`);
+  return `${app.origin}/${locale}${path}`;
+}
+
+/**
  * A dealership's storefront, in a locale: `https://nile-motors.autome.com/ar`.
  * Protocol and port follow NEXT_PUBLIC_APP_URL, so on a dev machine it is
  * `http://nile-motors.localhost:3000/en`.
