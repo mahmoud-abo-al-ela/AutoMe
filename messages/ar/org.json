@@ -24,10 +24,10 @@
     "viewingAsIn": "تتصفح باسم <b>{name}</b> داخل <b>{org}</b>",
     "unknownUser": "مستخدم",
     "superAdmin": "(المشرف العام: {name})",
-    "exit": "إنهاء انتحال الهوية",
+    "exit": "إنهاء جلسة الدعم",
     "ending": "جارٍ الإنهاء…",
-    "ended": "تم إنهاء انتحال الهوية",
-    "endFailed": "تعذّر إنهاء انتحال الهوية"
+    "ended": "انتهت جلسة الدعم",
+    "endFailed": "تعذّر إنهاء جلسة الدعم"
   },
   "upgradeBanner": {
     "notIncluded": "باقة {plan} لا تشمل {resource}.",
@@ -959,6 +959,8 @@
       "WORKING_HOURS_UPDATED": "<b>{who}</b> غيّر مواعيد العمل.",
       "IMPERSONATION_STARTED": "<b>{who}</b> دخل إلى لوحتك للمساعدة.",
       "IMPERSONATION_ENDED": "<b>{who}</b> خرج بعد {minutes, plural, one {دقيقة واحدة} two {دقيقتين} few {{value} دقائق} many {{value} دقيقة} other {{value} دقيقة}}.",
+      "ORG_SUSPENDED": "أوقف <b>{who}</b> {dealership}، فأُخفيت صفحته وسياراته عن المشترين.",
+      "ORG_ACTIVATED": "أعاد <b>{who}</b> تفعيل {dealership}.",
       "other": "<b>{who}</b>: {action}."
     },
     "fields": {
@@ -1008,7 +1010,7 @@
       "ORG_UPDATED": "تحديث المعرض",
       "ORG_DELETED": "حذف المعرض",
       "ORG_SUSPENDED": "إيقاف المعرض",
-      "ORG_ACTIVATED": "تفعيل المعرض",
+      "ORG_ACTIVATED": "إعادة تفعيل المعرض",
       "MEMBER_INVITED": "دعوة عضو",
       "MEMBER_ACCEPTED": "قبول العضوية",
       "MEMBER_REMOVED": "إزالة عضو",
@@ -1033,8 +1035,8 @@
       "USER_DELETED": "حذف مستخدم",
       "WORKING_HOURS_UPDATED": "تحديث ساعات العمل",
       "ORG_SETTINGS_UPDATED": "تحديث الإعدادات",
-      "IMPERSONATION_STARTED": "بدء انتحال الهوية",
-      "IMPERSONATION_ENDED": "إنهاء انتحال الهوية"
+      "IMPERSONATION_STARTED": "بدء جلسة دعم",
+      "IMPERSONATION_ENDED": "إنهاء جلسة دعم"
     },
     "entities": {
       "ORGANIZATION": "المعرض",
@@ -1044,7 +1046,7 @@
       "MEMBERSHIP": "العضوية",
       "SUBSCRIPTION": "الاشتراك",
       "WORKING_HOURS": "ساعات العمل",
-      "IMPERSONATION_SESSION": "جلسة انتحال الهوية"
+      "IMPERSONATION_SESSION": "جلسة دعم"
     },
     "unknownUser": "مستخدم غير معروف"
   },

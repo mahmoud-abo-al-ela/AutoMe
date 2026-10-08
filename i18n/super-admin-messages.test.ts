@@ -33,13 +33,9 @@ describe("super-admin messages", () => {
   });
 
   it("translates every key, bar the ones that carry no words", () => {
-    // Punctuation around already-formatted values, and latency percentile
-    // labels that are written the same way in both languages.
-    const NOT_LANGUAGE = new Set([
-      "analytics.top.rank",
-      "analytics.ai.columns.p50",
-      "analytics.ai.columns.p95",
-    ]);
+    // Keys written the same way in both languages because they carry no
+    // words. None today; add one here only with a reason.
+    const NOT_LANGUAGE = new Set<string>([]);
 
     const untranslated = flatten(enSuperAdmin)
       .filter(

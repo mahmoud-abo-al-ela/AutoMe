@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useFormatters } from "@/hooks/use-formatters";
-import type { OrganizationRowData } from "./OrganizationsTable";
 
 export default function DeleteOrganizationDialog({
   open,
@@ -22,7 +21,7 @@ export default function DeleteOrganizationDialog({
   isDeleting,
 }: {
   open: boolean;
-  org: OrganizationRowData | null;
+  org: { name: string; cars: number; team: number } | null;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
   isDeleting: boolean;
@@ -32,8 +31,8 @@ export default function DeleteOrganizationDialog({
   const tActions = useTranslations("common.actions");
   const { number } = useFormatters();
 
-  const cars = org?._count?.cars ?? 0;
-  const members = org?._count?.memberships ?? 0;
+  const cars = org?.cars ?? 0;
+  const members = org?.team ?? 0;
 
   const handleConfirm = async () => {
     await onConfirm();

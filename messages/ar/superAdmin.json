@@ -138,68 +138,255 @@
   },
   "organizations": {
     "title": "المعارض",
-    "subtitle": "إدارة كل المعارض على المنصة",
-    "create": "إنشاء معرض",
-    "searchPlaceholder": "ابحث في المعارض…",
+    "subtitle": "كل معارض AutoMe، وباقة كل منها وحاله.",
+    "create": "إضافة معرض",
+    "export": "تصدير CSV",
+    "exporting": "جارٍ التصدير…",
+    "exportFailed": "تعذّر تصدير المعارض",
+    "views": {
+      "label": "الحالة",
+      "all": "كل الحالات",
+      "active": "نشطة",
+      "trial": "في فترة تجربة",
+      "overdue": "سداد متأخر",
+      "noCars": "بلا سيارات بعد",
+      "suspended": "موقوفة"
+    },
+    "searchLabel": "البحث في المعارض",
+    "searchPlaceholder": "الاسم أو البريد أو الهاتف أو عنوان الموقع",
     "filters": {
-      "status": "الحالة",
-      "allStatuses": "كل الحالات",
       "plan": "الباقة",
-      "allPlans": "كل الباقات"
+      "allPlans": "كل الباقات",
+      "region": "المحافظة",
+      "allRegions": "كل المحافظات",
+      "sort": "الترتيب",
+      "clear": "مسح عوامل التصفية"
     },
-    "empty": "لم يتم العثور على معارض",
-    "actions": {
-      "impersonate": "انتحال الهوية",
+    "sorts": {
+      "newest": "الأحدث أولًا",
+      "oldest": "الأقدم أولًا",
+      "name": "الاسم",
+      "cars": "الأكثر سيارات"
+    },
+    "columns": {
+      "selectAll": "تحديد كل المعارض في هذه الصفحة",
+      "selectRow": "تحديد {name}",
+      "dealership": "المعرض",
+      "plan": "الباقة",
+      "status": "الحالة",
+      "cars": "السيارات",
+      "team": "الفريق",
+      "drives": "القيادات التجريبية، ٣٠ يومًا",
+      "paid": "المدفوع حتى الآن",
+      "joined": "الانضمام",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "suspended": "موقوف",
+      "overdue": "متأخر منذ {date}",
+      "trial": "تنتهي التجربة {date}",
+      "canceled": "الباقة ملغاة",
+      "pending": "بانتظار السداد"
+    },
+    "paidNone": "لا شيء",
+    "freePlan": "الباقة المجانية",
+    "bulk": {
+      "selected": "{count, plural, one {معرض واحد محدد} two {معرضان محددان} few {{value} معارض محددة} many {{value} معرضًا محددًا} other {{value} معرض محدد}}",
       "suspend": "إيقاف",
-      "activate": "تفعيل",
-      "suspending": "جارٍ الإيقاف…",
-      "activating": "جارٍ التفعيل…"
+      "activate": "إعادة التفعيل",
+      "export": "تصدير",
+      "clear": "إلغاء التحديد"
     },
+    "actionsFor": "إجراءات {name}",
+    "actions": {
+      "open": "فتح",
+      "impersonate": "بدء جلسة دعم",
+      "publicPage": "فتح الصفحة العامة",
+      "suspend": "إيقاف",
+      "activate": "إعادة التفعيل",
+      "suspending": "جارٍ الإيقاف…",
+      "activating": "جارٍ إعادة التفعيل…",
+      "delete": "حذف"
+    },
+    "pagination": {
+      "label": "الصفحات",
+      "showing": "عرض {from} إلى {to} من {total}",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    },
+    "empty": "لا توجد معارض مطابقة.",
+    "emptyHint": "جرّب عرضًا آخر، أو امسح البحث وعوامل التصفية.",
     "toasts": {
-      "suspended": "تم إيقاف المعرض",
-      "suspendedBody": "تم إيقاف {name}.",
-      "activated": "تم تفعيل المعرض",
-      "activatedBody": "تم تفعيل {name}.",
-      "statusFailed": "تعذّر تحديث الحالة",
-      "deleted": "تم حذف المعرض",
-      "deletedBody": "تم حذف {name}.",
-      "deleteFailed": "تعذّر حذف المعرض"
+      "suspended": "أُوقف المعرض",
+      "suspendedBody": "أُوقف {name} وأصبح مخفيًا عن المشترين.",
+      "activated": "أُعيد تفعيل المعرض",
+      "activatedBody": "عاد {name} نشطًا.",
+      "statusFailed": "تعذّر تغيير الحالة",
+      "deleted": "حُذف المعرض",
+      "deletedBody": "حُذف {name}.",
+      "deleteFailed": "تعذّر حذف المعرض",
+      "bulkSuspended": "{count, plural, one {أُوقف معرض واحد} two {أُوقف معرضان} few {أُوقفت {value} معارض} many {أُوقف {value} معرضًا} other {أُوقف {value} معرض}}",
+      "bulkActivated": "{count, plural, one {أُعيد تفعيل معرض واحد} two {أُعيد تفعيل معرضين} few {أُعيد تفعيل {value} معارض} many {أُعيد تفعيل {value} معرضًا} other {أُعيد تفعيل {value} معرض}}",
+      "bulkFailed": "تعذّر تغيير بعض المعارض. حاول مرة أخرى."
     },
     "delete": {
       "title": "حذف المعرض",
-      "confirm": "هل أنت متأكد من حذف <strong>{name}</strong>؟ لا يمكن التراجع عن هذا الإجراء.",
-      "dataWarning": "يضم هذا المعرض {cars} و{members}. سيتم حذف كل بياناته نهائيًا.",
+      "confirm": "حذف <strong>{name}</strong>؟ لا يمكن التراجع عن ذلك.",
+      "dataWarning": "لديه {cars} و{members}. ستُحذف كل بياناته نهائيًا.",
       "allDataWarning": "سيتم حذف كل البيانات المرتبطة نهائيًا — السيارات والقيادات التجريبية والمحادثات وعضويات الفريق.",
       "cars": "{count, plural, zero {{value} سيارة} one {سيارة واحدة} two {سيارتين} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
       "members": "{count, plural, zero {{value} عضو} one {عضوًا واحدًا} two {عضوين} few {{value} أعضاء} many {{value} عضوًا} other {{value} عضو}}",
       "submit": "حذف المعرض"
     },
     "impersonate": {
-      "title": "انتحال هوية مستخدم",
-      "description": "ادخل إلى <strong>{name}</strong> بصفة مستخدم محدد. سيتم تسجيل كل ما تفعله.",
+      "title": "بدء جلسة دعم",
+      "description": "ادخل إلى <strong>{name}</strong> باسم أحد أعضاء فريقه. يُسجَّل كل ما تفعله.",
       "auditTitle": "سجل التدقيق",
-      "auditBody": "كل إجراء يتم أثناء انتحال الهوية يُسجَّل باسمك.",
-      "userLabel": "انتحال هوية",
+      "auditBody": "كل ما تفعله أثناء الجلسة يُسجَّل باسمك.",
+      "userLabel": "الدخول باسم",
       "loadingMembers": "جارٍ تحميل الأعضاء…",
       "userPlaceholder": "اختر مستخدمًا",
-      "reasonLabel": "سبب انتحال الهوية",
+      "reasonLabel": "سبب الجلسة",
       "reasonPlaceholder": "مثال: التحقق من المشكلة المُبلَّغ عنها رقم ١٢٣، طلب دعم من عميل…",
       "reasonHelp": "يُسجَّل هذا السبب في سجل النشاط.",
       "missingFields": "اختر مستخدمًا واكتب السبب",
-      "started": "بدأ انتحال الهوية",
+      "started": "بدأت جلسة الدعم",
       "starting": "جارٍ البدء…",
-      "submit": "بدء انتحال الهوية"
+      "submit": "بدء الجلسة"
     },
     "details": {
-      "back": "العودة إلى المعارض",
-      "stats": {
-        "cars": "إجمالي السيارات",
-        "members": "أعضاء الفريق",
-        "testDrives": "القيادات التجريبية"
+      "back": "المعارض",
+      "more": "إجراءات أخرى",
+      "planLine": "الباقة {plan}",
+      "joined": "انضم في {date}",
+      "tabs": {
+        "label": "المعرض",
+        "summary": "الملخص",
+        "cars": "السيارات",
+        "team": "الفريق",
+        "billing": "الفوترة",
+        "activity": "النشاط"
       },
-      "members": "أعضاء الفريق ({value})",
-      "activity": "أحدث النشاط",
-      "activityEmpty": "لا يوجد نشاط مسجّل",
+      "alert": {
+        "overdueTitle": "السداد متأخر منذ {date}.",
+        "overdueFailed": "فشل سداد مبلغ {amount} في {date}.",
+        "overdueDrops": "ينتقل {name} إلى الباقة المجانية في {date} إن لم يُسدَّد المبلغ.",
+        "overdueDropsSoon": "ينتقل {name} إلى الباقة المجانية إن لم يُسدَّد المبلغ.",
+        "trial": "تنتهي تجربة الباقة {plan} في {date}.",
+        "suspended": "موقوف. صفحته وسياراته مخفية عن المشترين.",
+        "seeBilling": "عرض الفوترة"
+      },
+      "kpis": {
+        "label": "الأرقام",
+        "carsOnSale": "سيارات معروضة",
+        "carsNote": "من {total}، منها {hidden} مخفية",
+        "drives": "القيادات التجريبية، ٣٠ يومًا",
+        "drivesNote": "اكتمل منها {value}",
+        "questions": "أسئلة المشترين، ٣٠ يومًا",
+        "paid": "المدفوع حتى الآن",
+        "paidNote": "{count, plural, one {دفعة واحدة} two {دفعتان} few {{value} دفعات} many {{value} دفعة} other {{value} دفعة}}",
+        "paidNone": "لا شيء بعد"
+      },
+      "newestCars": "أحدث السيارات",
+      "allCars": "كل السيارات",
+      "recent": "آخر النشاط",
+      "allActivity": "كل النشاط",
+      "activityEmpty": "لم يُسجَّل شيء بعد.",
+      "plan": {
+        "title": "الباقة",
+        "plan": "الباقة",
+        "price": "السعر",
+        "paidUntil": "مدفوعة حتى",
+        "trialEnds": "تنتهي التجربة",
+        "renewal": "التجديد",
+        "cancels": "تُلغى في نهاية الفترة",
+        "monthly": "{plan}، شهريًا",
+        "yearly": "{plan}، سنويًا",
+        "perMonth": "{amount} في الشهر",
+        "perYear": "{amount} في السنة",
+        "free": "الباقة المجانية",
+        "cars": "السيارات",
+        "team": "الفريق",
+        "usage": "{used} من {limit}",
+        "change": "تغيير الباقة",
+        "usageUnlimited": "{used}، بلا حد"
+      },
+      "info": {
+        "title": "التفاصيل",
+        "owner": "المالك",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "address": "العنوان",
+        "place": "المنطقة",
+        "website": "الموقع الإلكتروني",
+        "rating": "التقييم",
+        "ratingValue": "{rating} من {count, plural, one {تقييم واحد} two {تقييمين} few {{value} تقييمات} many {{value} تقييمًا} other {{value} تقييم}}",
+        "noReviews": "لا تقييمات بعد",
+        "notGiven": "غير مذكور"
+      },
+      "cars": {
+        "car": "السيارة",
+        "price": "السعر",
+        "status": "الحالة",
+        "added": "أُضيفت",
+        "empty": "لا سيارات بعد.",
+        "showing": "عرض {from} إلى {to} من {total}",
+        "statusLabel": "الحالة",
+        "all": "الكل",
+        "searchLabel": "البحث في السيارات",
+        "searchPlaceholder": "الماركة أو الطراز أو السنة",
+        "sortLabel": "الترتيب",
+        "sorts": {
+          "newest": "الأحدث أولًا",
+          "interest": "الأكثر اهتمامًا",
+          "longest": "الأطول عرضًا",
+          "price": "الأعلى سعرًا"
+        },
+        "saves": "مرات الحفظ",
+        "questions": "الأسئلة",
+        "drives": "القيادات التجريبية",
+        "listed": "مدة العرض",
+        "days": "{count, plural, one {يوم واحد} two {يومان} few {{value} أيام} many {{value} يومًا} other {{value} يوم}}",
+        "today": "اليوم",
+        "noMatch": "لا توجد سيارات مطابقة.",
+        "clear": "مسح البحث"
+      },
+      "team": {
+        "person": "الشخص",
+        "role": "الدور",
+        "joined": "الانضمام",
+        "empty": "لا فريق بعد.",
+        "carsAdded": "السيارات المضافة",
+        "changes": "التغييرات، ٣٠ يومًا",
+        "signInAs": "الدخول باسم {name}",
+        "notSignedIn": "لم يسجّل الدخول بعد",
+        "people": "الأشخاص",
+        "seats": "المقاعد",
+        "seatsLine": "{used} من {limit} في الباقة {plan}",
+        "invitations": "الدعوات",
+        "ownerInvite": "دُعي <b>{email}</b> ليكون مالك المعرض، ولم ينشئ حسابًا بعد.",
+        "memberPending": "أُضيف <b>{name}</b> إلى الفريق، ولم يسجّل الدخول بعد.",
+        "noInvitations": "لا دعوات مفتوحة.",
+        "seatsUnlimited": "{used} في الباقة {plan}، بلا حد"
+      },
+      "billing": {
+        "payments": "المدفوعات",
+        "date": "التاريخ",
+        "what": "مقابل",
+        "amount": "المبلغ",
+        "method": "وسيلة الدفع",
+        "result": "النتيجة",
+        "card": "بطاقة تنتهي بـ {last4}",
+        "wallet": "محفظة إلكترونية",
+        "unknownMethod": "غير معروفة",
+        "empty": "لا مدفوعات بعد."
+      },
+      "pagination": {
+        "label": "الصفحات",
+        "previous": "الصفحة السابقة",
+        "next": "الصفحة التالية"
+      },
       "subscription": {
         "title": "الاشتراك",
         "periodStart": "بداية الفترة",
@@ -215,304 +402,667 @@
         "updated": "تم تحديث الباقة",
         "updatedBody": "أصبح الاشتراك على باقة {plan}.",
         "updateFailed": "تعذّر تحديث الباقة"
+      },
+      "plans": {
+        "title": "الباقات",
+        "current": "الباقة الحالية",
+        "moveTo": "النقل إلى {plan}",
+        "free": "مجانية",
+        "cars": "السيارات: حتى {value}",
+        "people": "الفريق: حتى {value}",
+        "photos": "الصور لكل سيارة: {value}",
+        "unpaid": "غير مدفوعة منذ {date}. الباقة المجانية من {drops}.",
+        "trial": "تنتهي التجربة في {date}.",
+        "paidUntil": "مدفوعة حتى {date}.",
+        "cancels": "تُلغى في {date}.",
+        "paidSoFar": "دُفع {amount} حتى الآن",
+        "dialogTitle": "نقل {name} إلى الباقة {plan}؟",
+        "dialogBody": "يسري التغيير الآن دون سداد. تبقى مواعيد الفوترة والحالة كما هي.",
+        "dialogKeep": "الإبقاء على الباقة الحالية",
+        "dialogConfirm": "النقل إلى {plan}",
+        "moving": "جارٍ النقل…",
+        "perMonthPrice": "{amount} في الشهر",
+        "carsUnlimited": "السيارات: بلا حد",
+        "peopleUnlimited": "الفريق: بلا حد"
       }
     },
     "form": {
-      "title": "إنشاء معرض",
-      "subtitle": "إعداد معرض جديد على المنصة",
-      "back": "العودة إلى المعارض",
-      "basic": {
-        "title": "المعلومات الأساسية",
-        "subtitle": "البيانات الأساسية للمعرض",
-        "name": "اسم المعرض *",
-        "namePlaceholder": "معرض النيل للسيارات",
-        "slug": "المعرّف (الرابط)",
-        "slugHelp": "يُقترح من الحروف الإنجليزية في الاسم — اكتبه بنفسك إذا كان الاسم بالعربية. يجب ألا يتكرر.",
-        "description": "الوصف",
-        "descriptionPlaceholder": "وصف مختصر للمعرض…"
+      "title": "إضافة معرض",
+      "subtitle": "يظهر للمشترين فور إنشائه، ويصل إلى المالك بريد لتسجيل الدخول.",
+      "back": "المعارض",
+      "steps": {
+        "label": "الخطوات",
+        "count": "الخطوة {current} من {total}",
+        "dealership": "المعرض",
+        "owner": "المالك وبيانات التواصل",
+        "plan": "الباقة والمراجعة",
+        "done": "مكتملة",
+        "now": "الخطوة الحالية"
       },
-      "contact": {
-        "title": "بيانات التواصل",
-        "description": "طرق التواصل مع المعرض",
-        "email": "البريد الإلكتروني",
-        "phone": "الهاتف",
-        "website": "الموقع الإلكتروني",
-        "address": "العنوان",
-        "addressPlaceholder": "١٥ شارع التحرير، الدقي، الجيزة"
-      },
+      "optional": "(اختياري)",
+      "name": "الاسم",
+      "namePlaceholder": "معرض النيل للسيارات",
+      "slug": "عنوان الموقع",
+      "slugHelp": "يُقترح من الأحرف الإنجليزية في الاسم. اكتبه بنفسك إن كان الاسم بالعربية.",
+      "slugChecking": "جارٍ التحقق…",
+      "slugAvailable": "متاح.",
+      "slugTaken": "مستخدم بالفعل. جرّب عنوانًا آخر.",
+      "slugInvalid": "استخدم من {min} إلى {max} من الأحرف الإنجليزية أو الأرقام، مع شرطة واحدة بين الكلمات.",
+      "description": "نبذة عن المعرض",
+      "descriptionPlaceholder": "ماذا يبيع، ومنذ متى، وبماذا يُعرف.",
+      "region": "المحافظة",
+      "regionPlaceholder": "اختر المحافظة",
+      "city": "المنطقة",
+      "cityPlaceholder": "اختر المنطقة",
+      "cityFirst": "اختر المحافظة أولًا",
+      "search": "بحث",
+      "noResults": "لا نتائج",
+      "address": "عنوان الشارع",
+      "addressPlaceholder": "١٢ شارع عباس العقاد",
+      "ownerEmail": "بريد المالك",
+      "ownerHelp": "يدير المعرض ويضيف فريقه.",
+      "ownerChecking": "جارٍ التحقق…",
+      "ownerExisting": "لدى {name} حساب على AutoMe، ويصبح المالك فورًا.",
+      "ownerExistingNoName": "لهذا البريد حساب على AutoMe، ويصبح صاحبه المالك فورًا.",
+      "ownerNew": "لا حساب لهذا البريد بعد. يصله بريد لإنشاء حساب، ويصبح المالك عند إنشائه.",
+      "phone": "الهاتف",
+      "email": "بريد المعرض",
+      "website": "الموقع الإلكتروني",
       "plan": {
-        "title": "باقة الاشتراك",
-        "description": "اختر باقة هذا المعرض",
-        "label": "الباقة *",
-        "placeholder": "اختر باقة",
-        "features": "تشمل باقة {name}:"
+        "title": "أي باقة؟",
+        "hint": "تعمل ٣٠ يومًا دون سداد، ثم يجددها المالك من لوحة التحكم."
       },
-      "owner": {
-        "title": "المالك",
-        "description": "يمكنك تعيين مالك لهذا المعرض (اختياري)",
-        "email": "بريد المالك (اختياري)",
-        "help": "إذا كان هذا البريد لمستخدم موجود، يصبح مالك المعرض."
+      "review": {
+        "title": "راجع قبل الإنشاء",
+        "name": "الاسم",
+        "slug": "عنوان الموقع",
+        "where": "الموقع",
+        "about": "النبذة",
+        "owner": "المالك",
+        "ownerExisting": "{email}، لديه حساب على AutoMe",
+        "ownerNew": "{email}، سيُدعى لإنشاء حساب",
+        "contact": "التواصل",
+        "change": "تعديل",
+        "changeLabel": "تعديل {field}",
+        "none": "غير مذكور"
       },
-      "nameRequired": "اسم المعرض مطلوب",
-      "planRequired": "اختر باقة",
-      "slugInvalid": "يحتاج المعرّف إلى {min} إلى {max} حرفًا إنجليزيًا أو رقمًا، مع شرطة واحدة بين الكلمات",
-      "created": "تم إنشاء المعرض",
-      "createdBody": "تم إنشاء {name} على باقة {plan}.",
-      "createFailed": "تعذّر إنشاء المعرض",
+      "errors": {
+        "name": "اكتب اسم المعرض.",
+        "slug": "اختر عنوان الموقع.",
+        "region": "اختر المحافظة.",
+        "city": "اختر المنطقة.",
+        "owner": "اكتب بريد المالك.",
+        "emailFormat": "اكتب بريدًا إلكترونيًا مثل name@example.com.",
+        "plan": "اختر باقة."
+      },
+      "next": "التالي",
+      "previous": "رجوع",
       "submit": "إنشاء المعرض",
-      "submitting": "جارٍ الإنشاء…"
+      "submitting": "جارٍ الإنشاء…",
+      "created": "أُنشئ المعرض",
+      "createdBody": "{name} متاح الآن على الباقة {plan}.",
+      "createFailed": "تعذّر إنشاء المعرض"
+    },
+    "csv": {
+      "slug": "عنوان الموقع",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف"
+    },
+    "suspendDialog": {
+      "title": "إيقاف {name}؟",
+      "titleMany": "{count, plural, one {إيقاف معرض واحد؟} two {إيقاف معرضين؟} few {إيقاف {value} معارض؟} many {إيقاف {value} معرضًا؟} other {إيقاف {value} معرض؟}}",
+      "body": "تُخفى صفحته وسياراته عن المشترين حتى تعيد تفعيله.",
+      "bodyMany": "تُخفى صفحاتها وسياراتها عن المشترين حتى تعيد تفعيلها.",
+      "keep": "إبقاؤه نشطًا",
+      "keepMany": "إبقاؤها نشطة",
+      "confirm": "إيقاف"
     }
   },
   "users": {
-    "title": "كل المستخدمين",
-    "subtitle": "إدارة كل مستخدمي المنصة في جميع المعارض",
-    "stats": {
-      "total": "إجمالي المستخدمين",
+    "title": "المستخدمون",
+    "subtitle": "كل من لديه حساب على AutoMe: المشترون وفرق المعارض وفريق AutoMe.",
+    "export": "تصدير CSV",
+    "exporting": "جارٍ التصدير…",
+    "exportFailed": "تعذّر تصدير المستخدمين",
+    "views": {
+      "label": "الحساب",
+      "all": "كل الحسابات",
+      "buyers": "المشترون",
+      "teams": "فرق المعارض",
       "admins": "مسؤولو المنصة",
-      "regular": "المستخدمون العاديون"
+      "new": "انضموا هذا الشهر"
     },
-    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
+    "searchLabel": "البحث في المستخدمين",
+    "searchPlaceholder": "الاسم أو البريد أو الهاتف",
     "filters": {
-      "role": "التصفية حسب الدور",
-      "allRoles": "كل الأدوار",
-      "users": "المستخدمون",
-      "admins": "المسؤولون"
+      "dealership": "المعرض",
+      "anyDealership": "أي معرض",
+      "sort": "الترتيب",
+      "clear": "مسح عوامل التصفية"
+    },
+    "sorts": {
+      "newest": "الأحدث أولًا",
+      "oldest": "الأقدم أولًا",
+      "name": "الاسم",
+      "active": "الأكثر نشاطًا"
+    },
+    "columns": {
+      "person": "الشخص",
+      "account": "الحساب",
+      "dealership": "المعرض",
+      "savedCars": "السيارات المحفوظة",
+      "testDrives": "القيادات التجريبية",
+      "joined": "الانضمام",
+      "actions": "الإجراءات"
+    },
+    "kinds": {
+      "buyer": "مشترٍ",
+      "owner": "مالك",
+      "member": "عضو",
+      "admin": "مسؤول المنصة"
+    },
+    "noName": "بلا اسم",
+    "moreDealerships": "+{value} غيرها",
+    "actionsFor": "إجراءات {name}",
+    "actions": {
+      "open": "فتح",
+      "impersonate": "بدء جلسة دعم",
+      "makeAdmin": "جعله مسؤولًا على المنصة",
+      "removeAdmin": "إزالة صلاحية المسؤول"
+    },
+    "roleDialog": {
+      "makeTitle": "جعل {name} مسؤولًا على المنصة؟",
+      "makeBody": "سيتمكن من رؤية كل معارض AutoMe وتعديلها، ومن بدء جلسات الدعم.",
+      "makeConfirm": "جعله مسؤولًا",
+      "removeTitle": "إزالة صلاحية المسؤول من {name}؟",
+      "removeBody": "يحتفظ بحسابه وبأي معرض ينتمي إليه، لكنه لن يتمكن من فتح إدارة المنصة.",
+      "removeConfirm": "إزالة الصلاحية",
+      "keep": "الإبقاء كما هو",
+      "saving": "جارٍ الحفظ…",
+      "made": "أصبح {name} مسؤولًا على المنصة.",
+      "removed": "لم يعد {name} مسؤولًا على المنصة.",
+      "failed": "تعذّر تغيير الصلاحية"
+    },
+    "pagination": {
+      "label": "الصفحات",
+      "showing": "عرض {from} إلى {to} من {total}",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    },
+    "empty": "لا يوجد أشخاص مطابقون.",
+    "emptyHint": "جرّب عرضًا آخر، أو امسح البحث وعوامل التصفية.",
+    "csv": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف"
     },
     "roles": {
       "ADMIN": "مسؤول",
       "USER": "مستخدم"
     },
-    "columns": {
-      "user": "المستخدم",
-      "role": "الدور",
-      "organizations": "المعارض",
-      "activity": "النشاط",
-      "joined": "تاريخ الانضمام"
-    },
-    "empty": "لم يتم العثور على مستخدمين",
-    "noOrganizations": "لا توجد معارض",
-    "moreOrganizations": "+{value} أخرى",
-    "testDrives": "{count, plural, zero {{value} قيادة تجريبية} one {قيادة تجريبية واحدة} two {قيادتان تجريبيتان} few {{value} قيادات تجريبية} many {{value} قيادة تجريبية} other {{value} قيادة تجريبية}}",
-    "savedCars": "{count, plural, zero {{value} محفوظة} one {سيارة محفوظة واحدة} two {سيارتان محفوظتان} few {{value} سيارات محفوظة} many {{value} سيارة محفوظة} other {{value} سيارة محفوظة}}",
-    "actions": {
-      "label": "الإجراءات",
-      "changeRole": "تغيير الدور"
-    },
-    "changeRole": {
-      "title": "تغيير دور المستخدم",
-      "description": "حدّث دور {name}. سيغيّر ذلك صلاحياته على مستوى المنصة.",
-      "placeholder": "اختر دورًا",
-      "submit": "تحديث الدور",
-      "submitting": "جارٍ التحديث…",
-      "updated": "تم تغيير الدور إلى {role}",
-      "updatedBody": "تم تحديث دور {name}.",
-      "failed": "تعذّر تحديث الدور"
-    },
-    "pagination": "عرض {from}–{to} من {total}",
     "details": {
-      "back": "العودة إلى المستخدمين",
+      "back": "المستخدمون",
       "joined": "انضم في {date}",
-      "organizations": "المعارض",
-      "organizationsEmpty": "ليس عضوًا في أي معرض",
-      "activity": "النشاط",
+      "more": "إجراءات أخرى",
       "tabs": {
-        "audit": "سجل النشاط",
-        "testDrives": "القيادات التجريبية"
+        "label": "الشخص",
+        "summary": "الملخص",
+        "dealerships": "المعارض",
+        "drives": "القيادات التجريبية",
+        "saved": "السيارات المحفوظة",
+        "reviews": "التقييمات",
+        "sessions": "جلسات الدعم",
+        "activity": "النشاط"
       },
-      "activityEmpty": "لا يوجد نشاط مسجّل",
-      "testDrivesEmpty": "لا توجد قيادات تجريبية محجوزة",
-      "unknownTime": "وقت غير معروف"
-    }
+      "kpis": {
+        "label": "الأرقام",
+        "drives": "القيادات التجريبية",
+        "upcoming": "القادمة: {value}",
+        "noneUpcoming": "لا شيء قادم",
+        "saved": "السيارات المحفوظة",
+        "savedAt": "{count, plural, one {في معرض واحد} two {في معرضين} few {في {value} معارض} many {في {value} معرضًا} other {في {value} معرض}}",
+        "reviews": "التقييمات المكتوبة",
+        "averageRating": "بمتوسط {rating} من ٥",
+        "dealerships": "المعارض",
+        "carsAdded": "السيارات المضافة",
+        "changes": "التغييرات، ٣٠ يومًا",
+        "sessions": "جلسات الدعم",
+        "openNow": "المفتوحة الآن: {value}",
+        "noneOpen": "لا جلسات مفتوحة"
+      },
+      "seeAll": "عرض الكل",
+      "driveStatus": {
+        "PENDING": "بانتظار المعرض",
+        "CONFIRMED": "مؤكدة",
+        "COMPLETED": "اكتملت",
+        "CANCELLED": "أُلغيت"
+      },
+      "columns": {
+        "car": "السيارة",
+        "dealership": "المعرض",
+        "when": "الموعد",
+        "status": "الحالة",
+        "price": "السعر",
+        "saved": "تاريخ الحفظ",
+        "signedInAs": "الدخول باسم",
+        "reason": "السبب",
+        "started": "البدء",
+        "length": "المدة"
+      },
+      "minutes": "{count, plural, one {دقيقة واحدة} two {دقيقتان} few {{value} دقائق} many {{value} دقيقة} other {{value} دقيقة}}",
+      "stillOpen": "ما زالت مفتوحة",
+      "reviewStars": "{value} من ٥",
+      "reviewPending": "بانتظار الموافقة",
+      "reviewPublished": "منشور",
+      "role": {
+        "OWNER": "مالك",
+        "MEMBER": "عضو"
+      },
+      "dealershipJoined": "انضم في {date}",
+      "dealershipCarsAdded": "السيارات المضافة: {value}",
+      "dealershipChanges": "التغييرات خلال ٣٠ يومًا: {value}",
+      "openDealership": "فتح المعرض",
+      "empty": {
+        "drives": "لا قيادات تجريبية بعد.",
+        "saved": "لا سيارات محفوظة بعد.",
+        "reviews": "لا تقييمات بعد.",
+        "sessions": "لا جلسات دعم بعد.",
+        "activity": "لم يُسجَّل شيء بعد.",
+        "dealerships": "ليس عضوًا في فريق أي معرض."
+      },
+      "pagination": {
+        "label": "الصفحات",
+        "previous": "الصفحة السابقة",
+        "next": "الصفحة التالية"
+      },
+      "emailLabel": "مراسلة {email}",
+      "callLabel": "الاتصال بـ {phone}"
+    },
+    "notBuyer": "ليس مشتريًا"
   },
   "plans": {
-    "title": "الباقات والأسعار",
-    "subtitle": "إدارة باقات الاشتراك ومستويات الأسعار",
-    "stats": {
-      "mrr": "الإيراد الشهري المتكرر",
-      "active": "الاشتراكات النشطة",
-      "trial": "الاشتراكات التجريبية",
-      "churned": "الاشتراكات الملغاة"
+    "title": "الباقات",
+    "subtitle": "ما تكلفه كل باقة وما تشمله، ومن عليها. يسري أي تغيير على كل المعارض المشتركة في الباقة.",
+    "kpis": {
+      "label": "أرقام الفوترة",
+      "income": "المدفوع شهريًا",
+      "paying": "مدفوعة",
+      "payingNote": "من {value} معرض",
+      "trialing": "في فترة تجربة",
+      "trialsEnding": "تنتهي هذا الأسبوع: {value}",
+      "noneEnding": "لا شيء ينتهي هذا الأسبوع",
+      "overdue": "سداد متأخر",
+      "atRisk": "{amount} شهريًا معرضة للفقد",
+      "nothingAtRisk": "لا شيء معرض للفقد"
     },
-    "card": {
-      "edit": "تعديل الباقة",
-      "delete": "حذف الباقة",
-      "orYearly": "أو {amount} سنويًا (توفير {percent})",
-      "features": "المزايا",
-      "activeSubscriptions": "{count, plural, zero {{value} اشتراك نشط} one {اشتراك نشط واحد} two {اشتراكان نشطان} few {{value} اشتراكات نشطة} many {{value} اشتراكًا نشطًا} other {{value} اشتراك نشط}}"
+    "table": {
+      "label": "مقارنة الباقات",
+      "dealerships": "{count, plural, one {معرض واحد} two {معرضان} few {{value} معارض} many {{value} معرضًا} other {{value} معرض}}",
+      "income": "{amount} شهريًا",
+      "nothingIn": "لم يُدفع شيء بعد",
+      "edit": "تعديل",
+      "editPlan": "تعديل {plan}"
     },
-    "add": {
-      "title": "إضافة باقة جديدة",
-      "body": "أنشئ باقة أسعار جديدة للمنصة",
-      "allExist": "كل أنواع الباقات موجودة بالفعل",
-      "allExistBody": "يمكن وجود باقة واحدة فقط من كل نوع (المبتدئة، الاحترافية، المؤسسات)."
+    "rows": {
+      "price": "السعر",
+      "yearly": "الدفع السنوي",
+      "trial": "التجربة المجانية",
+      "cars": "السيارات",
+      "team": "الفريق",
+      "photos": "الصور لكل سيارة",
+      "activity": "مدة حفظ النشاط",
+      "aiListing": "المساعدة الذكية في الإعلانات شهريًا",
+      "aiAssistant": "المساعد الذكي للمشترين",
+      "chat": "المحادثة مع المشترين",
+      "priority": "الدعم ذو الأولوية"
     },
-    "toasts": {
-      "missingFields": "املأ كل الحقول المطلوبة",
-      "created": "تم إنشاء الباقة",
-      "createdBody": "تم إنشاء باقة {name}.",
-      "createFailed": "تعذّر إنشاء الباقة",
-      "updated": "تم تحديث الباقة",
-      "updatedBody": "تم تحديث باقة {name}.",
-      "updateFailed": "تعذّر تحديث الباقة",
-      "deleted": "تم حذف الباقة",
-      "deletedBody": "تم حذف {name}.",
-      "deleteFailed": "تعذّر حذف الباقة"
+    "values": {
+      "free": "مجانية",
+      "perMonth": "{amount} في الشهر",
+      "perYear": "{amount} في السنة",
+      "perYearSaving": "{amount} في السنة، بتوفير {percent}",
+      "none": "لا يوجد",
+      "days": "{count, plural, one {يوم واحد} two {يومان} few {{value} أيام} many {{value} يومًا} other {{value} يوم}}",
+      "noLimit": "بلا حد",
+      "always": "دائمًا",
+      "off": "متوقفة",
+      "included": "مشمولة",
+      "notIncluded": "غير مشمولة"
     },
-    "delete": {
-      "title": "حذف باقة {name}؟",
-      "body": "سيتم حذف باقة <strong>{name}</strong> نهائيًا، ولا يمكن التراجع عن ذلك.",
-      "activeWarning": "على هذه الباقة {count}. لا يمكن حذفها قبل نقل كل المشتركين إلى باقة أخرى.",
-      "activeCount": "{count, plural, zero {{value} اشتراك نشط} one {اشتراك نشط واحد} two {اشتراكان نشطان} few {{value} اشتراكات نشطة} many {{value} اشتراكًا نشطًا} other {{value} اشتراك نشط}}",
-      "submit": "حذف الباقة"
-    },
-    "form": {
-      "createTitle": "إنشاء باقة جديدة",
-      "createDescription": "أضف باقة أسعار جديدة إلى المنصة",
-      "editTitle": "تعديل {name}",
-      "editDescription": "حدّث أسعار باقة {name} وحدودها",
-      "create": "إنشاء الباقة",
-      "creating": "جارٍ الإنشاء…",
-      "tabs": {
-        "basic": "المعلومات الأساسية",
-        "limits": "الحدود",
-        "features": "المزايا"
+    "editor": {
+      "title": "تعديل {plan}",
+      "note": "المعارض على هذه الباقة: {value}. يسري السعر الجديد من دفعتها التالية.",
+      "lastChanged": "آخر تعديل {date}",
+      "price": "السعر",
+      "limits": "الحدود",
+      "included": "ما تشمله",
+      "monthly": "شهريًا (ج.م)",
+      "yearly": "سنويًا (ج.م)",
+      "trial": "التجربة المجانية (أيام)",
+      "trialHint": "٠ لعدم وجود تجربة.",
+      "cars": "السيارات",
+      "team": "الفريق",
+      "photos": "الصور لكل سيارة",
+      "activity": "مدة حفظ النشاط (أيام)",
+      "noLimit": "بلا حد",
+      "always": "دائمًا",
+      "aiListing": "المساعدة الذكية في الإعلانات",
+      "aiLimit": "الإعلانات شهريًا",
+      "aiAssistant": "المساعد الذكي للمشترين",
+      "chat": "المحادثة مع المشترين",
+      "priority": "الدعم ذو الأولوية",
+      "errors": {
+        "whole": "اكتب عددًا صحيحًا.",
+        "atLeast": "اكتب {min} أو أكثر.",
+        "atMost": "اكتب {max} أو أقل."
       },
-      "name": "اسم الباقة",
-      "namePlaceholder": "مثال: الأعمال",
-      "type": "نوع الباقة",
-      "typePlaceholder": "اختر النوع",
-      "monthlyPrice": "السعر الشهري (ج.م)",
-      "yearlyPrice": "السعر السنوي (ج.م)",
-      "pricePlaceholder": "مثال: {value}",
-      "maxCars": "الحد الأقصى للسيارات (‎-1 = بلا حدود)",
-      "maxMembers": "الحد الأقصى للأعضاء (‎-1 = بلا حدود)",
-      "maxImages": "الحد الأقصى للصور لكل سيارة",
-      "retention": "مدة الاحتفاظ بسجل النشاط (بالأيام)",
-      "retentionPlaceholder": "اتركه فارغًا لمدة غير محدودة",
-      "trialDays": "الفترة التجريبية المجانية (بالأيام)",
-      "trialPlaceholder": "0 لعدم وجود فترة تجريبية",
-      "trialHelp": "تبدأ المعارض الجديدة على هذه الباقة فورًا دون دفع، ويُطلب أول دفع قبل انتهاء الفترة التجريبية.",
-      "aiProcessing": "تحليل السيارات بالذكاء الاصطناعي",
-      "aiLimit": "عدد طلبات الذكاء الاصطناعي شهريًا (‎-1 = بلا حدود)",
-      "aiLimitZero": "الحد 0 يمنع كل طلبات الذكاء الاصطناعي، فتكون الميزة مفعّلة لكنها غير قابلة للاستخدام.",
-      "aiAssistant": "ردود ذكية على أسئلة المشترين (بلا حدود)",
-      "chat": "دعم المحادثة المباشرة",
-      "prioritySupport": "دعم ذو أولوية"
+      "save": "حفظ {plan}",
+      "saving": "جارٍ الحفظ…",
+      "saved": "حُفظت {plan}",
+      "savedBody": "يسري ذلك على كل المعارض المشتركة في {plan}.",
+      "failed": "تعذّر حفظ الباقة"
     }
   },
   "analytics": {
-    "title": "تحليلات المنصة",
-    "subtitle": "متابعة أداء المنصة ونموها",
-    "growth": {
-      "organizations": "المعارض هذا الشهر",
-      "users": "المستخدمون هذا الشهر",
-      "cars": "السيارات المعروضة هذا الشهر",
-      "vsLastMonth": "مقارنة بالشهر الماضي ({value})"
+    "title": "التحليلات",
+    "subtitle": "أداء السوق: ما يُعرض، وما يطلبه المشترون، والمعارض، واستخدام الذكاء الاصطناعي.",
+    "reports": {
+      "label": "التقارير",
+      "marketplace": "السوق",
+      "dealerships": "المعارض",
+      "buyers": "المشترون",
+      "ai": "الذكاء الاصطناعي"
     },
-    "charts": {
-      "growthTitle": "نمو المنصة",
-      "growthSubtitle": "المعارض والمستخدمون الجدد خلال آخر ستة أشهر",
-      "activityTitle": "نشاط المنصة",
-      "activitySubtitle": "إعلانات السيارات وحجوزات القيادة التجريبية بمرور الوقت",
-      "series": {
-        "organizations": "المعارض",
-        "users": "المستخدمون",
-        "cars": "السيارات",
-        "testDrives": "القيادات التجريبية"
-      }
+    "periods": {
+      "7": "٧ أيام",
+      "30": "٣٠ يومًا",
+      "90": "٩٠ يومًا",
+      "365": "١٢ شهرًا",
+      "label": "الفترة"
     },
-    "top": {
-      "byListings": "الأعلى في الإعلانات",
-      "byTestDrives": "الأعلى في القيادات التجريبية",
-      "rank": "#{value}",
-      "empty": "لا توجد بيانات"
+    "before": {
+      "7": "الأيام السبعة السابقة",
+      "30": "الثلاثين يومًا السابقة",
+      "90": "التسعين يومًا السابقة",
+      "365": "الاثني عشر شهرًا السابقة"
+    },
+    "change": {
+      "up": "أكثر بنسبة {value} من قبل",
+      "down": "أقل بنسبة {value} من قبل",
+      "same": "كما كان من قبل",
+      "new": "لا شيء من قبل"
+    },
+    "funnel": {
+      "title": "من العرض إلى البيع",
+      "note": "خلال الفترة، مقارنةً بـ{before}",
+      "carsLive": "سيارات معروضة",
+      "listed": "{count, plural, zero {لم تُعرض سيارات خلال الفترة} one {سيارة واحدة عُرضت خلال الفترة} two {سيارتان عُرضتا خلال الفترة} few {{value} سيارات عُرضت خلال الفترة} many {{value} سيارة عُرضت خلال الفترة} other {{value} سيارة عُرضت خلال الفترة}}",
+      "saves": "حفظها المشترون",
+      "asked": "طلبات تجربة القيادة",
+      "confirmed": "مؤكدة",
+      "driven": "تمت القيادة",
+      "sold": "بيعت",
+      "ofAsked": "{value} من الطلبات",
+      "ofConfirmed": "{value} من المؤكدة"
+    },
+    "prices": {
+      "title": "السيارات المعروضة حسب السعر",
+      "note": "ج.م",
+      "under500k": "أقل من ٥٠٠ ألف",
+      "to1m": "٥٠٠ ألف – مليون",
+      "to2m": "مليون – مليونان",
+      "to4m": "مليونان – ٤ ملايين",
+      "over4m": "أكثر من ٤ ملايين"
+    },
+    "makes": {
+      "title": "الماركات الأكثر طلبًا",
+      "note": "حسب طلبات تجربة القيادة",
+      "empty": "لا توجد طلبات تجربة قيادة في هذه الفترة."
+    },
+    "speed": {
+      "title": "سرعة البيع",
+      "daysToSell": "الوسيط من العرض حتى البيع",
+      "days": "{count, plural, zero {أقل من يوم} one {يوم واحد} two {يومان} few {{value} أيام} many {{value} يومًا} other {{value} يوم}}",
+      "faster": "أسرع بـ{value} من قبل",
+      "slower": "أبطأ بـ{value} من قبل",
+      "noSales": "لا مبيعات في هذه الفترة",
+      "unsaved": "سيارات معروضة لم يحفظها أحد بعد {days} يومًا",
+      "unsavedShare": "{value} من السيارات المعروضة",
+      "cancelled": "تجارب القيادة الملغاة",
+      "cancelledOf": "{count} من {total}"
+    },
+    "dealerships": {
+      "active": "نشطة",
+      "joined": "انضمت خلال الفترة",
+      "suspended": "موقوفة",
+      "withoutCars": "نشطة بلا سيارات معروضة",
+      "plans": "المعارض النشطة حسب الباقة",
+      "noPlan": "بلا باقة",
+      "regions": "المعارض النشطة حسب المحافظة",
+      "noRegion": "غير محددة",
+      "busiest": "المعارض الأكثر نشاطًا",
+      "busiestNote": "حسب طلبات تجربة القيادة خلال الفترة",
+      "columns": {
+        "dealership": "المعرض",
+        "governorate": "المحافظة",
+        "carsLive": "سيارات معروضة",
+        "testDrives": "تجارب القيادة",
+        "driven": "تمت القيادة",
+        "sold": "بيعت"
+      },
+      "empty": "لا توجد طلبات تجربة قيادة في هذه الفترة."
+    },
+    "buyers": {
+      "joined": "مشترون جدد",
+      "saved": "مشترون حفظوا سيارة",
+      "askedToDrive": "مشترون طلبوا تجربة قيادة",
+      "askedAgain": "طلبوا أكثر من تجربة",
+      "mostSaved": "السيارات الأكثر حفظًا",
+      "mostSavedNote": "عدد مرات الحفظ خلال الفترة",
+      "saves": "{count, plural, zero {لا حفظ} one {حفظ واحد} two {حفظان} few {{value} عمليات حفظ} many {{value} عملية حفظ} other {{value} عملية حفظ}}",
+      "bodyTypes": "فئات السيارات الأكثر طلبًا",
+      "bodyTypesNote": "حسب طلبات تجربة القيادة",
+      "empty": "لا شيء في هذه الفترة."
     },
     "ai": {
-      "title": "استخدام الذكاء الاصطناعي — آخر {days} يومًا",
-      "empty": "لم تُسجَّل أي طلبات للذكاء الاصطناعي في هذه الفترة.",
-      "calls": "{count, plural, zero {{value} طلب} one {طلب واحد} two {طلبان} few {{value} طلبات} many {{value} طلبًا} other {{value} طلب}}",
-      "success": "نجاح {value}",
-      "byFeature": "حسب الميزة",
-      "byModel": "حسب النموذج",
-      "failures": "الأخطاء حسب السبب",
+      "calls": "طلبات الذكاء الاصطناعي",
+      "succeeded": "نجحت",
+      "failedOf": "تعذّر {count}",
+      "wait": "الانتظار المعتاد",
+      "slowest": "أبطأ ٥٪ فوق {value}",
+      "cost": "تكلفة المزوّد",
+      "features": "حسب الميزة",
+      "models": "حسب النموذج",
+      "failures": "أسباب تعذّر الطلبات",
+      "noFailures": "لم يتعذّر أي طلب في هذه الفترة.",
+      "empty": "لا توجد طلبات ذكاء اصطناعي في هذه الفترة.",
       "columns": {
         "feature": "الميزة",
         "model": "النموذج",
         "calls": "الطلبات",
-        "success": "النجاح",
-        "tokensIn": "رموز الإدخال",
-        "tokensOut": "رموز الإخراج",
-        "p50": "p50",
-        "p95": "p95"
+        "success": "نجحت",
+        "tokensIn": "الرموز الداخلة",
+        "tokensOut": "الرموز الخارجة",
+        "typical": "الانتظار المعتاد",
+        "slowest": "أبطأ ٥٪"
+      },
+      "names": {
+        "carListingFromImage": "إعلان من الصور",
+        "searchFiltersFromImage": "البحث بالصورة",
+        "searchFiltersFromText": "البحث بالوصف",
+        "listingTranslation": "ترجمة الإعلانات",
+        "carImageAltText": "وصف الصور",
+        "carPhotoGrouping": "تجميع الصور حسب السيارة",
+        "listingQualityCoach": "مساعد جودة الإعلان",
+        "listingQA": "الإجابة عن أسئلة المشترين",
+        "chatTranslation": "ترجمة المحادثات",
+        "chatModeration": "فحص المحادثات",
+        "weeklyDigest": "الملخص الأسبوعي"
       }
     }
   },
   "auditLogs": {
-    "title": "سجل النشاط",
-    "subtitle": "تتبّع كل نشاط وتغيير على المنصة",
-    "export": "تصدير السجل",
-    "searchPlaceholder": "ابحث ببريد المستخدم أو معرّف العنصر…",
+    "title": "النشاط",
+    "subtitle": "كل تغيير جرى على AutoMe، الأحدث أولًا. افتح أيًّا منها لترى قيمته قبل التغيير وبعده.",
+    "export": "تصدير CSV",
+    "exporting": "جارٍ التصدير…",
+    "exportFailed": "تعذّر تصدير النشاط",
+    "searchLabel": "البحث في النشاط",
+    "searchPlaceholder": "الشخص أو المعرض أو معرّف السجل",
     "filters": {
-      "action": "التصفية حسب الإجراء",
-      "allActions": "كل الإجراءات",
-      "entity": "التصفية حسب العنصر",
-      "allEntities": "كل العناصر"
+      "who": "من",
+      "kind": "النوع",
+      "dealership": "المعرض",
+      "anyDealership": "أي معرض",
+      "searchDealerships": "البحث في المعارض",
+      "noDealerships": "لا توجد معارض",
+      "period": "الفترة",
+      "clear": "مسح عوامل التصفية"
+    },
+    "who": {
+      "all": "أي شخص",
+      "staff": "فريق AutoMe",
+      "support": "أثناء جلسات الدعم",
+      "others": "المعارض والمشترون"
+    },
+    "kinds": {
+      "all": "كل الأنواع",
+      "cars": "السيارات",
+      "drives": "تجارب القيادة",
+      "team": "الفريق",
+      "plan": "الباقات والفوترة",
+      "dealership": "بيانات المعرض",
+      "accounts": "الحسابات",
+      "sessions": "جلسات الدعم"
+    },
+    "periods": {
+      "7": "آخر ٧ أيام",
+      "30": "آخر ٣٠ يومًا",
+      "90": "آخر ٩٠ يومًا",
+      "all": "أي وقت"
     },
     "columns": {
-      "timestamp": "الوقت",
-      "user": "المستخدم",
-      "action": "الإجراء",
-      "entity": "العنصر",
-      "organization": "المعرض",
+      "when": "الوقت",
+      "who": "من",
+      "what": "ما حدث",
+      "target": "على",
+      "dealership": "المعرض",
+      "source": "بواسطة",
       "details": "التفاصيل"
     },
-    "empty": "لم يتم العثور على سجلات",
-    "viewDetails": "عرض التفاصيل",
-    "pagination": "عرض {from}–{to} من {total}",
-    "details": {
-      "title": "تفاصيل السجل",
-      "action": "الإجراء",
-      "entityType": "نوع العنصر",
-      "entityId": "معرّف العنصر",
-      "timestamp": "الوقت",
-      "ipAddress": "عنوان IP",
-      "userAgent": "المتصفح",
-      "metadata": "بيانات إضافية",
+    "sources": {
+      "support": "جلسة دعم",
+      "staff": "فريق AutoMe",
+      "dealer": "المعرض",
+      "buyer": "مشترٍ",
+      "removed": "حساب محذوف",
+      "system": "تلقائي"
+    },
+    "system": "النظام",
+    "signedInAs": "باسم {name}",
+    "details": "التفاصيل",
+    "hide": "إخفاء",
+    "detailsFor": "تفاصيل {action}، {time}",
+    "change": {
+      "field": "الحقل",
       "before": "قبل",
       "after": "بعد"
+    },
+    "reason": "السبب: «{reason}»",
+    "session": "تم أثناء جلسة دعم، بالدخول باسم <b>{name}</b>.",
+    "seeSessions": "عرض جلسات الدعم الخاصة به",
+    "device": "{browser} على {system}",
+    "ip": "عنوان IP",
+    "recorded": "سُجّل {time}",
+    "pagination": {
+      "label": "الصفحات",
+      "showing": "عرض {from} إلى {to} من {total}",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    },
+    "empty": "لا يوجد نشاط مطابق.",
+    "emptyHint": "جرّب فترة أخرى، أو امسح البحث وعوامل التصفية.",
+    "csv": {
+      "when": "الوقت",
+      "who": "من",
+      "signedInAs": "الدخول باسم",
+      "what": "ما حدث",
+      "target": "على",
+      "dealership": "المعرض",
+      "source": "بواسطة",
+      "changes": "التغييرات",
+      "ip": "عنوان IP",
+      "device": "الجهاز"
     }
   },
   "impersonation": {
-    "title": "انتحال الهوية",
-    "subtitle": "تصفّح المعارض بصفة مالكيها لأغراض الدعم وتتبّع الأخطاء",
-    "activeAlert": "{count, plural, zero {لا توجد جلسات انتحال هوية نشطة.} one {توجد جلسة انتحال هوية نشطة واحدة.} two {توجد جلستا انتحال هوية نشطتان.} few {توجد {value} جلسات انتحال هوية نشطة.} many {توجد {value} جلسة انتحال هوية نشطة.} other {توجد {value} جلسة انتحال هوية نشطة.}} كل إجراء يتم أثناء انتحال الهوية يُسجَّل.",
-    "active": {
-      "title": "الجلسات النشطة",
-      "badge": "{value} نشطة",
-      "empty": "لا توجد جلسات انتحال هوية نشطة",
-      "started": "بدأت {time}",
-      "end": "إنهاء الجلسة",
+    "title": "جلسات الدعم",
+    "subtitle": "كل مرة دخل فيها فريق AutoMe باسم أحد أعضاء معرض: لماذا، وكم استمرت، وماذا غيّر.",
+    "start": "بدء جلسة دعم",
+    "views": {
+      "label": "العروض",
+      "all": "الكل",
+      "open": "مفتوحة الآن",
+      "mine": "جلساتي",
+      "week": "هذا الأسبوع"
+    },
+    "searchLabel": "البحث في جلسات الدعم",
+    "searchPlaceholder": "المعرض أو الشخص أو السبب",
+    "filters": {
+      "admin": "المسؤول",
+      "anyAdmin": "أي مسؤول",
+      "period": "الفترة",
+      "clear": "مسح عوامل التصفية"
+    },
+    "periods": {
+      "7": "آخر ٧ أيام",
+      "30": "آخر ٣٠ يومًا",
+      "90": "آخر ٩٠ يومًا",
+      "all": "أي وقت"
+    },
+    "columns": {
+      "started": "البدء",
+      "by": "بواسطة",
+      "dealership": "المعرض",
+      "signedInAs": "الدخول باسم",
+      "reason": "السبب",
+      "length": "المدة",
+      "changes": "التغييرات",
+      "actions": "الإجراءات"
+    },
+    "you": "أنت",
+    "open": "{length}، مفتوحة",
+    "hours": "{hours} س {minutes} د",
+    "minutes": "{value} د",
+    "end": "إنهاء",
+    "view": "عرض التغييرات",
+    "endFor": "إنهاء الجلسة في {dealership}",
+    "viewFor": "عرض ما تغيّر في {dealership}",
+    "endDialog": {
+      "title": "إنهاء جلسة الدعم هذه؟",
+      "body": "{admin} داخل باسم {person} في {dealership}. إنهاؤها يُخرجه من لوحة تحكم المعرض.",
+      "keep": "إبقاؤها مفتوحة",
+      "confirm": "إنهاء الجلسة",
       "ending": "جارٍ الإنهاء…",
-      "ended": "انتهت جلسة انتحال الهوية",
-      "endedBody": "تم إنهاء الجلسة بصفة {name}.",
-      "endFailed": "تعذّر إنهاء الجلسة"
+      "ended": "انتهت جلسة الدعم",
+      "failed": "تعذّر إنهاء الجلسة"
     },
-    "history": {
-      "title": "أحدث الجلسات",
-      "empty": "لا يوجد سجل لانتحال الهوية"
+    "startDialog": {
+      "title": "بدء جلسة دعم",
+      "body": "اختر المعرض، ثم اختر الشخص الذي تدخل باسمه واذكر السبب.",
+      "dealership": "المعرض",
+      "choose": "اختر معرضًا",
+      "search": "البحث في المعارض",
+      "none": "لا توجد معارض",
+      "next": "التالي"
     },
-    "quick": {
-      "title": "انتحال سريع",
-      "searchPlaceholder": "ابحث في المعارض…",
-      "noOwner": "بدون مالك",
-      "empty": "لم يتم العثور على معارض",
-      "showing": "عرض {shown} من {total}",
-      "loading": "جارٍ التحميل…",
-      "cannot": "لا يمكن انتحال الهوية",
-      "cannotBody": "لا يوجد مالك لهذا المعرض لانتحال هويته.",
-      "started": "بدأ انتحال الهوية",
-      "startedBody": "أنت الآن تتصفّح {org} بصفة {name}.",
-      "failed": "تعذّر بدء انتحال الهوية"
-    }
+    "pagination": {
+      "label": "الصفحات",
+      "showing": "عرض {from} إلى {to} من {total}",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    },
+    "empty": "لا توجد جلسات دعم مطابقة.",
+    "emptyHint": "جرّب عرضًا آخر، أو امسح البحث وعوامل التصفية."
   }
 }

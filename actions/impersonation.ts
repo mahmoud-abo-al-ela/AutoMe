@@ -58,7 +58,7 @@ export const endImpersonationAction = withErrorHandling(async () => {
   const session = await getCurrentImpersonationSession();
 
   if (!session) {
-    throw new NotFoundError("No active impersonation session");
+    throw new NotFoundError("Support session");
   }
 
   // Get the actual super admin
@@ -72,7 +72,7 @@ export const endImpersonationAction = withErrorHandling(async () => {
 
   revalidateLocalized("/super-admin");
 
-  return createSuccessResponse(null, "Impersonation session ended");
+  return createSuccessResponse(null, "Support session ended");
 });
 
 /**

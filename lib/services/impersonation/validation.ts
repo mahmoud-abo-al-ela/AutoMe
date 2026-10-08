@@ -10,7 +10,7 @@ export async function validateSuperAdmin(superAdminId: string) {
   });
 
   if (!superAdmin || superAdmin.role !== "ADMIN") {
-    throw new AuthorizationError("Only Admins can impersonate users");
+    throw new AuthorizationError("Only admins can start support sessions");
   }
 
   return superAdmin;

@@ -49,5 +49,5 @@ export const endImpersonation = withSuperAdmin(async (admin, sessionId: string) 
   await auditHelpers.logImpersonationEnded(session, admin.email);
 
   revalidateLocalized("/super-admin/impersonation");
-  return createSuccessResponse(null, "Impersonation session ended");
+  return createSuccessResponse(null, "Support session ended");
 });

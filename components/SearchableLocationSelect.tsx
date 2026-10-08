@@ -83,7 +83,14 @@ export default function SearchableLocationSelect({
             className="h-10 border-0 px-0 shadow-none focus-visible:ring-0"
           />
         </div>
-        <div className="max-h-64 overflow-y-auto p-1">
+        {/* The list is portalled outside any dialog it opens from, and the
+            dialog's scroll lock cancels wheel and touch scrolling it sees
+            there — so they stop here. */}
+        <div
+          className="max-h-64 overflow-y-auto overscroll-contain p-1"
+          onWheel={(event) => event.stopPropagation()}
+          onTouchMove={(event) => event.stopPropagation()}
+        >
           {filteredOptions.length === 0 ? (
             <p className="px-2 py-3 text-center text-sm text-muted-foreground">
               {emptyMessage}

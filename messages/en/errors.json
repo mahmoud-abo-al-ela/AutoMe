@@ -27,7 +27,8 @@
     "Conversation": "The conversation",
     "Image": "The image",
     "Membership": "The membership",
-    "Working hours": "The working hours"
+    "Working hours": "The working hours",
+    "Support session": "The support session"
   },
   "ai": {
     "busy": "Our AI is at capacity right now. Please try again in a few minutes.",

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DEFAULT_OVERVIEW_PERIOD, OVERVIEW_PERIODS } from "@/lib/services/super-admin/overview-options";
 
-const trigger = "h-11 min-w-[176px] rounded-control border-[#8c8170] bg-field";
+const trigger = "h-11 data-[size=default]:h-11 min-w-[176px] rounded-control border-[#8c8170] bg-field";
 
 /**
  * The overview's period and what it is compared with. Both live in the URL

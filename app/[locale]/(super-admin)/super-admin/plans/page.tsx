@@ -1,64 +1,7 @@
-import { db } from "@/lib/prisma";
-import PlansHeader from "./_components/PlansHeader";
-import PlansGrid from "./_components/PlansGrid";
-import SubscriptionStats from "./_components/SubscriptionStats";
+import { getPlansPage } from "@/lib/services/super-admin/plans";
+import { PlansView } from "./_components/PlansView";
 
-async function getPlansData() {
-  const [plans, subscriptionStats] = await Promise.all([
-    db.plan.findMany({
-      orderBy: { monthlyPrice: "asc" },
-      include: {
-        _count: {
-          select: { subscriptions: true },
-        },
-        subscriptions: {
-          where: { status: "ACTIVE" },
-          select: { id: true },
-        },
-      },
-    }),
-    db.subscription.groupBy({
-      by: ["status"],
-      _count: { id: true },
-    }),
-  ]);
-
-  const mrr = await db.subscription.findMany({
-    where: { status: "ACTIVE" },
-    include: { plan: true },
-  });
-
-  // Piasters a month: a yearly subscription counts a twelfth of its price.
-  const monthlyRecurringRevenue = mrr.reduce(
-    (sum, sub) =>
-      sum +
-      (sub.billingPeriod === "YEARLY"
-        ? Math.round((sub.plan?.yearlyPrice || 0) / 12)
-        : sub.plan?.monthlyPrice || 0),
-    0
-  );
-
-  return {
-    plans: plans.map((p) => ({
-      ...p,
-      activeSubscriptions: p.subscriptions.length,
-    })),
-    subscriptionStats: subscriptionStats.reduce<Record<string, number>>((acc, s) => {
-      acc[s.status] = s._count.id;
-      return acc;
-    }, {}),
-    mrr: monthlyRecurringRevenue,
-  };
-}
-
+/** Every plan, what it costs and includes, and who is on it. The layout has already checked this is an admin. */
 export default async function PlansPage() {
-  const { plans, subscriptionStats, mrr } = await getPlansData();
-
-  return (
-    <div className="space-y-6">
-      <PlansHeader />
-      <SubscriptionStats stats={subscriptionStats} mrr={mrr} />
-      <PlansGrid plans={plans} />
-    </div>
-  );
+  return <PlansView data={await getPlansPage()} />;
 }

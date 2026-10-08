@@ -12,7 +12,7 @@ import { ACTIVITY_DAYS, ACTIVITY_KINDS, type ActivityKind } from "@/lib/services
 import type { Activity } from "@/lib/services/audit/activity";
 import { OrgPageHeader } from "../../_components/OrgPageHeader";
 import { inputClass } from "../../_components/form-ui";
-import { useDescribeEntry } from "./use-describe-entry";
+import { useDescribeEntry } from "@/components/dashboard/use-describe-entry";
 
 export type ActivityFilters = { kind: ActivityKind; who: string; days: string; page: number };
 
@@ -38,7 +38,9 @@ export function ActivityFeed({
   const t = useTranslations("org.auditLogs");
   const fmt = useFormatters();
   const router = useRouter();
-  const describe = useDescribeEntry(activity.lookups, dealershipName);
+  // `base` is /org/{slug}/audit-logs; a car links to its editor beside it.
+  const orgBase = base.replace(/\/audit-logs$/, "");
+  const describe = useDescribeEntry(activity.lookups, dealershipName, { carHref: (carId) => `${orgBase}/cars/${carId}/edit` });
   const { entries, people, pagination } = activity;
 
   const href = (next: Partial<ActivityFilters>) => {
