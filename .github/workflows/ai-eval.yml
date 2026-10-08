@@ -109,7 +109,11 @@ jobs:
       # compare step below is what decides whether the run fails.
       - name: Run the evaluation suites
         continue-on-error: true
-        run: pnpm eval ${{ inputs.suite }}
+        # Through the environment, never interpolated into the script: a
+        # dispatch input written into `run` is a shell injection.
+        env:
+          SUITE: ${{ inputs.suite }}
+        run: pnpm eval ${SUITE:+"$SUITE"}
 
       - name: Compare with the baseline
         run: |

@@ -54,7 +54,7 @@ export function AssistantQuality({ data }: { data: Assistant }) {
           </div>
 
           <div className="grid gap-5 xl:grid-cols-2">
-            <Panel title={t("byModel")} note={t("byModelNote")}>
+            <Panel heading="h3" title={t("byModel")} note={t("byModelNote")}>
               {data.byModel.length === 0 ? (
                 <p className={empty}>{t("noAnswers")}</p>
               ) : (
@@ -97,7 +97,7 @@ export function AssistantQuality({ data }: { data: Assistant }) {
               )}
             </Panel>
 
-            <Panel title={t("unhelpful")}>
+            <Panel heading="h3" title={t("unhelpful")}>
               {data.unhelpful.length === 0 ? (
                 <p className={empty}>{t("noUnhelpful")}</p>
               ) : (

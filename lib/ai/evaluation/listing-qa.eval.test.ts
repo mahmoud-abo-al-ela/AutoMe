@@ -319,6 +319,9 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
     { timeout: CALL_TIMEOUT },
     async (name, t) => {
       const result = outcome(t, name);
+      // No wording of the model's own: the buyer saw the page's fixed copy,
+      // which is not the model's to be graded on.
+      if (!shownText(result)) t.skip("the buyer saw the page's fixed copy");
       const verdicts = await judge({
         kind: "assistantReply",
         question: CASES[name].question,

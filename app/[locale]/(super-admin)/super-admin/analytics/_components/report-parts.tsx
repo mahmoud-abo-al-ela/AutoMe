@@ -24,11 +24,24 @@ export function usePercent() {
  * with how it moved since the period before, and a list of labelled bars.
  */
 
-export function Panel({ title, note, children, className }: { title: string; note?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({
+  title,
+  note,
+  children,
+  className,
+  heading: Heading = "h2",
+}: {
+  title: string;
+  note?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  /** h3 for a panel inside a titled section of the report. */
+  heading?: "h2" | "h3";
+}) {
   return (
     <section className={cn("flex min-w-0 flex-col overflow-hidden rounded-[20px] border border-border bg-card", className)}>
       <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-border px-5 py-3.5">
-        <h2 className="text-body font-semibold">{title}</h2>
+        <Heading className="text-body font-semibold">{title}</Heading>
         {note && <span className="text-micro text-muted-foreground">{note}</span>}
       </header>
       {children}

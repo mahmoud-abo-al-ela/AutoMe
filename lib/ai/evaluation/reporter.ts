@@ -19,6 +19,23 @@ const toCall = (call: AiCallRecord): ReportedCall => ({
   cached: call.cached,
 });
 
+/**
+ * The error that stopped the suite a case belongs to, if any. A `beforeAll`
+ * that throws — where most suites call the model — marks every case under it
+ * skipped, without a note; read as "did not run", a broken suite would vanish
+ * from the report and the run would pass.
+ */
+function suiteFailure(test: TestCase): string | null {
+  for (let node: TestCase["parent"] | undefined = test.parent; node; ) {
+    if (node.state() === "failed") {
+      const [first] = node.errors();
+      return `suite failed: ${first?.message ?? "unknown error"}`;
+    }
+    node = node.type === "module" ? undefined : node.parent;
+  }
+  return null;
+}
+
 function toCase(file: string, test: TestCase): ReportedCase | null {
   const result = test.result();
   const durationMs = Math.round(test.diagnostic()?.duration ?? 0);
@@ -27,6 +44,8 @@ function toCase(file: string, test: TestCase): ReportedCase | null {
 
   if (result.state === "passed") return { id, outcome: "pass", durationMs, calls };
   if (result.state === "failed") return { id, outcome: "fail", durationMs, calls };
+  const broken = result.state === "skipped" ? suiteFailure(test) : null;
+  if (broken) return { id, outcome: "fail", durationMs, note: broken, calls };
   if (result.state === "skipped" && result.note) {
     return { id, outcome: "inconclusive", durationMs, note: result.note, calls };
   }

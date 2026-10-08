@@ -54,6 +54,12 @@ export const isAdvisory = (id: string) => id.includes(ADVISORY_MARK);
 export interface Comparison {
   /** Passed in the baseline, failed now — the only thing that fails a run. */
   regressions: string[];
+  /**
+   * In the baseline, in a suite this run executed, but absent from it — a
+   * renamed, deleted or no-longer-collected case. Fails the run, like a
+   * regression, until the baseline is updated to accept it.
+   */
+  missing: string[];
   /** Advisory cases that failed this run — what the judge disagreed with. */
   advisoryFailures: string[];
   /** Failed in the baseline, pass now. */
@@ -72,6 +78,7 @@ export function allCases(report: EvalReport): ReportedCase[] {
 export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | null): Comparison {
   const comparison: Comparison = {
     regressions: [],
+    missing: [],
     advisoryFailures: [],
     fixed: [],
     added: [],
@@ -91,7 +98,19 @@ export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | n
     else if (before === "pass" && outcome === "fail" && !isAdvisory(id)) comparison.regressions.push(id);
     else if (before === "fail" && outcome === "pass") comparison.fixed.push(id);
   }
+  comparison.missing = missingFromRun(report, baseline).filter((id) => !isAdvisory(id));
   return comparison;
+}
+
+/** The suite file a case id belongs to — see ReportedCase.id. */
+const fileOf = (id: string) => id.split(" › ")[0];
+
+/** Baseline cases from the suites this run executed that the run did not report. */
+function missingFromRun(report: EvalReport, baseline: EvalBaseline | null): string[] {
+  if (!baseline) return [];
+  const ran = new Set(report.suites.map((suite) => suite.file));
+  const reported = new Set(allCases(report).map((c) => c.id));
+  return Object.keys(baseline.cases).filter((id) => ran.has(fileOf(id)) && !reported.has(id));
 }
 
 /**
@@ -100,6 +119,8 @@ export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | n
  */
 export function nextBaseline(report: EvalReport, previous: EvalBaseline | null, now = new Date()): EvalBaseline {
   const cases: EvalBaseline["cases"] = { ...(previous?.cases ?? {}) };
+  // Accepting a run accepts what it no longer has, too.
+  for (const id of missingFromRun(report, previous)) delete cases[id];
   for (const { id, outcome } of allCases(report)) {
     if (outcome !== "inconclusive") cases[id] = outcome;
   }

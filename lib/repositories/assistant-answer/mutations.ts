@@ -25,13 +25,16 @@ export interface AnswerToKeep {
  * rate it, a decline or off-topic reply so the quality report can count it.
  * Both ids are server-sourced — the car's own row, never the request.
  * Pruned here rather than by a cron, like buyer questions: the only place old
- * answers pile up is a car still being asked about.
+ * replies pile up is a car still being asked about. Only on an answer, so a
+ * decline or an off-topic message costs one write; the next answer prunes it.
  */
 export async function recordAssistantAnswer(input: AnswerToKeep): Promise<string> {
-  const cutoff = new Date(Date.now() - ASSISTANT_ANSWER_RETENTION_DAYS * 86_400_000);
-  await db.assistantAnswer.deleteMany({
-    where: { carId: input.carId, createdAt: { lt: cutoff } },
-  });
+  if (input.outcome === "ANSWERED") {
+    const cutoff = new Date(Date.now() - ASSISTANT_ANSWER_RETENTION_DAYS * 86_400_000);
+    await db.assistantAnswer.deleteMany({
+      where: { carId: input.carId, createdAt: { lt: cutoff } },
+    });
+  }
   const row = await db.assistantAnswer.create({ data: input, select: { id: true } });
   return row.id;
 }

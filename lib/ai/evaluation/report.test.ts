@@ -80,3 +80,21 @@ describe("advisory judge cases", () => {
     expect(result.advisoryFailures).toEqual(["listing-qa › [judge] fridayAr"]);
   });
 });
+
+describe("cases missing from a run", () => {
+  const FILE = "lib/ai/evaluation/listing-qa.eval.test.ts";
+
+  it("flags a baseline case its suite no longer reports, but not suites that did not run", () => {
+    const run = report([{ id: `${FILE} › kept`, outcome: "pass" }]);
+    const baseline = {
+      updatedAt: "",
+      cases: { [`${FILE} › kept`]: "pass", [`${FILE} › renamed`]: "pass", "lib/ai/evaluation/other.eval.test.ts › x": "pass" },
+    } as const;
+
+    expect(compareToBaseline(run, { ...baseline, cases: { ...baseline.cases } }).missing).toEqual([`${FILE} › renamed`]);
+    expect(Object.keys(nextBaseline(run, { ...baseline, cases: { ...baseline.cases } }).cases)).toEqual([
+      `${FILE} › kept`,
+      "lib/ai/evaluation/other.eval.test.ts › x",
+    ]);
+  });
+});

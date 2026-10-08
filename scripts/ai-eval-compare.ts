@@ -4,8 +4,8 @@
  *   pnpm eval:compare                    # eval-report.json vs the baseline
  *   pnpm eval:compare --update-baseline  # accept this run as the new baseline
  *
- * Exits 1 only on a regression: a case that passed in the baseline and fails
- * now. A case no model could answer is inconclusive and never fails the run —
+ * Exits 1 on a regression — a case that passed in the baseline and fails now —
+ * or a baseline case a suite that ran no longer reports. A case no model could answer is inconclusive and never fails the run —
  * a quota-starved night is not a quality regression. Paths can be overridden
  * with AI_EVAL_REPORT and AI_EVAL_BASELINE.
  */
@@ -50,6 +50,7 @@ console.info(
     .join(", ") || "none"
 );
 list("REGRESSIONS — passed in the baseline, fail now", result.regressions);
+list("MISSING — in the baseline, not in this run (renamed, deleted or not collected)", result.missing);
 list("Judge disagreements — advisory, never fail the run", result.advisoryFailures);
 list("Fixed — failed in the baseline, pass now", result.fixed);
 list("New cases", result.added);
@@ -61,4 +62,4 @@ if (process.argv.includes("--update-baseline")) {
   process.exit(0);
 }
 
-process.exit(result.regressions.length > 0 ? 1 : 0);
+process.exit(result.regressions.length > 0 || result.missing.length > 0 ? 1 : 0);
