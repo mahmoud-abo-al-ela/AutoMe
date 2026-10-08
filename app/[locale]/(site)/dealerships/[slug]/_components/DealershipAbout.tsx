@@ -1,6 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { resolveDealershipText, textDirection } from "@/lib/utils/dealership-text";
 import { buttonVariants } from "@/components/ui/button";
 import { DealershipTermsList, hasStatedTerms } from "@/components/dealership/DealershipTermsList";
 import { telHref } from "@/lib/utils/phone";
@@ -19,8 +21,10 @@ const heading = "mb-4 text-h3 font-semibold";
 export function DealershipAbout({ dealership }: { dealership: DealershipDetail }) {
     const t = useTranslations("dealerships.detail");
     const phoneHref = telHref(dealership.phone);
+    // In the reader's language; Get directions still searches the dealer's own text.
+    const address = resolveDealershipText(dealership, "address", useLocale() as Locale);
     const contacts = [
-        dealership.address && { label: t("about.address"), value: <span dir="auto">{dealership.address}</span> },
+        address && { label: t("about.address"), value: <span {...textDirection(address)}>{address.text}</span> },
         dealership.phone && {
             label: t("about.phone"),
             value: phoneHref ? (

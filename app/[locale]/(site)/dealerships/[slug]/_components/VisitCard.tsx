@@ -2,7 +2,9 @@
 
 import { useMemo } from "react";
 import { MapPin, Navigation, Phone } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { resolveDealershipText, textDirection } from "@/lib/utils/dealership-text";
 import { buttonVariants } from "@/components/ui/button";
 import { BuyerAccessNotice, useBuyerAccess } from "@/components/BuyerAccess";
 import { useOpenStatusMessage } from "@/components/dealership/OpenStatusBadge";
@@ -42,6 +44,8 @@ export function VisitCard({
     const describe = useOpenStatusMessage();
     const { can } = useBuyerAccess();
     const status = useMemo(() => getOpenStatus(dealership.workingHours), [dealership.workingHours]);
+    // Shown in the reader's language; Directions still searches the dealer's own text.
+    const address = resolveDealershipText(dealership, "address", useLocale() as Locale);
 
     const phoneHref = telHref(dealership.phone);
     const contactLinks = [
@@ -105,10 +109,10 @@ export function VisitCard({
 
             {!compact && (
                 <div className="hidden flex-col items-start gap-2 border-t border-border pt-5 lg:flex">
-                    {dealership.address && (
-                        <p dir="auto" className="flex items-start gap-2 text-caption font-semibold">
+                    {address && (
+                        <p className="flex items-start gap-2 text-caption font-semibold">
                             <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                            {dealership.address}
+                            <span {...textDirection(address)}>{address.text}</span>
                         </p>
                     )}
                     <ShareDealershipButton dealership={dealership} variant="link" size="sm" className="h-auto px-0" />

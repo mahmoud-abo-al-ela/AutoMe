@@ -9,6 +9,7 @@
 export const maxDuration = 60;
 
 import Hero from "@/components/Hero/Hero";
+import { resolveDealershipText } from "@/lib/utils/dealership-text";
 import Featured from "@/components/FeaturedCars/Featured";
 import Stats from "@/components/Stats/Stats";
 import Testimonials from "@/components/Testimonials/Testimonials";
@@ -52,7 +53,7 @@ export async function generateMetadata({
       // Mirrors the root layout's tab title and description.
       title: organization?.name ?? t("title"),
       description: organization
-        ? organization.description || `${organization.name} — AutoMe`
+        ? resolveDealershipText(organization, "description", locale as Locale)?.text || `${organization.name} — AutoMe`
         : t("description"),
     },
   };

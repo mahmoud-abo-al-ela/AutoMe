@@ -29,7 +29,13 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
         slug: dealership.slug,
         logo: dealership.logo,
         description: dealership.description,
+        // The description and address per language (lib/utils/dealership-text
+        // resolves them).
+        descriptionEn: dealership.descriptionEn,
+        descriptionAr: dealership.descriptionAr,
         address: dealership.address,
+        addressEn: dealership.addressEn,
+        addressAr: dealership.addressAr,
         city: dealership.city,
         region: dealership.region,
         country: dealership.country,

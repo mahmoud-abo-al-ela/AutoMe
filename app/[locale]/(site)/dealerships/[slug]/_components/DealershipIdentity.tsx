@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useFormatters } from "@/hooks/use-formatters";
 import { usePlaceNames } from "@/hooks/use-place-names";
+import { resolveDealershipText, textDirection } from "@/lib/utils/dealership-text";
 import type { DealershipDetail } from "../_lib/detail-types";
 
 const initialsOf = (name: string) =>
@@ -26,6 +27,7 @@ export function DealershipIdentity({ dealership }: { dealership: DealershipDetai
     const fmt = useFormatters();
     const place = usePlaceNames();
     const separator = <ChevronRight aria-hidden className="size-3.5 shrink-0 rtl:rotate-180" />;
+    const description = resolveDealershipText(dealership, "description", fmt.locale);
     // "Tanta, Gharbia"; the region is dropped when it repeats the city (Cairo).
     const where = [...new Set([place.city(dealership.city), place.region(dealership.region)].filter(Boolean))].join(
         fmt.locale === "ar" ? "، " : ", "
@@ -95,10 +97,11 @@ export function DealershipIdentity({ dealership }: { dealership: DealershipDetai
                 </div>
             </header>
 
-            {dealership.description && (
-                // The dealer's own words, in whatever language they wrote them.
-                <p dir="auto" className="mt-4 max-w-3xl text-body">
-                    {dealership.description}
+            {description && (
+                // In the reader's language once translated; until then the
+                // dealer's own words, set in their language's direction.
+                <p {...textDirection(description)} className="mt-4 max-w-3xl text-body">
+                    {description.text}
                 </p>
             )}
         </>

@@ -3,3 +3,4 @@ export * from "./dealership";
 export * from "./users";
 export * from "./listing";
 export * from "./detail";
+export * from "./profile-translation";

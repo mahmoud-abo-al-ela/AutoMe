@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { after } from "next/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -7,6 +8,7 @@ import type { Locale } from "@/i18n/routing";
 import * as dealershipService from "@/lib/services/dealership";
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
+import { dealershipTranslationPlan, resolveDealershipText } from "@/lib/utils/dealership-text";
 import {
     generateBreadcrumbStructuredData,
     generateDealershipStructuredData,
@@ -48,7 +50,9 @@ export async function generateMetadata({ params }: Pick<PageProps, "params">): P
         return { title: t("notFoundTitle"), description: t("notFoundDescription") };
     }
 
-    const { name, description, city, region, logo, carCount } = dealership;
+    const { name, city, region, logo, carCount } = dealership;
+    // In the page's language when the translation exists.
+    const description = resolveDealershipText(dealership, "description", locale as Locale)?.text;
     // The tab title gets the brand from the root title.template; og/twitter
     // titles do not inherit it, so they spell the brand out themselves.
     const socialTitle = name + " | AutoMe";
@@ -94,6 +98,20 @@ export default async function DealershipDetailPage({ params, searchParams }: Pag
     const { slug, locale } = await params;
     const dealership = await loadDealership(slug);
     if (!dealership) notFound();
+
+    // A description or address saved before translation existed (or whose
+    // translation failed) is translated after this response — nobody waits on it, and the
+    // next visitor reads it in their language. Billed to no one (see
+    // AI_FEATURES.dealershipProfileTranslation).
+    if (dealershipTranslationPlan(dealership).length > 0) {
+        after(() =>
+            dealershipService.syncDealershipProfileText(dealership.id, {
+                organizationId: dealership.id,
+                userId: null,
+                priority: "low",
+            })
+        );
+    }
 
     const [carsResult, filterOptions, t] = await Promise.all([
         dealershipService.getDealershipCars(
