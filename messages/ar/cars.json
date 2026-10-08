@@ -9,11 +9,7 @@
     "searchPlaceholder": "ابحث بالماركة أو الموديل أو بكلمة مفتاحية…",
     "searchLabel": "البحث عن سيارات",
     "clearSearch": "مسح البحث",
-    "popular": "الأكثر بحثًا:",
-    "quickSuv": "دفع رباعي",
-    "quickElectric": "كهربائية",
-    "quickUnder": "أقل من {price}",
-    "quickLuxury": "فاخرة"
+    "popular": "الأكثر بحثًا:"
   },
   "results": {
     "sortLabel": "ترتيب النتائج",

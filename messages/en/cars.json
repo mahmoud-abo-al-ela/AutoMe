@@ -9,11 +9,7 @@
     "searchPlaceholder": "Search by make, model, or keyword…",
     "searchLabel": "Search cars",
     "clearSearch": "Clear search",
-    "popular": "Popular:",
-    "quickSuv": "SUV",
-    "quickElectric": "Electric",
-    "quickUnder": "Under {price}",
-    "quickLuxury": "Luxury"
+    "popular": "Popular:"
   },
   "results": {
     "sortLabel": "Sort results",

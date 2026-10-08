@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/navigation";
 import { StartConversationButton, carChatReturnPath, useChatDock } from "@/components/StreamChat";
 import { PricePlate } from "@/components/brand";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
+import { useBuyerAccess } from "@/components/BuyerAccess";
 import { useFormatters } from "@/hooks/use-formatters";
 import { resolveCarTitle } from "@/lib/utils/car-text";
 import type { Locale } from "@/i18n/routing";
@@ -26,6 +27,7 @@ const MobileStickyBar = ({ car }: { car: CarDetail }) => {
   const router = useRouter();
   const { openCarChat } = useChatDock();
   const { signInTo } = useAuthRedirects();
+  const { can } = useBuyerAccess();
   // The title in the reader's language, as on the page above — `car.title`
   // alone was the English one on the Arabic page.
   const title = resolveCarTitle(car, locale)?.text ?? `${fmt.number(car.year, { useGrouping: false })} ${car.make} ${car.model}`;
@@ -38,7 +40,8 @@ const MobileStickyBar = ({ car }: { car: CarDetail }) => {
             <PricePlate amount={car.price} currency={car.priceCurrency} size="sm" className="self-start" />
             <span className="truncate text-micro text-muted-foreground">{title}</span>
           </div>
-          {isSignedIn ? (
+          {/* No chat for staff or the dealer's own team; the card above says why. */}
+          {!can("message") ? null : isSignedIn ? (
             <StartConversationButton carId={car.id} onChatOpen={openCarChat} variant="marker" size="xl" />
           ) : (
             <Button

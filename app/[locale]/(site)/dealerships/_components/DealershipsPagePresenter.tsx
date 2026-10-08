@@ -51,7 +51,6 @@ export const DealershipsPagePresenter = ({
         searchQuery={searchValue}
         onSearchChange={handlers.setSearch}
         onClearSearch={() => handlers.setSearch("")}
-        stats={filterOptions?.stats}
       />
 
       <DealershipFilterBar

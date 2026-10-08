@@ -9,6 +9,7 @@ import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { dealershipReviewSchema } from "@/lib/validations/schemas";
 import { ValidationError } from "@/lib/utils/errors";
+import { assertBuyerAllowed } from "@/lib/auth/assert-buyer";
 import type {
     DealershipFilters,
     DealershipPagination,
@@ -103,6 +104,9 @@ export const createDealershipReview = withAuth(
     async (ctx, organizationId: string, reviewData: unknown) => {
     await enforceRateLimit();
     const validatedReview = validateAction(dealershipReviewSchema, reviewData);
+    // The client names the dealership being reviewed, not the caller's own;
+    // the check compares it with the caller's memberships, read server side.
+    assertBuyerAllowed(ctx.user, organizationId, "review");
 
     const result = await dealershipService.createDealershipReview(
         organizationId,

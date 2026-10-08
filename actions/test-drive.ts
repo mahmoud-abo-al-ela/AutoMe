@@ -17,6 +17,7 @@ import { isDateString } from "@/lib/utils/date-only";
 import { displayNameFor } from "@/lib/utils/userHelpers";
 import { cairoNow } from "@/lib/utils/datetime";
 import { getCurrentOrganization } from "@/lib/getOrganization";
+import { assertBuyerAllowed, assertNotImpersonating } from "@/lib/auth/assert-buyer";
 
 import { db } from "@/lib/prisma";
 import {
@@ -41,14 +42,18 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
   await enforceRateLimit();
   const testDriveData = validateAction(requestTestDriveSchema, rawData);
 
-  // Validate car belongs to current organization when on a subdomain
-  const organization = await getCurrentOrganization();
-  if (organization && testDriveData.carId) {
-    const car = await carRepository.findCarById(testDriveData.carId);
-    if (!car || car.organizationId !== organization.id) {
-      throw new NotFoundError("Car");
-    }
+  const car = await carRepository.findCarById(testDriveData.carId);
+  if (!car) {
+    throw new NotFoundError("Car");
   }
+
+  // On a subdomain, only that dealership's cars can be booked.
+  const organization = await getCurrentOrganization();
+  if (organization && car.organizationId !== organization.id) {
+    throw new NotFoundError("Car");
+  }
+
+  assertBuyerAllowed(ctx.user, car.organizationId, "testDrive");
 
   // serializeTestDrive is nullable for callers that may pass nothing, but
   // createTestDrive always hands it a freshly created row.
@@ -163,6 +168,7 @@ export const getTestDriveById = withAuth(async (ctx, testDriveId: string) => {
 });
 
 export const editTestDrive = withAuth(async (ctx, input) => {
+  assertNotImpersonating(ctx.user);
   const { testDriveId, date, startTime, endTime, notes } = validateAction(
     editTestDriveSchema,
     input,
@@ -183,6 +189,7 @@ export const editTestDrive = withAuth(async (ctx, input) => {
 });
 
 export const cancelTestDriveByUser = withAuth(async (ctx, testDriveId: string) => {
+  assertNotImpersonating(ctx.user);
   const cancelledTestDrive = await testDriveService.cancelTestDrive(
     testDriveId,
     ctx.userId,

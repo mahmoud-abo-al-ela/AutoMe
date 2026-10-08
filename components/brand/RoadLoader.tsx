@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
-import { useSiteBrandName } from "./SiteBrand";
+import { useSiteBrandName, useSitePlateBand } from "./SiteBrand";
+import type { PlateBand } from "@/lib/org/client";
 
 /**
  * The public site's loading state for waits with no known layout (Figma:
@@ -22,14 +23,18 @@ import { useSiteBrandName } from "./SiteBrand";
 export function RoadLoader({
   label,
   description,
+  band,
   className,
 }: {
   label?: string;
   description?: string;
+  /** The plate's band, where no SiteBrandProvider gives it (the dashboard, the root loader). */
+  band?: PlateBand;
   className?: string;
 }) {
   const t = useTranslations("common.states");
   const brand = useSiteBrandName();
+  const siteBand = useSitePlateBand();
 
   return (
     <div
@@ -39,7 +44,7 @@ export function RoadLoader({
         className
       )}
     >
-      <Logo name={brand} size="lg" />
+      <Logo name={brand} size="lg" band={band ?? siteBand} />
       <span aria-hidden className="road-run block h-1.5 w-44 rounded-full" />
       <div className="flex max-w-sm flex-col gap-1">
         <p className={label ? "text-body font-semibold" : "text-caption text-muted-foreground"}>

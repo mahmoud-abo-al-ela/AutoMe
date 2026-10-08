@@ -160,12 +160,6 @@ export const useCarsPage = (
     [filters, applyFilters]
   );
 
-  // Merge a partial filters patch (used by hero quick-picks) and apply.
-  const applyPatch = useCallback(
-    (patch: Partial<CarPageFilters>) => applyFilters({ ...filters, ...patch }),
-    [filters, applyFilters]
-  );
-
   // Toggle one value in a multi-select array field.
   const toggleMulti = useCallback(
     (key: MultiKey, value: string) => {
@@ -368,7 +362,6 @@ export const useCarsPage = (
     activeFilters: getActiveFilters(),
     handlers: {
       setFilter,
-      applyPatch,
       toggleMulti,
       commitRange,
       setSearch,

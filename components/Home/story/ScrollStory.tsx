@@ -52,7 +52,7 @@ export function ScrollStory() {
   const pinned = useRef<HTMLDivElement>(null);
   const trigger = useRef<ScrollTrigger | null>(null);
 
-  const number = (i: number) => fmt.number(i + 1, { minimumIntegerDigits: 2 });
+  const number = (i: number) => fmt.number(i + 1);
 
   // A road stop jumps to its step. Instantly, not smooth-scrolled, so the snap
   // never catches it partway; the step's own crossfade carries the change.

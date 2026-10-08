@@ -1,4 +1,18 @@
 import { cn } from "@/lib/utils";
+import type { PlateBand } from "@/lib/org/client";
+
+/**
+ * The band across the top of the plate: who is signed in. Egyptian plates
+ * colour that band by licence type, and these borrow it (see the plate
+ * tokens in globals.css). Like a real plate the words are bilingual in every
+ * locale, not translated.
+ */
+const BANDS: Record<PlateBand, { latin: string; arabic: string; className: string }> = {
+  buyer: { latin: "EGYPT", arabic: "مصر", className: "bg-plate-band text-plate-band-foreground" },
+  owner: { latin: "OWNER", arabic: "مالك", className: "bg-plate-owner text-plate-owner-foreground" },
+  team: { latin: "TEAM", arabic: "فريق", className: "bg-plate-team text-plate-team-foreground" },
+  admin: { latin: "ADMIN", arabic: "إدارة", className: "bg-plate-admin text-plate-admin-foreground" },
+};
 
 /**
  * The wordmark, set on a plate (Figma: Logo). The band reads EGYPT / مصر like
@@ -13,22 +27,23 @@ import { cn } from "@/lib/utils";
  * `lg` is the plate on its own as an object (the road loader), with the key
  * shadow the marker buttons use so it sits on the page like a real plate.
  *
- * `admin` is the super-admin plate: the band reads ADMIN / إدارة, so
- * staff always see they are in the platform admin, not a dealership.
+ * `band` says who is looking (lib/org/client: plateBandFor): the plain
+ * EGYPT plate for buyers and visitors, OWNER / TEAM for a dealership's own
+ * people, ADMIN for platform staff — so nobody mistakes where they stand.
  */
 export function Logo({
   name = "AutoMe",
   size = "md",
-  variant = "default",
+  band = "buyer",
   className,
 }: {
   name?: string;
   size?: "md" | "lg";
-  variant?: "default" | "admin";
+  band?: PlateBand;
   className?: string;
 }) {
   const lg = size === "lg";
-  const admin = variant === "admin";
+  const { latin, arabic, className: bandClassName } = BANDS[band];
   return (
     <span
       aria-hidden
@@ -42,12 +57,12 @@ export function Logo({
         dir="ltr"
         className={cn(
           "flex justify-between gap-3 font-bold leading-[1.6]",
-          "bg-plate-band",
+          bandClassName,
           lg ? "px-2 text-[10px]" : "px-1.5 text-[8px]"
         )}
       >
-        <span>{admin ? "ADMIN" : "EGYPT"}</span>
-        <span>{admin ? "إدارة" : "مصر"}</span>
+        <span>{latin}</span>
+        <span>{arabic}</span>
       </span>
       <span
         className={cn(

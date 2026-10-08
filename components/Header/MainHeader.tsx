@@ -5,7 +5,7 @@ import { CarFront, Heart, MessageSquare } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/brand";
+import { Logo, useRememberPlateBand } from "@/components/brand";
 import { UnreadBadge } from "@/components/StreamChat";
 import { navItems, subdomainNavItems, adminNavItems } from "@/lib/HeaderConfig";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
@@ -17,6 +17,8 @@ export type HeaderUser = {
   name?: string | null;
   email?: string | null;
   role?: string | null;
+  /** Set by checkUser while a super admin impersonates this user. */
+  isImpersonated?: boolean | null;
   memberships?: {
     role?: string | null;
     organization?: { slug?: string | null } | null;
@@ -110,6 +112,8 @@ export default function MainHeader({
   const t = useTranslations("nav");
   const { afterSignOut, signIn } = useAuthRedirects();
   const access = useHeaderAccess(user, organizationSlug);
+  // For the next cold load, whose loader shows before the user is known.
+  useRememberPlateBand(access.plateBand);
   const { pathname } = access;
 
   const brandName = access.isOnSubdomain && organization?.name ? organization.name : "AutoMe";
@@ -134,7 +138,7 @@ export default function MainHeader({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={organization.logo} alt="" className="size-9 rounded-control object-cover" />
           ) : null}
-          <Logo name={brandName} />
+          <Logo name={brandName} band={access.plateBand} />
         </Link>
 
         <nav aria-label={t("primaryNav")} className="hidden h-full flex-1 items-stretch justify-center gap-1 md:flex">

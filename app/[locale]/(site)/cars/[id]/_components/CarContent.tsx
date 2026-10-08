@@ -12,6 +12,7 @@ import CarSpecifications from "./CarSpecifications";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { OpenChatFromLink } from "@/components/StreamChat";
+import { BuyerTargetProvider } from "@/components/BuyerAccess";
 import type { CarDetail } from "../_lib/car-detail-types";
 import { getTranslations } from "next-intl/server";
 import { isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
@@ -66,6 +67,10 @@ const CarContent = async ({ id }: { id: string }) => {
   const market = marketPrices ? toMarketPosition(marketPrices) : null;
 
   return (
+    // The buyer buttons on this page act on this car's dealership.
+    <BuyerTargetProvider
+      target={{ organizationId: car.organizationId, organizationSlug: car.organization?.slug, carId: car.id }}
+    >
     <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-4 sm:px-6 md:pt-6 xl:px-0">
       <Breadcrumbs car={car} />
 
@@ -97,6 +102,7 @@ const CarContent = async ({ id }: { id: string }) => {
         <OpenChatFromLink carId={car.id} />
       </Suspense>
     </div>
+    </BuyerTargetProvider>
   );
 };
 

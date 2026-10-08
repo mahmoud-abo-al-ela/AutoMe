@@ -55,7 +55,7 @@ export function ListingRow({ car, index = 0 }: { car: ListingRowCar; index?: num
             <CarIcon aria-hidden className="size-9 text-muted-foreground/40" />
           </div>
         )}
-        <CarCardActions carId={car.id} isWishlisted={car.isWishlisted || false} />
+        <CarCardActions carId={car.id} organizationId={car.organizationId} isWishlisted={car.isWishlisted || false} />
       </div>
 
       <div className="flex min-w-0 flex-col gap-2.5 py-1">

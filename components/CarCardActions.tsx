@@ -21,6 +21,7 @@ import { compareUtils } from "@/lib/utils";
 import { logError } from "@/lib/utils/errors";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
+import { useBuyerAccess } from "@/components/BuyerAccess";
 
 /** Mirrors the cap enforced by compareUtils.addToCompare. */
 const COMPARE_LIMIT = 3;
@@ -31,11 +32,14 @@ const COMPARE_LIMIT = 3;
  */
 export default function CarCardActions({
   carId,
+  organizationId,
   isWishlisted = false,
   onWishlistChange,
   isWishlistPage = false,
 }: {
   carId: string;
+  /** The car's dealership, for the buyer policy: a list mixes dealerships. */
+  organizationId?: string;
   isWishlisted?: boolean;
   /** Called after a successful toggle so a list can drop the removed card. */
   onWishlistChange?: (removedCarId: string) => void;
@@ -45,6 +49,7 @@ export default function CarCardActions({
   const actionError = useActionError();
   const fmt = useFormatters();
   const [isFavorite, setIsFavorite] = useState(isWishlisted);
+  const { can } = useBuyerAccess(organizationId ? { organizationId } : undefined);
   const [isInCompare, setIsInCompare] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -121,6 +126,8 @@ export default function CarCardActions({
   return (
     <TooltipProvider delayDuration={300}>
       <div className="absolute end-2 top-2 z-20 flex gap-2 sm:end-3 sm:top-3">
+        {/* A car saved before saving was blocked keeps its heart, so it can be removed. */}
+        {(can("save") || isFavorite) && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -143,6 +150,7 @@ export default function CarCardActions({
             {t(isFavorite ? "removeFromFavorites" : "addToFavorites")}
           </TooltipContent>
         </Tooltip>
+        )}
 
         <Tooltip>
           <TooltipTrigger asChild>

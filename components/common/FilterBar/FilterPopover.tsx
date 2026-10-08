@@ -37,7 +37,7 @@ export const FilterPopover = ({
           variant="outline"
           aria-label={active ? `${label}, ${activeCount} selected` : label}
           className={cn(
-            "h-9 gap-1.5 px-3 text-xs font-medium",
+            "h-9 gap-1.5 bg-field px-3 text-xs font-medium hover:bg-field hover:border-border-strong",
             active && "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10"
           )}
         >

@@ -112,7 +112,8 @@ export const DealershipFilterBar = ({
                     inflects the noun against six forms, and the bold span
                     around the number cannot survive that. */}
                 <p
-                    className="text-sm text-muted-foreground"
+                    // Same weight and colour as the Browse cars count.
+                    className="text-h3 font-semibold max-sm:text-body"
                     role="status"
                     aria-live="polite"
                 >
@@ -145,7 +146,7 @@ export const DealershipFilterBar = ({
                     <div className="md:hidden">
                         <Button
                             variant="outline"
-                            className="h-9 gap-2 px-3 text-xs font-medium"
+                            className="h-9 gap-2 bg-field px-3 text-xs font-medium hover:bg-field hover:border-border-strong"
                             onClick={() => setSheetOpen(true)}
                         >
                             <SlidersHorizontal className="h-4 w-4" />
@@ -161,7 +162,7 @@ export const DealershipFilterBar = ({
                     {/* Per-page (desktop only) */}
                     <Select value={String(perPage)} onValueChange={(v) => onPerPageChange(Number(v))}>
                         <SelectTrigger
-                            className="hidden h-9 w-[110px] text-sm sm:flex"
+                            className="hidden h-9 w-[110px] bg-field text-sm sm:flex"
                             aria-label={t("perPageLabel")}
                         >
                             <SelectValue />
@@ -177,7 +178,7 @@ export const DealershipFilterBar = ({
 
                     {/* Sort */}
                     <Select value={sortValue} onValueChange={onSortChange}>
-                        <SelectTrigger className="h-9 flex-1 text-sm sm:w-[180px] sm:flex-none" aria-label={t("sortLabel")}>
+                        <SelectTrigger className="h-9 flex-1 bg-field text-sm sm:w-[180px] sm:flex-none" aria-label={t("sortLabel")}>
                             <SelectValue placeholder={t("sortPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>

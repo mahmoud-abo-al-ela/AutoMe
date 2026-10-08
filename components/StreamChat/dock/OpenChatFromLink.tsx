@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useChatDock } from "./ChatDockContext";
+import { useBuyerAccess } from "@/components/BuyerAccess";
 
 /** The query a car page is sent back with when the reader asked to chat. */
 export const OPEN_CHAT_PARAM = "chat";
@@ -28,7 +29,9 @@ export function OpenChatFromLink({ carId }: { carId: string }) {
   const { openCarChat } = useChatDock();
   const router = useRouter();
   const pathname = usePathname();
-  const wantsChat = searchParams.get(OPEN_CHAT_PARAM) === "1";
+  // A shared ?chat=1 link must not open a chat the viewer may not start.
+  const mayMessage = useBuyerAccess().can("message");
+  const wantsChat = searchParams.get(OPEN_CHAT_PARAM) === "1" && mayMessage;
 
   useEffect(() => {
     if (!wantsChat || !isSignedIn) return;

@@ -9,8 +9,10 @@ import { Suspense } from "react";
 import { DealerPitchProvider, RoadLoader, SiteBrandProvider } from "@/components/brand";
 import { alexandria } from "@/components/brand/site-font";
 import { SiteToaster } from "@/components/brand/SiteToaster";
-import { showsDealerPitch } from "@/lib/org/client";
+import { plateBandFor, showsDealerPitch } from "@/lib/org/client";
 import type { Locale } from "@/i18n/routing";
+import { BuyerViewerProvider } from "@/components/BuyerAccess";
+import { toBuyerViewer } from "@/lib/auth/buyer-policy";
 
 export default async function SiteLayout({
   children,
@@ -37,8 +39,10 @@ export default async function SiteLayout({
     // data-theme="site" switches the root palette to the public-site theme
     // (see globals.css); the override below must use the same selector, or
     // the theme block — more specific than a bare :root — would win over it.
-    <SiteBrandProvider name={organization?.name}>
+    <SiteBrandProvider name={organization?.name} band={plateBandFor(user, organization?.slug)}>
       <DealerPitchProvider show={showsDealerPitch(user, !!organization)}>
+        {/* Which buyer buttons this viewer gets (lib/auth/buyer-policy). */}
+        <BuyerViewerProvider viewer={toBuyerViewer(user)} onSubdomain={!!organization}>
         <div data-theme="site" className={`${alexandria.variable} flex flex-col min-h-screen`}>
           {primaryColor && (
             <style dangerouslySetInnerHTML={{
@@ -74,6 +78,7 @@ export default async function SiteLayout({
           {/* Phones: above the bottom tab bar (84px incl. safe area). */}
           <SiteToaster locale={locale} mobileOffset={{ bottom: 96 }} />
         </div>
+        </BuyerViewerProvider>
       </DealerPitchProvider>
     </SiteBrandProvider>
   );

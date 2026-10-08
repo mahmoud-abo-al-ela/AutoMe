@@ -24,6 +24,7 @@ import { Link } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { carChatReturnPath, useChatDock } from "@/components/StreamChat";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
+import { useBuyerAccess } from "@/components/BuyerAccess";
 import type { Locale } from "@/i18n/routing";
 import { askListingAssistant, rateListingAssistantAnswer } from "@/actions/listing-assistant";
 import { ActionErrorText } from "@/components/ActionErrorText";
@@ -331,8 +332,10 @@ function AskDealerLink({ carId, label }: { carId: string; label: string }) {
   const { isSignedIn } = useUser();
   const { openCarChat } = useChatDock();
   const { signInTo } = useAuthRedirects();
+  const { can } = useBuyerAccess();
   const className =
     "inline-flex cursor-pointer items-center gap-1.5 font-semibold text-foreground underline underline-offset-2";
+  if (!can("message")) return null;
   const content = (
     <>
       <MessageCircle className="w-3.5 h-3.5" aria-hidden />

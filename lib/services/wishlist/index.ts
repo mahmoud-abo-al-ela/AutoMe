@@ -2,6 +2,8 @@
 import * as userRepository from "@/lib/repositories/user";
 import * as carRepository from "@/lib/repositories/car";
 import { AuthenticationError, NotFoundError } from "@/lib/utils/errors";
+import { assertBuyerAllowed, assertNotImpersonating } from "@/lib/auth/assert-buyer";
+import type { BuyerViewerSource } from "@/lib/auth/buyer-policy";
 
 /**
  * Get user's wishlist, optionally filtered by organization
@@ -16,9 +18,15 @@ export async function getUserWishlist(userId: string, pagination: { page?: numbe
 }
 
 /**
- * Toggle car in wishlist
+ * Toggle car in wishlist.
+ *
+ * `viewer` is the session user, checked against the buyer policy. Removing is
+ * always allowed (outside impersonation) so an account that may no longer save
+ * can still clear what it saved before.
  */
-export async function toggleWishlist(carId: string, userId: string) {
+export async function toggleWishlist(carId: string, userId: string, viewer: BuyerViewerSource) {
+  assertNotImpersonating(viewer);
+
   const user = await userRepository.findUserByClerkId(userId);
   if (!user) {
     throw new AuthenticationError("User not found");
@@ -35,6 +43,7 @@ export async function toggleWishlist(carId: string, userId: string) {
     await userRepository.removeCarFromWishlist(user.id, carId);
     return { message: "Car removed from wishlist", isWishlisted: false };
   } else {
+    assertBuyerAllowed(viewer, car.organizationId, "save");
     await userRepository.addCarToWishlist(user.id, carId);
     return { message: "Car added to wishlist", isWishlisted: true };
   }
