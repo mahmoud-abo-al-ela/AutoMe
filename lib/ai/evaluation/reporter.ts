@@ -27,9 +27,11 @@ const toCall = (call: AiCallRecord): ReportedCall => ({
  */
 function suiteFailure(test: TestCase): string | null {
   for (let node: TestCase["parent"] | undefined = test.parent; node; ) {
-    if (node.state() === "failed") {
-      const [first] = node.errors();
-      return `suite failed: ${first?.message ?? "unknown error"}`;
+    // The suite's own errors — a hook that threw. Not its state: a suite is
+    // "failed" whenever any one of its cases failed.
+    const [first] = node.errors();
+    if (first) {
+      return `suite failed: ${first.message}`;
     }
     node = node.type === "module" ? undefined : node.parent;
   }
@@ -44,11 +46,11 @@ function toCase(file: string, test: TestCase): ReportedCase | null {
 
   if (result.state === "passed") return { id, outcome: "pass", durationMs, calls };
   if (result.state === "failed") return { id, outcome: "fail", durationMs, calls };
-  const broken = result.state === "skipped" ? suiteFailure(test) : null;
-  if (broken) return { id, outcome: "fail", durationMs, note: broken, calls };
   if (result.state === "skipped" && result.note) {
     return { id, outcome: "inconclusive", durationMs, note: result.note, calls };
   }
+  const broken = result.state === "skipped" ? suiteFailure(test) : null;
+  if (broken) return { id, outcome: "fail", durationMs, note: broken, calls };
   return null;
 }
 
