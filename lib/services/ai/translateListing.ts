@@ -26,10 +26,8 @@ export async function translateListing(
   const translated = await generateStructured({
     feature: AI_FEATURES.listingTranslation,
     task: "text",
-    parts: [
-      textPart(from === "en" ? listingTranslationPrompt.toArabic : listingTranslationPrompt.toEnglish),
-      textPart(listing),
-    ],
+    system: from === "en" ? listingTranslationPrompt.toArabic : listingTranslationPrompt.toEnglish,
+    parts: [textPart(listing)],
     schema: listingTranslationSchema,
     promptVersion: `${listingTranslationPrompt.version}.${from}`,
     ctx,

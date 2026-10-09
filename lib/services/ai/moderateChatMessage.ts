@@ -20,7 +20,8 @@ export async function moderateChatMessage(
   return generateStructured({
     feature: AI_FEATURES.chatModeration,
     task: "textFast",
-    parts: [textPart(chatModerationPrompt.text(sender)), textPart(JSON.stringify(text))],
+    system: chatModerationPrompt.text(sender),
+    parts: [textPart(JSON.stringify(text))],
     schema: chatModerationSchema,
     promptVersion: `${chatModerationPrompt.version}.${sender ?? "unknown"}`,
     ctx,

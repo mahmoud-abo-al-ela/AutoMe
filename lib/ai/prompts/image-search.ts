@@ -9,7 +9,7 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const imageSearchPrompt = {
-  version: "2026-09-29.1",
+  version: "2026-10-10.1",
   text: `Identify the car in this photo so it can be matched against a car
 marketplace.
 

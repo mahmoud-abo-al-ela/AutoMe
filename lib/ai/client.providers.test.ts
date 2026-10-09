@@ -353,3 +353,23 @@ describe("the OpenAI-compatible request", () => {
     expect(rows()[0].errorCode).toBe("HTTP_400");
   });
 });
+
+describe("the system role through an OpenAI-compatible API", () => {
+  it("sends the instructions as a system message ahead of the user's data", async () => {
+    fetchMock.mockResolvedValue(chatReply('{"make":"Toyota","year":2020}'));
+
+    await call({ system: "Rules." });
+
+    const { messages } = requestBody();
+    expect(messages[0]).toEqual({ role: "system", content: "Rules." });
+    expect(messages[1].role).toBe("user");
+  });
+
+  it("sends no system message when there are no instructions to send", async () => {
+    fetchMock.mockResolvedValue(chatReply('{"make":"Toyota","year":2020}'));
+
+    await call();
+
+    expect(requestBody().messages.map((m: { role: string }) => m.role)).toEqual(["user"]);
+  });
+});

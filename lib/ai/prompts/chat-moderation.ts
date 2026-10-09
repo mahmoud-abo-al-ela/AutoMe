@@ -15,9 +15,9 @@ import type { ChatSender } from "@/lib/ai/prompts/chat-translation";
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const chatModerationPrompt = {
-  version: "2026-09-29.1",
+  version: "2026-10-10.1",
   text: (sender: ChatSender | null) => `You review one message from a chat between a car buyer and a car dealership in
-Egypt, to protect the person receiving it. The next part is the message, as a JSON
+Egypt, to protect the person receiving it. The user's message is the chat message, as a JSON
 string.${sender ? ` It was written by the ${sender === "buyer" ? "BUYER" : "DEALERSHIP"}.` : ""}
 
 First write "reason": one short sentence on what the message does. Then "category":

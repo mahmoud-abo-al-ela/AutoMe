@@ -20,7 +20,7 @@ import {
   type ModelTask,
   type TokenUsage,
 } from "@/lib/ai/models";
-import { capacityBlock, type CapacityPriority } from "@/lib/ai/breaker";
+import { capacityBlock, recordTokens, reserveRequest, type CapacityPriority } from "@/lib/ai/breaker";
 import * as cache from "@/lib/ai/cache";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { recordAiFailure } from "@/lib/ai/telemetry";
@@ -63,6 +63,12 @@ export type AiProgressEvent =
 export interface GenerateStructuredInput<T> {
   feature: AiFeature;
   task: ModelTask;
+  /**
+   * The prompt: instructions, sent in the system role. `parts` is then only
+   * data — the listing, the question, the photos — which no text inside can
+   * promote to an instruction.
+   */
+  system?: string;
   parts: AiPart[];
   /** Validates the reply *and* generates the schema sent to the provider. */
   schema: ZodType<T>;
@@ -95,6 +101,14 @@ export interface GenerateStructuredInput<T> {
    */
   firstTokenTimeoutMs?: number;
   /**
+   * How long to wait for capacity when every key is at our own cap, instead
+   * of failing "AI busy" at once. For batch work nobody is watching — the
+   * evaluation suites, a backfill — where a per-minute cap clears on its own.
+   * Never for a request a person is waiting on. Defaults to
+   * AI_WAIT_FOR_CAPACITY_MS, which production leaves unset (no wait).
+   */
+  waitForCapacityMs?: number;
+  /**
    * Called with real progress. Setting it also streams the provider reply, so
    * "text" events arrive as the model writes rather than all at once.
    */
@@ -124,6 +138,14 @@ const DEFAULT_TIMEOUT_MS = 20_000;
  * room for the upload, the DB writes and the response.
  */
 const DEFAULT_BUDGET_MS = 45_000;
+
+/** How often a call waiting for capacity looks again. */
+const CAPACITY_POLL_MS = 5_000;
+
+function waitForCapacityFromEnv(): number {
+  const parsed = Number.parseInt(process.env.AI_WAIT_FOR_CAPACITY_MS ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
 
 function budgetFromEnv(): number {
   const raw = process.env.AI_REQUEST_BUDGET_MS;
@@ -189,6 +211,20 @@ export class QueueTimeoutError extends Error {
   constructor() {
     super("The AI model did not start answering in time");
     this.name = "QueueTimeoutError";
+  }
+}
+
+/**
+ * The key's slot could not be reserved: in-flight requests took the last of
+ * its cap since the chain was checked. Nothing was sent and nothing billed;
+ * the next key, or the next provider's, may have room.
+ */
+export class KeyCappedError extends Error {
+  readonly code = "KEY_CAPPED";
+
+  constructor() {
+    super("This key reached its cap before the request was sent");
+    this.name = "KeyCappedError";
   }
 }
 
@@ -301,6 +337,8 @@ async function meter(input: MeterInput): Promise<string | null> {
       success: input.success,
       errorCode: input.errorCode,
     });
+    const { inputTokens, outputTokens, thinkingTokens } = input.usage;
+    await recordTokens(input.ledger, inputTokens + outputTokens + thinkingTokens);
     return row?.id ?? null;
   } catch (error) {
     logError("AiUsage write failed", error);
@@ -311,6 +349,10 @@ async function meter(input: MeterInput): Promise<string | null> {
 /** Errors thrown by our own validation already carry a key; pass those through. */
 function toPublicError(error: unknown): Error {
   if (error instanceof AppError) return error;
+
+  if (error instanceof KeyCappedError) {
+    return new ServiceUnavailableError("AI capacity reached", { key: "errors.ai.busy" });
+  }
 
   if (isAbortError(error) || error instanceof QueueTimeoutError) {
     return new ServiceUnavailableError("The AI request timed out", {
@@ -326,8 +368,11 @@ function toPublicError(error: unknown): Error {
 interface AttemptInput<T> {
   entry: ChainEntry;
   apiKey: string;
+  /** Which of the provider's keys — what each attempt reserves a slot on. */
+  keyIndex: number;
   ledger: string;
   feature: AiFeature;
+  system: string | undefined;
   parts: AiPart[];
   schema: ZodType<T>;
   responseJsonSchema: unknown;
@@ -380,6 +425,8 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usage
     // Starting an attempt with no budget left would spend a request the caller
     // can never receive — the function is killed before the reply arrives.
     if (allowance <= 0) throw budgetExhausted();
+    // Before anything is sent, so a refused slot costs no request, no row.
+    if (!(await reserveRequest(providerId, input.keyIndex, input.ctx?.priority))) throw new KeyCappedError();
 
     devLog(`→ ${entryLabel(input.entry)}${attempt > 1 ? ` (retry ${attempt})` : ""}`);
     input.emit({
@@ -404,6 +451,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usage
         input.apiKey,
         {
           model,
+          system: input.system,
           parts: input.parts,
           responseJsonSchema: input.responseJsonSchema,
           temperature: input.temperature,
@@ -593,7 +641,8 @@ export async function generateStructuredWithMeta<T>(
     }
   };
   const maxAttempts = input.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
-  const deadline = Date.now() + (input.budgetMs ?? budgetFromEnv());
+  const budgetMs = input.budgetMs ?? budgetFromEnv();
+  let deadline = Date.now() + budgetMs;
 
   const keyFor = (entry: ChainEntry) =>
     input.cacheBytes === undefined
@@ -608,15 +657,12 @@ export async function generateStructuredWithMeta<T>(
   // Checked across the whole chain before any call: an answer a fallback model
   // gave earlier is still a valid answer. A hit writes no ledger row, because a
   // row means "a request reached the provider".
-  for (const entry of configured) {
-    const key = keyFor(entry);
-    if (!key) break;
-
-    const hit = cache.get<T>(key);
-    if (hit !== undefined) {
+  if (input.cacheBytes !== undefined) {
+    const hit = await cache.getFirst<T>(configured.map((entry) => keyFor(entry)!));
+    if (hit) {
       devLog(`${input.feature} ← cache`);
       emit({ type: "cached" });
-      return { data: hit, meta: metaFor(entry, null, true) };
+      return { data: hit.value, meta: metaFor(configured[hit.index], null, true) };
     }
   }
 
@@ -625,28 +671,44 @@ export async function generateStructuredWithMeta<T>(
   // its own caps; one at its limit is skipped, not fatal.
   const deadKeys = new Map<ProviderId, Set<number>>();
   const providers = [...new Set(configured.map((entry) => entry.provider))];
-  const blocks: string[] = [];
-  await Promise.all(
-    providers.map(async (provider) => {
-      const dead = new Set<number>();
-      const checks = await Promise.all(
-        keysOf(provider).map((_, index) => capacityBlock(provider, index, input.ctx?.priority))
-      );
-      checks.forEach((block, index) => {
-        if (block) {
-          dead.add(index);
-          blocks.push(block);
-        }
-      });
-      deadKeys.set(provider, dead);
-    })
-  );
+  let blocks: string[] = [];
+  const checkCapacity = async () => {
+    blocks = [];
+    await Promise.all(
+      providers.map(async (provider) => {
+        const dead = new Set<number>();
+        const checks = await Promise.all(
+          keysOf(provider).map((_, index) => capacityBlock(provider, index, input.ctx?.priority))
+        );
+        checks.forEach((block, index) => {
+          if (block) {
+            dead.add(index);
+            blocks.push(block);
+          }
+        });
+        deadKeys.set(provider, dead);
+      })
+    );
+  };
   const liveKeys = (provider: ProviderId) =>
     keysOf(provider)
       .map((_, index) => index)
       .filter((index) => !deadKeys.get(provider)!.has(index));
+  const liveChain = () => configured.filter((entry) => liveKeys(entry.provider).length > 0);
 
-  const models = configured.filter((entry) => liveKeys(entry.provider).length > 0);
+  await checkCapacity();
+  let chain = liveChain();
+  const waitUntil = Date.now() + (input.waitForCapacityMs ?? waitForCapacityFromEnv());
+  if (chain.length === 0 && Date.now() < waitUntil) {
+    while (chain.length === 0 && Date.now() < waitUntil) {
+      await new Promise((resolve) => setTimeout(resolve, Math.min(CAPACITY_POLL_MS, waitUntil - Date.now())));
+      await checkCapacity();
+      chain = liveChain();
+    }
+    // The budget is for the call, not the queue in front of it.
+    deadline = Date.now() + budgetMs;
+  }
+  const models = chain;
   if (models.length === 0) {
     // The message is developer-facing; the client renders `messageKey`.
     throw new ServiceUnavailableError(`AI capacity reached (${blocks.join("; ")})`, {
@@ -681,8 +743,10 @@ export async function generateStructuredWithMeta<T>(
         const result = await attemptModel({
           entry,
           apiKey: keysOf(entry.provider)[keyIndex],
+          keyIndex,
           ledger: ledgerId(entry.provider, keyIndex),
           feature: input.feature,
+          system: input.system,
           parts: input.parts,
           schema: input.schema,
           responseJsonSchema,
@@ -705,7 +769,7 @@ export async function generateStructuredWithMeta<T>(
         });
 
         const key = keyFor(entry);
-        if (key) cache.set(key, result.data);
+        if (key) await cache.set(key, result.data);
         devLog(
           `${input.feature} ← ${entryLabel(entry)} (${((Date.now() - attemptStarted) / 1000).toFixed(1)} s)`
         );
@@ -713,7 +777,9 @@ export async function generateStructuredWithMeta<T>(
       } catch (caught) {
         error = caught;
         lastError = caught;
-        if (isProviderUnavailableError(caught)) {
+        // A key refused us, or its cap filled while we walked: out of play for
+        // the rest of this request, and the next key may have room.
+        if (isProviderUnavailableError(caught) || caught instanceof KeyCappedError) {
           deadKeys.get(entry.provider)!.add(keyIndex);
           continue;
         }
@@ -732,6 +798,7 @@ export async function generateStructuredWithMeta<T>(
       isModelUnavailableError(error) ||
       isCapacityError(error) ||
       isProviderUnavailableError(error) ||
+      error instanceof KeyCappedError ||
       isUnreadableReply(error) ||
       error instanceof QueueTimeoutError;
     // A timeout is never retried on the same model — the provider still bills

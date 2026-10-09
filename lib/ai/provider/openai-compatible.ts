@@ -137,7 +137,10 @@ export function createOpenAiCompatibleProvider(config: OpenAiCompatibleConfig): 
         },
         body: JSON.stringify({
           model: req.model,
-          messages: [{ role: "user", content: toContent(req.parts) }],
+          messages: [
+            ...(req.system ? [{ role: "system", content: req.system }] : []),
+            { role: "user", content: toContent(req.parts) },
+          ],
           temperature: req.temperature ?? 0.2,
           ...(req.maxOutputTokens ? { max_tokens: req.maxOutputTokens } : {}),
           ...(effort ? { reasoning_effort: effort } : {}),

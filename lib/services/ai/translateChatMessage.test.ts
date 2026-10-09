@@ -35,9 +35,9 @@ describe("translateChatMessage", () => {
     await translateChatMessage(text, "ar", null, ctx);
     await translateChatMessage(text, "en", null, ctx);
     const [toAr, toEn] = generateStructured.mock.calls.map((c) => c[0]);
-    expect(toAr.parts).toHaveLength(2);
-    expect(toAr.parts[1].text).toBe(JSON.stringify(text));
-    expect(toAr.parts[0].text).not.toContain(text);
+    expect(toAr.parts).toHaveLength(1);
+    expect(toAr.parts[0].text).toBe(JSON.stringify(text));
+    expect(toAr.system).not.toContain(text);
     expect(toAr.cacheBytes).toBe(text);
     expect(toAr.promptVersion).not.toBe(toEn.promptVersion);
   });
@@ -47,8 +47,8 @@ describe("translateChatMessage", () => {
     await translateChatMessage("We can do 600k cash.", "ar", "dealership", ctx);
     await translateChatMessage("We can do 600k cash.", "ar", "buyer", ctx);
     const [dealer, buyer] = generateStructured.mock.calls.map((c) => c[0]);
-    expect(dealer.parts[0].text).toMatch(/DEALERSHIP, which is SELLING/);
-    expect(buyer.parts[0].text).toMatch(/written by the BUYER/);
+    expect(dealer.system).toMatch(/DEALERSHIP, which is SELLING/);
+    expect(buyer.system).toMatch(/written by the BUYER/);
     expect(dealer.promptVersion).not.toBe(buyer.promptVersion);
   });
 });

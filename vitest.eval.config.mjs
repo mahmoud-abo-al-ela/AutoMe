@@ -31,5 +31,11 @@ export default defineConfig({
     // One file at a time: the suites share provider caps measured per minute,
     // and parallel files only turn real answers into "AI busy".
     fileParallelism: false,
+    env: {
+      // Sequential cases outrun Google's per-minute cap within a few questions
+      // (each busy model costs a second request). Production fails fast with
+      // "AI busy"; a run nobody is watching waits for the minute to clear.
+      AI_WAIT_FOR_CAPACITY_MS: "70000",
+    },
   },
 });

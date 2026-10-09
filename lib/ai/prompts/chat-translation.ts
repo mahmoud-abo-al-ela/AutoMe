@@ -32,9 +32,9 @@ const SENDER: Record<ChatSender, string> = {
 };
 
 export const chatTranslationPrompt = {
-  version: "2026-09-29.2",
+  version: "2026-10-10.1",
   text: (to: Locale, sender: ChatSender | null) => `You translate one message from a chat between a car buyer and a car
-dealership in Egypt. The next part is the message, as a JSON string.${sender ? `
+dealership in Egypt. The user's message is the chat message, as a JSON string.${sender ? `
 ${SENDER[sender]}` : ""}
 
 Translate it into ${to === "en" ? "English" : "Arabic"} and return the translation.
