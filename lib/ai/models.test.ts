@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { modelsFor, modelFor, estimateCostMicroUsd, parseChainEntry } from "@/lib/ai/models";
+import { modelsFor, modelFor, estimateCostMicroUsd, listPriceMicroUsd, parseChainEntry } from "@/lib/ai/models";
 
 const ENV_KEYS = [
   "AI_MODELS_VISION",
@@ -150,5 +150,33 @@ describe("estimateCostMicroUsd", () => {
 
     // A missing price must never fail or inflate a request.
     expect(estimateCostMicroUsd("gemini-99-imaginary", usage)).toBe(0);
+  });
+});
+
+describe("listPriceMicroUsd", () => {
+  const usage = { inputTokens: 1_000_000, outputTokens: 100_000, thinkingTokens: 100_000, cachedTokens: 0 };
+
+  it("prices Google tokens at list price whether or not the call was billed", () => {
+    delete process.env.AI_BILLING_MODE;
+    // 1M input at 300,000 + 200k output+thinking at 2,500,000 per million.
+    expect(listPriceMicroUsd("google", "gemini-3.5-flash-lite", usage)).toBe(800_000);
+    // The ledger's billed cost stays an honest zero on the free tier.
+    expect(estimateCostMicroUsd("gemini-3.5-flash-lite", usage, "google")).toBe(0);
+  });
+
+  it("calls a model with no known price unknown, not free", () => {
+    expect(listPriceMicroUsd("google", "gemma-4-26b-a4b-it", usage)).toBeNull();
+  });
+
+  it("prices CodeCraft at the plan's rate per million tokens, when it is configured", () => {
+    delete process.env.AI_CODECRAFT_USD_PER_MTOK;
+    expect(listPriceMicroUsd("codecraft", "gpt-5.5", usage)).toBeNull();
+    process.env.AI_CODECRAFT_USD_PER_MTOK = "2";
+    try {
+      // 1.2M tokens at $2 per million.
+      expect(listPriceMicroUsd("codecraft", "gpt-5.5", usage)).toBe(2_400_000);
+    } finally {
+      delete process.env.AI_CODECRAFT_USD_PER_MTOK;
+    }
   });
 });

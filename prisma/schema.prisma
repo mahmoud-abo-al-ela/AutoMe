@@ -702,7 +702,7 @@ model AiUsage {
   userId         String?
   user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  feature  String // "carListingFromImage" | "searchFiltersFromText" | "searchFiltersFromImage"
+  feature  String // an AI_FEATURES value (lib/ai/features.ts)
   provider String @default("google")
   model    String
 
@@ -725,7 +725,10 @@ model AiUsage {
 
   @@index([organizationId, feature, createdAt]) // monthly per-org quota count
   @@index([feature, createdAt]) // per-feature reporting
-  @@index([createdAt]) // platform-wide RPD/RPM breaker, all features
+  @@index([createdAt]) // platform-wide reporting by period
+  // The breaker's ledger reads — per key (provider), per window — when Redis is
+  // not configured or fails, and the monthly token seed when it is.
+  @@index([provider, createdAt])
 }
 
 enum ServiceHistory {

@@ -1,5 +1,7 @@
 import * as repo from "@/lib/repositories/super-admin/analytics";
-import { getFailuresByCode, getUsageByFeature, getUsageByModel } from "@/lib/repositories/ai-usage";
+import { getFailuresByCode, getUsageByFeature, getUsageByModel, type ModelUsage } from "@/lib/repositories/ai-usage";
+import { listPriceMicroUsd } from "@/lib/ai/models";
+import { isProviderId } from "@/lib/ai/providers";
 import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { median, PRICE_BANDS, STALE_AFTER_DAYS, type AnalyticsPeriod, type AnalyticsQuery } from "./analytics-options";
 import { periodWindows } from "./overview";
@@ -126,11 +128,31 @@ async function ai(w: ReturnType<typeof analyticsWindows>) {
     failed: failures.reduce((sum, f) => sum + f.count, 0),
     latency,
     costMicroUsd: features.reduce((sum, f) => sum + f.costMicroUsd, 0),
+    listPrice: atListPrices(models),
     features,
     models,
     failures,
     assistant,
   };
+}
+
+/**
+ * What the period's tokens would have cost at list prices — what leaving the
+ * free tiers would cost. An estimate beside the billed cost, never instead of
+ * it; calls on a model with no known price are counted, not guessed.
+ */
+function atListPrices(models: ModelUsage[]) {
+  let microUsd = 0;
+  let unpricedCalls = 0;
+  for (const row of models) {
+    // "ledger/model", where the ledger is "provider" or "provider#n".
+    const slash = row.model.indexOf("/");
+    const provider = row.model.slice(0, slash).split("#")[0];
+    const price = isProviderId(provider) ? listPriceMicroUsd(provider, row.model.slice(slash + 1), row) : null;
+    if (price === null) unpricedCalls += row.calls;
+    else microUsd += price;
+  }
+  return { microUsd, unpricedCalls };
 }
 
 const UNHELPFUL_SHOWN = 6;

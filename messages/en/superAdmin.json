@@ -926,7 +926,9 @@
         "answer": "Answer",
         "fixedCopy": "(standard reply)",
         "viewCar": "View car"
-      }
+      },
+      "listPrice": "{value} at list prices",
+      "unpriced": "{count} calls unpriced"
     }
   },
   "auditLogs": {

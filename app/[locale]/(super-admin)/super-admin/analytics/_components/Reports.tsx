@@ -261,6 +261,8 @@ export function AiReport({ data }: { data: Of<"ai"> }) {
         ? fmt.number(ms / 1000, { style: "unit", unit: "second", unitDisplay: "narrow", maximumFractionDigits: 1 })
         : fmt.number(ms, { style: "unit", unit: "millisecond", unitDisplay: "narrow" });
   const feature = (name: string) => (t.has(`names.${name}`) ? t(`names.${name}`) : name);
+  const usd = (microUsd: number) =>
+    fmt.number(microUsd / 1_000_000, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   if (data.calls.current === 0) {
     return <p className="rounded-[20px] border border-border bg-card px-6 py-16 text-center text-caption text-muted-foreground">{t("empty")}</p>;
@@ -282,7 +284,13 @@ export function AiReport({ data }: { data: Of<"ai"> }) {
         />
         <Stat
           label={t("cost")}
-          value={<span dir="ltr">{fmt.number(data.costMicroUsd / 1_000_000, { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
+          value={<span dir="ltr">{usd(data.costMicroUsd)}</span>}
+          note={
+            <span className="text-micro text-muted-foreground">
+              {t("listPrice", { value: usd(data.listPrice.microUsd) })}
+              {data.listPrice.unpricedCalls > 0 && ` · ${t("unpriced", { count: n(data.listPrice.unpricedCalls) })}`}
+            </span>
+          }
         />
       </div>
 
