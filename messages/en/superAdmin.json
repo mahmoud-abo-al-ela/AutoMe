@@ -897,7 +897,35 @@
         "listingQA": "Answers to buyers",
         "chatTranslation": "Chat translation",
         "chatModeration": "Chat screening",
-        "weeklyDigest": "Weekly summary"
+        "weeklyDigest": "Weekly summary",
+        "evalJudge": "Evaluation judge"
+      },
+      "assistant": {
+        "title": "Listing assistant",
+        "replies": "Buyer questions",
+        "answered": "Answered",
+        "answeredOf": "{count} answered",
+        "declined": "Sent to the dealer",
+        "offTopicNote": "{count} not about the car",
+        "helpful": "Found helpful",
+        "ratedOf": "{count} rated",
+        "byModel": "Answers by model and prompt",
+        "byModelNote": "The model and prompt version that wrote each answer",
+        "noAnswers": "No answers in this period.",
+        "columns": {
+          "model": "Model",
+          "prompt": "Prompt",
+          "answers": "Answers",
+          "rated": "Rated",
+          "helpful": "Helpful"
+        },
+        "untracked": "Before tracking",
+        "unhelpful": "Latest unhelpful answers",
+        "noUnhelpful": "No answers were marked unhelpful in this period.",
+        "asked": "Asked",
+        "answer": "Answer",
+        "fixedCopy": "(standard reply)",
+        "viewCar": "View car"
       }
     }
   },

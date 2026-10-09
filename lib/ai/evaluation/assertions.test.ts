@@ -9,6 +9,7 @@ import {
   isPlausibleKilometres,
   firstLeak,
   listingText,
+  egyptianDialectWord,
 } from "@/lib/ai/evaluation/assertions";
 
 /**
@@ -131,5 +132,20 @@ describe("listingText", () => {
       featuresAr: ["f"],
     });
     for (const part of ["a", "b", "c", "d", "e", "f"]) expect(text).toContain(part);
+  });
+});
+
+describe("egyptianDialectWord", () => {
+  it("finds a colloquial word, with or without a conjunction in front", () => {
+    expect(egyptianDialectWord("مفيش حوادث مذكورة")).toBe("مفيش");
+    expect(egyptianDialectWord("السيارة متاحة ومش مستعملة كتير")).toBe("مش");
+    expect(egyptianDialectWord("العربية دي بكام؟")).toBe("العربية دي");
+  });
+
+  it("passes plain Modern Standard Arabic, including words that only contain a marker", () => {
+    expect(egyptianDialectWord("لا يوجد في الإعلان ما يشير إلى حوادث، ويمكنك سؤال التاجر.")).toBeNull();
+    // مشروع contains مش, ديزل contains دي, الذي is not اللي.
+    expect(egyptianDialectWord("محرك ديزل ضمن مشروع التاجر الذي يعمل الآن")).toBeNull();
+    expect(egyptianDialectWord("الإعلان مكتوب باللغة العربية")).toBeNull();
   });
 });

@@ -26,7 +26,7 @@ vi.mock("@/lib/repositories/ai-usage", () => ({
   countPlatformCallsSince,
 }));
 
-import { generateStructured } from "@/lib/ai/client";
+import { generateStructured, generateStructuredWithMeta, subscribeAiCalls } from "@/lib/ai/client";
 import { modelsFor } from "@/lib/ai/models";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { textPart } from "@/lib/ai/provider/types";
@@ -654,5 +654,80 @@ describe("generateStructured — reply length", () => {
     generate.mockClear();
     await call({ maxOutputTokens: 8192, cacheBytes: undefined });
     expect(generate.mock.calls[0][0].maxOutputTokens).toBe(8192);
+  });
+});
+
+describe("generateStructuredWithMeta — where a reply came from", () => {
+  const withMeta = (overrides: Record<string, unknown> = {}) =>
+    generateStructuredWithMeta({
+      feature: AI_FEATURES.carListingFromImage,
+      task: "vision",
+      parts: [textPart("prompt")],
+      schema,
+      promptVersion: "test.1",
+      ctx: { organizationId: "org-1", userId: "user-1" },
+      ...overrides,
+    });
+
+  it("names the ledger row and the model of the attempt that answered", async () => {
+    createAiUsage
+      .mockResolvedValueOnce({ id: "row-failed" })
+      .mockResolvedValueOnce({ id: "row-answered" });
+    generate
+      .mockRejectedValueOnce(httpError(404))
+      .mockResolvedValueOnce(ok('{"make":"Fiat","year":2019}'));
+
+    const { data, meta } = await withMeta();
+
+    expect(data).toEqual({ make: "Fiat", year: 2019 });
+    expect(meta).toMatchObject({ usageId: "row-answered", provider: "google", promptVersion: "test.1", cached: false });
+    expect(meta.model).toBe(createAiUsage.mock.calls[1][0].model);
+  });
+
+  it("marks a cache hit, which wrote no row", async () => {
+    createAiUsage.mockResolvedValue({ id: "row-1" });
+    generate.mockResolvedValue(ok('{"make":"Seat","year":2018}'));
+    const bytes = Buffer.from("same photo");
+
+    await withMeta({ cacheBytes: bytes });
+    const { meta } = await withMeta({ cacheBytes: bytes });
+
+    expect(meta).toMatchObject({ usageId: null, cached: true });
+  });
+
+  it("answers without a row id when the ledger write fails", async () => {
+    createAiUsage.mockRejectedValue(new Error("db down"));
+    generate.mockResolvedValue(ok('{"make":"Lada","year":2010}'));
+
+    const { data, meta } = await withMeta();
+
+    expect(data).toEqual({ make: "Lada", year: 2010 });
+    expect(meta.usageId).toBeNull();
+  });
+});
+
+describe("subscribeAiCalls", () => {
+  it("tells a listener which model answered, until it unsubscribes", async () => {
+    const heard: unknown[] = [];
+    const stop = subscribeAiCalls((c) => heard.push(c));
+    generate.mockResolvedValue(ok('{"make":"Jeep","year":2017}'));
+
+    await call();
+    stop();
+    await call();
+
+    expect(heard).toEqual([
+      expect.objectContaining({ feature: AI_FEATURES.carListingFromImage, provider: "google", cached: false }),
+    ]);
+  });
+
+  it("never lets a throwing listener cost the call", async () => {
+    const stop = subscribeAiCalls(() => {
+      throw new Error("listener bug");
+    });
+    generate.mockResolvedValue(ok('{"make":"Saab","year":2009}'));
+
+    await expect(call()).resolves.toEqual({ make: "Saab", year: 2009 });
+    stop();
   });
 });

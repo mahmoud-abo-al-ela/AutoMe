@@ -156,6 +156,12 @@ function Ai() {
         <TablePanel rows={5} />
         <BarsPanel rows={4} />
       </div>
+      {/* The listing assistant's quality section. */}
+      <Stats />
+      <div className="grid gap-5 xl:grid-cols-2">
+        <TablePanel rows={4} />
+        <TablePanel rows={4} />
+      </div>
     </>
   );
 }

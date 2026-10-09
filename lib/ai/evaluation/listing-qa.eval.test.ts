@@ -10,7 +10,8 @@ vi.hoisted(() => {
 import { answerListingQuestion, type ListingAnswer } from "@/lib/services/ai/answerListingQuestion";
 import { buildListingFacts, type ListingSource } from "@/lib/ai/grounding";
 import * as cache from "@/lib/ai/cache";
-import { containsWesternDigits, isPredominantlyArabic } from "@/lib/ai/evaluation/assertions";
+import { containsWesternDigits, egyptianDialectWord, isPredominantlyArabic } from "@/lib/ai/evaluation/assertions";
+import { failedCriteria, judge } from "@/lib/ai/evaluation/judge";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
 /**
@@ -295,4 +296,40 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
       expect(accident.answer).toMatch(/dealer/i);
     }
   });
+
+  /** What the buyer reads: the answer, or the model's own decline wording. */
+  function shownText(result: ListingAnswer): string {
+    return result.grounded ? result.answer : (result.message ?? "");
+  }
+
+  it.for(
+    (Object.keys(CASES) as CaseName[]).filter((name) => CASES[name].language === "ar")
+  )("writes Arabic in Modern Standard Arabic, never Egyptian dialect: %s", (name, t) => {
+    const text = shownText(outcome(t, name));
+    expect(egyptianDialectWord(text), text).toBeNull();
+  });
+
+  // A second model grades what assertions cannot. Advisory: these cases are
+  // reported, never a reason to fail the run (see report.ts).
+  it.for([
+    "fridayAr", "dealerInstalments", "disclosedPaint", "cheaper", "whereAr",
+    "financing", "accident", "service", "generalKnowledge",
+  ] as const)(
+    "[judge] %s",
+    { timeout: CALL_TIMEOUT },
+    async (name, t) => {
+      const result = outcome(t, name);
+      // No wording of the model's own: the buyer saw the page's fixed copy,
+      // which is not the model's to be graded on.
+      if (!shownText(result)) t.skip("the buyer saw the page's fixed copy");
+      const verdicts = await judge({
+        kind: "assistantReply",
+        question: CASES[name].question,
+        reply: shownText(result),
+        declined: !result.grounded,
+      });
+      if (verdicts === "unavailable") t.skip("every model in the chain was unavailable");
+      expect(failedCriteria(verdicts as Exclude<typeof verdicts, "unavailable">)).toEqual([]);
+    }
+  );
 });

@@ -50,6 +50,11 @@ export const AI_FEATURES = {
    * — the dealer did not ask for it — so metered and billed to no one.
    */
   weeklyDigest: "weeklyDigest",
+  /**
+   * The evaluation suites' judge grading a reply (lib/ai/evaluation/judge.ts).
+   * Never runs in production; metered like any call, billed to no one.
+   */
+  evalJudge: "evalJudge",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

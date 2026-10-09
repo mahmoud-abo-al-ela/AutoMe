@@ -11,8 +11,10 @@ import { translateListing, type ListingText } from "@/lib/services/ai";
 import * as cache from "@/lib/ai/cache";
 import {
   containsArabic,
+  egyptianDialectWord,
   isPredominantlyArabic,
 } from "@/lib/ai/evaluation/assertions";
+import { failedCriteria, judge } from "@/lib/ai/evaluation/judge";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
 /**
@@ -98,6 +100,26 @@ describe.skipIf(!enabled)("listing translation (real model)", () => {
     expect(answered(t, toArabic).features).toHaveLength(ENGLISH.features.length);
     expect(answered(t, toEnglish).features).toHaveLength(ARABIC.features.length);
   });
+
+  it("writes the Arabic version in Modern Standard Arabic, never Egyptian dialect", (t) => {
+    const out = answered(t, toArabic);
+    const text = [out.title, out.description, ...out.features].join("\n");
+    expect(egyptianDialectWord(text), text).toBeNull();
+  });
+
+  // Advisory (see report.ts): a second model checks no fact was added or lost.
+  it.for(["toArabic", "toEnglish"] as const)(
+    "[judge] %s keeps every fact",
+    { timeout: CALL_TIMEOUT },
+    async (direction, t) => {
+      const [source, out] =
+        direction === "toArabic" ? [ENGLISH, answered(t, toArabic)] : [ARABIC, answered(t, toEnglish)];
+      const text = (l: ListingText) => [l.title, l.description, ...l.features].join("\n");
+      const verdicts = await judge({ kind: "translation", source: text(source), reply: text(out) });
+      if (verdicts === "unavailable") t.skip("every model in the chain was unavailable");
+      expect(failedCriteria(verdicts as Exclude<typeof verdicts, "unavailable">)).toEqual([]);
+    }
+  );
 
   it("translates an instruction in the dealer's text instead of obeying it", (t) => {
     const out = answered(t, injected);

@@ -112,12 +112,13 @@ async function buyers(w: ReturnType<typeof analyticsWindows>) {
 
 async function ai(w: ReturnType<typeof analyticsWindows>) {
   // The usage readers take a start only; the current period runs to now.
-  const [calls, latency, features, models, failures] = await Promise.all([
+  const [calls, latency, features, models, failures, assistant] = await Promise.all([
     pair(repo.countAiCalls, w),
     repo.findAiLatency(w.current),
     getUsageByFeature(w.current.from),
     getUsageByModel(w.current.from),
     getFailuresByCode(w.current.from),
+    assistantQuality(w),
   ]);
   return {
     report: "ai" as const,
@@ -128,6 +129,40 @@ async function ai(w: ReturnType<typeof analyticsWindows>) {
     features,
     models,
     failures,
+    assistant,
+  };
+}
+
+const UNHELPFUL_SHOWN = 6;
+
+/**
+ * The listing assistant: what it did with buyers' questions, how buyers rated
+ * its answers, and which model and prompt wrote the ones they did not like.
+ */
+async function assistantQuality(w: ReturnType<typeof analyticsWindows>) {
+  const [replies, previous, ratings, byModel, unhelpful] = await Promise.all([
+    repo.countAssistantReplies(w.current),
+    repo.countAssistantReplies(w.previous),
+    repo.countAssistantRatings(w.current),
+    repo.findAssistantQualityByModel(w.current),
+    repo.findUnhelpfulAnswers(w.current, UNHELPFUL_SHOWN),
+  ]);
+  const total = (r: typeof replies) => r.answered + r.declined + r.offTopic;
+  return {
+    replies: { current: total(replies), previous: total(previous) },
+    ...replies,
+    ratings,
+    byModel,
+    unhelpful: unhelpful.map((row) => ({
+      id: row.id,
+      carId: row.carId,
+      question: row.question,
+      answer: row.answer,
+      model: row.model,
+      promptVersion: row.promptVersion,
+      ratedAt: row.ratedAt,
+      dealership: row.organization.name,
+    })),
   };
 }
 

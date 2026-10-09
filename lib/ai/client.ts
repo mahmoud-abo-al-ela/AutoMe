@@ -281,10 +281,12 @@ interface MeterInput {
  * Write one ledger row. Never throws: losing a usage row is bad, but failing a
  * dealer's upload because the ledger write failed is worse. Awaited rather than
  * detached, because a floating promise dies when the function returns.
+ *
+ * Returns the row's id, or null when it could not be written.
  */
-async function meter(input: MeterInput): Promise<void> {
+async function meter(input: MeterInput): Promise<string | null> {
   try {
-    await createAiUsage({
+    const row = await createAiUsage({
       organizationId: input.ctx?.organizationId ?? null,
       userId: input.ctx?.userId ?? null,
       feature: input.feature,
@@ -299,8 +301,10 @@ async function meter(input: MeterInput): Promise<void> {
       success: input.success,
       errorCode: input.errorCode,
     });
+    return row?.id ?? null;
   } catch (error) {
     logError("AiUsage write failed", error);
+    return null;
   }
 }
 
@@ -363,8 +367,11 @@ function budgetExhausted(): Error {
  *
  * Throws the *original* error rather than a mapped one, so the caller can still
  * tell a retired model from a broken request and move down the chain.
+ *
+ * Returns the ledger row of the attempt that answered alongside the reply, so
+ * what the reply is later judged on can be traced to the call that wrote it.
  */
-async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
+async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usageId: string | null }> {
   const { provider: providerId, model } = input.entry;
   const provider = PROVIDERS[providerId].provider;
 
@@ -388,6 +395,8 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
     let usage: TokenUsage = ZERO_USAGE;
     let success = false;
     let errorCode: string | null = null;
+    let data: T | undefined;
+    let usageId: string | null = null;
 
     try {
       const result = await callWithTimeout(
@@ -442,8 +451,9 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
         );
       }
 
+      // Returned after the `finally` below, which is what writes the row.
       success = true;
-      return validated.data;
+      data = validated.data;
     } catch (error) {
       if (errorCode === null) errorCode = errorCodeOf(error);
 
@@ -465,7 +475,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
     } finally {
       const latencyMs = Date.now() - started;
 
-      await meter({
+      usageId = await meter({
         ctx: input.ctx,
         feature: input.feature,
         provider: providerId,
@@ -489,6 +499,8 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<T> {
         });
       }
     }
+
+    if (success) return { data: data as T, usageId };
   }
 
   // Unreachable: the final attempt either returns or throws above.
@@ -506,9 +518,55 @@ function devLog(message: string) {
   if (process.env.NODE_ENV === "development") console.info(`[ai] ${message}`);
 }
 
-export async function generateStructured<T>(
+/** Where a reply came from — what feedback and evaluation are traced back to. */
+export interface AiCallMeta {
+  /** The AiUsage row of the attempt that answered; null on a cache hit or a lost row. */
+  usageId: string | null;
+  provider: ProviderId;
+  model: string;
+  promptVersion: string;
+  cached: boolean;
+}
+
+/** One answered call, as a listener sees it. */
+export type AiCallRecord = AiCallMeta & { feature: AiFeature };
+
+const callListeners = new Set<(call: AiCallRecord) => void>();
+
+/**
+ * Hear about every answered call. The evaluation suites use it to report which
+ * model answered each case — a fallback answer is a different experiment.
+ * Returns the unsubscribe. A listener that throws never costs the call.
+ */
+export function subscribeAiCalls(listener: (call: AiCallRecord) => void): () => void {
+  callListeners.add(listener);
+  return () => callListeners.delete(listener);
+}
+
+function announce(feature: AiFeature, meta: AiCallMeta) {
+  for (const listener of callListeners) {
+    try {
+      listener({ feature, ...meta });
+    } catch (error) {
+      logError("AI call listener threw; ignoring", error);
+    }
+  }
+}
+
+export async function generateStructured<T>(input: GenerateStructuredInput<T>): Promise<T> {
+  return (await generateStructuredWithMeta(input)).data;
+}
+
+/** generateStructured, plus which model answered and the ledger row it wrote. */
+export async function generateStructuredWithMeta<T>(
   input: GenerateStructuredInput<T>
-): Promise<T> {
+): Promise<{ data: T; meta: AiCallMeta }> {
+  const metaFor = (entry: ChainEntry, usageId: string | null, cached: boolean): AiCallMeta => {
+    const meta = { usageId, provider: entry.provider, model: entry.model, promptVersion: input.promptVersion, cached };
+    announce(input.feature, meta);
+    return meta;
+  };
+
   // Only providers with at least one key: an entry can ship before its key does.
   const keyring = new Map<ProviderId, string[]>();
   const keysOf = (provider: ProviderId) => {
@@ -558,7 +616,7 @@ export async function generateStructured<T>(
     if (hit !== undefined) {
       devLog(`${input.feature} ← cache`);
       emit({ type: "cached" });
-      return hit;
+      return { data: hit, meta: metaFor(entry, null, true) };
     }
   }
 
@@ -647,11 +705,11 @@ export async function generateStructured<T>(
         });
 
         const key = keyFor(entry);
-        if (key) cache.set(key, result);
+        if (key) cache.set(key, result.data);
         devLog(
           `${input.feature} ← ${entryLabel(entry)} (${((Date.now() - attemptStarted) / 1000).toFixed(1)} s)`
         );
-        return result;
+        return { data: result.data, meta: metaFor(entry, result.usageId, false) };
       } catch (caught) {
         error = caught;
         lastError = caught;

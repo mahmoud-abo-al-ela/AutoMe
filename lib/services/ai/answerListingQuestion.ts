@@ -1,4 +1,4 @@
-import { generateStructured, type AiCallerContext } from "@/lib/ai/client";
+import { generateStructuredWithMeta, type AiCallerContext, type AiCallMeta } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { citationsHold, type ListingFacts, type ListingFactKey } from "@/lib/ai/grounding";
 import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
@@ -10,9 +10,9 @@ import type { Trace } from "@/lib/utils/dev-trace";
 /**
  * What a buyer is shown: an answer the record backs, or a decline — with the
  * model's own wording for it when that wording passes declineText, and the
- * caller's fixed wording when it does not.
+ * caller's fixed wording when it does not. `meta` says which call wrote it.
  */
-export type ListingAnswer =
+export type ListingAnswer = { meta: AiCallMeta } & (
   | {
       grounded: true;
       answer: string;
@@ -25,7 +25,8 @@ export type ListingAnswer =
       standalone?: string;
     }
   /** `offTopic`: not a question about this car at all — nothing for the dealer. */
-  | { grounded: false; message?: string; offTopic?: true; standalone?: string };
+  | { grounded: false; message?: string; offTopic?: true; standalone?: string }
+);
 
 /** An earlier exchange, as the page sends it back. Context, never facts. */
 export interface PastExchange {
@@ -115,7 +116,7 @@ export async function answerListingQuestion(
 ): Promise<ListingAnswer> {
   const { trace, history = [] } = options;
   const record = JSON.stringify(facts);
-  const reply = await generateStructured({
+  const { data: reply, meta } = await generateStructuredWithMeta({
     feature: AI_FEATURES.listingQA,
     // A buyer is waiting on the page: the fast chain, not the dealer one.
     task: "textFast",
@@ -158,14 +159,14 @@ export async function answerListingQuestion(
   // shown — "test" once came back answered with an unrelated one.
   if (!reply.relevant) {
     const message = declineText(answer);
-    return message ? { grounded: false, offTopic: true, message } : { grounded: false, offTopic: true };
+    return { meta, grounded: false, offTopic: true, ...(message && { message }) };
   }
   if (!reply.grounded) {
     const message = declineText(answer);
-    return { grounded: false, ...(message && { message }), ...(standalone && { standalone }) };
+    return { meta, grounded: false, ...(message && { message }), ...(standalone && { standalone }) };
   }
   if (!answer || !holds) {
-    return { grounded: false, ...(standalone && { standalone }) };
+    return { meta, grounded: false, ...(standalone && { standalone }) };
   }
   const fieldsUsed = [...new Set(reply.fieldsUsed)];
   const actions = backedActions(facts, reply.actions ?? []);
@@ -174,6 +175,7 @@ export async function answerListingQuestion(
     trace?.step(`buttons: [${actions.join(", ")}] · cars named: [${carRefs.join(", ")}]`);
   }
   return {
+    meta,
     grounded: true,
     answer,
     fieldsUsed,

@@ -117,3 +117,27 @@ export function firstLeak(text: string, needles: string[]): string | null {
   const haystack = squash(text);
   return needles.find((needle) => haystack.includes(squash(needle))) ?? null;
 }
+
+/**
+ * Egyptian colloquial words that have no place in the product's Arabic, which
+ * is plain Modern Standard Arabic everywhere except person-to-person chat
+ * translation. Unambiguous markers only — "العربية" alone also means "Arabic",
+ * so only its colloquial "this car" phrasings are listed.
+ */
+const EGYPTIAN_DIALECT = [
+  "مفيش", "دلوقتي", "دلوقت", "أيوه", "ايوه", "لأ", "مش", "عايز", "عايزة", "عاوز", "إزاي", "ازاي",
+  "كده", "فين", "إمتى", "امتى", "اللي", "ده", "دي", "دول", "بتاع", "بتاعة", "بتاعت", "العربية دي",
+  "عربيتك", "عربيتي", "يقولك", "هيوصل", "هتلاقي",
+];
+
+const ARABIC_LETTER = "؀-ۿ";
+// Longest first, so a phrase is named before the word inside it.
+const DIALECT_PATTERNS = [...EGYPTIAN_DIALECT].sort((a, b) => b.length - a.length).map(
+  // Whole words, allowing the conjunctions و/ف in front: "ومفيش" is still مفيش.
+  (word) => [word, new RegExp(`(?<![${ARABIC_LETTER}])[وف]?${word}(?![${ARABIC_LETTER}])`)] as const
+);
+
+/** The first Egyptian colloquial word in the text, or null when it reads as MSA. */
+export function egyptianDialectWord(text: string): string | null {
+  return DIALECT_PATTERNS.find(([, pattern]) => pattern.test(text))?.[0] ?? null;
+}

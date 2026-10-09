@@ -8,16 +8,40 @@ import { cn } from "@/lib/utils";
 import { changeFrom } from "@/lib/services/super-admin/analytics-options";
 import type { Pair } from "@/lib/services/super-admin/analytics";
 
+/** Table cell styles shared by every report's tables. */
+export const th = "px-3 py-3 text-center font-semibold first:ps-5 first:text-start";
+export const td = "px-3 py-3 text-center tabular-nums first:ps-5 first:text-start";
+export const link = "font-semibold text-[#1d4e9e] underline-offset-2 hover:underline";
+
+/** A share as a whole percent, or a dash when there is nothing to share out. */
+export function usePercent() {
+  const fmt = useFormatters();
+  return (part: number, whole: number) => (whole > 0 ? fmt.number(part / whole, { style: "percent", maximumFractionDigits: 0 }) : "—");
+}
+
 /**
  * The pieces every Analytics report is built from: a titled panel, a number
  * with how it moved since the period before, and a list of labelled bars.
  */
 
-export function Panel({ title, note, children, className }: { title: string; note?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({
+  title,
+  note,
+  children,
+  className,
+  heading: Heading = "h2",
+}: {
+  title: string;
+  note?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  /** h3 for a panel inside a titled section of the report. */
+  heading?: "h2" | "h3";
+}) {
   return (
     <section className={cn("flex min-w-0 flex-col overflow-hidden rounded-[20px] border border-border bg-card", className)}>
       <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-border px-5 py-3.5">
-        <h2 className="text-body font-semibold">{title}</h2>
+        <Heading className="text-body font-semibold">{title}</Heading>
         {note && <span className="text-micro text-muted-foreground">{note}</span>}
       </header>
       {children}
