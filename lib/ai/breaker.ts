@@ -1,6 +1,6 @@
 import type { Redis } from "@upstash/redis";
 import { countPlatformCallsSince, sumProviderTokensSince } from "@/lib/repositories/ai-usage";
-import { PROVIDERS, ledgerId, type ProviderCaps, type ProviderId } from "@/lib/ai/providers";
+import { PROVIDERS, isProviderId, ledgerId, type ProviderCaps, type ProviderId } from "@/lib/ai/providers";
 import { getRedis } from "@/lib/redis";
 import { logError } from "@/lib/utils/errors";
 
@@ -255,6 +255,9 @@ export async function reserveRequest(
 export async function recordTokens(ledger: string, tokens: number): Promise<void> {
   const redis = getRedis();
   if (!redis || tokens <= 0) return;
+  // Only a provider sold by the month has a counter — no round trip for one without.
+  const provider = ledger.split("#")[0];
+  if (!isProviderId(provider) || currentCaps(provider).monthlyTokens === undefined) return;
   try {
     const key = monthKey(ledger, Date.now());
     // Only into a seeded counter: INCRBY on a missing key would start the

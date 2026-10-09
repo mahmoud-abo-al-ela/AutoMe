@@ -13,8 +13,9 @@ import { toLatinDigits } from "@/lib/utils/phone";
  *
  * Where a number may come from:
  * - the facts the answer cites — the claim it makes;
- * - the car's identity — year, make and model — which an answer names the
- *   car by without citing it ("this 2019 i10 is silver");
+ * - the car's identity — year, make and model — and the dealership's name,
+ *   which an answer names them by without citing them ("this 2019 i10 is
+ *   silver", "Auto 2000 opens at 10");
  * - the buyer's own question: "is it under 800k?" may be answered with 800k.
  * Never the conversation so far: the page sends it, so it is not evidence.
  */
@@ -33,7 +34,9 @@ const MULTIPLIERS: [RegExp, number][] = [
 ];
 
 /** "720,000", "١٢٠٬٠٠٠", "4.6", "1.25", followed by an optional multiplier word. */
-const NUMBER = /\d+(?:[,٬]\d{3})*(?:[.٫]\d+)?/g;
+// A group separator only when exactly three digits follow it: "2018,2019" is
+// two years, not 2,018,201.
+const NUMBER = /\d+(?:[,٬]\d{3}(?!\d))*(?:[.٫]\d+)?/g;
 
 /** Every number a text states, as values. Times also yield their 12-hour hour. */
 export function numbersIn(text: string): number[] {
@@ -89,7 +92,7 @@ export function unbackedNumbers(
 ): number[] {
   const allowed = [
     ...numbersOf(cited.map((key) => facts[key])),
-    ...numbersOf([facts.year, facts.make, facts.model]),
+    ...numbersOf([facts.year, facts.make, facts.model, (facts.dealership as { name?: string } | undefined)?.name]),
     ...numbersIn(question),
   ];
   return numbersIn(answer).filter((claimed) => !matches(claimed, allowed));

@@ -26,6 +26,8 @@ export async function moderateChatMessage(
     promptVersion: `${chatModerationPrompt.version}.${sender ?? "unknown"}`,
     ctx,
     cacheBytes: text,
+    // A private message between buyer and dealer: never into the shared cache.
+    privateCache: true,
     thinking: "low",
     temperature: 0,
     firstTokenTimeoutMs: 6_000,

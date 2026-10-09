@@ -33,7 +33,18 @@ describe("numbersIn", () => {
   });
 });
 
+describe("numbersIn — lists", () => {
+  it("reads a list without spaces as separate numbers, not one grouped one", () => {
+    expect(numbersIn("2018,2019")).toEqual([2018, 2019]);
+  });
+});
+
 describe("unbackedNumbers", () => {
+  it("allows digits in the dealership's name", () => {
+    const withName = { ...facts, dealership: { name: "Auto 2000" } };
+    expect(unbackedNumbers("Auto 2000 opens at 10 AM.", withName, ["workingHours"], "Hours?")).toEqual([]);
+  });
+
   it("accepts an answer whose numbers are the cited facts'", () => {
     expect(unbackedNumbers("It is listed at 720,000 EGP.", facts, ["price"], "How much?")).toEqual([]);
     expect(unbackedNumbers("السعر ٧٢٠ ألف جنيه", facts, ["price"], "بكام؟")).toEqual([]);

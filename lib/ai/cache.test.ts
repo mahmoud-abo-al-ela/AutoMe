@@ -75,3 +75,16 @@ describe("the AI response cache", () => {
     expect(await cache.get("k")).toBe(3);
   });
 });
+
+describe("private content", () => {
+  it("never writes or reads the shared cache when told not to", async () => {
+    const redis = fakeRedis();
+    redisRef.current = redis;
+    await cache.set("chat", "translated", { shared: false });
+    expect(redis.set).not.toHaveBeenCalled();
+
+    cache.clear();
+    expect(await cache.get("chat", { shared: false })).toBeUndefined();
+    expect(redis.mget).not.toHaveBeenCalled();
+  });
+});

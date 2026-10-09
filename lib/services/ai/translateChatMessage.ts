@@ -31,6 +31,8 @@ export async function translateChatMessage(
     promptVersion: `${chatTranslationPrompt.version}.${to}.${sender ?? "unknown"}`,
     ctx,
     cacheBytes: text,
+    // A private message between buyer and dealer: never into the shared cache.
+    privateCache: true,
     thinking: "low",
     temperature: 0,
     // Same reasoning as the listing assistant: the fast chain's Google

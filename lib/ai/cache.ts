@@ -72,17 +72,29 @@ function setLocal(key: string, value: unknown): void {
 }
 
 /**
+ * `shared: false` keeps a feature's replies in this process only — for
+ * private content, like a chat message between a buyer and a dealer, that has
+ * no business in a store outside the app.
+ */
+export interface CacheOptions {
+  shared?: boolean;
+}
+
+/**
  * The first of these keys that has an answer, in order, and its index — one
  * round trip for the whole chain, not one per model. A Redis failure is a
  * miss: the provider is still there.
  */
-export async function getFirst<T>(keys: string[]): Promise<{ value: T; index: number } | undefined> {
+export async function getFirst<T>(
+  keys: string[],
+  { shared = true }: CacheOptions = {}
+): Promise<{ value: T; index: number } | undefined> {
   for (const [index, key] of keys.entries()) {
     const local = getLocal<T>(key);
     if (local !== undefined) return { value: local, index };
   }
 
-  const redis = getRedis();
+  const redis = shared ? getRedis() : null;
   if (!redis || keys.length === 0) return undefined;
   try {
     const values = await redis.mget<(T | null)[]>(...keys.map((key) => PREFIX + key));
@@ -96,14 +108,14 @@ export async function getFirst<T>(keys: string[]): Promise<{ value: T; index: nu
   }
 }
 
-export async function get<T>(key: string): Promise<T | undefined> {
-  return (await getFirst<T>([key]))?.value;
+export async function get<T>(key: string, options?: CacheOptions): Promise<T | undefined> {
+  return (await getFirst<T>([key], options))?.value;
 }
 
-export async function set(key: string, value: unknown): Promise<void> {
+export async function set(key: string, value: unknown, { shared = true }: CacheOptions = {}): Promise<void> {
   setLocal(key, value);
 
-  const redis = getRedis();
+  const redis = shared ? getRedis() : null;
   if (!redis) return;
   try {
     if (JSON.stringify(value).length > MAX_SHARED_BYTES) return;

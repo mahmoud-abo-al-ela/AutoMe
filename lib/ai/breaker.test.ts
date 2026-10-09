@@ -130,3 +130,12 @@ describe("capacityBlock", () => {
     expect([...redis.store.keys()].some((k) => k.startsWith("ai:tok:"))).toBe(false);
   });
 });
+
+describe("recordTokens", () => {
+  it("makes no Redis call for a provider without a monthly allowance", async () => {
+    const exists = vi.fn(async () => 1);
+    redisRef.current = { exists, incrby: vi.fn() };
+    await recordTokens("google", 5_000);
+    expect(exists).not.toHaveBeenCalled();
+  });
+});

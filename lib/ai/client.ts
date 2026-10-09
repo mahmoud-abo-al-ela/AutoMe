@@ -80,6 +80,11 @@ export interface GenerateStructuredInput<T> {
   ctx?: AiCallerContext | null;
   /** Bytes to key the cache on. Omit to bypass the cache entirely. */
   cacheBytes?: Buffer | string;
+  /**
+   * Keep this feature's cached replies in the process, never in the shared
+   * cache: for private content such as a chat message.
+   */
+  privateCache?: boolean;
   timeoutMs?: number;
   /** Wall-clock ceiling for the whole call. Defaults to AI_REQUEST_BUDGET_MS. */
   budgetMs?: number;
@@ -658,7 +663,7 @@ export async function generateStructuredWithMeta<T>(
   // gave earlier is still a valid answer. A hit writes no ledger row, because a
   // row means "a request reached the provider".
   if (input.cacheBytes !== undefined) {
-    const hit = await cache.getFirst<T>(configured.map((entry) => keyFor(entry)!));
+    const hit = await cache.getFirst<T>(configured.map((entry) => keyFor(entry)!), { shared: !input.privateCache });
     if (hit) {
       devLog(`${input.feature} ← cache`);
       emit({ type: "cached" });
@@ -769,7 +774,7 @@ export async function generateStructuredWithMeta<T>(
         });
 
         const key = keyFor(entry);
-        if (key) await cache.set(key, result.data);
+        if (key) await cache.set(key, result.data, { shared: !input.privateCache });
         devLog(
           `${input.feature} ← ${entryLabel(entry)} (${((Date.now() - attemptStarted) / 1000).toFixed(1)} s)`
         );
