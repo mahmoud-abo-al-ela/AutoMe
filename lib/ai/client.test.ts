@@ -731,3 +731,45 @@ describe("subscribeAiCalls", () => {
     stop();
   });
 });
+
+describe("generateStructured — waiting for capacity", () => {
+  it("fails at once by default — a person is waiting", async () => {
+    countPlatformCallsSince.mockResolvedValue(100_000);
+    const started = Date.now();
+    await expect(call()).rejects.toBeInstanceOf(ServiceUnavailableError);
+    expect(Date.now() - started).toBeLessThan(1_000);
+  });
+
+  it("waits for a per-minute cap to clear when the caller can afford to", async () => {
+    vi.useFakeTimers();
+    try {
+      // Capped for the first two looks, then a slot frees up.
+      countPlatformCallsSince
+        .mockResolvedValueOnce(100_000)
+        .mockResolvedValueOnce(100_000)
+        .mockResolvedValue(0);
+      generate.mockResolvedValue(ok('{"make":"Dacia","year":2020}'));
+
+      const pending = call({ waitForCapacityMs: 60_000 });
+      await vi.advanceTimersByTimeAsync(5_000);
+      await expect(pending).resolves.toEqual({ make: "Dacia", year: 2020 });
+      expect(generate).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("gives up as busy once the wait runs out", async () => {
+    vi.useFakeTimers();
+    try {
+      countPlatformCallsSince.mockResolvedValue(100_000);
+      const pending = call({ waitForCapacityMs: 12_000 });
+      const settled = expect(pending).rejects.toBeInstanceOf(ServiceUnavailableError);
+      await vi.advanceTimersByTimeAsync(15_000);
+      await settled;
+      expect(generate).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

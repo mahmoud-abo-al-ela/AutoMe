@@ -25,11 +25,14 @@ export async function translateChatMessage(
   const reply = await generateStructured({
     feature: AI_FEATURES.chatTranslation,
     task: "textFast",
-    parts: [textPart(chatTranslationPrompt.text(to, sender)), textPart(JSON.stringify(text))],
+    system: chatTranslationPrompt.text(to, sender),
+    parts: [textPart(JSON.stringify(text))],
     schema: chatTranslationSchema,
     promptVersion: `${chatTranslationPrompt.version}.${to}.${sender ?? "unknown"}`,
     ctx,
     cacheBytes: text,
+    // A private message between buyer and dealer: never into the shared cache.
+    privateCache: true,
     thinking: "low",
     temperature: 0,
     // Same reasoning as the listing assistant: the fast chain's Google

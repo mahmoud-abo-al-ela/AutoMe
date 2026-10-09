@@ -11,6 +11,7 @@ const {
   findComparablePrices,
   recordAssistantAnswer,
   rateAssistantAnswer,
+  findRepliesForHistory,
 } = vi.hoisted(() => ({
   findCarForAssistant: vi.fn(),
   findActiveSubscription: vi.fn(),
@@ -22,6 +23,7 @@ const {
   findComparablePrices: vi.fn(),
   recordAssistantAnswer: vi.fn(),
   rateAssistantAnswer: vi.fn(),
+  findRepliesForHistory: vi.fn(),
 }));
 
 vi.mock("@/lib/repositories/car", () => ({
@@ -39,7 +41,7 @@ vi.mock("@/lib/services/ai/answerListingQuestion", () => ({
   }),
 }));
 vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion }));
-vi.mock("@/lib/repositories/assistant-answer", () => ({ recordAssistantAnswer, rateAssistantAnswer }));
+vi.mock("@/lib/repositories/assistant-answer", () => ({ recordAssistantAnswer, rateAssistantAnswer, findRepliesForHistory }));
 
 import { askAboutListing, isListingAssistantOffered, rateListingAnswer } from "@/lib/services/car/listing-assistant";
 import { NotFoundError } from "@/lib/utils/errors";
@@ -153,15 +155,14 @@ describe("askAboutListing", () => {
 
   it("files a follow-up for the dealer as the question on its own", async () => {
     answerListingQuestion.mockResolvedValue({ grounded: false, standalone: "العربية دي بكام؟" });
-    await askAboutListing("car-1", "وبكام؟", "ar", null, {
-      history: [{ question: "لونها ايه؟", answer: "أبيض." }],
-    });
+    findRepliesForHistory.mockResolvedValue([{ question: "ما لون السيارة؟", answer: "أبيض.", outcome: "ANSWERED" }]);
+    await askAboutListing("car-1", "وبكام؟", "ar", null, { historyIds: ["reply-1"] });
     expect(recordDeclinedQuestion).toHaveBeenCalledWith(
       expect.objectContaining({ question: "العربية دي بكام؟" })
     );
     // The conversation reached the model call.
     expect(answerListingQuestion.mock.calls[0][4]).toMatchObject({
-      history: [{ question: "لونها ايه؟", answer: "أبيض." }],
+      history: [{ question: "ما لون السيارة؟", answer: "أبيض." }],
     });
   });
 
@@ -383,10 +384,10 @@ describe("rating answers", () => {
     ]);
   });
 
-  it("never hands back an id to rate a decline with", async () => {
+  it("never hands back an id to rate a decline with — only one to name it by", async () => {
     recordAssistantAnswer.mockResolvedValue("decline-1");
     answerListingQuestion.mockResolvedValue({ grounded: false });
-    expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({ status: "notInListing" });
+    expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({ status: "notInListing", replyId: "decline-1" });
   });
 
   it("still answers when the answer cannot be kept, just without a rating", async () => {
@@ -411,5 +412,39 @@ describe("rating answers", () => {
     rateAssistantAnswer.mockResolvedValue(null);
     await rateListingAnswer("answer-1", false);
     expect(recordDeclinedQuestion).not.toHaveBeenCalled();
+  });
+});
+
+describe("the conversation so far", () => {
+  it("reads earlier replies back from the server, scoped to this car and the last two hours", async () => {
+    findRepliesForHistory.mockResolvedValue([
+      { question: "Has it had an accident?", answer: "", outcome: "DECLINED" },
+      { question: "What colour is it?", answer: "White.", outcome: "ANSWERED" },
+    ]);
+    await askAboutListing("car-1", "and the price?", "en", null, { historyIds: ["r1", "r2"] });
+
+    const [query] = findRepliesForHistory.mock.calls[0];
+    expect(query).toMatchObject({ ids: ["r1", "r2"], carId: "car-1" });
+    expect(Date.now() - query.since.getTime()).toBeCloseTo(2 * 60 * 60_000, -3);
+    // A decline shown as fixed copy has no stored wording; the model is told what it said.
+    expect(answerListingQuestion.mock.calls[0][4].history).toEqual([
+      { question: "Has it had an accident?", answer: "(The listing does not say; ask the dealer.)" },
+      { question: "What colour is it?", answer: "White." },
+    ]);
+  });
+
+  it("answers without the conversation when it cannot be read", async () => {
+    findRepliesForHistory.mockRejectedValue(new Error("db down"));
+    expect(await askAboutListing("car-1", "Colour?", "en", null, { historyIds: ["r1"] })).toMatchObject({
+      status: "answered",
+    });
+    expect(answerListingQuestion.mock.calls[0][4].history).toEqual([]);
+  });
+
+  it("hands back an id for every kept reply, so the page can name it next time", async () => {
+    recordAssistantAnswer.mockResolvedValue("kept-1");
+    expect(await askAboutListing("car-1", "Colour?", "en", null)).toMatchObject({ answerId: "kept-1", replyId: "kept-1" });
+    answerListingQuestion.mockResolvedValue({ grounded: false });
+    expect(await askAboutListing("car-1", "Accidents?", "en", null)).toEqual({ status: "notInListing", replyId: "kept-1" });
   });
 });

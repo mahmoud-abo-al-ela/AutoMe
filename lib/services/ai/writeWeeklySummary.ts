@@ -20,7 +20,8 @@ export async function writeWeeklySummary(
   return generateStructured({
     feature: AI_FEATURES.weeklyDigest,
     task: "text",
-    parts: [textPart(weeklySummaryPrompt.text(locale)), textPart(json)],
+    system: weeklySummaryPrompt.text(locale),
+    parts: [textPart(json)],
     schema: weeklySummarySchema,
     promptVersion: `${weeklySummaryPrompt.version}.${locale}`,
     ctx,

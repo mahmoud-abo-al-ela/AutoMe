@@ -22,6 +22,12 @@ export function textPart(text: string): AiPart {
 
 export interface ProviderRequest {
   model: string;
+  /**
+   * The instructions, sent in the provider's system role — apart from the
+   * user content, which is data. A model without a system role gets them as
+   * the first user part instead; see each provider.
+   */
+  system?: string;
   parts: AiPart[];
   /** JSON Schema for the reply. Every reply this client asks for is JSON. */
   responseJsonSchema?: unknown;

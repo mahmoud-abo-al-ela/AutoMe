@@ -31,7 +31,8 @@ export async function extractSearchFilters(
   const extraction = await generateStructured({
     feature: AI_FEATURES.searchFiltersFromImage,
     task: "visionFast",
-    parts: [image.part, textPart(imageSearchPrompt.text)],
+    system: imageSearchPrompt.text,
+    parts: [image.part],
     schema: imageSearchSchema,
     promptVersion: imageSearchPrompt.version,
     ctx,

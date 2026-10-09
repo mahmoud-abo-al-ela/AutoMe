@@ -1,6 +1,7 @@
 import { generateStructuredWithMeta, type AiCallerContext, type AiCallMeta } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { citationsHold, type ListingFacts, type ListingFactKey } from "@/lib/ai/grounding";
+import { unbackedNumbers } from "@/lib/ai/grounding-verify";
 import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
 import { listingQaSchema, type ListingQaReply } from "@/lib/ai/schemas/listing-qa";
 import { textPart } from "@/lib/ai/provider/types";
@@ -97,8 +98,9 @@ export function declineText(text: string): string | undefined {
  * Answer a buyer's question from one listing's facts, or decline.
  *
  * The model's own `grounded` flag is necessary but not sufficient: an answer
- * is shown only when it also cites at least one fact and every cited fact is
- * one this listing actually has. Anything else is a decline.
+ * is shown only when it also cites at least one fact, every cited fact is one
+ * this listing actually has, and every number it states is the record's (see
+ * unbackedNumbers). Anything else is a decline.
  *
  * A decline may carry the model's own wording — "the listing doesn't say
  * whether it's been in an accident" reads as a reply, a fixed sentence reads
@@ -120,8 +122,8 @@ export async function answerListingQuestion(
     feature: AI_FEATURES.listingQA,
     // A buyer is waiting on the page: the fast chain, not the dealer one.
     task: "textFast",
+    system: listingQaPrompt.text(language),
     parts: [
-      textPart(listingQaPrompt.text(language)),
       textPart(record),
       ...(history.length > 0 ? [textPart(JSON.stringify(history))] : []),
       textPart(JSON.stringify(question)),
@@ -165,7 +167,11 @@ export async function answerListingQuestion(
     const message = declineText(answer);
     return { meta, grounded: false, ...(message && { message }), ...(standalone && { standalone }) };
   }
-  if (!answer || !holds) {
+  // Citing a real fact is not stating it correctly: every number must be one
+  // the record holds, or the answer is withheld like one with bad citations.
+  const unbacked = unbackedNumbers(answer, facts, reply.fieldsUsed, question);
+  if (unbacked.length > 0) trace?.step(`numbers not in the record: [${unbacked.join(", ")}] → rejected`);
+  if (!answer || !holds || unbacked.length > 0) {
     return { meta, grounded: false, ...(standalone && { standalone }) };
   }
   const fieldsUsed = [...new Set(reply.fieldsUsed)];

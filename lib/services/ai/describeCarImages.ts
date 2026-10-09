@@ -25,10 +25,7 @@ export async function describeCarImages(
 ): Promise<Record<string, ImageAlt>> {
   if (photos.length === 0) return {};
 
-  const parts: AiPart[] = [
-    ...photos.map((photo) => imagePart(photo.bytes.toString("base64"), photo.mimeType)),
-    textPart(imageAltsPrompt.text(car, photos.length)),
-  ];
+  const parts: AiPart[] = photos.map((photo) => imagePart(photo.bytes.toString("base64"), photo.mimeType));
 
   // Keyed on the car as well as the bytes: the prompt names the car, so the
   // same photo under a corrected make must not be served the old description.
@@ -39,6 +36,7 @@ export async function describeCarImages(
   const reply = await generateStructured({
     feature: AI_FEATURES.carImageAltText,
     task: "visionFast",
+    system: imageAltsPrompt.text(car, photos.length),
     parts,
     schema: imageAltsSchema,
     promptVersion: imageAltsPrompt.version,

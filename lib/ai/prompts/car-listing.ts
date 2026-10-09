@@ -10,7 +10,7 @@
  * stale answer from the previous wording can never be served.
  */
 export const carListingPrompt = {
-  version: "2026-09-29.2",
+  version: "2026-10-10.1",
   text: `You are cataloguing a car — new or used — for an Egyptian dealership listing.
 
 The photos (one to three) all show the SAME car from different angles. Use all

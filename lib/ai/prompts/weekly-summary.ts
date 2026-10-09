@@ -9,9 +9,9 @@ import type { Locale } from "@/i18n/routing";
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const weeklySummaryPrompt = {
-  version: "2026-09-29.2",
+  version: "2026-10-10.1",
   text: (locale: Locale) => `You write the opening of a weekly summary email to the owner of a car dealership
-in Egypt that sells new and used cars on AutoMe. The next part is last week's
+in Egypt that sells new and used cars on AutoMe. The user's message is last week's
 figures as JSON:
 
 - carsListed: cars added to the listing last week; carsAvailable: cars for sale now

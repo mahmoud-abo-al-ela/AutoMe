@@ -35,15 +35,22 @@ function getClient(apiKey: string): GoogleGenAI {
   return client;
 }
 
+const isGemma = (model: string) => model.startsWith("gemma-");
+
 /** One provider call. No retry, no timeout, no metering — those belong to the client. */
 export async function generate(
   req: ProviderRequest,
   apiKey: string = process.env.GEMINI_API_KEY ?? ""
 ): Promise<ProviderResult> {
+  // Gemma is served through the same API without a system role — a
+  // systemInstruction is refused with a 400 — so it reads the instructions as
+  // the first user part, as every model did before the system role.
+  const inline = Boolean(req.system) && isGemma(req.model);
   const params = {
     model: req.model,
-    contents: [{ role: "user", parts: req.parts }],
+    contents: [{ role: "user", parts: inline ? [{ text: req.system! }, ...req.parts] : req.parts }],
     config: {
+      ...(req.system && !inline ? { systemInstruction: req.system } : {}),
       temperature: req.temperature ?? 0.2,
       responseMimeType: "application/json",
       ...(req.maxOutputTokens ? { maxOutputTokens: req.maxOutputTokens } : {}),
@@ -51,7 +58,7 @@ export async function generate(
       // Gemma is served through the same API without Gemini's thinking
       // controls; the setting is left off rather than risking a 400 on the
       // model meant to rescue the call.
-      ...(req.thinking === "low" && !req.model.startsWith("gemma-")
+      ...(req.thinking === "low" && !isGemma(req.model)
         ? { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } }
         : {}),
       ...(req.signal ? { abortSignal: req.signal } : {}),

@@ -75,28 +75,22 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
     setExchanges((all) => all.map((e) => (e.id === id ? { ...e, ...patch } : e)));
 
   /**
-   * What was said so far, for the model to read a follow-up by. Only real
-   * replies: small talk, errors and "unavailable" say nothing about the car.
+   * What was said so far, for the model to read a follow-up by — named by the
+   * server's id for each reply; the server reads back what it said. Only real
+   * replies carry one: small talk, errors and "unavailable" say nothing about
+   * the car.
    */
   const historyFor = (all: Exchange[]) =>
     all
       .flatMap((e) => {
         const r = e.reply;
-        const answer =
-          r?.status === "answered"
-            ? r.answer
-            : r?.status === "notInListing"
-              ? r.message || t("notInListing")
-              : r?.status === "offTopic"
-                ? r.message || t("offTopic")
-                : null;
-        return answer ? [{ question: e.question.slice(0, 300), answer: answer.slice(0, 600) }] : [];
+        return r && "replyId" in r && r.replyId ? [r.replyId] : [];
       })
       .slice(-HISTORY_SENT);
 
   const ask = useMutation({
-    mutationFn: async ({ question, history }: { id: number; question: string; history: ReturnType<typeof historyFor> }) => {
-      const response = await askListingAssistant({ carId, question, locale, history });
+    mutationFn: async ({ question, historyIds }: { id: number; question: string; historyIds: string[] }) => {
+      const response = await askListingAssistant({ carId, question, locale, historyIds });
       if (!response.success) throw response.error;
       return response.data;
     },
@@ -109,10 +103,10 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
     const trimmed = text.trim();
     if (trimmed.length < 2 || ask.isPending) return;
     const id = nextId.current++;
-    const history = historyFor(exchanges);
+    const historyIds = historyFor(exchanges);
     setExchanges((all) => [...all, { id, question: trimmed }].slice(-MAX_EXCHANGES));
     setQuestion("");
-    ask.mutate({ id, question: trimmed, history });
+    ask.mutate({ id, question: trimmed, historyIds });
   };
 
   const onSubmit = (event: FormEvent) => {

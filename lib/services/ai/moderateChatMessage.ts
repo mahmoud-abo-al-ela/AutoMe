@@ -20,11 +20,14 @@ export async function moderateChatMessage(
   return generateStructured({
     feature: AI_FEATURES.chatModeration,
     task: "textFast",
-    parts: [textPart(chatModerationPrompt.text(sender)), textPart(JSON.stringify(text))],
+    system: chatModerationPrompt.text(sender),
+    parts: [textPart(JSON.stringify(text))],
     schema: chatModerationSchema,
     promptVersion: `${chatModerationPrompt.version}.${sender ?? "unknown"}`,
     ctx,
     cacheBytes: text,
+    // A private message between buyer and dealer: never into the shared cache.
+    privateCache: true,
     thinking: "low",
     temperature: 0,
     firstTokenTimeoutMs: 6_000,

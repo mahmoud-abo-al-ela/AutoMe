@@ -85,7 +85,8 @@ export async function extractCarListing(
   const extraction = await generateStructured({
     feature: AI_FEATURES.carListingFromImage,
     task: "vision",
-    parts: [...images.map((image) => image.part), textPart(carListingPrompt.text)],
+    system: carListingPrompt.text,
+    parts: images.map((image) => image.part),
     schema: carListingSchema,
     promptVersion: carListingPrompt.version,
     ctx,

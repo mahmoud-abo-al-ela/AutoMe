@@ -126,6 +126,14 @@ describe.skipIf(!hasTestDb)("AI usage reporting (real Postgres)", () => {
       expect(rows.find((r) => r.model === "google/gemini-3.7-flash")?.calls).toBe(7);
     });
 
+    it("sums each model's tokens, for pricing them", async () => {
+      const rows = await getUsageByModel(since());
+      expect(rows.find((r) => r.model === "google/gemini-3.7-flash")).toMatchObject({
+        inputTokens: 500,
+        outputTokens: 50,
+      });
+    });
+
     it("computes percentiles that a mean would hide", async () => {
       const rows = await getUsageByModel(since());
       const main = rows.find((r) => r.model === "google/gemini-3.7-flash");

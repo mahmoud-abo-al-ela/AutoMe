@@ -37,12 +37,14 @@ export type AssistantReply =
       answer: string;
       /** For rating it; absent when it could not be kept. */
       answerId?: string;
+      /** For naming this reply as context to a follow-up; see historyIds. */
+      replyId?: string;
       actions?: AssistantAction[];
       cars?: SuggestedCar[];
     }
-  | { status: "notInListing"; message?: string }
+  | { status: "notInListing"; message?: string; replyId?: string }
   /** Not a question about this car; not filed for the dealer. */
-  | { status: "offTopic"; message?: string }
+  | { status: "offTopic"; message?: string; replyId?: string }
   /** Answered without the model — see classifyBuyerMessage. */
   | { status: "smallTalk"; kind: "greeting" | "thanks" | "noise" }
   | { status: "unavailable" };
@@ -115,9 +117,9 @@ export async function askAboutListing(
   question: string,
   locale: Locale,
   currentOrganizationId: string | null,
-  options: { trace?: Trace; history?: PastExchange[] } = {}
+  options: { trace?: Trace; historyIds?: string[] } = {}
 ): Promise<AssistantReply> {
-  const { trace, history = [] } = options;
+  const { trace, historyIds = [] } = options;
   const car = await carRepository.findCarForAssistant(carId);
   if (!car || (currentOrganizationId && car.organizationId !== currentOrganizationId)) {
     throw new NotFoundError("Car");
@@ -125,12 +127,14 @@ export async function askAboutListing(
   trace?.step(`car ✓ ${car.year} ${car.make} ${car.model} · dealership ${car.organization.name}`);
 
   const price = Number(car.price);
-  const [allowance, dealerAnswers, otherCars, marketPrices] = await Promise.all([
+  const [allowance, dealerAnswers, otherCars, marketPrices, history] = await Promise.all([
     allowanceFor(car.organizationId),
     dealerAnswersFor(car.id, car.organizationId),
     otherCarsFor(car.organizationId, car.id, price),
     marketPricesFor({ ...car, price }),
+    pastExchanges(car.id, historyIds),
   ]);
+  if (historyIds.length > 0) trace?.step(`conversation: ${history.length} of ${historyIds.length} earlier replies found`);
   if (!allowance.offered) {
     trace?.end("the dealership's plan does not include the assistant — no AI call");
     return { status: "unavailable" };
@@ -209,7 +213,7 @@ export async function askAboutListing(
     return {
       status: "answered",
       answer: reply.answer,
-      ...(answerId && { answerId }),
+      ...(answerId && { answerId, replyId: answerId }),
       ...(actions.length > 0 && { actions }),
       ...(cars.length > 0 && { cars }),
     };
@@ -217,14 +221,14 @@ export async function askAboutListing(
   // Not a question about the car: the dealer has nothing to answer.
   if (reply.offTopic) {
     trace?.end(`off-topic — not filed for the dealer: "${reply.message ?? "(fixed copy)"}"`);
-    await keep("OFF_TOPIC", reply.message ?? "");
-    return reply.message ? { status: "offTopic", message: reply.message } : { status: "offTopic" };
+    const replyId = await keep("OFF_TOPIC", reply.message ?? "");
+    return { status: "offTopic", ...(reply.message && { message: reply.message }), ...(replyId && { replyId }) };
   }
 
   trace?.step("declined → filing the question in the dealer's Buyer Questions inbox");
   // The question as it stands alone: a dealer cannot answer "وبكام؟".
   const asked = reply.standalone ?? question;
-  await Promise.all([
+  const [, replyId] = await Promise.all([
     recordForDealer({
       organizationId: car.organizationId,
       carId: car.id,
@@ -235,7 +239,36 @@ export async function askAboutListing(
     keep("DECLINED", reply.message ?? ""),
   ]);
   trace?.end(`declined + "ask the dealer": "${reply.message ?? "(fixed copy)"}"`);
-  return reply.message ? { status: "notInListing", message: reply.message } : { status: "notInListing" };
+  return { status: "notInListing", ...(reply.message && { message: reply.message }), ...(replyId && { replyId }) };
+}
+
+/** How long a page may refer back to a reply; a conversation, not an archive. */
+const HISTORY_WINDOW_MS = 2 * 60 * 60_000;
+
+/**
+ * The earlier exchanges the page names, read back from what the server kept
+ * — never text the page sends, which anyone could write. A reply shown as the
+ * page's fixed copy has no stored wording; the model is told what it said.
+ * Context only, so a failed read answers without it rather than failing.
+ */
+async function pastExchanges(carId: string, ids: string[]): Promise<PastExchange[]> {
+  if (ids.length === 0) return [];
+  try {
+    const rows = await assistantAnswerRepository.findRepliesForHistory({
+      ids,
+      carId,
+      since: new Date(Date.now() - HISTORY_WINDOW_MS),
+    });
+    return rows.map((row) => ({
+      question: row.question,
+      answer:
+        row.answer ||
+        (row.outcome === "OFF_TOPIC" ? "(Not a question about this car.)" : "(The listing does not say; ask the dealer.)"),
+    }));
+  } catch (error) {
+    logError("Loading the conversation so far failed; answering without it", error);
+    return [];
+  }
 }
 
 /**

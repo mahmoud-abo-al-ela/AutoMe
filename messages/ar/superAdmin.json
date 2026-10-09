@@ -926,7 +926,9 @@
         "answer": "الإجابة",
         "fixedCopy": "(رد ثابت)",
         "viewCar": "عرض السيارة"
-      }
+      },
+      "listPrice": "{value} بأسعار القائمة",
+      "unpriced": "{count} طلبًا بلا سعر معروف"
     }
   },
   "auditLogs": {

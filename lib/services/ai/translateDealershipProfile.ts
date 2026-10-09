@@ -27,10 +27,8 @@ export async function translateDealershipProfile(
   const translated = await generateStructured({
     feature: AI_FEATURES.dealershipProfileTranslation,
     task: "text",
-    parts: [
-      textPart(from === "en" ? dealershipProfilePrompt.toArabic : dealershipProfilePrompt.toEnglish),
-      textPart(source),
-    ],
+    system: from === "en" ? dealershipProfilePrompt.toArabic : dealershipProfilePrompt.toEnglish,
+    parts: [textPart(source)],
     schema: dealershipProfileSchema,
     promptVersion: `${dealershipProfilePrompt.version}.${from}`,
     ctx,

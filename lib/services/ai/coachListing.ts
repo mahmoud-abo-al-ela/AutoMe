@@ -34,7 +34,8 @@ export async function coachListing(
   const reply = await generateStructured({
     feature: AI_FEATURES.listingQualityCoach,
     task: "text",
-    parts: [textPart(listingCoachPrompt.text(language, issues)), textPart(data)],
+    system: listingCoachPrompt.text(language, issues),
+    parts: [textPart(data)],
     schema: listingCoachSchema,
     promptVersion: `${listingCoachPrompt.version}.${language}`,
     ctx,

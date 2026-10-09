@@ -8,10 +8,10 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const listingCoachPrompt = {
-  version: "2026-09-29.1",
+  version: "2026-10-10.1",
   text: (language: "en" | "ar", issues: string[]) =>
     `You are helping an Egyptian car dealer improve one listing before publishing it.
-The next part is the listing as JSON. Checks have flagged these issues: ${issues.join(", ")}.
+The user's message is the listing as JSON. Checks have flagged these issues: ${issues.join(", ")}.
 
 Issue meanings:
 - fewPhotos / morePhotos: the listing has too few photos.

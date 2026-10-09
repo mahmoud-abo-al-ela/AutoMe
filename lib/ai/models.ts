@@ -234,20 +234,39 @@ export function estimateCostMicroUsd(
   usage: TokenUsage,
   provider: ProviderId = "google"
 ): number {
-  // Only Google is priced. CodeCraft's plan is sold in tokens, not dollars —
+  // Only Google is billed. CodeCraft's plan is sold in tokens, not dollars —
   // the ledger's token counts are what its monthly cap reads.
   if (!isBilled() || provider !== "google") return 0;
+  return listPriceMicroUsd(provider, model, usage) ?? 0;
+}
 
-  const price = PRICES[model];
-  if (!price) return 0;
-
+function priceOf(price: ModelPrice, usage: TokenUsage): number {
   const billableInput = Math.max(0, usage.inputTokens - usage.cachedTokens);
-
   const cost =
     (billableInput * price.input +
       usage.cachedTokens * price.cached +
       (usage.outputTokens + usage.thinkingTokens) * price.output) /
     1_000_000;
-
   return Math.round(cost);
+}
+
+/**
+ * What these tokens would cost at list price, billed or not — for reading
+ * capacity in money (what moving off the free tiers would cost), never for the
+ * ledger, whose costMicroUsd stays what was actually billed. Null when the
+ * model has no known price: an unpriced model is unknown, not free.
+ *
+ * CodeCraft sells a monthly token allowance, so its "list price" is the plan's
+ * price per million tokens, from AI_CODECRAFT_USD_PER_MTOK (the plan price ÷
+ * its allowance); unset, it is unknown.
+ */
+export function listPriceMicroUsd(provider: ProviderId, model: string, usage: TokenUsage): number | null {
+  if (provider === "google") {
+    const price = PRICES[model];
+    return price ? priceOf(price, usage) : null;
+  }
+  const perMillion = Number.parseFloat(process.env.AI_CODECRAFT_USD_PER_MTOK ?? "");
+  if (!Number.isFinite(perMillion) || perMillion < 0) return null;
+  const microUsd = perMillion * 1_000_000;
+  return priceOf({ input: microUsd, output: microUsd, cached: microUsd }, usage);
 }

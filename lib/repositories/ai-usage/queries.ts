@@ -147,11 +147,16 @@ export async function getUsageByFeature(since: Date): Promise<FeatureUsage[]> {
 
 /** One row per model, with the latency percentiles a mean would hide. */
 export interface ModelUsage {
+    /** "ledger/model" — the ledger is the provider id, or "id#n" for its n-th key. */
     model: string;
     calls: number;
     failures: number;
     p50LatencyMs: number;
     p95LatencyMs: number;
+    inputTokens: number;
+    outputTokens: number;
+    thinkingTokens: number;
+    cachedTokens: number;
 }
 
 export async function getUsageByModel(since: Date): Promise<ModelUsage[]> {
@@ -165,6 +170,10 @@ export async function getUsageByModel(since: Date): Promise<ModelUsage[]> {
             failures: bigint;
             p50: number | null;
             p95: number | null;
+            input: bigint | null;
+            output: bigint | null;
+            thinking: bigint | null;
+            cached: bigint | null;
         }[]
     >`
         SELECT
@@ -172,7 +181,11 @@ export async function getUsageByModel(since: Date): Promise<ModelUsage[]> {
             COUNT(*)                                                         AS calls,
             COUNT(*) FILTER (WHERE NOT "success")                            AS failures,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY "latencyMs")         AS p50,
-            percentile_cont(0.95) WITHIN GROUP (ORDER BY "latencyMs")        AS p95
+            percentile_cont(0.95) WITHIN GROUP (ORDER BY "latencyMs")        AS p95,
+            SUM("inputTokens")                                               AS input,
+            SUM("outputTokens")                                              AS output,
+            SUM("thinkingTokens")                                            AS thinking,
+            SUM("cachedTokens")                                              AS cached
         FROM "AiUsage"
         WHERE "createdAt" >= ${since}
         GROUP BY "provider", "model"
@@ -185,6 +198,10 @@ export async function getUsageByModel(since: Date): Promise<ModelUsage[]> {
         failures: Number(row.failures),
         p50LatencyMs: Math.round(row.p50 ?? 0),
         p95LatencyMs: Math.round(row.p95 ?? 0),
+        inputTokens: Number(row.input ?? 0),
+        outputTokens: Number(row.output ?? 0),
+        thinkingTokens: Number(row.thinking ?? 0),
+        cachedTokens: Number(row.cached ?? 0),
     }));
 }
 
