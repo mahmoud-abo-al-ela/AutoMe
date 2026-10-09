@@ -342,19 +342,11 @@ export const listingQuestionSchema = z.object({
   question: z.string().trim().min(2).max(300),
   locale: z.enum(["en", "ar"]),
   /**
-   * The last few exchanges, so a follow-up ("and the price?") can be read.
-   * Sent by the browser, so untrusted: context for the model, never facts.
-   * Bounded, because every character is sent with each question.
+   * The last few replies, by id, so a follow-up ("and the price?") can be
+   * read. Ids, not text: the server reads back what it said, so a page
+   * cannot put words in the assistant's mouth. Bounded at four exchanges.
    */
-  history: z
-    .array(
-      z.object({
-        question: z.string().max(300),
-        answer: z.string().max(600),
-      })
-    )
-    .max(4)
-    .default([]),
+  historyIds: z.array(z.string().uuid()).max(4).default([]),
 });
 
 export type ListingQuestionInput = z.infer<typeof listingQuestionSchema>;
