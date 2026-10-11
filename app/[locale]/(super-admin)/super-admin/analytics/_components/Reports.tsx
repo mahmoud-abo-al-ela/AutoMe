@@ -296,10 +296,10 @@ export function AiReport({ data }: { data: Of<"ai"> }) {
 
       <Panel title={t("features")}>
         <div className="relative overflow-x-auto">
-          <table className="w-full min-w-[560px] border-collapse text-caption">
+          <table className="w-full min-w-[640px] border-collapse text-caption">
             <thead>
               <tr className="whitespace-nowrap border-b border-border bg-muted/60 text-muted-foreground">
-                {(["feature", "calls", "success", "tokensIn", "tokensOut"] as const).map((key) => (
+                {(["feature", "calls", "success", "tokensIn", "cached", "tokensOut"] as const).map((key) => (
                   <th key={key} scope="col" className={cn(th, key === "tokensOut" && "pe-5")}>
                     {t(`columns.${key}`)}
                   </th>
@@ -313,6 +313,8 @@ export function AiReport({ data }: { data: Of<"ai"> }) {
                   <td className={td}>{n(row.calls)}</td>
                   <td className={td}>{percent(row.calls - row.failures, row.calls)}</td>
                   <td className={td}>{n(row.inputTokens)}</td>
+                  {/* How much input the provider served from its prompt cache. */}
+                  <td className={td}>{percent(row.cachedTokens, row.inputTokens)}</td>
                   <td className={cn(td, "pe-5")}>{n(row.outputTokens)}</td>
                 </tr>
               ))}

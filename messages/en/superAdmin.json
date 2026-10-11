@@ -884,7 +884,8 @@
         "tokensIn": "Tokens in",
         "tokensOut": "Tokens out",
         "typical": "Typical wait",
-        "slowest": "Slowest 5%"
+        "slowest": "Slowest 5%",
+        "cached": "Cached"
       },
       "names": {
         "carListingFromImage": "Listing from photos",

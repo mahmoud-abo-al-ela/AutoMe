@@ -884,7 +884,8 @@
         "tokensIn": "الرموز الداخلة",
         "tokensOut": "الرموز الخارجة",
         "typical": "الانتظار المعتاد",
-        "slowest": "أبطأ ٥٪"
+        "slowest": "أبطأ ٥٪",
+        "cached": "من الذاكرة المؤقتة"
       },
       "names": {
         "carListingFromImage": "إعلان من الصور",

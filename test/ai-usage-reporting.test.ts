@@ -50,7 +50,7 @@ describe.skipIf(!hasTestDb)("AI usage reporting (real Postgres)", () => {
       data: [
         // Five successes on the main model with a wide latency spread, so a
         // mean and a p95 disagree.
-        row({ latencyMs: 1000, inputTokens: 100, outputTokens: 10 }),
+        row({ latencyMs: 1000, inputTokens: 100, outputTokens: 10, cachedTokens: 80 }),
         row({ latencyMs: 2000, inputTokens: 100, outputTokens: 10 }),
         row({ latencyMs: 3000, inputTokens: 100, outputTokens: 10 }),
         row({ latencyMs: 4000, inputTokens: 100, outputTokens: 10 }),
@@ -75,6 +75,11 @@ describe.skipIf(!hasTestDb)("AI usage reporting (real Postgres)", () => {
   });
 
   describe("getUsageByFeature", () => {
+    it("sums the input the provider served from its prompt cache", async () => {
+      const rows = await getUsageByFeature(since());
+      expect(rows.find((r) => r.feature === "carListingFromImage")).toMatchObject({ inputTokens: 500, cachedTokens: 80 });
+    });
+
     it("counts calls and failures per feature, busiest first", async () => {
       const rows = await getUsageByFeature(since());
 

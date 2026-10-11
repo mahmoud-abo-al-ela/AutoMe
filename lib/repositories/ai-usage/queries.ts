@@ -106,6 +106,8 @@ export interface FeatureUsage {
     inputTokens: number;
     outputTokens: number;
     thinkingTokens: number;
+    /** Input tokens the provider served from its prompt cache — a subset of inputTokens. */
+    cachedTokens: number;
     costMicroUsd: number;
 }
 
@@ -118,6 +120,7 @@ export async function getUsageByFeature(since: Date): Promise<FeatureUsage[]> {
             inputTokens: true,
             outputTokens: true,
             thinkingTokens: true,
+            cachedTokens: true,
             costMicroUsd: true,
         },
     });
@@ -140,6 +143,7 @@ export async function getUsageByFeature(since: Date): Promise<FeatureUsage[]> {
             inputTokens: row._sum.inputTokens ?? 0,
             outputTokens: row._sum.outputTokens ?? 0,
             thinkingTokens: row._sum.thinkingTokens ?? 0,
+            cachedTokens: row._sum.cachedTokens ?? 0,
             costMicroUsd: row._sum.costMicroUsd ?? 0,
         }))
         .sort((a, b) => b.calls - a.calls);
