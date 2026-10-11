@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkUser } from "@/lib/checkUser";
-import { db } from "@/lib/prisma";
+import { orgService } from "@/lib/services/super-admin";
 import { logError } from "@/lib/utils/errors";
 
 export async function GET(
@@ -16,23 +16,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const members = await db.membership.findMany({
-      where: { organizationId: id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            imageUrl: true,
-          },
-        },
-      },
-      orderBy: [
-        { role: "asc" }, // OWNER first, then ADMIN, then MEMBER
-        { createdAt: "asc" },
-      ],
-    });
+    const members = await orgService.listOrganizationMembers(id);
 
     return NextResponse.json({ members });
   } catch (error) {

@@ -1,3 +1,4 @@
+import type { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 /**
@@ -20,6 +21,82 @@ export async function findManyMembers(organizationId: string) {
       },
     },
     orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+  });
+}
+
+/**
+ * One page of a dealership's members, newest first, optionally searched by
+ * name or email, with the total.
+ */
+export async function findMembersPage({
+  organizationId,
+  search,
+  skip,
+  take,
+}: {
+  organizationId: string;
+  search?: string | null;
+  skip: number;
+  take: number;
+}) {
+  const where: Prisma.MembershipWhereInput = {
+    organizationId,
+    ...(search && {
+      user: {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { email: { contains: search, mode: "insensitive" as const } },
+        ],
+      },
+    }),
+  };
+
+  const [memberships, total] = await Promise.all([
+    db.membership.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    db.membership.count({ where }),
+  ]);
+  return { memberships, total };
+}
+
+/**
+ * A dealership's members with the user's public fields, owners first — the
+ * shape the super-admin's "sign in as" picker reads.
+ */
+export async function findMembersWithUserCard(organizationId: string) {
+  return db.membership.findMany({
+    where: { organizationId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          imageUrl: true,
+        },
+      },
+    },
+    orderBy: [
+      { role: "asc" }, // OWNER first, then ADMIN, then MEMBER
+      { createdAt: "asc" },
+    ],
   });
 }
 

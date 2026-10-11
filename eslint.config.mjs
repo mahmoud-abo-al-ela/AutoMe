@@ -48,15 +48,12 @@ const KNOWN_PRISMA_VIOLATIONS = [
   "actions/super-admin/organizations.ts",
   "actions/super-admin/plans.ts",
   "actions/super-admin/users.ts",
-  "actions/team.ts",
   "actions/test-drive.ts",
   "app/[[]locale]/org/[[]slug]/billing/page.tsx",
-  "app/api/super-admin/organizations/[[]id]/members/route.ts",
   "app/api/webhooks/clerk/route.ts",
   "lib/checkUser.ts",
   "lib/org/access.ts",
   "lib/org/resolve.ts",
-  "lib/services/dealership/users.ts",
 ];
 
 // The layers' import direction: app → actions → services → repositories, never

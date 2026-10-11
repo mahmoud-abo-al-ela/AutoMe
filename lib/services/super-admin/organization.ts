@@ -2,6 +2,7 @@ import * as orgRepo from "@/lib/repositories/super-admin/organization";
 import * as planRepo from "@/lib/repositories/super-admin/plan";
 import * as userRepo from "@/lib/repositories/super-admin/user";
 import * as membershipRepo from "@/lib/repositories/super-admin/membership";
+import * as teamRepo from "@/lib/repositories/team";
 import { sendOrganizationInvitationEmail } from "./email";
 import { AppError, ConflictError, NotFoundError, ValidationError } from "@/lib/utils/errors";
 import {
@@ -165,4 +166,12 @@ export async function checkSlug(slug: string) {
 export async function findAccountByEmail(email: string) {
   const user = await userRepo.findUserByEmail(email.trim().toLowerCase());
   return user ? { hasAccount: true, name: user.name } : { hasAccount: false, name: null };
+}
+
+/**
+ * A dealership's members, owners first, for the super-admin's "sign in as"
+ * picker (served by /api/super-admin/organizations/[id]/members).
+ */
+export async function listOrganizationMembers(organizationId: string) {
+  return teamRepo.findMembersWithUserCard(organizationId);
 }
