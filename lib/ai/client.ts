@@ -24,6 +24,7 @@ import { capacityBlock, recordTokens, reserveRequest, type CapacityPriority } fr
 import * as cache from "@/lib/ai/cache";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { recordAiFailure } from "@/lib/ai/telemetry";
+import { aiSpan } from "@/lib/ai/tracing";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
 import {
   ServiceUnavailableError,
@@ -451,24 +452,45 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usage
     let usageId: string | null = null;
 
     try {
-      const result = await callWithTimeout(
-        provider,
-        input.apiKey,
+      const result = await aiSpan(
+        "gen_ai.chat",
+        `chat ${entryLabel(input.entry)}`,
         {
-          model,
-          system: input.system,
-          parts: input.parts,
-          responseJsonSchema: input.responseJsonSchema,
-          temperature: input.temperature,
-          // Each provider maps this to its own control, or leaves it off.
-          thinking: input.thinking,
-          maxOutputTokens: input.maxOutputTokens,
-          onText: input.streaming
-            ? (text) => input.emit({ type: "text", text })
-            : undefined,
+          "gen_ai.system": providerId,
+          "gen_ai.operation.name": "chat",
+          "gen_ai.request.model": model,
+          "gen_ai.request.max_tokens": input.maxOutputTokens,
+          "gen_ai.request.temperature": input.temperature,
+          "autome.ai.feature": input.feature,
+          "autome.ai.attempt": attempt,
         },
-        allowance,
-        input.firstTokenMs
+        async (span) => {
+          const reply = await callWithTimeout(
+            provider,
+            input.apiKey,
+            {
+              model,
+              system: input.system,
+              parts: input.parts,
+              responseJsonSchema: input.responseJsonSchema,
+              temperature: input.temperature,
+              // Each provider maps this to its own control, or leaves it off.
+              thinking: input.thinking,
+              maxOutputTokens: input.maxOutputTokens,
+              onText: input.streaming
+                ? (text) => input.emit({ type: "text", text })
+                : undefined,
+            },
+            allowance,
+            input.firstTokenMs
+          );
+          span.set({
+            "gen_ai.usage.input_tokens": reply.usage.inputTokens,
+            "gen_ai.usage.output_tokens": reply.usage.outputTokens + reply.usage.thinkingTokens,
+            "gen_ai.usage.cache_read.input_tokens": reply.usage.cachedTokens,
+          });
+          return reply;
+        }
       );
       usage = result.usage;
 
@@ -614,7 +636,28 @@ export async function generateStructured<T>(input: GenerateStructuredInput<T>): 
 export async function generateStructuredWithMeta<T>(
   input: GenerateStructuredInput<T>
 ): Promise<{ data: T; meta: AiCallMeta }> {
-  const metaFor = (entry: ChainEntry, usageId: string | null, cached: boolean): AiCallMeta => {
+  return aiSpan(
+    "gen_ai.invoke",
+    `ai ${input.feature}`,
+    {
+      "autome.ai.feature": input.feature,
+      "autome.ai.task": input.task,
+      "autome.ai.prompt_version": input.promptVersion,
+    },
+    async (span) => {
+      const result = await runStructured(input);
+      span.set({
+        "gen_ai.system": result.meta.provider,
+        "gen_ai.response.model": result.meta.model,
+        "autome.ai.cached": result.meta.cached,
+      });
+      return result;
+    }
+  );
+}
+
+async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ data: T; meta: AiCallMeta }> {
+  const metaFor =(entry: ChainEntry, usageId: string | null, cached: boolean): AiCallMeta => {
     const meta = { usageId, provider: entry.provider, model: entry.model, promptVersion: input.promptVersion, cached };
     announce(input.feature, meta);
     return meta;
