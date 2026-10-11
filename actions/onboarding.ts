@@ -1,36 +1,23 @@
 "use server";
 
 import { z } from "zod";
-import { db } from "@/lib/prisma";
 import {
   saveOnboardingSession as saveSession,
   resumeOnboardingSession as resumeSession,
 } from "@/lib/services/onboarding/session";
 import { createUnpaidOrganization } from "@/lib/services/billing/signup";
-import { confirmPayment } from "@/lib/services/billing/confirm";
-import { findPaymentSummary } from "@/lib/repositories/payment";
+import { confirmSignupPaymentFor } from "@/lib/services/billing/confirm";
+import { isSlugAvailable } from "@/lib/services/onboarding";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { NotFoundError } from "@/lib/utils/errors";
-import { isValidSlug } from "@/lib/utils/slug";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { organizationSchema } from "@/lib/validations/schemas";
 import type { OrganizationInput } from "@/lib/validations/schemas";
 import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
 
 export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
-  // Not worth a query for something the create step would refuse anyway.
-  if (!isValidSlug(slug)) {
-    return createSuccessResponse({ available: false });
-  }
-
-  const existing = await db.organization.findUnique({
-    where: { slug },
-    select: { id: true },
-  });
-
-  return createSuccessResponse({ available: !existing });
+  return createSuccessResponse({ available: await isSlugAvailable(slug) });
 });
 
 /**
@@ -100,14 +87,7 @@ const paymentRefSchema = z.string().uuid();
  */
 export const confirmSignupPayment = withAuth(async (ctx, ref: string) => {
   const paymentId = validateAction(paymentRefSchema, ref);
-  const payment = await findPaymentSummary(paymentId);
-
-  // Someone else's payment reads as no payment at all.
-  if (!payment || payment.userId !== ctx.user.id || payment.purpose !== "SIGNUP") {
-    throw new NotFoundError("Payment");
-  }
-
-  const { state, payment: current } = await confirmPayment(payment);
+  const { state, payment: current } = await confirmSignupPaymentFor(ctx.user.id, paymentId);
   return createSuccessResponse({
     state,
     organizationSlug: current.organization?.slug ?? null,

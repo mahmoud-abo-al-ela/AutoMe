@@ -1,7 +1,7 @@
 import * as paymentRepo from "@/lib/repositories/payment";
 import type { PaymentSummary } from "@/lib/repositories/payment";
 import { findTransactionByReference } from "@/lib/services/paymob";
-import { logError } from "@/lib/utils/errors";
+import { NotFoundError, logError } from "@/lib/utils/errors";
 import { settlePayment } from "./settle";
 
 /**
@@ -12,7 +12,8 @@ import { settlePayment } from "./settle";
  * and settled from the answer, exactly as the callback would. The query string
  * Paymob adds to the return URL is never read: it is unsigned.
  *
- * Callers check the payment is the viewer's own before calling.
+ * confirmPayment trusts its caller to have checked the payment is the
+ * viewer's own; the two functions at the end of this file do that check.
  */
 
 export type PaymentState =
@@ -41,4 +42,28 @@ export async function confirmPayment(payment: PaymentSummary): Promise<PaymentSt
     return { state: "failed", payment: current };
   }
   return { state: "pending", payment: current };
+}
+
+/**
+ * A sign-up payment, for the person who started it. Anyone else's payment —
+ * or a payment that is not a sign-up — reads as no payment at all.
+ */
+export async function confirmSignupPaymentFor(userId: string, paymentId: string) {
+  const payment = await paymentRepo.findPaymentSummary(paymentId);
+  if (!payment || payment.userId !== userId || payment.purpose !== "SIGNUP") {
+    throw new NotFoundError("Payment");
+  }
+  return confirmPayment(payment);
+}
+
+/**
+ * A renewal or upgrade, for the dealership it pays for. Another dealership's
+ * payment — or a sign-up — reads as no payment at all.
+ */
+export async function confirmDealershipPayment(organizationId: string, paymentId: string) {
+  const payment = await paymentRepo.findPaymentSummary(paymentId);
+  if (!payment || payment.organizationId !== organizationId || payment.purpose === "SIGNUP") {
+    throw new NotFoundError("Payment");
+  }
+  return confirmPayment(payment);
 }

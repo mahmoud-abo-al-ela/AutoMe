@@ -37,7 +37,12 @@ const testDriveService = vi.hoisted(() => ({
   editTestDrive: vi.fn(),
   cancelTestDrive: vi.fn(),
 }));
-vi.mock("@/lib/services/test-drive", () => testDriveService);
+// Partial: the booking writes are mocked, but the bookable-car check runs for
+// real (on the mocked car repository), since it is what refuses a blocked viewer.
+vi.mock("@/lib/services/test-drive", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  ...testDriveService,
+}));
 
 const dealershipService = vi.hoisted(() => ({ createDealershipReview: vi.fn() }));
 vi.mock("@/lib/services/dealership", () => dealershipService);

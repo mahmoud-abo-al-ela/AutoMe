@@ -43,9 +43,6 @@ const PRISMA_BOUNDARY = {
 // green while each is moved; every new file is held to the rule as an error.
 // Remove a line when its queries move into a repository. Never add one.
 const KNOWN_PRISMA_VIOLATIONS = [
-  "actions/onboarding.ts",
-  "actions/stream-chat.ts",
-  "actions/test-drive.ts",
   "app/api/webhooks/clerk/route.ts",
   "lib/checkUser.ts",
   "lib/org/access.ts",
@@ -86,12 +83,9 @@ const LAYER = {
 // a service; never add one.
 const KNOWN_LAYER_VIOLATIONS = {
   entryPoints: [
-    "actions/billing.ts",
     "actions/buyer-questions.ts",
     "actions/cars-listing.ts",
     "actions/home.ts",
-    "actions/onboarding.ts",
-    "actions/test-drive.ts",
     "app/api/cron/backfill-image-alts/route.ts",
     "app/api/cron/backfill-question-embeddings/route.ts",
     "app/api/webhooks/clerk/route.ts",

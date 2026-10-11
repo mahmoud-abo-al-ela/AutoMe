@@ -10,8 +10,7 @@ import {
   payRenewal as payRenewalService,
   type BillingActor,
 } from "@/lib/services/billing/manage";
-import { confirmPayment } from "@/lib/services/billing/confirm";
-import { findPaymentSummary } from "@/lib/repositories/payment";
+import { confirmDealershipPayment } from "@/lib/services/billing/confirm";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
@@ -172,14 +171,10 @@ export const keepCurrentPlan = withAuth(async (ctx, organizationId: string) => {
  */
 export const confirmBillingPayment = withAuth(async (ctx, organizationId: string, ref: string) => {
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
-  const payment = await findPaymentSummary(validateAction(uuidSchema, ref));
-
-  // Another dealership's payment reads as no payment at all.
-  if (!payment || payment.organizationId !== organization.id || payment.purpose === "SIGNUP") {
-    throw new NotFoundError("Payment");
-  }
-
-  const { state, payment: current } = await confirmPayment(payment);
+  const { state, payment: current } = await confirmDealershipPayment(
+    organization.id,
+    validateAction(uuidSchema, ref)
+  );
   return createSuccessResponse({
     state,
     purpose: current.purpose,

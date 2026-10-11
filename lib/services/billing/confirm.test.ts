@@ -11,7 +11,7 @@ vi.mock("@/lib/utils/errors", async (importOriginal) => ({
 import { findPaymentSummary, type PaymentSummary } from "@/lib/repositories/payment";
 import { findTransactionByReference } from "@/lib/services/paymob";
 import { settlePayment } from "@/lib/services/billing/settle";
-import { confirmPayment } from "@/lib/services/billing/confirm";
+import { confirmDealershipPayment, confirmPayment, confirmSignupPaymentFor } from "@/lib/services/billing/confirm";
 
 const summary = (status: PaymentSummary["status"], slug: string | null = null): PaymentSummary => ({
   id: "payment-1",
@@ -68,5 +68,40 @@ describe("confirmPayment", () => {
     vi.mocked(findTransactionByReference).mockResolvedValue({ id: 9002 } as never);
     vi.mocked(findPaymentSummary).mockResolvedValue(summary("PAID", "nile-motors"));
     expect((await confirmPayment(summary("FAILED"))).state).toBe("paid");
+  });
+});
+
+describe("confirmSignupPaymentFor", () => {
+  it("confirms the person's own sign-up payment", async () => {
+    vi.mocked(findPaymentSummary).mockResolvedValue(summary("PAID", "nile-motors"));
+    expect((await confirmSignupPaymentFor("user-1", "payment-1")).state).toBe("paid");
+  });
+
+  it("reads someone else's payment, a renewal, or no payment at all as not found", async () => {
+    vi.mocked(findPaymentSummary).mockResolvedValue(summary("PAID", "nile-motors"));
+    await expect(confirmSignupPaymentFor("user-2", "payment-1")).rejects.toThrow("Payment");
+
+    vi.mocked(findPaymentSummary).mockResolvedValue({ ...summary("PAID", "nile-motors"), purpose: "RENEWAL" });
+    await expect(confirmSignupPaymentFor("user-1", "payment-1")).rejects.toThrow("Payment");
+
+    vi.mocked(findPaymentSummary).mockResolvedValue(null);
+    await expect(confirmSignupPaymentFor("user-1", "payment-1")).rejects.toThrow("Payment");
+  });
+});
+
+describe("confirmDealershipPayment", () => {
+  const renewal = { ...summary("PAID", "nile-motors"), purpose: "RENEWAL" as const };
+
+  it("confirms a renewal for the dealership it pays for", async () => {
+    vi.mocked(findPaymentSummary).mockResolvedValue(renewal);
+    expect((await confirmDealershipPayment("org-1", "payment-1")).state).toBe("paid");
+  });
+
+  it("reads another dealership's payment, or a sign-up, as not found", async () => {
+    vi.mocked(findPaymentSummary).mockResolvedValue(renewal);
+    await expect(confirmDealershipPayment("org-2", "payment-1")).rejects.toThrow("Payment");
+
+    vi.mocked(findPaymentSummary).mockResolvedValue(summary("PAID", "nile-motors"));
+    await expect(confirmDealershipPayment("org-1", "payment-1")).rejects.toThrow("Payment");
   });
 });

@@ -100,6 +100,15 @@ export async function findMembersWithUserCard(organizationId: string) {
   });
 }
 
+/** The user ids of a dealership's members. */
+export async function findMemberUserIds(organizationId: string) {
+  const memberships = await db.membership.findMany({
+    where: { organizationId },
+    select: { userId: true },
+  });
+  return memberships.map((m) => m.userId);
+}
+
 /** The dealership owner's name and email, or null when it has no owner. */
 export async function findOwnerContact(organizationId: string) {
   const ownerMembership = await db.membership.findFirst({
