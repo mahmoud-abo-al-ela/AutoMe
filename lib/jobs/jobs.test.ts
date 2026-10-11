@@ -47,6 +47,27 @@ describe("enqueue", () => {
     expect(refreshImageAlts).toHaveBeenCalledWith(CAR, "org-1", payload.caller, { rethrow: true });
   });
 
+  it("never publishes to a doubled slash when the app URL ends in one", async () => {
+    process.env.QSTASH_TOKEN = "t";
+    process.env.NEXT_PUBLIC_APP_URL = "https://autome.example/";
+    await enqueue("image-alts", payload);
+    expect(publishJSON.mock.calls[0][0].url).toBe("https://autome.example/api/jobs/image-alts");
+  });
+
+  it("falls back when a publish hangs, rather than holding the save", async () => {
+    vi.useFakeTimers();
+    try {
+      process.env.QSTASH_TOKEN = "t";
+      publishJSON.mockReturnValue(new Promise(() => {}));
+      const pending = enqueue("image-alts", payload);
+      await vi.advanceTimersByTimeAsync(2_000);
+      await pending;
+      expect(afterQueue).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("runs it after the response when QStash could not reach the app (a local URL)", async () => {
     process.env.QSTASH_TOKEN = "t";
     process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";

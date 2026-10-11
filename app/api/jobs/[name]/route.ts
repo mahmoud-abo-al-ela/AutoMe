@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { isJobName, runJob } from "@/lib/jobs/registry";
+import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
 
 /**
@@ -40,7 +41,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ nam
     const valid = await new Receiver({ currentSigningKey, nextSigningKey }).verify({
       signature,
       body,
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/api/jobs/${name}`,
+      url: jobUrl(name) ?? request.url,
       clockTolerance: 5,
     });
     if (!valid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import { Client } from "@upstash/qstash";
 import { runJob, JOBS, type JobName, type JobPayload } from "@/lib/jobs/registry";
+import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
 
 /**
@@ -10,11 +11,14 @@ import { logError } from "@/lib/utils/errors";
  * failure (an "AI busy", a timeout) is simply gone.
  *
  * Without QStash configured — local development, CI, a deploy before the
- * variables are added — or on a host QStash cannot reach, the job runs in
- * `after()` exactly as before, so nothing depends on the queue to work.
+ * variables are added — on a host QStash cannot reach, or when it does not
+ * answer, the job runs after the response exactly as before, so nothing
+ * depends on the queue to work.
  */
 
 const RETRIES = 3;
+/** Queueing sits in front of the caller's response; a slow queue is a down one. */
+const PUBLISH_TIMEOUT_MS = 2_000;
 
 let client: Client | null | undefined;
 
@@ -24,39 +28,44 @@ function qstash(): Client | null {
   return client;
 }
 
-/** Where QStash delivers; null when it could not reach us (a local URL). */
-function deliveryBase(): string | null {
-  const base = process.env.NEXT_PUBLIC_APP_URL;
-  if (!base) return null;
+/**
+ * Run the job once the response is sent — or now, where there is no response
+ * to wait for (a script, a test): `after()` only exists inside a request.
+ */
+async function runWithoutQueue<N extends JobName>(name: N, payload: JobPayload<N>): Promise<void> {
+  const run = () => runJob(name, payload).catch((error) => logError(`Job ${name} failed`, error));
   try {
-    const { hostname } = new URL(base);
-    return hostname === "localhost" || hostname.endsWith(".localhost") || hostname === "127.0.0.1" ? null : base;
+    after(run);
   } catch {
-    return null;
+    await run();
   }
 }
 
-function runAfter<N extends JobName>(name: N, payload: JobPayload<N>) {
-  after(() => runJob(name, payload).catch((error) => logError(`Job ${name} failed`, error)));
-}
-
 /**
- * Queue a job. Call it from a server action or route handler — the fallback
- * runs in that request's `after()`. The payload is validated now, so a bad
- * one fails where it was written, not minutes later in the queue.
+ * Queue a job. The payload is validated now, so a bad one fails where it was
+ * written, not minutes later in the queue.
  */
 export async function enqueue<N extends JobName>(name: N, payload: JobPayload<N>): Promise<void> {
   const body = JOBS[name].schema.parse(payload) as JobPayload<N>;
   const queue = qstash();
-  const base = deliveryBase();
-  if (!queue || !base) return runAfter(name, body);
+  const url = jobUrl(name);
+  if (!queue || !url) return runWithoutQueue(name, body);
 
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    await queue.publishJSON({ url: `${base}/api/jobs/${name}`, body, retries: RETRIES });
+    await Promise.race([
+      queue.publishJSON({ url, body, retries: RETRIES }),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error("QStash publish timed out")), PUBLISH_TIMEOUT_MS);
+      }),
+    ]);
   } catch (error) {
-    // The queue is down: do the work the old way rather than drop it.
+    // Do the work the old way rather than drop it. If a slow publish did land,
+    // the job runs twice — every job is idempotent, so that only costs a call.
     logError(`Could not queue job ${name}; running it after the response`, error);
-    runAfter(name, body);
+    await runWithoutQueue(name, body);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
