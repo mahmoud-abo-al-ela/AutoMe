@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { changeOrganizationPlan } from "@/actions/super-admin";
 import type { DealershipDetail } from "@/lib/services/super-admin/dealership-detail";
 import { BillingPayments } from "./BillingPayments";
-import { usePlanName } from "./use-plan-name";
+import { usePlanName } from "../../../../_components/use-plan-name";
 
 /**
  * The Billing tab (canvas: dealership tabs round 1, "Billing C · Plans

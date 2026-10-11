@@ -9,7 +9,7 @@ import type { DealershipDetail } from "@/lib/services/super-admin/dealership-det
 import ImpersonateModal from "../../../_components/ImpersonateModal";
 import { panel, td, th } from "./record-styles";
 import { TeamSidebar } from "./TeamSidebar";
-import { usePlanName } from "./use-plan-name";
+import { usePlanName } from "../../../../_components/use-plan-name";
 
 /**
  * The Team tab (canvas: dealership tabs round 1, "Team A · People table"):

@@ -6,7 +6,7 @@ import { formatPlanAmount } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";
 import type { DealershipDetail } from "@/lib/services/super-admin/dealership-detail";
 import { PAYMENT_TONES, panel, td, th } from "./record-styles";
-import { usePlanName } from "./use-plan-name";
+import { usePlanName } from "../../../../_components/use-plan-name";
 
 type Payment = Extract<DealershipDetail, { payments: unknown }>["payments"][number];
 
