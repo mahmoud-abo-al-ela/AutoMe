@@ -7,9 +7,6 @@ const car: CarForEmbedding = {
   year: 2020,
   bodyType: "Sedan",
   fuelType: "Gasoline",
-  transmission: "Automatic",
-  color: "White",
-  seats: 5,
   title: null,
   titleEn: "Toyota Corolla 2020",
   titleAr: "تويوتا كورولا ٢٠٢٠",
@@ -21,25 +18,24 @@ const car: CarForEmbedding = {
 };
 
 describe("carEmbeddingText", () => {
-  it("says what the car is in both languages, with the dealer's own words", () => {
-    const text = carEmbeddingText(car);
-    expect(text).toContain("2020 Toyota Corolla, Sedan, Gasoline, Automatic, White, 5 seats");
-    expect(text).toContain("تويوتا Corolla، سيدان، بنزين، أوتوماتيك، أبيض");
-    expect(text).toContain("Single owner, full service history.");
-    expect(text).toContain("مالك واحد، سجل صيانة كامل.");
-    expect(text).toContain("Rear camera, Cruise control");
+  it("says what the car is and what the dealer wrote, in both languages", () => {
+    expect(carEmbeddingText(car).split("\n")).toEqual([
+      "2020 Toyota Corolla, Sedan, Gasoline",
+      "Single owner, full service history.",
+      "مالك واحد، سجل صيانة كامل.",
+      "Rear camera, Cruise control",
+      "كاميرا خلفية",
+    ]);
   });
 
-  it("leaves out the price and anything the car does not have", () => {
-    const text = carEmbeddingText({ ...car, titleAr: null, descriptionAr: null, featuresAr: [], seats: null });
-    expect(text).not.toMatch(/undefined|null|seats/);
-    expect(text.split("\n")).toHaveLength(5);
+  it("leaves out what the car does not have, and never the word for nothing", () => {
+    const text = carEmbeddingText({ ...car, descriptionAr: null, featuresAr: [], features: [] });
+    expect(text).not.toMatch(/undefined|null/);
+    expect(text.split("\n")).toHaveLength(2);
   });
 
-  it("falls back to the original title and description when there is no English copy", () => {
-    const text = carEmbeddingText({ ...car, titleEn: null, title: "Clean Corolla", descriptionEn: null, description: "One owner." });
-    expect(text).toContain("Clean Corolla");
-    expect(text).toContain("One owner.");
+  it("falls back to the original description when there is no English copy", () => {
+    expect(carEmbeddingText({ ...car, descriptionEn: null, description: "One owner." })).toContain("One owner.");
   });
 });
 

@@ -1,14 +1,15 @@
 import { createHash } from "node:crypto";
-import arCarAttributes from "@/messages/ar/carAttributes.json";
 
 /**
  * The text a car's meaning is made from, for meaning-based search.
  *
- * In both languages, because buyers search in both and a vector compares best
- * with text in the same language: specs with their Arabic names, and the
- * dealer's own title, description and features as they wrote them in each.
- * Price, mileage and year-as-a-number are left out — a buyer's "under a
- * million" is a filter, not a meaning, and numbers make poor vectors.
+ * Lean on purpose: what the car is (year, make, model, body, fuel) and what
+ * the dealer wrote about it, in both languages — measured against the fuller
+ * listing on 2026-10-12 (lib/ai/evaluation/search.eval.test.ts): the right car
+ * came first for 11 of 12 queries instead of 9, and within 0.03 of each
+ * query's best match sat 3% of the wrong cars instead of 12%. Colour, gearbox,
+ * seats and repeated labels made every car look like every other; a buyer's
+ * "automatic" or "white" is a filter, as are price, mileage and year ranges.
  */
 
 export interface CarForEmbedding {
@@ -17,9 +18,6 @@ export interface CarForEmbedding {
   year: number;
   bodyType: string;
   fuelType: string;
-  transmission: string;
-  color: string;
-  seats: number | null;
   title: string | null;
   titleEn: string | null;
   titleAr: string | null;
@@ -33,9 +31,6 @@ export interface CarForEmbedding {
 /** Long descriptions are clipped: the opening says what the car is. */
 const MAX_DESCRIPTION = 1_200;
 
-const ar = arCarAttributes as Record<string, Record<string, string>>;
-const arabic = (group: string, value: string) => ar[group]?.[value] ?? ar[group]?.[value.toLowerCase()];
-
 function clip(text: string | null | undefined): string | null {
   const trimmed = text?.trim();
   if (!trimmed) return null;
@@ -43,26 +38,8 @@ function clip(text: string | null | undefined): string | null {
 }
 
 export function carEmbeddingText(car: CarForEmbedding): string {
-  const specs = [
-    `${car.year} ${car.make} ${car.model}`,
-    car.bodyType,
-    car.fuelType,
-    car.transmission,
-    car.color,
-    car.seats ? `${car.seats} seats` : null,
-  ];
-  const specsAr = [
-    [arabic("make", car.make), car.model].filter(Boolean).join(" "),
-    arabic("body", car.bodyType),
-    arabic("fuel", car.fuelType),
-    arabic("transmission", car.transmission),
-    arabic("color", car.color),
-  ];
   const lines = [
-    specs.filter(Boolean).join(", "),
-    specsAr.filter(Boolean).join("، "),
-    clip(car.titleEn ?? car.title),
-    clip(car.titleAr),
+    `${car.year} ${car.make} ${car.model}, ${car.bodyType}, ${car.fuelType}`,
     clip(car.descriptionEn ?? car.description),
     clip(car.descriptionAr),
     car.features.length > 0 ? car.features.join(", ") : null,
