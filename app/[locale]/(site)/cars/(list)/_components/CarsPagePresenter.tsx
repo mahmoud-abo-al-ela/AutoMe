@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { AlertCircle, Car, SearchX, SlidersHorizontal } from "lucide-react";
 import FilterPanel from "./FilterPanel";
 import CarsHero from "./CarsHero";
@@ -9,6 +9,7 @@ import ResultsSummary, { type ResultsView } from "./ResultsSummary";
 import { ActiveFilters } from "./ActiveFilters";
 import { CompareTray } from "./CompareTray";
 import { ListingRow } from "./ListingRow";
+import { SearchMatchNotice, SearchNotice } from "./SearchNotice";
 import CarCard from "@/components/CarCard";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -45,9 +46,11 @@ export const CarsPagePresenter = ({
   activeFilters,
   handlers,
   relaxedSearch,
+  searchMatch,
 }: CarsPageData) => {
   const t = useTranslations("cars");
   const fmt = useFormatters();
+  const locale = useLocale();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [view, setView] = useState<ResultsView>("grid");
   const [isDesktop, setIsDesktop] = useState(false);
@@ -125,13 +128,12 @@ export const CarsPagePresenter = ({
   } else {
     results = (
       <div className={isFetching ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"}>
-        {relaxedSearch && (
-          <p role="status" className="mb-4 flex items-start gap-2 rounded-control border border-border bg-muted/50 px-3 py-2.5 text-caption">
-            <SearchX aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <span>
-              {t.rich("states.relaxedSearch", { term: relaxedSearch, b: (chunks) => <bdi className="font-semibold">{chunks}</bdi> })}
-            </span>
-          </p>
+        {relaxedSearch ? (
+          <SearchNotice>
+            {t.rich("states.relaxedSearch", { term: relaxedSearch, b: (chunks) => <bdi className="font-semibold">{chunks}</bdi> })}
+          </SearchNotice>
+        ) : (
+          searchMatch && <SearchMatchNotice searchMatch={searchMatch} locale={locale} />
         )}
         {showList ? (
           <ul className="flex flex-col gap-4">
