@@ -25,6 +25,7 @@ import * as cache from "@/lib/ai/cache";
 import { createAiUsage } from "@/lib/repositories/ai-usage";
 import { recordAiFailure } from "@/lib/ai/telemetry";
 import { aiSpan } from "@/lib/ai/tracing";
+import { recordTrace, shouldTrace } from "@/lib/ai/trace";
 import { parseFirstJsonObject } from "@/lib/utils/ai-json";
 import {
   ServiceUnavailableError,
@@ -395,6 +396,9 @@ interface AttemptInput<T> {
   modelCount: number;
   emit: (event: AiProgressEvent) => void;
   streaming: boolean;
+  /** Whether this call keeps a trace of what it was given and replied. */
+  traced: boolean;
+  promptVersion: string;
 }
 
 /** How long an attempt may take: its own ceiling, or whatever budget is left. */
@@ -450,6 +454,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usage
     let errorCode: string | null = null;
     let data: T | undefined;
     let usageId: string | null = null;
+    let replyText: string | undefined;
 
     try {
       const result = await aiSpan(
@@ -493,6 +498,7 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usage
         }
       );
       usage = result.usage;
+      replyText = result.text;
 
       let parsed: Record<string, unknown>;
       try {
@@ -561,6 +567,20 @@ async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usage
         success,
         errorCode,
       });
+
+      // A reply worth reading later: one that answered, or one that came back
+      // and could not be used. A refusal or a timeout has nothing to read.
+      if (input.traced && (success || errorCode === "INVALID_JSON" || errorCode === "SCHEMA_REJECTED")) {
+        await recordTrace({
+          aiUsageId: usageId,
+          feature: input.feature,
+          model: entryLabel(input.entry),
+          promptVersion: input.promptVersion,
+          parts: input.parts,
+          output: replyText,
+          errorCode: success ? null : errorCode,
+        });
+      }
 
       if (!success) {
         // Aggregates live in the ledger; this is only so a captured exception
@@ -657,6 +677,8 @@ export async function generateStructuredWithMeta<T>(
 }
 
 async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ data: T; meta: AiCallMeta }> {
+  // Decided once per call, so every attempt of a traced call is traced.
+  const traced = shouldTrace(input.feature, Boolean(input.privateCache));
   const metaFor =(entry: ChainEntry, usageId: string | null, cached: boolean): AiCallMeta => {
     const meta = { usageId, provider: entry.provider, model: entry.model, promptVersion: input.promptVersion, cached };
     announce(input.feature, meta);
@@ -814,6 +836,8 @@ async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ da
           modelCount: models.length,
           emit,
           streaming: Boolean(input.onProgress),
+          traced,
+          promptVersion: input.promptVersion,
         });
 
         const key = keyFor(entry);

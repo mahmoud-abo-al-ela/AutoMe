@@ -925,7 +925,12 @@
         "asked": "Asked",
         "answer": "Answer",
         "fixedCopy": "(standard reply)",
-        "viewCar": "View car"
+        "viewCar": "View car",
+        "trace": {
+          "open": "What the model saw",
+          "input": "Given (redacted)",
+          "output": "Replied"
+        }
       },
       "listPrice": "{value} at list prices",
       "unpriced": "{count} calls unpriced"

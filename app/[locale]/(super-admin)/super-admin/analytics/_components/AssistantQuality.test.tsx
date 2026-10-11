@@ -37,6 +37,7 @@ const DATA: Data = {
       promptVersion: "2026-09-29.2.ar",
       ratedAt: new Date(Date.now() - 3 * 60 * 60_000),
       dealership: "Nile Motors",
+      trace: { input: '{"make":"Hyundai"}\n---\n"هل تعرضت السيارة لحادث؟"', output: '{"grounded":true,"answer":"لا."}' },
     },
   ],
 };
@@ -61,6 +62,9 @@ describe("AssistantQuality", () => {
     expect(html).toContain('href="/cars/car-1"');
     // A decline in the dealer's fixed copy has no stored wording.
     expect(html).toContain("(standard reply)");
+    // The trace behind the 👎, behind a disclosure.
+    expect(html).toContain("What the model saw");
+    expect(html).toContain("&quot;grounded&quot;:true");
   });
 
   it("renders in Arabic with every string translated", () => {

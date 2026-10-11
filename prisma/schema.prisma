@@ -731,6 +731,27 @@ model AiUsage {
   @@index([provider, createdAt])
 }
 
+// What one AI call was given and what it replied, for debugging a bad answer —
+// a 👎 links here through AssistantAnswer.aiUsageId. Sampled (every listing
+// assistant answer, a share of the rest), redacted (emails and phone numbers
+// replaced), and kept 14 days. The prompt itself is not stored: promptVersion
+// names it in git. Photos are a digest, never bytes. Private chat features are
+// never traced.
+model AiTrace {
+  id            String   @id @default(uuid())
+  aiUsageId     String?  // the attempt's ledger row; no relation, like AssistantAnswer
+  feature       String
+  model         String   // "provider/model"
+  promptVersion String
+  input         String   // the data parts, redacted
+  output        String?  // the raw reply, redacted; null when none came back
+  errorCode     String?  // INVALID_JSON / SCHEMA_REJECTED for a reply that failed
+  createdAt     DateTime @default(now())
+
+  @@index([aiUsageId])
+  @@index([createdAt]) // retention
+}
+
 enum ServiceHistory {
   FULL // every service documented
   PARTIAL

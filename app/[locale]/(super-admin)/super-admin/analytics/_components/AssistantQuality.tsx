@@ -138,6 +138,29 @@ export function AssistantQuality({ data }: { data: Assistant }) {
                           </>
                         )}
                       </p>
+                      {row.trace && (
+                        <details className="text-micro">
+                          <summary className={cn(link, "w-fit cursor-pointer")}>{t("trace.open")}</summary>
+                          <dl className="mt-2 flex flex-col gap-2">
+                            <div>
+                              <dt className="font-semibold text-muted-foreground">{t("trace.input")}</dt>
+                              <dd>
+                                <pre dir="auto" className="max-h-56 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-muted p-2 font-mono">
+                                  {row.trace.input}
+                                </pre>
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="font-semibold text-muted-foreground">{t("trace.output")}</dt>
+                              <dd>
+                                <pre dir="auto" className="max-h-40 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-muted p-2 font-mono">
+                                  {row.trace.output ?? "—"}
+                                </pre>
+                              </dd>
+                            </div>
+                          </dl>
+                        </details>
+                      )}
                     </li>
                   ))}
                 </ul>

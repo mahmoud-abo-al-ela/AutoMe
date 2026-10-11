@@ -17,6 +17,8 @@ vi.mock("@/lib/ai/provider/gemini", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/ai/provider/gemini")>()),
   generate,
 }));
+// Traces are covered in client.trace.test.ts; here they would only reach for a database.
+vi.mock("@/lib/repositories/ai-trace", () => ({ createAiTrace: async () => {}, pruneAiTraces: async () => 0 }));
 vi.mock("@/lib/repositories/ai-usage", () => ({
   createAiUsage: async () => ({ id: "row-1" }),
   countPlatformCallsSince: async () => 0,
