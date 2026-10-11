@@ -198,7 +198,7 @@ describe("askAboutListing", () => {
       { question: "Instalments?", answer: "Yes.", appliesToAllCars: true },
     ]);
     await askAboutListing("car-1", "Can I pay monthly?", "en", null);
-    expect(findAnswersForCar).toHaveBeenCalledWith("car-1", "org-dealer");
+    expect(findAnswersForCar).toHaveBeenCalledWith("car-1", "org-dealer", 21);
     expect(answerListingQuestion.mock.calls[0][1].dealerAnswers).toEqual([
       { question: "Instalments?", answer: "Yes.", about: "allCars" },
     ]);

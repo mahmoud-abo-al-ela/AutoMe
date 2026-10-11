@@ -84,18 +84,27 @@ describe("dealerAnswersForQuestion", () => {
     expect(embedTexts).not.toHaveBeenCalled();
   });
 
-  it("ranks by meaning once there are more than fit", async () => {
+  it("spends no embedding when exactly as many as fit", async () => {
     repo.findAnswersForCar.mockResolvedValue(answers(20));
+    expect(await dealerAnswersForQuestion({ carId: "car", organizationId: "org", question: "x" })).toHaveLength(20);
+    expect(embedTexts).not.toHaveBeenCalled();
+  });
+
+  it("ranks by meaning once there are more than fit, with a short wait for the buyer", async () => {
+    repo.findAnswersForCar.mockResolvedValue(answers(21));
     repo.findAnswersForCarByMeaning.mockResolvedValue(answers(20).reverse());
     const result = await dealerAnswersForQuestion({ carId: "car", organizationId: "org", question: "instalments?" });
     expect(result[0].question).toBe("q19");
     expect(repo.findAnswersForCarByMeaning).toHaveBeenCalledWith(expect.objectContaining({ vector: VECTOR, take: 20 }));
+    expect(embedTexts.mock.calls[0][0].timeoutMs).toBe(2_000);
   });
 
-  it("falls back to the most-asked when the question cannot be embedded", async () => {
-    repo.findAnswersForCar.mockResolvedValue(answers(20));
+  it("falls back to the most-asked that fit when the question cannot be embedded", async () => {
+    repo.findAnswersForCar.mockResolvedValue(answers(21));
     embedTexts.mockRejectedValue(new ServiceUnavailableError("busy"));
-    expect((await dealerAnswersForQuestion({ carId: "car", organizationId: "org", question: "x" }))[0].question).toBe("q0");
+    const result = await dealerAnswersForQuestion({ carId: "car", organizationId: "org", question: "x" });
+    expect(result[0].question).toBe("q0");
+    expect(result).toHaveLength(20);
   });
 });
 

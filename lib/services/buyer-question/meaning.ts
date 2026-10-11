@@ -33,6 +33,9 @@ export const FOLD_SIMILARITY = 0.9;
  */
 export const SUGGEST_SIMILARITY = 0.78;
 
+/** How long a buyer's answer may wait on embedding their question. */
+const BUYER_WAIT_MS = 2_000;
+
 /** Platform housekeeping: metered, billed to no one, behind dealers' own AI. */
 const CALLER = { organizationId: null, userId: null, priority: "low" as const };
 
@@ -80,8 +83,10 @@ export async function embedQuestion(questionId: string, organizationId: string):
  * answers this. If the question cannot be embedded, most-asked it is.
  */
 export async function dealerAnswersForQuestion(input: { carId: string; organizationId: string; question: string }) {
-  const answers = await buyerQuestionRepository.findAnswersForCar(input.carId, input.organizationId);
-  if (answers.length < MAX_DEALER_ANSWERS) return answers;
+  // One more than fit, to know whether any were left out at all.
+  const answers = await buyerQuestionRepository.findAnswersForCar(input.carId, input.organizationId, MAX_DEALER_ANSWERS + 1);
+  if (answers.length <= MAX_DEALER_ANSWERS) return answers;
+  const mostAsked = answers.slice(0, MAX_DEALER_ANSWERS);
 
   try {
     const { model, vectors } = await embedTexts({
@@ -89,6 +94,8 @@ export async function dealerAnswersForQuestion(input: { carId: string; organizat
       texts: [input.question],
       task: "similarity",
       ctx: { ...CALLER, organizationId: input.organizationId },
+      // A buyer is waiting: a slow embedding falls back to most-asked fast.
+      timeoutMs: BUYER_WAIT_MS,
     });
     return await buyerQuestionRepository.findAnswersForCarByMeaning({
       carId: input.carId,
@@ -99,7 +106,7 @@ export async function dealerAnswersForQuestion(input: { carId: string; organizat
     });
   } catch (error) {
     logError("Ranking dealer answers by meaning failed; using the most-asked", error);
-    return answers;
+    return mostAsked;
   }
 }
 

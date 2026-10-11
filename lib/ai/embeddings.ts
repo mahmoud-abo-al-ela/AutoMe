@@ -48,6 +48,8 @@ export interface EmbedInput {
   texts: string[];
   task: EmbeddingTask;
   ctx?: AiCallerContext | null;
+  /** Per-request ceiling; shorter where a person is waiting. */
+  timeoutMs?: number;
 }
 
 export interface Embeddings {
@@ -113,7 +115,7 @@ async function embedBatch(input: EmbedInput, model: string, texts: string[]): Pr
           "autome.ai.feature": input.feature,
           "autome.ai.texts": texts.length,
         },
-        () => provider.embed!({ model, texts, dimensions: EMBEDDING_DIMENSIONS, task: input.task, signal: AbortSignal.timeout(TIMEOUT_MS) }, apiKey)
+        () => provider.embed!({ model, texts, dimensions: EMBEDDING_DIMENSIONS, task: input.task, signal: AbortSignal.timeout(input.timeoutMs ?? TIMEOUT_MS) }, apiKey)
       );
       return vectors;
     } catch (error) {

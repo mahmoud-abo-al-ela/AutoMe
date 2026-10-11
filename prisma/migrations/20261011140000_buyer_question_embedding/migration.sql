@@ -9,6 +9,8 @@ CREATE EXTENSION IF NOT EXISTS vector;
 ALTER TABLE "BuyerQuestion" ADD COLUMN "embedding" vector(768),
 ADD COLUMN "embeddingModel" TEXT;
 
--- Cosine distance, approximate nearest neighbours. Prisma cannot declare an
--- HNSW index, so it lives here only (see the BuyerQuestion model).
-CREATE INDEX "BuyerQuestion_embedding_idx" ON "BuyerQuestion" USING hnsw ("embedding" vector_cosine_ops);
+-- No vector index, on purpose. Every search is filtered to one car or one
+-- dealership first, and pgvector's approximate (HNSW) index applies a filter
+-- *after* picking its nearest candidates platform-wide — a dealership's own
+-- questions would silently drop out as the table grows. Filtered, the sets are
+-- a dealership's questions: small enough for an exact scan.

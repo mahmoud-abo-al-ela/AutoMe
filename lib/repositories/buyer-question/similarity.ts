@@ -65,16 +65,23 @@ export async function findNearestEarlierQuestion(input: {
  */
 export async function foldQuestionInto(input: { fromId: string; intoId: string; organizationId: string }): Promise<boolean> {
   return db.$transaction(async (tx) => {
-    const from = await tx.buyerQuestion.findFirst({
+    const [from, into] = await Promise.all([
+      tx.buyerQuestion.findFirst({
+        where: { id: input.fromId, organizationId: input.organizationId, status: "OPEN" },
+        select: { askCount: true, lastAskedAt: true },
+      }),
+      tx.buyerQuestion.findFirst({
+        where: { id: input.intoId, organizationId: input.organizationId },
+        select: { lastAskedAt: true },
+      }),
+    ]);
+    if (!from || !into) return false;
+    // Deleted only if it is still open at the moment of deleting: a dealer
+    // who answers it while this runs keeps their answer, and nothing folds.
+    const { count } = await tx.buyerQuestion.deleteMany({
       where: { id: input.fromId, organizationId: input.organizationId, status: "OPEN" },
-      select: { askCount: true, lastAskedAt: true },
     });
-    if (!from) return false;
-    const into = await tx.buyerQuestion.findFirst({
-      where: { id: input.intoId, organizationId: input.organizationId },
-      select: { lastAskedAt: true },
-    });
-    if (!into) return false;
+    if (count === 0) return false;
     await tx.buyerQuestion.update({
       where: { id: input.intoId },
       data: {
@@ -82,7 +89,6 @@ export async function foldQuestionInto(input: { fromId: string; intoId: string; 
         lastAskedAt: from.lastAskedAt > into.lastAskedAt ? from.lastAskedAt : into.lastAskedAt,
       },
     });
-    await tx.buyerQuestion.delete({ where: { id: input.fromId } });
     return true;
   });
 }
