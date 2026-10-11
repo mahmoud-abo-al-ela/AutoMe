@@ -104,6 +104,12 @@ describe.skipIf(!hasTestDb)("hybrid car search (real Postgres + pgvector)", () =
     expect(names(await search({ search: "family" }))).toEqual(["corolla"]);
   });
 
+  it("searches by words alone when the meaning query fails, rather than failing the page", async () => {
+    // A vector of the wrong length makes pgvector refuse the query.
+    const result = await search({ search: "family", meaning: { vector: [1, 2, 3], model: MODEL } });
+    expect(names(result)).toEqual(["corolla"]);
+  });
+
   it("returns nothing for a meaning no car is near, rather than every car", async () => {
     const result = await search({ search: "zzqx", meaning: { vector: v(400), model: MODEL } });
     expect(result.pagination.total).toBe(0);
