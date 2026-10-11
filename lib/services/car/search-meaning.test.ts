@@ -13,7 +13,7 @@ import { ServiceUnavailableError } from "@/lib/utils/errors";
 beforeEach(() => {
   vi.clearAllMocks();
   embedTexts.mockResolvedValue({ model: "gemini-embedding-2", vectors: [[0.5]] });
-  findManyCars.mockResolvedValue({ cars: [], pagination: {} });
+  findManyCars.mockResolvedValue({ cars: [], pagination: { total: 0 } });
 });
 
 describe("searchMeaning", () => {
@@ -49,5 +49,34 @@ describe("getCars", () => {
   it("leaves a search without text to the plain listing", async () => {
     await getCars({ make: "Kia", meaning: { vector: [9], model: "forged" } } as never, {});
     expect(findManyCars.mock.calls[0][0].meaning).toBeNull();
+  });
+});
+
+describe("getCars — words that found nothing beside the buyer's filters", () => {
+  const page = (total: number) => ({ cars: Array.from({ length: total }, (_, i) => ({ id: `c${i}` })), pagination: { total } });
+
+  it("shows what the filters find instead, and says which words were set aside", async () => {
+    findManyCars.mockResolvedValueOnce(page(0)).mockResolvedValueOnce(page(3));
+    const result = await getCars({ search: "family", bodyType: "SUV", maxPrice: 1_500_000 }, {});
+
+    expect(result).toMatchObject({ relaxedSearch: "family", pagination: { total: 3 } });
+    expect(findManyCars.mock.calls[1][0]).toMatchObject({ search: undefined, meaning: null, bodyType: "SUV", maxPrice: 1_500_000 });
+  });
+
+  it("never widens a plain search with nothing else to go on", async () => {
+    findManyCars.mockResolvedValueOnce(page(0));
+    expect(await getCars({ search: "corola" }, {})).toMatchObject({ relaxedSearch: null });
+    expect(findManyCars).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the words when they found cars", async () => {
+    findManyCars.mockResolvedValueOnce(page(2));
+    expect(await getCars({ search: "family", bodyType: "SUV" }, {})).toMatchObject({ relaxedSearch: null });
+    expect(findManyCars).toHaveBeenCalledTimes(1);
+  });
+
+  it("says nothing was set aside when the filters find nothing either", async () => {
+    findManyCars.mockResolvedValueOnce(page(0)).mockResolvedValueOnce(page(0));
+    expect(await getCars({ search: "family", bodyType: "SUV" }, {})).toMatchObject({ relaxedSearch: null, pagination: { total: 0 } });
   });
 });

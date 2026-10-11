@@ -44,6 +44,7 @@ export const CarsPagePresenter = ({
   optionsLoading,
   activeFilters,
   handlers,
+  relaxedSearch,
 }: CarsPageData) => {
   const t = useTranslations("cars");
   const fmt = useFormatters();
@@ -124,6 +125,14 @@ export const CarsPagePresenter = ({
   } else {
     results = (
       <div className={isFetching ? "pointer-events-none opacity-60 transition-opacity" : "transition-opacity"}>
+        {relaxedSearch && (
+          <p role="status" className="mb-4 flex items-start gap-2 rounded-control border border-border bg-muted/50 px-3 py-2.5 text-caption">
+            <SearchX aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <span>
+              {t.rich("states.relaxedSearch", { term: relaxedSearch, b: (chunks) => <bdi className="font-semibold">{chunks}</bdi> })}
+            </span>
+          </p>
+        )}
         {showList ? (
           <ul className="flex flex-col gap-4">
             {cars.map((car, i) => (
