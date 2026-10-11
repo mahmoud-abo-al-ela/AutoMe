@@ -20,8 +20,7 @@ lib/repositories/**               data access — the only layer that touches Pr
   - actions and route handlers reach data through a service, not a repository;
   - nothing in `lib/` imports from `app`, `actions`, `components` or `hooks`;
   - repositories never import services.
-  Files that predate the rule are listed in `KNOWN_LAYER_VIOLATIONS` in `eslint.config.mjs`;
-  that list, like the Prisma one below, only shrinks.
+  No file is exempt; a new crossing is a lint error. Put the code in the right layer.
 - **Only `lib/repositories/**` (and `lib/prisma.ts`) may import `@/lib/prisma` or import
   values from `@/lib/generated/prisma`.** `import type` from the generated client is fine
   anywhere. ESLint enforces this; files that predate the rule are listed by name in

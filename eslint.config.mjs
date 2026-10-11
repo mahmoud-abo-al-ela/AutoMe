@@ -43,7 +43,6 @@ const PRISMA_BOUNDARY = {
 // green while each is moved; every new file is held to the rule as an error.
 // Remove a line when its queries move into a repository. Never add one.
 const KNOWN_PRISMA_VIOLATIONS = [
-  "app/api/webhooks/clerk/route.ts",
   "lib/checkUser.ts",
   "lib/org/access.ts",
   "lib/org/resolve.ts",
@@ -78,20 +77,8 @@ const LAYER = {
   ),
 };
 
-// Files that already crossed a layer when the direction was enforced
-// (2026-10-11), reported as warnings. Remove a line when the file goes through
-// a service; never add one.
-const KNOWN_LAYER_VIOLATIONS = {
-  entryPoints: [
-    "actions/buyer-questions.ts",
-    "actions/cars-listing.ts",
-    "actions/home.ts",
-    "app/api/cron/backfill-image-alts/route.ts",
-    "app/api/cron/backfill-question-embeddings/route.ts",
-    "app/api/webhooks/clerk/route.ts",
-  ],
-};
-
+// No file is exempt: every crossing that predated the rule was moved behind a
+// service (2026-10-11). A new one is an error — fix it, don't list it.
 const UI_FILES = ["app/**", "components/**", "hooks/**"];
 const ENTRY_POINT_FILES = ["actions/**", "app/api/**"];
 const UI_LAYER = [LAYER.repositories("Pages and components"), LAYER.serverOnly];
@@ -154,10 +141,6 @@ const eslintConfig = [
   {
     files: ["lib/repositories/**"],
     rules: { "no-restricted-syntax": ["error", LAYER.ui, LAYER.services] },
-  },
-  {
-    files: KNOWN_LAYER_VIOLATIONS.entryPoints,
-    rules: { "no-restricted-syntax": ["warn", ...ENTRY_POINT_LAYER] },
   },
   {
     // Tests reach into any layer to set up and assert.

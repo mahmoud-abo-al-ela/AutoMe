@@ -1,7 +1,5 @@
 "use server";
-import * as carRepository from "@/lib/repositories/car";
-import { withMarketPositions } from "@/lib/services/car/market-price";
-import type { SerializedCar } from "@/lib/utils/serializers";
+import { getFeaturedCars as findFeaturedCars } from "@/lib/services/car/storefront";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
@@ -10,20 +8,10 @@ import { validateAction } from "@/lib/middleware/with-validation";
 import { describedSearchSchema } from "@/lib/validations/schemas";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
-export const getFeaturedCars = withErrorHandling(async (limit = 4) => {
+export const getFeaturedCars = withErrorHandling(async (limit: number = 4) => {
   const organization = await getCurrentOrganization();
 
-  const result = await carRepository.findManyCars(
-    {
-      featured: true,
-      onlyAvailable: true,
-      ...(organization?.id && { organizationId: organization.id }),
-    },
-    { page: 1, limit }
-  );
-
-  // findManyCars only ever serializes real rows; see getCars.
-  return createSuccessResponse(await withMarketPositions(result.cars as SerializedCar[]));
+  return createSuccessResponse(await findFeaturedCars(organization?.id ?? null, limit));
 });
 
 /**
