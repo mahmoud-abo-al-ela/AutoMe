@@ -10,14 +10,3 @@ export async function createMembership(data: Prisma.MembershipUncheckedCreateInp
     data,
   });
 }
-
-export async function findUserMembershipInOrganization(userId: string, organizationId: string) {
-  return db.user.findUnique({
-    where: { id: userId },
-    include: {
-      memberships: {
-        where: { organizationId },
-      },
-    },
-  });
-}

@@ -15,7 +15,7 @@ import { exportActivity } from "@/actions/super-admin";
 import { PLATFORM_ACTIVITY_PER_PAGE, platformActivityQueryString } from "@/lib/services/super-admin/platform-activity-options";
 import type { PlatformActivity, PlatformActivityEntry, PlatformActivitySource } from "@/lib/services/super-admin/platform-activity";
 import { downloadCsv } from "../../organizations/_components/use-dealership-display";
-import { Pager } from "../../organizations/[id]/_components/RecordTabs";
+import { Pager } from "../../_components/Pager";
 import { ActivityToolbar } from "./ActivityToolbar";
 import { useActivityDisplay } from "./use-activity-display";
 

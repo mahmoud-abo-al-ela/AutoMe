@@ -1,52 +1,17 @@
 "use server";
 
 import { revalidateLocalized } from "@/lib/utils/revalidate";
-import * as impersonationService from "@/lib/services/super-admin/impersonation";
-import { auditHelpers } from "@/lib/services/audit/audit";
+import { endImpersonation as endSession } from "@/lib/services/impersonation";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
-import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
-import { validateAction } from "@/lib/middleware/with-validation";
-import { startImpersonationSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 
 /**
- * Start an impersonation session
- */
-export const startImpersonation = withSuperAdmin(
-  async (admin, organizationId: string, targetUserId: string) => {
-    await enforceRateLimit();
-    const validated = validateAction(startImpersonationSchema, {
-      organizationId,
-      targetUserId,
-    });
-    organizationId = validated.organizationId;
-    targetUserId = validated.targetUserId;
-
-    const { session } = await impersonationService.startImpersonation(
-      organizationId,
-      targetUserId,
-      admin.id
-    );
-
-    // Audit through the service layer (captures request metadata + retention);
-    // no direct db access from the action layer.
-    await auditHelpers.logImpersonationStarted(session, admin.email);
-
-    revalidateLocalized("/super-admin/impersonation");
-    return createSuccessResponse({
-      session,
-      orgSlug: session.organization.slug,
-    });
-  }
-);
-
-/**
- * End an impersonation session
+ * End a support session from the super-admin sessions list — anyone's, not
+ * only the caller's. Sessions start from the dealership page (actions/impersonation.ts);
+ * both go through lib/services/impersonation, which records the end in the audit log.
  */
 export const endImpersonation = withSuperAdmin(async (admin, sessionId: string) => {
-  const session = await impersonationService.endImpersonation(sessionId);
-
-  await auditHelpers.logImpersonationEnded(session, admin.email);
+  await endSession(sessionId, admin.email);
 
   revalidateLocalized("/super-admin/impersonation");
   return createSuccessResponse(null, "Support session ended");

@@ -1,7 +1,7 @@
 // Super Admin Actions - Re-exports for backward compatibility
 export { updateUserRole } from "./users";
 export { updatePlanSettings } from "./plans";
-export { startImpersonation, endImpersonation } from "./impersonation";
+export { endImpersonation } from "./impersonation";
 export {
   createOrganization,
   updateOrganizationStatus,

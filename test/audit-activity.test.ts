@@ -92,7 +92,7 @@ describe.skipIf(!hasTestDb)("audit activity (real Postgres)", () => {
     expect(row?.metadata).toMatchObject({ userAgent: "vitest" });
   });
 
-  it("records a super-admin action exactly as given, with no request context or retention", async () => {
+  it("records a super-admin action with the request's context, kept forever", async () => {
     const row = await recordAdminAuditEntry({
       action: "ORG_UPDATED",
       entityType: "ORGANIZATION",
@@ -102,9 +102,13 @@ describe.skipIf(!hasTestDb)("audit activity (real Postgres)", () => {
       organizationId: OTHER_ORG,
       metadata: { isActive: true },
     });
-    expect(row).toMatchObject({ retainUntil: null, impersonatedBy: null, metadata: { isActive: true } });
-    expect(row.metadata).not.toHaveProperty("userAgent");
-    await db.auditLog.delete({ where: { id: row.id } });
+    expect(row).toMatchObject({ retainUntil: null, impersonatedBy: null, metadata: { isActive: true, userAgent: "vitest" } });
+    await db.auditLog.delete({ where: { id: row!.id } });
+  });
+
+  it("does not fail a super-admin action whose audit entry cannot be written", async () => {
+    const entry = { action: "NOT_AN_ACTION", entityType: "ORGANIZATION", entityId: OTHER_ORG } as never;
+    await expect(recordAdminAuditEntry(entry)).resolves.toBeNull();
   });
 
   it("shows a dealership only its own entries, and names only its own cars and members", async () => {
