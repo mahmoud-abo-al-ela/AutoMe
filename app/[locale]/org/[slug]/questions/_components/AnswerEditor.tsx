@@ -12,6 +12,9 @@ const MAX_ANSWER = 500;
 
 export type AnswerDraft = { answer: string; allCars: boolean };
 
+/** An answer the dealer gave on another car to a question that means the same. */
+export type AnswerSuggestion = { question: string; answer: string; appliesToAllCars: boolean };
+
 type Props = {
   initial: AnswerDraft;
   /** Every change, so the text outlives the editor closing or another row opening. */
@@ -24,6 +27,7 @@ type Props = {
   onClose: () => void;
   isPending: boolean;
   autoFocus?: boolean;
+  suggestion?: AnswerSuggestion | null;
 };
 
 /**
@@ -40,6 +44,7 @@ export function AnswerEditor({
   onClose,
   isPending,
   autoFocus,
+  suggestion,
 }: Props) {
   const t = useTranslations("org.buyerQuestions.editor");
   const fmt = useFormatters();
@@ -59,6 +64,26 @@ export function AnswerEditor({
 
   return (
     <div className="flex flex-col gap-2.5 sm:ms-[78px]">
+      {suggestion && suggestion.answer !== answer.trim() && (
+        <section aria-label={t("suggestion.title")} className="flex flex-col gap-2 rounded-control border border-border bg-muted/50 px-3 py-2.5 text-caption">
+          <p className="font-semibold">{t("suggestion.title")}</p>
+          <p className="text-muted-foreground">
+            <bdi>{suggestion.question}</bdi>
+          </p>
+          <p>
+            <bdi>{suggestion.answer}</bdi>
+          </p>
+          <Button
+            variant="outline-strong"
+            size="control"
+            className="h-9 w-fit border bg-field"
+            disabled={isPending}
+            onClick={() => setAnswer(suggestion.answer.slice(0, MAX_ANSWER))}
+          >
+            {t("suggestion.use")}
+          </Button>
+        </section>
+      )}
       <div className="flex items-baseline justify-between gap-3">
         <label htmlFor={`${id}-answer`} className="text-caption font-semibold">
           {t("label")}

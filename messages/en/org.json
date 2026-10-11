@@ -548,7 +548,11 @@
       "allCars": "Use this answer for every car",
       "hintCar": "The assistant tells buyers who ask about this car, in their own language.",
       "hintAll": "The assistant tells buyers who ask about any of your cars, in their own language.",
-      "count": "{used} of {max}"
+      "count": "{used} of {max}",
+      "suggestion": {
+        "title": "You answered a similar question on another car",
+        "use": "Use this answer"
+      }
     },
     "actions": {
       "answer": "Answer",

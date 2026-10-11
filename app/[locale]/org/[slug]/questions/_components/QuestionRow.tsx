@@ -145,6 +145,7 @@ export function QuestionRow({ question, isOpen, isPending, autoFocus, draft, onD
           onClose={onClose}
           isPending={isPending}
           autoFocus={autoFocus}
+          suggestion={status === "OPEN" ? question.suggestion : null}
         />
       )}
     </li>
