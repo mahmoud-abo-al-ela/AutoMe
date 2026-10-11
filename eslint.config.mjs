@@ -101,7 +101,6 @@ const LAYER = {
 // (2026-10-11), reported as warnings. Remove a line when the file goes through
 // a service; never add one.
 const KNOWN_LAYER_VIOLATIONS = {
-  ui: ["app/sitemap.ts"],
   entryPoints: [
     "actions/billing.ts",
     "actions/buyer-questions.ts",
@@ -177,10 +176,6 @@ const eslintConfig = [
   {
     files: ["lib/repositories/**"],
     rules: { "no-restricted-syntax": ["error", LAYER.ui, LAYER.services] },
-  },
-  {
-    files: KNOWN_LAYER_VIOLATIONS.ui,
-    rules: { "no-restricted-syntax": ["warn", ...UI_LAYER] },
   },
   {
     files: KNOWN_LAYER_VIOLATIONS.entryPoints,
