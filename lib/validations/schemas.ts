@@ -329,6 +329,13 @@ export const listingReviewSchema = z.object({
 });
 
 
+// ============ DESCRIBED SEARCH ============
+
+/** A buyer's description of the car they want, from the hero search. Sent to the model. */
+export const describedSearchSchema = z.object({
+  query: z.string().trim().min(2).max(200),
+});
+
 // ============ LISTING ASSISTANT ============
 
 /**
