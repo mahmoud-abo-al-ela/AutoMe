@@ -6,15 +6,23 @@ import { Link } from "@/i18n/navigation";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 
-/** Previous, numbered and next page links, for a tab with more than one page. */
+/**
+ * Previous, numbered and next page links, for a list or tab with more than one
+ * page. A tab keeps the reader's place (`scroll` off); a full-page list may
+ * send them back to the top. `linkClassName` adds to each link's classes.
+ */
 export function Pager({
   page,
   pages,
   href,
+  scroll = false,
+  linkClassName,
 }: {
   page: number;
   pages: number;
   href: (page: number) => string;
+  scroll?: boolean;
+  linkClassName?: string;
 }) {
   const t = useTranslations("superAdmin.organizations.details.pagination");
   const fmt = useFormatters();
@@ -28,10 +36,10 @@ export function Pager({
     <nav aria-label={t("label")} className="flex items-center gap-1.5">
       <Link
         href={href(Math.max(1, page - 1))}
-        scroll={false}
+        scroll={scroll}
         aria-label={t("previous")}
         aria-disabled={page === 1}
-        className={cn(link, page === 1 && "pointer-events-none opacity-40")}
+        className={cn(link, linkClassName, page === 1 && "pointer-events-none opacity-40")}
       >
         <ChevronLeft aria-hidden className="size-4 rtl:-scale-x-100" />
       </Link>
@@ -40,10 +48,11 @@ export function Pager({
           {i > 0 && p - shown[i - 1] > 1 && <span aria-hidden>…</span>}
           <Link
             href={href(p)}
-            scroll={false}
+            scroll={scroll}
             aria-current={p === page ? "page" : undefined}
             className={cn(
               link,
+              linkClassName,
               p === page && "border-inverse bg-inverse text-inverse-foreground",
             )}
           >
@@ -53,10 +62,10 @@ export function Pager({
       ))}
       <Link
         href={href(Math.min(pages, page + 1))}
-        scroll={false}
+        scroll={scroll}
         aria-label={t("next")}
         aria-disabled={page === pages}
-        className={cn(link, page === pages && "pointer-events-none opacity-40")}
+        className={cn(link, linkClassName, page === pages && "pointer-events-none opacity-40")}
       >
         <ChevronRight aria-hidden className="size-4 rtl:-scale-x-100" />
       </Link>
