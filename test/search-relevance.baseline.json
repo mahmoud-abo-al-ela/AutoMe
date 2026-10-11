@@ -6,11 +6,17 @@
         "sunny",
         "eClass",
         "elantra",
-        "corolla18"
+        "corolla18",
+        "civic",
+        "mg5",
+        "octavia",
+        "passat",
+        "logan",
+        "megane"
       ],
-      "total": 4,
-      "pAtK": 0.8,
-      "recall": 0.4,
+      "total": 18,
+      "pAtK": 1,
+      "recall": 1,
       "mrr": 1,
       "irrelevantRate": 0,
       "targetRank": null
@@ -38,11 +44,19 @@
     },
     "لو سمحت تويوتا": {
       "lang": "ar",
-      "results": [],
-      "total": 0,
-      "pAtK": 0,
-      "recall": 0,
-      "mrr": 0,
+      "results": [
+        "prius",
+        "camry",
+        "landCruiser",
+        "hilux",
+        "yaris",
+        "corolla18",
+        "corolla20"
+      ],
+      "total": 7,
+      "pAtK": 1,
+      "recall": 1,
+      "mrr": 1,
       "irrelevantRate": 0,
       "targetRank": null
     },
@@ -94,7 +108,7 @@
         "cerato21",
         "elantra"
       ],
-      "total": 12,
+      "total": 18,
       "pAtK": 1,
       "recall": 1,
       "mrr": 1,
@@ -116,11 +130,19 @@
     },
     "تويوتا كورولا": {
       "lang": "ar",
-      "results": [],
-      "total": 0,
+      "results": [
+        "prius",
+        "camry",
+        "landCruiser",
+        "hilux",
+        "yaris",
+        "corolla18",
+        "corolla20"
+      ],
+      "total": 7,
       "pAtK": 0,
-      "recall": 0,
-      "mrr": 0,
+      "recall": 1,
+      "mrr": 0.16666666666666666,
       "irrelevantRate": 0,
       "targetRank": null
     },
@@ -159,20 +181,14 @@
     "toyota corolla 2020": {
       "lang": "en",
       "results": [
-        "corolla18",
-        "corolla20",
-        "prius",
-        "camry",
-        "landCruiser",
-        "hilux",
-        "yaris"
+        "corolla20"
       ],
-      "total": 7,
-      "pAtK": 0,
+      "total": 1,
+      "pAtK": 1,
       "recall": 1,
-      "mrr": 0.5,
-      "irrelevantRate": 0.7142857142857143,
-      "targetRank": 2
+      "mrr": 1,
+      "irrelevantRate": 0,
+      "targetRank": 1
     },
     "bmw x5": {
       "lang": "en",
@@ -216,11 +232,20 @@
     "car sedan": {
       "lang": "en",
       "results": [
-        "accent"
+        "accent",
+        "civic",
+        "mg5",
+        "octavia",
+        "passat",
+        "logan",
+        "megane",
+        "model3",
+        "sunny",
+        "cClass"
       ],
-      "total": 1,
-      "pAtK": 0.2,
-      "recall": 0.1,
+      "total": 18,
+      "pAtK": 1,
+      "recall": 1,
       "mrr": 1,
       "irrelevantRate": 0,
       "targetRank": null
@@ -291,25 +316,25 @@
   },
   "aggregate": {
     "overall": {
-      "pAtK": 0.7894736842105263,
-      "recall": 0.8157894736842105,
-      "mrr": 0.868421052631579,
-      "irrelevantRate": 0.08145363408521304,
-      "zeroResults": 2
+      "pAtK": 0.9473684210526315,
+      "recall": 1,
+      "mrr": 0.9561403508771931,
+      "irrelevantRate": 0.043859649122807015,
+      "zeroResults": 0
     },
     "en": {
-      "pAtK": 0.8363636363636363,
-      "recall": 0.9181818181818181,
-      "mrr": 0.9545454545454546,
-      "irrelevantRate": 0.1406926406926407,
+      "pAtK": 1,
+      "recall": 1,
+      "mrr": 1,
+      "irrelevantRate": 0.07575757575757575,
       "zeroResults": 0
     },
     "ar": {
-      "pAtK": 0.725,
-      "recall": 0.675,
-      "mrr": 0.75,
+      "pAtK": 0.875,
+      "recall": 1,
+      "mrr": 0.8958333333333334,
       "irrelevantRate": 0,
-      "zeroResults": 2
+      "zeroResults": 0
     }
   }
 }

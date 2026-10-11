@@ -1,17 +1,18 @@
-import { expandSearchTermForText } from "@/lib/locations";
+import { expandSearchTerm, expandSearchTermForText } from "@/lib/locations";
 import { searchWords } from "@/lib/utils/search-text";
 
 /**
- * Builds the Postgres prefix tsquery for the car search box.
+ * Builds the Postgres prefix tsqueries for the car search box — one per term,
+ * which search.js judges and combines.
  *
- * Lifted out of search.js so it can be tested directly: it produces a string
- * that is injected into `to_tsquery`, where a malformed grouping is a runtime
+ * Lifted out of search.js so it can be tested directly: it produces strings
+ * that are injected into `to_tsquery`, where a malformed grouping is a runtime
  * SQL error rather than a wrong result.
  *
  * Three jobs:
  *
  * - **Prefix matching**, so as-you-type queries hit partial words:
- *   "toyota cor" → `toyota:* & cor:*`.
+ *   "toyota cor" → `toyota:*`, `cor:*`.
  * - **Alias expansion**, so an Arabic query reaches the English columns a
  *   reader sees translated. "نيسان" has to find the Nissans, because that is
  *   what the filter chip beside the search box says.
@@ -45,26 +46,78 @@ function orGroup(variants: string[]): string | null {
   return `(${clauses.join(" | ")})`;
 }
 
-export function toPrefixTsquery(term: string): string {
+/**
+ * One thing the buyer typed — a word, or a multi-word place that is one alias —
+ * with every way it can match a car. Judged on its own by the search (does any
+ * car have it? only in prose? in most cars?), so a word no listing uses cannot
+ * empty a search the other words would answer.
+ */
+export interface SearchTerm {
+  /** As the buyer typed it, for telling them which words were set aside. */
+  text: string;
+  /** Prefix tsquery over every field: `(nissan:* | نيسان:*)`. */
+  query: string;
+  /**
+   * The same, restricted to the structured fields — make and model (weight A),
+   * body, fuel, gearbox, colour, location and feature tags (D) — and never the
+   * free text of titles and descriptions (B, C).
+   */
+  structuredQuery: string;
+  /** Canonical dealership city/region values the term names, compared by equality. */
+  places: string[];
+  /** A model year ("2020", "٢٠٢٠"), which the search vector does not hold. */
+  year: number | null;
+}
+
+/** Most terms a search is judged on; any further words reach only its meaning. */
+export const MAX_SEARCH_TERMS = 8;
+
+const YEAR = /^(19|20)\d{2}$/;
+
+function toTerm(text: string, variants: string[], places: string[]): SearchTerm | null {
+  const query = orGroup(variants);
+  if (!query) return null;
+  const words = searchWords(text);
+  return {
+    text,
+    query,
+    // Every lexeme is `word:*`; weights are added after the prefix marker.
+    structuredQuery: query.replace(/:\*/g, ":*AD"),
+    places,
+    year: words.length === 1 && YEAR.test(words[0]) ? Number(words[0]) : null,
+  };
+}
+
+/**
+ * The terms of a search, deduplicated: "تويوتا toyota" is one term, not two.
+ */
+export function searchTerms(term: string): SearchTerm[] {
   const trimmed = term?.trim();
-  if (!trimmed) return "";
+  if (!trimmed) return [];
+
+  const tokens = trimmed.split(/\s+/);
 
   // A multi-word place name is one alias, so the whole phrase is tried first.
-  const phraseVariants = expandSearchTermForText(trimmed);
-  if (phraseVariants.length > 1) {
-    const group = orGroup(phraseVariants);
-    if (group) return group;
+  if (tokens.length > 1) {
+    const phrase = expandSearchTerm(trimmed);
+    const isAlias = phrase.text.length > 1 || phrase.exact.length > 0;
+    const whole = isAlias ? toTerm(trimmed, phrase.text, phrase.exact) : null;
+    if (whole) return [whole];
   }
 
   // Otherwise each word is expanded on its own, so a free word can sit beside
   // an alias ("نيسان 2020").
-  const groups = trimmed
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((token) => orGroup(expandSearchTermForText(token)))
-    .filter(Boolean);
-
-  return groups.join(" & ");
+  const terms: SearchTerm[] = [];
+  const seen = new Set<string>();
+  for (const token of tokens) {
+    const { text, exact } = expandSearchTerm(token);
+    const found = toTerm(token, text, exact);
+    if (!found || seen.has(found.query)) continue;
+    seen.add(found.query);
+    terms.push(found);
+    if (terms.length === MAX_SEARCH_TERMS) break;
+  }
+  return terms;
 }
 
 /**

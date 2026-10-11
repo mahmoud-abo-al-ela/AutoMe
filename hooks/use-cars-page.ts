@@ -347,6 +347,8 @@ export const useCarsPage = (
     // The search words that found nothing alongside the filters, and were set
     // aside so the filters' cars show — null when the words were kept.
     relaxedSearch: queryData?.success ? (queryData.data.relaxedSearch ?? null) : null,
+    // How the words matched — all, some, by meaning — and those no car has.
+    searchMatch: queryData?.success ? (queryData.data.search ?? null) : null,
     // First-load only; subsequent fetches keep previous data mounted.
     loading: isLoading,
     isFetching,

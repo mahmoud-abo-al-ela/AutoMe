@@ -1,0 +1,268 @@
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+
+vi.hoisted(() => {
+  if (process.env.TEST_DATABASE_URL) {
+    process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+  }
+});
+
+// The listing service asks a model for the search's meaning; here a test sets it.
+vi.mock("@/lib/services/car/search-meaning", () => ({ searchMeaning: vi.fn(async () => null) }));
+
+const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
+
+import { searchCarsRanked } from "@/lib/repositories/car/search";
+import { setCarEmbedding } from "@/lib/repositories/car/embedding";
+import { getCars } from "@/lib/services/car/listing";
+import { db } from "@/lib/prisma";
+import { CARS, HIDDEN_TENANT_CARS, OTHER_TENANT_CARS, type RelevanceCar } from "@/test/fixtures/search-relevance";
+
+/**
+ * How a search's words match — all of them, some, none (meaning) — judged by
+ * the cars in scope rather than a word list, and bounded in every tier by the
+ * tenant, the listing's visibility and the buyer's filters. Real Postgres: the
+ * judging is SQL.
+ */
+
+const ORG = "org_test_tiers";
+const PLAIN_ORG = "org_test_tiers_plain";
+const OTHER_ORG = "org_test_tiers_other";
+const HIDDEN_ORG = "org_test_tiers_hidden";
+const MODEL = "gemini-embedding-2";
+
+const keyOf = new Map<string, string>();
+const idOf = new Map<string, string>();
+
+function axis(i: number): number[] {
+  const out = new Array(768).fill(0);
+  out[i] = 1;
+  return out;
+}
+
+let created = 0;
+async function insert(organizationId: string, key: string, car: RelevanceCar) {
+  const row = await db.car.create({
+    data: {
+      organizationId,
+      make: car.make,
+      model: car.model,
+      year: car.year,
+      price: car.price ?? 500_000,
+      mileage: 40_000,
+      fuelType: car.fuelType ?? "Gasoline",
+      transmission: car.transmission,
+      color: car.color ?? "White",
+      bodyType: car.bodyType,
+      status: car.status ?? "AVAILABLE",
+      images: [],
+      features: car.features ?? [],
+      featuresAr: car.featuresAr ?? [],
+      descriptionEn: car.descriptionEn ?? null,
+      descriptionAr: car.descriptionAr ?? null,
+      createdAt: new Date(Date.UTC(2026, 1, 1, 0, created++)),
+    },
+  });
+  keyOf.set(row.id, key);
+  idOf.set(key, row.id);
+}
+
+type Result = Awaited<ReturnType<typeof searchCarsRanked>>;
+const keys = (result: Result) => result.cars.map((car) => keyOf.get((car as { id: string }).id) ?? "unknown");
+const ownKeys = new Set(Object.keys(CARS));
+
+const search = (filters: Record<string, unknown>) =>
+  searchCarsRanked({ organizationId: ORG, ...filters }, { page: 1, limit: 50 });
+
+/** Every result is this dealership's own available car — whatever the tier. */
+function expectOwn(result: Result) {
+  for (const key of keys(result)) {
+    expect(ownKeys.has(key), `${key} is not this dealership's car`).toBe(true);
+    expect(key).not.toBe("corollaSold");
+  }
+}
+
+const where = (predicate: (car: RelevanceCar) => boolean) =>
+  Object.entries(CARS as Record<string, RelevanceCar>)
+    .filter(([, car]) => car.status !== "SOLD" && predicate(car))
+    .map(([key]) => key);
+
+const ORGS = [ORG, PLAIN_ORG, OTHER_ORG, HIDDEN_ORG];
+
+describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
+  beforeAll(async () => {
+    await db.organization.deleteMany({ where: { id: { in: ORGS } } });
+    await db.organization.createMany({
+      data: [
+        { id: ORG, name: "Tiers Motors", slug: "tiers-test", isActive: true },
+        { id: PLAIN_ORG, name: "Plain Motors", slug: "tiers-test-plain", isActive: true },
+        { id: OTHER_ORG, name: "Other Motors", slug: "tiers-test-other", isActive: true },
+        { id: HIDDEN_ORG, name: "Hidden Motors", slug: "tiers-test-hidden", isActive: false },
+      ],
+    });
+    for (const [key, car] of Object.entries(CARS)) await insert(ORG, key, car);
+    for (const [key, car] of Object.entries(OTHER_TENANT_CARS)) await insert(OTHER_ORG, key, car);
+    await insert(OTHER_ORG, "otherBrabus", { make: "Mercedes-Benz", model: "G-Class", year: 2022, bodyType: "SUV", transmission: "Automatic", descriptionEn: "Brabus edition." });
+    for (const [key, car] of Object.entries(HIDDEN_TENANT_CARS)) await insert(HIDDEN_ORG, key, car);
+    await insert(HIDDEN_ORG, "hiddenMaybach", { make: "Mercedes-Benz", model: "S-Class", year: 2023, bodyType: "Sedan", transmission: "Automatic", descriptionEn: "Maybach package." });
+
+    // Like production before any listing said "عربية": a dealership whose cars never do.
+    for (const [key, car] of Object.entries({
+      plainSedan1: { make: "Kia", model: "Cerato", year: 2020, bodyType: "Sedan", transmission: "Automatic" },
+      plainSedan2: { make: "Hyundai", model: "Elantra", year: 2021, bodyType: "Sedan", transmission: "Automatic" },
+      plainSedan3: { make: "Nissan", model: "Sunny", year: 2019, bodyType: "Sedan", transmission: "Manual" },
+      plainSuv: { make: "Kia", model: "Sportage", year: 2021, bodyType: "SUV", transmission: "Automatic" },
+    } satisfies Record<string, RelevanceCar>)) {
+      await insert(PLAIN_ORG, key, car);
+    }
+
+    // One car of each dealership means the same thing — the axis the meaning tests query.
+    for (const [key, organizationId] of [["x5", ORG], ["otherX5", OTHER_ORG], ["hiddenSedan", HIDDEN_ORG]] as const) {
+      await setCarEmbedding({ id: idOf.get(key)!, organizationId, vector: axis(1), model: MODEL, hash: "h" });
+    }
+  }, 60_000);
+
+  afterAll(async () => {
+    await db.organization.deleteMany({ where: { id: { in: ORGS } } });
+    await db.$disconnect();
+  });
+
+  describe("words no car has", () => {
+    it("sets aside a word no listing uses, and finds what the rest asks for (the reported bug)", async () => {
+      const result = await searchCarsRanked({ organizationId: PLAIN_ORG, search: "عربية سيدان" }, { page: 1, limit: 50 });
+      expect(new Set(keys(result))).toEqual(new Set(["plainSedan1", "plainSedan2", "plainSedan3"]));
+      expect(result.search).toEqual({ match: "all", missing: ["عربية"] });
+    });
+
+    it("finds the Toyotas for a polite request", async () => {
+      const result = await search({ search: "لو سمحت تويوتا" });
+      expect(new Set(keys(result))).toEqual(new Set(where((c) => c.make === "Toyota")));
+      expect(result.search).toEqual({ match: "all", missing: ["لو", "سمحت"] });
+    });
+
+    it("never widens to every car when no word is found", async () => {
+      const result = await search({ search: "لو سمحت" });
+      expect(result.pagination.total).toBe(0);
+      expect(result.search).toEqual({ match: "none", missing: ["لو", "سمحت"] });
+    });
+  });
+
+  describe("words only in prose, and common words", () => {
+    it("ranks by a word dealers write in descriptions instead of hiding every car without it", async () => {
+      // Four sedan descriptions say "عربية"; all eighteen sedans are what was asked for.
+      const result = await search({ search: "عربية سيدان" });
+      const sedans = where((c) => c.bodyType === "Sedan");
+      expect(new Set(keys(result))).toEqual(new Set(sedans));
+      expect(new Set(keys(result).slice(0, 4))).toEqual(new Set(["corolla18", "elantra", "eClass", "sunny"]));
+      expect(result.search).toEqual({ match: "all", missing: [] });
+    });
+
+    it("does the same for a generic English word", async () => {
+      const result = await search({ search: "car sedan" });
+      expect(result.pagination.total).toBe(where((c) => c.bodyType === "Sedan").length);
+    });
+
+    it("still narrows by a prose word typed on its own", async () => {
+      const result = await search({ search: "فبريكا" });
+      expect(new Set(keys(result))).toEqual(new Set(["corolla18", "tucson"]));
+    });
+
+    it("ranks by a word most cars have rather than narrowing by it", async () => {
+      // 27 of 37 cars are automatic: the sedans are what narrows; automatic ones lead.
+      const result = await search({ search: "سيدان أوتوماتيك" });
+      const sedans = where((c) => c.bodyType === "Sedan");
+      const automatic = where((c) => c.bodyType === "Sedan" && c.transmission === "Automatic");
+      expect(new Set(keys(result))).toEqual(new Set(sedans));
+      expect(new Set(keys(result).slice(0, automatic.length))).toEqual(new Set(automatic));
+    });
+  });
+
+  describe("some of the words", () => {
+    it("shows the cars with any of the words when none has them all, rarest first", async () => {
+      const result = await search({ search: "hilux sunroof" });
+      expect(result.search).toEqual({ match: "some", missing: [] });
+      expect(keys(result)[0]).toBe("hilux");
+      expect(new Set(keys(result))).toEqual(new Set(["hilux", "corolla20", "camry", "x5", "civic", "landCruiser"]));
+      expectOwn(result);
+    });
+
+    it("keeps the buyer's filters", async () => {
+      const result = await search({ search: "hilux sunroof", make: "Toyota" });
+      expect(result.search?.match).toBe("some");
+      expect(keys(result).every((key) => (CARS as Record<string, RelevanceCar>)[key].make === "Toyota")).toBe(true);
+      expect(keys(result)).not.toContain("x5");
+    });
+  });
+
+  describe("identifiers, years and mixed languages", () => {
+    it("ranks the named model first", async () => {
+      expect(keys(await search({ search: "BMW X5" }))).toEqual(["x5"]);
+      expect(keys(await search({ search: "320i" }))).toEqual(["bmw320"]);
+    });
+
+    it("matches a model year against the year, which the text does not hold", async () => {
+      expect(keys(await search({ search: "تويوتا corolla 2020" }))).toEqual(["corolla20"]);
+      const sedans2020 = where((c) => c.bodyType === "Sedan" && c.year === 2020);
+      expect(new Set(keys(await search({ search: "٢٠٢٠ سيدان" })))).toEqual(new Set(sedans2020));
+    });
+
+    it("still falls back to spelling for a typo, and says nothing is missing", async () => {
+      const result = await search({ search: "corola" });
+      expect(keys(result)).toEqual(expect.arrayContaining(["corolla20", "corolla18"]));
+      expect(result.search).toEqual({ match: "similar", missing: [] });
+    });
+  });
+
+  describe("filters and tenants bound every tier", () => {
+    it("all: the words within the filters", async () => {
+      expect(keys(await search({ search: "تويوتا", bodyType: "SUV" }))).toEqual(["landCruiser"]);
+    });
+
+    it("a word only another dealership uses is missing here", async () => {
+      const result = await search({ search: "brabus" });
+      expect(result.pagination.total).toBe(0);
+      expect(result.search?.missing).toEqual(["brabus"]);
+    });
+
+    it("the public search finds another active dealership's word, and never a suspended one's", async () => {
+      const brabus = await searchCarsRanked({ search: "brabus" }, { page: 1, limit: 50 });
+      expect(keys(brabus)).toContain("otherBrabus");
+      const maybach = await searchCarsRanked({ search: "maybach" }, { page: 1, limit: 50 });
+      expect(keys(maybach)).not.toContain("hiddenMaybach");
+      expect(maybach.search?.missing).toEqual(["maybach"]);
+    });
+
+    it("the public search never shows a suspended dealership's or a sold car", async () => {
+      const result = await searchCarsRanked({ search: "عربية سيدان" }, { page: 1, limit: 100 });
+      expect(keys(result)).not.toContain("hiddenSedan");
+      expect(keys(result)).not.toContain("corollaSold");
+    });
+
+    it("meaning: only this dealership's cars, within the filters", async () => {
+      const meaning = { vector: axis(1), model: MODEL };
+      const result = await search({ search: "zzqx", meaning });
+      expect(keys(result)).toEqual(["x5"]);
+      expect(result.search).toEqual({ match: "meaning", missing: ["zzqx"] });
+      const filtered = await search({ search: "zzqx", meaning, bodyType: "Sedan" });
+      expect(filtered.pagination.total).toBe(0);
+    });
+
+    it("meaning, in the public search: never a suspended dealership's car", async () => {
+      const result = await searchCarsRanked({ search: "zzqx", meaning: { vector: axis(1), model: MODEL } }, { page: 1, limit: 50 });
+      expect(keys(result)).toEqual(expect.arrayContaining(["x5", "otherX5"]));
+      expect(keys(result)).not.toContain("hiddenSedan");
+    });
+
+    it("words and meaning fused: the words' list is not cut short", async () => {
+      const result = await search({ search: "سيدان", meaning: { vector: axis(1), model: MODEL } });
+      // Every sedan by its words, plus the X5 by its meaning.
+      expect(result.pagination.total).toBe(where((c) => c.bodyType === "Sedan").length + 1);
+      expectOwn(result);
+    });
+
+    it("none, then the filters' cars: still this dealership's, still filtered", async () => {
+      const result = await getCars({ search: "لو سمحت", bodyType: "SUV" }, { page: 1, limit: 50 }, null, ORG);
+      expect(result.relaxedSearch).toBe("لو سمحت");
+      expect(new Set(keys(result as Result))).toEqual(new Set(where((c) => c.bodyType === "SUV")));
+    });
+  });
+});

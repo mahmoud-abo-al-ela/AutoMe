@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { toPrefixTsquery, toTrigramTerm } from "./search-query";
+import { MAX_SEARCH_TERMS, searchTerms, toTrigramTerm } from "./search-query";
 
-describe("toPrefixTsquery", () => {
+/** Every term ANDed — the tsquery a search requiring all of its words runs. */
+const toPrefixTsquery = (term: string) =>
+  searchTerms(term)
+    .map((t) => t.query)
+    .join(" & ");
+
+describe("searchTerms: the tsquery of each word", () => {
   it("makes every word a prefix match", () => {
     expect(toPrefixTsquery("toyota cor")).toBe("toyota:* & cor:*");
   });
@@ -103,6 +109,50 @@ describe("toPrefixTsquery", () => {
 
   it("lowercases, matching the simple text-search config", () => {
     expect(toPrefixTsquery("Toyota COROLLA")).toBe("toyota:* & corolla:*");
+  });
+});
+
+describe("searchTerms", () => {
+  it("makes each word a term the search can judge on its own", () => {
+    expect(searchTerms("عربية سيدان").map((t) => [t.text, t.query])).toEqual([
+      ["عربية", "عربيه:*"],
+      ["سيدان", "(سيدان:* | sedan:*)"],
+    ]);
+  });
+
+  it("restricts a term's structured form to make/model and the attribute fields", () => {
+    const [nissan] = searchTerms("نيسان");
+    expect(nissan.structuredQuery).toBe("(نيسان:*AD | nissan:*AD)");
+    const [xTrail] = searchTerms("x-trail");
+    expect(xTrail.structuredQuery).toBe("x:*AD & trail:*AD");
+  });
+
+  it("reads a model year, in either kind of digit", () => {
+    expect(searchTerms("2020")[0].year).toBe(2020);
+    expect(searchTerms("٢٠٢٠")[0].year).toBe(2020);
+    expect(searchTerms("x5")[0].year).toBeNull();
+    expect(searchTerms("12345")[0].year).toBeNull();
+  });
+
+  it("carries a place's canonical values, and keeps a multi-word place whole", () => {
+    expect(searchTerms("القاهرة")[0].places).toContain("CAI");
+    const terms = searchTerms("المحلة الكبرى");
+    expect(terms).toHaveLength(1);
+    expect(terms[0].places.length).toBeGreaterThan(0);
+  });
+
+  it("counts a word and its alias once", () => {
+    expect(searchTerms("نيسان nissan nissan")).toHaveLength(2);
+    expect(searchTerms("toyota toyota")).toHaveLength(1);
+  });
+
+  it("judges at most eight terms", () => {
+    expect(searchTerms("a1 b2 c3 d4 e5 f6 g7 h8 i9 j10")).toHaveLength(MAX_SEARCH_TERMS);
+  });
+
+  it("drops what has no word to search for", () => {
+    expect(searchTerms("؟؟ !!! ...")).toEqual([]);
+    expect(searchTerms("   ")).toEqual([]);
   });
 });
 

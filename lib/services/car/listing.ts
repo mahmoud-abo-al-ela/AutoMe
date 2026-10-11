@@ -33,6 +33,16 @@ export interface CarFilters {
   meaning?: SearchMeaning | null;
 }
 
+/**
+ * How a search's words matched the cars (see searchCarsRanked): all of them,
+ * some (no car has them all), by meaning or by spelling alone (no word did) —
+ * and the words no car in scope has, which were set aside.
+ */
+export interface SearchMatch {
+  match: "all" | "some" | "meaning" | "similar" | "none";
+  missing: string[];
+}
+
 export interface CarPagination {
   page?: number;
   limit?: number;
@@ -86,9 +96,11 @@ export async function getCars(
   const search = filters.search?.trim();
   if (result.pagination.total === 0 && search && hasCarFilters(filters)) {
     const widened = await carRepository.findManyCars({ ...queryFilters, search: undefined, meaning: null }, pagination);
-    if (widened.pagination.total > 0) return { ...widened, relaxedSearch: search };
+    if (widened.pagination.total > 0) return { ...widened, search: null, relaxedSearch: search };
   }
-  return { ...result, relaxedSearch: null as string | null };
+  // Only the ranked branch (a search term) reports how the words matched.
+  const match = "search" in result ? (result.search as SearchMatch) : null;
+  return { ...result, search: match, relaxedSearch: null as string | null };
 }
 
 /** Whether the buyer narrowed by anything about the car itself, beyond the words. */
