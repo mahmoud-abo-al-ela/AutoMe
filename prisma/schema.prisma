@@ -793,6 +793,17 @@ model BuyerQuestion {
   answeredBy       User?               @relation(fields: [answeredById], references: [id], onDelete: SetNull)
   answeredAt       DateTime?
 
+  // The question's meaning as a vector (pgvector), written by the
+  // question-embedding job — what folds a rephrased repeat into this row, ranks
+  // the dealer's answers against a new question, and suggests this answer on
+  // another car. Only comparable with vectors from the same model, so the model
+  // is kept beside it and every search filters on it. Read and written with raw
+  // SQL (Unsupported); its HNSW index (cosine) is created in the
+  // 20261011140000 migration — Prisma cannot declare that index type, so keep
+  // it out of any migration Prisma generates.
+  embedding      Unsupported("vector(768)")?
+  embeddingModel String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

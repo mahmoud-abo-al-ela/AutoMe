@@ -40,7 +40,9 @@ vi.mock("@/lib/services/ai/answerListingQuestion", () => ({
     ...(await answerListingQuestion(...args)),
   }),
 }));
-vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion }));
+vi.mock("@/lib/repositories/buyer-question", () => ({ findAnswersForCar, recordDeclinedQuestion, MAX_DEALER_ANSWERS: 20 }));
+const enqueue = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/jobs", () => ({ enqueue }));
 vi.mock("@/lib/repositories/assistant-answer", () => ({ recordAssistantAnswer, rateAssistantAnswer, findRepliesForHistory }));
 
 import { askAboutListing, isListingAssistantOffered, rateListingAnswer } from "@/lib/services/car/listing-assistant";
@@ -142,6 +144,18 @@ describe("askAboutListing", () => {
       questionKey: "any accidents",
       locale: "en",
     });
+  });
+
+  it("queues a new declined question for its meaning — never an exact repeat already embedded", async () => {
+    answerListingQuestion.mockResolvedValue({ grounded: false });
+    recordDeclinedQuestion.mockResolvedValueOnce({ id: "q-new", embeddingModel: null });
+    await askAboutListing("car-1", "Any accidents?", "en", null);
+    expect(enqueue).toHaveBeenCalledWith("question-embedding", { questionId: "q-new", organizationId: "org-dealer" });
+
+    enqueue.mockClear();
+    recordDeclinedQuestion.mockResolvedValueOnce({ id: "q-old", embeddingModel: "gemini-embedding-2" });
+    await askAboutListing("car-1", "Any accidents?", "en", null);
+    expect(enqueue).not.toHaveBeenCalled();
   });
 
   it("does not file an off-topic message for the dealer", async () => {

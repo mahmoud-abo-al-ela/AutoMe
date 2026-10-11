@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { refreshImageAlts } from "@/lib/services/car/image-alts";
+import { embedQuestion } from "@/lib/services/buyer-question/meaning";
 
 /**
  * Every background job: the shape of its payload and what running it does.
@@ -31,6 +32,20 @@ export const JOBS = {
     run: ({ carId, organizationId, caller }: { carId: string; organizationId: string; caller: z.infer<typeof callerSchema> }) =>
       refreshImageAlts(carId, organizationId, caller, { rethrow: true }),
   },
+  /**
+   * Give a declined buyer question its meaning (a vector), folding it into
+   * the earlier question it repeats on the same car. Idempotent: skips a
+   * question already embedded by the current model, or gone.
+   */
+  "question-embedding": {
+    schema: z.object({
+      questionId: z.string().uuid(),
+      organizationId: z.string().min(1),
+    }),
+    run: async ({ questionId, organizationId }: { questionId: string; organizationId: string }) => {
+      await embedQuestion(questionId, organizationId);
+    },
+  },
 } as const;
 
 export type JobName = keyof typeof JOBS;
@@ -41,7 +56,12 @@ export function isJobName(value: string): value is JobName {
 }
 
 /** Validate and run one job. Throws on a bad payload or a failed run. */
-export async function runJob(name: JobName, payload: unknown): Promise<void> {
-  const job = JOBS[name];
+export async function runJob<N extends JobName>(name: N, payload: unknown): Promise<void> {
+  // Each entry's run takes its own schema's output; TypeScript cannot see
+  // that through the union of entries, so it is said once, here.
+  const job = JOBS[name] as unknown as {
+    schema: { parse(value: unknown): JobPayload<N> };
+    run(payload: JobPayload<N>): Promise<unknown>;
+  };
   await job.run(job.schema.parse(payload));
 }
