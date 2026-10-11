@@ -237,6 +237,8 @@ export async function askAboutListing(
       question: asked,
       questionKey: questionKey(asked),
       locale,
+      // What the buyer was told — shown to the dealer beside the question.
+      declineMessage: reply.message ?? null,
     }),
     keep("DECLINED", reply.message ?? ""),
   ]);

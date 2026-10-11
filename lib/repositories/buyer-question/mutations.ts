@@ -16,6 +16,8 @@ export interface DeclinedQuestion {
   question: string;
   questionKey: string;
   locale: string;
+  /** What the assistant told the buyer; null for the page's fixed copy, absent for a 👎. */
+  declineMessage?: string | null;
 }
 
 /**
@@ -51,7 +53,12 @@ export async function recordDeclinedQuestion(input: DeclinedQuestion) {
   return db.buyerQuestion.upsert({
     where: { carId_questionKey: { carId: input.carId, questionKey: input.questionKey } },
     create: input,
-    update: { askCount: { increment: 1 }, lastAskedAt: new Date() },
+    update: {
+      askCount: { increment: 1 },
+      lastAskedAt: new Date(),
+      // The latest wording, when this ask came with one.
+      ...(input.declineMessage !== undefined && { declineMessage: input.declineMessage }),
+    },
   });
 }
 

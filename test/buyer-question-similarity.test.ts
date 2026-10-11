@@ -14,6 +14,7 @@ import {
   findNearestEarlierQuestion,
   findQuestionsMissingEmbedding,
   foldQuestionInto,
+  linkRelatedQuestion,
   setQuestionEmbedding,
 } from "@/lib/repositories/buyer-question";
 import { db } from "@/lib/prisma";
@@ -116,9 +117,34 @@ describe.skipIf(!hasTestDb)("buyer question similarity (real Postgres + pgvector
       before: asked.createdAt,
       vector: v(1),
       model: MODEL,
+      statuses: ["OPEN", "ANSWERED"],
     });
     expect(nearest?.id).toBe(close.id);
     expect(nearest!.similarity).toBeGreaterThan(0.99);
+  });
+
+  it("searches only the statuses asked for", async () => {
+    await db.buyerQuestion.deleteMany({ where: { organizationId: ORG } });
+    const answered = await question({ carId: CAR_A, status: "ANSWERED", answer: "No accidents.", vector: v(4), createdAt: earlier(30) });
+    await question({ carId: CAR_A, vector: v(4), createdAt: earlier(20) });
+    const asked = await question({ carId: CAR_A, vector: v(4) });
+    const search = { organizationId: ORG, carId: CAR_A, excludeId: asked.id, before: asked.createdAt, vector: v(4), model: MODEL };
+
+    expect((await findNearestEarlierQuestion({ ...search, statuses: ["ANSWERED"] }))?.id).toBe(answered.id);
+    expect((await findNearestEarlierQuestion({ ...search, statuses: ["OPEN"] }))?.id).not.toBe(answered.id);
+  });
+
+  it("links a question to the answered one it rephrases, each keeping its own status", async () => {
+    const answered = await question({ carId: CAR_A, status: "ANSWERED", answer: "No accidents." });
+    const asked = await question({ carId: CAR_A });
+    await linkRelatedQuestion({ id: asked.id, relatedId: answered.id, organizationId: ORG });
+
+    const row = await db.buyerQuestion.findUnique({ where: { id: asked.id }, include: { relatedQuestion: true } });
+    expect(row).toMatchObject({ status: "OPEN", relatedQuestion: { id: answered.id, status: "ANSWERED", answer: "No accidents." } });
+    // Not across dealerships.
+    const theirs = await question({ organizationId: OTHER_ORG, carId: CAR_OTHER });
+    await linkRelatedQuestion({ id: theirs.id, relatedId: answered.id, organizationId: ORG });
+    expect((await db.buyerQuestion.findUnique({ where: { id: theirs.id } }))?.relatedQuestionId).toBeNull();
   });
 
   it("folds an open repeat into the question it repeats, and never folds away an answer", async () => {

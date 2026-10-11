@@ -55,6 +55,9 @@ export async function findBuyerQuestions(
         answer: true,
         appliesToAllCars: true,
         answeredAt: true,
+        declineMessage: true,
+        // The answered question this one rephrases — the assistant missed it.
+        relatedQuestion: { select: { id: true, question: true, answer: true, status: true } },
         car: {
           select: { id: true, make: true, model: true, year: true, title: true, titleEn: true, titleAr: true },
         },

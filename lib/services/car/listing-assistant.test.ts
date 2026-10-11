@@ -143,6 +143,7 @@ describe("askAboutListing", () => {
       question: "  Any ACCIDENTS? ",
       questionKey: "any accidents",
       locale: "en",
+      declineMessage: null,
     });
   });
 

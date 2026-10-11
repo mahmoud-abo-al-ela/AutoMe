@@ -5,6 +5,7 @@ const repo = vi.hoisted(() => ({
   findQuestionForEmbedding: vi.fn(),
   findNearestEarlierQuestion: vi.fn(),
   foldQuestionInto: vi.fn(),
+  linkRelatedQuestion: vi.fn(),
   setQuestionEmbedding: vi.fn(),
   findAnswersForCar: vi.fn(),
   findAnswersForCarByMeaning: vi.fn(),
@@ -37,18 +38,34 @@ beforeEach(() => {
 });
 
 describe("embedQuestion", () => {
+  /** The nearest earlier question by status: what the two searches find. */
+  const nearest = (open: { id: string; similarity: number } | null, answered: { id: string; similarity: number } | null) =>
+    repo.findNearestEarlierQuestion.mockImplementation(async ({ statuses }: { statuses: string[] }) =>
+      statuses.includes("OPEN") ? open : answered
+    );
+
   it("folds an open question into the earlier one it repeats", async () => {
     repo.findQuestionForEmbedding.mockResolvedValue(question());
-    repo.findNearestEarlierQuestion.mockResolvedValue({ id: "q1", similarity: 0.93 });
+    nearest({ id: "q1", similarity: 0.93 }, null);
 
     expect(await embedQuestion("q2", "org")).toBe("folded");
     expect(repo.foldQuestionInto).toHaveBeenCalledWith({ fromId: "q2", intoId: "q1", organizationId: "org" });
     expect(repo.setQuestionEmbedding).not.toHaveBeenCalled();
   });
 
+  it("never folds into a question the dealer answered — it links instead, so the miss shows", async () => {
+    repo.findQuestionForEmbedding.mockResolvedValue(question());
+    nearest(null, { id: "answered-1", similarity: 0.95 });
+
+    expect(await embedQuestion("q2", "org")).toBe("linked");
+    expect(repo.foldQuestionInto).not.toHaveBeenCalled();
+    expect(repo.linkRelatedQuestion).toHaveBeenCalledWith({ id: "q2", relatedId: "answered-1", organizationId: "org" });
+    expect(repo.setQuestionEmbedding).toHaveBeenCalled();
+  });
+
   it("keeps a question that is only related, and stores its meaning", async () => {
     repo.findQuestionForEmbedding.mockResolvedValue(question());
-    repo.findNearestEarlierQuestion.mockResolvedValue({ id: "q1", similarity: 0.86 });
+    nearest({ id: "q1", similarity: 0.86 }, { id: "answered-1", similarity: 0.7 });
 
     expect(await embedQuestion("q2", "org")).toBe("embedded");
     expect(repo.setQuestionEmbedding).toHaveBeenCalledWith({ id: "q2", organizationId: "org", vector: VECTOR, model: "gemini-embedding-2" });

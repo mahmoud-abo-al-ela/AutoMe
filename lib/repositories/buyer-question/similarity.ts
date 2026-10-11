@@ -30,9 +30,9 @@ export async function setQuestionEmbedding(input: { id: string; organizationId: 
 }
 
 /**
- * The closest earlier question on the same car — open or answered, never
- * dismissed — by the same model, with how close it is. Earlier only, so two
- * rephrasings embedded at once fold one way, into the older.
+ * The closest earlier question on the same car in one of these statuses, by
+ * the same model, with how close it is. Earlier only, so two rephrasings
+ * embedded at once fold one way, into the older.
  */
 export async function findNearestEarlierQuestion(input: {
   organizationId: string;
@@ -41,6 +41,7 @@ export async function findNearestEarlierQuestion(input: {
   before: Date;
   vector: number[];
   model: string;
+  statuses: ("OPEN" | "ANSWERED")[];
 }): Promise<{ id: string; similarity: number } | null> {
   const [row] = await db.$queryRaw<{ id: string; similarity: number }[]>`
     SELECT "id", 1 - ("embedding" <=> ${vector(input.vector)}) AS similarity
@@ -49,12 +50,24 @@ export async function findNearestEarlierQuestion(input: {
       AND "carId" = ${input.carId}
       AND "id" <> ${input.excludeId}
       AND "createdAt" < ${input.before}
-      AND "status" IN ('OPEN', 'ANSWERED')
+      AND "status"::text IN (${Prisma.join(input.statuses)})
       AND "embeddingModel" = ${input.model}
       AND "embedding" IS NOT NULL
     ORDER BY "embedding" <=> ${vector(input.vector)}
     LIMIT 1`;
   return row ? { id: row.id, similarity: Number(row.similarity) } : null;
+}
+
+/**
+ * Link an open question to the answered one it rephrases on the same car. The
+ * two keep their own statuses and answers; the link only tells the dealer the
+ * assistant had an answer and did not use it. Both scoped to the dealership.
+ */
+export async function linkRelatedQuestion(input: { id: string; relatedId: string; organizationId: string }) {
+  await db.buyerQuestion.updateMany({
+    where: { id: input.id, organizationId: input.organizationId, NOT: { id: input.relatedId } },
+    data: { relatedQuestionId: input.relatedId },
+  });
 }
 
 /**

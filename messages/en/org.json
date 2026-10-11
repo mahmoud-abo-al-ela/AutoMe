@@ -577,6 +577,13 @@
       "status": "{from} to {to} of {total}",
       "previous": "Previous",
       "next": "Next"
+    },
+    "missed": {
+      "title": "Needs attention",
+      "body": "You already answered a similar question about this car, but the assistant didn’t use your answer here. Answer this one too, or adjust your earlier answer so it covers both.",
+      "earlier": "Your earlier question",
+      "yourAnswer": "Your answer",
+      "assistantSaid": "What the assistant told the buyer"
     }
   },
   "settings": {

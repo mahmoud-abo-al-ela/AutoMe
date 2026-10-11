@@ -32,6 +32,11 @@ export const FOLD_SIMILARITY = 0.9;
  * questions and is wrong about 1.6% of the time.
  */
 export const SUGGEST_SIMILARITY = 0.78;
+/**
+ * Linking a declined question to the answered one it rephrases flags it for
+ * the dealer and shows both; a wrong link costs a glance, like a suggestion.
+ */
+export const RELATED_SIMILARITY = SUGGEST_SIMILARITY;
 
 /** How long a buyer's answer may wait on embedding their question. */
 const BUYER_WAIT_MS = 2_000;
@@ -40,12 +45,17 @@ const BUYER_WAIT_MS = 2_000;
 const CALLER = { organizationId: null, userId: null, priority: "low" as const };
 
 /**
- * The question-embedding job: give a declined question its vector, or fold it
- * into the earlier question it repeats on the same car. Idempotent — a
+ * The question-embedding job: give a declined question its vector — folding
+ * it into an earlier open question it repeats on the same car, or linking it to
+ * an answered one it rephrases (the dealer's answer existed and the assistant
+ * did not use it). Idempotent — a
  * question already embedded by the current model, or gone, is left alone.
  * Throws when the embedding fails, so the queue retries.
  */
-export async function embedQuestion(questionId: string, organizationId: string): Promise<"embedded" | "folded" | "skipped"> {
+export async function embedQuestion(
+  questionId: string,
+  organizationId: string
+): Promise<"embedded" | "folded" | "linked" | "skipped"> {
   const row = await buyerQuestionRepository.findQuestionForEmbedding(questionId, organizationId);
   if (!row || row.embeddingModel === embeddingModel()) return "skipped";
 
@@ -57,23 +67,36 @@ export async function embedQuestion(questionId: string, organizationId: string):
   });
   const [vector] = vectors;
 
+  let related = false;
   if (row.status === "OPEN") {
-    const nearest = await buyerQuestionRepository.findNearestEarlierQuestion({
-      organizationId,
-      carId: row.carId,
-      excludeId: row.id,
-      before: row.createdAt,
-      vector,
-      model,
-    });
-    if (nearest && nearest.similarity >= FOLD_SIMILARITY) {
-      const folded = await buyerQuestionRepository.foldQuestionInto({ fromId: row.id, intoId: nearest.id, organizationId });
+    const nearest = (statuses: ("OPEN" | "ANSWERED")[]) =>
+      buyerQuestionRepository.findNearestEarlierQuestion({
+        organizationId,
+        carId: row.carId,
+        excludeId: row.id,
+        before: row.createdAt,
+        vector,
+        model,
+        statuses,
+      });
+    const [open, answered] = await Promise.all([nearest(["OPEN"]), nearest(["ANSWERED"])]);
+
+    // A repeat of a question still waiting for the dealer: one question.
+    if (open && open.similarity >= FOLD_SIMILARITY) {
+      const folded = await buyerQuestionRepository.foldQuestionInto({ fromId: row.id, intoId: open.id, organizationId });
       if (folded) return "folded";
+    }
+    // A rephrasing of a question the dealer already answered, declined anyway:
+    // never folded — that would hide the miss. Kept open and linked, so the
+    // dealer sees the assistant had their answer and did not use it.
+    if (answered && answered.similarity >= RELATED_SIMILARITY) {
+      await buyerQuestionRepository.linkRelatedQuestion({ id: row.id, relatedId: answered.id, organizationId });
+      related = true;
     }
   }
 
   await buyerQuestionRepository.setQuestionEmbedding({ id: row.id, organizationId, vector, model });
-  return "embedded";
+  return related ? "linked" : "embedded";
 }
 
 /**

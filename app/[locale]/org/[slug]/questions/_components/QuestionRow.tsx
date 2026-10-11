@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -44,6 +45,9 @@ export function QuestionRow({ question, isOpen, isPending, autoFocus, draft, onD
   const hot = askCount >= HOT_ASKS;
   const carTitle = resolveCarTitle(car, locale)?.text ?? `${car.make} ${car.model} ${fmt.number(car.year, { useGrouping: false })}`;
   const asked = t("asked.label", { count: askCount, value: fmt.number(askCount) });
+  // The dealer had answered this already, on this car, and the assistant
+  // declined it anyway: the miss is shown, never folded away.
+  const missed = status === "OPEN" && question.relatedQuestion?.status === "ANSWERED" ? question.relatedQuestion : null;
 
   return (
     <li
@@ -89,6 +93,32 @@ export function QuestionRow({ question, isOpen, isPending, autoFocus, draft, onD
             </Link>
             <span>{t("lastAsked", { when: fmt.relativeToNow(question.lastAskedAt), language: t(`language.${question.locale === "ar" ? "ar" : "en"}`) })}</span>
           </p>
+
+          {missed && (
+            <div className="mt-2 flex flex-col gap-1.5 rounded-xl border border-[#e8c56b] bg-[#fff8e1] px-3 py-2.5 text-caption">
+              <span className="flex items-center gap-1.5 font-semibold text-[#8a5e00]">
+                <TriangleAlert aria-hidden className="size-4 shrink-0" />
+                {t("missed.title")}
+              </span>
+              <p className="text-foreground">{t("missed.body")}</p>
+              <dl className="flex flex-col gap-1">
+                <div>
+                  <dt className="text-micro font-semibold text-muted-foreground">{t("missed.earlier")}</dt>
+                  <dd><bdi>{missed.question}</bdi></dd>
+                </div>
+                <div>
+                  <dt className="text-micro font-semibold text-muted-foreground">{t("missed.yourAnswer")}</dt>
+                  <dd><bdi>{missed.answer}</bdi></dd>
+                </div>
+                {question.declineMessage && (
+                  <div>
+                    <dt className="text-micro font-semibold text-muted-foreground">{t("missed.assistantSaid")}</dt>
+                    <dd><bdi>{question.declineMessage}</bdi></dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          )}
 
           {status === "ANSWERED" && !isOpen && (
             <div className="mt-2 flex flex-col gap-1 rounded-xl bg-muted/60 px-3 py-2.5">
