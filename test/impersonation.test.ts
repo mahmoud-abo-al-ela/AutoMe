@@ -19,12 +19,14 @@ vi.mock("@/lib/services/audit", () => ({
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import {
+  endImpersonation,
   getActiveImpersonationCount,
   getCurrentImpersonationSession,
   getImpersonationSessions,
 } from "@/lib/services/impersonation/impersonation";
 import { validateSuperAdmin, validateTargetMembership } from "@/lib/services/impersonation/validation";
 import { clearImpersonationCookies } from "@/lib/services/impersonation/cookie";
+import { auditHelpers } from "@/lib/services/audit";
 import { db } from "@/lib/prisma";
 
 /**
@@ -81,6 +83,7 @@ describe.skipIf(!hasTestDb)("impersonation (real Postgres)", () => {
     await db.impersonationSession.deleteMany({ where: { targetOrganizationId: ORG } });
     cookie.sessionId = null;
     vi.mocked(clearImpersonationCookies).mockClear();
+    vi.mocked(auditHelpers.logImpersonationEnded).mockClear();
   });
 
   it("lets only an admin start a session", async () => {
@@ -115,6 +118,25 @@ describe.skipIf(!hasTestDb)("impersonation (real Postgres)", () => {
     cookie.sessionId = await session(HOUR);
     const current = await getCurrentImpersonationSession();
     expect(current).toMatchObject({ superAdmin: { id: adminId }, targetUser: { id: memberId } });
+  });
+
+  it("ends someone else's session from the list without signing the admin out of their own", async () => {
+    const mine = await session(HOUR);
+    const theirs = await session(HOUR);
+    cookie.sessionId = mine;
+
+    await endImpersonation(theirs, "imp-admin@test.local");
+
+    expect((await db.impersonationSession.findUnique({ where: { id: theirs } }))?.endedAt).not.toBeNull();
+    expect((await db.impersonationSession.findUnique({ where: { id: mine } }))?.endedAt).toBeNull();
+    expect(clearImpersonationCookies).not.toHaveBeenCalled();
+    expect(auditHelpers.logImpersonationEnded).toHaveBeenCalled();
+  });
+
+  it("signs the admin out when the session they end is their own", async () => {
+    cookie.sessionId = await session(HOUR);
+    await endImpersonation(cookie.sessionId, "imp-admin@test.local");
+    expect(clearImpersonationCookies).toHaveBeenCalled();
   });
 
   it("ends a session past its four hours and forgets it", async () => {

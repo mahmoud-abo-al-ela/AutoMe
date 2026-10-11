@@ -4,10 +4,7 @@
 export { updateUserRole, exportUsers } from "./super-admin/users";
 export { updatePlanSettings } from "./super-admin/plans";
 export { exportActivity } from "./super-admin/activity";
-export {
-  startImpersonation,
-  endImpersonation,
-} from "./super-admin/impersonation";
+export { endImpersonation } from "./super-admin/impersonation";
 export {
   createOrganization,
   updateOrganizationStatus,

@@ -269,13 +269,6 @@ export const signupCheckoutSchema = z.object({
   onboardingSessionId: z.string().min(1),
 });
 
-// ============ IMPERSONATION (super-admin) ============
-
-export const startImpersonationSchema = z.object({
-  organizationId: z.string().min(1, "Organization is required"),
-  targetUserId: z.string().min(1, "Target user is required"),
-});
-
 // ============ INFERRED INPUT TYPES ============
 // The Zod schema is the runtime contract; z.infer makes it the compile-time one
 // too, so action inputs never get hand-written a second time (they'd drift).
@@ -293,7 +286,6 @@ export type EditTestDriveInput = z.infer<typeof editTestDriveSchema>;
 export type UpdateTestDriveStatusInput = z.infer<typeof updateTestDriveStatusSchema>;
 export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
 export type SignupCheckoutInput = z.infer<typeof signupCheckoutSchema>;
-export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
 
 // ============ LISTING QUALITY COACH ============

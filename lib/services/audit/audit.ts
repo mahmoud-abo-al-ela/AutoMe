@@ -92,13 +92,26 @@ export async function createAuditLog({
 }
 
 /**
- * Record a super-admin action exactly as given: no request context and no
- * retention date are added, and — unlike createAuditLog — a failed write
- * throws to the caller. This is how the super-admin actions have always
- * logged; bringing them onto createAuditLog would change both.
+ * Record a super-admin action, with the request's IP and user agent.
+ *
+ * Unlike createAuditLog, the entry never expires: a dealership's plan sets
+ * how long its own activity is kept, but what the platform did to that
+ * dealership is the platform's record. As with createAuditLog, a failed write
+ * is logged, never thrown — the change it records has already been saved.
  */
 export async function recordAdminAuditEntry(entry: Prisma.AuditLogUncheckedCreateInput) {
-  return createAuditLogEntry(entry);
+  try {
+    const { ipAddress, userAgent } = await getRequestMetadata();
+    const given = entry.metadata && typeof entry.metadata === "object" ? (entry.metadata as Record<string, unknown>) : {};
+    return await createAuditLogEntry({
+      ...entry,
+      retainUntil: null,
+      metadata: JSON.parse(JSON.stringify({ ...given, ipAddress, userAgent })),
+    });
+  } catch (error) {
+    logError("Failed to record a super-admin audit entry:", error);
+    return null;
+  }
 }
 
 /**

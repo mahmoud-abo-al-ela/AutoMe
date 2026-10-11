@@ -101,8 +101,12 @@ export async function endImpersonation(
   // Log the impersonation end
   await auditHelpers.logImpersonationEnded(session, superAdminEmail);
 
-  // Clear cookies
-  await clearImpersonationCookies();
+  // Only the caller's own session lives in their cookies. Ending someone
+  // else's from the super-admin sessions list must not sign this admin out
+  // of the session they are in.
+  if ((await getSessionIdFromCookies()) === sessionId) {
+    await clearImpersonationCookies();
+  }
 
   return session;
 }
