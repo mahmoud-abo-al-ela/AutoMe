@@ -1,6 +1,7 @@
 // Billing service - Business logic layer for plans, subscriptions, and billing
 import type { AuditAction, PlanType, Prisma } from "@/lib/generated/prisma";
 import * as billingRepo from "@/lib/repositories/billing";
+import { findOwnerContact } from "@/lib/repositories/team";
 import { cairoMidnight } from "@/lib/utils/date-only";
 import { isFreePlan } from "@/lib/utils/plan-change";
 import { daysLeft, graceEndsOn, renewalStage } from "./periods";
@@ -96,6 +97,14 @@ export async function getBillingData(organizationId: string, now: Date = new Dat
     renewal,
     lastPayment: payments.find((payment) => payment.status === "PAID") ?? null,
   };
+}
+
+/**
+ * Who a member who is not the owner should contact about billing: the
+ * owner's name and email, or null when the dealership has no owner.
+ */
+export async function getBillingContact(organizationId: string) {
+  return findOwnerContact(organizationId);
 }
 
 /**

@@ -45,11 +45,7 @@ const PRISMA_BOUNDARY = {
 const KNOWN_PRISMA_VIOLATIONS = [
   "actions/onboarding.ts",
   "actions/stream-chat.ts",
-  "actions/super-admin/organizations.ts",
-  "actions/super-admin/plans.ts",
-  "actions/super-admin/users.ts",
   "actions/test-drive.ts",
-  "app/[[]locale]/org/[[]slug]/billing/page.tsx",
   "app/api/webhooks/clerk/route.ts",
   "lib/checkUser.ts",
   "lib/org/access.ts",

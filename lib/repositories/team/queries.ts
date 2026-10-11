@@ -100,6 +100,26 @@ export async function findMembersWithUserCard(organizationId: string) {
   });
 }
 
+/** The dealership owner's name and email, or null when it has no owner. */
+export async function findOwnerContact(organizationId: string) {
+  const ownerMembership = await db.membership.findFirst({
+    where: {
+      organizationId,
+      role: "OWNER",
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  return ownerMembership?.user || null;
+}
+
 /**
  * Find membership by user and organization
  */

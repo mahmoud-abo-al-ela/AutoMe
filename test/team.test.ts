@@ -14,6 +14,7 @@ const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { changeMemberRole, inviteTeamMember, removeTeamMember } from "@/lib/services/team";
 import { getUsers } from "@/lib/services/dealership/users";
+import { getBillingContact } from "@/lib/services/billing";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { db } from "@/lib/prisma";
 
@@ -88,6 +89,11 @@ describe.skipIf(!hasTestDb)("team management (real Postgres)", () => {
     await removeTeamMember(actor(), ORG, ids.memberMembership);
     expect(auditHelpers.logMemberRemoved).toHaveBeenCalled();
     expect(await db.membership.findUnique({ where: { id: ids.memberMembership } })).toBeNull();
+  });
+
+  it("names the owner as the billing contact, and no one where there is no owner", async () => {
+    expect(await getBillingContact(ORG)).toEqual({ name: "Team owner", email: "team-owner@test.local" });
+    expect(await getBillingContact(OTHER_ORG)).toBeNull();
   });
 
   it("lists a dealership's members for its owner, searchable, and only that dealership's", async () => {

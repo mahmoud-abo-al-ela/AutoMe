@@ -1,5 +1,5 @@
 import { logError } from "@/lib/utils/errors";
-import type { AuditAction, EntityType } from "@/lib/generated/prisma";
+import type { AuditAction, EntityType, Prisma } from "@/lib/generated/prisma";
 import {
   createAuditLogEntry,
   getAuditLogs,
@@ -89,6 +89,16 @@ export async function createAuditLog({
     // Don't throw - audit logging should not break the main flow
     return null;
   }
+}
+
+/**
+ * Record a super-admin action exactly as given: no request context and no
+ * retention date are added, and — unlike createAuditLog — a failed write
+ * throws to the caller. This is how the super-admin actions have always
+ * logged; bringing them onto createAuditLog would change both.
+ */
+export async function recordAdminAuditEntry(entry: Prisma.AuditLogUncheckedCreateInput) {
+  return createAuditLogEntry(entry);
 }
 
 /**

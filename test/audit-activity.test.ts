@@ -11,7 +11,7 @@ vi.mock("next/headers", () => ({ headers: async () => new Headers({ "user-agent"
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
-import { createAuditLog } from "@/lib/services/audit/audit";
+import { createAuditLog, recordAdminAuditEntry } from "@/lib/services/audit/audit";
 import { getActivity, getUserActivity } from "@/lib/services/audit/activity";
 import { db } from "@/lib/prisma";
 
@@ -90,6 +90,21 @@ describe.skipIf(!hasTestDb)("audit activity (real Postgres)", () => {
     const row = await db.auditLog.findFirst({ where: { organizationId: ORG, entityId: ownCarId } });
     expect(row).toMatchObject({ action: "CAR_CREATED", userId: ownerId, impersonatedBy: null });
     expect(row?.metadata).toMatchObject({ userAgent: "vitest" });
+  });
+
+  it("records a super-admin action exactly as given, with no request context or retention", async () => {
+    const row = await recordAdminAuditEntry({
+      action: "ORG_UPDATED",
+      entityType: "ORGANIZATION",
+      entityId: OTHER_ORG,
+      userId: ownerId,
+      userEmail: "audit-owner@test.local",
+      organizationId: OTHER_ORG,
+      metadata: { isActive: true },
+    });
+    expect(row).toMatchObject({ retainUntil: null, impersonatedBy: null, metadata: { isActive: true } });
+    expect(row.metadata).not.toHaveProperty("userAgent");
+    await db.auditLog.delete({ where: { id: row.id } });
   });
 
   it("shows a dealership only its own entries, and names only its own cars and members", async () => {
