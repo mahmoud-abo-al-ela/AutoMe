@@ -15,9 +15,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
     formatPlanPrice,
-    planKeyFor,
     planPeriodKey,
 } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { PlanFeatureList } from "./PlanFeatureList";
 import { planSignupKind } from "@/lib/utils/plan-signup";

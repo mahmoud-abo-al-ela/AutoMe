@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 import type { PlatformOverview } from "@/lib/services/super-admin/overview";

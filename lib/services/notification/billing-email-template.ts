@@ -1,7 +1,7 @@
 import { createTranslator } from "next-intl";
 import type { BillingPeriod } from "@/lib/generated/prisma";
 import type { Locale } from "@/i18n/routing";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import { formatDate } from "@/lib/utils/datetime";
 import { escapeHtml } from "./email-templates";

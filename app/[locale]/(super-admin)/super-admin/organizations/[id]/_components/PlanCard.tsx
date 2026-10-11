@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { SectionPanel } from "@/components/dashboard/SectionPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 import { formatPlanAmount } from "@/lib/utils/currency";

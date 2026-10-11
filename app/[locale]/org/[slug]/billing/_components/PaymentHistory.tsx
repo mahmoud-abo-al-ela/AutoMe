@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";

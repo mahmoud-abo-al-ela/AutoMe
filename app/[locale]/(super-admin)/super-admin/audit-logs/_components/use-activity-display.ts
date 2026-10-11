@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import type { Change } from "@/components/dashboard/use-describe-entry";
 import { useAuditLabels } from "@/hooks/use-audit-labels";
 import { useFormatters } from "@/hooks/use-formatters";

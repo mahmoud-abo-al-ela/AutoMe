@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useDescribeEntry } from "@/components/dashboard/use-describe-entry";
 import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";

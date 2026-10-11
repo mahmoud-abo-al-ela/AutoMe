@@ -1,6 +1,6 @@
 import { redirect } from "@/i18n/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { checkUser } from "@/lib/checkUser";
 import { getOrganizationBySlug } from "@/lib/getOrganization";
 import { confirmBillingPayment } from "@/actions/billing";

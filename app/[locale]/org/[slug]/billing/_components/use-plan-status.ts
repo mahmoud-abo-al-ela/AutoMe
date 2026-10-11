@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { isFreePlan } from "@/lib/utils/plan-change";
 import type { BillingPaidAhead, BillingSubscription } from "./_lib/billing-types";
 
