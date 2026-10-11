@@ -59,6 +59,26 @@ export interface ProviderResult {
  * metering, no key selection — a provider may have several keys, and which one
  * to spend is the client's decision (see keysFor in lib/ai/providers).
  */
+/**
+ * What a vector is for. Retrieval models embed a short question and the
+ * longer text that answers it differently, so each side says which it is.
+ */
+export type EmbeddingTask = "query" | "document" | "similarity";
+
+export interface EmbedRequest {
+  model: string;
+  texts: string[];
+  /** Vector length; the stored column and every query must agree on it. */
+  dimensions: number;
+  task: EmbeddingTask;
+  signal?: AbortSignal;
+}
+
+export interface EmbedResult {
+  /** One per input text, in order. */
+  vectors: number[][];
+}
+
 export interface AiProvider {
   /**
    * Must throw errors carrying a numeric `status` for HTTP failures, so the
@@ -66,4 +86,6 @@ export interface AiProvider {
    * for every provider.
    */
   generate(req: ProviderRequest, apiKey: string): Promise<ProviderResult>;
+  /** Text to vectors, where the provider offers it; same error contract as generate. */
+  embed?(req: EmbedRequest, apiKey: string): Promise<EmbedResult>;
 }

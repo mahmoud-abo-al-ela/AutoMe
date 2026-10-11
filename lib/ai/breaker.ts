@@ -79,6 +79,30 @@ export function currentCaps(
   return { rpm: share(caps.rpm)!, rpd: share(caps.rpd), monthlyTokens: share(caps.monthlyTokens) };
 }
 
+/**
+ * A separate allowance on the same key. Google meters embedding models apart
+ * from the text models, so embedding requests must not spend the text pool's
+ * 10 a minute — nor be refused because a buyer is waiting on an answer.
+ */
+export type CapacityPool = "embed";
+
+const DEFAULT_EMBED_CAPS: ProviderCaps = { rpm: 60, rpd: 1_000 };
+
+/** The caps a pool answers to; the provider's own caps when there is none. */
+export function capsFor(provider: ProviderId, priority: CapacityPriority, pool?: CapacityPool): ProviderCaps {
+  if (!pool) return currentCaps(provider, priority);
+  return {
+    rpm: capFromEnv(["AI_EMBED_MAX_RPM"], DEFAULT_EMBED_CAPS.rpm)!,
+    rpd: capFromEnv(["AI_EMBED_MAX_RPD"], DEFAULT_EMBED_CAPS.rpd),
+  };
+}
+
+/** How a key's pool appears in AiUsage.provider: "google", "google#2:embed". */
+export function poolLedger(provider: ProviderId, keyIndex: number, pool?: CapacityPool): string {
+  const ledger = ledgerId(provider, keyIndex);
+  return pool ? `${ledger}:${pool}` : ledger;
+}
+
 function startOfMonthUtc(now: number): Date {
   const date = new Date(now);
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
@@ -172,10 +196,11 @@ async function ledgerUsage(ledger: string, caps: ProviderCaps, now: number): Pro
 export async function capacityBlock(
   provider: ProviderId,
   keyIndex = 0,
-  priority: CapacityPriority = "standard"
+  priority: CapacityPriority = "standard",
+  pool?: CapacityPool
 ): Promise<string | null> {
-  const caps = currentCaps(provider, priority);
-  const ledger = ledgerId(provider, keyIndex);
+  const caps = capsFor(provider, priority, pool);
+  const ledger = poolLedger(provider, keyIndex, pool);
   const now = Date.now();
 
   const redis = getRedis();
@@ -208,13 +233,14 @@ export async function capacityBlock(
 export async function reserveRequest(
   provider: ProviderId,
   keyIndex = 0,
-  priority: CapacityPriority = "standard"
+  priority: CapacityPriority = "standard",
+  pool?: CapacityPool
 ): Promise<boolean> {
   const redis = getRedis();
   if (!redis) return true;
 
-  const caps = currentCaps(provider, priority);
-  const ledger = ledgerId(provider, keyIndex);
+  const caps = capsFor(provider, priority, pool);
+  const ledger = poolLedger(provider, keyIndex, pool);
   const now = Date.now();
   const bucket = Math.floor(now / MINUTE_MS);
   const minute = minuteKey(ledger, bucket);
@@ -255,9 +281,10 @@ export async function reserveRequest(
 export async function recordTokens(ledger: string, tokens: number): Promise<void> {
   const redis = getRedis();
   if (!redis || tokens <= 0) return;
-  // Only a provider sold by the month has a counter — no round trip for one without.
+  // Only a provider sold by the month has a counter — no round trip for one
+  // without, nor for a pool (`google:embed`), which is metered by requests.
   const provider = ledger.split("#")[0];
-  if (!isProviderId(provider) || currentCaps(provider).monthlyTokens === undefined) return;
+  if (ledger.includes(":") || !isProviderId(provider) || currentCaps(provider).monthlyTokens === undefined) return;
   try {
     const key = monthKey(ledger, Date.now());
     // Only into a seeded counter: INCRBY on a missing key would start the
