@@ -62,6 +62,11 @@ export const AI_FEATURES = {
    * no one: the platform's housekeeping, not a dealer request.
    */
   questionEmbedding: "questionEmbedding",
+  /**
+   * A listing turned into a vector for meaning-based search. Metered, billed
+   * to no one: written on save and by the backfill, never asked for.
+   */
+  carEmbedding: "carEmbedding",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

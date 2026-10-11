@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { refreshImageAlts } from "@/lib/services/car/image-alts";
 import { embedQuestion } from "@/lib/services/buyer-question/meaning";
+import { embedCar } from "@/lib/services/car/embedding";
 
 /**
  * Every background job: the shape of its payload and what running it does.
@@ -37,6 +38,19 @@ export const JOBS = {
    * the earlier question it repeats on the same car. Idempotent: skips a
    * question already embedded by the current model, or gone.
    */
+  /**
+   * Give a car its meaning for search after a save. Idempotent: skips a car
+   * whose text and embedding model have not changed since its last vector.
+   */
+  "car-embedding": {
+    schema: z.object({
+      carId: z.string().uuid(),
+      organizationId: z.string().min(1),
+    }),
+    run: async ({ carId, organizationId }: { carId: string; organizationId: string }) => {
+      await embedCar(carId, organizationId);
+    },
+  },
   "question-embedding": {
     schema: z.object({
       questionId: z.string().uuid(),

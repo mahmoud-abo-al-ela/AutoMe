@@ -107,19 +107,22 @@ async function fillOtherLanguage<T extends BilingualListing>(
 }
 
 /**
- * Describe the car's photos once the save has answered. Platform-initiated,
- * so it is metered but never billed to the dealer (carImageAltText is not in
- * DEALER_METERED_FEATURES), and runs at low priority so it cannot take shared
- * capacity from a dealer waiting on the AI. Queued as a background job, so a
- * busy AI is retried rather than lost; never fails the save.
+ * The AI work a save leaves behind: describe the car's photos, and give it its
+ * meaning for search. Platform-initiated, so both are metered but never billed
+ * to the dealer (neither feature is in DEALER_METERED_FEATURES), and run at low
+ * priority so they cannot take shared capacity from a dealer waiting on the AI.
+ * Queued as background jobs, so a busy AI is retried rather than lost; never
+ * fails the save.
  */
-async function describePhotosAfterSave(ctx: TenantContext, carId: string) {
+async function enrichAfterSave(ctx: TenantContext, carId: string) {
+  const organizationId = ctx.organization.id;
   const caller = { ...aiCallerFor(ctx), priority: "low" as const };
-  try {
-    await enqueue("image-alts", { carId, organizationId: ctx.organization.id, caller });
-  } catch (error) {
-    logError("Could not queue photo descriptions; the next save will try again", error);
-  }
+  const queue = (job: Promise<void>, what: string) =>
+    job.catch((error) => logError(`Could not queue ${what}; the next save will try again`, error));
+  await Promise.all([
+    queue(enqueue("image-alts", { carId, organizationId, caller }), "photo descriptions"),
+    queue(enqueue("car-embedding", { carId, organizationId }), "the car's search meaning"),
+  ]);
 }
 
 /** Client input: only the two known locales mean anything. */
@@ -146,7 +149,7 @@ export const addCar = withOrgAuth(
       if (car?.id) {
         // The photo read, translation and advice behind this car: one use.
         await claimAiUsageForCar(ctx, car.id);
-        await describePhotosAfterSave(ctx, car.id);
+        await enrichAfterSave(ctx, car.id);
       }
 
       revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
@@ -220,7 +223,7 @@ export const updateCarFull = withOrgAuth(
   // already counted this month is claimed again, and still counts once.
   await claimAiUsageForCar(ctx, carId);
   // Also after an edit: new photos need describing, removed ones pruning.
-  await describePhotosAfterSave(ctx, carId);
+  await enrichAfterSave(ctx, carId);
 
   revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse({ ...updatedCar, translation }, "Car updated successfully");
