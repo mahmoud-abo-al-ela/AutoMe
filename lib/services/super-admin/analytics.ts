@@ -146,9 +146,10 @@ function atListPrices(models: ModelUsage[]) {
   let microUsd = 0;
   let unpricedCalls = 0;
   for (const row of models) {
-    // "ledger/model", where the ledger is "provider" or "provider#n".
+    // "ledger/model", where the ledger is "provider", "provider#n", or either
+    // with a capacity pool ("google:embed").
     const slash = row.model.indexOf("/");
-    const provider = row.model.slice(0, slash).split("#")[0];
+    const provider = row.model.slice(0, slash).split(/[#:]/)[0];
     const price = isProviderId(provider) ? listPriceMicroUsd(provider, row.model.slice(slash + 1), row) : null;
     if (price === null) unpricedCalls += row.calls;
     else microUsd += price;

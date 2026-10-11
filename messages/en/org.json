@@ -548,7 +548,11 @@
       "allCars": "Use this answer for every car",
       "hintCar": "The assistant tells buyers who ask about this car, in their own language.",
       "hintAll": "The assistant tells buyers who ask about any of your cars, in their own language.",
-      "count": "{used} of {max}"
+      "count": "{used} of {max}",
+      "suggestion": {
+        "title": "You answered a similar question on another car",
+        "use": "Reuse this answer"
+      }
     },
     "actions": {
       "answer": "Answer",
@@ -573,6 +577,13 @@
       "status": "{from} to {to} of {total}",
       "previous": "Previous",
       "next": "Next"
+    },
+    "missed": {
+      "title": "Needs attention",
+      "body": "You already answered a similar question about this car, but the assistant didn’t use your answer here. Answer this one too, or adjust your earlier answer so it covers both.",
+      "earlier": "Your earlier question",
+      "yourAnswer": "Your answer",
+      "assistantSaid": "What the assistant told the buyer"
     }
   },
   "settings": {

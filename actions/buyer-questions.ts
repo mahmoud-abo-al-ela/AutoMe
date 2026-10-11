@@ -9,6 +9,7 @@ import {
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { NotFoundError } from "@/lib/utils/errors";
+import { answerSuggestions } from "@/lib/services/buyer-question/meaning";
 
 /**
  * The dealer's inbox of questions the listing assistant could not answer.
@@ -27,9 +28,14 @@ export const getBuyerQuestions = withOrgAuth(async (ctx, input: unknown) => {
     buyerQuestionRepository.findBuyerQuestions(ctx.organization.id, view, page, PAGE_SIZE),
     buyerQuestionRepository.countBuyerQuestionsByView(ctx.organization.id),
   ]);
+  // Unanswered only: an answer the dealer already gave on another car that
+  // says the same, one click from being reused. Scoped to this dealership.
+  const suggestions =
+    view === "OPEN" ? await answerSuggestions(ctx.organization.id, questions.map((q) => q.id)) : [];
+  const suggestionFor = new Map(suggestions.map(({ questionId, ...rest }) => [questionId, rest]));
 
   return createSuccessResponse({
-    questions,
+    questions: questions.map((question) => ({ ...question, suggestion: suggestionFor.get(question.id) ?? null })),
     counts,
     pagination: { page, limit: PAGE_SIZE, total, totalPages: Math.ceil(total / PAGE_SIZE) },
   });

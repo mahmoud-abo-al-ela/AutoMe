@@ -13,6 +13,8 @@ const repo = vi.hoisted(() => ({
   setBuyerQuestionStatus: vi.fn(),
 }));
 vi.mock("@/lib/repositories/buyer-question", () => repo);
+const answerSuggestions = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/services/buyer-question/meaning", () => ({ answerSuggestions }));
 
 import { resolveTenantContext } from "@/lib/auth";
 import type { TenantContext } from "@/lib/auth/context";
@@ -34,6 +36,7 @@ const ID = "3f1c2a52-6f0e-4d9b-9a3e-2f6a8f0c1d11";
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(resolveTenantContext).mockResolvedValue(ctx);
+  answerSuggestions.mockResolvedValue([]);
 });
 
 describe("buyer question actions", () => {
@@ -86,5 +89,37 @@ describe("buyer question actions", () => {
     });
     const response = await setBuyerQuestionStatus({ id: ID, status: "ANSWERED" });
     expect(response).toMatchObject({ success: false });
+  });
+});
+
+describe("answer suggestions", () => {
+  const row = (id: string) => ({ id, question: "Installments?" });
+
+  it("attaches an earlier answer to each unanswered question it matches, for this dealership", async () => {
+    repo.findBuyerQuestions.mockResolvedValue({ questions: [row("q1"), row("q2")], total: 2 });
+    repo.countBuyerQuestionsByView.mockResolvedValue({ OPEN: 2, ANSWERED: 0, ALL_CARS: 0, DISMISSED: 0 });
+    answerSuggestions.mockResolvedValue([
+      { questionId: "q1", question: "Do you do installments?", answer: "Yes, 5 years", appliesToAllCars: false },
+    ]);
+
+    const response = await getBuyerQuestions({ view: "OPEN", page: 1 });
+
+    expect(answerSuggestions).toHaveBeenCalledWith("org-1", ["q1", "q2"]);
+    expect(response).toMatchObject({
+      success: true,
+      data: {
+        questions: [
+          { id: "q1", suggestion: { question: "Do you do installments?", answer: "Yes, 5 years", appliesToAllCars: false } },
+          { id: "q2", suggestion: null },
+        ],
+      },
+    });
+  });
+
+  it("looks for none outside the unanswered view", async () => {
+    repo.findBuyerQuestions.mockResolvedValue({ questions: [row("q1")], total: 1 });
+    repo.countBuyerQuestionsByView.mockResolvedValue({ OPEN: 0, ANSWERED: 1, ALL_CARS: 0, DISMISSED: 0 });
+    await getBuyerQuestions({ view: "ANSWERED", page: 1 });
+    expect(answerSuggestions).not.toHaveBeenCalled();
   });
 });

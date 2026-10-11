@@ -793,6 +793,28 @@ model BuyerQuestion {
   answeredBy       User?               @relation(fields: [answeredById], references: [id], onDelete: SetNull)
   answeredAt       DateTime?
 
+  // The question the dealer already answered on this car that this one
+  // rephrases — set when the assistant declined it anyway. Kept as its own open
+  // question, linked rather than folded, so the dealer sees the assistant
+  // missed their answer; each keeps its own status and answer.
+  relatedQuestionId String?
+  relatedQuestion   BuyerQuestion?  @relation("RelatedQuestion", fields: [relatedQuestionId], references: [id], onDelete: SetNull)
+  rephrasings       BuyerQuestion[] @relation("RelatedQuestion")
+  // What the assistant last told a buyer when it declined this question; null
+  // when the page showed its fixed copy, or the question came from a 👎.
+  declineMessage    String?
+
+  // The question's meaning as a vector (pgvector), written by the
+  // question-embedding job — what folds a rephrased repeat into this row, ranks
+  // the dealer's answers against a new question, and suggests this answer on
+  // another car. Only comparable with vectors from the same model, so the model
+  // is kept beside it and every search filters on it. Read and written with raw
+  // SQL (Unsupported). Deliberately unindexed: searches filter to one car or
+  // dealership first, and an approximate vector index would filter after
+  // choosing candidates platform-wide, silently missing a dealer's own rows.
+  embedding      Unsupported("vector(768)")?
+  embeddingModel String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

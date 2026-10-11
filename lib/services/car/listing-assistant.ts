@@ -11,6 +11,8 @@ import {
 } from "@/lib/services/ai/answerListingQuestion";
 import { dealershipPlaceName } from "@/lib/locations/names";
 import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
+import { dealerAnswersForQuestion } from "@/lib/services/buyer-question/meaning";
+import { enqueue } from "@/lib/jobs";
 import * as assistantAnswerRepository from "@/lib/repositories/assistant-answer";
 import { questionKey } from "@/lib/utils/question-key";
 import type { AssistantOutcome } from "@/lib/generated/prisma";
@@ -129,7 +131,7 @@ export async function askAboutListing(
   const price = Number(car.price);
   const [allowance, dealerAnswers, otherCars, marketPrices, history] = await Promise.all([
     allowanceFor(car.organizationId),
-    dealerAnswersFor(car.id, car.organizationId),
+    dealerAnswersFor(car.id, car.organizationId, question),
     otherCarsFor(car.organizationId, car.id, price),
     marketPricesFor({ ...car, price }),
     pastExchanges(car.id, historyIds),
@@ -235,6 +237,8 @@ export async function askAboutListing(
       question: asked,
       questionKey: questionKey(asked),
       locale,
+      // What the buyer was told — shown to the dealer beside the question.
+      declineMessage: reply.message ?? null,
     }),
     keep("DECLINED", reply.message ?? ""),
   ]);
@@ -276,9 +280,9 @@ async function pastExchanges(carId: string, ids: string[]): Promise<PastExchange
  * for one, so a failed read — or a deploy that reached production before its
  * migration did — answers from the listing alone instead of failing.
  */
-async function dealerAnswersFor(carId: string, organizationId: string) {
+async function dealerAnswersFor(carId: string, organizationId: string, question: string) {
   try {
-    return await buyerQuestionRepository.findAnswersForCar(carId, organizationId);
+    return await dealerAnswersForQuestion({ carId, organizationId, question });
   } catch (error) {
     logError("Loading dealer answers failed; answering from the listing alone", error);
     return [];
@@ -387,7 +391,12 @@ export async function rateListingAnswer(answerId: string, helpful: boolean): Pro
 
 async function recordForDealer(input: buyerQuestionRepository.DeclinedQuestion) {
   try {
-    await buyerQuestionRepository.recordDeclinedQuestion(input);
+    const row = await buyerQuestionRepository.recordDeclinedQuestion(input);
+    // A new question gets its meaning in the background, which may fold it
+    // into one the dealer already has. An exact repeat already has it.
+    if (row && !row.embeddingModel) {
+      await enqueue("question-embedding", { questionId: row.id, organizationId: input.organizationId });
+    }
   } catch (error) {
     logError("Recording a declined buyer question failed", error);
   }

@@ -139,3 +139,20 @@ describe("recordTokens", () => {
     expect(exists).not.toHaveBeenCalled();
   });
 });
+
+describe("the embedding pool", () => {
+  it("counts embedding requests apart from the text models on the same key", async () => {
+    redisRef.current = fakeRedis();
+    for (let i = 0; i < 10; i++) await reserveRequest("google", 0);
+    // The text pool is full; the embedding pool is untouched.
+    expect(await reserveRequest("google", 0)).toBe(false);
+    expect(await reserveRequest("google", 0, "standard", "embed")).toBe(true);
+    expect(await capacityBlock("google", 0, "standard", "embed")).toBeNull();
+  });
+
+  it("reads its ledger rows under their own name when Redis is absent", async () => {
+    countPlatformCallsSince.mockResolvedValue(0);
+    await capacityBlock("google", 1, "standard", "embed");
+    expect(countPlatformCallsSince).toHaveBeenCalledWith(expect.any(Date), "google#2:embed");
+  });
+});

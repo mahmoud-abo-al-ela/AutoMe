@@ -94,6 +94,7 @@ export const PROVIDERS: Record<ProviderId, ProviderEntry> = {
     provider: {
       // Resolved per call, so a test mocking the module intercepts it.
       generate: (req, apiKey) => gemini.generate(req, apiKey),
+      embed: (req, apiKey) => gemini.embed(req, apiKey),
     },
   },
 };

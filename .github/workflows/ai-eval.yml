@@ -56,7 +56,8 @@ jobs:
     # database. Throwaway, like the CI test job's.
     services:
       postgres:
-        image: postgres:16
+        # pgvector: the 20261011140000 migration creates the vector extension.
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: postgres
           POSTGRES_DB: autome_eval

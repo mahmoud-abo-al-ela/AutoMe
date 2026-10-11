@@ -14,15 +14,14 @@ import { PROVIDERS, keysFor, ledgerId, type ProviderId } from "@/lib/ai/provider
 import type { AiFeature } from "@/lib/ai/features";
 import {
   entryLabel,
-  estimateCostMicroUsd,
   modelsFor,
   type ChainEntry,
   type ModelTask,
   type TokenUsage,
 } from "@/lib/ai/models";
-import { capacityBlock, recordTokens, reserveRequest, type CapacityPriority } from "@/lib/ai/breaker";
+import { capacityBlock, reserveRequest, type CapacityPriority } from "@/lib/ai/breaker";
 import * as cache from "@/lib/ai/cache";
-import { createAiUsage } from "@/lib/repositories/ai-usage";
+import { meter, ZERO_USAGE } from "@/lib/ai/meter";
 import { recordAiFailure } from "@/lib/ai/telemetry";
 import { aiSpan } from "@/lib/ai/tracing";
 import { recordTrace, shouldTrace } from "@/lib/ai/trace";
@@ -181,13 +180,6 @@ const DEFAULT_MAX_ATTEMPTS = 2;
  */
 const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
 
-const ZERO_USAGE: TokenUsage = {
-  inputTokens: 0,
-  outputTokens: 0,
-  thinkingTokens: 0,
-  cachedTokens: 0,
-};
-
 /** Derived JSON Schemas are stable per Zod schema, so derive each one once. */
 const schemaCache = new WeakMap<object, unknown>();
 
@@ -304,52 +296,6 @@ async function callWithTimeout(
   } finally {
     if (timer) clearTimeout(timer);
     if (firstTimer) clearTimeout(firstTimer);
-  }
-}
-
-interface MeterInput {
-  ctx: AiCallerContext | null | undefined;
-  feature: AiFeature;
-  provider: ProviderId;
-  /** Which key: what AiUsage.provider records and the per-key caps count. */
-  ledger: string;
-  model: string;
-  usage: TokenUsage;
-  latencyMs: number;
-  success: boolean;
-  errorCode: string | null;
-}
-
-/**
- * Write one ledger row. Never throws: losing a usage row is bad, but failing a
- * dealer's upload because the ledger write failed is worse. Awaited rather than
- * detached, because a floating promise dies when the function returns.
- *
- * Returns the row's id, or null when it could not be written.
- */
-async function meter(input: MeterInput): Promise<string | null> {
-  try {
-    const row = await createAiUsage({
-      organizationId: input.ctx?.organizationId ?? null,
-      userId: input.ctx?.userId ?? null,
-      feature: input.feature,
-      provider: input.ledger,
-      model: input.model,
-      inputTokens: input.usage.inputTokens,
-      outputTokens: input.usage.outputTokens,
-      thinkingTokens: input.usage.thinkingTokens,
-      cachedTokens: input.usage.cachedTokens,
-      costMicroUsd: estimateCostMicroUsd(input.model, input.usage, input.provider),
-      latencyMs: input.latencyMs,
-      success: input.success,
-      errorCode: input.errorCode,
-    });
-    const { inputTokens, outputTokens, thinkingTokens } = input.usage;
-    await recordTokens(input.ledger, inputTokens + outputTokens + thinkingTokens);
-    return row?.id ?? null;
-  } catch (error) {
-    logError("AiUsage write failed", error);
-    return null;
   }
 }
 

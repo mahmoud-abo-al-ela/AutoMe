@@ -55,6 +55,13 @@ export const AI_FEATURES = {
    * Never runs in production; metered like any call, billed to no one.
    */
   evalJudge: "evalJudge",
+  /**
+   * A buyer question turned into a vector — to fold a rephrased repeat into
+   * the question already in the dealer's inbox, rank the dealer's answers by
+   * meaning, and suggest an answer given on another car. Metered, billed to
+   * no one: the platform's housekeeping, not a dealer request.
+   */
+  questionEmbedding: "questionEmbedding",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

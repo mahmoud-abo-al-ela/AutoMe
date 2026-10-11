@@ -1,6 +1,6 @@
 import { GoogleGenAI, ThinkingLevel, type GenerateContentResponse } from "@google/genai";
 import type { TokenUsage } from "@/lib/ai/models";
-import type { ProviderRequest, ProviderResult } from "@/lib/ai/provider/types";
+import type { EmbedRequest, EmbedResult, EmbeddingTask, ProviderRequest, ProviderResult } from "@/lib/ai/provider/types";
 
 /**
  * Google's Gemini API, through its SDK. The only module in the repo that
@@ -83,6 +83,30 @@ export async function generate(
   }
   // Usage arrives on the final chunk; the running total is what was billed.
   return { text: text || undefined, usage: usageOf(last) };
+}
+
+const TASK_TYPES: Record<EmbeddingTask, string> = {
+  query: "RETRIEVAL_QUERY",
+  document: "RETRIEVAL_DOCUMENT",
+  similarity: "SEMANTIC_SIMILARITY",
+};
+
+/** Texts to vectors, all in one request. No retry or metering — the caller's. */
+export async function embed(req: EmbedRequest, apiKey: string): Promise<EmbedResult> {
+  const response = await getClient(apiKey).models.embedContent({
+    model: req.model,
+    contents: req.texts,
+    config: {
+      outputDimensionality: req.dimensions,
+      taskType: TASK_TYPES[req.task],
+      ...(req.signal ? { abortSignal: req.signal } : {}),
+    },
+  });
+  const vectors = (response.embeddings ?? []).map((embedding) => embedding.values ?? []);
+  if (vectors.length !== req.texts.length || vectors.some((v) => v.length !== req.dimensions)) {
+    throw Object.assign(new Error("Embedding response did not match the request"), { code: "EMBEDDING_SHAPE" });
+  }
+  return { vectors };
 }
 
 /**

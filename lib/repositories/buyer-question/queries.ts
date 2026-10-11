@@ -11,7 +11,7 @@ export const MAX_DEALER_ANSWERS = 20;
  * the dealer marked as true of every car they sell. Most-asked first, so the
  * cap drops the long tail rather than the questions buyers actually ask.
  */
-export async function findAnswersForCar(carId: string, organizationId: string) {
+export async function findAnswersForCar(carId: string, organizationId: string, take = MAX_DEALER_ANSWERS) {
   return db.buyerQuestion.findMany({
     where: {
       organizationId,
@@ -20,7 +20,7 @@ export async function findAnswersForCar(carId: string, organizationId: string) {
     },
     select: { question: true, answer: true, appliesToAllCars: true },
     orderBy: [{ askCount: "desc" }, { answeredAt: "desc" }],
-    take: MAX_DEALER_ANSWERS,
+    take,
   });
 }
 
@@ -55,6 +55,9 @@ export async function findBuyerQuestions(
         answer: true,
         appliesToAllCars: true,
         answeredAt: true,
+        declineMessage: true,
+        // The answered question this one rephrases — the assistant missed it.
+        relatedQuestion: { select: { id: true, question: true, answer: true, status: true } },
         car: {
           select: { id: true, make: true, model: true, year: true, title: true, titleEn: true, titleAr: true },
         },
