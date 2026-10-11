@@ -39,7 +39,7 @@ beforeEach(() => {
 describe("embedQuestion", () => {
   it("folds an open question into the earlier one it repeats", async () => {
     repo.findQuestionForEmbedding.mockResolvedValue(question());
-    repo.findNearestEarlierQuestion.mockResolvedValue({ id: "q1", similarity: 0.91 });
+    repo.findNearestEarlierQuestion.mockResolvedValue({ id: "q1", similarity: 0.93 });
 
     expect(await embedQuestion("q2", "org")).toBe("folded");
     expect(repo.foldQuestionInto).toHaveBeenCalledWith({ fromId: "q2", intoId: "q1", organizationId: "org" });
@@ -48,7 +48,7 @@ describe("embedQuestion", () => {
 
   it("keeps a question that is only related, and stores its meaning", async () => {
     repo.findQuestionForEmbedding.mockResolvedValue(question());
-    repo.findNearestEarlierQuestion.mockResolvedValue({ id: "q1", similarity: 0.8 });
+    repo.findNearestEarlierQuestion.mockResolvedValue({ id: "q1", similarity: 0.86 });
 
     expect(await embedQuestion("q2", "org")).toBe("embedded");
     expect(repo.setQuestionEmbedding).toHaveBeenCalledWith({ id: "q2", organizationId: "org", vector: VECTOR, model: "gemini-embedding-2" });

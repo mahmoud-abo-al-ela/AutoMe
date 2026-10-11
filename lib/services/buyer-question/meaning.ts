@@ -8,15 +8,29 @@ import { logError } from "@/lib/utils/errors";
  * Buyer questions by meaning, not by wording: the same question rephrased —
  * or asked in the other language — is one question.
  *
- * Thresholds are cosine similarity between two questions' vectors. Measured on
- * gemini-embedding-2 (2026-10-11): an English question and its Egyptian-Arabic
- * paraphrase 0.82, unrelated questions about the same car ~0.6. The retrieval
- * evaluation (lib/ai/evaluation/retrieval.eval.test.ts) is what moves them.
+ * Thresholds are cosine similarity between two questions' vectors, set from
+ * the retrieval evaluation (lib/ai/evaluation/retrieval.eval.test.ts — 32
+ * questions, 8 meanings, English, MSA and Egyptian Arabic) on
+ * gemini-embedding-2, 2026-10-11:
+ *
+ *   same question      median 0.773 · p25 0.727 · min 0.493
+ *   different question median 0.613 · p98 0.775 · max 0.851
+ *
+ * The two overlap, so no single line separates them; each use picks its own
+ * side of the overlap by what a mistake costs. Rerun the evaluation before
+ * moving either, and after changing AI_EMBEDDING_MODEL.
  */
 
-/** Folding deletes a row, so only near-certain repeats fold. */
-export const FOLD_SIMILARITY = 0.86;
-/** A suggestion is a dealer's click away from being used, so it can reach further. */
+/**
+ * Folding deletes a row, so it sits well above the closest two different
+ * questions ever came (0.851): only near-identical rephrasings fold.
+ */
+export const FOLD_SIMILARITY = 0.9;
+/**
+ * A suggestion costs a dealer a glance, and is theirs to accept: at the
+ * different-question 98th percentile, where it finds about half the same
+ * questions and is wrong about 1.6% of the time.
+ */
 export const SUGGEST_SIMILARITY = 0.78;
 
 /** Platform housekeeping: metered, billed to no one, behind dealers' own AI. */
