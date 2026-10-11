@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { getCars, getCarsFilters } from "@/actions/cars-listing";
@@ -10,13 +10,10 @@ import {
   parseFiltersFromSearch,
   buildCarsUrl,
   buildActiveFilterChips,
+  clearedFilters,
 } from "./cars-page-filters";
-import type { CarPageFilters, MultiKey, ChipFormatters } from "./cars-page-filters";
-import type { ActionResponse } from "@/lib/utils/response";
-import { useTranslations } from "next-intl";
-import { useFormatters } from "./use-formatters";
-import { useCarAttributes } from "./use-car-attributes";
-import { usePlaceNames } from "./use-place-names";
+import type { CarPageFilters, MultiKey } from "./cars-page-filters";
+import { useChipFormatters } from "./use-chip-formatters";
 
 // Re-exported for backward-compatible import sites.
 export { DEFAULT_PER_PAGE, parseFiltersFromSearch, buildCarsUrl };
@@ -37,11 +34,6 @@ export const useCarsPage = (
   // hydration mismatch); fall back to parsing the URL on the client only.
   const initial =
     initialState || parseFiltersFromSearch(typeof window !== "undefined" ? window.location.search : "");
-
-  const t = useTranslations("cars.filters");
-  const fmt = useFormatters();
-  const attr = useCarAttributes();
-  const place = usePlaceNames();
 
   const [filters, setFilters] = useState({ ...DEFAULT_FILTERS, ...initial.filters });
   const [page, setPage] = useState(initial.page || 1);
@@ -258,75 +250,17 @@ export const useCarsPage = (
   // Clear one active-filter chip. For multi fields, `value` removes a single entry.
   const clearFilter = useCallback(
     (type: string, value?: string) => {
-      const next = { ...filters };
-      switch (type) {
-        case "search":
-          next.search = undefined;
-          break;
-        case "make":
-        case "bodyType":
-        case "fuelType":
-        case "transmission":
-          next[type] = value ? (filters[type] || []).filter((v) => v !== value) : [];
-          break;
-        case "dealership":
-          next.dealership = undefined;
-          break;
-        case "city":
-          next.city = undefined;
-          break;
-        case "color":
-          next.color = undefined;
-          break;
-        case "minSeats":
-          next.minSeats = undefined;
-          break;
-        case "price":
-          next.minPrice = undefined;
-          next.maxPrice = undefined;
-          break;
-        case "year":
-          next.minYear = undefined;
-          next.maxYear = undefined;
-          break;
-        case "mileage":
-          next.minMileage = undefined;
-          next.maxMileage = undefined;
-          break;
-        case "all":
-          resetAllFilters();
-          return;
-        default:
-          break;
+      const next = clearedFilters(filters, type, value);
+      if (next === null) {
+        resetAllFilters();
+        return;
       }
       applyFilters(next);
     },
     [filters, applyFilters, resetAllFilters]
   );
 
-  // Chip labels are locale-dependent, so the formatters are rebuilt when the
-  // locale changes and the memo is keyed on them.
-  const chipFormatters = useMemo<ChipFormatters>(
-    () => ({
-      any: t("any"),
-      price: (v: number) => fmt.price(v),
-      mileage: (v: number) => fmt.mileage(v),
-      number: (v: number) => fmt.number(v, { useGrouping: false }),
-      attribute: (type: string, value: string) => {
-        if (type === "bodyType") return attr.body(value);
-        if (type === "fuelType") return attr.fuel(value);
-        if (type === "transmission") return attr.transmission(value);
-        if (type === "color") return attr.color(value);
-        // Brands render in their Arabic market form when they stand alone, as
-        // they do on a chip. Car titles keep "{make} {model}" Latin together,
-        // since the model is open-ended free text with no Arabic form.
-        if (type === "make") return attr.make(value);
-        return value;
-      },
-      place: (value: string) => place.city(value),
-    }),
-    [t, fmt, attr, place]
-  );
+  const chipFormatters = useChipFormatters();
 
   const getActiveFilters = useCallback(
     () => buildActiveFilterChips(filters, chipFormatters),
