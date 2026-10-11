@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { useFormatters } from "@/hooks/use-formatters";
 import { findGovernorate } from "@/lib/locations/data";

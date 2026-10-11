@@ -102,8 +102,6 @@ const LAYER = {
 // a service; never add one.
 const KNOWN_LAYER_VIOLATIONS = {
   ui: ["app/sitemap.ts"],
-  // planKeyFor lives in components/Pricing; it belongs in lib/.
-  lib: ["lib/services/notification/billing-email-template.ts"],
   entryPoints: [
     "actions/billing.ts",
     "actions/buyer-questions.ts",
@@ -183,10 +181,6 @@ const eslintConfig = [
   {
     files: KNOWN_LAYER_VIOLATIONS.ui,
     rules: { "no-restricted-syntax": ["warn", ...UI_LAYER] },
-  },
-  {
-    files: KNOWN_LAYER_VIOLATIONS.lib,
-    rules: { "no-restricted-syntax": ["warn", LAYER.ui] },
   },
   {
     files: KNOWN_LAYER_VIOLATIONS.entryPoints,

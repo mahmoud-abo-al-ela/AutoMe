@@ -3,6 +3,7 @@ import { Zap, Shield, Headphones, type LucideIcon } from "lucide-react";
 import type { Prisma } from "@/lib/generated/prisma";
 import type { Locale } from "@/i18n/routing";
 import { formatPlanAmount } from "@/lib/utils/currency";
+import { planKeyFor, type PlanKey } from "@/lib/constants/plans";
 
 /**
  * A feature bullet, as a message key plus its ICU params rather than a
@@ -17,15 +18,6 @@ export type PlanFeature = {
   params?: Record<string, number>;
   included: boolean;
 };
-
-/** Message keys under `home.pricing.plans`, keyed off the DB plan `type`. */
-const PLAN_KEY_BY_TYPE = {
-  STARTER: "starter",
-  PRO: "pro",
-  ENTERPRISE: "enterprise",
-} as const;
-
-export type PlanKey = (typeof PLAN_KEY_BY_TYPE)[keyof typeof PLAN_KEY_BY_TYPE];
 
 /** The shape the pricing cards render, whether it came from the DB or the defaults. */
 export type UiPlan = {
@@ -46,12 +38,6 @@ export type UiPlan = {
   icon: LucideIcon;
   type?: string | null;
 };
-
-/** Message key under `plans.plans` for a DB plan `type`, or null if unrecognised. */
-export function planKeyFor(type?: string | null): PlanKey | null {
-  if (!type) return null;
-  return PLAN_KEY_BY_TYPE[type as keyof typeof PLAN_KEY_BY_TYPE] ?? null;
-}
 
 /**
  * A plan's name in the reader's language: the shared copy for a known type,

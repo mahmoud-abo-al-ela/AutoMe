@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { checkUser } from "@/lib/checkUser";
 import { getOrganizationBySlug, getUserMembership } from "@/lib/getOrganization";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { formatNumber } from "@/lib/utils/number";
 import { ACTIVITY_DAYS, ACTIVITY_KINDS, getActivity, type ActivityKind } from "@/lib/services/audit/activity";
 import { ActivityFeed } from "./_components/ActivityFeed";

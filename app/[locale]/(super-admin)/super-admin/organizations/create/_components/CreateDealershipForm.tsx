@@ -8,7 +8,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import SearchableLocationSelect from "@/components/SearchableLocationSelect";
 import { Field, inputClass } from "@/components/dashboard/form-ui";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useActionError } from "@/hooks/use-action-error";
 import { useEgyptLocations } from "@/hooks/use-egypt-locations";
 import { useFormatters } from "@/hooks/use-formatters";

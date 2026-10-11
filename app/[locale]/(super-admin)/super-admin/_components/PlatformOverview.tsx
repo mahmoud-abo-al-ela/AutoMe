@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { OrgPageHeader } from "@/components/dashboard/OrgPageHeader";
 import { SectionPanel } from "@/components/dashboard/SectionPanel";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";

@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { formatPlanPrice, planKeyFor } from "@/components/Pricing/pricing-plans";
+import { formatPlanPrice } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { isFreePlan, planChange } from "@/lib/utils/plan-change";
 import { cn } from "@/lib/utils";

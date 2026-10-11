@@ -6,7 +6,7 @@ import { useFormatters } from "@/hooks/use-formatters";
 import { Search, X } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { EGYPT_GOVERNORATES } from "@/lib/locations/data";
 import {
   DEALERSHIP_PLANS,

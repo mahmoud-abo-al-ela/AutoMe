@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { AlertTriangle, Clock, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFormatters } from "@/hooks/use-formatters";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";
 import { useBillingActions } from "./use-billing-actions";

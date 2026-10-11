@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useAuditLabels } from "@/hooks/use-audit-labels";
 import { useFormatters } from "@/hooks/use-formatters";
 import { findCity, findGovernorate } from "@/lib/locations/data";

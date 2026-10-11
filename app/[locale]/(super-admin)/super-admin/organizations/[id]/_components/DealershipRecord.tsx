@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { CircleAlert } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { planKeyFor } from "@/components/Pricing/pricing-plans";
+import { planKeyFor } from "@/lib/constants/plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";
