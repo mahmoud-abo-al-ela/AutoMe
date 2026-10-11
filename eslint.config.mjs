@@ -11,7 +11,9 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 // through a repository, so the Prisma client and the generated client's runtime
 // values (the `Prisma` namespace, enum objects) are off limits outside it.
 // `import type` stays allowed everywhere: model and enum types cost nothing at
-// runtime and are how the rest of the app names the data's shape.
+// runtime and are how the rest of the app names the data's shape. No file is
+// exempt (every query outside a repository was moved, 2026-10-11): a new one
+// is an error — add or reuse a repository function instead.
 const PRISMA_BOUNDARY = {
   paths: [
     {
@@ -37,16 +39,6 @@ const PRISMA_BOUNDARY = {
     },
   ],
 };
-
-// Files that already used the Prisma client outside lib/repositories when the
-// boundary was introduced (2026-10-11). They report as warnings so lint stays
-// green while each is moved; every new file is held to the rule as an error.
-// Remove a line when its queries move into a repository. Never add one.
-const KNOWN_PRISMA_VIOLATIONS = [
-  "lib/checkUser.ts",
-  "lib/org/access.ts",
-  "lib/org/resolve.ts",
-];
 
 // The layers' import direction: app → actions → services → repositories, never
 // back. Expressed with no-restricted-syntax (a rule separate from the Prisma
@@ -120,10 +112,6 @@ const eslintConfig = [
       "**/*.test.{js,jsx,ts,tsx}",
     ],
     rules: { "no-restricted-imports": "off" },
-  },
-  {
-    files: KNOWN_PRISMA_VIOLATIONS,
-    rules: { "no-restricted-imports": ["warn", PRISMA_BOUNDARY] },
   },
   {
     files: UI_FILES,

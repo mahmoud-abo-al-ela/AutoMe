@@ -1,19 +1,12 @@
 import { headers } from "next/headers";
 import { cache } from "react";
-import { db } from "@/lib/prisma";
+import * as tenantRepository from "@/lib/repositories/tenant";
 import { auth } from "@clerk/nextjs/server";
 
 export const getOrganizationBySlug = cache(async (slug: string | null | undefined) => {
   if (!slug) return null;
 
-  return db.organization.findUnique({
-    where: { slug, isActive: true },
-    include: {
-      subscription: {
-        include: { plan: true },
-      },
-    },
-  });
+  return tenantRepository.findActiveOrganizationBySlug(slug);
 });
 
 export async function getOrganization(slug: string) {
@@ -23,9 +16,7 @@ export async function getOrganization(slug: string) {
     return { organization: null, membership: null };
   }
 
-  const user = await db.user.findUnique({
-    where: { clerkId },
-  });
+  const user = await tenantRepository.findUserRowByClerkId(clerkId);
 
   if (!user) {
     return { organization: null, membership: null };
@@ -37,14 +28,7 @@ export async function getOrganization(slug: string) {
     return { organization: null, membership: null };
   }
 
-  const membership = await db.membership.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: user.id,
-        organizationId: organization.id,
-      },
-    },
-  });
+  const membership = await tenantRepository.findMembershipRow(user.id, organization.id);
 
   return { organization, membership };
 }
@@ -52,14 +36,7 @@ export async function getOrganization(slug: string) {
 export const getOrganizationById = cache(async (id: string | null | undefined) => {
   if (!id) return null;
 
-  return db.organization.findUnique({
-    where: { id, isActive: true },
-    include: {
-      subscription: {
-        include: { plan: true },
-      },
-    },
-  });
+  return tenantRepository.findActiveOrganizationById(id);
 });
 
 export async function getCurrentOrganization() {
@@ -85,21 +62,7 @@ export async function getImpersonationContext() {
 }
 
 export async function getUserOrganizations(userId: string) {
-  const memberships = await db.membership.findMany({
-    where: { userId },
-    include: {
-      organization: {
-        include: {
-          subscription: {
-            include: { plan: true },
-          },
-        },
-      },
-    },
-    orderBy: {
-      organization: { name: "asc" },
-    },
-  });
+  const memberships = await tenantRepository.findMembershipsWithOrganizations(userId);
 
   return memberships.map((m) => ({
     ...m.organization,

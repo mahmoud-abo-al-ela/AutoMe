@@ -1,6 +1,6 @@
 import type { MemberRole } from "@/lib/generated/prisma";
 import type { OrganizationWithPlan } from "@/lib/auth/context";
-import { db } from "@/lib/prisma";
+import * as tenantRepository from "@/lib/repositories/tenant";
 import { AuthorizationError } from "@/lib/utils/errors";
 
 export async function checkOrganizationAccess(
@@ -8,14 +8,7 @@ export async function checkOrganizationAccess(
   organizationId: string,
   requiredRole: MemberRole | null = null
 ): Promise<boolean> {
-  const membership = await db.membership.findUnique({
-    where: {
-      userId_organizationId: {
-        userId,
-        organizationId,
-      },
-    },
-  });
+  const membership = await tenantRepository.findMembershipRow(userId, organizationId);
 
   if (!membership) return false;
 
@@ -30,23 +23,7 @@ export async function checkOrganizationAccess(
 }
 
 export async function getUserMembership(userId: string, organizationId: string) {
-  return db.membership.findUnique({
-    where: {
-      userId_organizationId: {
-        userId,
-        organizationId,
-      },
-    },
-    include: {
-      organization: {
-        include: {
-          subscription: {
-            include: { plan: true },
-          },
-        },
-      },
-    },
-  });
+  return tenantRepository.findMembershipWithOrganization(userId, organizationId);
 }
 
 /**
