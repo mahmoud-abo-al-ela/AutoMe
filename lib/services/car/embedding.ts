@@ -3,8 +3,11 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import * as carRepository from "@/lib/repositories/car";
 import { carEmbeddingText, embeddingHash } from "@/lib/services/car/embedding-text";
 
-/** Platform housekeeping: metered, billed to no one, behind dealers' own AI. */
-const CALLER = { userId: null, priority: "low" as const };
+/**
+ * Metered, billed to no one. Standard priority within the embedding pool: the
+ * dealers' cars come before anonymous search queries (see carSearchQuery).
+ */
+const CALLER = { userId: null, priority: "standard" as const };
 
 /**
  * The car-embedding job: give a car its meaning for search, or refresh it after

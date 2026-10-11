@@ -67,6 +67,12 @@ export const AI_FEATURES = {
    * to no one: written on save and by the backfill, never asked for.
    */
   carEmbedding: "carEmbedding",
+  /**
+   * A buyer's search text turned into a vector, to rank cars by what they
+   * meant. Public and anonymous: metered, billed to no one, at low priority
+   * in the embedding pool so it can never crowd out the dealers' own jobs.
+   */
+  carSearchQuery: "carSearchQuery",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];
