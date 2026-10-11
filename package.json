@@ -16,7 +16,7 @@
     "prebuild": "node scripts/clean-next.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --dir app --dir components --dir lib --dir actions --dir hooks --dir i18n --dir test --file middleware.ts --file instrumentation.ts --file instrumentation-client.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "eval": "vitest run --config vitest.eval.config.mjs",

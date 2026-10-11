@@ -1,6 +1,6 @@
 import { logError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
-import { AuditAction, EntityType } from "@/lib/generated/prisma";
+import type { AuditAction, EntityType } from "@/lib/generated/prisma";
 import { getRequestMetadata, calculateRetentionDate } from "./metadata";
 import {
   getAuditLogs,
