@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
-import {
-  findSitemapCars,
-  findSitemapDealerships,
-} from "@/lib/repositories/sitemap";
+import { getSitemapListings } from "@/lib/services/sitemap";
+import { logError } from "@/lib/utils/errors";
 import { requestOrigin } from "@/lib/utils/page-seo";
 import { sitemapEntries } from "@/lib/utils/seo-meta";
 
@@ -55,10 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   try {
-    const [cars, dealerships] = await Promise.all([
-      findSitemapCars(),
-      findSitemapDealerships(),
-    ]);
+    const { cars, dealerships } = await getSitemapListings();
 
     return [
       ...staticEntries,
@@ -76,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     // A database outage should cost the crawler the dynamic URLs, not the
     // whole file: a 500 here makes Google back off the sitemap entirely.
-    console.error("Error generating sitemap:", error);
+    logError("Sitemap could not list cars and dealerships; serving the static pages only", error);
     return staticEntries;
   }
 }
