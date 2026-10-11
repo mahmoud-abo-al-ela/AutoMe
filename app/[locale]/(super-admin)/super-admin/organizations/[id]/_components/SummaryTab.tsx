@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { DealershipDetail } from "@/lib/services/super-admin/dealership-detail";
 import { useDealershipDisplay } from "../../_components/use-dealership-display";
 import { ActivityList } from "./ActivityList";
-import { CarsTable } from "./RecordTabs";
+import { CarsTable } from "./record/CarsTable";
 import { PlanCard } from "./PlanCard";
 
 type Summary = Extract<DealershipDetail, { summary: unknown }>;

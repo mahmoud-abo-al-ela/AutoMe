@@ -27,7 +27,7 @@ import { endImpersonation } from "@/actions/super-admin";
 import { SESSIONS_PER_PAGE, SESSION_VIEWS, sessionQueryString } from "@/lib/services/super-admin/sessions-options";
 import type { SessionRow, SessionsPage } from "@/lib/services/super-admin/sessions";
 import ImpersonateModal from "../../organizations/_components/ImpersonateModal";
-import { Pager } from "../../organizations/[id]/_components/RecordTabs";
+import { Pager } from "../../_components/Pager";
 import { SessionsToolbar } from "./SessionsToolbar";
 
 const BASE = "/super-admin/impersonation";

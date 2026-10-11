@@ -9,7 +9,7 @@ import { useDescribeEntry } from "@/components/dashboard/use-describe-entry";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 import type { UserDetail } from "@/lib/services/super-admin/user-detail";
-import { Pager } from "../../../organizations/[id]/_components/RecordTabs";
+import { Pager } from "../../../_components/Pager";
 
 type Summary = Extract<UserDetail, { summary: unknown }>["summary"];
 type Drive = Summary["drives"][number];
