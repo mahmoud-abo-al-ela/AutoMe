@@ -30,7 +30,8 @@
     "plateBand": "Search {value} cars",
     "plateBandFallback": "Search cars",
     "quickUnder": "Under {price}",
-    "quickSevenSeats": "7+ seats"
+    "quickSevenSeats": "7+ seats",
+    "describing": "Reading your search…"
   },
   "stats": {
     "customersLabel": "Happy Customers",

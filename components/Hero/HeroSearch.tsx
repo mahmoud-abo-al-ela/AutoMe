@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { Camera, Search, Upload } from "lucide-react";
+import { Camera, Loader2, Search, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { describeSearch } from "@/actions/home";
+import { describedSearchParams, hasFilters, readsLikeSentence } from "@/lib/search/describe";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 
@@ -15,8 +18,12 @@ import ImageSearchPanel from "./ImageSearchPanel";
  * blue band carries the live count, the body holds the field, and the yellow
  * key is the page's one primary action.
  *
- * Text search goes straight to /cars?search=…; a photo (picked or dropped
- * anywhere on the field) runs the AI photo search in useImageSearch.
+ * A short query goes straight to /cars?search=… as it always has; one that
+ * reads like a description ("automatic SUV under 1.5 million") is first turned
+ * into filters by the model (describeSearch). If that fails or finds no filter,
+ * it is the plain text search after all — the buyer is never stopped. A photo
+ * (picked or dropped anywhere on the field) runs the AI photo search in
+ * useImageSearch.
  */
 const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const t = useTranslations("home.hero");
@@ -24,14 +31,25 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
+  const described = useMutation({ mutationFn: describeSearch });
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) {
+    const query = searchQuery.trim();
+    if (!query) {
       toast.error(t("emptySearch"));
       return;
     }
-    router.push(`/cars?search=${encodeURIComponent(searchQuery.trim())}`);
+    const plain = () => router.push(`/cars?search=${encodeURIComponent(query)}`);
+    if (!readsLikeSentence(query)) return plain();
+
+    try {
+      const result = await described.mutateAsync({ query });
+      if (!result.success || !hasFilters(result.data)) return plain();
+      router.push(`/cars?${describedSearchParams(result.data).toString()}`);
+    } catch {
+      plain();
+    }
   };
 
   if (image.isActive) {
@@ -86,9 +104,16 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
         >
           <Camera />
         </Button>
-        <Button type="submit" variant="marker" size="xl" disabled={image.loading} className="shrink-0 max-sm:px-3.5">
-          <Search className="sm:hidden" />
-          <span className="max-sm:sr-only">{tActions("search")}</span>
+        <Button
+          type="submit"
+          variant="marker"
+          size="xl"
+          disabled={image.loading || described.isPending}
+          aria-busy={described.isPending}
+          className="shrink-0 max-sm:px-3.5"
+        >
+          {described.isPending ? <Loader2 aria-hidden className="animate-spin" /> : <Search className="sm:hidden" />}
+          <span className="max-sm:sr-only">{described.isPending ? t("describing") : tActions("search")}</span>
         </Button>
         <input
           ref={image.fileInputRef}

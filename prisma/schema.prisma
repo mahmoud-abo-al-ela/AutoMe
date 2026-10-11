@@ -499,6 +499,17 @@ model Car {
   // is declared Unsupported and populated entirely by the database.
   searchVector  Unsupported("tsvector")?
 
+  // The listing's meaning as a vector (pgvector), from its bilingual title,
+  // description, features and specs — what lets "a family car that's cheap to
+  // run" find a car whose words never say that. Written by the car-embedding
+  // job on save; only comparable within one model (embeddingModel), so every
+  // search filters on it. embeddingHash fingerprints the text it was made
+  // from, so a save that changed none of it costs no request. Raw SQL only,
+  // and deliberately unindexed — see BuyerQuestion.embedding.
+  embedding      Unsupported("vector(768)")?
+  embeddingModel String?
+  embeddingHash  String?
+
   savedBy       SavedCar[]
   testDrive     TestDrive[]
   buyerQuestions BuyerQuestion[]

@@ -4,6 +4,12 @@ export const AI_FEATURES = {
   /** Buyer uploads a photo on the hero; the model extracts search filters. */
   searchFiltersFromImage: "searchFiltersFromImage",
   /**
+   * Buyer describes the car they want in the hero search ("automatic SUV
+   * under 1.5 million"); the model turns it into filters. Public: metered,
+   * billed to no one, rate-limited per visitor.
+   */
+  searchFiltersFromText: "searchFiltersFromText",
+  /**
    * A dealer saves a listing written in one language; the model writes the
    * other. Bills to the dealer's AI allowance like the photo extraction.
    */
@@ -62,6 +68,17 @@ export const AI_FEATURES = {
    * no one: the platform's housekeeping, not a dealer request.
    */
   questionEmbedding: "questionEmbedding",
+  /**
+   * A listing turned into a vector for meaning-based search. Metered, billed
+   * to no one: written on save and by the backfill, never asked for.
+   */
+  carEmbedding: "carEmbedding",
+  /**
+   * A buyer's search text turned into a vector, to rank cars by what they
+   * meant. Public and anonymous: metered, billed to no one, at low priority
+   * in the embedding pool so it can never crowd out the dealers' own jobs.
+   */
+  carSearchQuery: "carSearchQuery",
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];

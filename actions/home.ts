@@ -5,7 +5,9 @@ import type { SerializedCar } from "@/lib/utils/serializers";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
-import { extractSearchFilters } from "@/lib/services/ai";
+import { extractSearchFilters, extractTextSearchFilters } from "@/lib/services/ai";
+import { validateAction } from "@/lib/middleware/with-validation";
+import { describedSearchSchema } from "@/lib/validations/schemas";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 
 export const getFeaturedCars = withErrorHandling(async (limit = 4) => {
@@ -51,6 +53,27 @@ export const processImagesSearch = withErrorHandling(async (file: File) => {
     // No resolved User row on the public path, and AiUsage.userId is a foreign
     // key to User.id rather than a Clerk id — attribution stops at the org.
     userId: null,
+  });
+
+  return createSuccessResponse(filters);
+});
+
+/**
+ * A buyer described the car they want in the hero search ("automatic SUV under
+ * 1.5 million in Nasr City"): the model turns it into listing filters plus the
+ * words still to search for. Public, so validated then rate-limited before the
+ * model; attribution stops at the dealership subdomain, as for the photo search.
+ */
+export const describeSearch = withErrorHandling(async (input: unknown) => {
+  const { query } = validateAction(describedSearchSchema, input);
+  await enforceRateLimit();
+
+  const organization = await getCurrentOrganization();
+  const filters = await extractTextSearchFilters(query, {
+    organizationId: organization?.id ?? null,
+    userId: null,
+    // Anonymous: it yields to dealers' AI within the shared caps.
+    priority: "low",
   });
 
   return createSuccessResponse(filters);

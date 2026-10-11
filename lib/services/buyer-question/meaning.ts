@@ -41,8 +41,11 @@ export const RELATED_SIMILARITY = SUGGEST_SIMILARITY;
 /** How long a buyer's answer may wait on embedding their question. */
 const BUYER_WAIT_MS = 2_000;
 
-/** Platform housekeeping: metered, billed to no one, behind dealers' own AI. */
-const CALLER = { organizationId: null, userId: null, priority: "low" as const };
+/**
+ * Metered, billed to no one. Standard priority within the embedding pool: a
+ * dealer's own questions come before anonymous search (see carSearchQuery).
+ */
+const CALLER = { organizationId: null, userId: null, priority: "standard" as const };
 
 /**
  * The question-embedding job: give a declined question its vector — folding

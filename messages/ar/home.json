@@ -30,7 +30,8 @@
     "plateBand": "ابحث في {value} سيارة",
     "plateBandFallback": "ابحث عن سيارة",
     "quickUnder": "أقل من {price}",
-    "quickSevenSeats": "٧ مقاعد أو أكثر"
+    "quickSevenSeats": "٧ مقاعد أو أكثر",
+    "describing": "جارٍ فهم بحثك…"
   },
   "stats": {
     "customersLabel": "عميل سعيد",

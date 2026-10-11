@@ -344,6 +344,9 @@ export const useCarsPage = (
     pagination: queryData?.success
       ? queryData.data.pagination
       : { total: 0, page, limit: perPage, totalPages: 0 },
+    // The search words that found nothing alongside the filters, and were set
+    // aside so the filters' cars show — null when the words were kept.
+    relaxedSearch: queryData?.success ? (queryData.data.relaxedSearch ?? null) : null,
     // First-load only; subsequent fetches keep previous data mounted.
     loading: isLoading,
     isFetching,

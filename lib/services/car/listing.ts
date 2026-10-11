@@ -1,6 +1,7 @@
 // Car listing and filter service functions
 import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
+import { searchMeaning, type SearchMeaning } from "@/lib/services/car/search-meaning";
 
 /**
  * The car listing filter set, as understood by buildCarWhereClause. Declared
@@ -28,6 +29,8 @@ export interface CarFilters {
   maxMileage?: number;
   featured?: boolean;
   sortBy?: string;
+  /** Set by getCars, never by a caller: the search text's meaning, for hybrid ranking. */
+  meaning?: SearchMeaning | null;
 }
 
 export interface CarPagination {
@@ -70,7 +73,42 @@ export async function getCars(
     delete queryFilters.city;
   }
 
-  return await carRepository.findManyCars(queryFilters, pagination);
+  // Free text is ranked by its meaning as well as its words; null (no key,
+  // busy, slow) leaves the search on its words alone.
+  queryFilters.meaning = await searchMeaning(filters.search);
+
+  const result = await carRepository.findManyCars(queryFilters, pagination);
+
+  // The words alone emptied a search the buyer also filtered — "family" in
+  // "family SUV under 1.5 million", which no listing may say in so many words.
+  // Show what the filters find instead, and say which words were set aside;
+  // a plain search with nothing else to go on is never widened.
+  const search = filters.search?.trim();
+  if (result.pagination.total === 0 && search && hasCarFilters(filters)) {
+    const widened = await carRepository.findManyCars({ ...queryFilters, search: undefined, meaning: null }, pagination);
+    if (widened.pagination.total > 0) return { ...widened, relaxedSearch: search };
+  }
+  return { ...result, relaxedSearch: null as string | null };
+}
+
+/** Whether the buyer narrowed by anything about the car itself, beyond the words. */
+function hasCarFilters(filters: CarFilters): boolean {
+  const set = (value: unknown) =>
+    value !== undefined && value !== null && value !== "" && !(Array.isArray(value) && value.length === 0);
+  return [
+    filters.make,
+    filters.bodyType,
+    filters.fuelType,
+    filters.transmission,
+    filters.color,
+    filters.minSeats,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.minYear,
+    filters.maxYear,
+    filters.minMileage,
+    filters.maxMileage,
+  ].some(set);
 }
 
 /**
