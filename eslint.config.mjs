@@ -60,8 +60,6 @@ const KNOWN_PRISMA_VIOLATIONS = [
   "lib/services/audit/audit.ts",
   "lib/services/audit/metadata.ts",
   "lib/services/audit/query.js",
-  "lib/services/billing/settle.ts",
-  "lib/services/billing/signup.ts",
   "lib/services/dealership/users.ts",
   "lib/services/impersonation/impersonation.ts",
   "lib/services/impersonation/query.ts",

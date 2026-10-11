@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const tx = { marker: "tx" };
 
-vi.mock("@/lib/prisma", () => ({
-  db: { $transaction: vi.fn((fn: (client: unknown) => unknown) => fn(tx)) },
+vi.mock("@/lib/repositories/transaction", () => ({
+  runInTransaction: vi.fn((fn: (client: unknown) => unknown) => fn(tx)),
 }));
 vi.mock("@/lib/repositories/payment", () => ({
   findPaymentForSettlement: vi.fn(),
@@ -32,7 +32,7 @@ import { createOrganizationRecords } from "@/lib/services/onboarding/creation";
 import { resolveLogoUrl } from "@/lib/services/onboarding/logo";
 import { sendWelcomeEmail } from "@/lib/services/notification";
 import { emailOwners } from "@/lib/services/billing/notices";
-import { db } from "@/lib/prisma";
+import { runInTransaction } from "@/lib/repositories/transaction";
 import { settlePayment, SettlementError } from "@/lib/services/billing/settle";
 import { periodFrom } from "@/lib/services/billing/periods";
 import type { PaymobTransaction } from "@/lib/services/paymob";
@@ -134,7 +134,7 @@ describe("settlePayment — what is never applied", () => {
     given(payment());
     const tx2 = { ...paidTx, order: { id: 1, merchant_order_id: "payment-2" } };
     expect(await settlePayment("payment-1", tx2, NOW)).toMatchObject({ status: "rejected", reason: "reference_mismatch" });
-    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(runInTransaction).not.toHaveBeenCalled();
   });
 
   it("rejects a paid amount or currency that differs from the payment", async () => {
@@ -147,7 +147,7 @@ describe("settlePayment — what is never applied", () => {
       status: "rejected",
       reason: "currency_mismatch",
     });
-    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(runInTransaction).not.toHaveBeenCalled();
   });
 
   it("does nothing for a payment that is already paid", async () => {
@@ -157,7 +157,7 @@ describe("settlePayment — what is never applied", () => {
       paymentId: "payment-1",
       organizationId: "org-1",
     });
-    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(runInTransaction).not.toHaveBeenCalled();
   });
 
   it("waits on a pending transaction", async () => {
@@ -175,7 +175,7 @@ describe("settlePayment — what is never applied", () => {
       method: "card",
       maskedPan: "2346",
     });
-    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(runInTransaction).not.toHaveBeenCalled();
   });
 
   it("applies nothing when another settlement won the race", async () => {
@@ -265,7 +265,7 @@ describe("settlePayment — sign-up", () => {
   it("throws, for a person to look at, when the onboarding session is gone", async () => {
     vi.mocked(paymentRepo.findOnboardingSessionData).mockResolvedValue(null);
     await expect(settlePayment("payment-1", paidTx, NOW)).rejects.toBeInstanceOf(SettlementError);
-    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(runInTransaction).not.toHaveBeenCalled();
   });
 });
 

@@ -1,5 +1,5 @@
 import type { Prisma, PaymentPurpose } from "@/lib/generated/prisma";
-import { db } from "@/lib/prisma";
+import { runInTransaction } from "@/lib/repositories/transaction";
 import * as paymentRepo from "@/lib/repositories/payment";
 import type { PaymentForSettlement } from "@/lib/repositories/payment";
 import { auditHelpers } from "@/lib/services/audit/audit";
@@ -121,7 +121,7 @@ export async function settlePayment(
   // Outside the transaction: uploads and reads that must not hold it open.
   const signup = payment.purpose === "SIGNUP" ? await prepareSignup(payment) : null;
 
-  const applied = await db.$transaction(async (tx) => {
+  const applied = await runInTransaction(async (tx) => {
     const won = await paymentRepo.claimPaymentAsPaid(tx, paymentId, {
       providerTransactionId: String(transaction.id),
       ...card(transaction),

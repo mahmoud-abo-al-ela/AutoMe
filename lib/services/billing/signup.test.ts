@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const tx = { marker: "tx" };
 
-vi.mock("@/lib/prisma", () => ({
-  db: { $transaction: vi.fn((fn: (client: unknown) => unknown) => fn(tx)) },
+vi.mock("@/lib/repositories/transaction", () => ({
+  runInTransaction: vi.fn((fn: (client: unknown) => unknown) => fn(tx)),
 }));
 vi.mock("@/lib/repositories/billing", () => ({ findPlanById: vi.fn() }));
 vi.mock("@/lib/repositories/user", () => ({ findUserOwnedOrganization: vi.fn() }));
-vi.mock("@/lib/repositories/payment", () => ({ isSlugTaken: vi.fn() }));
+vi.mock("@/lib/repositories/payment", () => ({ isOrganizationSlugTaken: vi.fn() }));
 vi.mock("@/lib/services/onboarding/creation", () => ({ createOrganizationRecords: vi.fn() }));
 vi.mock("@/lib/services/onboarding/logo", () => ({ resolveLogoUrl: vi.fn() }));
 vi.mock("@/lib/services/onboarding/session", () => ({ getOnboardingSessionForUser: vi.fn() }));
@@ -17,7 +17,7 @@ vi.mock("@/lib/services/billing/checkout", () => ({ startCheckout: vi.fn() }));
 
 import * as billingRepo from "@/lib/repositories/billing";
 import { findUserOwnedOrganization } from "@/lib/repositories/user";
-import { isSlugTaken } from "@/lib/repositories/payment";
+import { isOrganizationSlugTaken } from "@/lib/repositories/payment";
 import { createOrganizationRecords } from "@/lib/services/onboarding/creation";
 import { resolveLogoUrl } from "@/lib/services/onboarding/logo";
 import { getOnboardingSessionForUser } from "@/lib/services/onboarding/session";
@@ -42,7 +42,7 @@ const plan = (p: object) => vi.mocked(billingRepo.findPlanById).mockResolvedValu
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(findUserOwnedOrganization).mockResolvedValue(null);
-  vi.mocked(isSlugTaken).mockResolvedValue(false);
+  vi.mocked(isOrganizationSlugTaken).mockResolvedValue(false);
   vi.mocked(resolveLogoUrl).mockResolvedValue(null);
   vi.mocked(sendWelcomeEmail).mockResolvedValue(null as never);
   vi.mocked(createOrganizationRecords).mockResolvedValue({ id: "org-1", name: "Nile Motors", slug: "nile-motors" } as never);
@@ -106,7 +106,7 @@ describe("createUnpaidOrganization", () => {
 
   it("refuses a taken slug", async () => {
     plan(starter);
-    vi.mocked(isSlugTaken).mockResolvedValue(true);
+    vi.mocked(isOrganizationSlugTaken).mockResolvedValue(true);
     const error = await create("plan-starter").catch((e: unknown) => e);
     expect((error as ConflictError).messageKey).toBe("errors.onboarding.slugTaken");
   });
@@ -156,7 +156,7 @@ describe("startSignupCheckout", () => {
   });
 
   it("does not take payment for a slug that is already taken", async () => {
-    vi.mocked(isSlugTaken).mockResolvedValue(true);
+    vi.mocked(isOrganizationSlugTaken).mockResolvedValue(true);
     await expect(start()).rejects.toBeInstanceOf(ConflictError);
     expect(startCheckout).not.toHaveBeenCalled();
   });
