@@ -244,6 +244,7 @@ export const findUnhelpfulAnswers = (w: Window, take: number) =>
       answer: true,
       model: true,
       promptVersion: true,
+      aiUsageId: true,
       ratedAt: true,
       organization: { select: { name: true } },
     },

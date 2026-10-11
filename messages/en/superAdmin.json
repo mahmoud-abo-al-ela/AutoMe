@@ -884,7 +884,8 @@
         "tokensIn": "Tokens in",
         "tokensOut": "Tokens out",
         "typical": "Typical wait",
-        "slowest": "Slowest 5%"
+        "slowest": "Slowest 5%",
+        "cached": "Cached"
       },
       "names": {
         "carListingFromImage": "Listing from photos",
@@ -925,7 +926,12 @@
         "asked": "Asked",
         "answer": "Answer",
         "fixedCopy": "(standard reply)",
-        "viewCar": "View car"
+        "viewCar": "View car",
+        "trace": {
+          "open": "What the model saw",
+          "input": "Given (redacted)",
+          "output": "Replied"
+        }
       },
       "listPrice": "{value} at list prices",
       "unpriced": "{count} calls unpriced"

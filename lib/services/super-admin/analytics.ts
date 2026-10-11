@@ -2,6 +2,7 @@ import * as repo from "@/lib/repositories/super-admin/analytics";
 import { getFailuresByCode, getUsageByFeature, getUsageByModel, type ModelUsage } from "@/lib/repositories/ai-usage";
 import { listPriceMicroUsd } from "@/lib/ai/models";
 import { isProviderId } from "@/lib/ai/providers";
+import { findTracesByUsage } from "@/lib/repositories/ai-trace";
 import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { median, PRICE_BANDS, STALE_AFTER_DAYS, type AnalyticsPeriod, type AnalyticsQuery } from "./analytics-options";
 import { periodWindows } from "./overview";
@@ -169,6 +170,9 @@ async function assistantQuality(w: ReturnType<typeof analyticsWindows>) {
     repo.findAssistantQualityByModel(w.current),
     repo.findUnhelpfulAnswers(w.current, UNHELPFUL_SHOWN),
   ]);
+  // What the model saw for each, where a trace was kept (14 days, redacted).
+  const traces = await findTracesByUsage(unhelpful.flatMap((row) => (row.aiUsageId ? [row.aiUsageId] : [])));
+  const traceOf = new Map(traces.map((trace) => [trace.aiUsageId, trace]));
   const total = (r: typeof replies) => r.answered + r.declined + r.offTopic;
   return {
     replies: { current: total(replies), previous: total(previous) },
@@ -184,6 +188,10 @@ async function assistantQuality(w: ReturnType<typeof analyticsWindows>) {
       promptVersion: row.promptVersion,
       ratedAt: row.ratedAt,
       dealership: row.organization.name,
+      trace: (() => {
+        const trace = row.aiUsageId ? traceOf.get(row.aiUsageId) : undefined;
+        return trace ? { input: trace.input, output: trace.output } : null;
+      })(),
     })),
   };
 }

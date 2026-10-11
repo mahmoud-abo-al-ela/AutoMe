@@ -45,6 +45,9 @@ const isCrawlerFile = createRouteMatcher(["/sitemap.xml", "/robots.txt"]);
 const isPublicApiRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
+  // Background jobs, delivered by QStash; each request proves itself with a
+  // signature (app/api/jobs/[name]/route.ts), never a session.
+  "/api/jobs(.*)",
 ]);
 
 const intlMiddleware = createIntlMiddleware(routing);
