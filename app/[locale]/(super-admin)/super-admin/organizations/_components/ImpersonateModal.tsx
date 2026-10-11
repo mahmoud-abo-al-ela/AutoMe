@@ -24,7 +24,7 @@ import { AlertCircle, UserCog, Loader2 } from "lucide-react";
 import { startImpersonationAction } from "@/actions/impersonation";
 import { toast } from "sonner";
 import { useActionError } from "@/hooks/use-action-error";
-import { Prisma } from "@/lib/generated/prisma";
+import type { Prisma } from "@/lib/generated/prisma";
 
 /**
  * A member as /api/super-admin/organizations/[id]/members returns it. That

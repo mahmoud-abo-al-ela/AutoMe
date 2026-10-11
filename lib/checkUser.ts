@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
-import { Prisma } from "@/lib/generated/prisma";
+import type { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
 const userIncludeQuery = {

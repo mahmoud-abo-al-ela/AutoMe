@@ -1,5 +1,5 @@
 import { createAuditLog } from "./audit";
-import { AuditAction } from "@/lib/generated/prisma";
+import type { AuditAction } from "@/lib/generated/prisma";
 
 /**
  * Subscription audit log helpers
