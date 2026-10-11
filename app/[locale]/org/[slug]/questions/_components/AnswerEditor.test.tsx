@@ -34,17 +34,17 @@ describe("AnswerEditor — a suggested answer", () => {
     expect(html).toContain("You answered a similar question on another car");
     expect(html).toContain("Do you offer installments?");
     expect(html).toContain("Yes — up to 5 years through NBE.");
-    expect(html).toContain("Use this answer");
+    expect(html).toContain("Reuse this answer");
   });
 
   it("is in Arabic on an Arabic page", () => {
     const html = render("ar");
     expect(html).toContain("أجبت عن سؤال مشابه على سيارة أخرى");
-    expect(html).toContain("استخدم هذه الإجابة");
+    expect(html).toContain("أعد استخدام هذه الإجابة");
   });
 
   it("steps aside once the answer is already in the box, and when there is none", () => {
-    expect(render("en", SUGGESTION.answer)).not.toContain("Use this answer");
-    expect(render("en", "", null)).not.toContain("Use this answer");
+    expect(render("en", SUGGESTION.answer)).not.toContain("You answered a similar question");
+    expect(render("en", "", null)).not.toContain("You answered a similar question");
   });
 });

@@ -551,7 +551,7 @@
       "count": "{used} of {max}",
       "suggestion": {
         "title": "You answered a similar question on another car",
-        "use": "Use this answer"
+        "use": "Reuse this answer"
       }
     },
     "actions": {
