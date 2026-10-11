@@ -82,14 +82,16 @@ async function download(urls: string[]): Promise<PhotoToDescribe[]> {
 
 /**
  * Describe any undescribed photos of a car and drop alt text for photos it no
- * longer has. Runs after a save has answered (see the car actions), so it
- * never throws: a failure leaves the fallback alt text, and the next save
- * tries again.
+ * longer has. Runs after a save has answered (see the car actions). By default
+ * it never throws: a failure leaves the fallback alt text, and the next save
+ * tries again. As a background job (`rethrow`) it throws instead, so the
+ * queue retries it — an "AI busy" now is a description in a few minutes.
  */
 export async function refreshImageAlts(
   carId: string,
   organizationId: string,
-  caller: AiCallerContext
+  caller: AiCallerContext,
+  { rethrow = false }: { rethrow?: boolean } = {}
 ): Promise<void> {
   try {
     const car = await carRepository.findCarById(carId);
@@ -115,6 +117,7 @@ export async function refreshImageAlts(
       await carRepository.updateCarImageAlts(carId, organizationId, merged);
     }
   } catch (error) {
+    if (rethrow) throw error;
     logError("Car image alt text skipped", error);
   }
 }

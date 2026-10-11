@@ -1,12 +1,11 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
-import { after } from "next/server";
 import * as carService from "@/lib/services/car";
 import { coachListing, translateListing, type ListingText, type ListingToCoach } from "@/lib/services/ai";
 import { reviewListing, type ListingIssueCode } from "@/lib/services/car/listing-quality";
 import { aiCallerFor } from "@/lib/ai/caller";
-import { refreshImageAlts } from "@/lib/services/car/image-alts";
+import { enqueue } from "@/lib/jobs";
 import { marketPricesFor, toMarketPosition } from "@/lib/services/car/market-price";
 import { claimAiUsageForCar } from "@/lib/services/car/ai-allowance";
 import {
@@ -111,11 +110,16 @@ async function fillOtherLanguage<T extends BilingualListing>(
  * Describe the car's photos once the save has answered. Platform-initiated,
  * so it is metered but never billed to the dealer (carImageAltText is not in
  * DEALER_METERED_FEATURES), and runs at low priority so it cannot take shared
- * capacity from a dealer waiting on the AI. refreshImageAlts never throws.
+ * capacity from a dealer waiting on the AI. Queued as a background job, so a
+ * busy AI is retried rather than lost; never fails the save.
  */
-function describePhotosAfterSave(ctx: TenantContext, carId: string) {
+async function describePhotosAfterSave(ctx: TenantContext, carId: string) {
   const caller = { ...aiCallerFor(ctx), priority: "low" as const };
-  after(() => refreshImageAlts(carId, ctx.organization.id, caller));
+  try {
+    await enqueue("image-alts", { carId, organizationId: ctx.organization.id, caller });
+  } catch (error) {
+    logError("Could not queue photo descriptions; the next save will try again", error);
+  }
 }
 
 /** Client input: only the two known locales mean anything. */
@@ -142,7 +146,7 @@ export const addCar = withOrgAuth(
       if (car?.id) {
         // The photo read, translation and advice behind this car: one use.
         await claimAiUsageForCar(ctx, car.id);
-        describePhotosAfterSave(ctx, car.id);
+        await describePhotosAfterSave(ctx, car.id);
       }
 
       revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
@@ -216,7 +220,7 @@ export const updateCarFull = withOrgAuth(
   // already counted this month is claimed again, and still counts once.
   await claimAiUsageForCar(ctx, carId);
   // Also after an edit: new photos need describing, removed ones pruning.
-  describePhotosAfterSave(ctx, carId);
+  await describePhotosAfterSave(ctx, carId);
 
   revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
   return createSuccessResponse({ ...updatedCar, translation }, "Car updated successfully");
