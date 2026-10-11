@@ -91,6 +91,11 @@ export async function isSlugTaken(tx: Prisma.TransactionClient, slug: string) {
   return (await tx.organization.count({ where: { slug } })) > 0;
 }
 
+/** The same check outside a transaction — the pre-flight before a checkout starts. */
+export async function isOrganizationSlugTaken(slug: string) {
+  return isSlugTaken(db, slug);
+}
+
 export async function completeOnboardingSessionInTx(tx: Prisma.TransactionClient, id: string) {
   await tx.onboardingSession.update({ where: { id }, data: { status: "COMPLETED" } });
 }

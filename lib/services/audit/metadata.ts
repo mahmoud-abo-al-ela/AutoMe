@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
-import { db } from "@/lib/prisma";
+import { findAuditRetentionDays } from "@/lib/repositories/audit";
+import { findSessionSuperAdminId } from "@/lib/repositories/impersonation";
 
 /**
  * Get request metadata (IP, user agent, impersonation info)
@@ -22,11 +23,7 @@ export async function getRequestMetadata() {
   if (impersonatedBy) {
     const sessionId = headersList.get("x-impersonation-session");
     if (sessionId) {
-      const session = await db.impersonationSession.findUnique({
-        where: { id: sessionId },
-        select: { superAdminId: true },
-      });
-      actualSuperAdminId = session?.superAdminId;
+      actualSuperAdminId = await findSessionSuperAdminId(sessionId);
     }
   }
 
@@ -49,16 +46,7 @@ export async function calculateRetentionDate(organizationId?: string | null) {
     return null;
   }
 
-  const org = await db.organization.findUnique({
-    where: { id: organizationId },
-    include: {
-      subscription: {
-        include: { plan: true },
-      },
-    },
-  });
-
-  const retentionDays = org?.subscription?.plan?.auditLogRetentionDays;
+  const retentionDays = await findAuditRetentionDays(organizationId);
   
   if (retentionDays !== null && retentionDays !== undefined) {
     const retainUntil = new Date();

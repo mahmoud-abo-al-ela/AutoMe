@@ -1,9 +1,9 @@
 import type { BillingPeriod, Prisma } from "@/lib/generated/prisma";
 import type { Locale } from "@/i18n/routing";
-import { db } from "@/lib/prisma";
+import { runInTransaction } from "@/lib/repositories/transaction";
 import * as billingRepo from "@/lib/repositories/billing";
 import { findUserOwnedOrganization } from "@/lib/repositories/user";
-import { isSlugTaken } from "@/lib/repositories/payment";
+import { isOrganizationSlugTaken } from "@/lib/repositories/payment";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { sendWelcomeEmail } from "@/lib/services/notification";
 import { createOrganizationRecords, type OrganizationDetails } from "@/lib/services/onboarding/creation";
@@ -37,7 +37,7 @@ async function assertCanCreate(userId: string, slug: string): Promise<void> {
   if (await findUserOwnedOrganization(userId)) {
     throw new ConflictError("User already owns a dealership", { key: "errors.onboarding.alreadyOwner" });
   }
-  if (await isSlugTaken(db, slug)) {
+  if (await isOrganizationSlugTaken(slug)) {
     throw new ConflictError("This URL slug is already taken", { key: "errors.onboarding.slugTaken" });
   }
 }
@@ -137,7 +137,7 @@ export async function createUnpaidOrganization({
   }
 
   const logoUrl = await resolveLogoUrl(logo, details.slug);
-  const organization = await db.$transaction((tx) =>
+  const organization = await runInTransaction((tx) =>
     createOrganizationRecords(tx, { ...details, logoUrl }, user.id, subscription)
   );
 

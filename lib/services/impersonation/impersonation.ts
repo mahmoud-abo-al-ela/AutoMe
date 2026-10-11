@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import * as impersonationRepo from "@/lib/repositories/impersonation";
 import { auditHelpers } from "@/lib/services/audit";
 import { validateSuperAdmin, validateTargetMembership } from "./validation";
 import {
@@ -7,11 +7,22 @@ import {
   getSessionIdFromCookies,
 } from "./cookie";
 import { getRequestMetadata } from "./metadata";
-import { getImpersonationSessions, getActiveImpersonationCount } from "./query";
 
 /**
  * Impersonation service for Super Admins to view organizations as specific users
  */
+
+/** A support session ends on its own this long after it starts. */
+const SESSION_LIFETIME_MS = 4 * 60 * 60 * 1000;
+
+const lifetimeStart = () => new Date(Date.now() - SESSION_LIFETIME_MS);
+
+export const getImpersonationSessions = impersonationRepo.getImpersonationSessions;
+
+/** Support sessions running now: not ended, and started within their lifetime. */
+export async function getActiveImpersonationCount() {
+  return impersonationRepo.countOpenSessionsStartedSince(lifetimeStart());
+}
 
 /**
  * Start an impersonation session
@@ -49,15 +60,13 @@ export async function startImpersonation({
   const { ipAddress, userAgent } = await getRequestMetadata();
 
   // Create impersonation session
-  const session = await db.impersonationSession.create({
-    data: {
-      superAdminId,
-      targetUserId,
-      targetOrganizationId,
-      reason,
-      ipAddress,
-      userAgent,
-    },
+  const session = await impersonationRepo.createImpersonationSession({
+    superAdminId,
+    targetUserId,
+    targetOrganizationId,
+    reason,
+    ipAddress,
+    userAgent,
   });
 
   // Log the impersonation start
@@ -87,10 +96,7 @@ export async function endImpersonation(
   superAdminEmail?: string | null
 ) {
   // Update session with end time
-  const session = await db.impersonationSession.update({
-    where: { id: sessionId },
-    data: { endedAt: new Date() },
-  });
+  const session = await impersonationRepo.endImpersonationSession(sessionId, new Date());
 
   // Log the impersonation end
   await auditHelpers.logImpersonationEnded(session, superAdminEmail);
@@ -108,17 +114,7 @@ export async function getCurrentImpersonationSession() {
   const sessionId = await getSessionIdFromCookies();
   if (!sessionId) return null;
 
-  const session = await db.impersonationSession.findUnique({
-    where: { id: sessionId },
-    include: {
-      superAdmin: {
-        select: { id: true, name: true, email: true },
-      },
-      targetUser: {
-        select: { id: true, name: true, email: true },
-      },
-    },
-  });
+  const session = await impersonationRepo.findSessionWithParticipants(sessionId);
 
   // Check if session is still valid (not ended and within 4 hours)
   if (session) {
@@ -128,8 +124,7 @@ export async function getCurrentImpersonationSession() {
       return null;
     }
 
-    const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000);
-    if (session.startedAt < fourHoursAgo) {
+    if (session.startedAt < lifetimeStart()) {
       // Session expired, end it
       await endImpersonation(sessionId, session.superAdmin.email);
       return null;
@@ -138,8 +133,6 @@ export async function getCurrentImpersonationSession() {
 
   return session;
 }
-
-export { getImpersonationSessions, getActiveImpersonationCount };
 
 export default {
   startImpersonation,

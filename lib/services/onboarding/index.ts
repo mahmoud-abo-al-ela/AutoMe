@@ -1,6 +1,8 @@
 // Onboarding service - Business logic layer
 import * as billingService from "@/lib/services/billing";
 import { findUserOwnedOrganization } from "@/lib/repositories/user";
+import { isOrganizationSlugTaken } from "@/lib/repositories/payment";
+import { isValidSlug } from "@/lib/utils/slug";
 
 // Re-export session management functions
 export {
@@ -36,4 +38,14 @@ export async function getOnboardingData(userId: string) {
  */
 export async function getUserOwnedOrganization(userId: string) {
   return findUserOwnedOrganization(userId);
+}
+
+/**
+ * Whether a dealership web address can still be taken, as the owner types it.
+ * A malformed one is refused without a query: the create step would refuse it
+ * anyway.
+ */
+export async function isSlugAvailable(slug: string) {
+  if (!isValidSlug(slug)) return false;
+  return !(await isOrganizationSlugTaken(slug));
 }

@@ -6,36 +6,24 @@ import {
   buyerQuestionListSchema,
   buyerQuestionStatusSchema,
 } from "@/lib/validations/schemas";
-import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { createSuccessResponse } from "@/lib/utils/response";
-import { NotFoundError } from "@/lib/utils/errors";
-import { answerSuggestions } from "@/lib/services/buyer-question/meaning";
+import * as inbox from "@/lib/services/buyer-question/inbox";
 
 /**
- * The dealer's inbox of questions the listing assistant could not answer.
- *
- * Every read and write is scoped to ctx.organization.id inside the query, so
- * an id from another dealership matches nothing. Any member may answer: the
- * people who talk to buyers are rarely the owner. Not rate-limited — these
- * are authenticated writes to the dealer's own rows and call no provider.
+ * The dealer's inbox of questions the listing assistant could not answer
+ * (lib/services/buyer-question/inbox.ts). Any member may answer: the people
+ * who talk to buyers are rarely the owner. Not rate-limited — these are
+ * authenticated writes to the dealer's own rows and call no provider.
  */
 
 const PAGE_SIZE = 20;
 
 export const getBuyerQuestions = withOrgAuth(async (ctx, input: unknown) => {
   const { view, page } = validateAction(buyerQuestionListSchema, input);
-  const [{ questions, total }, counts] = await Promise.all([
-    buyerQuestionRepository.findBuyerQuestions(ctx.organization.id, view, page, PAGE_SIZE),
-    buyerQuestionRepository.countBuyerQuestionsByView(ctx.organization.id),
-  ]);
-  // Unanswered only: an answer the dealer already gave on another car that
-  // says the same, one click from being reused. Scoped to this dealership.
-  const suggestions =
-    view === "OPEN" ? await answerSuggestions(ctx.organization.id, questions.map((q) => q.id)) : [];
-  const suggestionFor = new Map(suggestions.map(({ questionId, ...rest }) => [questionId, rest]));
+  const { questions, counts, total } = await inbox.getInbox(ctx.organization.id, view, page, PAGE_SIZE);
 
   return createSuccessResponse({
-    questions: questions.map((question) => ({ ...question, suggestion: suggestionFor.get(question.id) ?? null })),
+    questions,
     counts,
     pagination: { page, limit: PAGE_SIZE, total, totalPages: Math.ceil(total / PAGE_SIZE) },
   });
@@ -43,7 +31,7 @@ export const getBuyerQuestions = withOrgAuth(async (ctx, input: unknown) => {
 
 export const answerBuyerQuestion = withOrgAuth(async (ctx, input: unknown) => {
   const { id, answer, appliesToAllCars } = validateAction(answerBuyerQuestionSchema, input);
-  const changed = await buyerQuestionRepository.answerBuyerQuestion({
+  await inbox.answerQuestion({
     organizationId: ctx.organization.id,
     id,
     answer,
@@ -51,19 +39,13 @@ export const answerBuyerQuestion = withOrgAuth(async (ctx, input: unknown) => {
     // The database User.id, not ctx.userId (the Clerk id): the foreign key.
     answeredById: ctx.user.id,
   });
-  if (changed === 0) throw new NotFoundError("Question");
 
   return createSuccessResponse({ id });
 });
 
 export const setBuyerQuestionStatus = withOrgAuth(async (ctx, input: unknown) => {
   const { id, status } = validateAction(buyerQuestionStatusSchema, input);
-  const changed = await buyerQuestionRepository.setBuyerQuestionStatus({
-    organizationId: ctx.organization.id,
-    id,
-    status,
-  });
-  if (changed === 0) throw new NotFoundError("Question");
+  await inbox.setQuestionStatus({ organizationId: ctx.organization.id, id, status });
 
   return createSuccessResponse({ id });
 });

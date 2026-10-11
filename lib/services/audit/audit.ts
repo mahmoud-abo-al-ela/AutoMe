@@ -1,12 +1,12 @@
 import { logError } from "@/lib/utils/errors";
-import { db } from "@/lib/prisma";
-import type { AuditAction, EntityType } from "@/lib/generated/prisma";
-import { getRequestMetadata, calculateRetentionDate } from "./metadata";
+import type { AuditAction, EntityType, Prisma } from "@/lib/generated/prisma";
 import {
+  createAuditLogEntry,
   getAuditLogs,
   getAllAuditLogs,
   cleanupExpiredAuditLogs,
-} from "./query";
+} from "@/lib/repositories/audit";
+import { getRequestMetadata, calculateRetentionDate } from "./metadata";
 import * as organizationLogs from "./organization";
 import * as carLogs from "./car";
 import * as testDriveLogs from "./test-drive";
@@ -64,24 +64,22 @@ export async function createAuditLog({
     const retainUntil = await calculateRetentionDate(organizationId);
 
     // Create the audit log entry
-    const auditLog = await db.auditLog.create({
-      data: {
-        action,
-        entityType,
-        entityId,
-        organizationId,
-        userId: requestMetadata.actualSuperAdminId || userId,
-        userEmail,
-        impersonatedBy: requestMetadata.impersonatedBy ? userId : null,
-        oldValue: oldValue ? JSON.parse(JSON.stringify(oldValue)) : null,
-        newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : null,
-        retainUntil,
-        metadata: {
-          ...metadata,
-          ipAddress: requestMetadata.ipAddress,
-          userAgent: requestMetadata.userAgent,
-          impersonationSessionId: requestMetadata.impersonationSessionId,
-        },
+    const auditLog = await createAuditLogEntry({
+      action,
+      entityType,
+      entityId,
+      organizationId,
+      userId: requestMetadata.actualSuperAdminId || userId,
+      userEmail,
+      impersonatedBy: requestMetadata.impersonatedBy ? userId : null,
+      oldValue: oldValue ? JSON.parse(JSON.stringify(oldValue)) : null,
+      newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : null,
+      retainUntil,
+      metadata: {
+        ...metadata,
+        ipAddress: requestMetadata.ipAddress,
+        userAgent: requestMetadata.userAgent,
+        impersonationSessionId: requestMetadata.impersonationSessionId,
       },
     });
 
@@ -91,6 +89,16 @@ export async function createAuditLog({
     // Don't throw - audit logging should not break the main flow
     return null;
   }
+}
+
+/**
+ * Record a super-admin action exactly as given: no request context and no
+ * retention date are added, and — unlike createAuditLog — a failed write
+ * throws to the caller. This is how the super-admin actions have always
+ * logged; bringing them onto createAuditLog would change both.
+ */
+export async function recordAdminAuditEntry(entry: Prisma.AuditLogUncheckedCreateInput) {
+  return createAuditLogEntry(entry);
 }
 
 /**

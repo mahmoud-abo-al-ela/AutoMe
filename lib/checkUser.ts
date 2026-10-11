@@ -1,26 +1,10 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
-import type { Prisma } from "@/lib/generated/prisma";
-import { db } from "@/lib/prisma";
+import * as tenantRepository from "@/lib/repositories/tenant";
+import type { UserWithOrganizations } from "@/lib/repositories/tenant";
+import { createAuditLogEntry } from "@/lib/repositories/audit";
 
-const userIncludeQuery = {
-  memberships: {
-    include: {
-      organization: {
-        include: {
-          subscription: {
-            include: { plan: true },
-          },
-        },
-      },
-    },
-  },
-} satisfies Prisma.UserInclude;
-
-/** A User row with memberships → organization → subscription → plan joined. */
-export type UserWithOrganizations = Prisma.UserGetPayload<{
-  include: typeof userIncludeQuery;
-}>;
+export type { UserWithOrganizations };
 
 /**
  * What checkUser resolves to: the user row, plus the impersonation marker when
@@ -50,7 +34,7 @@ export async function checkUser(): Promise<CurrentUser | null> {
   // would grant this user OWNER membership on all of them. Now that
   // `User.email` is nullable, that is reachable rather than theoretical.
   if (userData.email) {
-    userData = await assignPendingOrganizations(userData);
+    userData = await assignPendingOrganizations(userData, userData.email);
   }
 
   return await resolveImpersonation(userData);
@@ -71,9 +55,7 @@ export async function getActualUser() {
   const { userId } = await auth();
   if (!userId) return null;
 
-  return db.user.findUnique({
-    where: { clerkId: userId },
-  });
+  return tenantRepository.findUserRowByClerkId(userId);
 }
 
 /**
@@ -81,10 +63,7 @@ export async function getActualUser() {
  */
 
 async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations> {
-  let userData = await db.user.findUnique({
-    where: { clerkId },
-    include: userIncludeQuery,
-  });
+  let userData = await tenantRepository.findUserWithOrganizationsByClerkId(clerkId);
 
   if (!userData) {
     const clerkUser = await currentUser();
@@ -100,14 +79,11 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
     const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
 
     try {
-      userData = await db.user.create({
-        data: {
-          clerkId,
-          name,
-          imageUrl: clerkUser.imageUrl,
-          email,
-        },
-        include: userIncludeQuery,
+      userData = await tenantRepository.createUserWithOrganizations({
+        clerkId,
+        name,
+        imageUrl: clerkUser.imageUrl,
+        email,
       });
     } catch (error) {
       // find-then-create is not atomic. A first page load renders several
@@ -123,10 +99,7 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
         (error as { code?: string }).code === "P2002";
       if (!isDuplicateClerkId) throw error;
 
-      userData = await db.user.findUnique({
-        where: { clerkId },
-        include: userIncludeQuery,
-      });
+      userData = await tenantRepository.findUserWithOrganizationsByClerkId(clerkId);
       if (!userData) throw error;
     }
   }
@@ -135,50 +108,32 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
 }
 
 async function assignPendingOrganizations(
-  userData: UserWithOrganizations
+  userData: UserWithOrganizations,
+  email: string
 ): Promise<UserWithOrganizations> {
-  const pendingOrgs = await db.organization.findMany({
-    where: { pendingOwnerEmail: userData.email },
-  });
+  const pendingOrgs = await tenantRepository.findOrganizationsAwaitingOwner(email);
 
   if (pendingOrgs.length === 0) {
     return userData;
   }
 
   for (const org of pendingOrgs) {
-    await db.membership.create({
-      data: {
-        userId: userData.id,
-        organizationId: org.id,
-        role: "OWNER",
-        acceptedAt: new Date(),
-      },
-    });
+    await tenantRepository.assignPendingOwner(org.id, userData.id);
 
-    await db.organization.update({
-      where: { id: org.id },
-      data: { pendingOwnerEmail: null },
-    });
-
-    await db.auditLog.create({
-      data: {
-        action: "MEMBER_ACCEPTED",
-        entityType: "MEMBERSHIP",
-        entityId: userData.id,
-        organizationId: org.id,
-        userId: userData.id,
-        userEmail: userData.email,
-        metadata: { role: "OWNER", autoAssigned: true },
-      },
+    await createAuditLogEntry({
+      action: "MEMBER_ACCEPTED",
+      entityType: "MEMBERSHIP",
+      entityId: userData.id,
+      organizationId: org.id,
+      userId: userData.id,
+      userEmail: userData.email,
+      metadata: { role: "OWNER", autoAssigned: true },
     });
   }
 
   // Refetch user with updated memberships. Read by primary key for a row this
   // request just loaded, so the null branch is unreachable.
-  return (await db.user.findUnique({
-    where: { id: userData.id },
-    include: userIncludeQuery,
-  })) as UserWithOrganizations;
+  return (await tenantRepository.findUserWithOrganizationsById(userData.id)) as UserWithOrganizations;
 }
 
 async function resolveImpersonation(
@@ -189,10 +144,7 @@ async function resolveImpersonation(
   const impersonatedUserId = headersList.get("x-impersonated-user");
 
   if (isImpersonating && userData.role === "ADMIN" && impersonatedUserId) {
-    const impersonatedUser = await db.user.findUnique({
-      where: { id: impersonatedUserId },
-      include: userIncludeQuery,
-    });
+    const impersonatedUser = await tenantRepository.findUserWithOrganizationsById(impersonatedUserId);
 
     if (impersonatedUser) {
       return {

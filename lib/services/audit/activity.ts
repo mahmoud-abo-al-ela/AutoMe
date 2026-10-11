@@ -1,6 +1,10 @@
-import { db } from "@/lib/prisma";
 import type { EntityType } from "@/lib/generated/prisma";
-import { getAuditLogs } from "./query";
+import {
+  findActivityLookupRows,
+  findMembershipPeople,
+  findUserAuditLogs,
+  getAuditLogs,
+} from "@/lib/repositories/audit";
 import type { ActivityKind } from "./activity-filters";
 
 export { ACTIVITY_DAYS, ACTIVITY_KINDS, type ActivityKind } from "./activity-filters";
@@ -52,11 +56,7 @@ export async function getActivity({
 
   const [lookups, people] = await Promise.all([
     findLookups(logs, organizationId),
-    db.membership.findMany({
-      where: { organizationId },
-      select: { role: true, user: { select: { id: true, name: true, email: true } } },
-      orderBy: { createdAt: "asc" },
-    }),
+    findMembershipPeople(organizationId),
   ]);
 
   return {
@@ -121,19 +121,13 @@ export async function findLookups(logs: LogRow[], organizationId?: string) {
   );
   const planIds = ids(values.map((value) => field(value, "planId")));
 
-  const [cars, users, memberships, plans] = await Promise.all([
-    carIds.length
-      ? db.car.findMany({ where: { id: { in: carIds }, ...(organizationId && { organizationId }) }, select: { id: true, make: true, model: true, year: true } })
-      : [],
-    userIds.length ? db.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true, email: true } }) : [],
-    membershipIds.length
-      ? db.membership.findMany({
-          where: { id: { in: membershipIds }, ...(organizationId && { organizationId }) },
-          select: { id: true, user: { select: { name: true, email: true } } },
-        })
-      : [],
-    planIds.length ? db.plan.findMany({ where: { id: { in: planIds } }, select: { id: true, type: true, name: true } }) : [],
-  ]);
+  const { cars, users, memberships, plans } = await findActivityLookupRows({
+    carIds,
+    userIds,
+    membershipIds,
+    planIds,
+    organizationId,
+  });
 
   return {
     cars: Object.fromEntries(cars.map((car) => [car.id, { make: car.make, model: car.model, year: car.year }])),
@@ -149,17 +143,7 @@ export async function findLookups(logs: LogRow[], organizationId?: string) {
  * happened at, since there may be several.
  */
 export async function getUserActivity({ userId, page, take = ACTIVITY_PAGE_SIZE }: { userId: string; page: number; take?: number }) {
-  const where = { userId };
-  const [logs, total] = await Promise.all([
-    db.auditLog.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * take,
-      take,
-      include: { user: { select: { name: true, email: true } }, organization: { select: { id: true, name: true } } },
-    }),
-    db.auditLog.count({ where }),
-  ]);
+  const { logs, total } = await findUserAuditLogs({ userId, skip: (page - 1) * take, take });
   const lookups = await findLookups(logs);
   return {
     entries: logs.map((log) => ({ ...toEntry(log), dealership: log.organization })),

@@ -1,8 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import * as carRepository from "@/lib/repositories/car";
-import { refreshImageAlts } from "@/lib/services/car/image-alts";
+import { backfillImageAlts } from "@/lib/services/car/image-alts-backfill";
 import { logError } from "@/lib/utils/errors";
 
 /**
@@ -58,18 +57,7 @@ export async function POST(request: Request) {
   const { limit, after } = parsed.data;
 
   try {
-    const cars = await carRepository.findCarsMissingImageAlts({ take: limit, afterId: after });
-    for (const car of cars) {
-      // Scoped to the car's own dealership inside; never throws.
-      await refreshImageAlts(car.id, car.organizationId, {
-        organizationId: car.organizationId,
-        userId: null,
-        priority: "low",
-      });
-    }
-    const next = cars.at(-1)?.id ?? null;
-    const remaining = next ? await carRepository.countCarsMissingImageAlts(next) : 0;
-    return NextResponse.json({ processed: cars.length, next, remaining });
+    return NextResponse.json(await backfillImageAlts(limit, after));
   } catch (error) {
     logError("Alt-text backfill failed", error);
     return NextResponse.json({ error: "Backfill failed" }, { status: 500 });

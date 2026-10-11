@@ -4,31 +4,8 @@ import {
   getUserMembership,
 } from "@/lib/getOrganization";
 import { notFound } from "next/navigation";
-import { db } from "@/lib/prisma";
-import { getBillingData } from "@/lib/services/billing";
+import { getBillingContact, getBillingData } from "@/lib/services/billing";
 import { BillingView } from "./_components/BillingView";
-
-/**
- * Get the organization owner's name and email for non-owner contact info
- */
-async function getOrganizationOwner(organizationId: string) {
-  const ownerMembership = await db.membership.findFirst({
-    where: {
-      organizationId,
-      role: "OWNER",
-    },
-    include: {
-      user: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-    },
-  });
-
-  return ownerMembership?.user || null;
-}
 
 export default async function BillingPage({
   params,
@@ -53,7 +30,7 @@ export default async function BillingPage({
 
   // For non-owners, fetch the owner's contact info
   const owner = !isOwner
-    ? await getOrganizationOwner(organization.id)
+    ? await getBillingContact(organization.id)
     : null;
 
   return (

@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as carService from "@/lib/services/car";
 import * as wishlistService from "@/lib/services/wishlist";
-import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
 import { ValidationError, NotFoundError } from "@/lib/utils/errors";
@@ -12,7 +11,6 @@ import { serializeCarWithImages, type SerializedCar } from "@/lib/utils/serializ
 import type { CarFilters } from "@/lib/services/car/listing";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { carTitlesRequestSchema } from "@/lib/validations/schemas";
-import { CAR_CURRENCY } from "@/lib/utils/currency";
 
 /** The listing filters plus the page/limit the client sends alongside them. */
 type CarListingInput = CarFilters & { page?: number; limit?: number };
@@ -105,7 +103,7 @@ export const getWishlist = withAuth(
  */
 export const getCarTitles = withErrorHandling(async (input: unknown) => {
   const carIds = validateAction(carTitlesRequestSchema, input);
-  const rows = await carRepository.findCarTitlesByIds(carIds);
+  const rows = await carService.getCarTitles(carIds);
   return createSuccessResponse(Object.fromEntries(rows.map((row) => [row.id, row])));
 });
 
@@ -116,10 +114,7 @@ export const getCarTitles = withErrorHandling(async (input: unknown) => {
  */
 export const getMarketSummary = withErrorHandling(async () => {
   const organization = await getCurrentOrganization();
-  const summary = await carRepository.getMarketSummary({
-    organizationId: organization?.id ?? null,
-    currency: CAR_CURRENCY,
-  });
+  const summary = await carService.getMarketSummary(organization?.id ?? null);
   return createSuccessResponse({
     ...summary,
     updatedAt: summary.updatedAt ? summary.updatedAt.toISOString() : null,
@@ -133,7 +128,7 @@ export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {
 
   // Scope to current organization when on a subdomain
   const organization = await getCurrentOrganization();
-  const cars = await carRepository.findCarsByIds(carIds, organization?.id || null);
+  const cars = await carService.getCarsForComparison(carIds, organization?.id || null);
 
   if (!cars || cars.length === 0) {
     throw new ValidationError("No cars found with the provided IDs", "carIds", { key: "errors.compare.noCars" });

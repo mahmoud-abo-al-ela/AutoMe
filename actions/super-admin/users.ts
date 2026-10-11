@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
+import { recordAdminAuditEntry } from "@/lib/services/audit";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as userService from "@/lib/services/super-admin/user";
 import { withSuperAdmin } from "@/lib/middleware/with-auth";
@@ -16,15 +16,13 @@ export const updateUserRole = withSuperAdmin(
   async (admin, userId: string, newRole: UserRole) => {
     await userService.updateUserRole(userId, newRole, admin.id);
 
-    await db.auditLog.create({
-      data: {
-        action: "USER_ROLE_CHANGED",
-        entityType: "USER",
-        entityId: userId,
-        userId: admin.id,
-        userEmail: admin.email,
-        metadata: { newRole },
-      },
+    await recordAdminAuditEntry({
+      action: "USER_ROLE_CHANGED",
+      entityType: "USER",
+      entityId: userId,
+      userId: admin.id,
+      userEmail: admin.email,
+      metadata: { newRole },
     });
 
     revalidateLocalized("/super-admin/users");

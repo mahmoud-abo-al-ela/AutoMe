@@ -1,9 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { embedTexts, embeddingModel } from "@/lib/ai/embeddings";
-import { AI_FEATURES } from "@/lib/ai/features";
-import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
+import { backfillQuestionEmbeddings } from "@/lib/services/buyer-question/meaning";
 import { logError } from "@/lib/utils/errors";
 
 /**
@@ -52,26 +50,7 @@ export async function POST(request: Request) {
   const { limit, after } = parsed.data;
 
   try {
-    const questions = await buyerQuestionRepository.findQuestionsMissingEmbedding(embeddingModel(), limit, after);
-    if (questions.length === 0) return NextResponse.json({ embedded: 0, next: null });
-
-    const { model, vectors } = await embedTexts({
-      feature: AI_FEATURES.questionEmbedding,
-      texts: questions.map((q) => q.question),
-      task: "similarity",
-      ctx: { organizationId: null, userId: null, priority: "low" },
-    });
-    for (const [i, question] of questions.entries()) {
-      // Scoped to the question's own dealership in the WHERE.
-      await buyerQuestionRepository.setQuestionEmbedding({
-        id: question.id,
-        organizationId: question.organizationId,
-        vector: vectors[i],
-        model,
-      });
-    }
-    const next = questions.length === limit ? questions.at(-1)!.id : null;
-    return NextResponse.json({ embedded: questions.length, next });
+    return NextResponse.json(await backfillQuestionEmbeddings(limit, after));
   } catch (error) {
     logError("Question-embedding backfill failed", error);
     return NextResponse.json({ error: "Backfill failed" }, { status: 500 });

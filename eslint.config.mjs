@@ -11,7 +11,9 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 // through a repository, so the Prisma client and the generated client's runtime
 // values (the `Prisma` namespace, enum objects) are off limits outside it.
 // `import type` stays allowed everywhere: model and enum types cost nothing at
-// runtime and are how the rest of the app names the data's shape.
+// runtime and are how the rest of the app names the data's shape. No file is
+// exempt (every query outside a repository was moved, 2026-10-11): a new one
+// is an error — add or reuse a repository function instead.
 const PRISMA_BOUNDARY = {
   paths: [
     {
@@ -37,36 +39,6 @@ const PRISMA_BOUNDARY = {
     },
   ],
 };
-
-// Files that already used the Prisma client outside lib/repositories when the
-// boundary was introduced (2026-10-11). They report as warnings so lint stays
-// green while each is moved; every new file is held to the rule as an error.
-// Remove a line when its queries move into a repository. Never add one.
-const KNOWN_PRISMA_VIOLATIONS = [
-  "actions/onboarding.ts",
-  "actions/stream-chat.ts",
-  "actions/super-admin/organizations.ts",
-  "actions/super-admin/plans.ts",
-  "actions/super-admin/users.ts",
-  "actions/team.ts",
-  "actions/test-drive.ts",
-  "app/[[]locale]/org/[[]slug]/billing/page.tsx",
-  "app/api/super-admin/organizations/[[]id]/members/route.ts",
-  "app/api/webhooks/clerk/route.ts",
-  "lib/checkUser.ts",
-  "lib/org/access.ts",
-  "lib/org/resolve.ts",
-  "lib/services/audit/activity.ts",
-  "lib/services/audit/audit.ts",
-  "lib/services/audit/metadata.ts",
-  "lib/services/audit/query.js",
-  "lib/services/billing/settle.ts",
-  "lib/services/billing/signup.ts",
-  "lib/services/dealership/users.ts",
-  "lib/services/impersonation/impersonation.ts",
-  "lib/services/impersonation/query.ts",
-  "lib/services/impersonation/validation.ts",
-];
 
 // The layers' import direction: app → actions → services → repositories, never
 // back. Expressed with no-restricted-syntax (a rule separate from the Prisma
@@ -97,23 +69,8 @@ const LAYER = {
   ),
 };
 
-// Files that already crossed a layer when the direction was enforced
-// (2026-10-11), reported as warnings. Remove a line when the file goes through
-// a service; never add one.
-const KNOWN_LAYER_VIOLATIONS = {
-  entryPoints: [
-    "actions/billing.ts",
-    "actions/buyer-questions.ts",
-    "actions/cars-listing.ts",
-    "actions/home.ts",
-    "actions/onboarding.ts",
-    "actions/test-drive.ts",
-    "app/api/cron/backfill-image-alts/route.ts",
-    "app/api/cron/backfill-question-embeddings/route.ts",
-    "app/api/webhooks/clerk/route.ts",
-  ],
-};
-
+// No file is exempt: every crossing that predated the rule was moved behind a
+// service (2026-10-11). A new one is an error — fix it, don't list it.
 const UI_FILES = ["app/**", "components/**", "hooks/**"];
 const ENTRY_POINT_FILES = ["actions/**", "app/api/**"];
 const UI_LAYER = [LAYER.repositories("Pages and components"), LAYER.serverOnly];
@@ -157,10 +114,6 @@ const eslintConfig = [
     rules: { "no-restricted-imports": "off" },
   },
   {
-    files: KNOWN_PRISMA_VIOLATIONS,
-    rules: { "no-restricted-imports": ["warn", PRISMA_BOUNDARY] },
-  },
-  {
     files: UI_FILES,
     ignores: ENTRY_POINT_FILES,
     rules: { "no-restricted-syntax": ["error", ...UI_LAYER] },
@@ -176,10 +129,6 @@ const eslintConfig = [
   {
     files: ["lib/repositories/**"],
     rules: { "no-restricted-syntax": ["error", LAYER.ui, LAYER.services] },
-  },
-  {
-    files: KNOWN_LAYER_VIOLATIONS.entryPoints,
-    rules: { "no-restricted-syntax": ["warn", ...ENTRY_POINT_LAYER] },
   },
   {
     // Tests reach into any layer to set up and assert.

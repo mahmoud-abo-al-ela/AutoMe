@@ -2,7 +2,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as testDriveService from "@/lib/services/test-drive";
-import * as carRepository from "@/lib/repositories/car";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth, withOrgAuth } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
@@ -12,19 +11,10 @@ import {
   editTestDriveSchema,
   updateTestDriveStatusSchema,
 } from "@/lib/validations/schemas";
-import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
+import { ValidationError } from "@/lib/utils/errors";
 import { isDateString } from "@/lib/utils/date-only";
-import { displayNameFor } from "@/lib/utils/userHelpers";
-import { cairoNow } from "@/lib/utils/datetime";
 import { getCurrentOrganization } from "@/lib/getOrganization";
-import { assertBuyerAllowed, assertNotImpersonating } from "@/lib/auth/assert-buyer";
-
-import { db } from "@/lib/prisma";
-import {
-  sendTestDriveConfirmationEmail,
-  sendTestDriveAdminNotificationEmail,
-  sendTestDriveStatusUpdateEmail,
-} from "@/lib/services/notification";
+import { assertNotImpersonating } from "@/lib/auth/assert-buyer";
 
 /**
  * Every page that shows a test drive: the car's page, the buyer's booking
@@ -42,18 +32,7 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
   await enforceRateLimit();
   const testDriveData = validateAction(requestTestDriveSchema, rawData);
 
-  const car = await carRepository.findCarById(testDriveData.carId);
-  if (!car) {
-    throw new NotFoundError("Car");
-  }
-
-  // On a subdomain, only that dealership's cars can be booked.
-  const organization = await getCurrentOrganization();
-  if (organization && car.organizationId !== organization.id) {
-    throw new NotFoundError("Car");
-  }
-
-  assertBuyerAllowed(ctx.user, car.organizationId, "testDrive");
+  await testDriveService.findBookableCar(testDriveData.carId, ctx.user);
 
   // serializeTestDrive is nullable for callers that may pass nothing, but
   // createTestDrive always hands it a freshly created row.
@@ -62,66 +41,7 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
     ctx.userId,
   ))!;
 
-  // Fetch full data for email dispatch
-  const fullTestDrive = await db.testDrive.findUnique({
-    where: { id: testDrive.id },
-    include: {
-      car: true,
-      user: true,
-      organization: {
-        include: { memberships: { include: { user: true } } },
-      },
-    },
-  });
-
-  if (fullTestDrive && fullTestDrive.user) {
-    const org = fullTestDrive.organization;
-    const car = fullTestDrive.car;
-    const user = fullTestDrive.user;
-
-    const ownerEmail =
-      org.email ||
-      org.memberships.find((m) => m.role === "OWNER")?.user?.email;
-
-    const carName = car.title || `${car.make} ${car.model} ${car.year}`;
-    const userName = displayNameFor(user);
-
-    // Send confirmation to customer. Phone-only signups have no address, so
-    // there is nowhere to send it — the booking itself already succeeded and
-    // is visible in the app.
-    if (user.email) {
-      sendTestDriveConfirmationEmail({
-        to: user.email,
-        customerName: userName,
-        carTitle: carName,
-        date: fullTestDrive.date,
-        startTime: fullTestDrive.startTime,
-        endTime: fullTestDrive.endTime,
-        dealershipName: org.name,
-        dealershipAddress: org.address,
-      }).catch((error) => {
-        // Non-blocking: email failure should not fail the main operation
-        logError(error);
-      });
-    }
-
-    // Send notification to dealership
-    if (ownerEmail) {
-      sendTestDriveAdminNotificationEmail({
-        to: ownerEmail,
-        dealerName: org.name,
-        customerName: userName,
-        carTitle: carName,
-        date: fullTestDrive.date,
-        startTime: fullTestDrive.startTime,
-        endTime: fullTestDrive.endTime,
-        orgSlug: org.slug,
-      }).catch((error) => {
-        // Non-blocking: email failure should not fail the main operation
-        logError(error);
-      });
-    }
-  }
+  await testDriveService.notifyTestDriveRequested(testDrive.id);
 
   revalidateTestDrivePages(testDriveData.carId);
 
@@ -218,35 +138,7 @@ export const updateTestDriveStatus = withOrgAuth(async (ctx, input) => {
     ctx.organization.id,
   );
 
-  if (["CONFIRMED", "CANCELLED"].includes(status)) {
-    const fullTestDrive = await db.testDrive.findUnique({
-      where: { id: testDriveId },
-      include: { car: true, user: true, organization: true },
-    });
-
-    const recipient = fullTestDrive?.user?.email;
-    // Cancelling a drive whose time has already passed is the dealer recording
-    // that the buyer never came — not news for the buyer, so no email.
-    const now = cairoNow();
-    const slotDate = fullTestDrive?.date.toISOString().slice(0, 10) ?? "";
-    const alreadyOver =
-      !!fullTestDrive && (slotDate < now.date || (slotDate === now.date && fullTestDrive.endTime <= now.time));
-    const tellBuyer = !(status === "CANCELLED" && alreadyOver);
-    if (fullTestDrive && fullTestDrive.user && recipient && tellBuyer) {
-      const car = fullTestDrive.car;
-      const user = fullTestDrive.user;
-      sendTestDriveStatusUpdateEmail({
-        to: recipient,
-        customerName: displayNameFor(user),
-        carTitle: car.title || `${car.make} ${car.model} ${car.year}`,
-        status,
-        dealershipName: fullTestDrive.organization.name,
-      }).catch((error) => {
-        // Non-blocking: email failure should not fail the main operation
-        logError(error);
-      });
-    }
-  }
+  await testDriveService.notifyTestDriveStatusChanged(testDriveId, status);
 
   revalidateTestDrivePages(updatedTestDrive?.carId);
 

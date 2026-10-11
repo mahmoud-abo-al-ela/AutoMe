@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
+import { recordAdminAuditEntry } from "@/lib/services/audit";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as orgService from "@/lib/services/super-admin/organization";
 import * as subscriptionService from "@/lib/services/super-admin/subscription";
@@ -21,21 +21,19 @@ export const createOrganization = withSuperAdmin(
   const data = validateAction(createDealershipSchema, input);
   const { organization, plan } = await orgService.createOrganization(data);
 
-  await db.auditLog.create({
-    data: {
-      action: "ORG_CREATED",
-      entityType: "ORGANIZATION",
-      entityId: organization.id,
-      userId: admin.id,
-      userEmail: admin.email,
-      organizationId: organization.id,
-      metadata: {
-        name: data.name,
-        slug: organization.slug,
-        planId: data.planId,
-        planName: plan.name,
-        ownerEmail: data.ownerEmail,
-      },
+  await recordAdminAuditEntry({
+    action: "ORG_CREATED",
+    entityType: "ORGANIZATION",
+    entityId: organization.id,
+    userId: admin.id,
+    userEmail: admin.email,
+    organizationId: organization.id,
+    metadata: {
+      name: data.name,
+      slug: organization.slug,
+      planId: data.planId,
+      planName: plan.name,
+      ownerEmail: data.ownerEmail,
     },
   });
 
@@ -50,16 +48,14 @@ export const updateOrganizationStatus = withSuperAdmin(
   async (admin, orgId: string, isActive: boolean) => {
     await orgService.updateOrganizationStatus(orgId, isActive);
 
-    await db.auditLog.create({
-      data: {
-        action: isActive ? "ORG_ACTIVATED" : "ORG_SUSPENDED",
-        entityType: "ORGANIZATION",
-        entityId: orgId,
-        userId: admin.id,
-        userEmail: admin.email,
-        organizationId: orgId,
-        metadata: { isActive },
-      },
+    await recordAdminAuditEntry({
+      action: isActive ? "ORG_ACTIVATED" : "ORG_SUSPENDED",
+      entityType: "ORGANIZATION",
+      entityId: orgId,
+      userId: admin.id,
+      userEmail: admin.email,
+      organizationId: orgId,
+      metadata: { isActive },
     });
 
     revalidateLocalized("/super-admin/organizations");
@@ -73,18 +69,16 @@ export const updateOrganizationStatus = withSuperAdmin(
 export const deleteOrganization = withSuperAdmin(async (admin, orgId: string) => {
   const org = await orgService.deleteOrganization(orgId);
 
-  await db.auditLog.create({
-    data: {
-      action: "ORG_DELETED",
-      entityType: "ORGANIZATION",
-      entityId: orgId,
-      userId: admin.id,
-      userEmail: admin.email,
-      metadata: {
-        deletedOrg: org.name,
-        deletedSlug: org.slug,
-        hardDelete: true,
-      },
+  await recordAdminAuditEntry({
+    action: "ORG_DELETED",
+    entityType: "ORGANIZATION",
+    entityId: orgId,
+    userId: admin.id,
+    userEmail: admin.email,
+    metadata: {
+      deletedOrg: org.name,
+      deletedSlug: org.slug,
+      hardDelete: true,
     },
   });
 
@@ -132,16 +126,14 @@ export const changeOrganizationPlan = withSuperAdmin(
     );
     await subscriptionService.changeOrganizationPlan(orgId, planId);
 
-    await db.auditLog.create({
-      data: {
-        action: "SUBSCRIPTION_UPGRADED",
-        entityType: "SUBSCRIPTION",
-        entityId: subscriptionId || orgId,
-        userId: admin.id,
-        userEmail: admin.email,
-        organizationId: orgId,
-        metadata: { newPlanId: planId },
-      },
+    await recordAdminAuditEntry({
+      action: "SUBSCRIPTION_UPGRADED",
+      entityType: "SUBSCRIPTION",
+      entityId: subscriptionId || orgId,
+      userId: admin.id,
+      userEmail: admin.email,
+      organizationId: orgId,
+      metadata: { newPlanId: planId },
     });
 
     revalidateLocalized("/super-admin/organizations");

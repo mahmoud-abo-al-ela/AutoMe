@@ -157,3 +157,33 @@ export async function answerSuggestions(organizationId: string, openQuestionIds:
     return [];
   }
 }
+
+/**
+ * Give a batch of buyer questions their meaning where they have none from the
+ * current embedding model — asked before embeddings existed, or every one after
+ * AI_EMBEDDING_MODEL changes — in one embedding request, oldest id first after
+ * `after`. It only stores vectors: it never folds questions together, so
+ * nothing a dealer has seen disappears in a backfill. Platform-paid, low
+ * priority, in the embedding pool.
+ */
+export async function backfillQuestionEmbeddings(limit: number, after?: string) {
+  const questions = await buyerQuestionRepository.findQuestionsMissingEmbedding(embeddingModel(), limit, after);
+  if (questions.length === 0) return { embedded: 0, next: null };
+
+  const { model, vectors } = await embedTexts({
+    feature: AI_FEATURES.questionEmbedding,
+    texts: questions.map((q) => q.question),
+    task: "similarity",
+    ctx: { organizationId: null, userId: null, priority: "low" },
+  });
+  for (const [i, question] of questions.entries()) {
+    // Scoped to the question's own dealership in the WHERE.
+    await buyerQuestionRepository.setQuestionEmbedding({
+      id: question.id,
+      organizationId: question.organizationId,
+      vector: vectors[i],
+      model,
+    });
+  }
+  return { embedded: questions.length, next: questions.length === limit ? questions.at(-1)!.id : null };
+}
