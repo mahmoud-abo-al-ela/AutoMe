@@ -57,9 +57,6 @@ const KNOWN_PRISMA_VIOLATIONS = [
   "lib/org/access.ts",
   "lib/org/resolve.ts",
   "lib/services/dealership/users.ts",
-  "lib/services/impersonation/impersonation.ts",
-  "lib/services/impersonation/query.ts",
-  "lib/services/impersonation/validation.ts",
 ];
 
 // The layers' import direction: app → actions → services → repositories, never

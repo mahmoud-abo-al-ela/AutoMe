@@ -35,6 +35,22 @@ export async function findMembership(userId: string, organizationId: string) {
   });
 }
 
+/** A membership with its user and organization, by the user–organization pair. */
+export async function findMembershipWithUserAndOrganization(userId: string, organizationId: string) {
+  return db.membership.findUnique({
+    where: {
+      userId_organizationId: {
+        userId,
+        organizationId,
+      },
+    },
+    include: {
+      user: true,
+      organization: true,
+    },
+  });
+}
+
 /**
  * Find membership by ID
  */

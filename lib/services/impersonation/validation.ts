@@ -1,13 +1,12 @@
-import { db } from "@/lib/prisma";
+import { findUserById } from "@/lib/repositories/user";
+import { findMembershipWithUserAndOrganization } from "@/lib/repositories/team";
 import { AuthorizationError } from "@/lib/utils/errors";
 
 /**
  * Validate that a user is a Super Admin
  */
 export async function validateSuperAdmin(superAdminId: string) {
-  const superAdmin = await db.user.findUnique({
-    where: { id: superAdminId },
-  });
+  const superAdmin = await findUserById(superAdminId);
 
   if (!superAdmin || superAdmin.role !== "ADMIN") {
     throw new AuthorizationError("Only admins can start support sessions");
@@ -23,18 +22,7 @@ export async function validateTargetMembership(
   targetUserId: string,
   targetOrganizationId: string
 ) {
-  const targetMembership = await db.membership.findUnique({
-    where: {
-      userId_organizationId: {
-        userId: targetUserId,
-        organizationId: targetOrganizationId,
-      },
-    },
-    include: {
-      user: true,
-      organization: true,
-    },
-  });
+  const targetMembership = await findMembershipWithUserAndOrganization(targetUserId, targetOrganizationId);
 
   if (!targetMembership) {
     throw new AuthorizationError("Target user does not have access to this organization", {
