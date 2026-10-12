@@ -182,7 +182,8 @@ export function comparisonFor(
 
 /** Fewer comparable listings than this is an anecdote, not a range. */
 export const MIN_COMPARABLE_LISTINGS = 3;
-const MAX_OTHER_CARS = 8;
+/** Alternatives in one record: enough to choose from, few enough to read. */
+export const MAX_OTHER_CARS = 8;
 const MAX_PHOTOS = 10;
 
 export function summarizeMarketPrices(
