@@ -41,11 +41,23 @@ async function runWithoutQueue<N extends JobName>(name: N, payload: JobPayload<N
   }
 }
 
+/** How QStash should deliver one job; ignored when the job runs without the queue. */
+export interface EnqueueOptions {
+  /** A second job with the same id is accepted but not queued (QStash keeps ids for 90 days). */
+  deduplicationId?: string;
+  /** Deliver no earlier than this — Unix time in seconds. */
+  notBefore?: number;
+}
+
 /**
  * Queue a job. The payload is validated now, so a bad one fails where it was
  * written, not minutes later in the queue.
  */
-export async function enqueue<N extends JobName>(name: N, payload: JobPayload<N>): Promise<void> {
+export async function enqueue<N extends JobName>(
+  name: N,
+  payload: JobPayload<N>,
+  options: EnqueueOptions = {}
+): Promise<void> {
   const body = JOBS[name].schema.parse(payload) as JobPayload<N>;
   const queue = qstash();
   const url = jobUrl(name);
@@ -54,7 +66,7 @@ export async function enqueue<N extends JobName>(name: N, payload: JobPayload<N>
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     await Promise.race([
-      queue.publishJSON({ url, body, retries: RETRIES }),
+      queue.publishJSON({ url, body, retries: RETRIES, ...options }),
       new Promise((_, reject) => {
         timer = setTimeout(() => reject(new Error("QStash publish timed out")), PUBLISH_TIMEOUT_MS);
       }),
