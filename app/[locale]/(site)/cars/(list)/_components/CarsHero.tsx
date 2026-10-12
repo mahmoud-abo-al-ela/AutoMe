@@ -33,7 +33,8 @@ export const CarsHero = ({
     <header className="mb-6 flex flex-col gap-5 border-b border-border pb-6 lg:mb-8">
       <h1 className="text-h1 font-extrabold">{t("browse.title")}</h1>
 
-      <div className="relative w-full lg:max-w-xl">
+      {/* z-40: its suggestions open over the sticky results toolbar (z-30) and stay under the site header (z-50). */}
+      <div className="relative z-40 w-full lg:max-w-xl">
         <Search aria-hidden className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
         <input
           type="search"
