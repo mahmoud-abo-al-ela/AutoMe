@@ -16,10 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import SearchableLocationSelect from "@/components/SearchableLocationSelect";
 import { OrgPageHeader } from "@/components/dashboard/OrgPageHeader";
-import { inputClass } from "@/components/dashboard/form-ui";
 import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
@@ -29,6 +26,7 @@ import type { SessionRow, SessionsPage } from "@/lib/services/super-admin/sessio
 import ImpersonateModal from "../../organizations/_components/ImpersonateModal";
 import { Pager } from "../../_components/Pager";
 import { SessionsToolbar } from "./SessionsToolbar";
+import { StartSessionDialog } from "./StartSessionDialog";
 
 const BASE = "/super-admin/impersonation";
 const th = "px-3 py-3 text-center font-semibold first:ps-5 first:text-start";
@@ -52,7 +50,6 @@ export function SessionsList({ data, currentAdminId }: { data: SessionsPage; cur
   const [ending, setEnding] = useState<SessionRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [picking, setPicking] = useState(false);
-  const [dealership, setDealership] = useState("");
   const [starting, setStarting] = useState<{ id: string; name: string; slug: string } | null>(null);
   const { query, rows } = data;
   const n = (value: number) => fmt.number(value);
@@ -284,42 +281,15 @@ export function SessionsList({ data, currentAdminId }: { data: SessionsPage; cur
       </AlertDialog>
 
       {/* Starting one: choose the dealership here, then who and why in the usual dialog. */}
-      <Dialog open={picking} onOpenChange={setPicking}>
-        <DialogContent className="rounded-[20px] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("startDialog.title")}</DialogTitle>
-            <DialogDescription>{t("startDialog.body")}</DialogDescription>
-          </DialogHeader>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-caption font-semibold">{t("startDialog.dealership")}</span>
-            <SearchableLocationSelect
-              value={dealership}
-              options={data.dealerships.map((d) => ({ value: d.id, label: d.name }))}
-              placeholder={t("startDialog.choose")}
-              searchPlaceholder={t("startDialog.search")}
-              emptyMessage={t("startDialog.none")}
-              onValueChange={setDealership}
-              triggerClassName={inputClass()}
-            />
-          </label>
-          <DialogFooter>
-            <Button
-              variant="marker"
-              size="control"
-              className="h-11"
-              disabled={!dealership}
-              onClick={() => {
-                const chosen = data.dealerships.find((d) => d.id === dealership);
-                if (!chosen) return;
-                setPicking(false);
-                setStarting(chosen);
-              }}
-            >
-              {t("startDialog.next")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <StartSessionDialog
+        open={picking}
+        onOpenChange={setPicking}
+        dealerships={data.dealerships}
+        onChoose={(chosen) => {
+          setPicking(false);
+          setStarting(chosen);
+        }}
+      />
       {starting && <ImpersonateModal organization={starting} onClose={() => setStarting(null)} />}
     </div>
   );

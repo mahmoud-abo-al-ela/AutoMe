@@ -9,7 +9,10 @@ import { ANALYTICS_PERIODS, ANALYTICS_REPORTS, analyticsQueryString, type Analyt
 import type { Analytics } from "@/lib/services/super-admin/analytics";
 import { useTabSwitch } from "../../_components/use-tab-switch";
 import { ReportSkeleton } from "./ReportSkeletons";
-import { AiReport, BuyersReport, DealershipsReport, MarketplaceReport } from "./Reports";
+import { AiReport } from "./AiReport";
+import { BuyersReport } from "./BuyersReport";
+import { DealershipsReport } from "./DealershipsReport";
+import { MarketplaceReport } from "./MarketplaceReport";
 
 const BASE = "/super-admin/analytics";
 

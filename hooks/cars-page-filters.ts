@@ -178,3 +178,51 @@ export function buildActiveFilterChips(
   }
   return chips;
 }
+
+/**
+ * The filters with one active-filter chip cleared; for a multi-select field,
+ * `value` removes just that entry. Null for "all", which resets everything.
+ */
+export function clearedFilters(filters: CarPageFilters, type: string, value?: string): CarPageFilters | null {
+  const next = { ...filters };
+  switch (type) {
+    case "search":
+      next.search = undefined;
+      break;
+    case "make":
+    case "bodyType":
+    case "fuelType":
+    case "transmission":
+      next[type] = value ? (filters[type] || []).filter((v) => v !== value) : [];
+      break;
+    case "dealership":
+      next.dealership = undefined;
+      break;
+    case "city":
+      next.city = undefined;
+      break;
+    case "color":
+      next.color = undefined;
+      break;
+    case "minSeats":
+      next.minSeats = undefined;
+      break;
+    case "price":
+      next.minPrice = undefined;
+      next.maxPrice = undefined;
+      break;
+    case "year":
+      next.minYear = undefined;
+      next.maxYear = undefined;
+      break;
+    case "mileage":
+      next.minMileage = undefined;
+      next.maxMileage = undefined;
+      break;
+    case "all":
+      return null;
+    default:
+      break;
+  }
+  return next;
+}

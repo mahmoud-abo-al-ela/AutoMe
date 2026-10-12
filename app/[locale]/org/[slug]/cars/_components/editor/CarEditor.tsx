@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { History, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,29 +15,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { getCarPlanLimits, getMaxImagesPerCar } from "@/actions/cars";
+import { getMaxImagesPerCar } from "@/actions/cars";
 import { ActionErrorText } from "@/components/ActionErrorText";
 import { useCarForm, CAR_STEPS, type CarFormInitialData, type CarFormValues, type CarStep } from "@/hooks/use-car-form";
-import { CarListingStreamError, useCarListingStream } from "@/hooks/use-car-listing-stream";
 import { useFormatters } from "@/hooks/use-formatters";
-import { usePlanUsage } from "@/hooks/use-plan-usage";
-import { MAX_AI_LISTING_PHOTOS } from "@/lib/constants/car-options";
 import { VALIDATION_RULES } from "@/lib/constants/validation";
 import { UNSET } from "@/lib/utils/car-disclosures";
-import type { ActionError } from "@/lib/utils/error-messages";
 import { cn } from "@/lib/utils";
 import { StepHeading, StepRail } from "./StepRail";
-import { PhotosStep, type AiOffer } from "./PhotosStep";
+import { PhotosStep } from "./PhotosStep";
 import { CarStep as CarDetailsStep } from "./CarStep";
 import { HistoryStep } from "./HistoryStep";
 import { PublishStep } from "./PublishStep";
 import { useCarDraft } from "./use-car-draft";
-
-/** The fields a photo reading fills in, and so may carry the AI mark. */
-const AI_FIELDS = [
-  "make", "model", "year", "price", "mileage", "bodyType", "fuelType", "transmission", "color", "seats",
-  "features", "featuresAr", "description", "descriptionAr", "titleAr",
-] as const satisfies readonly (keyof CarFormValues)[];
+import { usePhotoReading } from "./use-photo-reading";
 
 const NO_DATA: CarFormInitialData = {};
 
@@ -68,7 +58,6 @@ export function CarEditor({
   aside?: ReactNode;
 }) {
   const t = useTranslations("org.carForm.editor");
-  const tAi = useTranslations("org.carForm.ai");
   const fmt = useFormatters();
   const { slug } = useParams<{ slug: string }>();
   const isEdit = mode === "edit";
@@ -95,60 +84,19 @@ export function CarEditor({
     document.getElementById("step-title")?.focus({ preventScroll: true });
   }, [currentStep]);
 
-  // ── Reading the details from the photos (adding only) ─────────────────
-  const [aiEnabled, setAiEnabled] = useState<boolean | null>(isEdit ? false : null);
-  useEffect(() => {
-    if (isEdit) return;
-    getCarPlanLimits()
-      .then((result) => setAiEnabled(result?.success ? (result.data?.aiProcessingEnabled ?? false) : false))
-      .catch(() => setAiEnabled(false));
-  }, [isEdit]);
-  const { usage } = usePlanUsage("aiProcessing");
-  const limited = !!usage && usage.limit !== -1;
-  const remaining = limited ? Math.max(0, usage.limit - usage.current) : null;
-  const aiOffer: AiOffer =
-    isEdit || aiEnabled === null
-      ? { kind: "none" }
-      : !aiEnabled
-        ? { kind: "locked", billingHref: `/org/${slug}/billing` }
-        : remaining === 0
-          ? { kind: "exhausted" }
-          : { kind: "ready", remaining, limit: usage && usage.limit !== -1 ? usage.limit : null };
-
-  const { progress, extract } = useCarListingStream();
-  const [reading, setReading] = useState(false);
-  const [readError, setReadError] = useState<{ action?: ActionError; text?: string } | null>(null);
-  const [aiFilled, setAiFilled] = useState<ReadonlySet<keyof CarFormValues>>(new Set());
-  const [aiYears, setAiYears] = useState<{ from: number; to: number } | null>(null);
-
-  const readPhotos = async () => {
-    const files = (watch("images") ?? []).filter((photo): photo is File => photo instanceof File).slice(0, MAX_AI_LISTING_PHOTOS);
-    if (files.length === 0) return;
-    setReading(true);
-    setReadError(null);
-    try {
-      const draft = await extract(files);
-      const filled = new Set<keyof CarFormValues>();
-      for (const field of AI_FIELDS) {
-        const value = draft[field as keyof typeof draft];
-        if (value === undefined || value === null || value === "") continue;
-        // Not marked dirty: the draft already carries both languages, so there is nothing to translate on save.
-        setValue(field, value as never);
-        filled.add(field);
-      }
-      setAiFilled(filled);
-      setAiYears(draft.yearFrom !== draft.yearTo ? { from: draft.yearFrom, to: draft.yearTo } : null);
-      toast.success(tAi("extracted"));
-      await handlers.handleNext();
-    } catch (error) {
-      setReadError(error instanceof CarListingStreamError ? { action: error.error, text: tAi("processFailed") } : { text: tAi("unexpected") });
-    } finally {
-      setReading(false);
-    }
-  };
-
-  /** The AI's mark stays until the dealer edits the field. */
-  const isAi = (field: keyof CarFormValues) => aiFilled.has(field) && !formState.dirtyFields[field];
+  const {
+    aiOffer,
+    progress,
+    reading,
+    readError,
+    setReadError,
+    aiFilled,
+    setAiFilled,
+    aiYears,
+    setAiYears,
+    readPhotos,
+    isAi,
+  } = usePhotoReading({ form, isEdit, slug, onRead: handlers.handleNext });
 
   // ── A new car is kept in the browser as it is filled in (use-car-draft) ─
   const draft = useCarDraft({

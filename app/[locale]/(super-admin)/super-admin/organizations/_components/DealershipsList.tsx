@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Building2, ChevronLeft, ChevronRight, Download, Plus } from "lucide-react";
-import { toast } from "sonner";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Building2, Download, Plus } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,20 +15,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { OrgPageHeader } from "@/components/dashboard/OrgPageHeader";
-import { useActionError } from "@/hooks/use-action-error";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
-import { deleteOrganization, exportDealerships, updateOrganizationStatus } from "@/actions/super-admin";
-import {
-  DEALERSHIPS_PER_PAGE,
-  dealershipQueryString,
-} from "@/lib/services/super-admin/dealerships-options";
+import { dealershipQueryString } from "@/lib/services/super-admin/dealerships-options";
 import type { DealershipRow, DealershipsPage } from "@/lib/services/super-admin/dealerships";
+import { Pager } from "../../_components/Pager";
 import DeleteOrganizationDialog from "./DeleteOrganizationDialog";
 import ImpersonateModal from "./ImpersonateModal";
 import { DealershipRowMenu } from "./DealershipRowMenu";
 import { DealershipsToolbar } from "./DealershipsToolbar";
-import { STATUS_TONES, downloadCsv, useDealershipDisplay } from "./use-dealership-display";
+import { STATUS_TONES, downloadCsv } from "./use-dealership-display";
+import { useDealershipsList } from "./use-dealerships-list";
 
 const BASE = "/super-admin/organizations";
 
@@ -65,115 +60,36 @@ function Initials({ name, muted }: { name: string; muted?: boolean }) {
  */
 export function DealershipsList({ data }: { data: DealershipsPage }) {
   const t = useTranslations("superAdmin.organizations");
-  const tCommon = useTranslations("superAdmin.common");
-  const actionError = useActionError();
   const fmt = useFormatters();
-  const display = useDealershipDisplay();
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [busy, setBusy] = useState<string | null>(null);
-  const [exporting, setExporting] = useState(false);
-  const [impersonating, setImpersonating] = useState<DealershipRow | null>(null);
-  const [deleting, setDeleting] = useState<DealershipRow | null>(null);
-  // Suspending hides a storefront from buyers, so it asks first; reactivating does not.
-  const [suspending, setSuspending] = useState<DealershipRow[] | null>(null);
-  const { query, rows } = data;
   const n = (value: number) => fmt.number(value);
-
-  const refresh = () => startTransition(() => router.refresh());
-  const chosen = rows.filter((row) => selected.has(row.id));
-  const allChosen = rows.length > 0 && chosen.length === rows.length;
-  const toggle = (id: string) =>
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-
-  const setStatus = async (targets: DealershipRow[], isActive: boolean) => {
-    const changing = targets.filter((row) => row.isActive !== isActive);
-    if (changing.length === 0) return;
-    setBusy(changing.length === 1 ? changing[0].id : "bulk");
-    try {
-      const results = await Promise.all(changing.map((row) => updateOrganizationStatus(row.id, isActive)));
-      const failed = results.filter((result) => !result.success);
-      if (changing.length === 1) {
-        const [row] = changing;
-        if (failed.length) {
-          toast.error(t("toasts.statusFailed"), { description: actionError(failed[0].success ? undefined : failed[0].error, tCommon("errorBody")) });
-        } else {
-          toast.success(isActive ? t("toasts.activated") : t("toasts.suspended"), {
-            description: isActive ? t("toasts.activatedBody", { name: row.name }) : t("toasts.suspendedBody", { name: row.name }),
-          });
-        }
-      } else if (failed.length) {
-        toast.error(t("toasts.bulkFailed"));
-      } else {
-        const values = { count: changing.length, value: n(changing.length) };
-        toast.success(isActive ? t("toasts.bulkActivated", values) : t("toasts.bulkSuspended", values));
-        setSelected(new Set());
-      }
-      refresh();
-    } catch {
-      toast.error(tCommon("errorTitle"), { description: tCommon("errorBody") });
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const requestStatus = (targets: DealershipRow[], isActive: boolean) => {
-    if (isActive) return setStatus(targets, true);
-    const active = targets.filter((row) => row.isActive);
-    if (active.length > 0) setSuspending(active);
-  };
-
-  const confirmDelete = async () => {
-    if (!deleting) return;
-    setBusy(`delete-${deleting.id}`);
-    try {
-      const result = await deleteOrganization(deleting.id);
-      if (result.success) {
-        toast.success(t("toasts.deleted"), { description: t("toasts.deletedBody", { name: deleting.name }) });
-        setSelected((current) => {
-          const next = new Set(current);
-          next.delete(deleting.id);
-          return next;
-        });
-        refresh();
-      } else {
-        toast.error(t("toasts.deleteFailed"), { description: actionError(result.error, tCommon("errorBody")) });
-      }
-    } catch {
-      toast.error(tCommon("errorTitle"), { description: tCommon("errorBody") });
-    } finally {
-      setBusy(null);
-      setDeleting(null);
-    }
-  };
-
-  const filename = () => `autome-dealerships-${new Date().toISOString().slice(0, 10)}.csv`;
-  const exportAll = async () => {
-    setExporting(true);
-    try {
-      const params = Object.fromEntries(new URLSearchParams(dealershipQueryString(query)));
-      const result = await exportDealerships(params);
-      if (result.success && result.data) downloadCsv(display.csv(result.data), filename());
-      else toast.error(t("exportFailed"));
-    } catch {
-      toast.error(t("exportFailed"));
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const from = data.total === 0 ? 0 : (query.page - 1) * DEALERSHIPS_PER_PAGE + 1;
-  const to = Math.min(query.page * DEALERSHIPS_PER_PAGE, data.total);
-  const pageHref = (page: number) => `${BASE}${dealershipQueryString({ ...query, page })}`;
-  const pages = Array.from({ length: data.pages }, (_, i) => i + 1).filter(
-    (page) => data.pages <= 7 || page === 1 || page === data.pages || Math.abs(page - query.page) <= 1,
-  );
+  const {
+    query,
+    rows,
+    display,
+    pending,
+    startTransition,
+    selected,
+    setSelected,
+    busy,
+    exporting,
+    impersonating,
+    setImpersonating,
+    deleting,
+    setDeleting,
+    suspending,
+    setSuspending,
+    chosen,
+    allChosen,
+    toggle,
+    setStatus,
+    requestStatus,
+    confirmDelete,
+    exportAll,
+    filename,
+    from,
+    to,
+    pageHref,
+  } = useDealershipsList(data);
 
   const status = (row: DealershipRow) => {
     const { tone, label } = display.status(row);
@@ -347,38 +263,7 @@ export function DealershipsList({ data }: { data: DealershipsPage }) {
         {data.total > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-caption text-muted-foreground sm:px-5">
             <span>{t("pagination.showing", { from: n(from), to: n(to), total: n(data.total) })}</span>
-            {data.pages > 1 && (
-              <nav aria-label={t("pagination.label")} className="flex items-center gap-1.5">
-                <Link
-                  href={pageHref(Math.max(1, query.page - 1))}
-                  aria-label={t("pagination.previous")}
-                  aria-disabled={query.page === 1}
-                  className={cn(pagerLink, query.page === 1 && "pointer-events-none opacity-40")}
-                >
-                  <ChevronLeft aria-hidden className="size-4 rtl:-scale-x-100" />
-                </Link>
-                {pages.map((page, i) => (
-                  <span key={page} className="flex items-center gap-1.5">
-                    {i > 0 && page - pages[i - 1] > 1 && <span aria-hidden>…</span>}
-                    <Link
-                      href={pageHref(page)}
-                      aria-current={page === query.page ? "page" : undefined}
-                      className={cn(pagerLink, page === query.page && "border-inverse bg-inverse text-inverse-foreground")}
-                    >
-                      {n(page)}
-                    </Link>
-                  </span>
-                ))}
-                <Link
-                  href={pageHref(Math.min(data.pages, query.page + 1))}
-                  aria-label={t("pagination.next")}
-                  aria-disabled={query.page === data.pages}
-                  className={cn(pagerLink, query.page === data.pages && "pointer-events-none opacity-40")}
-                >
-                  <ChevronRight aria-hidden className="size-4 rtl:-scale-x-100" />
-                </Link>
-              </nav>
-            )}
+            <Pager page={query.page} pages={data.pages} href={pageHref} scroll linkClassName="text-foreground" />
           </div>
         )}
       </section>
@@ -421,6 +306,3 @@ export function DealershipsList({ data }: { data: DealershipsPage }) {
     </div>
   );
 }
-
-const pagerLink =
-  "flex size-10 items-center justify-center rounded-control border border-border bg-field text-caption font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";

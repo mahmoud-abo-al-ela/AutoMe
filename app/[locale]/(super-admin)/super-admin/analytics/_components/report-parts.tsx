@@ -6,7 +6,10 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 import { changeFrom } from "@/lib/services/super-admin/analytics-options";
-import type { Pair } from "@/lib/services/super-admin/analytics";
+import type { AnalyticsData, Pair } from "@/lib/services/super-admin/analytics";
+
+/** One report's data, by its name. */
+export type Of<R extends AnalyticsData["report"]> = Extract<AnalyticsData, { report: R }>;
 
 /** Table cell styles shared by every report's tables. */
 export const th = "px-3 py-3 text-center font-semibold first:ps-5 first:text-start";
