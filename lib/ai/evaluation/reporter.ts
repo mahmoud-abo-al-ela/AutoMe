@@ -42,8 +42,8 @@ function suiteFailure(test: TestCase): string | null {
 const MAX_NOTE_CHARS = 600;
 
 /** The first assertion that failed, on one line. */
-function failureNote(errors: ReadonlyArray<{ message?: string }> | undefined): string | undefined {
-  const message = errors?.[0]?.message?.replace(/s+/g, " ").trim();
+export function failureNote(errors: ReadonlyArray<{ message?: string }> | undefined): string | undefined {
+  const message = errors?.[0]?.message?.replace(/\s+/g, " ").trim();
   if (!message) return undefined;
   return message.length > MAX_NOTE_CHARS ? `${message.slice(0, MAX_NOTE_CHARS)}…` : message;
 }
