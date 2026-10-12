@@ -8,7 +8,7 @@ vi.hoisted(() => {
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
-import { findSimilarWords, refreshSearchTerms } from "@/lib/repositories/car/search-terms";
+import { findSimilarNames, findSimilarWords, refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 
@@ -118,6 +118,13 @@ describe.skipIf(!hasTestDb)("search vocabulary (real Postgres)", () => {
 
   it("refuses a floor the trigram index cannot honour", async () => {
     await expect(findSimilarWords(["zentrava"], { minSimilarity: 0.2, perToken: 3 })).rejects.toThrow(RangeError);
+  });
+
+  it("measures known names by the same similarity", async () => {
+    const found = await findSimilarNames(["تيوتا"], ["تويوتا", "هوندا", "تيوتا"], { minSimilarity: 0.4, perToken: 3 });
+    expect(found).toEqual([{ token: "تيوتا", word: "تويوتا", similarity: expect.any(Number), ndoc: 0 }]);
+    expect(found[0]!.similarity).toBeGreaterThanOrEqual(0.4);
+    await expect(findSimilarNames(["تيوتا"], ["تويوتا"], { minSimilarity: 0.2, perToken: 3 })).rejects.toThrow(RangeError);
   });
 
   it("refreshes twice at once without either failing", async () => {

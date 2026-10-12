@@ -122,7 +122,7 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       plainSedan1: { make: "Kia", model: "Cerato", year: 2020, bodyType: "Sedan", transmission: "Automatic" },
       plainSedan2: { make: "Hyundai", model: "Elantra", year: 2021, bodyType: "Sedan", transmission: "Automatic" },
       plainSedan3: { make: "Nissan", model: "Sunny", year: 2019, bodyType: "Sedan", transmission: "Manual" },
-      plainSuv: { make: "Kia", model: "Sportage", year: 2021, bodyType: "SUV", transmission: "Automatic" },
+      plainSuv: { make: "Kia", model: "Sportage", year: 2021, bodyType: "SUV", transmission: "Automatic", descriptionAr: "ناقل حركة اوتوماتيك." },
     } satisfies Record<string, RelevanceCar>)) {
       await insert(PLAIN_ORG, key, car);
     }
@@ -239,6 +239,18 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       expect(result.search?.corrected).toEqual([{ from: "corola", to: ["corolla"] }]);
     });
 
+    it("corrects an Arabic make, which no listing spells out, from the names the search knows", async () => {
+      const result = await search({ search: "تيوتا" });
+      expect(new Set(keys(result))).toEqual(new Set(where((c) => c.make === "Toyota")));
+      expect(result.search?.corrected).toEqual([{ from: "تيوتا", to: ["تويوتا"] }]);
+    });
+
+    it("names a word once when a listing and the known names both offer it", async () => {
+      // The plain dealership's SUV says "اوتوماتيك"; the names know "أوتوماتيك".
+      const result = await searchCarsRanked({ search: "اتوماتيك", organizationId: PLAIN_ORG }, { page: 1, limit: 50 });
+      expect(result.search?.corrected).toEqual([{ from: "اتوماتيك", to: ["أوتوماتيك"] }]);
+    });
+
     it("never corrects a model code, however close", async () => {
       // "320d" is as alike to "320i" as "corola" is to a word worth reading it as.
       const result = await search({ search: "320d" });
@@ -280,6 +292,8 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
         const result = await search({ search: "corola سيدان" });
         expect(result.search).toMatchObject({ match: "all", missing: ["corola"], corrected: [] });
         expect(new Set(keys(result))).toEqual(new Set(where((c) => c.bodyType === "Sedan")));
+        // The known names do not depend on the vocabulary.
+        expect((await search({ search: "تيوتا" })).search?.corrected).toEqual([{ from: "تيوتا", to: ["تويوتا"] }]);
       } finally {
         vocabulary.fail = false;
       }

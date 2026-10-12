@@ -1,4 +1,4 @@
-import { expandSearchTerm, hasAlias } from "@/lib/locations";
+import { expandSearchTerm, hasAlias, knownNames } from "@/lib/locations";
 import { searchWords } from "@/lib/utils/search-text";
 import { isCorrectable } from "@/lib/search/lexical";
 
@@ -134,11 +134,36 @@ export function correctableWord(term: SearchTerm): string | null {
   return words.length === 1 && isCorrectable(words[0]) ? words[0] : null;
 }
 
+let names: Map<string, string> | undefined;
+
+/**
+ * The alias index's one-word names a typo may be corrected to, keyed by the
+ * word as a search folds it, to the name as displayed: "تويوتا" → تويوتا,
+ * "هيونداي" → هيونداي. Built once.
+ */
+export function correctionNames(): Map<string, string> {
+  if (!names) {
+    names = new Map();
+    for (const surface of knownNames()) {
+      const words = searchWords(surface);
+      if (words.length === 1 && isCorrectable(words[0]) && !names.has(words[0])) names.set(words[0], surface);
+    }
+  }
+  return names;
+}
+
 /**
  * The term that stands in for a typo: any of the known words that may have
- * been meant, matched like every term, by prefix. Keeps the typed text, so
- * the search can say what it corrected.
+ * been meant, each with everything it is the display form of ("تويوتا"
+ * reaches the Toyotas), matched like every term, by prefix. Keeps the typed
+ * text, so the search can say what it corrected.
  */
 export function correctedTerm(typed: string, words: string[]): SearchTerm | null {
-  return toTerm(typed, words, []);
+  const expanded = words.map((word) => expandSearchTerm(word));
+  const unique = (values: string[]) => [...new Set(values)];
+  return toTerm(
+    typed,
+    unique(expanded.flatMap((variants) => variants.text)),
+    unique(expanded.flatMap((variants) => variants.exact))
+  );
 }

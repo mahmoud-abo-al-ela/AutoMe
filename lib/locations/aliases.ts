@@ -41,10 +41,13 @@ export interface SearchVariants {
 type Bucket = keyof SearchVariants;
 
 const INDEX = new Map<string, SearchVariants>();
+/** Every name the index knows, as displayed. */
+const SURFACES = new Set<string>();
 
 function add(surface: string, bucket: Bucket, value: string) {
   const key = normalizePlaceName(surface);
   if (!key) return;
+  SURFACES.add(surface.trim());
 
   let entry = INDEX.get(key);
   if (!entry) {
@@ -117,6 +120,16 @@ export function expandSearchTerm(term: string): SearchVariants {
 /** The variants safe to feed a substring or prefix matcher. */
 export function expandSearchTermForText(term: string): string[] {
   return expandSearchTerm(term).text;
+}
+
+/**
+ * Every name a reader may type that the index knows — makes, attributes and
+ * places, in both languages — as displayed. Typo correction proposes from
+ * them: an Arabic make name appears in no listing, so the listings' own
+ * vocabulary cannot offer it.
+ */
+export function knownNames(): string[] {
+  return [...SURFACES];
 }
 
 /** True when the term maps to at least one stored value. */

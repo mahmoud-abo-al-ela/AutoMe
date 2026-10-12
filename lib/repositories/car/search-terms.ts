@@ -63,3 +63,33 @@ export async function findSimilarWords(
   `);
   return rows;
 }
+
+/**
+ * The same, among names the caller knows rather than the vocabulary — the
+ * alias index's makes and attributes — measured by the same pg_trgm
+ * similarity, so one threshold means one thing. `ndoc` is 0: these are not
+ * counted in cars.
+ */
+export async function findSimilarNames(
+  tokens: string[],
+  names: string[],
+  { minSimilarity, perToken }: { minSimilarity: number; perToken: number }
+): Promise<SimilarWord[]> {
+  if (tokens.length === 0 || names.length === 0) return [];
+  if (minSimilarity < MIN_WORD_SIMILARITY) {
+    throw new RangeError(`minSimilarity must be at least ${MIN_WORD_SIMILARITY}`);
+  }
+
+  return db.$queryRaw<SimilarWord[]>(Prisma.sql`
+    SELECT t."token", n."word", n."similarity", 0 AS "ndoc"
+    FROM unnest(${tokens}::text[]) AS t("token")
+    CROSS JOIN LATERAL (
+      SELECT "word", similarity("word", t."token")::float8 AS "similarity"
+      FROM unnest(${names}::text[]) AS known("word")
+      WHERE "word" % t."token" AND "word" <> t."token"
+      ORDER BY similarity("word", t."token") DESC, "word"
+      LIMIT ${perToken}
+    ) n
+    WHERE n."similarity" >= ${minSimilarity}
+  `);
+}
