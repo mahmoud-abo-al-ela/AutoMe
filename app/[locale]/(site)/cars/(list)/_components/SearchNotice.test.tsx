@@ -78,7 +78,7 @@ describe("SearchMatchNotice", () => {
         />
       </NextIntlClientProvider>
     );
-    expect(html).toContain("ابحث بدلًا من <bdi");
+    expect(html).toContain("ابحث بدلًا من ذلك عن <bdi");
     expect(html).toContain("«فتحت»");
   });
 
