@@ -10,7 +10,8 @@ export const MAX_SUGGEST_QUERY = 40;
 
 export type SuggestionLocale = "en" | "ar";
 
-export type SuggestionKind = "make" | "model" | SpecKind;
+/** "recent": one of the buyer's own recent searches, kept in their browser (no count). */
+export type SuggestionKind = "make" | "model" | SpecKind | "recent";
 
 /** The filters choosing a suggestion sets, as the cars page's URL names them. */
 export interface SuggestionFilters {

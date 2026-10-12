@@ -12,8 +12,7 @@ import { describeSearch } from "@/actions/home";
 import { describedSearchParams, hasFilters, readsLikeSentence } from "@/lib/search/describe";
 import { suggestionParams } from "@/lib/search/suggest";
 import { SuggestionList } from "@/components/search/SuggestionList";
-import { useSearchSuggestions } from "@/components/search/use-search-suggestions";
-import { useSuggestionCombobox } from "@/components/search/use-suggestion-combobox";
+import { useSearchBox } from "@/components/search/use-search-box";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 
@@ -37,8 +36,7 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
   const described = useMutation({ mutationFn: describeSearch });
-  const suggestions = useSearchSuggestions(searchQuery);
-  const combobox = useSuggestionCombobox(suggestions, (suggestion) =>
+  const { options, combobox, remember } = useSearchBox(searchQuery, (suggestion) =>
     router.push(`/cars?${suggestionParams(suggestion).toString()}`)
   );
 
@@ -49,6 +47,7 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
       toast.error(t("emptySearch"));
       return;
     }
+    remember(query);
     const plain = () => router.push(`/cars?search=${encodeURIComponent(query)}`);
     if (!readsLikeSentence(query)) return plain();
 
@@ -144,7 +143,7 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
           </div>
         )}
       </form>
-      <SuggestionList query={searchQuery} suggestions={suggestions} {...combobox.listProps} />
+      <SuggestionList query={searchQuery} suggestions={options} {...combobox.listProps} />
     </div>
   );
 };

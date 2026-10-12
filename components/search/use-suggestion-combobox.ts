@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { SearchSuggestion } from "@/lib/search/suggest";
 
 /**
@@ -20,17 +20,25 @@ export function nextActive(active: number, key: string, count: number): number |
  * through them while focus stays in the field, Enter takes the highlighted
  * one (or, with none highlighted, does what the field always did), Escape
  * closes the list and keeps the text, Tab and leaving the field close it.
+ * Delete on a highlighted recent search removes it (`onRemove`) — the field
+ * is empty while recents show, so no text is being edited.
  */
 export function useSuggestionCombobox(
   suggestions: SearchSuggestion[],
-  onPick: (suggestion: SearchSuggestion) => void
+  onPick: (suggestion: SearchSuggestion) => void,
+  { onRemove }: { onRemove?: (suggestion: SearchSuggestion) => void } = {}
 ) {
   const listId = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
+  // After a removal, the highlight stays where it was rather than resetting.
+  const keepActive = useRef<number | null>(null);
 
   // A new list starts with nothing highlighted, so Enter still searches the text.
-  useEffect(() => setActive(-1), [suggestions]);
+  useEffect(() => {
+    setActive(keepActive.current ?? -1);
+    keepActive.current = null;
+  }, [suggestions]);
 
   const shown = open && suggestions.length > 0;
   const optionId = (index: number) => `${listId}-option-${index}`;
@@ -39,6 +47,11 @@ export function useSuggestionCombobox(
     setOpen(false);
     setActive(-1);
     onPick(suggestion);
+  };
+
+  const remove = (suggestion: SearchSuggestion, index: number) => {
+    keepActive.current = Math.min(index, suggestions.length - 2);
+    onRemove?.(suggestion);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -55,6 +68,11 @@ export function useSuggestionCombobox(
     if (event.key === "Enter" && shown && active >= 0) {
       event.preventDefault();
       pick(suggestions[active]);
+      return;
+    }
+    if (event.key === "Delete" && shown && active >= 0 && suggestions[active].kind === "recent" && onRemove) {
+      event.preventDefault();
+      remove(suggestions[active], active);
       return;
     }
     const next = nextActive(active, event.key, suggestions.length);
@@ -86,6 +104,7 @@ export function useSuggestionCombobox(
       optionId,
       onPick: pick,
       onHover: setActive,
+      onRemove: onRemove ? remove : undefined,
     },
   };
 }

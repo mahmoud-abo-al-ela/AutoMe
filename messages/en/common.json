@@ -137,6 +137,8 @@
       "transmission": "Transmission",
       "color": "Color",
       "feature": "Feature"
-    }
+    },
+    "recent": "Recent searches",
+    "remove": "Remove “{label}” from recent searches"
   }
 }

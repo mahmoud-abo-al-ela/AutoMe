@@ -4,8 +4,7 @@ import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 import type { SearchSuggestion } from "@/lib/search/suggest";
 import { SuggestionList } from "@/components/search/SuggestionList";
-import { useSearchSuggestions } from "@/components/search/use-search-suggestions";
-import { useSuggestionCombobox } from "@/components/search/use-suggestion-combobox";
+import { useSearchBox } from "@/components/search/use-search-box";
 
 /**
  * Browse page header (Figma: Browse — desktop). Replaces the animated gradient
@@ -28,8 +27,7 @@ export const CarsHero = ({
 }) => {
   const t = useTranslations("cars");
   const query = searchQuery || "";
-  const suggestions = useSearchSuggestions(query);
-  const combobox = useSuggestionCombobox(suggestions, onPickSuggestion);
+  const { options, combobox, remember } = useSearchBox(query, onPickSuggestion);
 
   return (
     <header className="mb-6 flex flex-col gap-5 border-b border-border pb-6 lg:mb-8">
@@ -41,6 +39,11 @@ export const CarsHero = ({
         <input
           type="search"
           {...combobox.inputProps}
+          onKeyDown={(event) => {
+            combobox.inputProps.onKeyDown(event);
+            // The field searches as it is typed; Enter is where a search is meant, so it is remembered.
+            if (event.key === "Enter" && !event.defaultPrevented && query.trim()) remember(query.trim());
+          }}
           value={query}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("hero.searchPlaceholder")}
@@ -58,7 +61,7 @@ export const CarsHero = ({
             <X className="size-4" />
           </button>
         )}
-        <SuggestionList query={query} suggestions={suggestions} showCounts={showSuggestionCounts} {...combobox.listProps} />
+        <SuggestionList query={query} suggestions={options} showCounts={showSuggestionCounts} {...combobox.listProps} />
       </div>
     </header>
   );
