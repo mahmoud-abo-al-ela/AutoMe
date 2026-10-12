@@ -16,7 +16,7 @@ function render(locale: "en" | "ar", searchMatch: SearchMatch) {
 
 describe("SearchMatchNotice", () => {
   it("names the words no car has, in Arabic", () => {
-    const html = render("ar", { match: "all", missing: ["عربية"] });
+    const html = render("ar", { match: "all", missing: ["عربية"], corrected: [] });
     expect(html).toContain('role="status"');
     expect(html).toContain("<bdi");
     expect(html).toContain("عربية");
@@ -24,20 +24,36 @@ describe("SearchMatchNotice", () => {
   });
 
   it("lists several set-aside words", () => {
-    expect(render("en", { match: "all", missing: ["please", "thanks"] })).toMatch(/please.*thanks/);
+    expect(render("en", { match: "all", missing: ["please", "thanks"], corrected: [] })).toMatch(/please.*thanks/);
   });
 
   it("says when no car had every word", () => {
-    expect(render("en", { match: "some", missing: [] })).toContain("No car has all of your words");
+    expect(render("en", { match: "some", missing: [], corrected: [] })).toContain("No car has all of your words");
   });
 
   it("says when the cars are the closest in meaning", () => {
-    expect(render("en", { match: "meaning", missing: ["zzqx"] })).toContain("closest to what you described");
-    expect(render("en", { match: "meaning", missing: [] })).toContain("closest to what you described");
+    expect(render("en", { match: "meaning", missing: ["zzqx"], corrected: [] })).toContain("closest to what you described");
+    expect(render("en", { match: "meaning", missing: [], corrected: [] })).toContain("closest to what you described");
   });
 
-  it("says nothing when every word matched, or a typo was matched by spelling", () => {
-    expect(render("en", { match: "all", missing: [] })).toBe("");
-    expect(render("en", { match: "similar", missing: [] })).toBe("");
+  it("says which word a typo was read as", () => {
+    const html = render("en", { match: "all", missing: [], corrected: [{ from: "corola", to: ["corolla"] }] });
+    expect(html).toContain("Showing results for <bdi");
+    expect(html).toContain("corolla</bdi> instead of “corola”");
+  });
+
+  it("offers every reading when it could not tell which was meant, in Arabic", () => {
+    const html = render("ar", { match: "all", missing: [], corrected: [{ from: "كرولا", to: ["كورولا", "كرولي"] }] });
+    expect(html).toContain("كورولا أو كرولي");
+    expect(html).toContain("«كرولا»");
+  });
+
+  it("says a typo was read before a word set aside", () => {
+    const html = render("en", { match: "all", missing: ["please"], corrected: [{ from: "corola", to: ["corolla"] }] });
+    expect(html.indexOf("corolla")).toBeLessThan(html.indexOf("please"));
+  });
+
+  it("says nothing when every word matched as typed", () => {
+    expect(render("en", { match: "all", missing: [], corrected: [] })).toBe("");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { MAX_SEARCH_TERMS, searchTerms, toTrigramTerm } from "./search-query";
+import { MAX_SEARCH_TERMS, correctableWord, correctedTerm, searchTerms } from "./search-query";
 
 /** Every term ANDed — the tsquery a search requiring all of its words runs. */
 const toPrefixTsquery = (term: string) =>
@@ -156,16 +156,34 @@ describe("searchTerms", () => {
   });
 });
 
-describe("toTrigramTerm", () => {
-  it("resolves an Arabic term to an English one the columns hold", () => {
-    expect(toTrigramTerm("نيسان")).toBe("Nissan");
+describe("correctableWord", () => {
+  const word = (text: string) => correctableWord(searchTerms(text)[0]!);
+
+  it("offers a free word for correction, folded", () => {
+    expect(word("Corola")).toBe("corola");
+    expect(word("كرولا")).toBe("كرولا");
   });
 
-  it("leaves a term with no alias alone, typos included", () => {
-    expect(toTrigramTerm("corola")).toBe("corola");
+  it("never offers a model code or a year", () => {
+    expect(word("X5")).toBeNull();
+    expect(word("320i")).toBeNull();
+    expect(word("2020")).toBeNull();
+    expect(word("٢٠٢٠")).toBeNull();
   });
 
-  it("handles empty input", () => {
-    expect(toTrigramTerm("")).toBe("");
+  it("never offers an alias, a known value or a place", () => {
+    expect(word("نيسان")).toBeNull();
+    expect(word("القاهرة")).toBeNull();
+  });
+
+  it("never offers a short word", () => {
+    expect(word("kia")).toBeNull();
+  });
+});
+
+describe("correctedTerm", () => {
+  it("matches any of the known words by prefix, keeping what was typed", () => {
+    expect(correctedTerm("corola", ["corolla"])).toMatchObject({ text: "corola", query: "corolla:*", places: [], year: null });
+    expect(correctedTerm("corola", ["corolla", "corona"])?.query).toBe("(corolla:* | corona:*)");
   });
 });

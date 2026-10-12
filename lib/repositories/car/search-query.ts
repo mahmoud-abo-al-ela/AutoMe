@@ -1,5 +1,6 @@
-import { expandSearchTerm, expandSearchTermForText } from "@/lib/locations";
+import { expandSearchTerm, hasAlias } from "@/lib/locations";
 import { searchWords } from "@/lib/utils/search-text";
+import { isCorrectable } from "@/lib/search/lexical";
 
 /**
  * Builds the Postgres prefix tsqueries for the car search box — one per term,
@@ -121,14 +122,23 @@ export function searchTerms(term: string): SearchTerm[] {
 }
 
 /**
- * The term to use for the trigram fallback, which compares against the English
- * make/model columns and so cannot work on Arabic input. Falls back to the
- * original, which simply matches nothing — the same as before.
+ * The folded word a typo correction may replace this term with, or null. Only
+ * a single free word qualifies: never a place, a year, or an alias or known
+ * value (a make in Arabic, a body type) — those are known words already, and
+ * one no car in scope has is genuinely absent, not misspelt. isCorrectable
+ * rules out short words and model codes.
  */
-export function toTrigramTerm(term: string): string {
-  const trimmed = term?.trim();
-  if (!trimmed) return "";
+export function correctableWord(term: SearchTerm): string | null {
+  if (term.places.length > 0 || term.year !== null || hasAlias(term.text)) return null;
+  const words = searchWords(term.text);
+  return words.length === 1 && isCorrectable(words[0]) ? words[0] : null;
+}
 
-  const [, firstAlias] = expandSearchTermForText(trimmed);
-  return firstAlias ?? trimmed;
+/**
+ * The term that stands in for a typo: any of the known words that may have
+ * been meant, matched like every term, by prefix. Keeps the typed text, so
+ * the search can say what it corrected.
+ */
+export function correctedTerm(typed: string, words: string[]): SearchTerm | null {
+  return toTerm(typed, words, []);
 }

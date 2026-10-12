@@ -35,12 +35,14 @@ export interface CarFilters {
 
 /**
  * How a search's words matched the cars (see searchCarsRanked): all of them,
- * some (no car has them all), by meaning or by spelling alone (no word did) —
- * and the words no car in scope has, which were set aside.
+ * some (no car has them all), or by meaning alone (no word did) — the words no
+ * car in scope has, which were set aside, and the typos read as known words
+ * (`to` holds several when the search could not tell which was meant).
  */
 export interface SearchMatch {
-  match: "all" | "some" | "meaning" | "similar" | "none";
+  match: "all" | "some" | "meaning" | "none";
   missing: string[];
+  corrected: { from: string; to: string[] }[];
 }
 
 export interface CarPagination {

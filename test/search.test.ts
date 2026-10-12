@@ -9,6 +9,7 @@ vi.hoisted(() => {
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { searchCarsRanked } from "@/lib/repositories/car/search";
+import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { foldSearchText } from "@/lib/utils/search-text";
 import { FOLD_FIXTURES } from "@/lib/utils/search-text.fixtures";
 import { findManyCars } from "@/lib/repositories/car/queries";
@@ -39,9 +40,9 @@ function car(
   };
 }
 
-// The FTS path relies on a generated tsvector column + GIN indexes and the
-// trigram fallback on the pg_trgm extension — none expressible in a mock. Needs
-// real Postgres with the 20260806120000_add_car_search migration applied.
+// The FTS path relies on a generated tsvector column + GIN indexes, and typo
+// correction on the vocabulary view and pg_trgm — none expressible in a mock.
+// Needs real Postgres with the migrations applied.
 describe.skipIf(!hasTestDb)("searchCarsRanked (real Postgres)", () => {
   beforeAll(async () => {
     await db.car.deleteMany({ where: { organizationId: ORG_ID } });
@@ -56,6 +57,7 @@ describe.skipIf(!hasTestDb)("searchCarsRanked (real Postgres)", () => {
         car({ make: "Honda", model: "Civic", price: 600000 }),
       ],
     });
+    await refreshSearchTerms();
   });
 
   afterAll(async () => {
@@ -74,11 +76,12 @@ describe.skipIf(!hasTestDb)("searchCarsRanked (real Postgres)", () => {
     expect(cars[0]?.model).toBe("Corolla");
   });
 
-  it("falls back to trigram similarity for a typo'd model", async () => {
-    // "corola" has no FTS match; the pg_trgm fallback still finds Corolla.
-    const { cars } = await searchCarsRanked({ search: "corola", organizationId: ORG_ID });
+  it("corrects a typo'd model", async () => {
+    // "corola" matches no word; the vocabulary reads it as "corolla".
+    const { cars, search } = await searchCarsRanked({ search: "corola", organizationId: ORG_ID });
 
-    expect(cars.some((c) => c?.model === "Corolla")).toBe(true);
+    expect(cars.map((c) => c?.model)).toEqual(["Corolla"]);
+    expect(search.corrected).toEqual([{ from: "corola", to: ["corolla"] }]);
   });
 
   it("returns no cars for a term that matches nothing", async () => {
