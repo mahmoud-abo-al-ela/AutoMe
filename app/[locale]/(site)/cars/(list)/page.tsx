@@ -2,24 +2,27 @@ import { getCars } from "@/actions/cars-listing";
 import ClientPage from "./ClientPage";
 import { CarsPageSkeleton } from "./_components/CarsPageSkeleton";
 import { Suspense } from "react";
-import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
 import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
+import { parseFiltersFromSearch } from "@/hooks/cars-page-filters";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-/** Repeated query keys arrive as arrays; the filter UI only ever sets one value. */
-const one = (v: string | string[] | undefined) =>
-  Array.isArray(v) ? v[0] : v;
-const csv = (v: string | string[] | undefined) => {
-  const value = one(v);
-  return value ? value.split(",").map((s) => s.trim()).filter(Boolean) : [];
-};
-const num = (v: string | string[] | undefined) => {
-  const value = one(v);
-  return value ? Number(value) : undefined;
-};
+/**
+ * The query string again, for the one parser the page's own URL state uses —
+ * so the server's first render and the client cannot read a URL differently
+ * (a copy of the parser here once missed `exact`). Repeated keys arrive as
+ * arrays; the filter UI only ever sets one value, so the first is kept.
+ */
+function queryString(params: SearchParams): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    const first = Array.isArray(value) ? value[0] : value;
+    if (first !== undefined) query.set(key, first);
+  }
+  return query.toString();
+}
 
 /**
  * The canonical is the bare listing, whatever the filters. Every filter
@@ -52,29 +55,7 @@ export default async function BrowseCarsPage({
 }) {
   const { locale } = await routeParams;
 
-  const params = await searchParams;
-  const perPage = num(params.perPage) || DEFAULT_PER_PAGE;
-  const page = num(params.page) || 1;
-
-  const filters = {
-    search: one(params.search) || undefined,
-    make: csv(params.make),
-    bodyType: csv(params.bodyType),
-    fuelType: csv(params.fuelType),
-    transmission: csv(params.transmission),
-    dealership: one(params.dealership) || undefined,
-    city: one(params.city) || undefined,
-    // Keep this map in sync with parseFiltersFromSearch in hooks/cars-page-filters.js.
-    color: one(params.color) || undefined,
-    minSeats: num(params.minSeats),
-    minPrice: num(params.minPrice),
-    maxPrice: num(params.maxPrice),
-    minYear: num(params.minYear),
-    maxYear: num(params.maxYear),
-    minMileage: num(params.minMileage),
-    maxMileage: num(params.maxMileage),
-    sortBy: one(params.sortBy) || "newest",
-  };
+  const { filters, page, perPage } = parseFiltersFromSearch(queryString(await searchParams));
 
   const initialData = await getCars({ ...filters, page, limit: perPage });
 

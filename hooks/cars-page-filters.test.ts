@@ -113,3 +113,14 @@ describe("clearedFilters", () => {
     expect(filters.make).toEqual(["Toyota", "Kia"]);
   });
 });
+
+describe("numbers in the URL", () => {
+  it("drops a value that is not a number instead of filtering by NaN", () => {
+    const { filters: parsed, page, perPage } = parseFiltersFromSearch("?minPrice=cheap&maxYear=soon&page=x&minMileage=0");
+    expect(parsed.minPrice).toBeUndefined();
+    expect(parsed.maxYear).toBeUndefined();
+    expect(parsed.minMileage).toBe(0);
+    expect(page).toBe(1);
+    expect(perPage).toBeGreaterThan(0);
+  });
+});

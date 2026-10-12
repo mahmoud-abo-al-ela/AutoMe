@@ -1,5 +1,5 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { refuseCronRequest } from "@/lib/auth/cron-secret";
 import { z } from "zod";
 import { backfillQuestionEmbeddings } from "@/lib/services/buyer-question/meaning";
 import { logError } from "@/lib/utils/errors";
@@ -25,23 +25,9 @@ const querySchema = z.object({
   after: z.string().uuid().optional(),
 });
 
-/** Constant-time: this endpoint is public and can be hammered. */
-function secretMatches(header: string | null, secret: string): boolean {
-  const expected = Buffer.from(`Bearer ${secret}`);
-  const given = Buffer.from(header ?? "");
-  return given.length === expected.length && timingSafeEqual(given, expected);
-}
-
 export async function POST(request: Request) {
-  // Fail closed: no secret configured means nobody may run this.
-  const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    logError("CRON_SECRET is not configured; refusing the question-embedding backfill");
-    return NextResponse.json({ error: "Not configured" }, { status: 500 });
-  }
-  if (!secretMatches(request.headers.get("authorization"), secret)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const refused = refuseCronRequest(request, "the question-embedding backfill");
+  if (refused) return refused;
 
   const parsed = querySchema.safeParse(Object.fromEntries(new URL(request.url).searchParams));
   if (!parsed.success) {
