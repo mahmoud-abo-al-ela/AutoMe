@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_FILTERS, clearedFilters, withSuggestion, type CarPageFilters } from "./cars-page-filters";
+import {
+  DEFAULT_FILTERS,
+  buildCarsUrl,
+  clearedFilters,
+  parseFiltersFromSearch,
+  withSuggestion,
+  type CarPageFilters,
+} from "./cars-page-filters";
 
 const filters: CarPageFilters = {
   ...DEFAULT_FILTERS,
@@ -18,6 +25,29 @@ const filters: CarPageFilters = {
   maxMileage: 80_000,
   sortBy: "priceAsc",
 };
+
+describe("exact spelling in the URL", () => {
+  it("round-trips with its search", () => {
+    const { filters: parsed } = parseFiltersFromSearch("?search=corola&exact=1");
+    expect(parsed).toMatchObject({ search: "corola", exact: true });
+    expect(buildCarsUrl(parsed, 1)).toBe("/cars?search=corola&exact=1");
+  });
+
+  it("is off unless the URL says exactly 1", () => {
+    expect(parseFiltersFromSearch("?search=corola").filters.exact).toBeUndefined();
+    expect(parseFiltersFromSearch("?search=corola&exact=true").filters.exact).toBeUndefined();
+  });
+
+  it("means nothing without a search, so it is not written", () => {
+    expect(buildCarsUrl({ ...DEFAULT_FILTERS, exact: true }, 1)).toBe("/cars");
+  });
+
+  it("goes with the words: clearing the search, or choosing a suggestion, drops it", () => {
+    const exact = { ...filters, search: "corola", exact: true };
+    expect(clearedFilters(exact, "search")?.exact).toBeUndefined();
+    expect(withSuggestion(exact, { filters: { make: "Toyota" } }).exact).toBeUndefined();
+  });
+});
 
 describe("withSuggestion", () => {
   it("adds a chosen make or spec to the buyer's own, keeping every other filter", () => {

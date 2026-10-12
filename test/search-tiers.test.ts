@@ -264,6 +264,25 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       expect(new Set(keys(await search({ search: "٢٠٢٠ سيدان" })))).toEqual(new Set(sedans2020));
     });
 
+    it("searches the words exactly as typed when asked: no correction, the rest as always", async () => {
+      const exact = await search({ search: "corola", exact: true });
+      expect(exact.pagination.total).toBe(0);
+      expect(exact.search).toEqual({ match: "none", missing: ["corola"], corrected: [] });
+      expect((await search({ search: "تيوتا", exact: true })).search?.corrected).toEqual([]);
+      // Exact spelling, not exact equality: folding and synonyms still apply.
+      expect(new Set(keys(await search({ search: "فتحه سقف", exact: true })))).toEqual(
+        new Set(["corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"])
+      );
+    });
+
+    it("takes exact spelling only when it is really asked for", async () => {
+      const loose = await getCars({ search: "corola", exact: "1" as unknown as boolean }, { page: 1, limit: 50 }, null, ORG);
+      // Named as the listings write it.
+      expect(loose.search?.corrected).toEqual([{ from: "corola", to: ["Corolla"] }]);
+      const exact = await getCars({ search: "corola", exact: true }, { page: 1, limit: 50 }, null, ORG);
+      expect(exact.search?.corrected).toEqual([]);
+    });
+
     it("reads a typo as the word it was probably meant to be, and says so", async () => {
       const result = await search({ search: "corola" });
       // Exactly what the word itself finds.

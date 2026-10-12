@@ -53,6 +53,35 @@ describe("SearchMatchNotice", () => {
     expect(html.indexOf("corolla")).toBeLessThan(html.indexOf("please"));
   });
 
+  it("offers the words as typed after a correction, when the page can search them", () => {
+    const corrected: SearchMatch = { match: "all", missing: [], corrected: [{ from: "corola", to: ["corolla"] }] };
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={{ cars: en }} timeZone="Africa/Cairo">
+        <SearchMatchNotice searchMatch={corrected} locale="en" term="corola" onSearchExact={() => undefined} />
+      </NextIntlClientProvider>
+    );
+    expect(html).toContain('<button type="button"');
+    expect(html).toContain("Search instead for <bdi");
+    expect(html).toContain("“corola”</bdi>");
+    // Without a way to run it, no link.
+    expect(render("en", corrected)).not.toContain("<button");
+  });
+
+  it("offers it in Arabic", () => {
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="ar" messages={{ cars: ar }} timeZone="Africa/Cairo">
+        <SearchMatchNotice
+          searchMatch={{ match: "all", missing: [], corrected: [{ from: "فتحت", to: ["فتحة"] }] }}
+          locale="ar"
+          term="فتحت"
+          onSearchExact={() => undefined}
+        />
+      </NextIntlClientProvider>
+    );
+    expect(html).toContain("ابحث بدلًا من ذلك عن");
+    expect(html).toContain("«فتحت»");
+  });
+
   it("says nothing when every word matched as typed", () => {
     expect(render("en", { match: "all", missing: [], corrected: [] })).toBe("");
   });

@@ -177,7 +177,8 @@ export const useCarsPage = (
         // No-op commits (debounce fired but the term is unchanged) shouldn't
         // flash skeletons over identical results.
         if (nextSearch === filtersRef.current.search) return;
-        const next = { ...filtersRef.current, search: nextSearch };
+        // New words are corrected again: "Search instead for" was for the old ones.
+        const next = { ...filtersRef.current, search: nextSearch, exact: undefined };
         setIsFilterPending(true);
         setFilters(next);
         setPage(1);
@@ -186,6 +187,9 @@ export const useCarsPage = (
     },
     [perPage, pushUrl]
   );
+
+  // "Search instead for …": the same words, without spelling correction.
+  const searchExact = useCallback(() => applyFilters({ ...filtersRef.current, exact: true }), [applyFilters]);
 
   // A suggestion chosen under the field, applied at once (withSuggestion) —
   // not after the typing debounce, which it cancels.
@@ -316,6 +320,7 @@ export const useCarsPage = (
       commitRange,
       setSearch,
       pickSuggestion,
+      searchExact,
       setSort,
       changePage,
       changePerPage,

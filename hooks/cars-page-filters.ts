@@ -25,6 +25,8 @@ export interface CarPageFilters {
   minMileage?: number;
   maxMileage?: number;
   sortBy: string;
+  /** The words as typed, spelling correction off ("Search instead for …"); only with a search. */
+  exact?: boolean;
 }
 
 export interface ActiveFilterChip {
@@ -50,6 +52,7 @@ export const DEFAULT_FILTERS: CarPageFilters = {
   minMileage: undefined,
   maxMileage: undefined,
   sortBy: "newest",
+  exact: undefined,
 };
 
 const num = (v: string | null | undefined) => (v !== null && v !== undefined && v !== "" ? Number(v) : undefined);
@@ -84,6 +87,7 @@ export function parseFiltersFromSearch(search: string): {
       minMileage: num(p.get("minMileage")),
       maxMileage: num(p.get("maxMileage")),
       sortBy: p.get("sortBy") || "newest",
+      exact: p.get("exact") === "1" || undefined,
     },
     page: num(p.get("page")) || 1,
     perPage: num(p.get("perPage")) || DEFAULT_PER_PAGE,
@@ -113,6 +117,7 @@ export function buildCarsUrl(
   if (filters.minMileage) params.set("minMileage", String(filters.minMileage));
   if (filters.maxMileage) params.set("maxMileage", String(filters.maxMileage));
   if (filters.sortBy && filters.sortBy !== "newest") params.set("sortBy", filters.sortBy);
+  if (filters.exact && filters.search) params.set("exact", "1");
   if (perPage && perPage !== DEFAULT_PER_PAGE) params.set("perPage", String(perPage));
   if (page > 1) params.set("page", String(page));
 
@@ -189,7 +194,7 @@ export function withSuggestion(
   filters: CarPageFilters,
   chosen: { filters?: SuggestionFilters; search?: string }
 ): CarPageFilters {
-  const next: CarPageFilters = { ...filters, search: chosen.search || undefined };
+  const next: CarPageFilters = { ...filters, search: chosen.search || undefined, exact: undefined };
   for (const key of MULTI_KEYS) {
     const value = chosen.filters?.[key];
     if (value && !filters[key].includes(value)) next[key] = [...filters[key], value];
@@ -207,6 +212,7 @@ export function clearedFilters(filters: CarPageFilters, type: string, value?: st
   switch (type) {
     case "search":
       next.search = undefined;
+      next.exact = undefined;
       break;
     case "make":
     case "bodyType":

@@ -71,7 +71,9 @@ export async function searchFacets(filters: CarFilters): Promise<SearchFacets> {
 }
 
 async function countFacets(filters: CarFilters, meaning: CarFilters["meaning"]): Promise<SearchFacets> {
-  const lexical = await analyzeTerms(buildStructuredConditions(filters), searchTerms(filters.search ?? ""));
+  const lexical = await analyzeTerms(buildStructuredConditions(filters), searchTerms(filters.search ?? ""), {
+    correct: filters.exact !== true,
+  });
 
   // The scope with no selectable filter applied; each filter becomes a flag.
   const unselected = Object.fromEntries(SELECTABLE_FILTERS.map((field) => [field, undefined]));

@@ -30,6 +30,11 @@ export interface CarFilters {
   maxMileage?: number;
   featured?: boolean;
   sortBy?: string;
+  /**
+   * Search the words as typed: no spelling correction. Folding, synonyms and
+   * every other rule still apply — it is exact spelling, not exact equality.
+   */
+  exact?: boolean;
   /** Set by getCars, never by a caller: the search text's meaning, for hybrid ranking. */
   meaning?: SearchMeaning | null;
 }
@@ -89,6 +94,8 @@ export async function getCars(
   // Free text is ranked by its meaning as well as its words; null (no key,
   // busy, slow) leaves the search on its words alone.
   queryFilters.meaning = await searchMeaning(filters.search);
+  // Read strictly: the filters reach here unvalidated from the client.
+  queryFilters.exact = filters.exact === true;
 
   const result = await carRepository.findManyCars(queryFilters, pagination);
 
@@ -205,7 +212,12 @@ async function searchOptions(queryFilters: CarFilters, baseFilters: CarFilters) 
   if (!search) return null;
 
   // The results asked for the same meaning a moment ago; it comes from the cache.
-  const facets = await carRepository.searchFacets({ ...queryFilters, search, meaning: await searchMeaning(search) });
+  const facets = await carRepository.searchFacets({
+    ...queryFilters,
+    search,
+    exact: queryFilters.exact === true,
+    meaning: await searchMeaning(search),
+  });
   if (facets.total === 0 && hasCarFilters(baseFilters)) return null;
   return {
     makes: facets.counts.make,

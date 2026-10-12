@@ -133,7 +133,14 @@ export const CarsPagePresenter = ({
             {t.rich("states.relaxedSearch", { term: relaxedSearch, b: (chunks) => <bdi className="font-semibold">{chunks}</bdi> })}
           </SearchNotice>
         ) : (
-          searchMatch && <SearchMatchNotice searchMatch={searchMatch} locale={locale} />
+          searchMatch && (
+            <SearchMatchNotice
+              searchMatch={searchMatch}
+              locale={locale}
+              term={filters.search}
+              onSearchExact={handlers.searchExact}
+            />
+          )
         )}
         {showList ? (
           <ul className="flex flex-col gap-4">

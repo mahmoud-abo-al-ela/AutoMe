@@ -21,7 +21,19 @@ export function SearchNotice({ children }: { children: ReactNode }) {
  * car having them all, or none matching and the cars shown being the closest
  * in meaning. Nothing when every word matched.
  */
-export function SearchMatchNotice({ searchMatch, locale }: { searchMatch: SearchMatch; locale: string }) {
+export function SearchMatchNotice({
+  searchMatch,
+  locale,
+  term,
+  onSearchExact,
+}: {
+  searchMatch: SearchMatch;
+  locale: string;
+  /** The words as the buyer typed them, for "Search instead for …". */
+  term?: string;
+  /** Runs the same words without spelling correction; the link shows only with it. */
+  onSearchExact?: () => void;
+}) {
   const t = useTranslations("cars.states");
   const { match, missing, corrected } = searchMatch;
   const b = (chunks: ReactNode) => <bdi className="font-semibold">{chunks}</bdi>;
@@ -32,6 +44,13 @@ export function SearchMatchNotice({ searchMatch, locale }: { searchMatch: Search
   if (match !== "none") {
     for (const { from, to } of corrected) {
       lines.push(t.rich("searchCorrected", { from, to: either.format(to), b }));
+    }
+    if (corrected.length > 0 && term && onSearchExact) {
+      lines.push(
+        <button type="button" onClick={onSearchExact} className="cursor-pointer text-primary underline-offset-2 hover:underline">
+          {t.rich("searchExact", { term, b })}
+        </button>
+      );
     }
   }
   if (match === "meaning") {

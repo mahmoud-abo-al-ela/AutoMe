@@ -133,6 +133,13 @@ describe.skipIf(!hasTestDb)("search facets (real Postgres)", () => {
       expect(facets.total).toBeGreaterThan(0);
     });
 
+    it("agree in exact spelling too: a typo kept as typed counts nothing", async () => {
+      const { facets } = await expectAgree({ organizationId: ORG, search: "corola", exact: true });
+      expect(facets.total).toBe(0);
+      const corrected = await expectAgree({ organizationId: ORG, search: "corola" });
+      expect(asMap(corrected.facets.counts.make)).toEqual({ Toyota: 2 });
+    });
+
     it("counts the Corollas for 'corolla', not the Kia that is better than one", async () => {
       const { facets } = await expectAgree({ organizationId: ORG, search: "corolla" });
       expect(asMap(facets.counts.make)).toEqual({ Toyota: 2 });
