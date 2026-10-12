@@ -16,11 +16,15 @@
  * marks, the administrative suffixes, and the article.
  */
 
-import { foldSearchText } from "@/lib/utils/search-text";
+import { ARABIC_LETTERS, foldSearchText } from "@/lib/utils/search-text";
 
 const LATIN_MARKS = /[̀-ͯ]/g;
-/** Anything that is neither a latin alphanumeric nor an Arabic letter. */
-const SEPARATORS = /[^a-z0-9؀-ۿ]+/g;
+/**
+ * Anything that is neither a latin alphanumeric nor an Arabic letter —
+ * Arabic punctuation included: the whole Arabic block once counted as
+ * letters, so "أسود؟" missed the colour and "هيونداي؟" the make.
+ */
+const SEPARATORS = new RegExp(`[^a-z0-9${ARABIC_LETTERS}]+`, "g");
 
 export function normalizePlaceName(value: string): string {
   return (

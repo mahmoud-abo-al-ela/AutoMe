@@ -81,6 +81,14 @@ export function foldSearchText(value: string): string {
     .replace(FOLDABLE, (character) => CHARACTER_FOLD[character]);
 }
 
+/**
+ * The Arabic letters, as the inside of a character class — the block without
+ * its punctuation (، ؛ ؟ ۔ and the rest), marks and digits. Anything that
+ * splits a name or a query into words splits on everything else, or "هيونداي؟"
+ * is one unknown word instead of a make and a question mark.
+ */
+export const ARABIC_LETTERS = `${range(0x0621, 0x063a)}${range(0x0641, 0x064a)}${range(0x066e, 0x06d3)}${range(0x06fa, 0x06ff)}`;
+
 /** Latin combining marks, which `foldSearchText` deliberately leaves alone. */
 const LATIN_MARKS = classOf(range(0x0300, 0x036f));
 
@@ -96,13 +104,7 @@ const LATIN_MARKS = classOf(range(0x0300, 0x036f));
  * Arabic-Indic digits are absent for a different reason: they are ASCII by the
  * time this runs.
  */
-const WORD = new RegExp(
-  `[a-z0-9]+|[${range(0x0621, 0x063a)}${range(0x0641, 0x064a)}${range(
-    0x066e,
-    0x06d3
-  )}${range(0x06fa, 0x06ff)}]+`,
-  "g"
-);
+const WORD = new RegExp(`[a-z0-9]+|[${ARABIC_LETTERS}]+`, "g");
 
 /**
  * The searchable words of a term.
@@ -125,9 +127,7 @@ export function searchWords(value: string): string[] {
   );
 }
 
-const ARABIC_LETTER = new RegExp(
-  `^[${range(0x0621, 0x063a)}${range(0x0641, 0x064a)}${range(0x066e, 0x06d3)}${range(0x06fa, 0x06ff)}]$`
-);
+const ARABIC_LETTER = new RegExp(`^[${ARABIC_LETTERS}]$`);
 
 /**
  * Which kind of word a folded character belongs to, as `searchWords` splits
