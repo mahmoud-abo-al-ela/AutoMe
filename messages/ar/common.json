@@ -131,7 +131,12 @@
     "cars": "{count, plural, one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
     "kind": {
       "make": "الماركة",
-      "model": "الموديل"
+      "model": "الموديل",
+      "bodyType": "نوع الهيكل",
+      "fuelType": "الوقود",
+      "transmission": "ناقل الحركة",
+      "color": "اللون",
+      "feature": "ميزة"
     }
   }
 }

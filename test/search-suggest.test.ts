@@ -8,7 +8,8 @@ vi.hoisted(() => {
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
-import { countPublicMakeModels } from "@/lib/repositories/car/suggest";
+import { countPublicMakeModels, countPublicSpecs } from "@/lib/repositories/car/suggest";
+import { searchCarsRanked } from "@/lib/repositories/car/search";
 import { resetSuggestionsForTests, suggestSearches } from "@/lib/services/car/search-suggestions";
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
@@ -65,6 +66,19 @@ describe.skipIf(!hasTestDb)("search suggestions (real Postgres)", () => {
         car(LIVE, { model: "Soldo", status: "SOLD" }),
         car(SUSPENDED, { make: "Hidzen", model: "Ghost" }),
         car(DELETED, { make: "Hidzen", model: "Phantom" }),
+        // Spec values no other suite writes, so their public counts are this suite's alone.
+        car(LIVE, {
+          model: "Quorra",
+          bodyType: "Convertible",
+          fuelType: "Plug-in Hybrid",
+          transmission: "Semi-Automatic",
+          color: "Bronze",
+          features: ["Fog lights"],
+        }),
+        car(LIVE, { model: "Vexa", bodyType: "Convertible", color: "Dark Bronze", featuresAr: ["كشافات ضباب"] }),
+        car(LIVE, { model: "Soldo", bodyType: "Convertible", color: "Bronze", features: ["Fog lights"], status: "SOLD" }),
+        car(SUSPENDED, { make: "Hidzen", bodyType: "Convertible", fuelType: "Plug-in Hybrid", color: "Bronze", features: ["Fog lights"] }),
+        car(DELETED, { make: "Hidzen", bodyType: "Convertible", transmission: "Semi-Automatic", color: "Bronze", featuresAr: ["كشافات ضباب"] }),
       ],
     });
     resetSuggestionsForTests();
@@ -78,17 +92,52 @@ describe.skipIf(!hasTestDb)("search suggestions (real Postgres)", () => {
 
   it("counts public makes and models only", async () => {
     expect(ours(await countPublicMakeModels()).sort((a, b) => a.model.localeCompare(b.model))).toEqual([
-      { make: "Zentrix", model: "Quorra", count: 2 },
-      { make: "Zentrix", model: "Vexa", count: 1 },
+      { make: "Zentrix", model: "Quorra", count: 3 },
+      { make: "Zentrix", model: "Vexa", count: 2 },
     ]);
   });
 
   it("suggests a public make and its models — never a hidden dealership's, nor loose words", async () => {
     expect(await suggestSearches("zentrix", "en")).toEqual([
-      { kind: "make", label: "Zentrix", count: 3, make: "Zentrix" },
-      { kind: "model", label: "Zentrix Quorra", count: 2, make: "Zentrix", search: "Quorra" },
-      { kind: "model", label: "Zentrix Vexa", count: 1, make: "Zentrix", search: "Vexa" },
+      { kind: "make", label: "Zentrix", count: 5, filters: { make: "Zentrix" } },
+      { kind: "model", label: "Zentrix Quorra", count: 3, filters: { make: "Zentrix" }, search: "Quorra" },
+      { kind: "model", label: "Zentrix Vexa", count: 2, filters: { make: "Zentrix" }, search: "Vexa" },
     ]);
     expect(await suggestSearches("hidzen", "en")).toEqual([]);
+  });
+
+  describe("spec counts", () => {
+    const count = (specs: Awaited<ReturnType<typeof countPublicSpecs>>, kind: string, value: string) =>
+      specs.find((spec) => spec.kind === kind && spec.value === value)?.count ?? 0;
+
+    it("count public cars only, by the value a car stores", async () => {
+      const specs = await countPublicSpecs(["Bronze"], ["Fog lights"]);
+      expect(count(specs, "bodyType", "Convertible")).toBe(2);
+      expect(count(specs, "fuelType", "Plug-in Hybrid")).toBe(1);
+      expect(count(specs, "transmission", "Semi-Automatic")).toBe(1);
+    });
+
+    it("count a colour as the colour filter matches it: by containing the name", async () => {
+      // "Bronze" and "Dark Bronze": the filter (ILIKE %Bronze%) finds both.
+      expect(count(await countPublicSpecs(["Bronze"], []), "color", "Bronze")).toBe(2);
+    });
+
+    it("count a feature as its search finds it, tagged in either language", async () => {
+      const featureCount = count(await countPublicSpecs([], ["Fog lights"]), "feature", "Fog lights");
+      expect(featureCount).toBe(2);
+      const page = { page: 1, limit: 50 };
+      expect((await searchCarsRanked({ search: "Fog lights" }, page)).pagination.total).toBe(featureCount);
+      expect((await searchCarsRanked({ search: "كشافات ضباب" }, page)).pagination.total).toBe(featureCount);
+    });
+
+    it("are offered as suggestions that set the filter, or search the feature", async () => {
+      resetSuggestionsForTests();
+      expect(await suggestSearches("convert", "en")).toEqual([
+        { kind: "bodyType", label: "Convertible", count: 2, filters: { bodyType: "Convertible" } },
+      ]);
+      expect(await suggestSearches("كشافات", "ar")).toEqual([
+        { kind: "feature", label: "كشافات ضباب", count: 2, search: "كشافات ضباب" },
+      ]);
+    });
   });
 });

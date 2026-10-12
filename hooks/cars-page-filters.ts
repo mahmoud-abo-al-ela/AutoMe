@@ -1,5 +1,6 @@
 // Pure filter/URL helpers for the cars listing page — no React, fully testable.
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
+import type { SuggestionFilters } from "@/lib/search/suggest";
 
 /** The filter keys the cars page holds as comma-joined multi-selects. */
 export const MULTI_KEYS = ["make", "bodyType", "fuelType", "transmission"] as const;
@@ -177,6 +178,24 @@ export function buildActiveFilterChips(
     chips.push({ type: "mileage", value: "mileage", label: `≤ ${max}` });
   }
   return chips;
+}
+
+/**
+ * The filters with a chosen suggestion applied. Its filters join the buyer's —
+ * a make or body type is added to those already chosen, a colour becomes the
+ * colour — and its text replaces what was typed. Nothing else changes.
+ */
+export function withSuggestion(
+  filters: CarPageFilters,
+  chosen: { filters?: SuggestionFilters; search?: string }
+): CarPageFilters {
+  const next: CarPageFilters = { ...filters, search: chosen.search || undefined };
+  for (const key of MULTI_KEYS) {
+    const value = chosen.filters?.[key];
+    if (value && !filters[key].includes(value)) next[key] = [...filters[key], value];
+  }
+  if (chosen.filters?.color) next.color = chosen.filters.color;
+  return next;
 }
 
 /**

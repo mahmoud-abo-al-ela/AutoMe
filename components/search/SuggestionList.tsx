@@ -24,6 +24,7 @@ export function SuggestionList({
   optionId,
   onPick,
   onHover,
+  showCounts = true,
   className,
 }: {
   id: string;
@@ -33,6 +34,11 @@ export function SuggestionList({
   optionId: (index: number) => string;
   onPick: (suggestion: SearchSuggestion) => void;
   onHover: (index: number) => void;
+  /**
+   * The counts are of all public listings. Off where other filters narrow the
+   * results, which they would misstate.
+   */
+  showCounts?: boolean;
   className?: string;
 }) {
   const t = useTranslations("common.searchSuggestions");
@@ -56,7 +62,7 @@ export function SuggestionList({
       >
         {suggestions.map((suggestion, index) => (
           <li
-            key={`${suggestion.kind}:${suggestion.make ?? ""}:${suggestion.search ?? ""}`}
+            key={`${suggestion.kind}:${suggestion.label}`}
             id={optionId(index)}
             role="option"
             aria-selected={index === active}
@@ -76,9 +82,11 @@ export function SuggestionList({
               <bdi className="font-medium">{suggestion.label}</bdi>
               <span className="ms-2 text-caption text-muted-foreground">{t(`kind.${suggestion.kind}`)}</span>
             </span>
-            <span className="shrink-0 text-caption text-muted-foreground">
-              {t("cars", { count: suggestion.count, value: fmt.number(suggestion.count) })}
-            </span>
+            {showCounts && (
+              <span className="shrink-0 text-caption text-muted-foreground">
+                {t("cars", { count: suggestion.count, value: fmt.number(suggestion.count) })}
+              </span>
+            )}
           </li>
         ))}
       </ul>

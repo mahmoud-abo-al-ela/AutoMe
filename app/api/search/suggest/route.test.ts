@@ -15,7 +15,7 @@ import { GET } from "@/app/api/search/suggest/route";
 import { RateLimitError, ServiceUnavailableError } from "@/lib/utils/errors";
 
 const call = (query: string) => GET(new Request(`http://localhost/api/search/suggest${query}`));
-const SUGGESTION = { kind: "make", label: "Toyota", count: 7, make: "Toyota" };
+const SUGGESTION = { kind: "make", label: "Toyota", count: 7, filters: { make: "Toyota" } };
 
 beforeEach(() => {
   vi.resetAllMocks();

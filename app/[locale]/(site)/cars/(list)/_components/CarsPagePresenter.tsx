@@ -173,6 +173,8 @@ export const CarsPagePresenter = ({
         onSearchChange={handlers.setSearch}
         onClearSearch={() => handlers.setSearch("")}
         onPickSuggestion={handlers.pickSuggestion}
+        // A suggestion's count is of all public listings; another filter would make it wrong here.
+        showSuggestionCounts={!activeFilters.some((filter) => filter.type !== "search")}
       />
 
       <div className="flex gap-6">

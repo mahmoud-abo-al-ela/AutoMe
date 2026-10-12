@@ -11,17 +11,25 @@ import { nextActive, useSuggestionCombobox } from "./use-suggestion-combobox";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const SUGGESTIONS: SearchSuggestion[] = [
-  { kind: "make", label: "Toyota", count: 7, make: "Toyota" },
-  { kind: "model", label: "Toyota Corolla", count: 4, make: "Toyota", search: "Corolla" },
-  { kind: "model", label: "Toyota Camry", count: 3, make: "Toyota", search: "Camry" },
+  { kind: "make", label: "Toyota", count: 7, filters: { make: "Toyota" } },
+  { kind: "model", label: "Toyota Corolla", count: 4, filters: { make: "Toyota" }, search: "Corolla" },
+  { kind: "model", label: "Toyota Camry", count: 3, filters: { make: "Toyota" }, search: "Camry" },
 ];
 
-function Harness({ suggestions, onPick }: { suggestions: SearchSuggestion[]; onPick: (s: SearchSuggestion) => void }) {
+function Harness({
+  suggestions,
+  onPick,
+  showCounts,
+}: {
+  suggestions: SearchSuggestion[];
+  onPick: (s: SearchSuggestion) => void;
+  showCounts?: boolean;
+}) {
   const combobox = useSuggestionCombobox(suggestions, onPick);
   return (
     <div className="relative">
       <input aria-label="Search" defaultValue="toy" {...combobox.inputProps} />
-      <SuggestionList suggestions={suggestions} {...combobox.listProps} />
+      <SuggestionList suggestions={suggestions} showCounts={showCounts} {...combobox.listProps} />
     </div>
   );
 }
@@ -30,11 +38,11 @@ let container: HTMLDivElement;
 let root: Root;
 let onPick: ReturnType<typeof vi.fn<(suggestion: SearchSuggestion) => void>>;
 
-function mount(locale: "en" | "ar" = "en", suggestions = SUGGESTIONS) {
+function mount(locale: "en" | "ar" = "en", suggestions = SUGGESTIONS, showCounts?: boolean) {
   act(() => {
     root.render(
       <NextIntlClientProvider locale={locale} messages={{ common: locale === "ar" ? ar : en }} timeZone="Africa/Cairo">
-        <Harness suggestions={suggestions} onPick={onPick} />
+        <Harness suggestions={suggestions} onPick={onPick} showCounts={showCounts} />
       </NextIntlClientProvider>
     );
   });
@@ -175,6 +183,22 @@ describe("the search combobox", () => {
     expect(selected()).toBe(2);
   });
 
+  it("names each spec's kind, in Arabic", () => {
+    mount("ar", [
+      { kind: "bodyType", label: "سيدان", count: 4, filters: { bodyType: "Sedan" } },
+      { kind: "feature", label: "فتحة سقف", count: 2, search: "فتحة سقف" },
+    ]);
+    focus();
+    expect(options()[0].textContent).toContain("نوع الهيكل");
+    expect(options()[1].textContent).toContain("ميزة");
+  });
+
+  it("leaves the counts out where they would misstate the results", () => {
+    mount("en", SUGGESTIONS, false);
+    focus();
+    expect(options()[0].textContent).toBe("ToyotaMake");
+  });
+
   it("stays closed with no suggestions", () => {
     mount("en", []);
     focus();
@@ -183,7 +207,7 @@ describe("the search combobox", () => {
   });
 
   it("says what each suggestion is and how many cars, in Arabic", () => {
-    mount("ar", [{ kind: "make", label: "تويوتا", count: 1, make: "Toyota" }]);
+    mount("ar", [{ kind: "make", label: "تويوتا", count: 1, filters: { make: "Toyota" } }]);
     focus();
     const [option] = options();
     expect(option.textContent).toContain("تويوتا");

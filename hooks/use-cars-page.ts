@@ -11,6 +11,7 @@ import {
   buildCarsUrl,
   buildActiveFilterChips,
   clearedFilters,
+  withSuggestion,
 } from "./cars-page-filters";
 import type { CarPageFilters, MultiKey } from "./cars-page-filters";
 import { useChipFormatters } from "./use-chip-formatters";
@@ -186,15 +187,12 @@ export const useCarsPage = (
     [perPage, pushUrl]
   );
 
-  // A suggestion chosen under the field: its make joins the make filter, and
-  // its text (a model, a word) replaces what was typed — at once, not after
-  // the typing debounce, which it cancels.
+  // A suggestion chosen under the field, applied at once (withSuggestion) —
+  // not after the typing debounce, which it cancels.
   const pickSuggestion = useCallback(
-    ({ make, search }: { make?: string; search?: string }) => {
+    (chosen: Parameters<typeof withSuggestion>[1]) => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-      const current = filtersRef.current;
-      const makes = make && !current.make.includes(make) ? [...current.make, make] : current.make;
-      applyFilters({ ...current, make: makes, search: search || undefined });
+      applyFilters(withSuggestion(filtersRef.current, chosen));
     },
     [applyFilters]
   );

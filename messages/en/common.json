@@ -131,7 +131,12 @@
     "cars": "{count, plural, one {{value} car} other {{value} cars}}",
     "kind": {
       "make": "Make",
-      "model": "Model"
+      "model": "Model",
+      "bodyType": "Body type",
+      "fuelType": "Fuel",
+      "transmission": "Transmission",
+      "color": "Color",
+      "feature": "Feature"
     }
   }
 }

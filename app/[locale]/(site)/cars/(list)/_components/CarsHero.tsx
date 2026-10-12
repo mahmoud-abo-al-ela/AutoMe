@@ -18,11 +18,13 @@ export const CarsHero = ({
   onSearchChange,
   onClearSearch,
   onPickSuggestion,
+  showSuggestionCounts = true,
 }: {
   searchQuery?: string;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onPickSuggestion: (suggestion: SearchSuggestion) => void;
+  showSuggestionCounts?: boolean;
 }) => {
   const t = useTranslations("cars");
   const query = searchQuery || "";
@@ -56,7 +58,7 @@ export const CarsHero = ({
             <X className="size-4" />
           </button>
         )}
-        <SuggestionList suggestions={suggestions} {...combobox.listProps} />
+        <SuggestionList suggestions={suggestions} showCounts={showSuggestionCounts} {...combobox.listProps} />
       </div>
     </header>
   );
