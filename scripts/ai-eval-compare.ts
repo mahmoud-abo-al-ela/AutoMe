@@ -11,6 +11,7 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
+  allCases,
   compareToBaseline,
   modelMix,
   nextBaseline,
@@ -32,10 +33,17 @@ const report = readJson<EvalReport>(reportPath);
 const baseline = existsSync(baselinePath) ? readJson<EvalBaseline>(baselinePath) : null;
 const result = compareToBaseline(report, baseline);
 
-const list = (title: string, ids: string[]) => {
+const notes = new Map(allCases(report).map((c) => [c.id, c.note]));
+
+/** Each case on a line; with `withNotes`, why it failed on the line under it. */
+const list = (title: string, ids: string[], { withNotes = false } = {}) => {
   if (ids.length === 0) return;
   console.info(`\n${title} (${ids.length})`);
-  for (const id of ids) console.info(`  - ${id}`);
+  for (const id of ids) {
+    console.info(`  - ${id}`);
+    const note = withNotes ? notes.get(id) : undefined;
+    if (note) console.info(`      ${note}`);
+  }
 };
 
 console.info(
@@ -51,7 +59,8 @@ console.info(
 );
 list("REGRESSIONS — passed in the baseline, fail now", result.regressions);
 list("MISSING — in the baseline, not in this run (renamed, deleted or not collected)", result.missing);
-list("Judge disagreements — advisory, never fail the run", result.advisoryFailures);
+list("Failed this run", result.failed, { withNotes: true });
+list("Judge disagreements — advisory, never fail the run", result.advisoryFailures, { withNotes: true });
 list("Fixed — failed in the baseline, pass now", result.fixed);
 list("New cases", result.added);
 list("Inconclusive — no model answered", result.inconclusive);

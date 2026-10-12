@@ -41,6 +41,16 @@ describe("compareToBaseline", () => {
     expect(result.inconclusive).toEqual(["a"]);
   });
 
+  it("lists every failed assertion, with no baseline too — but not the judge's", () => {
+    const run = report([
+      { id: "a", outcome: "fail", note: "expected 'no' to match /4.6/" },
+      { id: "b", outcome: "pass" },
+      { id: "x [judge] c", outcome: "fail" },
+    ]);
+    expect(compareToBaseline(run, null)).toMatchObject({ failed: ["a"], advisoryFailures: ["x [judge] c"] });
+    expect(compareToBaseline(run, { updatedAt: "", cases: { a: "pass" } })).toMatchObject({ failed: ["a"], regressions: ["a"] });
+  });
+
   it("treats every conclusive case as new when there is no baseline yet", () => {
     const result = compareToBaseline(report([{ id: "a", outcome: "fail" }]), null);
     expect(result).toMatchObject({ regressions: [], added: ["a"] });
