@@ -104,6 +104,20 @@ const REACHABLE: ListingSource = {
   dealership: { ...KNOWN.dealership, address: "45 Abbas El Akkad St, Nasr City, Cairo", phone: "0100 123 4567" },
 };
 
+/**
+ * The dealership's cars a question names, as the service now picks them
+ * (findOtherAvailableCarsMatching): its Kias however far from this car's
+ * price, nearest first. One manual, so "automatic" has something to leave out.
+ */
+const KIAS: ListingSource = {
+  ...KNOWN,
+  otherCars: [
+    { year: 2022, make: "Kia", model: "K5", color: "Grey", price: 1150000, mileage: 30000, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+    { year: 2023, make: "Kia", model: "Sportage", color: "White", price: 1900000, mileage: 15000, bodyType: "SUV", transmission: "Automatic", fuelType: "Petrol" },
+    { year: 2021, make: "Kia", model: "Sportage", color: "Red", price: 1450000, mileage: 60000, bodyType: "SUV", transmission: "Manual", fuelType: "Petrol" },
+  ],
+};
+
 const CASES = {
   colour: { listing: LISTING, question: "What colour is it?", language: "en" },
   fridayAr: { listing: LISTING, question: "المعرض فاتح يوم الجمعة؟", language: "ar" },
@@ -138,6 +152,12 @@ const CASES = {
   weather: { listing: KNOWN, question: "ايه أخبار الجو النهاردة؟", language: "ar" },
   poisonedColour: { listing: POISONED, question: "What colour is it?", language: "en" },
   poisonedAccident: { listing: POISONED, question: "Has it been in an accident?", language: "en" },
+  // Across the dealership's stock: the record holds what the question named.
+  kiaAr: { listing: KIAS, question: "عندكم كيا؟", language: "ar" },
+  automaticSuv: { listing: KIAS, question: "Any automatic Kia SUV?", language: "en" },
+  // Named nothing in stock, so the record holds the closest in price: no BMW.
+  noBmw: { listing: KNOWN, question: "Do you have a BMW?", language: "en" },
+  kiaCount: { listing: KIAS, question: "How many Kias do you have in total?", language: "en" },
 } as const;
 
 type CaseName = keyof typeof CASES;
@@ -243,6 +263,27 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
     // Refs follow otherCars: 1 is the black Elantra, 2 the cheaper Cerato.
     expect(outcome(t, "otherColour")).toMatchObject({ carRefs: [1] });
     expect(outcome(t, "cheaper")).toMatchObject({ carRefs: [2] });
+  });
+
+  it("offers the cars a question names from across the dealership's stock", (t) => {
+    const kias = outcome(t, "kiaAr");
+    expect(kias).toMatchObject({ grounded: true });
+    expect(isPredominantlyArabic(answerOf(t, "kiaAr"))).toBe(true);
+    expect((kias as { carRefs?: number[] }).carRefs?.length ?? 0).toBeGreaterThan(0);
+    // The automatic SUV only — not the manual one, not the sedan.
+    expect(outcome(t, "automaticSuv")).toMatchObject({ grounded: true, carRefs: [2] });
+  });
+
+  it("says the dealership has none when the record names none, rather than declining", (t) => {
+    const answer = answerOf(t, "noBmw");
+    expect(answer).toMatch(/no |not |don.t|doesn.t/i);
+    expect(outcome(t, "noBmw")).not.toMatchObject({ carRefs: expect.anything() });
+  });
+
+  it("never states the dealership's total stock from the selection it was shown", (t) => {
+    const result = outcome(t, "kiaCount");
+    if (!result.grounded) return; // Declining the count is right too.
+    expect(result.answer).not.toMatch(/(only|just|in total)|(three|3|both)s+(kias?|cars)/i);
   });
 
   it("offers directions when it says where the dealership is, and no cards", (t) => {

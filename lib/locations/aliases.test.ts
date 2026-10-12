@@ -155,3 +155,14 @@ describe("the split between exact and text variants", () => {
     expect(expandSearchTermForText("إم جي")).toContain("MG");
   });
 });
+
+describe("punctuation typed beside a name", () => {
+  // The Arabic block holds its own question mark and comma; they are not
+  // letters, so "هيونداي؟" is the make, as "Hyundai?" always was.
+  it("reads Arabic punctuation as a separator, like ASCII punctuation", () => {
+    expect(expandSearchTerm("هيونداي؟").text).toContain("Hyundai");
+    expect(expandSearchTerm("أسود؟").text).toContain("black");
+    expect(expandSearchTerm("القاهرة،").exact).toContain("CAI");
+    expect(expandSearchTerm("هيونداي?").text).toContain("Hyundai");
+  });
+});

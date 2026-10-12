@@ -1,6 +1,6 @@
 import * as carRepository from "@/lib/repositories/car";
 import * as billingRepository from "@/lib/repositories/billing";
-import { buildListingFacts, closestByPrice, type OtherCar } from "@/lib/ai/grounding";
+import { MAX_OTHER_CARS, buildListingFacts, closestByPrice, type OtherCar } from "@/lib/ai/grounding";
 // Shared with the site's fair-price gauge, so the two never disagree.
 import { marketPricesFor } from "./market-price";
 import type { CapacityPriority } from "@/lib/ai/breaker";
@@ -129,21 +129,22 @@ export async function askAboutListing(
   trace?.step(`car ✓ ${car.year} ${car.make} ${car.model} · dealership ${car.organization.name}`);
 
   const price = Number(car.price);
-  const [allowance, dealerAnswers, otherCars, marketPrices, history] = await Promise.all([
+  const [allowance, dealerAnswers, alternatives, marketPrices, history] = await Promise.all([
     allowanceFor(car.organizationId),
     dealerAnswersFor(car.id, car.organizationId, question),
-    otherCarsFor(car.organizationId, car.id, price),
+    otherCarsFor(car.organizationId, car.id, price, question),
     marketPricesFor({ ...car, price }),
     pastExchanges(car.id, historyIds),
   ]);
   if (historyIds.length > 0) trace?.step(`conversation: ${history.length} of ${historyIds.length} earlier replies found`);
+  const otherCars = alternatives.cars;
   if (!allowance.offered) {
     trace?.end("the dealership's plan does not include the assistant — no AI call");
     return { status: "unavailable" };
   }
   trace?.step(
     `plan ✓ assistant enabled (${allowance.priority} priority) · data: ` +
-      `${otherCars === null ? "other cars ✗ (read failed)" : `${otherCars.length} other cars`} · ` +
+      `${otherCars === null ? "other cars ✗ (read failed)" : `${otherCars.length} other cars (${alternatives.matched ? "the question names them" : "closest in price"})`} · ` +
       `${marketPrices ? `price range ✓ (${marketPrices.listings} × ${marketPrices.compared.model ?? marketPrices.compared.bodyType})` : "price range ✗ (under 3 comparable)"} · ` +
       `${dealerAnswers.length} dealer answers`
   );
@@ -303,22 +304,46 @@ function photoDescriptions(images: string[], stored: unknown, locale: Locale): s
   });
 }
 
+/** The dealership's other cars the model is shown, and why those. */
+interface OtherCars {
+  cars: OtherCarRow[] | null;
+  /** The cars the question names, rather than the ones closest in price. */
+  matched: boolean;
+}
+
+type AlternativeRow = Omit<OtherCarRow, "price" | "image"> & { price: unknown; images: string[] | null };
+
+const toOtherCar = ({ images, ...car }: AlternativeRow): OtherCarRow => ({
+  ...car,
+  price: Number(car.price),
+  image: images?.[0] ?? null,
+});
+
 /**
- * The dealership's other cars closest in price. Null — not an empty list —
- * when the read fails: "none for sale" is a claim, and only a successful read
- * can make it.
+ * The dealership's other cars worth showing the model: the ones the question
+ * names when it names any ("عندكم كيا؟" — wherever they are in price), and
+ * otherwise those closest in price to this one ("anything cheaper?").
+ *
+ * Null — not an empty list — when the cars could not be read: "none for
+ * sale" is a claim, and only a successful read can make it. A failed match
+ * falls back to the closest in price: alternatives are worth more than
+ * strictly matching ones.
  */
-async function otherCarsFor(organizationId: string, carId: string, price: number): Promise<OtherCarRow[] | null> {
-  try {
-    const cars = await carRepository.findOtherAvailableCars(organizationId, carId);
-    return closestByPrice(
-      cars.map(({ images, ...c }) => ({ ...c, price: Number(c.price), image: images?.[0] ?? null })),
-      price
-    );
-  } catch (error) {
-    logError("Loading the dealership's other cars failed; answering without them", error);
-    return null;
-  }
+async function otherCarsFor(organizationId: string, carId: string, price: number, question: string): Promise<OtherCars> {
+  const [matching, recent] = await Promise.all([
+    carRepository
+      .findOtherAvailableCarsMatching({ organizationId, excludeCarId: carId, question, price, take: MAX_OTHER_CARS })
+      .catch((error: unknown) => {
+        logError("Matching the dealership's cars to a buyer's question failed; offering the closest in price", error);
+        return [];
+      }),
+    carRepository.findOtherAvailableCars(organizationId, carId).catch((error: unknown) => {
+      logError("Loading the dealership's other cars failed; answering without them", error);
+      return null;
+    }),
+  ]);
+  if (matching.length > 0) return { cars: matching.map(toOtherCar), matched: true };
+  return { cars: recent && closestByPrice(recent.map(toOtherCar), price), matched: false };
 }
 
 /**

@@ -8,6 +8,7 @@ const {
   findAnswersForCar,
   recordDeclinedQuestion,
   findOtherAvailableCars,
+  findOtherAvailableCarsMatching,
   findComparablePrices,
   recordAssistantAnswer,
   rateAssistantAnswer,
@@ -20,6 +21,7 @@ const {
   findAnswersForCar: vi.fn(),
   recordDeclinedQuestion: vi.fn(),
   findOtherAvailableCars: vi.fn(),
+  findOtherAvailableCarsMatching: vi.fn(),
   findComparablePrices: vi.fn(),
   recordAssistantAnswer: vi.fn(),
   rateAssistantAnswer: vi.fn(),
@@ -29,6 +31,7 @@ const {
 vi.mock("@/lib/repositories/car", () => ({
   findCarForAssistant,
   findOtherAvailableCars,
+  findOtherAvailableCarsMatching,
   findComparablePrices,
 }));
 vi.mock("@/lib/repositories/billing", () => ({ findActiveSubscription }));
@@ -96,6 +99,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   findAnswersForCar.mockResolvedValue([]);
   findOtherAvailableCars.mockResolvedValue([]);
+  findOtherAvailableCarsMatching.mockResolvedValue([]);
   findComparablePrices.mockResolvedValue([]);
   findCarForAssistant.mockResolvedValue(car);
   findActiveSubscription.mockResolvedValue(plan({ enabled: true, limit: 300 }));
@@ -318,6 +322,43 @@ describe("askAboutListing", () => {
     // A failed read is unknown, not "none for sale".
     expect(facts).not.toHaveProperty("otherCars");
     expect(facts).not.toHaveProperty("marketPrices");
+  });
+
+  it("offers the cars the question names, wherever they are in price, before the closest in price", async () => {
+    findOtherAvailableCars.mockResolvedValue([
+      { id: "car-el", images: [], year: 2019, make: "Hyundai", model: "Elantra", color: "Black", price: "860000", mileage: 1, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+    ]);
+    findOtherAvailableCarsMatching.mockResolvedValue([
+      { id: "car-sp", images: ["https://img/sp.jpg"], year: 2023, make: "Kia", model: "Sportage", color: "Grey", price: "1900000", mileage: 1, bodyType: "SUV", transmission: "Automatic", fuelType: "Petrol" },
+    ]);
+    answerListingQuestion.mockResolvedValue({ grounded: true, answer: "They have a 2023 Sportage.", fieldsUsed: ["otherCars"], carRefs: [1] });
+
+    const reply = await askAboutListing("car-1", "عندكم كيا؟", "ar", null);
+
+    expect(findOtherAvailableCarsMatching).toHaveBeenCalledWith({
+      organizationId: "org-dealer", excludeCarId: "car-1", question: "عندكم كيا؟", price: 850000, take: 8,
+    });
+    expect(answerListingQuestion.mock.calls[0][1].otherCars.map((c: { model: string }) => c.model)).toEqual(["Sportage"]);
+    // The card is the matched car, by its position in what the model was shown.
+    expect(reply).toMatchObject({ cars: [{ id: "car-sp", model: "Sportage", price: 1900000, image: "https://img/sp.jpg" }] });
+  });
+
+  it("offers the closest in price when matching the question fails", async () => {
+    findOtherAvailableCarsMatching.mockRejectedValue(new Error("db"));
+    findOtherAvailableCars.mockResolvedValue([
+      { id: "car-el", images: [], year: 2019, make: "Hyundai", model: "Elantra", color: "Black", price: "860000", mileage: 1, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+    ]);
+    await askAboutListing("car-1", "Any Kia?", "en", null);
+    expect(answerListingQuestion.mock.calls[0][1].otherCars.map((c: { model: string }) => c.model)).toEqual(["Elantra"]);
+  });
+
+  it("still offers the cars the question names when the closest-in-price read fails", async () => {
+    findOtherAvailableCars.mockRejectedValue(new Error("db"));
+    findOtherAvailableCarsMatching.mockResolvedValue([
+      { id: "car-sp", images: [], year: 2023, make: "Kia", model: "Sportage", color: "Grey", price: "1900000", mileage: 1, bodyType: "SUV", transmission: "Automatic", fuelType: "Petrol" },
+    ]);
+    await askAboutListing("car-1", "Any Kia?", "en", null);
+    expect(answerListingQuestion.mock.calls[0][1].otherCars).toHaveLength(1);
   });
 
   it("does not spend when the plan does not offer it", async () => {
