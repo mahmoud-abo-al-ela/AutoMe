@@ -1,6 +1,9 @@
 import { db } from "@/lib/prisma";
+import { Prisma } from "@/lib/generated/prisma";
+import type { CarStatus } from "@/lib/generated/prisma";
 import { buildCarWhereClause } from "@/lib/repositories/car/filters";
-import type { CarStatus, Prisma } from "@/lib/generated/prisma";
+import { dealerSearchCondition } from "@/lib/repositories/car/search";
+import { FROM } from "@/lib/repositories/car/search-words";
 
 export type InventorySort = "listed" | "price" | "saves" | "drives";
 
@@ -23,21 +26,62 @@ const ORDER_BY = {
   drives: (dir: "asc" | "desc") => ({ testDrive: { _count: dir } }),
 } as const;
 
+/** The same orders in SQL, for a searched page (searchedPage). */
+const ORDER_SQL: Record<InventorySort, Prisma.Sql> = {
+  listed: Prisma.sql`c."createdAt"`,
+  price: Prisma.sql`c."price"`,
+  saves: Prisma.sql`(SELECT count(*) FROM "SavedCar" s WHERE s."carId" = c."id")`,
+  drives: Prisma.sql`(SELECT count(*) FROM "TestDrive" t WHERE t."carId" = c."id")`,
+};
+
+const SELECT = {
+  id: true,
+  make: true,
+  model: true,
+  year: true,
+  bodyType: true,
+  title: true,
+  titleEn: true,
+  titleAr: true,
+  price: true,
+  priceCurrency: true,
+  images: true,
+  status: true,
+  featured: true,
+  createdAt: true,
+  _count: { select: { savedBy: true, testDrive: true } },
+} as const;
+
 /**
  * One page of a dealership's own cars for the Cars table, every status, with
- * how many buyers saved each and asked to drive it. The where clause is the
- * listing's (buildCarWhereClause), so the dealer's search matches what a
- * buyer's does — Arabic make names included. Ties break on id so a page never
- * repeats or skips a car.
+ * how many buyers saved each and asked to drive it. Ties break on id so a page
+ * never repeats or skips a car.
+ *
+ * With search text, the dealer's search is the buyers' search engine
+ * (searchedPage): Arabic folding, synonyms, typo correction. Without it, the
+ * plain listing's where clause.
  */
 export async function findInventory(organizationId: string, query: InventoryQuery) {
+  const { cars, total } = query.search?.trim() ? await searchedPage(organizationId, query) : await plainPage(organizationId, query);
+
+  return {
+    total,
+    cars: cars.map(({ price, _count, ...car }) => ({
+      ...car,
+      price: Number(price),
+      saves: _count.savedBy,
+      testDrives: _count.testDrive,
+    })),
+  };
+}
+
+async function plainPage(organizationId: string, query: InventoryQuery) {
   // The builder is still JavaScript, so its clause is typed here; it builds
   // only Prisma filters, and its "insensitive" modes are QueryMode values.
   const where = buildCarWhereClause({
     organizationId,
     onlyAvailable: false,
     status: query.status,
-    search: query.search,
     bodyType: query.bodyType,
     minYear: query.minYear,
     featured: query.featured,
@@ -49,36 +93,46 @@ export async function findInventory(organizationId: string, query: InventoryQuer
       orderBy: [ORDER_BY[query.sort](query.dir), { id: "asc" }],
       skip: query.skip,
       take: query.take,
-      select: {
-        id: true,
-        make: true,
-        model: true,
-        year: true,
-        bodyType: true,
-        title: true,
-        titleEn: true,
-        titleAr: true,
-        price: true,
-        priceCurrency: true,
-        images: true,
-        status: true,
-        featured: true,
-        createdAt: true,
-        _count: { select: { savedBy: true, testDrive: true } },
-      },
+      select: SELECT,
     }),
     db.car.count({ where }),
   ]);
+  return { cars, total };
+}
 
-  return {
-    total,
-    cars: cars.map(({ price, _count, ...car }) => ({
-      ...car,
-      price: Number(price),
-      saves: _count.savedBy,
-      testDrives: _count.testDrive,
-    })),
-  };
+/**
+ * A page of the cars the search engine matches (dealerSearchCondition),
+ * sorted and paged in SQL — the match can be any size, and a list of its ids
+ * would not fit in one query (Postgres takes some 32,000 parameters) — then
+ * that page's cars loaded as the plain page loads them, in the same order.
+ * The dealership's scope is in the condition and again in the load.
+ */
+async function searchedPage(organizationId: string, query: InventoryQuery) {
+  const condition: Prisma.Sql | null = await dealerSearchCondition({
+    organizationId,
+    status: query.status,
+    bodyType: query.bodyType,
+    minYear: query.minYear,
+    featured: query.featured,
+    search: query.search,
+  });
+  if (!condition) return { cars: [], total: 0 };
+
+  const dir = Prisma.raw(query.dir === "asc" ? "ASC" : "DESC");
+  const [page, counted] = await Promise.all([
+    db.$queryRaw<{ id: string }[]>(Prisma.sql`
+      SELECT c."id" ${FROM}
+      WHERE ${condition}
+      ORDER BY ${ORDER_SQL[query.sort]} ${dir}, c."id" ASC
+      LIMIT ${query.take} OFFSET ${query.skip}
+    `),
+    db.$queryRaw<{ total: number }[]>(Prisma.sql`SELECT count(*)::int AS "total" ${FROM} WHERE ${condition}`),
+  ]);
+
+  const order = new Map(page.map(({ id }, i) => [id, i]));
+  const cars = await db.car.findMany({ where: { organizationId, id: { in: [...order.keys()] } }, select: SELECT });
+  cars.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  return { cars, total: counted[0]?.total ?? 0 };
 }
 
 /** How many of the dealership's cars are in each status — the counts on the Cars page's views. */
