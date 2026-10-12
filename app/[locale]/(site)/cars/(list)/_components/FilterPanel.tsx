@@ -72,12 +72,13 @@ const FilterPanel = ({
 
   return (
     <div className="w-full lg:rounded-control lg:border lg:border-border lg:bg-card lg:px-4 lg:pb-2">
-      <div className="flex min-h-14 items-center justify-between gap-3 border-b border-border max-lg:hidden">
+      {/* Wraps rather than overflows the rail when a language's labels run long. */}
+      <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 border-b border-border max-lg:hidden">
         <h2 className="flex items-center gap-2 text-body font-semibold">
           <Filter aria-hidden className="size-4" />
           {t("title")}
           {activeCount > 0 && (
-            <span className="rounded-full bg-inverse px-2 text-micro text-inverse-foreground">
+            <span className="whitespace-nowrap rounded-full bg-inverse px-2 text-micro text-inverse-foreground">
               {t("activeCount", { value: fmt.number(activeCount) })}
             </span>
           )}
@@ -87,10 +88,11 @@ const FilterPanel = ({
             type="button"
             onClick={onReset}
             disabled={isLoading}
-            className="flex min-h-10 items-center gap-1.5 text-caption font-medium text-primary hover:underline disabled:opacity-50"
+            className="flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap text-caption font-medium text-primary hover:underline disabled:opacity-50"
           >
             <RotateCcw aria-hidden className="size-3.5" />
-            {t("resetAll")}
+            {/* The short label: beside the title and the count, the rail has no room for "Reset all filters". */}
+            {t("clearAll")}
           </button>
         )}
       </div>
