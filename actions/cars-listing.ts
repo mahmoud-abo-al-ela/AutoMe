@@ -8,14 +8,22 @@ import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
 import { ValidationError, NotFoundError } from "@/lib/utils/errors";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { serializeCarWithImages, type SerializedCar } from "@/lib/utils/serializers";
-import type { CarFilters } from "@/lib/services/car/listing";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { carTitlesRequestSchema } from "@/lib/validations/schemas";
+import {
+  carListingFiltersSchema,
+  carListingInputSchema,
+  carTitlesRequestSchema,
+  type CarListingFiltersInput,
+  type CarListingInput,
+} from "@/lib/validations/schemas";
 
-/** The listing filters plus the page/limit the client sends alongside them. */
-type CarListingInput = CarFilters & { page?: number; limit?: number };
-
-export const getCars = withErrorHandling(async (filters: CarListingInput) => {
+/**
+ * Public: anyone may list cars. The input is validated down to what a buyer
+ * can choose (carListingInputSchema) — the scope of what may be seen at all is
+ * the server's to set, never the request's.
+ */
+export const getCars = withErrorHandling(async (input: CarListingInput) => {
+  const filters = validateAction(carListingInputSchema, input);
   const { userId } = await auth();
   const organization = await getCurrentOrganization();
 
@@ -66,7 +74,8 @@ export const getCarById = withErrorHandling(async (id: string) => {
   });
 });
 
-export const getCarsFilters = withErrorHandling(async (filters: CarFilters = {}) => {
+export const getCarsFilters = withErrorHandling(async (input: CarListingFiltersInput = {}) => {
+  const filters = validateAction(carListingFiltersSchema, input);
   const { userId } = await auth();
   const organization = await getCurrentOrganization();
   const filterOptions = await carService.getFilterOptions(filters, userId, organization?.id);
