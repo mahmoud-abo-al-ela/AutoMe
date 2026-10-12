@@ -38,6 +38,16 @@ function suiteFailure(test: TestCase): string | null {
   return null;
 }
 
+/** Room for the assertion and the model's words it quotes, not a stack trace. */
+const MAX_NOTE_CHARS = 600;
+
+/** The first assertion that failed, on one line. */
+function failureNote(errors: ReadonlyArray<{ message?: string }> | undefined): string | undefined {
+  const message = errors?.[0]?.message?.replace(/s+/g, " ").trim();
+  if (!message) return undefined;
+  return message.length > MAX_NOTE_CHARS ? `${message.slice(0, MAX_NOTE_CHARS)}…` : message;
+}
+
 function toCase(file: string, test: TestCase): ReportedCase | null {
   const result = test.result();
   const durationMs = Math.round(test.diagnostic()?.duration ?? 0);
@@ -45,7 +55,7 @@ function toCase(file: string, test: TestCase): ReportedCase | null {
   const id = `${file} › ${test.fullName}`;
 
   if (result.state === "passed") return { id, outcome: "pass", durationMs, calls };
-  if (result.state === "failed") return { id, outcome: "fail", durationMs, calls };
+  if (result.state === "failed") return { id, outcome: "fail", durationMs, note: failureNote(result.errors), calls };
   if (result.state === "skipped" && result.note) {
     return { id, outcome: "inconclusive", durationMs, note: result.note, calls };
   }

@@ -19,7 +19,10 @@ export interface ReportedCase {
   id: string;
   outcome: CaseOutcome;
   durationMs: number;
-  /** Why it was inconclusive: every model in the chain was unavailable. */
+  /**
+   * Why it was inconclusive (every model in the chain was unavailable), or why
+   * it failed: the assertion's message, which quotes what the model wrote.
+   */
   note?: string;
   /** Calls the case made itself; most suites call in beforeAll, see `suiteCalls`. */
   calls: ReportedCall[];
@@ -60,6 +63,11 @@ export interface Comparison {
    * regression, until the baseline is updated to accept it.
    */
   missing: string[];
+  /**
+   * Every assertion that failed this run, regression or not — with no
+   * baseline yet, the only place a failure shows at all.
+   */
+  failed: string[];
   /** Advisory cases that failed this run — what the judge disagreed with. */
   advisoryFailures: string[];
   /** Failed in the baseline, pass now. */
@@ -79,6 +87,7 @@ export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | n
   const comparison: Comparison = {
     regressions: [],
     missing: [],
+    failed: [],
     advisoryFailures: [],
     fixed: [],
     added: [],
@@ -92,7 +101,7 @@ export function compareToBaseline(report: EvalReport, baseline: EvalBaseline | n
       comparison.inconclusive.push(id);
       continue;
     }
-    if (isAdvisory(id) && outcome === "fail") comparison.advisoryFailures.push(id);
+    if (outcome === "fail") (isAdvisory(id) ? comparison.advisoryFailures : comparison.failed).push(id);
     const before = baseline?.cases[id];
     if (!before) comparison.added.push(id);
     else if (before === "pass" && outcome === "fail" && !isAdvisory(id)) comparison.regressions.push(id);
