@@ -144,48 +144,88 @@ export async function getFilterOptions(
   // Global (unfiltered) bounds pin the slider domains so they don't shift as
   // the user applies other filters. Only the tenant scope is honored here.
   const boundsFilters = organizationId ? { organizationId } : {};
-
-  const [
-    makes,
-    bodyTypes,
-    fuelTypes,
-    transmissions,
-    colors,
-    priceRange,
-    priceBounds,
-    yearBounds,
-    mileageBounds,
-    dealerships,
-    cities,
-  ] = await Promise.all([
-    carRepository.getCarFieldCounts("make", queryFilters),
-    carRepository.getCarFieldCounts("bodyType", queryFilters),
-    carRepository.getCarFieldCounts("fuelType", queryFilters),
-    carRepository.getCarFieldCounts("transmission", queryFilters),
-    carRepository.getCarFieldCounts("color", queryFilters),
-    carRepository.getCarPriceRange(queryFilters),
+  const boundsPromise = Promise.all([
     carRepository.getCarPriceRange(boundsFilters),
     carRepository.getCarYearRange(boundsFilters),
     carRepository.getCarMileageRange(boundsFilters),
-    organizationId
-      ? Promise.resolve([])
-      : carRepository.getCarDealershipOptions(queryFilters),
-    organizationId
-      ? Promise.resolve([])
-      : carRepository.getCarCityOptions(queryFilters),
   ]);
 
+  const options = (await searchOptions(queryFilters, baseFilters)) ?? (await plainOptions(queryFilters));
+  const [priceBounds, yearBounds, mileageBounds] = await boundsPromise;
+
   return {
-    makes,
-    bodyTypes,
-    fuelTypes,
-    transmissions,
-    colors,
-    priceRange,
+    ...options,
+    makes: keepSelected(options.makes, baseFilters.make),
+    bodyTypes: keepSelected(options.bodyTypes, baseFilters.bodyType),
+    fuelTypes: keepSelected(options.fuelTypes, baseFilters.fuelType),
+    transmissions: keepSelected(options.transmissions, baseFilters.transmission),
+    colors: keepSelected(options.colors, baseFilters.color),
+    cities:
+      queryFilters.city && !options.cities.some((city) => sameValue(city, queryFilters.city!))
+        ? [...options.cities, queryFilters.city].sort()
+        : options.cities,
     priceBounds,
     yearBounds,
     mileageBounds,
-    dealerships,
-    cities,
   };
+}
+
+/**
+ * The options for a search with text, counted over the cars its results are
+ * made of (searchFacets) — or null when there is no text, or when its words
+ * empty a search the buyer also filtered: getCars then shows what the filters
+ * find, and the options follow it.
+ */
+async function searchOptions(queryFilters: CarFilters, baseFilters: CarFilters) {
+  const search = queryFilters.search?.trim();
+  if (!search) return null;
+
+  // The results asked for the same meaning a moment ago; it comes from the cache.
+  const facets = await carRepository.searchFacets({ ...queryFilters, search, meaning: await searchMeaning(search) });
+  if (facets.total === 0 && hasCarFilters(baseFilters)) return null;
+  return {
+    makes: facets.counts.make,
+    bodyTypes: facets.counts.bodyType,
+    fuelTypes: facets.counts.fuelType,
+    transmissions: facets.counts.transmission,
+    colors: facets.counts.color,
+    priceRange: facets.priceRange,
+    dealerships: facets.dealerships,
+    cities: facets.cities,
+  };
+}
+
+/** The options for a listing without search text. */
+async function plainOptions(queryFilters: CarFilters) {
+  const filters = { ...queryFilters, search: undefined };
+  const [makes, bodyTypes, fuelTypes, transmissions, colors, priceRange, dealerships, cities] = await Promise.all([
+    carRepository.getCarFieldCounts("make", filters),
+    carRepository.getCarFieldCounts("bodyType", filters),
+    carRepository.getCarFieldCounts("fuelType", filters),
+    carRepository.getCarFieldCounts("transmission", filters),
+    carRepository.getCarFieldCounts("color", filters),
+    carRepository.getCarPriceRange(filters),
+    filters.organizationId ? Promise.resolve([]) : carRepository.getCarDealershipOptions(filters),
+    filters.organizationId ? Promise.resolve([]) : carRepository.getCarCityOptions(filters),
+  ]);
+  return { makes, bodyTypes, fuelTypes, transmissions, colors, priceRange, dealerships, cities };
+}
+
+const sameValue = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+
+/**
+ * A selected value stays in its list — at 0 when no car has it any more — so
+ * the buyer can still see it chosen and unchoose it there.
+ */
+export function keepSelected<T extends { value: string; count: number }>(
+  options: T[],
+  selected: string | string[] | undefined
+): (T | { value: string; count: number })[] {
+  const chosen = (Array.isArray(selected) ? selected : selected ? [selected] : []).filter(
+    (value) => value && !options.some((option) => sameValue(option.value, value))
+  );
+  if (chosen.length === 0) return options;
+  return [...options, ...chosen.map((value) => ({ value, count: 0 }))].sort((a, b) =>
+    a.value < b.value ? -1 : a.value > b.value ? 1 : 0
+  );
 }
