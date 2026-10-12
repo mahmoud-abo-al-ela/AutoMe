@@ -10,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { describeSearch } from "@/actions/home";
 import { describedSearchParams, hasFilters, readsLikeSentence } from "@/lib/search/describe";
+import { suggestionParams } from "@/lib/search/suggest";
+import { SuggestionList } from "@/components/search/SuggestionList";
+import { useSearchSuggestions } from "@/components/search/use-search-suggestions";
+import { useSuggestionCombobox } from "@/components/search/use-suggestion-combobox";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 
@@ -23,7 +27,8 @@ import ImageSearchPanel from "./ImageSearchPanel";
  * into filters by the model (describeSearch). If that fails or finds no filter,
  * it is the plain text search after all — the buyer is never stopped. A photo
  * (picked or dropped anywhere on the field) runs the AI photo search in
- * useImageSearch.
+ * useImageSearch. As the buyer types, makes, models and words are suggested
+ * under the field; choosing one goes straight to its cars.
  */
 const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const t = useTranslations("home.hero");
@@ -32,6 +37,10 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const image = useImageSearch();
   const described = useMutation({ mutationFn: describeSearch });
+  const suggestions = useSearchSuggestions(searchQuery);
+  const combobox = useSuggestionCombobox(suggestions, (suggestion) =>
+    router.push(`/cars?${suggestionParams(suggestion).toString()}`)
+  );
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,70 +77,75 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   }
 
   return (
-    <form
-      role="search"
-      onSubmit={handleSearch}
-      {...image.dragProps}
-      className={cn(
-        "relative w-full max-w-[600px] overflow-hidden rounded-control border-[3px] border-marker bg-field text-foreground",
-        image.isDragging && "ring-4 ring-marker/40"
-      )}
-    >
-      <div className="flex items-center justify-between gap-3 bg-plate-band px-3 py-0.5 text-micro font-bold">
-        <span>{bandLabel}</span>
-        <span aria-hidden dir="ltr">
-          EGYPT · مصر
-        </span>
-      </div>
-      <div className="flex items-center gap-1.5 p-1.5 ps-3">
-        <Search aria-hidden className="size-5 shrink-0 text-muted-foreground" />
-        <input
-          type="search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          aria-label={t("searchPlaceholder")}
-          className="h-12 w-0 min-w-0 flex-1 bg-transparent text-body outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xl"
-          onClick={image.openPicker}
-          title={t("searchByPhoto")}
-          aria-label={t("searchByPhoto")}
-          className={cn(searchQuery.trim() && "max-sm:hidden")}
-        >
-          <Camera />
-        </Button>
-        <Button
-          type="submit"
-          variant="marker"
-          size="xl"
-          disabled={image.loading || described.isPending}
-          aria-busy={described.isPending}
-          className="shrink-0 max-sm:px-3.5"
-        >
-          {described.isPending ? <Loader2 aria-hidden className="animate-spin" /> : <Search className="sm:hidden" />}
-          <span className="max-sm:sr-only">{described.isPending ? t("describing") : tActions("search")}</span>
-        </Button>
-        <input
-          ref={image.fileInputRef}
-          id="imageUpload"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={image.onFileInputChange}
-        />
-      </div>
-
-      {image.isDragging && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-field/95 text-caption font-semibold">
-          <Upload aria-hidden className="size-5" />
-          {t("dropImage")}
+    // The list sits outside the form, which clips to its plate shape.
+    <div className="relative w-full max-w-[600px]">
+      <form
+        role="search"
+        onSubmit={handleSearch}
+        {...image.dragProps}
+        className={cn(
+          "relative w-full overflow-hidden rounded-control border-[3px] border-marker bg-field text-foreground",
+          image.isDragging && "ring-4 ring-marker/40"
+        )}
+      >
+        <div className="flex items-center justify-between gap-3 bg-plate-band px-3 py-0.5 text-micro font-bold">
+          <span>{bandLabel}</span>
+          <span aria-hidden dir="ltr">
+            EGYPT · مصر
+          </span>
         </div>
-      )}
-    </form>
+        <div className="flex items-center gap-1.5 p-1.5 ps-3">
+          <Search aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+          <input
+            type="search"
+            {...combobox.inputProps}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
+            className="h-12 w-0 min-w-0 flex-1 bg-transparent text-body outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xl"
+            onClick={image.openPicker}
+            title={t("searchByPhoto")}
+            aria-label={t("searchByPhoto")}
+            className={cn(searchQuery.trim() && "max-sm:hidden")}
+          >
+            <Camera />
+          </Button>
+          <Button
+            type="submit"
+            variant="marker"
+            size="xl"
+            disabled={image.loading || described.isPending}
+            aria-busy={described.isPending}
+            className="shrink-0 max-sm:px-3.5"
+          >
+            {described.isPending ? <Loader2 aria-hidden className="animate-spin" /> : <Search className="sm:hidden" />}
+            <span className="max-sm:sr-only">{described.isPending ? t("describing") : tActions("search")}</span>
+          </Button>
+          <input
+            ref={image.fileInputRef}
+            id="imageUpload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={image.onFileInputChange}
+          />
+        </div>
+
+        {image.isDragging && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-field/95 text-caption font-semibold">
+            <Upload aria-hidden className="size-5" />
+            {t("dropImage")}
+          </div>
+        )}
+      </form>
+      <SuggestionList suggestions={suggestions} {...combobox.listProps} />
+    </div>
   );
 };
 

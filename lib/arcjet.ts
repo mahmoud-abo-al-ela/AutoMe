@@ -107,3 +107,23 @@ export const ajChatTranslation = arcjet({
     }),
   ],
 });
+
+/**
+ * Search suggestions, asked for as a buyer types — a request per pause, of a
+ * public, shared answer most often served by the CDN. Its own client, so
+ * typing cannot spend the shared bucket uploads and payments rely on.
+ * Generous for a person, refilled continuously; it stops scripts.
+ */
+export const ajSearchSuggest = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["ip.src"],
+  rules: [
+    shield({ mode: arcjetMode }),
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 20,
+      interval: 10,
+      capacity: 60,
+    }),
+  ],
+});

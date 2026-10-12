@@ -124,5 +124,14 @@
       "back": "رجوع",
       "home": "العودة للرئيسية"
     }
+  },
+  "searchSuggestions": {
+    "label": "اقتراحات",
+    "count": "{count, plural, =0 {لا توجد اقتراحات} one {اقتراح واحد} two {اقتراحان} few {{value} اقتراحات} many {{value} اقتراحًا} other {{value} اقتراح}}",
+    "cars": "{count, plural, one {سيارة واحدة} two {سيارتان} few {{value} سيارات} many {{value} سيارة} other {{value} سيارة}}",
+    "kind": {
+      "make": "الماركة",
+      "model": "الموديل"
+    }
   }
 }

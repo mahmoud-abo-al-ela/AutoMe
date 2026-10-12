@@ -186,6 +186,19 @@ export const useCarsPage = (
     [perPage, pushUrl]
   );
 
+  // A suggestion chosen under the field: its make joins the make filter, and
+  // its text (a model, a word) replaces what was typed — at once, not after
+  // the typing debounce, which it cancels.
+  const pickSuggestion = useCallback(
+    ({ make, search }: { make?: string; search?: string }) => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      const current = filtersRef.current;
+      const makes = make && !current.make.includes(make) ? [...current.make, make] : current.make;
+      applyFilters({ ...current, make: makes, search: search || undefined });
+    },
+    [applyFilters]
+  );
+
   // Keep the field in sync when search changes from elsewhere (chip clear,
   // reset, quick-pick, back/forward).
   useEffect(() => {
@@ -304,6 +317,7 @@ export const useCarsPage = (
       toggleMulti,
       commitRange,
       setSearch,
+      pickSuggestion,
       setSort,
       changePage,
       changePerPage,

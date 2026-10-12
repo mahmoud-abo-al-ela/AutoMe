@@ -172,6 +172,7 @@ export const CarsPagePresenter = ({
         searchQuery={searchValue}
         onSearchChange={handlers.setSearch}
         onClearSearch={() => handlers.setSearch("")}
+        onPickSuggestion={handlers.pickSuggestion}
       />
 
       <div className="flex gap-6">
