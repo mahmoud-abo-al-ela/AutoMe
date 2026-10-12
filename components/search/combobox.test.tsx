@@ -20,16 +20,18 @@ function Harness({
   suggestions,
   onPick,
   showCounts,
+  query,
 }: {
   suggestions: SearchSuggestion[];
   onPick: (s: SearchSuggestion) => void;
   showCounts?: boolean;
+  query: string;
 }) {
   const combobox = useSuggestionCombobox(suggestions, onPick);
   return (
     <div className="relative">
-      <input aria-label="Search" defaultValue="toy" {...combobox.inputProps} />
-      <SuggestionList suggestions={suggestions} showCounts={showCounts} {...combobox.listProps} />
+      <input aria-label="Search" defaultValue={query} {...combobox.inputProps} />
+      <SuggestionList query={query} suggestions={suggestions} showCounts={showCounts} {...combobox.listProps} />
     </div>
   );
 }
@@ -38,11 +40,11 @@ let container: HTMLDivElement;
 let root: Root;
 let onPick: ReturnType<typeof vi.fn<(suggestion: SearchSuggestion) => void>>;
 
-function mount(locale: "en" | "ar" = "en", suggestions = SUGGESTIONS, showCounts?: boolean) {
+function mount(locale: "en" | "ar" = "en", suggestions = SUGGESTIONS, showCounts?: boolean, query = "toy") {
   act(() => {
     root.render(
       <NextIntlClientProvider locale={locale} messages={{ common: locale === "ar" ? ar : en }} timeZone="Africa/Cairo">
-        <Harness suggestions={suggestions} onPick={onPick} showCounts={showCounts} />
+        <Harness suggestions={suggestions} onPick={onPick} showCounts={showCounts} query={query} />
       </NextIntlClientProvider>
     );
   });
@@ -197,6 +199,21 @@ describe("the search combobox", () => {
     mount("en", SUGGESTIONS, false);
     focus();
     expect(options()[0].textContent).toBe("ToyotaMake");
+  });
+
+  it("shows what was typed plain and the completion bold, in English and Arabic", () => {
+    mount();
+    focus();
+    expect(options()[0].querySelector("strong")?.textContent).toBe("ota");
+    act(() => root.unmount());
+    root = createRoot(container);
+    mount("ar", [{ kind: "make", label: "تويوتا", count: 7, filters: { make: "Toyota" } }], true, "تو");
+    focus();
+    expect(options()[0].querySelector("strong")?.textContent).toBe("يوتا");
+    // The marks change no text: the option still reads, and is picked, as before.
+    key("ArrowDown");
+    key("Enter");
+    expect(onPick).toHaveBeenCalledWith(expect.objectContaining({ label: "تويوتا" }));
   });
 
   it("stays closed with no suggestions", () => {

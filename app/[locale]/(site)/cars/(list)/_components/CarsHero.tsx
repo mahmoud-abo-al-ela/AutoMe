@@ -58,7 +58,7 @@ export const CarsHero = ({
             <X className="size-4" />
           </button>
         )}
-        <SuggestionList suggestions={suggestions} showCounts={showSuggestionCounts} {...combobox.listProps} />
+        <SuggestionList query={query} suggestions={suggestions} showCounts={showSuggestionCounts} {...combobox.listProps} />
       </div>
     </header>
   );

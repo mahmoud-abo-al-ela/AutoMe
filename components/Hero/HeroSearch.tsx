@@ -144,7 +144,7 @@ const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
           </div>
         )}
       </form>
-      <SuggestionList suggestions={suggestions} {...combobox.listProps} />
+      <SuggestionList query={searchQuery} suggestions={suggestions} {...combobox.listProps} />
     </div>
   );
 };

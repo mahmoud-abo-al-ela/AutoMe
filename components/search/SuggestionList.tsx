@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 import type { SearchSuggestion } from "@/lib/search/suggest";
+import { SuggestionLabel } from "./SuggestionLabel";
 
 /**
  * The listbox under a search field (useSuggestionCombobox drives it): each
@@ -18,6 +19,7 @@ import type { SearchSuggestion } from "@/lib/search/suggest";
  */
 export function SuggestionList({
   id,
+  query,
   suggestions,
   open,
   active,
@@ -28,6 +30,8 @@ export function SuggestionList({
   className,
 }: {
   id: string;
+  /** What the buyer has typed: plain in each label, the rest bold. */
+  query: string;
   suggestions: SearchSuggestion[];
   open: boolean;
   active: number;
@@ -79,7 +83,7 @@ export function SuggestionList({
           >
             <Search aria-hidden className="size-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1 truncate">
-              <bdi className="font-medium">{suggestion.label}</bdi>
+              <SuggestionLabel label={suggestion.label} query={query} />
               <span className="ms-2 text-caption text-muted-foreground">{t(`kind.${suggestion.kind}`)}</span>
             </span>
             {showCounts && (
