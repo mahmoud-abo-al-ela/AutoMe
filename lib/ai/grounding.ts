@@ -184,6 +184,8 @@ export function comparisonFor(
 export const MIN_COMPARABLE_LISTINGS = 3;
 /** Alternatives in one record: enough to choose from, few enough to read. */
 export const MAX_OTHER_CARS = 8;
+/** Reviews are stars out of this many (DealershipReview.rating). */
+const RATING_SCALE = 5;
 const MAX_PHOTOS = 10;
 
 export function summarizeMarketPrices(
@@ -291,7 +293,9 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     dealership: {
       name: source.dealership.name,
       ...(clip(source.dealership.about) && { about: clip(source.dealership.about) }),
-      ...(source.dealership.rating && { rating: source.dealership.rating }),
+      // The scale is in the record, so "4.6 out of 5" states two numbers the
+      // record backs: without it, unbackedNumbers withheld every such answer.
+      ...(source.dealership.rating && { rating: { ...source.dealership.rating, outOf: RATING_SCALE } }),
       ...(source.dealership.website && { website: source.dealership.website }),
       ...(source.dealership.place && { place: source.dealership.place }),
       ...(source.dealership.address && { address: source.dealership.address }),

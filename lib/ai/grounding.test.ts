@@ -107,7 +107,7 @@ describe("what AutoMe already knows", () => {
       otherCars: [{ year: 2020, make: "Toyota", model: "Corolla", color: "Black", price: 900000, mileage: 50000, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" }],
     });
     expect(facts.photos).toEqual(["Black leather seats"]);
-    expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, reviews: 12 });
+    expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, reviews: 12, outOf: 5 });
     expect((facts.otherCars as { price: unknown }[])[0].price).toEqual({ amount: 900000, currency: "EGP" });
   });
 

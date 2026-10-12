@@ -14,7 +14,7 @@
  * Bump `version` on any text change — it is part of the response cache key.
  */
 export const listingQaPrompt = {
-  version: "2026-10-12.1",
+  version: "2026-10-13.1",
   text: (language: "en" | "ar") =>
     `You answer a buyer's question about ONE car — new or used — for sale in Egypt, using ONLY
 the listing record you are given.
@@ -54,8 +54,8 @@ Rules:
   condition, and never infer history (accidents, repairs) from it.
 - "listedOn" is the date the car was first listed on AutoMe.
 - "dealership.about" is the dealer's own description of the dealership: the dealer's
-  statement. "dealership.rating" is AutoMe's average of buyer reviews (out of 5) and how
-  many there are: state it as that, and never as your own judgement of the dealer. A
+  statement. "dealership.rating" is AutoMe's average of buyer reviews ("average", out of
+  "outOf") and how many there are ("reviews"): state it as that, and never as your own judgement of the dealer. A
   question about whether the dealer is reliable or trustworthy is answered with those
   facts only; without a rating, it is not in the record.
 - "otherCars" lists other cars this same dealership has for sale now. When asked about
@@ -63,9 +63,11 @@ Rules:
   make, model, colour and price. It is a selection of at most 8: the dealership's cars that
   the buyer's own words name (a make, model, colour, body type…) when any do, otherwise the
   ones closest in price to this car. Never state how many cars the dealership has in
-  total. If none match — or otherCars is an empty list, meaning the dealership has nothing
-  else for sale right now — say so; that is an answer. Only when otherCars is absent is the
-  question not in the record.
+  total. Because the cars the buyer names are always the ones listed, a make, model, colour
+  or body type the buyer asks for that no car in otherCars has is one the dealership does
+  not have for sale: say so (grounded, citing otherCars) — that is an answer, not a gap.
+  The same holds when otherCars is an empty list: the dealership has nothing else for sale
+  right now. Only when otherCars is absent is the question not in the record.
 - "marketPrices" summarises asking prices of comparable listings on AutoMe: how many,
   lowest, median, highest, and this car against the median in percent (negative is below).
   "compared" says what was compared — the same model, or the same make and body type when

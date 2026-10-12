@@ -40,6 +40,15 @@ describe("numbersIn — lists", () => {
 });
 
 describe("unbackedNumbers", () => {
+  it("backs a rating stated on its scale, as buildListingFacts records it", () => {
+    const rated = { ...facts, dealership: { name: "Nile Motors", rating: { average: 4.6, reviews: 23, outOf: 5 } } };
+    for (const answer of ["Rated 4.6 out of 5 by 23 buyers.", "4.6/5 from 23 reviews.", "بمتوسط ٤٫٦ من ٥ في ٢٣ تقييمًا."]) {
+      expect(unbackedNumbers(answer, rated, ["dealership"], "Is this dealer trustworthy?"), answer).toEqual([]);
+    }
+    // Without the scale in the record, the 5 was unbacked and the answer withheld.
+    expect(unbackedNumbers("Rated 4.6 out of 5.", facts, ["dealership"], "Trustworthy?")).toEqual([5]);
+  });
+
   it("allows digits in the dealership's name", () => {
     const withName = { ...facts, dealership: { name: "Auto 2000" } };
     expect(unbackedNumbers("Auto 2000 opens at 10 AM.", withName, ["workingHours"], "Hours?")).toEqual([]);

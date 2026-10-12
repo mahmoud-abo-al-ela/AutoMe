@@ -232,7 +232,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   it("answers from the stated history, as the dealer's statement", (t) => {
     const answer = answerOf(t, "disclosedAccident");
     expect(answer).toMatch(/dealer/i);
-    expect(answer).toMatch(/no accident|not been in an? accident|accident-free/i);
+    expect(answer).toMatch(/no accident|not been in an? accident|accident[- ]free/i);
   });
 
   it("says the car is not original paint when the dealer said so, in Arabic", (t) => {
