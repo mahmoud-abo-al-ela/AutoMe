@@ -67,3 +67,70 @@ export function classifyTerms(n: number, counts: TermCount[]): TermRoles {
 export function inverseDocumentFrequency(n: number, df: number): number {
   return Math.log(1 + n / Math.max(df, 1));
 }
+
+/**
+ * Typo correction: a word no car in scope has may stand for a known word
+ * spelled nearly the same ("corola" → corolla, "كرولا" → كورولا). The known
+ * words come from the search's vocabulary (lib/repositories/car/search-terms.ts),
+ * and a candidate counts only if some car in the search's own scope has it.
+ * The thresholds are a starting point, tuned by test/search-relevance.test.ts.
+ */
+
+/** Shortest word, in letters, a correction is tried on: short words have too many neighbours. */
+export const CORRECTION_MIN_LENGTH = 4;
+/** How alike (pg_trgm similarity) a known word must be to stand in for a typo. */
+export const CORRECTION_SIMILARITY = 0.4;
+/** Candidates this close to the best are all kept: the search cannot tell which was meant. */
+export const CORRECTION_MARGIN = 0.05;
+/** At most this many known words stand in for one typo. */
+export const MAX_CORRECTIONS = 3;
+
+type Script = "arabic" | "latin";
+
+const ARABIC_WORD = /^\p{Script=Arabic}+$/u;
+const LATIN_WORD = /^\p{Script=Latin}+$/u;
+
+/** A word wholly in one script's letters; null for digits, a mix, or anything else. */
+function scriptOf(word: string): Script | null {
+  if (ARABIC_WORD.test(word)) return "arabic";
+  if (LATIN_WORD.test(word)) return "latin";
+  return null;
+}
+
+/**
+ * Whether a folded word may be corrected. Never one with a digit — a model
+ * code or a year ("X5", "320i", "2020") is exact or nothing — nor a word
+ * mixing scripts, nor a short one. Aliases and places are the caller's to
+ * exclude: they are known words already.
+ */
+export function isCorrectable(word: string): boolean {
+  return [...word].length >= CORRECTION_MIN_LENGTH && scriptOf(word) !== null;
+}
+
+export interface CorrectionCandidate {
+  word: string;
+  similarity: number;
+  /** Public cars with the word, as the vocabulary last counted. */
+  ndoc: number;
+  /** Cars in the search's scope with the word. */
+  df: number;
+}
+
+/**
+ * The known words that stand in for a typo, best first: in the typo's own
+ * script, had by some car in scope, alike enough — and every one about as alike
+ * as the best, since then the search cannot tell which was meant and shows
+ * them all. Empty when none qualifies, and the word stays missing.
+ */
+export function chooseCorrection(token: string, candidates: CorrectionCandidate[]): string[] {
+  const script = scriptOf(token);
+  const usable = candidates
+    .filter((c) => c.df > 0 && c.similarity >= CORRECTION_SIMILARITY && scriptOf(c.word) === script)
+    .sort((a, b) => b.similarity - a.similarity || b.ndoc - a.ndoc || a.word.localeCompare(b.word));
+  if (usable.length === 0) return [];
+  const best = usable[0].similarity;
+  return usable
+    .filter((c) => c.similarity >= best - CORRECTION_MARGIN)
+    .slice(0, MAX_CORRECTIONS)
+    .map((c) => c.word);
+}

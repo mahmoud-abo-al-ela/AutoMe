@@ -34,6 +34,8 @@ export const queryKeys = {
     chat: (id: string) => ["cars", "chat", id],
     filters: (filters: unknown = {}) => ["cars", "filters", filters],
     featured: () => ["cars", "featured"],
+    /** What the search box suggests for what has been typed (/api/search/suggest). */
+    suggestions: (locale: string, query: string) => ["cars", "suggestions", locale, query],
   },
   dealerships: {
     all: ["dealerships"],

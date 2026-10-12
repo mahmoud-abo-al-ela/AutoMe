@@ -133,7 +133,14 @@ export const CarsPagePresenter = ({
             {t.rich("states.relaxedSearch", { term: relaxedSearch, b: (chunks) => <bdi className="font-semibold">{chunks}</bdi> })}
           </SearchNotice>
         ) : (
-          searchMatch && <SearchMatchNotice searchMatch={searchMatch} locale={locale} />
+          searchMatch && (
+            <SearchMatchNotice
+              searchMatch={searchMatch}
+              locale={locale}
+              term={filters.search}
+              onSearchExact={handlers.searchExact}
+            />
+          )
         )}
         {showList ? (
           <ul className="flex flex-col gap-4">
@@ -172,6 +179,9 @@ export const CarsPagePresenter = ({
         searchQuery={searchValue}
         onSearchChange={handlers.setSearch}
         onClearSearch={() => handlers.setSearch("")}
+        onPickSuggestion={handlers.pickSuggestion}
+        // A suggestion's count is of all public listings; another filter would make it wrong here.
+        showSuggestionCounts={!activeFilters.some((filter) => filter.type !== "search")}
       />
 
       <div className="flex gap-6">

@@ -1,5 +1,6 @@
 // Pure filter/URL helpers for the cars listing page — no React, fully testable.
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
+import type { SuggestionFilters } from "@/lib/search/suggest";
 
 /** The filter keys the cars page holds as comma-joined multi-selects. */
 export const MULTI_KEYS = ["make", "bodyType", "fuelType", "transmission"] as const;
@@ -24,6 +25,8 @@ export interface CarPageFilters {
   minMileage?: number;
   maxMileage?: number;
   sortBy: string;
+  /** The words as typed, spelling correction off ("Search instead for …"); only with a search. */
+  exact?: boolean;
 }
 
 export interface ActiveFilterChip {
@@ -49,6 +52,7 @@ export const DEFAULT_FILTERS: CarPageFilters = {
   minMileage: undefined,
   maxMileage: undefined,
   sortBy: "newest",
+  exact: undefined,
 };
 
 const num = (v: string | null | undefined) => (v !== null && v !== undefined && v !== "" ? Number(v) : undefined);
@@ -83,6 +87,7 @@ export function parseFiltersFromSearch(search: string): {
       minMileage: num(p.get("minMileage")),
       maxMileage: num(p.get("maxMileage")),
       sortBy: p.get("sortBy") || "newest",
+      exact: p.get("exact") === "1" || undefined,
     },
     page: num(p.get("page")) || 1,
     perPage: num(p.get("perPage")) || DEFAULT_PER_PAGE,
@@ -112,6 +117,7 @@ export function buildCarsUrl(
   if (filters.minMileage) params.set("minMileage", String(filters.minMileage));
   if (filters.maxMileage) params.set("maxMileage", String(filters.maxMileage));
   if (filters.sortBy && filters.sortBy !== "newest") params.set("sortBy", filters.sortBy);
+  if (filters.exact && filters.search) params.set("exact", "1");
   if (perPage && perPage !== DEFAULT_PER_PAGE) params.set("perPage", String(perPage));
   if (page > 1) params.set("page", String(page));
 
@@ -180,6 +186,24 @@ export function buildActiveFilterChips(
 }
 
 /**
+ * The filters with a chosen suggestion applied. Its filters join the buyer's —
+ * a make or body type is added to those already chosen, a colour becomes the
+ * colour — and its text replaces what was typed. Nothing else changes.
+ */
+export function withSuggestion(
+  filters: CarPageFilters,
+  chosen: { filters?: SuggestionFilters; search?: string }
+): CarPageFilters {
+  const next: CarPageFilters = { ...filters, search: chosen.search || undefined, exact: undefined };
+  for (const key of MULTI_KEYS) {
+    const value = chosen.filters?.[key];
+    if (value && !filters[key].includes(value)) next[key] = [...filters[key], value];
+  }
+  if (chosen.filters?.color) next.color = chosen.filters.color;
+  return next;
+}
+
+/**
  * The filters with one active-filter chip cleared; for a multi-select field,
  * `value` removes just that entry. Null for "all", which resets everything.
  */
@@ -188,6 +212,7 @@ export function clearedFilters(filters: CarPageFilters, type: string, value?: st
   switch (type) {
     case "search":
       next.search = undefined;
+      next.exact = undefined;
       break;
     case "make":
     case "bodyType":

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { refreshImageAlts } from "@/lib/services/car/image-alts";
 import { embedQuestion } from "@/lib/services/buyer-question/meaning";
 import { embedCar } from "@/lib/services/car/embedding";
+import { refreshSearchVocabulary } from "@/lib/services/car/search-vocabulary";
 
 /**
  * Every background job: the shape of its payload and what running it does.
@@ -58,6 +59,17 @@ export const JOBS = {
     }),
     run: async ({ questionId, organizationId }: { questionId: string; organizationId: string }) => {
       await embedQuestion(questionId, organizationId);
+    },
+  },
+  /**
+   * Rebuild the search's vocabulary after cars or dealerships change, at most
+   * once per window (lib/jobs/search-terms.ts). Idempotent: it recomputes
+   * everything from the cars listed when it runs.
+   */
+  "search-terms": {
+    schema: z.object({}),
+    run: async () => {
+      await refreshSearchVocabulary();
     },
   },
 } as const;

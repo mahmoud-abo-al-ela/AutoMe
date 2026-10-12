@@ -146,5 +146,19 @@
     "AVAILABLE": "متاحة",
     "SOLD": "مباعة",
     "UNAVAILABLE": "غير متاحة"
+  },
+  "feature": {
+    "Sunroof": "فتحة سقف",
+    "Panoramic roof": "سقف بانوراما",
+    "Leather seats": "فرش جلد",
+    "Rear camera": "كاميرا خلفية",
+    "Parking sensors": "حساسات ركن",
+    "Cruise control": "مثبت سرعة",
+    "Touch screen": "شاشة تاتش",
+    "Apple CarPlay": "Apple CarPlay",
+    "Keyless entry": "دخول بدون مفتاح",
+    "Push-button start": "تشغيل بزر",
+    "Alloy wheels": "جنوط سبور",
+    "Fog lights": "كشافات ضباب"
   }
 }

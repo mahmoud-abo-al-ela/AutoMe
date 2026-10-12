@@ -1,5 +1,6 @@
-import { expandSearchTerm, expandSearchTermForText } from "@/lib/locations";
+import { expandSearchTerm, hasAlias, knownNames } from "@/lib/locations";
 import { searchWords } from "@/lib/utils/search-text";
+import { isCorrectable } from "@/lib/search/lexical";
 
 /**
  * Builds the Postgres prefix tsqueries for the car search box — one per term,
@@ -63,6 +64,19 @@ export interface SearchTerm {
    * free text of titles and descriptions (B, C).
    */
   structuredQuery: string;
+  /**
+   * Exactly the word (no prefix) as a make or model (A): whether the term names
+   * what a car is — "corolla", "x5" — rather than something about it. Exact, so
+   * "sport" does not name the Sportage.
+   */
+  nameQuery: string;
+  /**
+   * Prefix tsquery over the car's own name only — make and model (A) and its
+   * titles (B). A term that names cars is matched by it, so a description
+   * comparing itself to one ("better than a Corolla", "X5-like comfort") does
+   * not make a car one.
+   */
+  ownQuery: string;
   /** Canonical dealership city/region values the term names, compared by equality. */
   places: string[];
   /** A model year ("2020", "٢٠٢٠"), which the search vector does not hold. */
@@ -83,6 +97,8 @@ function toTerm(text: string, variants: string[], places: string[]): SearchTerm 
     query,
     // Every lexeme is `word:*`; weights are added after the prefix marker.
     structuredQuery: query.replace(/:\*/g, ":*AD"),
+    nameQuery: query.replace(/:\*/g, ":A"),
+    ownQuery: query.replace(/:\*/g, ":*AB"),
     places,
     year: words.length === 1 && YEAR.test(words[0]) ? Number(words[0]) : null,
   };
@@ -121,14 +137,48 @@ export function searchTerms(term: string): SearchTerm[] {
 }
 
 /**
- * The term to use for the trigram fallback, which compares against the English
- * make/model columns and so cannot work on Arabic input. Falls back to the
- * original, which simply matches nothing — the same as before.
+ * The folded word a typo correction may replace this term with, or null. Only
+ * a single free word qualifies: never a place, a year, or an alias or known
+ * value (a make in Arabic, a body type) — those are known words already, and
+ * one no car in scope has is genuinely absent, not misspelt. isCorrectable
+ * rules out short words and model codes.
  */
-export function toTrigramTerm(term: string): string {
-  const trimmed = term?.trim();
-  if (!trimmed) return "";
+export function correctableWord(term: SearchTerm): string | null {
+  if (term.places.length > 0 || term.year !== null || hasAlias(term.text)) return null;
+  const words = searchWords(term.text);
+  return words.length === 1 && isCorrectable(words[0]) ? words[0] : null;
+}
 
-  const [, firstAlias] = expandSearchTermForText(trimmed);
-  return firstAlias ?? trimmed;
+let names: Map<string, string> | undefined;
+
+/**
+ * The alias index's one-word names a typo may be corrected to, keyed by the
+ * word as a search folds it, to the name as displayed: "تويوتا" → تويوتا,
+ * "هيونداي" → هيونداي. Built once.
+ */
+export function correctionNames(): Map<string, string> {
+  if (!names) {
+    names = new Map();
+    for (const surface of knownNames()) {
+      const words = searchWords(surface);
+      if (words.length === 1 && isCorrectable(words[0]) && !names.has(words[0])) names.set(words[0], surface);
+    }
+  }
+  return names;
+}
+
+/**
+ * The term that stands in for a typo: any of the known words that may have
+ * been meant, each with everything it is the display form of ("تويوتا"
+ * reaches the Toyotas), matched like every term, by prefix. Keeps the typed
+ * text, so the search can say what it corrected.
+ */
+export function correctedTerm(typed: string, words: string[]): SearchTerm | null {
+  const expanded = words.map((word) => expandSearchTerm(word));
+  const unique = (values: string[]) => [...new Set(values)];
+  return toTerm(
+    typed,
+    unique(expanded.flatMap((variants) => variants.text)),
+    unique(expanded.flatMap((variants) => variants.exact))
+  );
 }

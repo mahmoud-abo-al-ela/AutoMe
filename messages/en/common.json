@@ -124,5 +124,21 @@
       "back": "Go back",
       "home": "Back to home"
     }
+  },
+  "searchSuggestions": {
+    "label": "Suggestions",
+    "count": "{count, plural, =0 {No suggestions} one {One suggestion} other {{value} suggestions}}",
+    "cars": "{count, plural, one {{value} car} other {{value} cars}}",
+    "kind": {
+      "make": "Make",
+      "model": "Model",
+      "bodyType": "Body type",
+      "fuelType": "Fuel",
+      "transmission": "Transmission",
+      "color": "Color",
+      "feature": "Feature"
+    },
+    "recent": "Recent searches",
+    "remove": "Remove “{label}” from recent searches"
   }
 }

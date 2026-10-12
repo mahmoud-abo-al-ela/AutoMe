@@ -83,6 +83,8 @@
     "emptyBody": "There are no vehicles available right now. Please check back soon.",
     "browseAll": "Browse all cars",
     "relaxedSearch": "No cars mention <b>“{term}”</b> — showing the cars that match your other filters.",
+    "searchCorrected": "Showing results for <b>{to}</b> instead of “{from}”.",
+    "searchExact": "Search instead for <b>“{term}”</b>",
     "searchMissingWords": "No cars mention <b>“{terms}”</b> — showing results for the rest of your search.",
     "searchSomeWords": "No car has all of your words — showing the cars that have some of them, closest first.",
     "searchMeaningOnly": "No cars mention <b>“{terms}”</b> — showing the cars closest to what you described.",

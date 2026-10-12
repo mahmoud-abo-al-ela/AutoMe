@@ -2,6 +2,7 @@ import aj, {
   ajChatTranslation,
   ajDealerAi,
   ajListingQuestions,
+  ajSearchSuggest,
   arcjetConfigured,
   arcjetRequired,
 } from "@/lib/arcjet";
@@ -105,6 +106,14 @@ export async function enforceRateLimit(requested = 1) {
  */
 export async function enforceDealerAiLimit(requested = 1) {
   return enforce(ajDealerAi, requested);
+}
+
+/**
+ * Enforce the search-suggestions bucket (see ajSearchSuggest), for the route
+ * that answers as a buyer types.
+ */
+export async function enforceSuggestLimit() {
+  return enforce(ajSearchSuggest, 1);
 }
 
 /**

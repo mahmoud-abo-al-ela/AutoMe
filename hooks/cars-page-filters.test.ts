@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_FILTERS, clearedFilters, type CarPageFilters } from "./cars-page-filters";
+import {
+  DEFAULT_FILTERS,
+  buildCarsUrl,
+  clearedFilters,
+  parseFiltersFromSearch,
+  withSuggestion,
+  type CarPageFilters,
+} from "./cars-page-filters";
 
 const filters: CarPageFilters = {
   ...DEFAULT_FILTERS,
@@ -18,6 +25,60 @@ const filters: CarPageFilters = {
   maxMileage: 80_000,
   sortBy: "priceAsc",
 };
+
+describe("exact spelling in the URL", () => {
+  it("round-trips with its search", () => {
+    const { filters: parsed } = parseFiltersFromSearch("?search=corola&exact=1");
+    expect(parsed).toMatchObject({ search: "corola", exact: true });
+    expect(buildCarsUrl(parsed, 1)).toBe("/cars?search=corola&exact=1");
+  });
+
+  it("is off unless the URL says exactly 1", () => {
+    expect(parseFiltersFromSearch("?search=corola").filters.exact).toBeUndefined();
+    expect(parseFiltersFromSearch("?search=corola&exact=true").filters.exact).toBeUndefined();
+  });
+
+  it("means nothing without a search, so it is not written", () => {
+    expect(buildCarsUrl({ ...DEFAULT_FILTERS, exact: true }, 1)).toBe("/cars");
+  });
+
+  it("goes with the words: clearing the search, or choosing a suggestion, drops it", () => {
+    const exact = { ...filters, search: "corola", exact: true };
+    expect(clearedFilters(exact, "search")?.exact).toBeUndefined();
+    expect(withSuggestion(exact, { filters: { make: "Toyota" } }).exact).toBeUndefined();
+  });
+});
+
+describe("withSuggestion", () => {
+  it("adds a chosen make or spec to the buyer's own, keeping every other filter", () => {
+    const next = withSuggestion(filters, { filters: { make: "BMW", bodyType: "SUV" } });
+    expect(next.make).toEqual(["Toyota", "Kia", "BMW"]);
+    expect(next.bodyType).toEqual(["Sedan", "SUV"]);
+    expect(next).toMatchObject({ dealership: "nile-motors", city: "maadi", minPrice: 300_000, maxYear: 2022, sortBy: "priceAsc" });
+  });
+
+  it("never adds a value twice", () => {
+    expect(withSuggestion(filters, { filters: { make: "Kia" } }).make).toEqual(["Toyota", "Kia"]);
+  });
+
+  it("sets a colour as the colour, and a fuel or gearbox as one more", () => {
+    const next = withSuggestion(filters, { filters: { color: "Silver", fuelType: "Diesel", transmission: "Manual" } });
+    expect(next.color).toBe("Silver");
+    expect(next.fuelType).toEqual(["Diesel"]);
+    expect(next.transmission).toEqual(["Manual"]);
+  });
+
+  it("replaces what was typed with the suggestion's text, or clears it", () => {
+    expect(withSuggestion(filters, { filters: { make: "Toyota" }, search: "Corolla" }).search).toBe("Corolla");
+    expect(withSuggestion(filters, { filters: { bodyType: "SUV" } }).search).toBeUndefined();
+    expect(withSuggestion(filters, { search: "Sunroof" })).toMatchObject({ search: "Sunroof", make: ["Toyota", "Kia"] });
+  });
+
+  it("never changes the filters it was given", () => {
+    withSuggestion(filters, { filters: { make: "BMW" } });
+    expect(filters.make).toEqual(["Toyota", "Kia"]);
+  });
+});
 
 describe("clearedFilters", () => {
   it("removes one value of a multi-select, keeping the rest", () => {

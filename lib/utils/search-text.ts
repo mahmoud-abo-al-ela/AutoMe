@@ -124,3 +124,26 @@ export function searchWords(value: string): string[] {
     []
   );
 }
+
+const ARABIC_LETTER = new RegExp(
+  `^[${range(0x0621, 0x063a)}${range(0x0641, 0x064a)}${range(0x066e, 0x06d3)}${range(0x06fa, 0x06ff)}]$`
+);
+
+/**
+ * Which kind of word a folded character belongs to, as `searchWords` splits
+ * them: an ASCII letter or digit, an Arabic letter, or neither (a separator).
+ * A word is a run of one kind — "x5" is one word, "x5سيدان" two.
+ */
+export function searchCharKind(character: string): "latin" | "arabic" | null {
+  if (/^[a-z0-9]$/.test(character)) return "latin";
+  return ARABIC_LETTER.test(character) ? "arabic" : null;
+}
+
+/**
+ * One character as `searchWords` folds it — possibly to nothing (a mark, a
+ * tatweel) or to more than one (an "İ" lowercases to two). For mapping folded
+ * text back to the original, a character at a time (lib/search/highlight.ts).
+ */
+export function foldSearchCharacter(character: string): string {
+  return foldSearchText(character).normalize("NFD").replace(LATIN_MARKS, "");
+}

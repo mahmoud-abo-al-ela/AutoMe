@@ -9,10 +9,22 @@ vi.hoisted(() => {
 // The listing service asks a model for the search's meaning; here a test sets it.
 vi.mock("@/lib/services/car/search-meaning", () => ({ searchMeaning: vi.fn(async () => null) }));
 
+// The vocabulary is real; a test can make reading it fail.
+const vocabulary = vi.hoisted(() => ({ fail: false }));
+vi.mock("@/lib/repositories/car/search-terms", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/repositories/car/search-terms")>();
+  return {
+    ...actual,
+    findSimilarWords: (...args: Parameters<typeof actual.findSimilarWords>) =>
+      vocabulary.fail ? Promise.reject(new Error("vocabulary unavailable")) : actual.findSimilarWords(...args),
+  };
+});
+
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { searchCarsRanked } from "@/lib/repositories/car/search";
 import { setCarEmbedding } from "@/lib/repositories/car/embedding";
+import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { getCars } from "@/lib/services/car/listing";
 import { db } from "@/lib/prisma";
 import { CARS, HIDDEN_TENANT_CARS, OTHER_TENANT_CARS, type RelevanceCar } from "@/test/fixtures/search-relevance";
@@ -110,7 +122,7 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       plainSedan1: { make: "Kia", model: "Cerato", year: 2020, bodyType: "Sedan", transmission: "Automatic" },
       plainSedan2: { make: "Hyundai", model: "Elantra", year: 2021, bodyType: "Sedan", transmission: "Automatic" },
       plainSedan3: { make: "Nissan", model: "Sunny", year: 2019, bodyType: "Sedan", transmission: "Manual" },
-      plainSuv: { make: "Kia", model: "Sportage", year: 2021, bodyType: "SUV", transmission: "Automatic" },
+      plainSuv: { make: "Kia", model: "Sportage", year: 2021, bodyType: "SUV", transmission: "Automatic", descriptionAr: "ناقل حركة اوتوماتيك." },
     } satisfies Record<string, RelevanceCar>)) {
       await insert(PLAIN_ORG, key, car);
     }
@@ -119,6 +131,7 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
     for (const [key, organizationId] of [["x5", ORG], ["otherX5", OTHER_ORG], ["hiddenSedan", HIDDEN_ORG]] as const) {
       await setCarEmbedding({ id: idOf.get(key)!, organizationId, vector: axis(1), model: MODEL, hash: "h" });
     }
+    await refreshSearchTerms();
   }, 60_000);
 
   afterAll(async () => {
@@ -130,19 +143,19 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
     it("sets aside a word no listing uses, and finds what the rest asks for (the reported bug)", async () => {
       const result = await searchCarsRanked({ organizationId: PLAIN_ORG, search: "عربية سيدان" }, { page: 1, limit: 50 });
       expect(new Set(keys(result))).toEqual(new Set(["plainSedan1", "plainSedan2", "plainSedan3"]));
-      expect(result.search).toEqual({ match: "all", missing: ["عربية"] });
+      expect(result.search).toEqual({ match: "all", missing: ["عربية"], corrected: [] });
     });
 
     it("finds the Toyotas for a polite request", async () => {
       const result = await search({ search: "لو سمحت تويوتا" });
       expect(new Set(keys(result))).toEqual(new Set(where((c) => c.make === "Toyota")));
-      expect(result.search).toEqual({ match: "all", missing: ["لو", "سمحت"] });
+      expect(result.search).toEqual({ match: "all", missing: ["لو", "سمحت"], corrected: [] });
     });
 
     it("never widens to every car when no word is found", async () => {
       const result = await search({ search: "لو سمحت" });
       expect(result.pagination.total).toBe(0);
-      expect(result.search).toEqual({ match: "none", missing: ["لو", "سمحت"] });
+      expect(result.search).toEqual({ match: "none", missing: ["لو", "سمحت"], corrected: [] });
     });
   });
 
@@ -153,7 +166,7 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       const sedans = where((c) => c.bodyType === "Sedan");
       expect(new Set(keys(result))).toEqual(new Set(sedans));
       expect(new Set(keys(result).slice(0, 4))).toEqual(new Set(["corolla18", "elantra", "eClass", "sunny"]));
-      expect(result.search).toEqual({ match: "all", missing: [] });
+      expect(result.search).toEqual({ match: "all", missing: [], corrected: [] });
     });
 
     it("does the same for a generic English word", async () => {
@@ -179,9 +192,10 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
   describe("some of the words", () => {
     it("shows the cars with any of the words when none has them all, rarest first", async () => {
       const result = await search({ search: "hilux sunroof" });
-      expect(result.search).toEqual({ match: "some", missing: [] });
+      expect(result.search).toEqual({ match: "some", missing: [], corrected: [] });
       expect(keys(result)[0]).toBe("hilux");
-      expect(new Set(keys(result))).toEqual(new Set(["hilux", "corolla20", "camry", "x5", "civic", "landCruiser"]));
+      // Every sunroof, the two written in Arabic ("فتحة سقف") included.
+      expect(new Set(keys(result))).toEqual(new Set(["hilux", "corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"]));
       expectOwn(result);
     });
 
@@ -190,6 +204,51 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       expect(result.search?.match).toBe("some");
       expect(keys(result).every((key) => (CARS as Record<string, RelevanceCar>)[key].make === "Toyota")).toBe(true);
       expect(keys(result)).not.toContain("x5");
+    });
+  });
+
+  describe("how a correction is named", () => {
+    it("as the listings write the word, not folded", async () => {
+      // The vocabulary holds "فتحه"; the Tucson's features say "فتحة سقف".
+      const result = await getCars({ search: "فتحت" }, { page: 1, limit: 50 }, null, ORG);
+      expect(result.search?.corrected).toEqual([{ from: "فتحت", to: ["فتحة"] }]);
+    });
+  });
+
+  describe("words that name a car", () => {
+    it("match the car's own name, not a description comparing itself to one", async () => {
+      // The Kia is "better than a Corolla"; the Sportage has "X5-like comfort".
+      expect(new Set(keys(await search({ search: "corolla" })))).toEqual(new Set(["corolla20", "corolla18"]));
+      expect(keys(await search({ search: "x5" }))).toEqual(["x5"]);
+    });
+
+    it("while a feature still matches a description that mentions it", async () => {
+      // The Land Cruiser's sunroof is only in its description.
+      expect(keys(await search({ search: "toyota sunroof" }))).toContain("landCruiser");
+    });
+
+    it("only when the whole word is a make or model, not the start of one", async () => {
+      // "sport" begins "Sportage" but names no car: "M Sport package" and "Sport line" still count.
+      expect(new Set(keys(await search({ search: "sport" })))).toEqual(new Set(["sportage", "x5", "bmw320"]));
+    });
+  });
+
+  describe("feature names in either language", () => {
+    const SUNROOFS = ["corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"];
+
+    it("finds every car with the feature, whichever language tagged or wrote it", async () => {
+      expect(new Set(keys(await search({ search: "فتحة سقف" })))).toEqual(new Set(SUNROOFS));
+      expect(new Set(keys(await search({ search: "sunroof" })))).toEqual(new Set(SUNROOFS));
+    });
+
+    it("maps another feature as itself, not as its neighbour", async () => {
+      // "سقف بانوراما" is the Panoramic roof — the Sportage — not a sunroof.
+      expect(keys(await search({ search: "سقف بانوراما" }))).toEqual(["sportage"]);
+    });
+
+    it("widens a whole feature name only, never a word of one", async () => {
+      expect(new Set(keys(await search({ search: "سقف" })))).toEqual(new Set(["tucson", "eClass"]));
+      expect(keys(await search({ search: "camera" }))).toEqual(["corolla20"]);
     });
   });
 
@@ -205,10 +264,63 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       expect(new Set(keys(await search({ search: "٢٠٢٠ سيدان" })))).toEqual(new Set(sedans2020));
     });
 
-    it("still falls back to spelling for a typo, and says nothing is missing", async () => {
+    it("searches the words exactly as typed when asked: no correction, the rest as always", async () => {
+      const exact = await search({ search: "corola", exact: true });
+      expect(exact.pagination.total).toBe(0);
+      expect(exact.search).toEqual({ match: "none", missing: ["corola"], corrected: [] });
+      expect((await search({ search: "تيوتا", exact: true })).search?.corrected).toEqual([]);
+      // Exact spelling, not exact equality: folding and synonyms still apply.
+      expect(new Set(keys(await search({ search: "فتحه سقف", exact: true })))).toEqual(
+        new Set(["corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"])
+      );
+    });
+
+    it("takes exact spelling only when it is really asked for", async () => {
+      const loose = await getCars({ search: "corola", exact: "1" as unknown as boolean }, { page: 1, limit: 50 }, null, ORG);
+      // Named as the listings write it.
+      expect(loose.search?.corrected).toEqual([{ from: "corola", to: ["Corolla"] }]);
+      const exact = await getCars({ search: "corola", exact: true }, { page: 1, limit: 50 }, null, ORG);
+      expect(exact.search?.corrected).toEqual([]);
+    });
+
+    it("reads a typo as the word it was probably meant to be, and says so", async () => {
       const result = await search({ search: "corola" });
-      expect(keys(result)).toEqual(expect.arrayContaining(["corolla20", "corolla18"]));
-      expect(result.search).toEqual({ match: "similar", missing: [] });
+      // Exactly what the word itself finds.
+      expect(keys(result)).toEqual(keys(await search({ search: "corolla" })));
+      expect(new Set(keys(result))).toEqual(new Set(["corolla20", "corolla18"]));
+      expect(result.search).toEqual({ match: "all", missing: [], corrected: [{ from: "corola", to: ["corolla"] }] });
+    });
+
+    it("corrects Arabic, and judges the corrected word like any other", async () => {
+      // "فبريكا" is in two descriptions only: prose, so on its own it filters.
+      const result = await search({ search: "فبركا" });
+      expect(new Set(keys(result))).toEqual(new Set(["corolla18", "tucson"]));
+      expect(result.search?.corrected).toEqual([{ from: "فبركا", to: ["فبريكا"] }]);
+    });
+
+    it("corrects one word beside others that matched as typed", async () => {
+      const result = await search({ search: "تويوتا corola 2020" });
+      expect(keys(result)).toEqual(["corolla20"]);
+      expect(result.search?.corrected).toEqual([{ from: "corola", to: ["corolla"] }]);
+    });
+
+    it("corrects an Arabic make, which no listing spells out, from the names the search knows", async () => {
+      const result = await search({ search: "تيوتا" });
+      expect(new Set(keys(result))).toEqual(new Set(where((c) => c.make === "Toyota")));
+      expect(result.search?.corrected).toEqual([{ from: "تيوتا", to: ["تويوتا"] }]);
+    });
+
+    it("names a word once when a listing and the known names both offer it", async () => {
+      // The plain dealership's SUV says "اوتوماتيك"; the names know "أوتوماتيك".
+      const result = await searchCarsRanked({ search: "اتوماتيك", organizationId: PLAIN_ORG }, { page: 1, limit: 50 });
+      expect(result.search?.corrected).toEqual([{ from: "اتوماتيك", to: ["أوتوماتيك"] }]);
+    });
+
+    it("never corrects a model code, however close", async () => {
+      // "320d" is as alike to "320i" as "corola" is to a word worth reading it as.
+      const result = await search({ search: "320d" });
+      expect(result.pagination.total).toBe(0);
+      expect(result.search).toEqual({ match: "none", missing: ["320d"], corrected: [] });
     });
   });
 
@@ -221,6 +333,35 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       const result = await search({ search: "brabus" });
       expect(result.pagination.total).toBe(0);
       expect(result.search?.missing).toEqual(["brabus"]);
+    });
+
+    it("corrects only to a word a car in this scope has", async () => {
+      const own = await search({ search: "brabuss" });
+      expect(own.pagination.total).toBe(0);
+      expect(own.search).toEqual({ match: "none", missing: ["brabuss"], corrected: [] });
+
+      const everyone = await searchCarsRanked({ search: "brabuss" }, { page: 1, limit: 50 });
+      expect(keys(everyone)).toEqual(["otherBrabus"]);
+      expect(everyone.search?.corrected).toEqual([{ from: "brabuss", to: ["brabus"] }]);
+    });
+
+    it("never corrects to a suspended dealership's word", async () => {
+      const result = await searchCarsRanked({ search: "maybachh" }, { page: 1, limit: 50 });
+      expect(result.pagination.total).toBe(0);
+      expect(result.search?.corrected).toEqual([]);
+    });
+
+    it("searches without correction when the vocabulary cannot be read", async () => {
+      vocabulary.fail = true;
+      try {
+        const result = await search({ search: "corola سيدان" });
+        expect(result.search).toMatchObject({ match: "all", missing: ["corola"], corrected: [] });
+        expect(new Set(keys(result))).toEqual(new Set(where((c) => c.bodyType === "Sedan")));
+        // The known names do not depend on the vocabulary.
+        expect((await search({ search: "تيوتا" })).search?.corrected).toEqual([{ from: "تيوتا", to: ["تويوتا"] }]);
+      } finally {
+        vocabulary.fail = false;
+      }
     });
 
     it("the public search finds another active dealership's word, and never a suspended one's", async () => {
@@ -241,7 +382,7 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       const meaning = { vector: axis(1), model: MODEL };
       const result = await search({ search: "zzqx", meaning });
       expect(keys(result)).toEqual(["x5"]);
-      expect(result.search).toEqual({ match: "meaning", missing: ["zzqx"] });
+      expect(result.search).toEqual({ match: "meaning", missing: ["zzqx"], corrected: [] });
       const filtered = await search({ search: "zzqx", meaning, bodyType: "Sedan" });
       expect(filtered.pagination.total).toBe(0);
     });

@@ -1,16 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { updateManyCars, findCarsByIds, findUser, logCarChanged } = vi.hoisted(() => ({
+const { updateManyCars, findCarsByIds, findUser, logCarChanged, searchTermsChanged } = vi.hoisted(() => ({
   updateManyCars: vi.fn(),
   findCarsByIds: vi.fn(),
   findUser: vi.fn(),
   logCarChanged: vi.fn(),
+  searchTermsChanged: vi.fn(),
 }));
 vi.mock("@/lib/repositories/car", () => ({ updateManyCars, findCarsByIds }));
 vi.mock("@/lib/services/audit/audit", () => ({ auditHelpers: { logCarChanged } }));
 vi.mock("@/lib/repositories/user", () => ({ findUserByClerkIdWithMemberships: findUser }));
 vi.mock("@/lib/services/storage", () => ({}));
 vi.mock("@/lib/getOrganization", () => ({ getOrganizationById: vi.fn() }));
+vi.mock("@/lib/jobs/search-terms", () => ({ searchTermsChanged }));
 
 import { updateCars } from "@/lib/services/car/crud";
 import { bulkCarUpdateSchema } from "@/lib/validations/schemas";
@@ -22,6 +24,7 @@ beforeEach(() => {
     { id: "b", organizationId: "org-1", status: "AVAILABLE" },
   ]);
   logCarChanged.mockReset();
+  searchTermsChanged.mockReset();
   findUser.mockReset().mockResolvedValue({ id: "db-user", email: "u@x.eg", role: "USER", memberships: [{ organizationId: "org-1" }] });
 });
 
@@ -43,6 +46,18 @@ describe("updateCars", () => {
       expect.objectContaining({ id: "a", status: "SOLD" }),
       { id: "db-user", email: "u@x.eg" },
     );
+  });
+
+  it("refreshes the search's vocabulary when a status change can list or unlist cars", async () => {
+    await updateCars(["a", "b"], { status: "SOLD" }, "user-1", "org-1");
+    expect(searchTermsChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves the vocabulary alone when only featured changes, or nothing changed", async () => {
+    await updateCars(["a", "b"], { featured: true }, "user-1", "org-1");
+    updateManyCars.mockResolvedValue(0);
+    await updateCars(["a", "b"], { status: "SOLD" }, "user-1", "org-1");
+    expect(searchTermsChanged).not.toHaveBeenCalled();
   });
 
   it("refuses someone outside the organization", async () => {

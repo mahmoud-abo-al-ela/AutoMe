@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { MAX_SEARCH_TERMS, searchTerms, toTrigramTerm } from "./search-query";
+import { MAX_SEARCH_TERMS, correctableWord, correctedTerm, correctionNames, searchTerms } from "./search-query";
 
 /** Every term ANDed — the tsquery a search requiring all of its words runs. */
 const toPrefixTsquery = (term: string) =>
@@ -156,16 +156,70 @@ describe("searchTerms", () => {
   });
 });
 
-describe("toTrigramTerm", () => {
-  it("resolves an Arabic term to an English one the columns hold", () => {
-    expect(toTrigramTerm("نيسان")).toBe("Nissan");
+describe("naming a car", () => {
+  it("asks for exactly the word as a make or model, and matches it by prefix in the car's own name", () => {
+    const [term] = searchTerms("corolla");
+    expect(term).toMatchObject({ nameQuery: "corolla:A", ownQuery: "corolla:*AB" });
   });
 
-  it("leaves a term with no alias alone, typos included", () => {
-    expect(toTrigramTerm("corola")).toBe("corola");
+  it("covers every spelling of an alias", () => {
+    const [term] = searchTerms("تويوتا");
+    expect(term?.nameQuery).toContain("toyota:A");
+    expect(term?.ownQuery).toContain("toyota:*AB");
+  });
+});
+
+describe("correctableWord", () => {
+  const word = (text: string) => correctableWord(searchTerms(text)[0]!);
+
+  it("offers a free word for correction, folded", () => {
+    expect(word("Corola")).toBe("corola");
+    expect(word("كرولا")).toBe("كرولا");
   });
 
-  it("handles empty input", () => {
-    expect(toTrigramTerm("")).toBe("");
+  it("never offers a model code or a year", () => {
+    expect(word("X5")).toBeNull();
+    expect(word("320i")).toBeNull();
+    expect(word("2020")).toBeNull();
+    expect(word("٢٠٢٠")).toBeNull();
+  });
+
+  it("never offers an alias, a known value or a place", () => {
+    expect(word("نيسان")).toBeNull();
+    expect(word("القاهرة")).toBeNull();
+  });
+
+  it("never offers a short word", () => {
+    expect(word("kia")).toBeNull();
+  });
+});
+
+describe("correctedTerm", () => {
+  it("matches any of the known words by prefix, keeping what was typed", () => {
+    expect(correctedTerm("corola", ["corolla"])).toMatchObject({ text: "corola", query: "corolla:*", places: [], year: null });
+    expect(correctedTerm("corola", ["corolla", "corona"])?.query).toBe("(corolla:* | corona:*)");
+  });
+
+  it("reaches what a known name stands for", () => {
+    const term = correctedTerm("تيوتا", ["تويوتا"]);
+    expect(term?.text).toBe("تيوتا");
+    expect(term?.query).toContain("toyota:*");
+    expect(term?.query).toContain("تويوتا:*");
+  });
+});
+
+describe("correctionNames", () => {
+  it("holds the alias index's one-word names, folded, to the name as written", () => {
+    const names = correctionNames();
+    expect(names.get("تويوتا")).toBe("تويوتا");
+    expect(names.get("اوتوماتيك")).toBe("أوتوماتيك");
+    // An English make is in every listing that has it: the vocabulary offers that one.
+    expect(names.has("toyota")).toBe(false);
+  });
+
+  it("leaves out names a typo of one word cannot be, and short ones", () => {
+    const names = correctionNames();
+    expect([...names.values()]).not.toContain("مرسيدس بنز");
+    expect(names.has("كيا")).toBe(false);
   });
 });

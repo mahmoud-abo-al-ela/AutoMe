@@ -7,6 +7,7 @@ import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/ut
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
 import { auditHelpers } from "@/lib/services/audit/audit";
+import { searchTermsChanged } from "@/lib/jobs/search-terms";
 import type { CarStatus } from "@/lib/generated/prisma";
 import { licenseMonthToDate } from "@/lib/utils/car-disclosures";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
@@ -105,6 +106,7 @@ export async function createCar(
   });
 
   await auditHelpers.logCarCreated({ ...car, organizationId }, actorOf(user));
+  await searchTermsChanged();
   return car;
 }
 
@@ -138,6 +140,8 @@ export async function updateCar(
 
   const updated = await carRepository.updateCar(carId, dataToUpdate);
   await auditHelpers.logCarChanged(existingCar, { ...existingCar, ...dataToUpdate }, actorOf(user));
+  // A status decides whether the car is listed; featured changes no word.
+  if (dataToUpdate.status !== undefined) await searchTermsChanged();
   return updated;
 }
 
@@ -168,6 +172,7 @@ export async function updateCars(
   await Promise.all(
     before.flatMap((car) => (car ? [auditHelpers.logCarChanged(car, { ...car, ...updateData }, actorOf(user))] : [])),
   );
+  if (changed > 0 && updateData.status !== undefined) await searchTermsChanged();
   return changed;
 }
 
@@ -196,6 +201,7 @@ export async function deleteCar(
 
   await carRepository.deleteCarById(carId);
   await auditHelpers.logCarDeleted(car, actorOf(user));
+  await searchTermsChanged();
 
   if (car.images && car.images.length > 0) {
     await storageService.deleteCarImages(car.images);
@@ -323,5 +329,6 @@ export async function updateCarFull(
     },
     actorOf(user),
   );
+  await searchTermsChanged();
   return updatedCar;
 }

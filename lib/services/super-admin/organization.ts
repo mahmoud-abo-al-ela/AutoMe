@@ -4,6 +4,7 @@ import * as userRepo from "@/lib/repositories/super-admin/user";
 import * as membershipRepo from "@/lib/repositories/super-admin/membership";
 import * as teamRepo from "@/lib/repositories/team";
 import { sendOrganizationInvitationEmail } from "./email";
+import { searchTermsChanged } from "@/lib/jobs/search-terms";
 import { AppError, ConflictError, NotFoundError, ValidationError } from "@/lib/utils/errors";
 import {
   isValidSlug,
@@ -127,7 +128,10 @@ export async function createOrganization(data: CreateOrganizationInput) {
 }
 
 export async function updateOrganizationStatus(orgId: string, isActive: boolean) {
-  return orgRepo.updateOrganizationStatus(orgId, isActive);
+  const updated = await orgRepo.updateOrganizationStatus(orgId, isActive);
+  // A suspended dealership's cars leave the public listing, and its words with them.
+  await searchTermsChanged();
+  return updated;
 }
 
 export async function deleteOrganization(orgId: string) {
@@ -140,6 +144,7 @@ export async function deleteOrganization(orgId: string) {
 
   // Delete all related data
   await orgRepo.deleteOrganizationWithRelations(orgId);
+  await searchTermsChanged();
 
   return org;
 }
