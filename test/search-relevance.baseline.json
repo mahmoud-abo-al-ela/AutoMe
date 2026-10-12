@@ -119,9 +119,14 @@
       "lang": "ar",
       "results": [
         "eClass",
-        "tucson"
+        "tucson",
+        "landCruiser",
+        "civic",
+        "camry",
+        "x5",
+        "corolla20"
       ],
-      "total": 2,
+      "total": 7,
       "pAtK": 1,
       "recall": 1,
       "mrr": 1,
@@ -212,6 +217,24 @@
       "mrr": 1,
       "irrelevantRate": 0,
       "targetRank": 1
+    },
+    "sunroof": {
+      "lang": "en",
+      "results": [
+        "eClass",
+        "tucson",
+        "landCruiser",
+        "civic",
+        "camry",
+        "x5",
+        "corolla20"
+      ],
+      "total": 7,
+      "pAtK": 1,
+      "recall": 1,
+      "mrr": 1,
+      "irrelevantRate": 0,
+      "targetRank": null
     },
     "toyota sunroof": {
       "lang": "en",
@@ -345,9 +368,9 @@
   },
   "aggregate": {
     "overall": {
-      "pAtK": 0.9523809523809523,
+      "pAtK": 0.9545454545454546,
       "recall": 1,
-      "mrr": 0.9642857142857143,
+      "mrr": 0.9659090909090909,
       "irrelevantRate": 0,
       "zeroResults": 0
     },

@@ -38,6 +38,19 @@ describe("expandSearchTerm", () => {
     expect(expandSearchTerm("أوتوماتيك").text).toContain("Automatic");
   });
 
+  it("maps a feature both ways, as features are tagged in either language", () => {
+    expect(expandSearchTerm("فتحة سقف").text).toEqual(["فتحة سقف", "Sunroof"]);
+    expect(expandSearchTerm("Sunroof").text).toEqual(["Sunroof", "فتحة سقف"]);
+    expect(expandSearchTerm("rear camera").text).toContain("كاميرا خلفية");
+    expect(expandSearchTerm("فتحه سقف").text).toContain("Sunroof");
+  });
+
+  it("maps a feature only as a whole phrase, and a name both languages share not at all", () => {
+    expect(expandSearchTerm("سقف").text).toEqual(["سقف"]);
+    expect(expandSearchTerm("camera").text).toEqual(["camera"]);
+    expect(expandSearchTerm("Apple CarPlay").text).toEqual(["Apple CarPlay"]);
+  });
+
   it("always keeps the original term, first", () => {
     expect(expandSearchTerm("القاهرة").text[0]).toBe("القاهرة");
     expect(expandSearchTerm("Corolla")).toEqual({

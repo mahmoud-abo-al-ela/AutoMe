@@ -90,6 +90,12 @@ const where = (predicate: (car: RelevanceCar) => boolean): CarKey[] =>
 const SEDANS = where((c) => c.bodyType === "Sedan");
 const TOYOTAS = where((c) => c.make === "Toyota");
 const HYUNDAIS = where((c) => c.make === "Hyundai");
+/**
+ * Every car with a sunroof, however it says so: tagged in English ("Sunroof"),
+ * in Arabic ("فتحة سقف"), or only mentioned in its description. A buyer who
+ * asks for one in either language wants them all.
+ */
+const SUNROOFS: CarKey[] = ["corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"];
 
 export type RelevanceQuery = {
   query: string;
@@ -110,7 +116,7 @@ export const QUERIES: RelevanceQuery[] = [
   { query: "تويوتا", lang: "ar", relevant: TOYOTAS },
   { query: "هيونداي", lang: "ar", relevant: HYUNDAIS },
   { query: "سيدان أوتوماتيك", lang: "ar", relevant: where((c) => c.bodyType === "Sedan" && c.transmission === "Automatic"), acceptable: SEDANS },
-  { query: "فتحة سقف", lang: "ar", relevant: ["tucson", "eClass"], acceptable: ["corolla20", "camry", "x5", "civic", "landCruiser"] },
+  { query: "فتحة سقف", lang: "ar", relevant: SUNROOFS },
   { query: "تويوتا كورولا", lang: "ar", relevant: ["corolla20", "corolla18"], acceptable: TOYOTAS },
   // English.
   { query: "toyota", lang: "en", relevant: TOYOTAS },
@@ -118,6 +124,7 @@ export const QUERIES: RelevanceQuery[] = [
   { query: "toyota corolla 2020", lang: "en", relevant: ["corolla20"], acceptable: ["corolla18"], target: "corolla20" },
   { query: "bmw x5", lang: "en", relevant: ["x5"], acceptable: ["x3", "bmw320"], target: "x5" },
   { query: "x5", lang: "en", relevant: ["x5"], target: "x5" },
+  { query: "sunroof", lang: "en", relevant: SUNROOFS },
   { query: "toyota sunroof", lang: "en", relevant: ["corolla20", "camry", "landCruiser"], acceptable: TOYOTAS },
   { query: "car sedan", lang: "en", relevant: SEDANS },
   { query: "automatic suv", lang: "en", relevant: where((c) => c.bodyType === "SUV" && c.transmission === "Automatic") },

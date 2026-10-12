@@ -146,5 +146,19 @@
     "AVAILABLE": "Available",
     "SOLD": "Sold",
     "UNAVAILABLE": "Unavailable"
+  },
+  "feature": {
+    "Sunroof": "Sunroof",
+    "Panoramic roof": "Panoramic roof",
+    "Leather seats": "Leather seats",
+    "Rear camera": "Rear camera",
+    "Parking sensors": "Parking sensors",
+    "Cruise control": "Cruise control",
+    "Touch screen": "Touch screen",
+    "Apple CarPlay": "Apple CarPlay",
+    "Keyless entry": "Keyless entry",
+    "Push-button start": "Push-button start",
+    "Alloy wheels": "Alloy wheels",
+    "Fog lights": "Fog lights"
   }
 }

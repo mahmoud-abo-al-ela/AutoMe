@@ -194,7 +194,8 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
       const result = await search({ search: "hilux sunroof" });
       expect(result.search).toEqual({ match: "some", missing: [], corrected: [] });
       expect(keys(result)[0]).toBe("hilux");
-      expect(new Set(keys(result))).toEqual(new Set(["hilux", "corolla20", "camry", "x5", "civic", "landCruiser"]));
+      // Every sunroof, the two written in Arabic ("فتحة سقف") included.
+      expect(new Set(keys(result))).toEqual(new Set(["hilux", "corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"]));
       expectOwn(result);
     });
 
@@ -229,6 +230,25 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
     it("only when the whole word is a make or model, not the start of one", async () => {
       // "sport" begins "Sportage" but names no car: "M Sport package" and "Sport line" still count.
       expect(new Set(keys(await search({ search: "sport" })))).toEqual(new Set(["sportage", "x5", "bmw320"]));
+    });
+  });
+
+  describe("feature names in either language", () => {
+    const SUNROOFS = ["corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"];
+
+    it("finds every car with the feature, whichever language tagged or wrote it", async () => {
+      expect(new Set(keys(await search({ search: "فتحة سقف" })))).toEqual(new Set(SUNROOFS));
+      expect(new Set(keys(await search({ search: "sunroof" })))).toEqual(new Set(SUNROOFS));
+    });
+
+    it("maps another feature as itself, not as its neighbour", async () => {
+      // "سقف بانوراما" is the Panoramic roof — the Sportage — not a sunroof.
+      expect(keys(await search({ search: "سقف بانوراما" }))).toEqual(["sportage"]);
+    });
+
+    it("widens a whole feature name only, never a word of one", async () => {
+      expect(new Set(keys(await search({ search: "سقف" })))).toEqual(new Set(["tucson", "eClass"]));
+      expect(keys(await search({ search: "camera" }))).toEqual(["corolla20"]);
     });
   });
 

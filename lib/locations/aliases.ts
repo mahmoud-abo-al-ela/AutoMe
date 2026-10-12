@@ -98,6 +98,18 @@ for (const group of attributeGroups) {
   }
 }
 
+// Features are tags a dealer types into two lists — English in `features`,
+// Arabic in `featuresAr` — and a listing may carry only one of them (one
+// listed before translation, or never translated). So each feature the editor
+// offers reaches the other language's name too, both ways: "فتحة سقف" finds a
+// car tagged "Sunroof", and "sunroof" one tagged "فتحة سقف". The names are
+// whole phrases, so a word of one ("سقف") stays a word.
+for (const [english, arabic] of Object.entries(arCarAttributes.feature)) {
+  if (english === arabic) continue;
+  add(arabic, "text", english);
+  add(english, "text", arabic);
+}
+
 /**
  * The search term, plus every stored value it stands for.
  *
