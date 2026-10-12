@@ -17,12 +17,12 @@ import { useFormatters } from "@/hooks/use-formatters";
 import { VALIDATION_RULES } from "@/lib/constants/validation";
 import { disclosuresFromForm, disclosuresToForm } from "@/lib/utils/car-disclosures";
 import {
-  CAR_STEPS,
-  createCarFormSchema,
-  stepFields,
-  type CarFormInitialData,
-  type CarFormValues,
-  type CarStep,
+    CAR_STEPS,
+    createCarFormSchema,
+    stepFields,
+    type CarFormInitialData,
+    type CarFormValues,
+    type CarStep,
 } from "./car-form-schema";
 
 export { CAR_STEPS, type CarFormInitialData, type CarFormValues, type CarStep } from "./car-form-schema";
