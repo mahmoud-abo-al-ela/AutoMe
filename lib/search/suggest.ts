@@ -9,7 +9,7 @@ export const MAX_SUGGEST_QUERY = 40;
 export type SuggestionLocale = "en" | "ar";
 
 export interface SearchSuggestion {
-  kind: "make" | "model" | "word";
+  kind: "make" | "model";
   /** As the list shows it, in the reader's language. */
   label: string;
   /** Public cars it leads to. */

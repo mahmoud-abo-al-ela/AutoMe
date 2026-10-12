@@ -74,9 +74,7 @@ export function SuggestionList({
             <Search aria-hidden className="size-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1 truncate">
               <bdi className="font-medium">{suggestion.label}</bdi>
-              {suggestion.kind !== "word" && (
-                <span className="ms-2 text-caption text-muted-foreground">{t(`kind.${suggestion.kind}`)}</span>
-              )}
+              <span className="ms-2 text-caption text-muted-foreground">{t(`kind.${suggestion.kind}`)}</span>
             </span>
             <span className="shrink-0 text-caption text-muted-foreground">
               {t("cars", { count: suggestion.count, value: fmt.number(suggestion.count) })}

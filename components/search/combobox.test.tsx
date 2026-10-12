@@ -13,7 +13,7 @@ import { nextActive, useSuggestionCombobox } from "./use-suggestion-combobox";
 const SUGGESTIONS: SearchSuggestion[] = [
   { kind: "make", label: "Toyota", count: 7, make: "Toyota" },
   { kind: "model", label: "Toyota Corolla", count: 4, make: "Toyota", search: "Corolla" },
-  { kind: "word", label: "sunroof", count: 3, search: "sunroof" },
+  { kind: "model", label: "Toyota Camry", count: 3, make: "Toyota", search: "Camry" },
 ];
 
 function Harness({ suggestions, onPick }: { suggestions: SearchSuggestion[]; onPick: (s: SearchSuggestion) => void }) {

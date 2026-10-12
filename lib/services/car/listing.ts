@@ -2,6 +2,7 @@
 import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import { searchMeaning, type SearchMeaning } from "@/lib/services/car/search-meaning";
+import { writtenForm } from "@/lib/search/highlight";
 
 /**
  * The car listing filter set, as understood by buildCarWhereClause. Declared
@@ -102,7 +103,30 @@ export async function getCars(
   }
   // Only the ranked branch (a search term) reports how the words matched.
   const match = "search" in result ? (result.search as SearchMatch) : null;
-  return { ...result, search: match, relaxedSearch: null as string | null };
+  return { ...result, search: match && spellCorrections(match, result.cars), relaxedSearch: null as string | null };
+}
+
+/** The fields a car is shown and found by. */
+const CAR_TEXT_FIELDS = ["titleAr", "titleEn", "title", "make", "model", "descriptionAr", "descriptionEn", "description"];
+
+/**
+ * The corrected words as the cars found spell them. The vocabulary holds words
+ * folded for search, so a correction would read "فتحه" where the listings say
+ * "فتحة"; the results have the word, written right.
+ */
+function spellCorrections(match: SearchMatch, cars: unknown[]): SearchMatch {
+  if (match.corrected.length === 0) return match;
+  const texts = cars.flatMap((car) => {
+    if (!car || typeof car !== "object") return [];
+    const fields = car as Record<string, unknown>;
+    return [...CAR_TEXT_FIELDS.map((key) => fields[key]), fields.features, fields.featuresAr]
+      .flat()
+      .filter((value): value is string => typeof value === "string");
+  });
+  return {
+    ...match,
+    corrected: match.corrected.map(({ from, to }) => ({ from, to: to.map((word) => writtenForm(word, texts) ?? word) })),
+  };
 }
 
 /** Whether the buyer narrowed by anything about the car itself, beyond the words. */

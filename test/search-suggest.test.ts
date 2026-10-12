@@ -8,8 +8,7 @@ vi.hoisted(() => {
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
-import { countPublicMakeModels, findWordsByPrefix } from "@/lib/repositories/car/suggest";
-import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
+import { countPublicMakeModels } from "@/lib/repositories/car/suggest";
 import { resetSuggestionsForTests, suggestSearches } from "@/lib/services/car/search-suggestions";
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
@@ -68,14 +67,12 @@ describe.skipIf(!hasTestDb)("search suggestions (real Postgres)", () => {
         car(DELETED, { make: "Hidzen", model: "Phantom" }),
       ],
     });
-    await refreshSearchTerms();
     resetSuggestionsForTests();
   });
 
   afterAll(async () => {
     await db.car.deleteMany({ where: { organizationId: { in: ORGS } } });
     await db.organization.deleteMany({ where: { id: { in: ORGS } } });
-    await refreshSearchTerms();
     await db.$disconnect();
   });
 
@@ -86,45 +83,12 @@ describe.skipIf(!hasTestDb)("search suggestions (real Postgres)", () => {
     ]);
   });
 
-  it("completes words from the listings, with live counts", async () => {
-    const words = await findWordsByPrefix("zentrix", 10);
-    expect(words).toEqual(
-      expect.arrayContaining([
-        { word: "zentrixwood", count: 1 },
-        { word: "zentrixglass", count: 1 },
-      ])
-    );
-  });
-
-  it("never offers a word no public car has any more, before the vocabulary catches up", async () => {
-    const [glass] = await db.car.findMany({ where: { organizationId: LIVE, model: "Vexa" } });
-    await db.car.update({ where: { id: glass!.id }, data: { status: "SOLD" } });
-    try {
-      const words = (await findWordsByPrefix("zentrix", 10)).map((w) => w.word);
-      expect(words).toContain("zentrixwood");
-      expect(words).not.toContain("zentrixglass");
-    } finally {
-      await db.car.update({ where: { id: glass!.id }, data: { status: "AVAILABLE" } });
-    }
-  });
-
-  it("treats a prefix as text, never as a pattern", async () => {
-    expect(await findWordsByPrefix("zen%", 10)).toEqual([]);
-    expect(await findWordsByPrefix("zentri_", 10)).toEqual([]);
-  });
-
-  it("counts a word with punctuation safely", async () => {
-    expect(await findWordsByPrefix("quorrasport-", 10)).toEqual([{ word: "quorrasport-like", count: 1 }]);
-  });
-
-  it("suggests a public make, its models and words — never a hidden dealership's", async () => {
-    const suggestions = await suggestSearches("zentrix", "en");
-    expect(suggestions.slice(0, 3)).toEqual([
+  it("suggests a public make and its models — never a hidden dealership's, nor loose words", async () => {
+    expect(await suggestSearches("zentrix", "en")).toEqual([
       { kind: "make", label: "Zentrix", count: 3, make: "Zentrix" },
       { kind: "model", label: "Zentrix Quorra", count: 2, make: "Zentrix", search: "Quorra" },
       { kind: "model", label: "Zentrix Vexa", count: 1, make: "Zentrix", search: "Vexa" },
     ]);
-    expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(["zentrixwood", "zentrixglass"]));
     expect(await suggestSearches("hidzen", "en")).toEqual([]);
   });
 });

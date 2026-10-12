@@ -206,6 +206,14 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
     });
   });
 
+  describe("how a correction is named", () => {
+    it("as the listings write the word, not folded", async () => {
+      // The vocabulary holds "فتحه"; the Tucson's features say "فتحة سقف".
+      const result = await getCars({ search: "فتحت" }, { page: 1, limit: 50 }, null, ORG);
+      expect(result.search?.corrected).toEqual([{ from: "فتحت", to: ["فتحة"] }]);
+    });
+  });
+
   describe("words that name a car", () => {
     it("match the car's own name, not a description comparing itself to one", async () => {
       // The Kia is "better than a Corolla"; the Sportage has "X5-like comfort".
