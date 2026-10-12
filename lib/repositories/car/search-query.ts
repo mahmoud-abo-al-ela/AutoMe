@@ -64,6 +64,19 @@ export interface SearchTerm {
    * free text of titles and descriptions (B, C).
    */
   structuredQuery: string;
+  /**
+   * Exactly the word (no prefix) as a make or model (A): whether the term names
+   * what a car is — "corolla", "x5" — rather than something about it. Exact, so
+   * "sport" does not name the Sportage.
+   */
+  nameQuery: string;
+  /**
+   * Prefix tsquery over the car's own name only — make and model (A) and its
+   * titles (B). A term that names cars is matched by it, so a description
+   * comparing itself to one ("better than a Corolla", "X5-like comfort") does
+   * not make a car one.
+   */
+  ownQuery: string;
   /** Canonical dealership city/region values the term names, compared by equality. */
   places: string[];
   /** A model year ("2020", "٢٠٢٠"), which the search vector does not hold. */
@@ -84,6 +97,8 @@ function toTerm(text: string, variants: string[], places: string[]): SearchTerm 
     query,
     // Every lexeme is `word:*`; weights are added after the prefix marker.
     structuredQuery: query.replace(/:\*/g, ":*AD"),
+    nameQuery: query.replace(/:\*/g, ":A"),
+    ownQuery: query.replace(/:\*/g, ":*AB"),
     places,
     year: words.length === 1 && YEAR.test(words[0]) ? Number(words[0]) : null,
   };

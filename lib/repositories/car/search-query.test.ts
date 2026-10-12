@@ -156,6 +156,19 @@ describe("searchTerms", () => {
   });
 });
 
+describe("naming a car", () => {
+  it("asks for exactly the word as a make or model, and matches it by prefix in the car's own name", () => {
+    const [term] = searchTerms("corolla");
+    expect(term).toMatchObject({ nameQuery: "corolla:A", ownQuery: "corolla:*AB" });
+  });
+
+  it("covers every spelling of an alias", () => {
+    const [term] = searchTerms("تويوتا");
+    expect(term?.nameQuery).toContain("toyota:A");
+    expect(term?.ownQuery).toContain("toyota:*AB");
+  });
+});
+
 describe("correctableWord", () => {
   const word = (text: string) => correctableWord(searchTerms(text)[0]!);
 

@@ -206,6 +206,24 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
     });
   });
 
+  describe("words that name a car", () => {
+    it("match the car's own name, not a description comparing itself to one", async () => {
+      // The Kia is "better than a Corolla"; the Sportage has "X5-like comfort".
+      expect(new Set(keys(await search({ search: "corolla" })))).toEqual(new Set(["corolla20", "corolla18"]));
+      expect(keys(await search({ search: "x5" }))).toEqual(["x5"]);
+    });
+
+    it("while a feature still matches a description that mentions it", async () => {
+      // The Land Cruiser's sunroof is only in its description.
+      expect(keys(await search({ search: "toyota sunroof" }))).toContain("landCruiser");
+    });
+
+    it("only when the whole word is a make or model, not the start of one", async () => {
+      // "sport" begins "Sportage" but names no car: "M Sport package" and "Sport line" still count.
+      expect(new Set(keys(await search({ search: "sport" })))).toEqual(new Set(["sportage", "x5", "bmw320"]));
+    });
+  });
+
   describe("identifiers, years and mixed languages", () => {
     it("ranks the named model first", async () => {
       expect(keys(await search({ search: "BMW X5" }))).toEqual(["x5"]);
@@ -220,9 +238,9 @@ describe.skipIf(!hasTestDb)("search tiers (real Postgres)", () => {
 
     it("reads a typo as the word it was probably meant to be, and says so", async () => {
       const result = await search({ search: "corola" });
-      // Exactly what the word itself finds — the Kia that is "better than a Corolla" included.
+      // Exactly what the word itself finds.
       expect(keys(result)).toEqual(keys(await search({ search: "corolla" })));
-      expect(keys(result)).toEqual(expect.arrayContaining(["corolla20", "corolla18"]));
+      expect(new Set(keys(result))).toEqual(new Set(["corolla20", "corolla18"]));
       expect(result.search).toEqual({ match: "all", missing: [], corrected: [{ from: "corola", to: ["corolla"] }] });
     });
 

@@ -124,4 +124,7 @@ export const QUERIES: RelevanceQuery[] = [
   { query: "white sedan", lang: "en", relevant: where((c) => c.bodyType === "Sedan" && c.color === "White"), acceptable: SEDANS },
   { query: "electric", lang: "en", relevant: ["model3"], target: "model3" },
   { query: "civic", lang: "en", relevant: ["civic"], target: "civic" },
+  // Typos, read as the word they were meant to be.
+  { query: "corola", lang: "en", relevant: ["corolla20", "corolla18"] },
+  { query: "تيوتا", lang: "ar", relevant: TOYOTAS },
 ];
