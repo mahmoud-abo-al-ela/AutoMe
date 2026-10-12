@@ -88,7 +88,10 @@ export default async function Hero({ summary }: { summary: HeroSummary | null })
 
       {/* Docked on the photo's lower edge: half on the photo, half on the page. */}
       <div className="relative z-10 mx-auto -mt-10 flex w-full max-w-[1360px] flex-col gap-4 px-4 sm:-mt-11 sm:px-6 xl:px-0">
-        <div className="hero-follow w-full max-w-[600px] rounded-control shadow-float" style={cssVar("--delay", "0.7s")}>
+        {/* Above the quick picks: its suggestions open over them. Each hero-follow
+            entrance is its own stacking context, so the list's own z-index
+            cannot lift it past the picks that come after it. */}
+        <div className="hero-follow relative z-20 w-full max-w-[600px] rounded-control shadow-float" style={cssVar("--delay", "0.7s")}>
           <HeroSearch
             bandLabel={
               summary && summary.listings > 0

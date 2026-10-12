@@ -161,6 +161,20 @@ describe("the search combobox", () => {
     expect(onPick).toHaveBeenCalledWith(SUGGESTIONS[2]);
   });
 
+  it("highlights an option the mouse moves over, but not one that slides under a resting pointer", () => {
+    mount();
+    focus();
+    key("ArrowDown");
+    act(() => {
+      options()[2].dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    });
+    expect(selected()).toBe(0);
+    act(() => {
+      options()[2].dispatchEvent(new MouseEvent("mousemove", { bubbles: true }));
+    });
+    expect(selected()).toBe(2);
+  });
+
   it("stays closed with no suggestions", () => {
     mount("en", []);
     focus();

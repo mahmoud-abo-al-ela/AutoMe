@@ -61,7 +61,10 @@ export function SuggestionList({
             role="option"
             aria-selected={index === active}
             onMouseDown={(event) => event.preventDefault()}
-            onMouseEnter={() => onHover(index)}
+            // Moving the mouse highlights, not the list arriving under a resting
+            // pointer: a page that scrolls would otherwise steal the keyboard's
+            // highlight, and Enter would take whatever slid under the mouse.
+            onMouseMove={() => index !== active && onHover(index)}
             onClick={() => onPick(suggestion)}
             className={cn(
               "flex min-h-11 cursor-pointer items-center gap-3 px-3.5 text-body",
