@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { History, Search, X } from "lucide-react";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -56,6 +57,13 @@ export function SuggestionList({
   const fmt = useFormatters();
   const recents = suggestions.length > 0 && suggestions.every((suggestion) => suggestion.kind === "recent");
 
+  // The arrows can move the highlight past the list's edge on a short screen;
+  // it scrolls the list along, so the highlighted option is always seen.
+  const activeId = open && active >= 0 ? optionId(active) : null;
+  useEffect(() => {
+    if (activeId) document.getElementById(activeId)?.scrollIntoView?.({ block: "nearest" });
+  }, [activeId]);
+
   return (
     <>
       {/* Always rendered, so a screen reader hears the count change as the buyer types. */}
@@ -68,7 +76,8 @@ export function SuggestionList({
         aria-label={recents ? t("recent") : t("label")}
         hidden={!open}
         className={cn(
-          "absolute inset-x-0 top-full z-30 mt-1.5 max-h-80 overflow-y-auto rounded-control border border-border bg-card py-1.5 text-start shadow-lg",
+          // Tall enough for all eight suggestions; a short screen scrolls the list instead.
+          "absolute inset-x-0 top-full z-30 mt-1.5 max-h-[min(23rem,60dvh)] overflow-y-auto rounded-control border border-border bg-card py-1.5 text-start shadow-lg",
           className
         )}
       >

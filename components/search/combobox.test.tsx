@@ -216,6 +216,24 @@ describe("the search combobox", () => {
     expect(onPick).toHaveBeenCalledWith(expect.objectContaining({ label: "تويوتا" }));
   });
 
+  it("scrolls the highlighted option into view as the arrows move", () => {
+    const scrolled: string[] = [];
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this.textContent ?? "");
+    };
+    try {
+      mount();
+      focus();
+      key("ArrowDown");
+      key("ArrowDown");
+      key("ArrowDown");
+      expect(scrolled).toEqual([options()[0].textContent, options()[1].textContent, options()[2].textContent]);
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
   it("stays closed with no suggestions", () => {
     mount("en", []);
     focus();
