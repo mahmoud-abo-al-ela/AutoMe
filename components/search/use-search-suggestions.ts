@@ -8,6 +8,8 @@ import { MAX_SUGGEST_QUERY, type SearchSuggestion } from "@/lib/search/suggest";
 
 /** Typing pauses this long before the box asks: a request per pause, not per key. */
 const DEBOUNCE_MS = 150;
+/** One empty list, so "no suggestions" is the same list from render to render. */
+const NONE: SearchSuggestion[] = [];
 
 async function fetchSuggestions(query: string, locale: string, signal: AbortSignal): Promise<SearchSuggestion[]> {
   const response = await fetch(`/api/search/suggest?${new URLSearchParams({ q: query, locale })}`, { signal });
@@ -39,5 +41,5 @@ export function useSearchSuggestions(query: string): SearchSuggestion[] {
     staleTime: 60_000,
     placeholderData: (previous) => previous,
   });
-  return enabled && query.trim() ? (data ?? []) : [];
+  return enabled && query.trim() ? (data ?? NONE) : NONE;
 }

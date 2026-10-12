@@ -1,13 +1,14 @@
 // Car repository - what the search box suggests as a buyer types. Public
-// listings only, by the same rule the public search applies: available cars
-// of active, undeleted dealerships. Nothing here depends on who is asking.
+// listings only — available cars of active, undeleted dealerships — by the
+// public search's own rule. Nothing here depends on who is asking.
 import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 import { searchTerms } from "./search-query";
+import { buildStructuredConditions } from "./search";
+import { FROM } from "./search-words";
 
-const PUBLIC = Prisma.sql`
-  FROM "Car" c JOIN "Organization" o ON o."id" = c."organizationId"
-  WHERE c."status" = 'AVAILABLE' AND o."isActive" AND o."deletedAt" IS NULL`;
+/** The public search's scope, with no tenant and no filter: what anyone may see. */
+const PUBLIC = Prisma.sql`${FROM} WHERE ${Prisma.join(buildStructuredConditions({}), " AND ")}`;
 
 export interface MakeModelCount {
   make: string;

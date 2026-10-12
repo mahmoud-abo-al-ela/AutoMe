@@ -34,7 +34,3 @@ export const SPECS: readonly Spec[] = [
   ...named("color", CAR_COLORS, (value) => AR.color[value.toLowerCase()]),
   ...named("feature", Object.keys(AR.feature), (value) => AR.feature[value]),
 ];
-
-/** The specs the filter panel filters by — every kind but features, which are searched. */
-export const FILTER_SPEC_KINDS = ["bodyType", "fuelType", "transmission", "color"] as const;
-export type FilterSpecKind = (typeof FILTER_SPEC_KINDS)[number];

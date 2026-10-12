@@ -9,7 +9,7 @@ import { db } from "@/lib/prisma";
  * threshold (0.3 unless the session changes it), so a lower floor would
  * silently behave as 0.3.
  */
-export const MIN_WORD_SIMILARITY = 0.3;
+const MIN_WORD_SIMILARITY = 0.3;
 
 /** A known word near one the buyer typed. */
 export interface SimilarWord {
