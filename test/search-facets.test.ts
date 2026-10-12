@@ -184,10 +184,18 @@ describe.skipIf(!hasTestDb)("search facets (real Postgres)", () => {
       expect(facets.cities).toEqual([]);
     });
 
-    it("the public search counts every active dealership, and never a suspended one", async () => {
-      const toyotas = await expectAgree({ search: "تويوتا" });
-      expect(toyotas.facets.dealerships.map((d) => d.slug)).not.toContain("facets-test-hidden");
-      expect(toyotas.facets.cities).not.toContain("zamalek");
+    it("the public search agrees with its counts", async () => {
+      // Within this suite's own city: other test files add and remove public
+      // cars while this runs, and two reads of the whole public catalogue — the
+      // results, then the counts — can differ by one of theirs.
+      await expectAgree({ search: "تويوتا", city: "maadi" });
+    });
+
+    it("the public search never counts a suspended dealership", async () => {
+      const toyotas = await searchFacets({ search: "تويوتا" });
+      expect(toyotas.dealerships.map((d) => d.slug)).toContain("facets-test");
+      expect(toyotas.dealerships.map((d) => d.slug)).not.toContain("facets-test-hidden");
+      expect(toyotas.cities).not.toContain("zamalek");
       const maybach = await searchFacets({ search: "maybach" });
       expect(maybach.total).toBe(0);
     });
