@@ -55,7 +55,11 @@ export const DEFAULT_FILTERS: CarPageFilters = {
   exact: undefined,
 };
 
-const num = (v: string | null | undefined) => (v !== null && v !== undefined && v !== "" ? Number(v) : undefined);
+/** A number from the URL, or nothing: a hand-edited "abc" is no filter rather than NaN. */
+const num = (v: string | null | undefined) => {
+  const value = v ? Number(v) : NaN;
+  return Number.isFinite(value) ? value : undefined;
+};
 
 /** Parse a `?query=string` (with or without leading ?) into a filters object + page/perPage. */
 export function parseFiltersFromSearch(search: string): {
