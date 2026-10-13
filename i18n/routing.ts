@@ -40,3 +40,14 @@ export const localeLabels = {
 export function isLocale(value: string): value is Locale {
   return (routing.locales as readonly string[]).includes(value);
 }
+
+/**
+ * A path in one language: "/ar" + "/cars?make=Kia". For URLs written outside
+ * the locale-aware router — `history.pushState` keeps a page's filters in the
+ * address without a navigation. Written without the prefix, such a URL is
+ * served in the default language on reload or when shared: there is no
+ * detection to fall back on (`localeDetection: false`, above).
+ */
+export function localizedPath(locale: Locale, path: string): string {
+  return `/${locale}${path}`;
+}

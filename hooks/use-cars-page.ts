@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
+import { useLocale } from "next-intl";
+import { localizedPath, type Locale } from "@/i18n/routing";
 import { getCars, getCarsFilters } from "@/actions/cars-listing";
 import { DEFAULT_PER_PAGE } from "@/lib/constants/car-options";
 import {
@@ -106,6 +108,9 @@ export const useCarsPage = (
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // The address keeps the page's language: written without it, a reload or a
+  // shared link opens in the default one (localizedPath).
+  const locale = useLocale() as Locale;
   const pushUrl = useCallback(
     (
       nextFilters: CarPageFilters,
@@ -113,13 +118,13 @@ export const useCarsPage = (
       nextPerPage: number,
       replace = false
     ) => {
-    const url = buildCarsUrl(nextFilters, nextPage, nextPerPage);
+    const url = localizedPath(locale, buildCarsUrl(nextFilters, nextPage, nextPerPage));
     if (replace) {
       window.history.replaceState(null, "", url);
     } else {
       window.history.pushState(null, "", url);
     }
-  }, []);
+  }, [locale]);
 
   const scrollToResults = useCallback(() => {
     if (typeof window === "undefined") return;
