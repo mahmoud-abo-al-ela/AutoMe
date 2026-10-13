@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import * as tenantRepository from "@/lib/repositories/tenant";
 import type { UserWithOrganizations } from "@/lib/repositories/tenant";
 import { createAuditLogEntry } from "@/lib/repositories/audit";
+import { relinkMigratedUser } from "@/lib/services/user/clerk-sync";
 
 export type { UserWithOrganizations };
 
@@ -69,6 +70,15 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
     const clerkUser = await currentUser();
     if (!clerkUser) {
       throw new Error("Clerk user not found despite auth() returning userId");
+    }
+
+    // An account copied from another Clerk instance keeps its row: the copy
+    // carries its old ID as externalId (lib/services/user/clerk-sync.ts).
+    // Re-read either way — a concurrent request may have just moved it.
+    if (clerkUser.externalId) {
+      await relinkMigratedUser(clerkId, clerkUser.externalId);
+      userData = await tenantRepository.findUserWithOrganizationsByClerkId(clerkId);
+      if (userData) return userData;
     }
 
     const name = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
