@@ -144,39 +144,43 @@ export default async function LocaleLayout({
   // browsers with the testing flag see the site's tools.
   const webMcpTrialToken = process.env.NEXT_PUBLIC_WEBMCP_TRIAL_TOKEN;
 
-  // Clerk draws its own sign-in, sign-up and account UI, which next-intl
-  // cannot reach into. Without this the auth screens stay English on /ar.
   return (
-    <ClerkProvider
-      localization={clerkLocalization[locale]}
-      // NEXT_PUBLIC_CLERK_SIGN_IN_URL/SIGN_UP_URL are "/sign-in" and
-      // "/sign-up" with no locale, and Clerk builds its own footer links from
-      // them — so "إنشاء حساب جديد" on the Arabic sign-in card pointed at the
-      // unprefixed path and bounced the reader into English. Props win over
-      // the env vars, which is the only way to make them locale-aware.
-      signInUrl={`/${locale}/sign-in`}
-      signUpUrl={`/${locale}/sign-up`}
-      // Where any Clerk flow without its own redirect ends up. Clerk's default
-      // is "/", which next-intl resolves to /en — the same trap one level down.
-      signInFallbackRedirectUrl={`/${locale}`}
-      signUpFallbackRedirectUrl={`/${locale}`}
+    <html
+      lang={locale}
+      dir={dir}
+      className={`${inter.variable} ${arabic.variable} scroll-smooth h-full`}
     >
-      <html
-        lang={locale}
-        dir={dir}
-        className={`${inter.variable} ${arabic.variable} scroll-smooth h-full`}
+      {webMcpTrialToken && (
+        <head>
+          <meta httpEquiv="origin-trial" content={webMcpTrialToken} />
+        </head>
+      )}
+      <body
+        // font-sans resolves per glyph from the stack in globals.css, so a
+        // mixed-script string renders Latin in Inter and Arabic in IBM Plex
+        // Sans Arabic. Swapping className wholesale used to push Latin car
+        // names through the Arabic face on /ar.
+        className="font-sans flex flex-col min-h-screen"
       >
-        {webMcpTrialToken && (
-          <head>
-            <meta httpEquiv="origin-trial" content={webMcpTrialToken} />
-          </head>
-        )}
-        <body
-          // font-sans resolves per glyph from the stack in globals.css, so a
-          // mixed-script string renders Latin in Inter and Arabic in IBM Plex
-          // Sans Arabic. Swapping className wholesale used to push Latin car
-          // names through the Arabic face on /ar.
-          className="font-sans flex flex-col min-h-screen"
+        {/* Inside <body>, not around <html>: Clerk Core 3 requires it. Clerk
+            draws its own sign-in, sign-up and account UI, which next-intl
+            cannot reach into — without this the auth screens stay English on /ar. */}
+        <ClerkProvider
+          localization={clerkLocalization[locale]}
+          // NEXT_PUBLIC_CLERK_SIGN_IN_URL/SIGN_UP_URL are "/sign-in" and
+          // "/sign-up" with no locale, and Clerk builds its own footer links from
+          // them — so "إنشاء حساب جديد" on the Arabic sign-in card pointed at the
+          // unprefixed path and bounced the reader into English. Props win over
+          // the env vars, which is the only way to make them locale-aware.
+          signInUrl={`/${locale}/sign-in`}
+          signUpUrl={`/${locale}/sign-up`}
+          // Where any Clerk flow without its own redirect ends up. Clerk's default
+          // is "/", which next-intl resolves to /en — the same trap one level down.
+          signInFallbackRedirectUrl={`/${locale}`}
+          signUpFallbackRedirectUrl={`/${locale}`}
+          // After signing out from any UserButton: the reader's own home page.
+          // Core 3 moved this here from each UserButton (hooks/use-auth-redirects).
+          afterSignOutUrl={`/${locale}`}
         >
           {/* Radix does not read `dir` off the document — without this every
               popover, dropdown and slider keeps LTR collision logic in Arabic. */}
@@ -187,8 +191,8 @@ export default async function LocaleLayout({
               </QueryProvider>
             </NextIntlClientProvider>
           </DirectionProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

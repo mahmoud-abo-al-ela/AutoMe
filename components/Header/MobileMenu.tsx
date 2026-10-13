@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
+import { Show, UserButton, useClerk } from "@clerk/nextjs";
 import { CarFront, ChevronRight, LogOut } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -77,9 +77,9 @@ export default function MobileMenu({
         <div aria-hidden className="mx-auto mt-3 h-1 w-10 rounded-full bg-border" />
 
         <div className="overflow-y-auto px-4 pb-4 pt-3">
-          <SignedIn>
+          <Show when="signed-in">
             <div className="mb-3 flex items-center gap-3 rounded-control bg-muted p-3">
-              <UserButton afterSignOutUrl={afterSignOut} />
+              <UserButton />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-caption font-semibold">{user?.name || t("welcomeBack")}</p>
                 {user?.email && <p dir="ltr" className="truncate text-micro text-muted-foreground rtl:text-right">{user.email}</p>}
@@ -97,7 +97,7 @@ export default function MobileMenu({
                 <LogOut className="size-5" />
               </Button>
             </div>
-          </SignedIn>
+          </Show>
 
           {access.showDashboardLink && (
             <Button variant="inverse" size="xl" asChild className="mb-3 w-full">
@@ -109,20 +109,20 @@ export default function MobileMenu({
 
           <nav aria-label={t("more")} className="flex flex-col">
             {sections.map((item) => row(item.href, t(item.labelKey)))}
-            <SignedIn>{!access.isOwner && row("/test-drive", t("testDrive"), <CarFront aria-hidden className="size-5" />)}</SignedIn>
+            <Show when="signed-in">{!access.isOwner && row("/test-drive", t("testDrive"), <CarFront aria-hidden className="size-5" />)}</Show>
             {extra.map((item) => row(item.href, item.label))}
             {access.showForDealers && row("/for-dealers", t("forDealers"))}
           </nav>
 
           <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
             <LanguageSwitcher className="h-11 rounded-control" onSwitch={close} />
-            <SignedOut>
+            <Show when="signed-out">
               <Button variant="marker" size="xl" asChild>
                 <Link href={signIn} onClick={close}>
                   {t("signIn")}
                 </Link>
               </Button>
-            </SignedOut>
+            </Show>
           </div>
         </div>
       </SheetContent>

@@ -1,7 +1,7 @@
 "use client";
 import { useTranslations } from "next-intl";
 
-import { UserButton, SignedIn, useClerk } from "@clerk/nextjs";
+import { UserButton, Show, useClerk } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 
@@ -17,17 +17,15 @@ export default function MobileUserSection({
   const { afterSignOut } = useAuthRedirects();
 
   return (
-    <SignedIn>
+    <Show when="signed-in">
       <div className="px-5 py-4 bg-gradient-to-r from-slate-50 to-blue-50 border-b">
         <div className="flex items-center gap-3">
           <UserButton
-            afterSignOutUrl={afterSignOut}
             appearance={{
               elements: {
                 avatarBox: "w-11 h-11 rounded-full shadow-md",
               },
-            }}
-          />
+            }} />
           <div className="flex-1">
             <p className="font-semibold text-sm">
               {user?.name || t("welcomeBack")}
@@ -48,6 +46,6 @@ export default function MobileUserSection({
           </button>
         </div>
       </div>
-    </SignedIn>
+    </Show>
   );
 }

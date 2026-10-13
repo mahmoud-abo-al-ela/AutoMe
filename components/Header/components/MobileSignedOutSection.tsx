@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
 
 export default function MobileSignedOutSection({
@@ -14,7 +14,7 @@ export default function MobileSignedOutSection({
   const t = useTranslations("nav");
   const { afterSignIn } = useAuthRedirects();
   return (
-    <SignedOut>
+    <Show when="signed-out">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -30,6 +30,6 @@ export default function MobileSignedOutSection({
           </Button>
         </SignInButton>
       </motion.div>
-    </SignedOut>
+    </Show>
   );
 }

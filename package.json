@@ -36,9 +36,8 @@
   "dependencies": {
     "@arcjet/inspect": "1.0.0-beta.8",
     "@arcjet/next": "1.0.0-beta.8",
-    "@clerk/elements": "^0.23.33",
-    "@clerk/localizations": "^4.15.8",
-    "@clerk/nextjs": "^6.39.7",
+    "@clerk/localizations": "^4.23.0",
+    "@clerk/nextjs": "^7.9.15",
     "@emailjs/nodejs": "^5.0.2",
     "@google/genai": "^1.35.0",
     "@gsap/react": "^2.1.2",

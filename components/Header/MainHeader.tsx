@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { CarFront, Heart, MessageSquare } from "lucide-react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo, useRememberPlateBand } from "@/components/brand";
@@ -110,7 +110,7 @@ export default function MainHeader({
   organization?: HeaderOrganization;
 }) {
   const t = useTranslations("nav");
-  const { afterSignOut, signIn } = useAuthRedirects();
+  const { signIn } = useAuthRedirects();
   const access = useHeaderAccess(user, organizationSlug);
   // For the next cold load, whose loader shows before the user is known.
   useRememberPlateBand(access.plateBand);
@@ -168,7 +168,7 @@ export default function MainHeader({
 
           <LanguageSwitcher className="h-10 rounded-control px-2.5 max-md:[&>span]:hidden" />
 
-          <SignedOut>
+          <Show when="signed-out">
             {access.showForDealers && (
               <Link
                 href="/for-dealers"
@@ -183,9 +183,9 @@ export default function MainHeader({
                 <Link href={signIn}>{t("signIn")}</Link>
               </Button>
             )}
-          </SignedOut>
+          </Show>
 
-          <SignedIn>
+          <Show when="signed-in">
             {!access.isOwner && (
               <div className="hidden items-center gap-1 md:flex">
                 <IconLink href="/wishlist" label={t("wishlist")} active={isCurrentSection(pathname, "/wishlist")}>
@@ -201,9 +201,9 @@ export default function MainHeader({
               </div>
             )}
             <div className="hidden md:block">
-              <UserButton afterSignOutUrl={afterSignOut} />
+              <UserButton />
             </div>
-          </SignedIn>
+          </Show>
         </div>
       </div>
     </header>

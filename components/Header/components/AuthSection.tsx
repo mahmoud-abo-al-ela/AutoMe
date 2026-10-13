@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { UserButton, Show, SignInButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { signedInLinks } from "@/lib/HeaderConfig";
 import { useAuthRedirects } from "@/hooks/use-auth-redirects";
@@ -17,11 +17,11 @@ export default function AuthSection({
   isAdmin?: boolean;
 }) {
   const t = useTranslations("nav");
-  const { afterSignIn, afterSignOut } = useAuthRedirects();
+  const { afterSignIn } = useAuthRedirects();
 
   return (
     <div className="flex items-center gap-6">
-      <SignedOut>
+      <Show when="signed-out">
         <SignInButton mode="modal" forceRedirectUrl={afterSignIn}>
           <Button
             variant="default"
@@ -30,8 +30,8 @@ export default function AuthSection({
             {t("signIn")}
           </Button>
         </SignInButton>
-      </SignedOut>
-      <SignedIn>
+      </Show>
+      <Show when="signed-in">
         <div className="flex items-center gap-6">
           {signedInLinks
             .filter((link) => !hasOrgMembership && !isAdmin)
@@ -48,15 +48,13 @@ export default function AuthSection({
               />
             ))}
           <UserButton
-            afterSignOutUrl={afterSignOut}
             appearance={{
               elements: {
                 avatarBox: "hover:scale-110 transition-transform duration-300",
               },
-            }}
-          />
+            }} />
         </div>
-      </SignedIn>
+      </Show>
     </div>
   );
 }

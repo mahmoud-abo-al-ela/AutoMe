@@ -180,7 +180,7 @@ export function OrgTopBar({
             className="hidden size-11 text-inverse-foreground/80 hover:bg-inverse-hover hover:text-inverse-foreground md:inline-flex [&_svg]:size-5"
           />
           <span className="flex size-11 items-center justify-center">
-            <UserButton afterSignOutUrl={`/${locale}`} />
+            <UserButton />
           </span>
         </div>
 
