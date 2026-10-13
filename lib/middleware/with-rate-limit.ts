@@ -5,6 +5,7 @@ import aj, {
   ajSearchSuggest,
   ajMcpPublic,
   ajMcpCostly,
+  ajMcpAccount,
   arcjetConfigured,
   arcjetRequired,
 } from "@/lib/arcjet";
@@ -171,6 +172,21 @@ export async function enforceMcpCostlyLimit() {
 
   const req = await request();
   const decision = await ajMcpCostly.protect(req);
+
+  assertArcjetAllowed(decision);
+}
+
+/**
+ * Enforce the signed-in MCP endpoint's limit (see ajMcpAccount), per AutoMe
+ * user. Called after the access token is verified, on top of the per-address
+ * public limit.
+ */
+export async function enforceMcpAccountLimit(userId: string) {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajMcpAccount.protect(req, { requested: 1, userId });
 
   assertArcjetAllowed(decision);
 }
