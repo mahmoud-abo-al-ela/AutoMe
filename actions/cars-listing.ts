@@ -13,6 +13,7 @@ import {
   carListingFiltersSchema,
   carListingInputSchema,
   carTitlesRequestSchema,
+  compareCarsRequestSchema,
   type CarListingFiltersInput,
   type CarListingInput,
 } from "@/lib/validations/schemas";
@@ -49,10 +50,11 @@ export const getCars = withErrorHandling(async (input: CarListingInput) => {
   return createSuccessResponse(result);
 });
 
+/** One car's public page — hidden cars are not found (repositories/car/visibility.ts). */
 export const getCarById = withErrorHandling(async (id: string) => {
   const { userId } = await auth();
 
-  const car = await carService.getCarById(id);
+  const car = await carService.getPublicCarById(id);
 
   // Validate car belongs to current organization when on a subdomain
   const organization = await getCurrentOrganization();
@@ -130,10 +132,11 @@ export const getMarketSummary = withErrorHandling(async () => {
   });
 });
 
-export const getCarsByIds = withErrorHandling(async (carIds: string[]) => {
-  if (!carIds || !Array.isArray(carIds) || carIds.length === 0) {
+export const getCarsByIds = withErrorHandling(async (input: string[]) => {
+  if (!Array.isArray(input) || input.length === 0) {
     throw new ValidationError("No car IDs provided", "carIds", { key: "errors.compare.noCars" });
   }
+  const carIds = validateAction(compareCarsRequestSchema, input);
 
   // Scope to current organization when on a subdomain
   const organization = await getCurrentOrganization();

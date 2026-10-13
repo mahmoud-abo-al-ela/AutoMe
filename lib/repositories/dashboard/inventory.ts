@@ -85,7 +85,7 @@ async function plainPage(organizationId: string, query: InventoryQuery) {
     bodyType: query.bodyType,
     minYear: query.minYear,
     featured: query.featured,
-  }) as Prisma.CarWhereInput;
+  }, { scope: "dealer" }) as Prisma.CarWhereInput;
 
   const [cars, total] = await Promise.all([
     db.car.findMany({

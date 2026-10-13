@@ -3,6 +3,7 @@
 // request. test/tenant-resolution.test.ts pins their behaviour.
 import type { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
+import { PUBLIC_DEALERSHIP_WHERE } from "@/lib/repositories/car/visibility";
 
 const WITH_PLAN = {
   subscription: {
@@ -79,17 +80,20 @@ export async function assignPendingOwner(organizationId: string, userId: string)
   });
 }
 
-/** An active dealership, with its subscription and plan. Suspended ones are not found. */
+/**
+ * An active dealership, with its subscription and plan. Suspended and deleted
+ * ones are not found — a storefront is a public page (car/visibility.ts).
+ */
 export async function findActiveOrganizationBySlug(slug: string) {
   return db.organization.findUnique({
-    where: { slug, isActive: true },
+    where: { slug, ...PUBLIC_DEALERSHIP_WHERE },
     include: WITH_PLAN,
   });
 }
 
 export async function findActiveOrganizationById(id: string) {
   return db.organization.findUnique({
-    where: { id, isActive: true },
+    where: { id, ...PUBLIC_DEALERSHIP_WHERE },
     include: WITH_PLAN,
   });
 }

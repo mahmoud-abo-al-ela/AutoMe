@@ -43,6 +43,11 @@ export async function toggleWishlist(carId: string, userId: string, viewer: Buye
     await userRepository.removeCarFromWishlist(user.id, carId);
     return { message: "Car removed from wishlist", isWishlisted: false };
   } else {
+    // Saving needs a car the public may open; removing never does, so a car
+    // whose dealership was suspended can still be cleared from the list.
+    if (!(await carRepository.findPublicCarById(carId))) {
+      throw new NotFoundError("Car");
+    }
     assertBuyerAllowed(viewer, car.organizationId, "save");
     await userRepository.addCarToWishlist(user.id, carId);
     return { message: "Car added to wishlist", isWishlisted: true };
