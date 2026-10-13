@@ -138,7 +138,7 @@ export default async function LocaleLayout({
 
   const dir = localeDirection[locale];
 
-  // Chrome's WebMCP origin trial (Chrome 149–156): the token switches the API
+  // Chrome's WebMCP origin trial (Chrome 149–162, until 2027-03-30): the token switches the API
   // on for ordinary visitors. It is bound to one origin, and is public by
   // design — it goes into the page. Unset, nothing is rendered and only
   // browsers with the testing flag see the site's tools.
