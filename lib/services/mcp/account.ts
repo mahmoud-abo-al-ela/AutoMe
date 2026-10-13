@@ -71,7 +71,7 @@ export async function resolveAccountCaller(clerkUserId: string) {
   const memberships = (user.memberships ?? []).map((membership) => ({ organizationId: membership.organizationId }));
   // The column defaults to USER; the serialized type only does not say so.
   const role = user.role ?? "USER";
-  return { id, clerkId: clerkUserId, role, viewer: { role, memberships, isImpersonated: false } };
+  return { id, clerkId: clerkUserId, email: user.email ?? null, role, viewer: { role, memberships, isImpersonated: false } };
 }
 
 export type AccountCaller = NonNullable<Awaited<ReturnType<typeof resolveAccountCaller>>>;

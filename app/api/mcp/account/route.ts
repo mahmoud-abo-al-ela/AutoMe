@@ -3,6 +3,7 @@ import { enforceMcpAccountLimit, enforceMcpPublicLimit } from "@/lib/middleware/
 import { createAccountMcpServer } from "@/lib/mcp/account/server";
 import { MAX_BODY_BYTES, callerIp, limitRefusal, methodNotAllowed, readJsonBody, refuse, serveMcp } from "@/lib/mcp/http";
 import { ACCOUNT_METADATA_PATH, accountMcpEnabled, resolveAccountCaller } from "@/lib/services/mcp/account";
+import { mcpClientLabel } from "@/lib/services/mcp/account-test-drives";
 import { siteUrl } from "@/lib/services/public-catalog/urls";
 
 /**
@@ -58,7 +59,12 @@ export async function POST(request: Request) {
   const read = await readJsonBody(request);
   if ("refused" in read) return read.refused;
 
-  const server = createAccountMcpServer({ ip: callerIp(request), userAgent: request.headers.get("user-agent"), user });
+  const server = createAccountMcpServer({
+    ip: callerIp(request),
+    userAgent: request.headers.get("user-agent"),
+    user,
+    client: mcpClientLabel(token.clientId),
+  });
   return serveMcp(server, request, read.body);
 }
 

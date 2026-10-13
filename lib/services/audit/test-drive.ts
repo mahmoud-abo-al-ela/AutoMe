@@ -44,3 +44,33 @@ export async function logTestDriveStatusChanged(testDrive: AuditTestDrive, oldSt
     },
   });
 }
+
+/**
+ * A booking made or cancelled by the buyer through an app acting for them
+ * (an MCP client): the dealer's Activity shows "A buyer booked…" / "{who}
+ * cancelled…", and the entry records which app it was. The site's own
+ * buyer requests are not logged; these are, because no person clicked them.
+ */
+export async function logTestDriveChangedByAgent(
+  testDrive: AuditTestDrive,
+  change: "requested" | "cancelled",
+  actor: AuditActor,
+  client: string | null
+) {
+  return createAuditLog({
+    action: change === "requested" ? "TEST_DRIVE_CREATED" : "TEST_DRIVE_CANCELED",
+    entityType: "TEST_DRIVE",
+    entityId: testDrive.id,
+    organizationId: testDrive.organizationId,
+    userId: actor.id,
+    userEmail: actor.email,
+    oldValue: change === "cancelled" ? { status: testDrive.status ?? null } : null,
+    newValue: {
+      status: change === "requested" ? "PENDING" : "CANCELLED",
+      carId: testDrive.carId ?? null,
+      date: testDrive.date instanceof Date ? testDrive.date.toISOString().slice(0, 10) : (testDrive.date ?? null),
+      startTime: testDrive.startTime ?? null,
+    },
+    metadata: { source: "mcp", client: client ?? "unknown" },
+  });
+}

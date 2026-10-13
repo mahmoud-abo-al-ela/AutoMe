@@ -202,3 +202,21 @@ export const ajMcpAccount = arcjet({
     }),
   ],
 });
+
+/**
+ * Test-drive requests and cancellations through the signed-in MCP endpoint,
+ * per AutoMe user and per kind: a handful a day is a person planning visits;
+ * more is a model looping, or acting on text it should not have obeyed.
+ * Each request notifies a real dealership. MCP_ACCOUNT_RL_TEST_DRIVES_PER_DAY.
+ */
+export const ajMcpAccountTestDrives = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["userId", "mcpAction"],
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "24h",
+      max: limitFromEnv("MCP_ACCOUNT_RL_TEST_DRIVES_PER_DAY", 3),
+    }),
+  ],
+});

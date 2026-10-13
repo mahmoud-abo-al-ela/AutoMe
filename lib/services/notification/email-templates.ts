@@ -85,6 +85,12 @@ export interface TestDriveConfirmationParams {
   endTime: string;
   dealershipName: string;
   dealershipAddress?: string | null;
+  /**
+   * The app that made the request for the buyer (an MCP client, e.g.
+   * "Claude"), when it was not the buyer on the site — named in the email, so
+   * a request they did not mean to make is one click from being cancelled.
+   */
+  requestedVia?: string | null;
 }
 
 export interface TestDriveNotificationParams {
@@ -166,7 +172,7 @@ export function buildMessagesUrl(conversationId: string): string {
   return `${APP_URL}/messages?conversation=${conversationId}`;
 }
 
-export function generateTestDriveConfirmationHtml({ customerName, carTitle, date, startTime, endTime, dealershipName, dealershipAddress }: TestDriveConfirmationParams): string {
+export function generateTestDriveConfirmationHtml({ customerName, carTitle, date, startTime, endTime, dealershipName, dealershipAddress, requestedVia }: TestDriveConfirmationParams): string {
   const safeCustomer = escapeHtml(customerName);
   const safeCarTitle = escapeHtml(carTitle);
   const safeDealership = escapeHtml(dealershipName);
@@ -185,6 +191,7 @@ export function generateTestDriveConfirmationHtml({ customerName, carTitle, date
     </div>
     
     <p style="margin: 20px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">We will notify you once the dealership confirms your request.</p>
+    ${requestedVia ? `<p style="margin: 20px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">This request was made for you by <strong>${escapeHtml(requestedVia)}</strong>, an app you connected to your AutoMe account. Didn't ask for it? Cancel it from <a href="${APP_URL}/test-drive" style="color: #3b82f6;">your test drives</a>.</p>` : ''}
   `;
   return baseEmailHtml('Test Drive Requested', content);
 }

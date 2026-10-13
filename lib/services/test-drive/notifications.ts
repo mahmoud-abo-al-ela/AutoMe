@@ -18,8 +18,11 @@ import { logError } from "@/lib/utils/errors";
 const carTitle = (car: { title: string | null; make: string; model: string; year: number }) =>
   car.title || `${car.make} ${car.model} ${car.year}`;
 
-/** A new booking: a confirmation to the buyer and a heads-up to the dealership. */
-export async function notifyTestDriveRequested(testDriveId: string) {
+/**
+ * A new booking: a confirmation to the buyer and a heads-up to the
+ * dealership. `requestedVia` names the app that made it for the buyer (MCP).
+ */
+export async function notifyTestDriveRequested(testDriveId: string, { requestedVia = null }: { requestedVia?: string | null } = {}) {
   const fullTestDrive = await testDriveRepository.findTestDriveForRequestEmails(testDriveId);
   if (!fullTestDrive || !fullTestDrive.user) return;
 
@@ -46,6 +49,7 @@ export async function notifyTestDriveRequested(testDriveId: string) {
       endTime: fullTestDrive.endTime,
       dealershipName: org.name,
       dealershipAddress: org.address,
+      requestedVia,
     }).catch((error) => {
       // Non-blocking: email failure should not fail the main operation
       logError(error);
