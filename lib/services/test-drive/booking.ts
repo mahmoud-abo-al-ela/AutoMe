@@ -29,35 +29,39 @@ interface TestDriveFormData {
 /**
  * Refuse a booking the form would never have offered. The form applies the
  * same rules (lib/utils/booking-slots), but a server action accepts whatever
- * a caller sends, and until this check the server stored any date and time.
- *
- * Not transactional: two requests for one slot in the same instant can both
- * pass. At a dealership's volume the second becomes a pending request the
- * dealer declines, which is the failure this would otherwise prevent.
+ * a caller sends. The rules run inside bookSlot's lock on the car's day
+ * (repositories/test-drive/booking.ts), against the bookings as they are at
+ * that moment — so two requests for overlapping slots cannot both pass.
  */
-async function assertBookable(
-  booking: { carId: string; organizationId: string; date: string; startTime: string; endTime: string },
-  excludeTestDriveId?: string
-) {
-  const [rows, booked] = await Promise.all([
-    workingHoursRepository.findWorkingHours(booking.organizationId),
-    testDriveRepository.getBookedTimeSlots(booking.carId, booking.date, excludeTestDriveId),
-  ]);
+async function slotCheck(
+  booking: { organizationId: string; date: string; startTime: string; endTime: string }
+): Promise<testDriveRepository.SlotCheck> {
+  const rows = await workingHoursRepository.findWorkingHours(booking.organizationId);
   const hours = formatWorkingHours(rows).find(
     (entry) => entry.dayKey === dayOfWeekForDate(booking.date)
   );
+  return ({ car, booked }) => {
+    // Hidden, sold or unavailable since the page was opened: not bookable.
+    if (!car) {
+      throw new ValidationError("Car is not available for test drive", "carId", { key: "errors.testDrive.carUnavailable" });
+    }
+    const problem = checkBooking(booking, hours, booked);
+    if (problem) rejectSlot(booking, problem);
+  };
+}
 
-  const problem = checkBooking(booking, hours, booked);
-  if (problem) {
-    throw new ValidationError(
-      `Test drive slot rejected (${problem}): ${booking.date} ${booking.startTime}-${booking.endTime}`,
-      "startTime",
-      {
-        key: `errors.testDrive.slot.${problem}`,
-        params: problem === "outsideWindow" ? { days: BOOKING_HORIZON_DAYS } : undefined,
-      }
-    );
-  }
+function rejectSlot(
+  booking: { date: string; startTime: string; endTime: string },
+  problem: NonNullable<ReturnType<typeof checkBooking>>
+): never {
+  throw new ValidationError(
+    `Test drive slot rejected (${problem}): ${booking.date} ${booking.startTime}-${booking.endTime}`,
+    "startTime",
+    {
+      key: `errors.testDrive.slot.${problem}`,
+      params: problem === "outsideWindow" ? { days: BOOKING_HORIZON_DAYS } : undefined,
+    }
+  );
 }
 
 /**
@@ -78,18 +82,19 @@ export async function requestTestDrive(testDriveData: TestDriveFormData, userId:
     throw new ValidationError("Car is not available for test drive", "carId", { key: "errors.testDrive.carUnavailable" });
   }
 
-  await assertBookable({ ...testDriveData, organizationId: car.organizationId });
-
-  return await testDriveRepository.createTestDrive({
-    date: dateOnlyToUtc(testDriveData.date),
-    startTime: testDriveData.startTime,
-    endTime: testDriveData.endTime,
-    notes: testDriveData.notes || "",
-    status: "PENDING",
-    userId: user.id,
-    carId: testDriveData.carId,
-    organizationId: car.organizationId,
-  });
+  const check = await slotCheck({ ...testDriveData, organizationId: car.organizationId });
+  // A repeated submission of the same request returns the booking it made.
+  return await testDriveRepository.bookSlot(
+    {
+      carId: testDriveData.carId,
+      date: dateOnlyToUtc(testDriveData.date),
+      day: testDriveData.date,
+      startTime: testDriveData.startTime,
+      endTime: testDriveData.endTime,
+    },
+    { kind: "create", userId: user.id, notes: testDriveData.notes || "" },
+    check
+  );
 }
 
 /**
@@ -128,22 +133,18 @@ export async function editTestDrive(testDriveId: string, updateData: Omit<TestDr
     );
   }
 
-  await assertBookable(
+  const check = await slotCheck({ ...updateData, organizationId: existingTestDrive.organizationId });
+  return await testDriveRepository.bookSlot(
     {
-      ...updateData,
       carId: existingTestDrive.carId,
-      organizationId: existingTestDrive.organizationId,
+      date: dateOnlyToUtc(updateData.date),
+      day: updateData.date,
+      startTime: updateData.startTime,
+      endTime: updateData.endTime,
     },
-    testDriveId
+    { kind: "move", testDriveId, notes: updateData.notes || "" },
+    check
   );
-
-  return await testDriveRepository.updateTestDrive(testDriveId, {
-    date: dateOnlyToUtc(updateData.date),
-    startTime: updateData.startTime,
-    endTime: updateData.endTime,
-    notes: updateData.notes || "",
-    status: "PENDING",
-  });
 }
 
 /**

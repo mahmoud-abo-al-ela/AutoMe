@@ -35,7 +35,7 @@ export const requestTestDrive = withAuth(async (ctx, rawData) => {
   await testDriveService.findBookableCar(testDriveData.carId, ctx.user);
 
   // serializeTestDrive is nullable for callers that may pass nothing, but
-  // createTestDrive always hands it a freshly created row.
+  // bookSlot always hands it a real row.
   const testDrive = (await testDriveService.requestTestDrive(
     testDriveData,
     ctx.userId,
