@@ -1,4 +1,4 @@
-import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
+import arcjet, { detectBot, fixedWindow, shield, slidingWindow, tokenBucket } from "@arcjet/next";
 
 
 export const arcjetConfigured = Boolean(process.env.ARCJET_KEY);
@@ -124,6 +124,61 @@ export const ajSearchSuggest = arcjet({
       refillRate: 20,
       interval: 10,
       capacity: 60,
+    }),
+  ],
+});
+
+/** A positive whole number from the environment, or the default. */
+function limitFromEnv(name: string, fallback: number): number {
+  const value = Number(process.env[name]);
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
+/**
+ * The public MCP endpoint (app/api/mcp). Its own client, so AI traffic never
+ * spends a buyer's bucket. Every value is provisional — tuned from the pilot's
+ * load test and data — and overridable without a deploy (MCP_RL_*).
+ *
+ * MCP clients are programs by definition, so bots are only observed
+ * (DRY_RUN logs each caller's category), never denied wholesale; the limits
+ * are what stop a crawler. The fixed window keyed on one constant is a ceiling
+ * across all callers together, which protects the database from a spread-out
+ * burst that no per-IP bucket sees.
+ */
+export const ajMcpPublic = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["ip.src"],
+  rules: [
+    shield({ mode: arcjetMode }),
+    detectBot({ mode: "DRY_RUN", allow: [] }),
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: limitFromEnv("MCP_RL_IP_REFILL", 30),
+      interval: 60,
+      capacity: limitFromEnv("MCP_RL_IP_CAPACITY", 60),
+    }),
+    fixedWindow({
+      mode: "LIVE",
+      characteristics: ["mcpScope"],
+      window: "60s",
+      max: limitFromEnv("MCP_RL_GLOBAL_PER_MINUTE", 1200),
+    }),
+  ],
+});
+
+/**
+ * The costly calls on top of the above, per IP: free-text search, deep pages,
+ * comparisons. A conversation makes a handful; a walk through the catalogue
+ * makes hundreds.
+ */
+export const ajMcpCostly = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["ip.src"],
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: limitFromEnv("MCP_RL_COSTLY_PER_HOUR", 120),
     }),
   ],
 });

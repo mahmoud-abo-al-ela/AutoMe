@@ -3,6 +3,8 @@ import aj, {
   ajDealerAi,
   ajListingQuestions,
   ajSearchSuggest,
+  ajMcpPublic,
+  ajMcpCostly,
   arcjetConfigured,
   arcjetRequired,
 } from "@/lib/arcjet";
@@ -144,4 +146,31 @@ export async function enforceChatTranslationLimit(userId: string) {
   const decision = await ajChatTranslation.protect(req, { requested: 1, userId });
 
   assertArcjetAllowed(decision, "Too many translations. Please try again later.");
+}
+
+/**
+ * Enforce the public MCP endpoint's limits (see ajMcpPublic): per IP, and a
+ * ceiling across every caller together. Called by the route before it reads
+ * the body.
+ */
+export async function enforceMcpPublicLimit() {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  // One constant for the shared ceiling — a value per caller would make it per caller.
+  const decision = await ajMcpPublic.protect(req, { requested: 1, mcpScope: "all" });
+
+  assertArcjetAllowed(decision);
+}
+
+/** Enforce the costly-call window (see ajMcpCostly), for a tool call that is one. */
+export async function enforceMcpCostlyLimit() {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajMcpCostly.protect(req);
+
+  assertArcjetAllowed(decision);
 }

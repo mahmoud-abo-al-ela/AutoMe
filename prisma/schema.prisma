@@ -910,3 +910,21 @@ model BillingNotice {
 
   @@unique([organizationId, kind, periodEnd])
 }
+
+/// One call to a public MCP tool, for the pilot's measures (latency, errors,
+/// rate limiting, result counts). Never the query text, the IP or a user:
+/// ipHash is a salted hash that changes daily, enough to count distinct
+/// callers and spot one hammering, not to identify anyone. Kept 30 days.
+model McpToolCall {
+  id           String   @id @default(uuid())
+  tool         String
+  durationMs   Int
+  resultCount  Int?
+  errorCode    String?  // invalid_input / not_found / rate_limited / unavailable / internal
+  clientFamily String?  // the client's own name for itself, e.g. "claude-ai"
+  ipHash       String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt]) // retention and time windows
+  @@index([tool, createdAt])
+}
