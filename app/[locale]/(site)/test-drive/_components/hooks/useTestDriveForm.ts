@@ -21,6 +21,16 @@ import {
     type TestDriveFormValues,
     type WorkingHours,
 } from "../../_lib/scheduling";
+import { checkBooking, type BookingProblem } from "@/lib/utils/booking-slots";
+
+/** Any hours at all: to ask checkBooking only about the date itself. */
+const ANY_HOURS = { isOpen: true, openTime: "00:00", closeTime: "23:59" };
+
+/** Why a date cannot be booked whatever the time — not a date, or outside the booking window. */
+function dateProblem(date: string): "invalid" | "outsideWindow" | null {
+    const problem = checkBooking({ date, startTime: "00:00", endTime: "00:30" }, ANY_HOURS, []);
+    return problem === "invalid" || problem === "outsideWindow" ? problem : null;
+}
 
 export const useTestDriveForm = ({
     carId,
@@ -71,6 +81,20 @@ export const useTestDriveForm = ({
 
     const watchDate = watch("date");
     const watchStartTime = watch("startTime");
+    const watchEndTime = watch("endTime");
+
+    /** A day's start times still free and the bookings already on it, without touching the form. */
+    const readDay = async (dateString: string) => {
+        const dayOfWeek = dayOfWeekForDate(dateString);
+        const { openTime, closeTime } = workingHours[dayOfWeek];
+        // Opening hours say a 09:00 slot exists; they do not say it is still
+        // bookable at 14:00. On any other date this is a no-op.
+        const allSlots = filterPastTimeSlots(generateTimeSlots(openTime, closeTime), dateString);
+        const result = await getBookedTimeSlots(carId, dateString);
+        if (!result.success) throw new Error(result.error.message);
+        const booked = result.data || [];
+        return { dayOfWeek, booked, freeStartTimes: filterAvailableTimeSlots(allSlots, booked) };
+    };
 
     // Date selection handler
     const handleDateChange = async (date: Date | undefined) => {
@@ -91,46 +115,81 @@ export const useTestDriveForm = ({
         setValue("startTime", "");
         setValue("endTime", "");
 
-        const { openTime, closeTime } = workingHours[dayOfWeek];
-        // Opening hours say a 09:00 slot exists; they do not say it is still
-        // bookable at 14:00. On any other date this is a no-op.
-        const allSlots = filterPastTimeSlots(
-            generateTimeSlots(openTime, closeTime),
-            dateString
-        );
-
         try {
-            // Fetch booked time slots for this date and car
-            const bookedSlotsResult = await getBookedTimeSlots(carId, dateString);
-
-            if (bookedSlotsResult.success) {
-                const booked = bookedSlotsResult.data || [];
-                setBookedSlots(booked);
-                setAvailableTimeSlots(filterAvailableTimeSlots(allSlots, booked));
-            } else {
-                setBookedSlots([]);
-                // If there's an error fetching booked slots, show all slots
-                console.warn(
-                    "Could not fetch booked time slots:",
-                    bookedSlotsResult.error
-                );
-                setAvailableTimeSlots(allSlots);
-            }
+            const day = await readDay(dateString);
+            setBookedSlots(day.booked);
+            setAvailableTimeSlots(day.freeStartTimes);
         } catch (error) {
-            console.error("Error fetching booked time slots:", error);
+            // Show every slot rather than none: the server refuses a taken one.
+            console.warn("Could not fetch booked time slots:", error);
+            const { openTime, closeTime } = workingHours[dayOfWeek];
             setBookedSlots([]);
-            // Fallback to showing all slots if there's an error
-            setAvailableTimeSlots(allSlots);
+            setAvailableTimeSlots(filterPastTimeSlots(generateTimeSlots(openTime, closeTime), dateString));
         }
     };
 
+    /**
+     * Fill the form with a booking, as if the person had picked it — after
+     * checking it against the rules the server applies (checkBooking), so the
+     * form never shows a slot it would refuse. Books nothing: requesting is
+     * still the person pressing Submit. The reason when it cannot be filled.
+     */
+    const prepareBooking = async (booking: {
+        date: string;
+        startTime: string;
+        endTime: string;
+        notes?: string;
+    }): Promise<BookingProblem | null> => {
+        const early = dateProblem(booking.date);
+        if (early) return early;
+        const hours = workingHours[dayOfWeekForDate(booking.date)];
+        if (!hours?.isOpen) return "closed";
+
+        const day = await readDay(booking.date);
+        const problem = checkBooking(booking, hours, day.booked);
+        if (problem) return problem;
+
+        setValue("date", booking.date);
+        setSelectedDay(day.dayOfWeek);
+        setBookedSlots(day.booked);
+        setAvailableTimeSlots(day.freeStartTimes);
+        setCalendarOpen(false);
+        setValue("startTime", booking.startTime);
+        setValue("endTime", booking.endTime);
+        setValue("notes", booking.notes ?? "");
+        return null;
+    };
+
+    /** A day as an agent asks about it: open or not, its hours, and the start times still free. */
+    const checkDay = async (date: string) => {
+        const early = dateProblem(date);
+        if (early) return { date, bookable: false as const, reason: early };
+        const hours = workingHours[dayOfWeekForDate(date)];
+        if (!hours?.isOpen) return { date, bookable: false as const, reason: "closed" as const };
+        const day = await readDay(date);
+        return {
+            date,
+            bookable: day.freeStartTimes.length > 0,
+            opens: hours.openTime,
+            closes: hours.closeTime,
+            freeStartTimes: day.freeStartTimes,
+            booked: day.booked.map(({ startTime, endTime }) => ({ startTime, endTime })),
+        };
+    };
+
     // Time selection handlers
+    // A person's pick is never empty (no item has value ""). An empty one is
+    // Radix's hidden native select catching up when the times are set before
+    // their options exist — as when a booking is filled in for them — and must
+    // not wipe the times it was given.
     const handleStartTimeSelect = (time: string) => {
+        if (!time) return;
         setValue("startTime", time);
         setValue("endTime", "");
     };
 
     const handleEndTimeSelect = (time: string) => {
+        if (!time) return;
         setValue("endTime", time);
     };
 
@@ -179,12 +238,15 @@ export const useTestDriveForm = ({
         errors,
         watchDate,
         watchStartTime,
+        watchEndTime,
         submitting,
         selectedDay,
         availableTimeSlots,
         calendarOpen,
         setCalendarOpen,
         handleDateChange,
+        prepareBooking,
+        checkDay,
         handleStartTimeSelect,
         handleEndTimeSelect,
         getAvailableEndTimes,

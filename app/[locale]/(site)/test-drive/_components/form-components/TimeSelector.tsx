@@ -20,6 +20,7 @@ const TimeSelector = ({
     disabled,
     error,
     defaultValue,
+    value,
 }: {
     label: string;
     placeholder?: string;
@@ -28,6 +29,8 @@ const TimeSelector = ({
     disabled: boolean;
     error?: string;
     defaultValue?: string;
+    /** The time chosen, when the form holds it — so a time it sets (a prepared booking) shows here. */
+    value?: string;
 }) => {
     const t = useTranslations("testDrive.form");
     const { clockTime } = useFormatters();
@@ -39,6 +42,7 @@ const TimeSelector = ({
                 disabled={disabled}
                 onValueChange={onTimeSelect}
                 defaultValue={defaultValue}
+                {...(value !== undefined && { value })}
             >
                 <SelectTrigger className={cn(error && "border-red-500")}>
                     <SelectValue placeholder={placeholder ?? t("selectTime")} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import DateSelector from "./DateSelector";
@@ -8,6 +9,7 @@ import NotesField from "./NotesField";
 import FormActions from "./FormActions";
 import { useTestDriveForm } from "../hooks";
 import type { WorkingHours } from "../../_lib/scheduling";
+import { useTestDriveWebMcpTools } from "../webmcp/use-test-drive-webmcp-tools";
 
 const TestDriveForm = ({
     carId,
@@ -22,12 +24,18 @@ const TestDriveForm = ({
 }) => {
     const t = useTranslations("testDrive.form");
 
+    const form = useTestDriveForm({ carId, workingHours, onSuccess });
+    const formRef = useRef<HTMLFormElement>(null);
+    // For a browser agent (WebMCP): check days and fill this form; the person submits.
+    useTestDriveWebMcpTools(form, formRef);
+
     const {
         register,
         handleSubmit,
         errors,
         watchDate,
         watchStartTime,
+        watchEndTime,
         submitting,
         selectedDay,
         availableTimeSlots,
@@ -39,11 +47,11 @@ const TestDriveForm = ({
         getAvailableEndTimes,
         isDateDisabled,
         onSubmit,
-    } = useTestDriveForm({ carId, workingHours, onSuccess });
+    } = form;
 
     return (
         <Card className="p-4 md:p-6 mx-2 md:mx-0 gap-3">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <DateSelector
                     selectedDate={watchDate}
                     onDateChange={handleDateChange}
@@ -62,6 +70,7 @@ const TestDriveForm = ({
                         <TimeSelector
                             label={t("startTime")}
                             timeSlots={availableTimeSlots}
+                            value={watchStartTime}
                             onTimeSelect={handleStartTimeSelect}
                             disabled={
                                 !watchDate || availableTimeSlots.length === 0 || submitting
@@ -75,6 +84,7 @@ const TestDriveForm = ({
                         <TimeSelector
                             label={t("endTime")}
                             timeSlots={getAvailableEndTimes()}
+                            value={watchEndTime}
                             onTimeSelect={handleEndTimeSelect}
                             disabled={
                                 !watchStartTime ||
