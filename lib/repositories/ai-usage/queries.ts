@@ -55,6 +55,20 @@ export async function countOrgUnsavedAiCallsThisMonth(organizationId: string, fe
 
 
 /**
+ * Every ledger (AiUsage.provider: "google", "google#2", "google:embed") with
+ * calls since a timestamp — the keys and pools that have been used, for a
+ * report of the breaker's state across all of them.
+ */
+export async function findProviderLedgersSince(since: Date): Promise<string[]> {
+    const rows = await db.aiUsage.findMany({
+        where: { createdAt: { gte: since } },
+        distinct: ["provider"],
+        select: { provider: true },
+    });
+    return rows.map((row) => row.provider);
+}
+
+/**
  * Count AI calls to one provider since a timestamp, across every feature and
  * tenant. Backs the per-provider request-count breaker (RPM / RPD): a provider's
  * cap is per key regardless of feature, so this counts every recorded attempt
