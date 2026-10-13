@@ -14,7 +14,10 @@ import { notFound } from "next/navigation";
 import { OpenChatFromLink } from "@/components/StreamChat";
 import { BuyerTargetProvider } from "@/components/BuyerAccess";
 import type { CarDetail } from "../_lib/car-detail-types";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import CarWebMcpTools from "./CarWebMcpTools";
+import { carToolSummary } from "../_lib/webmcp-summary";
 import { isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
 import { marketPricesFor, toMarketPosition } from "@/lib/services/car/market-price";
 import { logError } from "@/lib/utils/errors";
@@ -105,6 +108,9 @@ const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: st
       </div>
 
       <MobileStickyBar car={car} />
+
+      {/* The car, offered to a browser agent (WebMCP) where the browser has it. */}
+      <CarWebMcpTools summary={carToolSummary(car, (await getLocale()) as Locale)} />
 
       {/* Opens this car's chat when the page is reached back from sign-in. */}
       <Suspense fallback={null}>

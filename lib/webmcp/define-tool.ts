@@ -24,6 +24,15 @@ export interface WebMcpToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny>
   run: (input: z.output<Input>, options: { signal?: AbortSignal }) => Promise<unknown>;
 }
 
+/**
+ * A tool as a page's list of tools holds it, whatever its input. Safe to
+ * widen: toDescriptor parses the input with the tool's own schema before
+ * `run` ever sees it.
+ */
+export function defineWebMcpTool<Input extends z.ZodTypeAny>(definition: WebMcpToolDefinition<Input>): WebMcpToolDefinition {
+  return definition as unknown as WebMcpToolDefinition;
+}
+
 /** Chrome's guidance for what an agent reads well (secure-tools, 2026-09). */
 export const WEBMCP_BUDGETS = { name: 30, description: 500, parameterDescription: 150, output: 1_500 } as const;
 
