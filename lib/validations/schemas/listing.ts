@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_COMPARE_CARS } from "@/lib/utils";
 
 /**
  * The public cars listing's input (getCars, getCarsFilters): only what a
@@ -40,6 +41,9 @@ export const carListingInputSchema = carListingFiltersSchema.extend({
   page: z.number().int().min(1).max(10_000).optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
+
+/** The compare page's selection: one to MAX_COMPARE_CARS car ids. */
+export const compareCarsRequestSchema = z.array(z.string().uuid()).min(1).max(MAX_COMPARE_CARS);
 
 export type CarListingFiltersInput = z.infer<typeof carListingFiltersSchema>;
 export type CarListingInput = z.infer<typeof carListingInputSchema>;

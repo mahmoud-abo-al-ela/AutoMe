@@ -1,4 +1,5 @@
 import * as carRepository from "@/lib/repositories/car";
+import { NotFoundError } from "@/lib/utils/errors";
 import type { SerializedCar } from "@/lib/utils/serializers";
 import { CAR_CURRENCY } from "@/lib/utils/currency";
 import { withMarketPositions } from "./market-price";
@@ -28,9 +29,20 @@ export async function getMarketSummary(organizationId: string | null) {
   return carRepository.getMarketSummary({ organizationId, currency: CAR_CURRENCY });
 }
 
+/**
+ * One car's public page: available or sold, of an active dealership
+ * (repositories/car/visibility.ts). A hidden car is not found, exactly like an
+ * id that never existed. The dealer's own pages use getCarById instead.
+ */
+export async function getPublicCarById(id: string) {
+  const car = await carRepository.findPublicCarById(id);
+  if (!car) throw new NotFoundError("Car");
+  return car;
+}
+
 /** The cars a buyer is comparing, limited to the subdomain's dealership when on one. */
 export async function getCarsForComparison(carIds: string[], organizationId: string | null) {
-  return carRepository.findCarsByIds(carIds, organizationId);
+  return carRepository.findPublicCarsByIds(carIds, organizationId);
 }
 
 /** Public titles, both languages, for the given car ids; unknown ids are absent. */

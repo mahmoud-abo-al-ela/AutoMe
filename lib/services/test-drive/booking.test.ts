@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   findUserByClerkId: vi.fn(),
   findUserByClerkIdWithMemberships: vi.fn(),
   findCarById: vi.fn(),
+  findPublicCarById: vi.fn(),
   findWorkingHours: vi.fn(),
   getBookedTimeSlots: vi.fn(),
   createTestDrive: vi.fn(),
@@ -14,7 +15,7 @@ vi.mock("@/lib/repositories/user", () => ({
   findUserByClerkId: mocks.findUserByClerkId,
   findUserByClerkIdWithMemberships: mocks.findUserByClerkIdWithMemberships,
 }));
-vi.mock("@/lib/repositories/car", () => ({ findCarById: mocks.findCarById }));
+vi.mock("@/lib/repositories/car", () => ({ findCarById: mocks.findCarById, findPublicCarById: mocks.findPublicCarById }));
 vi.mock("@/lib/repositories/dealership/working-hours", () => ({
   findWorkingHours: mocks.findWorkingHours,
 }));
@@ -45,6 +46,7 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
   mocks.findUserByClerkId.mockResolvedValue({ id: "user-1" });
   mocks.findCarById.mockResolvedValue({ id: "car-1", status: "AVAILABLE", organizationId: "org-1" });
+  mocks.findPublicCarById.mockResolvedValue({ id: "car-1", status: "AVAILABLE", organizationId: "org-1" });
   mocks.findWorkingHours.mockResolvedValue([
     { dayOfWeek: "SATURDAY", openTime: "09:00", closeTime: "17:00", isOpen: true },
     { dayOfWeek: "FRIDAY", openTime: "", closeTime: "", isOpen: false },

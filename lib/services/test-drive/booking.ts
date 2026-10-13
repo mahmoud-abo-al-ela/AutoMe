@@ -69,7 +69,7 @@ export async function requestTestDrive(testDriveData: TestDriveFormData, userId:
     throw new AuthenticationError("User not found");
   }
 
-  const car = await carRepository.findCarById(testDriveData.carId);
+  const car = await carRepository.findPublicCarById(testDriveData.carId);
   if (!car) {
     throw new NotFoundError("Car");
   }
@@ -211,6 +211,10 @@ export async function checkExistingTestDrive(carId: string, userId?: string | nu
  * Get booked time slots for a car
  */
 export async function getBookedTimeSlots(carId: string, date: string, excludeTestDriveId?: string) {
+  // The calendar of a car the public may open, and of no other.
+  if (!(await carRepository.findPublicCarById(carId))) {
+    throw new NotFoundError("Car");
+  }
   return await testDriveRepository.getBookedTimeSlots(carId, date, excludeTestDriveId);
 }
 
@@ -225,7 +229,7 @@ export async function getBookedTimeSlots(carId: string, date: string, excludeTes
  * decides what to do with that.
  */
 export async function getCarWorkingHours(carId: string) {
-  const car = await carRepository.findCarById(carId);
+  const car = await carRepository.findPublicCarById(carId);
   if (!car) {
     throw new NotFoundError("Car");
   }

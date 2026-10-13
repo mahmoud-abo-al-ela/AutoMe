@@ -29,7 +29,7 @@ const userRepo = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/repositories/user", () => userRepo);
 
-const carRepo = vi.hoisted(() => ({ findCarById: vi.fn() }));
+const carRepo = vi.hoisted(() => ({ findCarById: vi.fn(), findPublicCarById: vi.fn() }));
 vi.mock("@/lib/repositories/car", () => carRepo);
 
 const testDriveService = vi.hoisted(() => ({
@@ -105,6 +105,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   userRepo.findUserByClerkId.mockImplementation(async (clerkId: string) => ({ id: clerkId }));
   carRepo.findCarById.mockResolvedValue(CAR);
+  carRepo.findPublicCarById.mockResolvedValue(CAR);
 });
 
 describe("toggleWishlist", () => {

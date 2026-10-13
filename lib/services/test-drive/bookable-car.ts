@@ -10,7 +10,9 @@ import { NotFoundError } from "@/lib/utils/errors";
  * allows this viewer to book it. Checked before anything is written.
  */
 export async function findBookableCar(carId: string, viewer: BuyerViewerSource) {
-  const car = await carRepository.findCarById(carId);
+  // A car the public may open (repositories/car/visibility.ts): a hidden
+  // dealership's car cannot be booked, and is not found rather than refused.
+  const car = await carRepository.findPublicCarById(carId);
   if (!car) {
     throw new NotFoundError("Car");
   }
