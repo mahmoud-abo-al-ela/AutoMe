@@ -9,6 +9,7 @@ import { getStreamToken } from "@/actions/stream-chat";
 import { createStreamI18n } from "@/i18n/stream-chat-i18n";
 import type { Locale } from "@/i18n/routing";
 import { logError } from "@/lib/utils/errors";
+import { ConnectedChatContext } from "./connected-chat";
 import { ChatDockProvider } from "./dock/ChatDockContext";
 import { ChatDock } from "./dock/ChatDock";
 import { disableAttachmentUploads } from "./no-attachments";
@@ -115,8 +116,10 @@ export function StreamChatProvider({ children }: { children: React.ReactNode }) 
                 theme="str-chat__theme-light"
                 i18nInstance={i18nInstance}
             >
-                {children}
-                <ChatDock />
+                <ConnectedChatContext.Provider value={client}>
+                    {children}
+                    <ChatDock />
+                </ConnectedChatContext.Provider>
             </Chat>
         </ChatDockProvider>
     );
