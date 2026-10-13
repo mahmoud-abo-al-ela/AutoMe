@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { isValidSlug } from "@/lib/utils/slug";
 import { optionalEmail, optionalText } from "./fields";
+import { DEALERSHIP_SORT_OPTIONS } from "@/lib/constants/dealership-options";
+
+const DEALERSHIP_SORTS = Object.values(DEALERSHIP_SORT_OPTIONS) as [string, ...string[]];
 
 export const organizationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -107,3 +110,29 @@ export const publicPageSchema = z.object({
 
 export type DealershipCarFiltersInput = z.infer<typeof dealershipCarFiltersSchema>;
 export type PublicPageInput = z.infer<typeof publicPageSchema>;
+
+/**
+ * The public dealerships list (/dealerships): what its filter panel and URL
+ * can set, and nothing else — not the plan a dealer pays for, which is the
+ * dealer's business. Values come from a URL a visitor can edit, so a bad one
+ * falls back to its default instead of breaking the page.
+ */
+export const dealershipListFiltersSchema = z.object({
+  search: z.string().trim().max(100).optional().catch(undefined),
+  city: z.string().trim().max(60).optional().catch(undefined),
+  region: z.string().trim().max(60).optional().catch(undefined),
+  minRating: z.number().finite().min(0).max(5).optional().catch(undefined),
+  maxRating: z.number().finite().min(0).max(5).optional().catch(undefined),
+  minCarCount: z.number().int().min(0).optional().catch(undefined),
+  maxCarCount: z.number().int().min(0).optional().catch(undefined),
+  sort: z.enum(DEALERSHIP_SORTS).optional().catch(undefined),
+});
+
+/** A page of the dealerships list: the page's own sizes (12/24/48) at most. */
+export const dealershipListPageSchema = z.object({
+  page: z.number().int().min(1).max(10_000).optional().catch(undefined),
+  limit: z.number().int().min(1).max(48).optional().catch(undefined),
+});
+
+export type DealershipListFiltersInput = z.input<typeof dealershipListFiltersSchema>;
+export type DealershipListPageInput = z.input<typeof dealershipListPageSchema>;

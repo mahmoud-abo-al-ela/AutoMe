@@ -21,7 +21,6 @@ const Footer = async ({
     name?: string | null;
     description?: string | null;
     phone?: string | null;
-    email?: string | null;
     address?: string | null;
   } | null;
 }) => {
@@ -87,16 +86,6 @@ const Footer = async ({
                     <dd>
                       <a href={`tel:${organization.phone}`} dir="ltr" className="hover:underline">
                         {organization.phone}
-                      </a>
-                    </dd>
-                  </div>
-                )}
-                {organization.email && (
-                  <div>
-                    <dt className="text-micro text-marker">{t("email")}</dt>
-                    <dd className="break-all">
-                      <a href={`mailto:${organization.email}`} dir="ltr" className="hover:underline">
-                        {organization.email}
                       </a>
                     </dd>
                   </div>

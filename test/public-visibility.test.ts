@@ -19,6 +19,7 @@ import {
 } from "@/lib/repositories/dealership/queries/detail";
 import { countDealershipReviewsByRating, findDealershipReviews } from "@/lib/repositories/dealership/queries/reviews";
 import { getDealershipBySlug } from "@/lib/services/dealership/detail";
+import { getDealerships } from "@/lib/services/dealership/listing";
 import { getPublicCar, searchPublicCars } from "@/lib/services/public-catalog";
 import { getUserWishlist } from "@/lib/repositories/user/wishlist";
 import { getPublicCarById } from "@/lib/services/car/storefront";
@@ -184,6 +185,14 @@ describe.skipIf(!hasTestDb)("public visibility (real Postgres)", () => {
         expect(page, field).not.toHaveProperty(field);
       }
       await expect(getDealershipBySlug("test-visibility-s")).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    it("the dealerships list shows only public dealerships, without their email or plan", async () => {
+      const { dealerships } = await getDealerships({ search: "Visibility" }, { limit: 48 });
+      expect(dealerships.map((d: { slug: string }) => d.slug)).toEqual(["test-visibility-a"]);
+      for (const field of ["email", "planType", "planName"]) {
+        expect(dealerships[0], field).not.toHaveProperty(field);
+      }
     });
 
     it("lists no cars, filter options or reviews of a hidden dealership, even by its id", async () => {

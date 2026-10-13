@@ -1,7 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { z } from "zod";
 import { runTool, type CallerContext, type PublicTool } from "./tool";
+import { registerPublicPrompts } from "./prompts";
+import { registerPublicResources } from "./resources";
+import { compareCarsTool } from "./tools/compare-cars";
 import { getCarTool } from "./tools/get-car";
+import { listDealershipsTool } from "./tools/list-dealerships";
 import { searchCarsTool } from "./tools/search-cars";
 import { searchOptionsTool } from "./tools/search-options";
 
@@ -45,6 +49,10 @@ export function createPublicMcpServer(caller: CallerContext): McpServer {
   );
   register(server, searchCarsTool, caller);
   register(server, getCarTool, caller);
+  register(server, listDealershipsTool, caller);
+  register(server, compareCarsTool, caller);
   register(server, searchOptionsTool, caller);
+  registerPublicResources(server, caller);
+  registerPublicPrompts(server);
   return server;
 }

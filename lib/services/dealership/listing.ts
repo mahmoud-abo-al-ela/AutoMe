@@ -112,7 +112,9 @@ export async function getDealerships(
             region: dealership.region,
             country: dealership.country,
             phone: dealership.phone,
-            email: dealership.email,
+            // Not the email nor the plan — the same rule as the dealership's
+            // own page (detail.ts): an inbox on a public list invites scraping,
+            // and the plan is the dealer's business.
             website: dealership.website,
             averageRating: dealership.averageRating || 0,
             totalReviews: dealership.totalReviews || 0,
@@ -120,8 +122,6 @@ export async function getDealerships(
             brands: dealership.brands || [],
             priceFrom: dealership.priceFrom ?? null,
             workingHours: formatWorkingHours(dealership.workingHours),
-            planType: dealership.subscription?.plan?.type || null,
-            planName: dealership.subscription?.plan?.name || null,
             createdAt: dealership.createdAt,
             updatedAt: dealership.updatedAt,
         })),

@@ -112,6 +112,32 @@ describe.skipIf(!hasTestDb)("public MCP tools (real Postgres)", () => {
     expect(missing).toMatchObject({ isError: true, structuredContent: { error: "not_found" } });
   });
 
+  it("list_dealerships lists only public dealerships, without email", async () => {
+    const result = await (await client()).callTool({ name: "list_dealerships", arguments: { query: "MCP", limit: 20 } });
+    const { dealerships } = result.structuredContent as { dealerships: { slug: string }[] };
+    expect(dealerships.map((d) => d.slug)).toEqual(["test-mcp-tools-a"]);
+    expect(JSON.stringify(result)).not.toContain(SECRET_EMAIL);
+  });
+
+  it("compare_cars returns the public cars side by side and the rest as notFound", async () => {
+    const ids = [idOf["A:AVAILABLE"], idOf["A:SOLD"], idOf["S:AVAILABLE"], idOf["A:UNAVAILABLE"]];
+    const result = await (await client()).callTool({ name: "compare_cars", arguments: { ids } });
+    const comparison = result.structuredContent as { cars: { id: string }[]; notFound: string[] };
+    expect(comparison.cars.map((car) => car.id)).toEqual([idOf["A:AVAILABLE"], idOf["A:SOLD"]]);
+    expect(comparison.notFound).toEqual([idOf["S:AVAILABLE"], idOf["A:UNAVAILABLE"]]);
+  });
+
+  it("the resources read what the tools show, and a hidden car or dealership is not found", async () => {
+    const mcp = await client();
+    const car = await mcp.readResource({ uri: `autome://car/${idOf["A:AVAILABLE"]}` });
+    expect(JSON.parse((car.contents[0] as { text: string }).text)).toMatchObject({ id: idOf["A:AVAILABLE"] });
+    const dealership = await mcp.readResource({ uri: "autome://dealership/test-mcp-tools-a" });
+    expect((dealership.contents[0] as { text: string }).text).not.toContain(SECRET_EMAIL);
+    for (const uri of [`autome://car/${idOf["S:AVAILABLE"]}`, "autome://dealership/test-mcp-tools-s", "autome://dealership/test-mcp-tools-d"]) {
+      await expect(mcp.readResource({ uri }), uri).rejects.toMatchObject({ code: -32002 });
+    }
+  });
+
   it("returns a dealer's injected text as the car's description and nothing more, and no private field", async () => {
     const result = await (await client()).callTool({ name: "get_car", arguments: { id: idOf["A:AVAILABLE"] } });
     const car = result.structuredContent as { description: { text: string }; dealership: Record<string, unknown> };
