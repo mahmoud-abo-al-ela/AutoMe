@@ -47,3 +47,32 @@ export function findTracesByUsage(aiUsageIds: string[]) {
     select: { aiUsageId: true, input: true, output: true, errorCode: true },
   });
 }
+
+const TRACE_FIELDS = {
+  id: true,
+  aiUsageId: true,
+  createdAt: true,
+  feature: true,
+  model: true,
+  promptVersion: true,
+  input: true,
+  output: true,
+  errorCode: true,
+} as const;
+
+/** The latest traces, newest first; only failed replies when `errorsOnly`. */
+export function findRecentTraces(filter: { limit: number; feature?: string; errorsOnly?: boolean }) {
+  return db.aiTrace.findMany({
+    where: {
+      ...(filter.feature && { feature: filter.feature }),
+      ...(filter.errorsOnly && { errorCode: { not: null } }),
+    },
+    orderBy: { createdAt: "desc" },
+    take: filter.limit,
+    select: TRACE_FIELDS,
+  });
+}
+
+export function findTraceById(id: string) {
+  return db.aiTrace.findUnique({ where: { id }, select: TRACE_FIELDS });
+}

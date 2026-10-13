@@ -20,8 +20,19 @@
  *   GRANT SELECT ON "AiUsage", "AiTrace" TO autome_ops_ro;
  *   ALTER ROLE autome_ops_ro SET default_transaction_read_only = on;
  *
+ * Optional:
+ *   OPS_MCP_REDIS_REST_URL + OPS_MCP_REDIS_READ_ONLY_TOKEN   the breaker's live
+ *     counters, with Upstash's read-only token; without them, the ledger.
+ *   OPS_MCP_EVAL_REPORT, OPS_MCP_EVAL_PREVIOUS_REPORT   eval-report.json files
+ *     from the nightly workflow, for get_latest_eval_report / compare_eval_runs.
+ *
+ * Tools: get_ai_usage_summary, get_recent_ai_errors, get_breaker_status,
+ * list_recent_traces, get_trace, get_latest_eval_report, compare_eval_runs.
+ * Each call is logged to stderr: time, tool, its arguments, outcome.
+ *
  * stdout carries the protocol: everything this file says goes to stderr.
  */
+import path from "node:path";
 import { checkOpsEnvironment, checkRolePosture, confineToReadOnly } from "@/lib/mcp/ops/guard";
 
 function refuse(problems: string[]): never {
@@ -45,8 +56,16 @@ async function main() {
   }
 
   const { createOpsMcpServer } = await import("@/lib/mcp/ops/server");
+  const { readOnlyRedis } = await import("@/lib/mcp/ops/redis");
   const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
-  await createOpsMcpServer().connect(new StdioServerTransport());
+  const file = (name: string) => (process.env[name] ? path.resolve(process.env[name]!) : undefined);
+  const server = createOpsMcpServer({
+    redis: readOnlyRedis(process.env),
+    evalReport: file("OPS_MCP_EVAL_REPORT"),
+    previousEvalReport: file("OPS_MCP_EVAL_PREVIOUS_REPORT"),
+    audit: (line) => console.error(line),
+  });
+  await server.connect(new StdioServerTransport());
   console.error("ai-ops: serving over stdio as a read-only role");
 }
 

@@ -58,6 +58,8 @@ AutoMe's cars for sale can be searched from any AI client that speaks the [Model
 
 Operators: the endpoint is off unless `MCP_PUBLIC_ENABLED=true`. `pnpm mcp:pilot-report --days 7` prints the pilot's numbers from the database `DATABASE_URL` points at; `pnpm mcp:load-test` checks the rate limits (it refuses production without `--production`).
 
+Developers: `pnpm -s mcp:ops` is a separate, internal MCP server over stdio for AI usage, errors, capacity, traces and evaluation runs. It runs only on a developer's machine, against a local database, as a read-only role it verifies at startup; setup and variables are in the header of `scripts/mcp/ai-ops/server.ts`, and `pnpm -s mcp:ops --check` tests them.
+
 ## SaaS model
 
 - **Tenancy.** Each dealership is an organization with its own members, roles, subdomain and data. Every repository query is scoped by an organization id resolved on the server from the session and subdomain — never from request input.

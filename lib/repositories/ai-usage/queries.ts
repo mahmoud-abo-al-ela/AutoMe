@@ -247,3 +247,24 @@ export async function getFailuresByCode(
         }))
         .sort((a, b) => b.count - a.count);
 }
+
+/** One failed attempt, as an operator reads it: what, where, when — no tenant or user. */
+export interface RecentFailure {
+    id: string;
+    createdAt: Date;
+    feature: string;
+    provider: string;
+    model: string;
+    errorCode: string | null;
+    latencyMs: number;
+}
+
+/** The latest failed attempts, newest first, across every feature and tenant. */
+export async function findRecentFailures(since: Date, limit: number): Promise<RecentFailure[]> {
+    return db.aiUsage.findMany({
+        where: { createdAt: { gte: since }, success: false },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        select: { id: true, createdAt: true, feature: true, provider: true, model: true, errorCode: true, latencyMs: true },
+    });
+}
