@@ -43,3 +43,8 @@ export function carUrl(id: string, locale: Locale, from?: LinkSource): string {
 export function dealershipUrl(slug: string, locale: Locale, from?: LinkSource): string {
   return link(`/${locale}/dealerships/${encodeURIComponent(slug)}`, from);
 }
+
+/** An absolute URL on AutoMe, e.g. an endpoint's own address for OAuth metadata. */
+export function siteUrl(path: string): string {
+  return link(path);
+}

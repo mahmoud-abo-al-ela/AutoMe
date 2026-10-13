@@ -183,3 +183,22 @@ export const ajMcpCostly = arcjet({
     }),
   ],
 });
+
+/**
+ * The signed-in MCP endpoint (app/api/mcp/account), per AutoMe user — the
+ * token's account, whatever address it calls from. A conversation reads a
+ * few lists; this is room for that and nothing like a sweep. Provisional,
+ * overridable like the public limits (MCP_ACCOUNT_RL_*, then a redeploy).
+ */
+export const ajMcpAccount = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["userId"],
+  rules: [
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: limitFromEnv("MCP_ACCOUNT_RL_REFILL", 20),
+      interval: 60,
+      capacity: limitFromEnv("MCP_ACCOUNT_RL_CAPACITY", 40),
+    }),
+  ],
+});

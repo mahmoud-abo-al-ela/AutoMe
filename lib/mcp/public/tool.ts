@@ -9,7 +9,12 @@ import { ToolTimeoutError, logToolError, toolErrorCode } from "./errors";
  * over the public catalog, testable without HTTP; runTool wraps every call the
  * same way — time budget, the costly-call limit, error codes, measures.
  */
-export interface PublicTool<Input extends z.ZodRawShape, Output extends z.ZodRawShape> {
+export interface PublicTool<
+  Input extends z.ZodRawShape,
+  Output extends z.ZodRawShape,
+  /** Who is calling: the address alone here; the signed-in user too on the account endpoint. */
+  Caller extends CallerContext = CallerContext,
+> {
   name: string;
   title: string;
   description: string;
@@ -17,7 +22,7 @@ export interface PublicTool<Input extends z.ZodRawShape, Output extends z.ZodRaw
   outputSchema: Output;
   /** Whether a call spends the costly-call window (free text, deep pages, comparisons). */
   costly?: (input: z.objectOutputType<Input, z.ZodTypeAny>) => boolean;
-  run: (input: z.objectOutputType<Input, z.ZodTypeAny>, caller: CallerContext) => Promise<ToolOutput<Output>>;
+  run: (input: z.objectOutputType<Input, z.ZodTypeAny>, caller: Caller) => Promise<ToolOutput<Output>>;
 }
 
 export interface ToolOutput<Output extends z.ZodRawShape> {
@@ -43,10 +48,10 @@ function withinBudget<T>(tool: string, work: Promise<T>): Promise<T> {
   return Promise.race([work, timeout]).finally(() => clearTimeout(timer));
 }
 
-export async function runTool<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
-  tool: PublicTool<Input, Output>,
+export async function runTool<Input extends z.ZodRawShape, Output extends z.ZodRawShape, Caller extends CallerContext>(
+  tool: PublicTool<Input, Output, Caller>,
   input: z.objectOutputType<Input, z.ZodTypeAny>,
-  caller: CallerContext
+  caller: Caller
 ): Promise<CallToolResult> {
   const started = Date.now();
   let resultCount: number | null = null;
