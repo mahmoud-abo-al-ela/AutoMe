@@ -1,6 +1,18 @@
 import type { Redis } from "@upstash/redis";
 import { countPlatformCallsSince, sumProviderTokensSince } from "@/lib/repositories/ai-usage";
 import { PROVIDERS, isProviderId, ledgerId, type ProviderCaps, type ProviderId } from "@/lib/ai/providers";
+import {
+  HOUR_MS,
+  MINUTE_MS,
+  dayBuckets,
+  minuteEstimate,
+  minuteKey,
+  monthKey,
+  readRedisWindows,
+  startOfMonthUtc,
+  total,
+  type Usage,
+} from "@/lib/ai/breaker-windows";
 import { getRedis } from "@/lib/redis";
 import { logError } from "@/lib/utils/errors";
 
@@ -103,19 +115,11 @@ export function poolLedger(provider: ProviderId, keyIndex: number, pool?: Capaci
   return pool ? `${ledger}:${pool}` : ledger;
 }
 
-function startOfMonthUtc(now: number): Date {
-  const date = new Date(now);
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
-}
-
-/** What one key has used, as the caps measure it. */
-interface Usage {
-  minute: number;
-  day: number;
-  tokens: number;
-}
-
-function blockFor(ledger: string, caps: ProviderCaps, usage: Usage): string | null {
+/**
+ * Why a key at these caps cannot take another call, or null if it can.
+ * Also read by breakerSnapshot, which reports it without acting on it.
+ */
+export function blockFor(ledger: string, caps: ProviderCaps, usage: Usage): string | null {
   if (usage.minute >= caps.rpm) return `${ledger}: ${usage.minute}/${caps.rpm} requests this minute`;
   if (caps.rpd !== undefined && usage.day >= caps.rpd) {
     return `${ledger}: ${usage.day}/${caps.rpd} requests today`;
@@ -126,37 +130,12 @@ function blockFor(ledger: string, caps: ProviderCaps, usage: Usage): string | nu
   return null;
 }
 
-// ---------- Redis counters ----------
-// Fixed windows, read so they behave like the rolling ones the ledger gives:
-// the minute is this bucket plus the previous one weighted by how much of it
-// is still inside the last 60 s; the day is the last 24 hourly buckets.
-
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-
-const minuteKey = (ledger: string, bucket: number) => `ai:rpm:${ledger}:${bucket}`;
-const hourKey = (ledger: string, bucket: number) => `ai:rph:${ledger}:${bucket}`;
-const monthKey = (ledger: string, now: number) => `ai:tok:${ledger}:${new Date(now).toISOString().slice(0, 7)}`;
-
-/** The last 24 hourly buckets, oldest first; the current one last. */
-function dayBuckets(ledger: string, now: number): string[] {
-  const current = Math.floor(now / HOUR_MS);
-  return Array.from({ length: 24 }, (_, i) => hourKey(ledger, current - 23 + i));
-}
-
-function minuteEstimate(now: number, current: number, previous: number): number {
-  const elapsed = (now % MINUTE_MS) / MINUTE_MS;
-  return Math.ceil(current + previous * (1 - elapsed));
-}
-
-const total = (values: unknown[]) => values.reduce<number>((sum, value) => sum + Number(value ?? 0), 0);
-
 /**
- * This month's tokens for a key. The first read of a month seeds the counter
- * from the ledger — a deploy mid-month must not start the allowance at zero.
+ * This month's tokens for a key whose counter is not there yet. The first
+ * read of a month seeds it from the ledger — a deploy mid-month must not
+ * start the allowance at zero.
  */
-async function monthTokens(redis: Redis, ledger: string, now: number, stored: unknown): Promise<number> {
-  if (stored !== null && stored !== undefined) return Number(stored);
+async function seedMonthTokens(redis: Redis, ledger: string, now: number): Promise<number> {
   const key = monthKey(ledger, now);
   const fromLedger = await sumProviderTokensSince(ledger, startOfMonthUtc(now));
   // NX: a seed that landed first wins. Forty days outlives the month.
@@ -165,21 +144,14 @@ async function monthTokens(redis: Redis, ledger: string, now: number, stored: un
 }
 
 async function redisUsage(redis: Redis, ledger: string, caps: ProviderCaps, now: number): Promise<Usage> {
-  const bucket = Math.floor(now / MINUTE_MS);
-  const values = await redis.mget<unknown[]>(
-    minuteKey(ledger, bucket),
-    minuteKey(ledger, bucket - 1),
-    ...dayBuckets(ledger, now),
-    monthKey(ledger, now)
-  );
-  return {
-    minute: minuteEstimate(now, Number(values[0] ?? 0), Number(values[1] ?? 0)),
-    day: total(values.slice(2, 26)),
-    tokens: caps.monthlyTokens === undefined ? 0 : await monthTokens(redis, ledger, now, values[26]),
-  };
+  const windows = await readRedisWindows(redis, ledger, now);
+  if (caps.monthlyTokens === undefined) return { minute: windows.minute, day: windows.day, tokens: 0 };
+  const tokens = windows.monthTokens ?? (await seedMonthTokens(redis, ledger, now));
+  return { minute: windows.minute, day: windows.day, tokens };
 }
 
-async function ledgerUsage(ledger: string, caps: ProviderCaps, now: number): Promise<Usage> {
+/** The same usage from the ledger alone: SELECTs only. Also breakerSnapshot's fallback. */
+export async function ledgerUsage(ledger: string, caps: ProviderCaps, now: number): Promise<Usage> {
   const [minute, day, tokens] = await Promise.all([
     countPlatformCallsSince(new Date(now - MINUTE_MS), ledger),
     caps.rpd === undefined ? Promise.resolve(0) : countPlatformCallsSince(new Date(now - 24 * HOUR_MS), ledger),

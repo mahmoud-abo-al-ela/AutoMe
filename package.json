@@ -30,7 +30,8 @@
     "db:reset": "prisma migrate reset --force && pnpm db:seed",
     "db:studio": "prisma studio",
     "mcp:pilot-report": "tsx --env-file=.env scripts/mcp/pilot-report.ts",
-    "mcp:load-test": "tsx scripts/mcp/load-test.ts"
+    "mcp:load-test": "tsx scripts/mcp/load-test.ts",
+    "mcp:ops": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.ops scripts/mcp/ai-ops/server.ts"
   },
   "dependencies": {
     "@arcjet/inspect": "1.0.0-beta.8",
