@@ -11,6 +11,7 @@ import {
   truncateForMeta,
 } from "@/lib/utils/seo-meta";
 import type { Locale } from "@/i18n/routing";
+import { mcpReferralMedium } from "@/lib/services/mcp/referrals";
 
 /**
  * The car detail page had no metadata at all, so every listing shared the
@@ -102,14 +103,18 @@ export async function generateMetadata({
 
 const CarPage = async ({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string; locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) => {
   const { id } = await params;
+  // Opened from an MCP answer's link: counted once the car is found.
+  const mcpMedium = mcpReferralMedium(await searchParams);
 
   return (
     <Suspense fallback={<PageSkeleton />}>
-      <CarContent id={id} />
+      <CarContent id={id} mcpMedium={mcpMedium} />
     </Suspense>
   );
 };

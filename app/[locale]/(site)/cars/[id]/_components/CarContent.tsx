@@ -18,6 +18,8 @@ import { getTranslations } from "next-intl/server";
 import { isListingAssistantOffered } from "@/lib/services/car/listing-assistant";
 import { marketPricesFor, toMarketPosition } from "@/lib/services/car/market-price";
 import { logError } from "@/lib/utils/errors";
+import { after } from "next/server";
+import { recordMcpReferral } from "@/lib/services/mcp/referrals";
 
 /**
  * Whether this dealer's plan offers buyers the assistant, with answers left
@@ -33,7 +35,7 @@ async function assistantOffered(organizationId: string): Promise<boolean> {
   }
 }
 
-const CarContent = async ({ id }: { id: string }) => {
+const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: string | null }) => {
   // Server component: getTranslations, not the useTranslations hook.
   const t = await getTranslations("carDetail.errors");
   let car: CarDetail;
@@ -57,6 +59,13 @@ const CarContent = async ({ id }: { id: string }) => {
   }
 
   if (!car) return notFound();
+
+  // A visit from an MCP answer's link, counted after the response — only now
+  // that the car is found, so a made-up id counts nothing.
+  if (mcpMedium) {
+    const medium = mcpMedium;
+    after(() => recordMcpReferral("car", car.id, medium));
+  }
 
   const [showAssistant, marketPrices] = await Promise.all([
     assistantOffered(car.organizationId),

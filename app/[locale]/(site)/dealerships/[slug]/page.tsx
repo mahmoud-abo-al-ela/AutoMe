@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { formatNumber } from "@/lib/utils/number";
 import type { Locale } from "@/i18n/routing";
 import * as dealershipService from "@/lib/services/dealership";
+import { mcpReferralMedium, recordMcpReferral } from "@/lib/services/mcp/referrals";
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { dealershipTranslationPlan, resolveDealershipText } from "@/lib/utils/dealership-text";
@@ -38,7 +39,7 @@ const loadDealership = cache(async (slug: string) => {
 
 type PageProps = {
     params: Promise<{ slug: string; locale: string }>;
-    searchParams: Promise<{ tab?: string | string[] }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({ params }: Pick<PageProps, "params">): Promise<Metadata> {
@@ -98,6 +99,11 @@ export default async function DealershipDetailPage({ params, searchParams }: Pag
     const { slug, locale } = await params;
     const dealership = await loadDealership(slug);
     if (!dealership) notFound();
+
+    // A visit from an MCP answer's link, counted after the response, now that
+    // the dealership is found.
+    const mcpMedium = mcpReferralMedium(await searchParams);
+    if (mcpMedium) after(() => recordMcpReferral("dealership", dealership.slug, mcpMedium));
 
     // A description or address saved before translation existed (or whose
     // translation failed) is translated after this response — nobody waits on it, and the

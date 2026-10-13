@@ -16,7 +16,8 @@ export interface LinkSource {
 }
 
 function siteBase(): string {
-  const raw = process.env.NEXT_PUBLIC_APP_URL;
+  // Like the billing links: the dev server outside production, never a guess in it.
+  const raw = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000");
   try {
     const url = new URL(raw ?? "");
     // A trailing slash in the setting must not make "//en/cars".

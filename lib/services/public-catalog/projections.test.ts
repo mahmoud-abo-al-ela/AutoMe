@@ -130,8 +130,11 @@ describe("links", () => {
     );
   });
 
-  it("refuse to exist without a configured site", () => {
+  it("refuse to exist in production without a configured site, and point at the dev server outside it", () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+    vi.stubEnv("NODE_ENV", "production");
     expect(() => carUrl("car-1", "en")).toThrow(ServiceUnavailableError);
+    vi.stubEnv("NODE_ENV", "development");
+    expect(carUrl("car-1", "en")).toBe("http://localhost:3000/en/cars/car-1");
   });
 });

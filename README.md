@@ -46,6 +46,18 @@ AI is not a feature bolted onto the side — it is how a car gets listed, how a 
 | **Photo descriptions** | Describes each photo for accessibility, SEO and the assistant's knowledge of what the car looks like | Platform-paid and low priority, so it never competes with a dealer waiting on the AI |
 | **Photo search** | Buyers search the marketplace with a photo of a car they like | Runs on a fast, separate model chain; metered but never billed to a dealership |
 
+## Use AutoMe from an AI assistant (MCP)
+
+AutoMe's cars for sale can be searched from any AI client that speaks the [Model Context Protocol](https://modelcontextprotocol.io) — for example Claude.
+
+- **Endpoint:** `https://auto-me.vercel.app/api/mcp` (Streamable HTTP, no sign-in).
+- **In Claude:** Settings → Connectors → *Add custom connector*, name `AutoMe`, the URL above, no OAuth. Then turn it on in a chat with **+ → Connectors** and ask, for example, *"Find an automatic SUV under 1.5 million EGP on AutoMe"* or *"عندكم تويوتا كورولا؟"*.
+- **Tools** (all read-only): `search_cars` (words in English or Arabic, typos tolerated, plus filters), `get_car`, `compare_cars`, `list_dealerships`, `get_search_options`. Resources `autome://car/{id}` and `autome://dealership/{slug}`; prompts `find_a_car` and `compare_cars`.
+- **What it shows:** exactly what any visitor sees — cars on sale from active dealerships, never hidden cars, a dealer's email or anything private. Searching uses words only: no AI model runs for it.
+- **Limits:** up to 20 results per page and 20 pages; requests are rate-limited per caller. Each call is measured (tool, duration, result count, error) without the query text, the caller's address or any user.
+
+Operators: the endpoint is off unless `MCP_PUBLIC_ENABLED=true`. `pnpm mcp:pilot-report --days 7` prints the pilot's numbers from the database `DATABASE_URL` points at; `pnpm mcp:load-test` checks the rate limits (it refuses production without `--production`).
+
 ## SaaS model
 
 - **Tenancy.** Each dealership is an organization with its own members, roles, subdomain and data. Every repository query is scoped by an organization id resolved on the server from the session and subdomain — never from request input.
