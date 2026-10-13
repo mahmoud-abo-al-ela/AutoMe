@@ -65,6 +65,15 @@ describe("POST /api/mcp", () => {
     expect((await post(big)).status).toBe(413);
   });
 
+  it("serves a client that accepts JSON only — this server only ever answers in JSON", async () => {
+    const response = await post(rpc("tools/list"), { accept: "application/json" });
+    expect(response.status).toBe(200);
+    expect((await response.json()).result.tools.length).toBeGreaterThan(0);
+    expect((await post(rpc("tools/list"), { accept: "*/*" })).status).toBe(200);
+    // One that reads neither is still refused.
+    expect((await post(rpc("tools/list"), { accept: "text/html" })).status).toBe(406);
+  });
+
   it("answers a body that is not JSON with a JSON-RPC parse error", async () => {
     const response = await post("{not json");
     expect(response.status).toBe(400);

@@ -139,9 +139,10 @@ function limitFromEnv(name: string, fallback: number): number {
  * spends a buyer's bucket. Every value is provisional — tuned from the pilot's
  * load test and data — and overridable without a deploy (MCP_RL_*).
  *
- * MCP clients are programs by definition, so bots are only observed
- * (DRY_RUN logs each caller's category), never denied wholesale; the limits
- * are what stop a crawler. The fixed window keyed on one constant is a ceiling
+ * No bot detection: MCP clients are programs by definition, and Arcjet's bot
+ * rule errors on a request with no User-Agent — which this endpoint then
+ * refused as "unavailable". The limits are what stop a crawler; the measures
+ * record each client's name. The fixed window keyed on one constant is a ceiling
  * across all callers together, which protects the database from a spread-out
  * burst that no per-IP bucket sees.
  */
@@ -150,7 +151,6 @@ export const ajMcpPublic = arcjet({
   characteristics: ["ip.src"],
   rules: [
     shield({ mode: arcjetMode }),
-    detectBot({ mode: "DRY_RUN", allow: [] }),
     tokenBucket({
       mode: "LIVE",
       refillRate: limitFromEnv("MCP_RL_IP_REFILL", 30),
