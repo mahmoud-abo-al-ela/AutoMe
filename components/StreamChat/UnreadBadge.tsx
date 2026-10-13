@@ -4,6 +4,7 @@ import { logError } from "@/lib/utils/errors";
 import { useEffect, useState, Component } from "react";
 import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
+import { useConnectedChat } from "./connected-chat";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -116,6 +117,8 @@ function UnreadBadgeInner({ className, organizationId }: UnreadBadgeProps) {
 }
 
 export function UnreadBadge({ className, organizationId }: UnreadBadgeProps) {
+    // Nothing to count before chat connects (and on the server).
+    if (!useConnectedChat()) return null;
     return (
         <UnreadBadgeErrorBoundary>
             <UnreadBadgeInner className={className} organizationId={organizationId} />

@@ -4,6 +4,7 @@ import { logError } from "@/lib/utils/errors";
 import { useEffect, useState, Component } from "react";
 import { useTranslations } from "next-intl";
 import { useChatContext } from "stream-chat-react";
+import { useConnectedChat } from "./connected-chat";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -124,6 +125,8 @@ function OrgUnreadBadgeInner({ organizationId, className }: OrgUnreadBadgeProps)
 }
 
 export function OrgUnreadBadge({ organizationId, className }: OrgUnreadBadgeProps) {
+    // Nothing to count before chat connects (and on the server).
+    if (!useConnectedChat()) return null;
     return (
         <OrgUnreadBadgeErrorBoundary>
             <OrgUnreadBadgeInner organizationId={organizationId} className={className} />
@@ -153,6 +156,7 @@ export function OrgUnreadCount({
     organizationId?: string | null;
     children: (count: number | null) => React.ReactNode;
 }) {
+    if (!useConnectedChat()) return <>{children(null)}</>;
     return (
         <OrgUnreadBadgeErrorBoundary fallback={children(null)}>
             <OrgUnreadCountInner organizationId={organizationId}>{children}</OrgUnreadCountInner>
