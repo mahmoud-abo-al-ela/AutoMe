@@ -928,3 +928,17 @@ model McpToolCall {
   @@index([createdAt]) // retention and time windows
   @@index([tool, createdAt])
 }
+
+/// A visit that came from an MCP answer: a car or dealership page opened from
+/// a link a public MCP tool returned (utm_source=mcp). What the pilot counts
+/// as "the answer led somewhere" — never who visited: no IP, no user. Kept 30 days.
+model McpReferral {
+  id        String   @id @default(uuid())
+  kind      String   // "car" | "dealership"
+  target    String   // the car's id or the dealership's slug
+  medium    String   // the tool whose answer held the link, e.g. "search_cars"
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([medium, createdAt])
+}
