@@ -6,6 +6,7 @@ import aj, {
   ajMcpPublic,
   ajMcpCostly,
   ajMcpAccount,
+  ajMcpAccountTestDrives,
   arcjetConfigured,
   arcjetRequired,
 } from "@/lib/arcjet";
@@ -189,4 +190,18 @@ export async function enforceMcpAccountLimit(userId: string) {
   const decision = await ajMcpAccount.protect(req, { requested: 1, userId });
 
   assertArcjetAllowed(decision);
+}
+
+/**
+ * Enforce the daily test-drive limit on the signed-in MCP endpoint (see
+ * ajMcpAccountTestDrives), per AutoMe user and per kind of change.
+ */
+export async function enforceMcpAccountTestDriveLimit(userId: string, action: "request" | "cancel") {
+  assertArcjetConfigured();
+  if (!arcjetConfigured) return;
+
+  const req = await request();
+  const decision = await ajMcpAccountTestDrives.protect(req, { userId, mcpAction: action });
+
+  assertArcjetAllowed(decision, "Too many test-drive changes today. Please try again tomorrow.");
 }

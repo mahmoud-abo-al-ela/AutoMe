@@ -79,6 +79,7 @@ export async function sendTestDriveConfirmationEmail({
   endTime,
   dealershipName,
   dealershipAddress,
+  requestedVia,
 }: TestDriveConfirmationParams & { to: string }): SendResult {
   if (!process.env.EMAILJS_PUBLIC_KEY || !process.env.EMAILJS_PRIVATE_KEY || !process.env.EMAILJS_SERVICE_ID) return null;
 
@@ -94,6 +95,7 @@ export async function sendTestDriveConfirmationEmail({
         endTime,
         dealershipName,
         dealershipAddress,
+        requestedVia,
       }),
     });
     if (error) logError("Error sending test drive confirmation:", error);

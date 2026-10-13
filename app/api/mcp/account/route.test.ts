@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   auth: vi.fn(),
   enforceMcpPublicLimit: vi.fn(),
   enforceMcpAccountLimit: vi.fn(),
+  enforceMcpAccountTestDriveLimit: vi.fn(),
   recordToolCall: vi.fn(),
   findUserByClerkIdWithMemberships: vi.fn(),
   setCarSaved: vi.fn(),
@@ -14,6 +15,7 @@ vi.mock("@clerk/nextjs/server", () => ({ auth: mocks.auth }));
 vi.mock("@/lib/middleware/with-rate-limit", () => ({
   enforceMcpPublicLimit: mocks.enforceMcpPublicLimit,
   enforceMcpAccountLimit: mocks.enforceMcpAccountLimit,
+  enforceMcpAccountTestDriveLimit: mocks.enforceMcpAccountTestDriveLimit,
   enforceMcpCostlyLimit: vi.fn(),
 }));
 vi.mock("@/lib/services/mcp/telemetry", () => ({ recordToolCall: mocks.recordToolCall }));
@@ -36,7 +38,8 @@ const rpc = (method: string, params: unknown = {}) => ({ jsonrpc: "2.0", id: 1, 
 const post = (body: unknown, headers: Record<string, string> = {}) =>
   POST(new Request("https://auto-me.example/api/mcp/account", { method: "POST", headers: { ...HEADERS, ...headers }, body: JSON.stringify(body) }));
 
-const signedIn = (userId = "user_clerk_1") => mocks.auth.mockResolvedValue({ isAuthenticated: true, userId, tokenType: "oauth_token" });
+const signedIn = (userId = "user_clerk_1") =>
+  mocks.auth.mockResolvedValue({ isAuthenticated: true, userId, tokenType: "oauth_token", clientId: "https://claude.ai/oauth/mcp-oauth-client-metadata" });
 const signedOut = () => mocks.auth.mockResolvedValue({ isAuthenticated: false, tokenType: "oauth_token" });
 
 beforeEach(() => {
@@ -92,11 +95,13 @@ describe("POST /api/mcp/account", () => {
     const response = await post(rpc("tools/list"), { authorization: "Bearer valid" });
     const { result } = (await response.json()) as { result: { tools: { name: string; inputSchema: { properties: object }; annotations: object }[] } };
     const tools = Object.fromEntries(result.tools.map((tool) => [tool.name, tool]));
-    expect(Object.keys(tools)).toEqual(["list_saved_cars", "list_my_test_drives", "save_car", "unsave_car"]);
+    expect(Object.keys(tools)).toEqual(["list_saved_cars", "list_my_test_drives", "save_car", "unsave_car", "request_test_drive", "cancel_test_drive"]);
     for (const tool of result.tools) expect(Object.keys(tool.inputSchema.properties)).not.toContain("userId");
     expect(tools.list_saved_cars.annotations).toMatchObject({ readOnlyHint: true });
     expect(tools.save_car.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: true });
     expect(tools.unsave_car.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true, idempotentHint: true });
+    expect(tools.request_test_drive.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, openWorldHint: true });
+    expect(tools.cancel_test_drive.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true, openWorldHint: true });
   });
 
   it("saves and unsaves for the token's account, with its memberships for the buyer policy", async () => {
@@ -148,5 +153,30 @@ describe("POST /api/mcp/account", () => {
 
   it("answers GET with 405", async () => {
     expect((await GET()).status).toBe(405);
+  });
+
+  it("limits test-drive requests per user per day, before booking anything", async () => {
+    signedIn();
+    mocks.enforceMcpAccountTestDriveLimit.mockRejectedValueOnce(new RateLimitError("too many today"));
+    const body = await (
+      await post(
+        rpc("tools/call", { name: "request_test_drive", arguments: { carId: "11111111-1111-4111-8111-111111111111", date: "2026-10-20", startTime: "10:00", endTime: "11:00" } }),
+        { authorization: "Bearer valid" }
+      )
+    ).json();
+    expect(body.result).toMatchObject({ isError: true, structuredContent: { error: "rate_limited" } });
+    expect(mocks.enforceMcpAccountTestDriveLimit).toHaveBeenCalledWith("db-user-1", "request");
+  });
+
+  it("refuses a malformed request before any limit or booking", async () => {
+    signedIn();
+    const body = await (
+      await post(
+        rpc("tools/call", { name: "request_test_drive", arguments: { carId: "not-a-uuid", date: "20/10/2026", startTime: "25:00", endTime: "11:00" } }),
+        { authorization: "Bearer valid" }
+      )
+    ).json();
+    expect(JSON.stringify(body)).toMatch(/error/i);
+    expect(mocks.enforceMcpAccountTestDriveLimit).not.toHaveBeenCalled();
   });
 });

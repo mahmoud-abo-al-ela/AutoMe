@@ -19,6 +19,8 @@ import type { CallerContext, PublicTool } from "../public/tool";
 
 export interface AccountCallerContext extends CallerContext {
   user: AccountCaller;
+  /** The app the person signed in with, to name it where it acted for them; null if unknown. */
+  client: string | null;
 }
 
 const locale = z.enum(["en", "ar"]).default("en").describe("Language for the links: en or ar.");
