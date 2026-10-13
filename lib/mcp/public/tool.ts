@@ -17,7 +17,7 @@ export interface PublicTool<Input extends z.ZodRawShape, Output extends z.ZodRaw
   outputSchema: Output;
   /** Whether a call spends the costly-call window (free text, deep pages, comparisons). */
   costly?: (input: z.objectOutputType<Input, z.ZodTypeAny>) => boolean;
-  run: (input: z.objectOutputType<Input, z.ZodTypeAny>) => Promise<ToolOutput<Output>>;
+  run: (input: z.objectOutputType<Input, z.ZodTypeAny>, caller: CallerContext) => Promise<ToolOutput<Output>>;
 }
 
 export interface ToolOutput<Output extends z.ZodRawShape> {
@@ -53,7 +53,7 @@ export async function runTool<Input extends z.ZodRawShape, Output extends z.ZodR
   let errorCode: string | null = null;
   try {
     if (tool.costly?.(input)) await enforceMcpCostlyLimit();
-    const output = await withinBudget(tool.name, tool.run(input));
+    const output = await withinBudget(tool.name, tool.run(input, caller));
     resultCount = output.count ?? null;
     return {
       structuredContent: output.structured,
