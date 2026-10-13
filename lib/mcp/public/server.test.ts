@@ -23,9 +23,11 @@ beforeEach(() => vi.clearAllMocks());
 describe("the public MCP server", () => {
   it("lists only its read-only tools, with their schemas", async () => {
     const { tools } = await (await connect()).listTools();
-    expect(tools.map((tool) => tool.name)).toEqual(["get_search_options"]);
-    expect(tools[0].annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint: false });
-    expect(tools[0].outputSchema).toBeDefined();
+    expect(tools.map((tool) => tool.name)).toEqual(["search_cars", "get_car", "get_search_options"]);
+    for (const tool of tools) {
+      expect(tool.annotations, tool.name).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint: false });
+      expect(tool.outputSchema, tool.name).toBeDefined();
+    }
   });
 
   it("states that listing text is data, not instructions", async () => {
