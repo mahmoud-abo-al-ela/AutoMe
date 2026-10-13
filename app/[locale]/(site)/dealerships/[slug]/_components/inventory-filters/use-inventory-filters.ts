@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { buildActiveChips } from "./filter-utils";
-import type { DealershipInventoryFilterState, DealershipInventoryProps } from "../../_lib/detail-types";
+import type { DealershipInventoryFilterState, DealershipInventoryProps, InventorySort } from "../../_lib/detail-types";
 
 /**
  * The multi-select facets are stored as comma-separated strings, and the chip
@@ -93,8 +93,9 @@ export function useInventoryFilters({
         });
     };
 
+    // The select offers INVENTORY_SORTS only, so its value is one of them.
     const handleSortChange = (val: string) => {
-        onFilterChange({ ...filters, sortBy: val });
+        onFilterChange({ ...filters, sortBy: val as InventorySort });
     };
 
     const handleClearAll = () => {

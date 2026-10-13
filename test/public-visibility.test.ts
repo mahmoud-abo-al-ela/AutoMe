@@ -12,6 +12,13 @@ import * as carRepository from "@/lib/repositories/car";
 import { findComparablePool } from "@/lib/repositories/car/queries/market";
 import { findInventory } from "@/lib/repositories/dashboard/inventory";
 import { findActiveOrganizationBySlug } from "@/lib/repositories/tenant";
+import {
+  findDealershipCars,
+  findPublicDealershipIdBySlug,
+  getDealershipCarFilterOptions,
+} from "@/lib/repositories/dealership/queries/detail";
+import { countDealershipReviewsByRating, findDealershipReviews } from "@/lib/repositories/dealership/queries/reviews";
+import { getDealershipBySlug } from "@/lib/services/dealership/detail";
 import { getUserWishlist } from "@/lib/repositories/user/wishlist";
 import { getPublicCarById } from "@/lib/services/car/storefront";
 import { getBookedTimeSlots, getCarWorkingHours } from "@/lib/services/test-drive/booking";
@@ -56,6 +63,9 @@ describe.skipIf(!hasTestDb)("public visibility (real Postgres)", () => {
       ],
     });
     await db.user.create({ data: { id: USER, clerkId: `clerk_${USER}` } });
+    await db.dealershipReview.createMany({
+      data: Object.values(ORGS).map((organizationId) => ({ organizationId, userId: USER, rating: 5, isApproved: true })),
+    });
 
     let price = 400_000;
     for (const [org, organizationId] of Object.entries(ORGS) as [keyof typeof ORGS, string][]) {
@@ -145,6 +155,31 @@ describe.skipIf(!hasTestDb)("public visibility (real Postgres)", () => {
 
     it("a saved list keeps only the cars that can be opened", async () => {
       expect(keys((await getUserWishlist(USER, { limit: 50 })).cars)).toEqual(OPENED);
+    });
+  });
+
+  describe("a dealership's public page", () => {
+    it("is found by slug only while public, and never shows the email or the plan", async () => {
+      expect(await findPublicDealershipIdBySlug("test-visibility-a")).toBe(ORGS.A);
+      expect(await findPublicDealershipIdBySlug("test-visibility-s")).toBeNull();
+      expect(await findPublicDealershipIdBySlug("test-visibility-d")).toBeNull();
+      const page = await getDealershipBySlug("test-visibility-a");
+      for (const field of ["email", "pendingOwnerEmail", "planType", "planName", "subscription", "settings", "theme"]) {
+        expect(page, field).not.toHaveProperty(field);
+      }
+      await expect(getDealershipBySlug("test-visibility-s")).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    it("lists no cars, filter options or reviews of a hidden dealership, even by its id", async () => {
+      for (const org of ["S", "D"] as const) {
+        expect((await findDealershipCars(ORGS[org], {}, { limit: 50 })).cars).toEqual([]);
+        const options = await getDealershipCarFilterOptions(ORGS[org]);
+        expect(options.bodyTypes ?? []).toEqual([]);
+        expect((await findDealershipReviews(ORGS[org], { limit: 50 })).reviews).toEqual([]);
+        expect(await countDealershipReviewsByRating(ORGS[org])).toEqual([]);
+      }
+      expect(keys((await findDealershipCars(ORGS.A, {}, { limit: 50 })).cars)).toEqual(LISTED);
+      expect((await findDealershipReviews(ORGS.A, { limit: 50 })).reviews).toHaveLength(1);
     });
   });
 

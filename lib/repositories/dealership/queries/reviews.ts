@@ -1,5 +1,6 @@
 // Dealership repository - review queries
 import { db } from "@/lib/prisma";
+import { PUBLIC_DEALERSHIP_WHERE } from "@/lib/repositories/car/visibility";
 
 export async function findDealershipReviews(
     organizationId: string,
@@ -13,6 +14,7 @@ export async function findDealershipReviews(
             where: {
                 organizationId,
                 isApproved: true,
+                organization: { is: PUBLIC_DEALERSHIP_WHERE },
             },
             include: {
                 user: {
@@ -33,6 +35,7 @@ export async function findDealershipReviews(
             where: {
                 organizationId,
                 isApproved: true,
+                organization: { is: PUBLIC_DEALERSHIP_WHERE },
             },
         }),
     ]);
@@ -53,7 +56,7 @@ export async function findDealershipReviews(
 export async function countDealershipReviewsByRating(organizationId: string) {
     const rows = await db.dealershipReview.groupBy({
         by: ["rating"],
-        where: { organizationId, isApproved: true },
+        where: { organizationId, isApproved: true, organization: { is: PUBLIC_DEALERSHIP_WHERE } },
         _count: { _all: true },
     });
     return rows.map((row) => ({ rating: row.rating, count: row._count._all }));

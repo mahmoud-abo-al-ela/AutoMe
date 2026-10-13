@@ -16,7 +16,7 @@ import FilterCheckboxPopover from "./inventory-filters/FilterCheckboxPopover";
 import FilterCheckboxGroup from "./inventory-filters/FilterCheckboxGroup";
 import ActiveFilterChips from "./inventory-filters/ActiveFilterChips";
 import { useInventoryFilters } from "./inventory-filters/use-inventory-filters";
-import type { DealershipInventoryProps } from "../_lib/detail-types";
+import { INVENTORY_SORTS, type DealershipInventoryProps } from "../_lib/detail-types";
 
 export const DealershipInventoryFilters = ({
     filters,
@@ -213,7 +213,7 @@ export const DealershipInventoryFilters = ({
                         <SelectValue placeholder={t("sortPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                        {(["newest", "priceAsc", "priceDesc", "year", "mileage"] as const).map((value) => (
+                        {INVENTORY_SORTS.map((value) => (
                             <SelectItem key={value} value={value} className="min-h-10 cursor-pointer">
                                 {t(`sort.${value}`)}
                             </SelectItem>
