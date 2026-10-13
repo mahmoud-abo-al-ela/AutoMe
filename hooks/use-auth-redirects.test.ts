@@ -48,11 +48,14 @@ const files = SOURCE_ROOTS.filter((dir) => fs.existsSync(dir)).flatMap((dir) =>
   sourceFiles(dir)
 );
 
+// Read once: three checks re-reading every file from disk ran past the
+// 5 s test timeout when the whole suite was loading the machine.
+const sources = files.map((file) => ({ file, source: fs.readFileSync(file, "utf8") }));
+
 const offendersFor = (pattern: RegExp) => {
   const offenders: string[] = [];
 
-  for (const file of files) {
-    const source = fs.readFileSync(file, "utf8");
+  for (const { file, source } of sources) {
     for (const match of source.matchAll(pattern)) {
       const line = source.slice(0, match.index).split("\n").length;
       offenders.push(`${file}:${line} ${match[0].trim()}`);
