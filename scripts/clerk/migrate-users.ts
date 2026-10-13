@@ -19,6 +19,8 @@
  * in the target by an account that is not a copy is reported, never touched.
  * Passwords cannot be read from Clerk's API, so copies have none — AutoMe's
  * users sign in with Google, which Clerk links to the copy by its email.
+ * A profile picture is not part of creating a user either: it is uploaded to
+ * each copy afterwards, also on a re-run, for a copy that has none yet.
  * Output names Clerk IDs only, never an email.
  */
 
@@ -34,6 +36,8 @@ interface ClerkUser {
   private_metadata: Record<string, unknown>;
   unsafe_metadata: Record<string, unknown>;
   created_at: number;
+  has_image: boolean;
+  image_url: string;
 }
 
 const API = "https://api.clerk.com/v1";
@@ -69,6 +73,26 @@ async function allUsers(call: ReturnType<typeof client>): Promise<ClerkUser[]> {
   }
 }
 
+/**
+ * Give a copy the source's profile picture when it has one and the copy has
+ * none. Clerk takes it as a file upload, not a URL, so it is fetched first.
+ */
+async function copyImage(source: ClerkUser, target: ClerkUser, toKey: string, apply: boolean): Promise<"copied" | "would" | "none"> {
+  if (!source.has_image || target.has_image) return "none";
+  if (!apply) return "would";
+  const image = await fetch(source.image_url);
+  if (!image.ok) throw new Error(`fetching the picture of ${source.id} → ${image.status}`);
+  const form = new FormData();
+  form.append("file", new Blob([await image.arrayBuffer()], { type: image.headers.get("content-type") ?? "image/jpeg" }), "profile");
+  const response = await fetch(`${API}/users/${target.id}/profile_image`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${toKey}` },
+    body: form,
+  });
+  if (!response.ok) throw new Error(`uploading the picture of ${target.id} → ${response.status} ${await response.text()}`);
+  return "copied";
+}
+
 const primaryEmail = (user: ClerkUser) =>
   user.email_addresses.find((email) => email.id === user.primary_email_address_id)?.email_address ??
   user.email_addresses[0]?.email_address ??
@@ -82,7 +106,12 @@ async function main() {
   const to = client(toKey);
 
   const users = await allUsers(from);
-  const outcome = { copied: 0, wouldCopy: 0, alreadyCopied: 0, emailTaken: 0, noEmail: 0 };
+  const outcome = { copied: 0, wouldCopy: 0, alreadyCopied: 0, emailTaken: 0, noEmail: 0, imagesCopied: 0, imagesToCopy: 0 };
+  const countImage = (result: Awaited<ReturnType<typeof copyImage>>, id: string) => {
+    if (result === "copied") outcome.imagesCopied++;
+    if (result === "would") outcome.imagesToCopy++;
+    if (result !== "none") console.info(`  ${id}: picture ${result === "copied" ? "copied" : "would be copied"}`);
+  };
   console.info(`${users.length} users in the source instance — ${apply ? "copying" : "dry run"}`);
 
   for (const user of users) {
@@ -90,6 +119,7 @@ async function main() {
     if (existing.length > 0) {
       outcome.alreadyCopied++;
       console.info(`  ${user.id}: already copied as ${existing[0].id}`);
+      countImage(await copyImage(user, existing[0], toKey, apply), user.id);
       continue;
     }
     const email = primaryEmail(user);
@@ -108,6 +138,7 @@ async function main() {
     if (!apply) {
       outcome.wouldCopy++;
       console.info(`  ${user.id}: would copy`);
+      if (user.has_image) countImage("would", user.id);
       continue;
     }
     const created = await to<ClerkUser>("/users", {
@@ -127,6 +158,7 @@ async function main() {
     });
     outcome.copied++;
     console.info(`  ${user.id}: copied as ${created.id}`);
+    countImage(await copyImage(user, created, toKey, apply), user.id);
   }
 
   console.info(JSON.stringify(outcome));
