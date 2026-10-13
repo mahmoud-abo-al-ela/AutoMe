@@ -42,6 +42,11 @@ const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"]);
 // marketplace.
 const isCrawlerFile = createRouteMatcher(["/sitemap.xml", "/robots.txt"]);
 
+// Discovery documents (OAuth for MCP clients, among others) live at the root,
+// per host. Localized, they were redirected to /en/.well-known/… and answered
+// with an HTML page where a client expects a plain 404.
+const isWellKnown = createRouteMatcher(["/.well-known/(.*)"]);
+
 const isPublicApiRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
@@ -201,7 +206,7 @@ export default async function middleware(
   req: NextRequest,
   event: NextFetchEvent
 ) {
-  if (isApiRoute(req) || isCrawlerFile(req)) {
+  if (isApiRoute(req) || isCrawlerFile(req) || isWellKnown(req)) {
     return clerk(req, event);
   }
 

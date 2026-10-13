@@ -34,6 +34,21 @@ function parseError() {
   return NextResponse.json({ jsonrpc: "2.0", error: { code: -32700, message: "Parse error" }, id: null }, { status: 400, headers: NEVER });
 }
 
+/**
+ * The request as the transport should see it. Streamable HTTP asks clients to
+ * accept JSON and an event stream, and the SDK refuses one that accepts only
+ * JSON (406) — but this server only ever answers in JSON, so a client that can
+ * read JSON is served. Anything that accepts neither is still refused.
+ */
+function forTransport(request: Request): Request {
+  const accept = request.headers.get("accept") ?? "";
+  const readsJson = accept === "" || accept.includes("application/json") || accept.includes("*/*");
+  if (!readsJson || accept.includes("text/event-stream")) return request;
+  const headers = new Headers(request.headers);
+  headers.set("accept", "application/json, text/event-stream");
+  return new Request(request.url, { method: request.method, headers });
+}
+
 /** The caller's address, for the daily-salted hash in the measures only — never stored as is. */
 function callerIp(request: Request): string | null {
   return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
@@ -70,7 +85,7 @@ export async function POST(request: Request) {
   const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
   try {
     await server.connect(transport);
-    const response = await transport.handleRequest(request, { parsedBody: body });
+    const response = await transport.handleRequest(forTransport(request), { parsedBody: body });
     const headers = new Headers(response.headers);
     headers.set("Cache-Control", "no-store");
     return new Response(response.body, { status: response.status, headers });
