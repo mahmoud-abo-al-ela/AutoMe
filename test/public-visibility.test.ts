@@ -19,6 +19,7 @@ import {
 } from "@/lib/repositories/dealership/queries/detail";
 import { countDealershipReviewsByRating, findDealershipReviews } from "@/lib/repositories/dealership/queries/reviews";
 import { getDealershipBySlug } from "@/lib/services/dealership/detail";
+import { getPublicCar, searchPublicCars } from "@/lib/services/public-catalog";
 import { getUserWishlist } from "@/lib/repositories/user/wishlist";
 import { getPublicCarById } from "@/lib/services/car/storefront";
 import { getBookedTimeSlots, getCarWorkingHours } from "@/lib/services/test-drive/booking";
@@ -155,6 +156,21 @@ describe.skipIf(!hasTestDb)("public visibility (real Postgres)", () => {
 
     it("a saved list keeps only the cars that can be opened", async () => {
       expect(keys((await getUserWishlist(USER, { limit: 50 })).cars)).toEqual(OPENED);
+    });
+  });
+
+  describe("the public catalog (MCP's view)", () => {
+    it("searches and opens exactly what the site does", async () => {
+      expect(keys((await searchPublicCars({ make: [MAKE], limit: 20 }, "en")).cars)).toEqual(LISTED);
+      expect(keys((await searchPublicCars({ query: MAKE, limit: 20 }, "ar")).cars)).toEqual(LISTED);
+      expect((await searchPublicCars({ query: MAKE, dealership: "test-visibility-s" }, "en")).cars).toEqual([]);
+      for (const key of Object.keys(idOf) as Key[]) {
+        if (OPENED.includes(key)) {
+          expect((await getPublicCar(idOf[key], "en")).id, key).toBe(idOf[key]);
+        } else {
+          await expect(getPublicCar(idOf[key], "en"), key).rejects.toBeInstanceOf(NotFoundError);
+        }
+      }
     });
   });
 
