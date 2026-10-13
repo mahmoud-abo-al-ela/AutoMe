@@ -11,6 +11,7 @@ vi.hoisted(() => {
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { searchCarsRanked } from "@/lib/repositories/car/search";
+import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { db } from "@/lib/prisma";
 import {
   CARS,
@@ -139,6 +140,10 @@ describe.skipIf(!hasTestDb)("search relevance, words alone (real Postgres)", () 
     for (const [key, car] of Object.entries(CARS)) await insert(REL_ORG, key, car);
     for (const [key, car] of Object.entries(OTHER_TENANT_CARS)) await insert(OTHER_ORG, key, car);
     for (const [key, car] of Object.entries(HIDDEN_TENANT_CARS)) await insert(HIDDEN_ORG, key, car);
+    // Spelling correction reads the car_search_terms view, which is shared:
+    // without a refresh it holds whatever the last suite to refresh it had
+    // seeded, and this suite's scores moved with the order suites ran in.
+    await refreshSearchTerms();
 
     for (const q of QUERIES) {
       const { cars, pagination } = await searchCarsRanked(
