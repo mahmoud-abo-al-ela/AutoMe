@@ -52,7 +52,7 @@ describe("POST /api/mcp", () => {
     expect((await init.json()).result.serverInfo.name).toBe("autome");
 
     const list = await (await post(rpc("tools/list"))).json();
-    expect(list.result.tools.map((tool: { name: string }) => tool.name)).toEqual(["search_cars", "get_car", "get_search_options"]);
+    expect(list.result.tools.map((tool: { name: string }) => tool.name)).toEqual(["search_cars", "get_car", "list_dealerships", "compare_cars", "get_search_options"]);
 
     const call = await (await post(rpc("tools/call", { name: "get_search_options", arguments: { locale: "ar" } }))).json();
     expect(call.result.structuredContent.makes).toContainEqual({ value: "Toyota", label: "تويوتا" });

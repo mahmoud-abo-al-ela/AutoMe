@@ -112,6 +112,29 @@ export async function searchPublicCars(input: PublicCarSearch, locale: Locale, f
   };
 }
 
+/** At most this many cars side by side; more is a list, not a comparison. */
+export const MAX_COMPARED_CARS = 4;
+
+export interface PublicComparison {
+  cars: PublicCarDetail[];
+  /** Ids asked for that are not public cars — hidden and missing alike. */
+  notFound: string[];
+}
+
+/** Several public cars, in the order asked; the ids that are not public come back as notFound. */
+export async function comparePublicCars(ids: string[], locale: Locale, from?: LinkSource): Promise<PublicComparison> {
+  const unique = [...new Set(ids)];
+  if (unique.length < 2 || unique.length > MAX_COMPARED_CARS) {
+    throw new ValidationError(`compare 2–${MAX_COMPARED_CARS} cars`, "ids");
+  }
+  const rows = (await carRepository.findPublicCarsByIds(unique)) as unknown as PublicCarRow[];
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return {
+    cars: unique.flatMap((id) => (byId.has(id) ? [publicCarDetail(byId.get(id)!, locale, from)] : [])),
+    notFound: unique.filter((id) => !byId.has(id)),
+  };
+}
+
 /** One public car, or not found — the same answer for a hidden car and a missing id. */
 export async function getPublicCar(id: string, locale: Locale, from?: LinkSource): Promise<PublicCarDetail> {
   const car = await carRepository.findPublicCarById(id);

@@ -189,7 +189,7 @@ describe.skipIf(!hasTestDb)("public visibility (real Postgres)", () => {
 
     it("the dealerships list shows only public dealerships, without their email or plan", async () => {
       const { dealerships } = await getDealerships({ search: "Visibility" }, { limit: 48 });
-      expect(dealerships.map((d) => d.slug)).toEqual(["test-visibility-a"]);
+      expect(dealerships.map((d: { slug: string }) => d.slug)).toEqual(["test-visibility-a"]);
       for (const field of ["email", "planType", "planName"]) {
         expect(dealerships[0], field).not.toHaveProperty(field);
       }
