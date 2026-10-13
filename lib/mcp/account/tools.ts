@@ -3,14 +3,18 @@ import {
   TEST_DRIVE_FILTERS,
   listMyTestDrives,
   listSavedCars,
+  saveCar,
+  unsaveCar,
   type AccountCaller,
 } from "@/lib/services/mcp/account";
+import { revalidateLocalized } from "@/lib/utils/revalidate";
 import type { CallerContext, PublicTool } from "../public/tool";
 
 /**
  * The signed-in buyer's tools (plans/mcp D-27). Each acts on the account the
- * access token belongs to and on nothing else: no input names a user. Read
- * tools here; saving and test drives follow in their own PRs.
+ * access token belongs to and on nothing else: no input names a user. Writes
+ * set a state rather than toggle one, so a client that repeats a call gets
+ * what it asked for, not the opposite. Test drives follow in their own PR.
  */
 
 export interface AccountCallerContext extends CallerContext {
@@ -78,5 +82,46 @@ export const listMyTestDrivesTool: PublicTool<typeof drivesInput, typeof drivesO
   run: async ({ status, locale, page }, caller) => {
     const structured = await listMyTestDrives(caller.user, status, page, locale);
     return { structured, count: structured.testDrives.length };
+  },
+};
+
+const carIdInput = { carId: z.string().uuid().describe("A car's id, e.g. from search_cars or list_saved_cars.") };
+const savedStateOutput = {
+  carId: z.string(),
+  saved: z.boolean(),
+  changed: z.boolean().describe("False when the car already was as asked."),
+};
+
+/** What the person sees changes where their saved cars show: the list, and the hearts on the cars pages. */
+function refreshSavedPages() {
+  revalidateLocalized("/wishlist");
+  revalidateLocalized("/cars");
+}
+
+export const saveCarTool: PublicTool<typeof carIdInput, typeof savedStateOutput, AccountCallerContext> = {
+  name: "save_car",
+  title: "Save a car",
+  description:
+    "Add a car to the signed-in person's saved cars on AutoMe. Saving again changes nothing. Only cars still " +
+    "for sale can be saved; a dealership's own staff cannot save its cars.",
+  inputSchema: carIdInput,
+  outputSchema: savedStateOutput,
+  run: async ({ carId }, caller) => {
+    const structured = await saveCar(caller.user, carId);
+    if (structured.changed) refreshSavedPages();
+    return { structured };
+  },
+};
+
+export const unsaveCarTool: PublicTool<typeof carIdInput, typeof savedStateOutput, AccountCallerContext> = {
+  name: "unsave_car",
+  title: "Remove a saved car",
+  description: "Remove a car from the signed-in person's saved cars on AutoMe. Removing one that is not saved changes nothing.",
+  inputSchema: carIdInput,
+  outputSchema: savedStateOutput,
+  run: async ({ carId }, caller) => {
+    const structured = await unsaveCar(caller.user, carId);
+    if (structured.changed) refreshSavedPages();
+    return { structured };
   },
 };

@@ -77,3 +77,31 @@ export async function getWishlistCarIds(userId: string) {
 
   return await userRepository.getUserWishlistCarIds(user.id);
 }
+
+/**
+ * Save or unsave a car — a state, not a toggle, so a repeated request leaves
+ * it as asked rather than flipping it back (the MCP tools; the site toggles).
+ * The same rules as toggleWishlist: saving needs a car the public may open
+ * and a viewer the buyer policy allows; unsaving is always allowed, so a car
+ * whose dealership was suspended can still be cleared. Never under
+ * impersonation. `changed` is false when it already was as asked.
+ */
+export async function setCarSaved(carId: string, userId: string, viewer: BuyerViewerSource, saved: boolean) {
+  assertNotImpersonating(viewer);
+
+  const user = await userRepository.findUserByClerkId(userId);
+  if (!user) {
+    throw new AuthenticationError("User not found");
+  }
+
+  if (!saved) {
+    return { saved: false, changed: await userRepository.unsaveCarOnce(user.id, carId) };
+  }
+
+  const car = await carRepository.findPublicCarById(carId);
+  if (!car) {
+    throw new NotFoundError("Car");
+  }
+  assertBuyerAllowed(viewer, car.organizationId, "save");
+  return { saved: true, changed: await userRepository.saveCarOnce(user.id, carId) };
+}

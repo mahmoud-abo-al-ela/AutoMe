@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-vi.mock("@/lib/repositories/user", () => ({ findUserByClerkId: vi.fn() }));
+vi.mock("@/lib/repositories/user", () => ({ findUserByClerkIdWithMemberships: vi.fn() }));
 vi.mock("@/lib/services/test-drive/status", () => ({ getTestDrives: vi.fn() }));
-vi.mock("@/lib/services/wishlist", () => ({ getUserWishlist: vi.fn() }));
+vi.mock("@/lib/services/wishlist", () => ({ getUserWishlist: vi.fn(), setCarSaved: vi.fn() }));
 
 import { accountResourceMetadata, oauthIssuer } from "./account";
 import { ServiceUnavailableError } from "@/lib/utils/errors";

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
   const presented = request.headers.get("authorization")?.toLowerCase().startsWith("bearer ") ?? false;
   const token = await auth({ acceptsToken: "oauth_token" });
-  if (!token.isAuthenticated) return unauthorized(presented);
+  if (!token.isAuthenticated || !token.userId) return unauthorized(presented);
   // A valid token for an account AutoMe no longer has is not a caller either.
   const user = await resolveAccountCaller(token.userId);
   if (!user) return unauthorized(true);

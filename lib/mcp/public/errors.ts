@@ -1,5 +1,6 @@
 import {
   AppError,
+  AuthorizationError,
   NotFoundError,
   RateLimitError,
   ServiceUnavailableError,
@@ -12,7 +13,7 @@ import { reportMcpFailure } from "@/lib/services/mcp/monitoring";
  * What a public MCP caller is told when a tool fails: one of a few fixed codes,
  * never a message, stack or query. The detail stays in the server log.
  */
-export type ToolErrorCode = "invalid_input" | "not_found" | "rate_limited" | "unavailable" | "internal";
+export type ToolErrorCode = "invalid_input" | "not_found" | "forbidden" | "rate_limited" | "unavailable" | "internal";
 
 /** A tool ran past its time budget; reported as "unavailable". */
 export class ToolTimeoutError extends Error {
@@ -24,6 +25,8 @@ export class ToolTimeoutError extends Error {
 export function toolErrorCode(error: unknown): ToolErrorCode {
   if (error instanceof ValidationError) return "invalid_input";
   if (error instanceof NotFoundError) return "not_found";
+  // The buyer policy (a dealer's own car, an admin): the caller's refusal, not AutoMe's fault.
+  if (error instanceof AuthorizationError) return "forbidden";
   if (error instanceof RateLimitError) return "rate_limited";
   if (error instanceof ServiceUnavailableError || error instanceof ToolTimeoutError) return "unavailable";
   return "internal";
