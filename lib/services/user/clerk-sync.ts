@@ -29,7 +29,9 @@ export type ClerkUserEvent = {
 type ClerkUserData = ClerkUserEvent["data"];
 
 /**
- * Give an account copied into this Clerk instance (scripts/clerk/migrate-users.ts)
+ * Give an account copied into this Clerk instance (the one-off move to the
+ * production instance, 2026-10-14; the copy script is in git history:
+ * scripts/clerk/migrate-users.ts)
  * the row it had under its old ID. The copy carries that ID as its
  * external_id, which only AutoMe sets — through Clerk's Backend API with the
  * secret key — so a user cannot claim someone else's row with it. True if

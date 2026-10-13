@@ -25,7 +25,7 @@ import { db } from "@/lib/prisma";
 /**
  * Moving AutoMe from Clerk's development instance to its production one
  * gives every person a new Clerk ID. The copy carries the old one as its
- * external_id (scripts/clerk/migrate-users.ts), and whichever path meets the
+ * external_id (the one-off copy, 2026-10-14), and whichever path meets the
  * new ID first — the person's first sign-in, or Clerk's user.created webhook
  * — must hand them their existing row, with everything hanging off it,
  * rather than create a second one (which the unique email would refuse).
