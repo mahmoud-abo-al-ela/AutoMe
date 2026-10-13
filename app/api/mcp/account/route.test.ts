@@ -5,7 +5,8 @@ const mocks = vi.hoisted(() => ({
   enforceMcpPublicLimit: vi.fn(),
   enforceMcpAccountLimit: vi.fn(),
   recordToolCall: vi.fn(),
-  findUserByClerkId: vi.fn(),
+  findUserByClerkIdWithMemberships: vi.fn(),
+  setCarSaved: vi.fn(),
   getUserWishlist: vi.fn(),
   getTestDrives: vi.fn(),
 }));
@@ -16,8 +17,9 @@ vi.mock("@/lib/middleware/with-rate-limit", () => ({
   enforceMcpCostlyLimit: vi.fn(),
 }));
 vi.mock("@/lib/services/mcp/telemetry", () => ({ recordToolCall: mocks.recordToolCall }));
-vi.mock("@/lib/repositories/user", () => ({ findUserByClerkId: mocks.findUserByClerkId }));
-vi.mock("@/lib/services/wishlist", () => ({ getUserWishlist: mocks.getUserWishlist }));
+vi.mock("@/lib/repositories/user", () => ({ findUserByClerkIdWithMemberships: mocks.findUserByClerkIdWithMemberships }));
+vi.mock("@/lib/services/wishlist", () => ({ getUserWishlist: mocks.getUserWishlist, setCarSaved: mocks.setCarSaved }));
+vi.mock("@/lib/utils/revalidate", () => ({ revalidateLocalized: vi.fn() }));
 vi.mock("@/lib/services/test-drive/status", () => ({ getTestDrives: mocks.getTestDrives }));
 vi.mock("@/lib/utils/errors", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/utils/errors")>()),
@@ -25,7 +27,7 @@ vi.mock("@/lib/utils/errors", async (importOriginal) => ({
 }));
 
 import { GET, POST } from "@/app/api/mcp/account/route";
-import { RateLimitError } from "@/lib/utils/errors";
+import { AuthorizationError, RateLimitError } from "@/lib/utils/errors";
 
 const METADATA = "https://auto-me.example/.well-known/oauth-protected-resource/api/mcp/account";
 const HEADERS = { "content-type": "application/json", accept: "application/json, text/event-stream" };
@@ -41,7 +43,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("MCP_ACCOUNT_ENABLED", "true");
   vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://auto-me.example");
-  mocks.findUserByClerkId.mockResolvedValue({ id: "db-user-1", role: "USER" });
+  mocks.findUserByClerkIdWithMemberships.mockResolvedValue({ id: "db-user-1", role: "USER", memberships: [{ organizationId: "org-own" }] });
 });
 afterEach(() => vi.unstubAllEnvs());
 
@@ -68,7 +70,7 @@ describe("POST /api/mcp/account", () => {
     expect(bad.headers.get("www-authenticate")).toBe(`Bearer error="invalid_token", resource_metadata="${METADATA}"`);
 
     signedIn("user_deleted");
-    mocks.findUserByClerkId.mockResolvedValue(null);
+    mocks.findUserByClerkIdWithMemberships.mockResolvedValue(null);
     const gone = await post(rpc("tools/list"), { authorization: "Bearer valid" });
     expect(gone.status).toBe(401);
     expect(gone.headers.get("www-authenticate")).toContain('error="invalid_token"');
@@ -85,15 +87,38 @@ describe("POST /api/mcp/account", () => {
     expect(mocks.enforceMcpAccountLimit).toHaveBeenCalledWith("db-user-1");
   });
 
-  it("offers the account's read tools, none of which takes a user", async () => {
+  it("offers the account's tools, none of which takes a user, each saying what it changes", async () => {
     signedIn();
     const response = await post(rpc("tools/list"), { authorization: "Bearer valid" });
     const { result } = (await response.json()) as { result: { tools: { name: string; inputSchema: { properties: object }; annotations: object }[] } };
-    expect(result.tools.map((tool) => tool.name)).toEqual(["list_saved_cars", "list_my_test_drives"]);
-    for (const tool of result.tools) {
-      expect(Object.keys(tool.inputSchema.properties)).not.toContain("userId");
-      expect(tool.annotations).toMatchObject({ readOnlyHint: true });
-    }
+    const tools = Object.fromEntries(result.tools.map((tool) => [tool.name, tool]));
+    expect(Object.keys(tools)).toEqual(["list_saved_cars", "list_my_test_drives", "save_car", "unsave_car"]);
+    for (const tool of result.tools) expect(Object.keys(tool.inputSchema.properties)).not.toContain("userId");
+    expect(tools.list_saved_cars.annotations).toMatchObject({ readOnlyHint: true });
+    expect(tools.save_car.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: true });
+    expect(tools.unsave_car.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true, idempotentHint: true });
+  });
+
+  it("saves and unsaves for the token's account, with its memberships for the buyer policy", async () => {
+    signedIn("user_clerk_1");
+    const carId = "11111111-1111-4111-8111-111111111111";
+    mocks.setCarSaved.mockResolvedValueOnce({ saved: true, changed: true }).mockResolvedValueOnce({ saved: false, changed: false });
+    const save = await (await post(rpc("tools/call", { name: "save_car", arguments: { carId } }), { authorization: "Bearer valid" })).json();
+    const viewer = { role: "USER", memberships: [{ organizationId: "org-own" }], isImpersonated: false };
+    expect(mocks.setCarSaved).toHaveBeenLastCalledWith(carId, "user_clerk_1", viewer, true);
+    expect(save.result.structuredContent).toEqual({ carId, saved: true, changed: true });
+
+    const unsave = await (await post(rpc("tools/call", { name: "unsave_car", arguments: { carId } }), { authorization: "Bearer valid" })).json();
+    expect(mocks.setCarSaved).toHaveBeenLastCalledWith(carId, "user_clerk_1", viewer, false);
+    expect(unsave.result.structuredContent).toEqual({ carId, saved: false, changed: false });
+  });
+
+  it("answers the buyer policy's refusal as forbidden — not as AutoMe's failure", async () => {
+    signedIn();
+    mocks.setCarSaved.mockRejectedValue(new AuthorizationError("own dealership"));
+    const body = await (await post(rpc("tools/call", { name: "save_car", arguments: { carId: "11111111-1111-4111-8111-111111111111" } }), { authorization: "Bearer valid" })).json();
+    expect(body.result).toMatchObject({ isError: true, structuredContent: { error: "forbidden" } });
+    expect(mocks.recordToolCall).toHaveBeenCalledWith(expect.objectContaining({ tool: "save_car", errorCode: "forbidden" }));
   });
 
   it("reads the token's own account and nobody else's", async () => {

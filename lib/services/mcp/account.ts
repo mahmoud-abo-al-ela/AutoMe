@@ -2,7 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import * as userRepository from "@/lib/repositories/user";
 import { carUrl, siteUrl } from "@/lib/services/public-catalog/urls";
 import { getTestDrives } from "@/lib/services/test-drive/status";
-import { getUserWishlist } from "@/lib/services/wishlist";
+import { getUserWishlist, setCarSaved } from "@/lib/services/wishlist";
 import { ServiceUnavailableError } from "@/lib/utils/errors";
 
 /**
@@ -58,11 +58,20 @@ export function accountResourceMetadata() {
   };
 }
 
-/** The AutoMe user an access token belongs to, or null — an unknown or deleted account. */
+/**
+ * The AutoMe user an access token belongs to, or null — an unknown or deleted
+ * account. With the dealerships they work at, for the buyer policy: staff may
+ * not save or book their own dealership's cars, here as on the site. An
+ * OAuth token is never a support session, so never impersonated.
+ */
 export async function resolveAccountCaller(clerkUserId: string) {
-  const user = await userRepository.findUserByClerkId(clerkUserId);
-  if (!user) return null;
-  return { id: user.id, clerkId: clerkUserId, role: user.role };
+  const user = await userRepository.findUserByClerkIdWithMemberships(clerkUserId);
+  if (!user?.id) return null;
+  const id: string = user.id;
+  const memberships = (user.memberships ?? []).map((membership) => ({ organizationId: membership.organizationId }));
+  // The column defaults to USER; the serialized type only does not say so.
+  const role = user.role ?? "USER";
+  return { id, clerkId: clerkUserId, role, viewer: { role, memberships, isImpersonated: false } };
 }
 
 export type AccountCaller = NonNullable<Awaited<ReturnType<typeof resolveAccountCaller>>>;
@@ -114,4 +123,14 @@ export async function listMyTestDrives(caller: AccountCaller, status: TestDriveF
         };
       }),
   };
+}
+
+/** Save a car to the buyer's list; as asked whatever its state (`changed` says if it was). */
+export async function saveCar(caller: AccountCaller, carId: string) {
+  return { carId, ...(await setCarSaved(carId, caller.clerkId, caller.viewer, true)) };
+}
+
+/** Remove a car from the buyer's list; as asked whatever its state. */
+export async function unsaveCar(caller: AccountCaller, carId: string) {
+  return { carId, ...(await setCarSaved(carId, caller.clerkId, caller.viewer, false)) };
 }

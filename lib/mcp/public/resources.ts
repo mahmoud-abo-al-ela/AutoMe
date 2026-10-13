@@ -19,6 +19,7 @@ const RESOURCE_NOT_FOUND = -32002;
 const RPC_CODES: Record<ToolErrorCode, number> = {
   not_found: RESOURCE_NOT_FOUND,
   invalid_input: ErrorCode.InvalidParams,
+  forbidden: ErrorCode.InvalidRequest,
   rate_limited: ErrorCode.InvalidRequest,
   unavailable: ErrorCode.InternalError,
   internal: ErrorCode.InternalError,
