@@ -138,6 +138,12 @@ export default async function LocaleLayout({
 
   const dir = localeDirection[locale];
 
+  // Chrome's WebMCP origin trial (Chrome 149–156): the token switches the API
+  // on for ordinary visitors. It is bound to one origin, and is public by
+  // design — it goes into the page. Unset, nothing is rendered and only
+  // browsers with the testing flag see the site's tools.
+  const webMcpTrialToken = process.env.NEXT_PUBLIC_WEBMCP_TRIAL_TOKEN;
+
   // Clerk draws its own sign-in, sign-up and account UI, which next-intl
   // cannot reach into. Without this the auth screens stay English on /ar.
   return (
@@ -160,6 +166,11 @@ export default async function LocaleLayout({
         dir={dir}
         className={`${inter.variable} ${arabic.variable} scroll-smooth h-full`}
       >
+        {webMcpTrialToken && (
+          <head>
+            <meta httpEquiv="origin-trial" content={webMcpTrialToken} />
+          </head>
+        )}
         <body
           // font-sans resolves per glyph from the stack in globals.css, so a
           // mixed-script string renders Latin in Inter and Arabic in IBM Plex
