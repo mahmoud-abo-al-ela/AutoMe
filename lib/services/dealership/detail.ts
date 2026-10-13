@@ -40,13 +40,13 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
         region: dealership.region,
         country: dealership.country,
         phone: dealership.phone,
-        email: dealership.email,
+        // Not the dealer's email (owner's decision, 2026-10-13): an inbox
+        // published on a page invites scraping; buyers reach the dealer by
+        // phone, chat or the site. Nor the plan, which is the dealer's business.
         website: dealership.website,
         averageRating: dealership.averageRating || 0,
         totalReviews: dealership.totalReviews || 0,
         carCount: dealership.carCount || 0,
-        planType: dealership.subscription?.plan?.type || null,
-        planName: dealership.subscription?.plan?.name || null,
         workingHours: formattedWorkingHours,
         // The standing terms buyers read on every listing (null = not stated).
         offersFinancing: dealership.offersFinancing,
@@ -57,6 +57,18 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
         createdAt: dealership.createdAt,
         updatedAt: dealership.updatedAt,
     };
+}
+
+/**
+ * The dealership a public request names by slug, if the public may see it.
+ * Its id is resolved here, server side — a request never supplies one.
+ */
+export async function resolvePublicDealershipId(slug: string): Promise<string> {
+    const id = await dealershipRepo.findPublicDealershipIdBySlug(slug);
+    if (!id) {
+        throw new NotFoundError("Dealership");
+    }
+    return id;
 }
 
 /**

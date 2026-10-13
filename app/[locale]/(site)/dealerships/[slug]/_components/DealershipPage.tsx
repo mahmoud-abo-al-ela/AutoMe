@@ -57,7 +57,7 @@ export function DealershipPage({
     const fetchCars = async (nextFilters: DealershipInventoryFilterState, page: number) => {
         setCarsLoading(true);
         try {
-            const response = await getDealershipCars(dealership.id, nextFilters, {
+            const response = await getDealershipCars(dealership.slug, nextFilters, {
                 page,
                 limit: DEALERSHIP_CARS_PER_PAGE,
             });

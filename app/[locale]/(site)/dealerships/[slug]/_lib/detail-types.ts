@@ -26,6 +26,10 @@ export type DealershipTab = (typeof DEALERSHIP_TABS)[number];
 /** Cars per page: three rows of the three-up grid. */
 export const DEALERSHIP_CARS_PER_PAGE = 9;
 
+/** The inventory's sort choices, in the order the select lists them. */
+export const INVENTORY_SORTS = ["newest", "priceAsc", "priceDesc", "year", "mileage"] as const;
+export type InventorySort = (typeof INVENTORY_SORTS)[number];
+
 /** The inventory filter state the detail page keeps in React state. */
 export interface DealershipInventoryFilterState {
   search?: string;
@@ -34,7 +38,7 @@ export interface DealershipInventoryFilterState {
   bodyType?: string;
   fuelType?: string;
   transmission?: string;
-  sortBy?: string;
+  sortBy?: InventorySort;
 }
 
 /** One removable chip in the active-filter row. */

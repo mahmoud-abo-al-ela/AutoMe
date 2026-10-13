@@ -32,7 +32,7 @@ const DealershipReviews = ({
     totalReviews,
 }: {
     organizationId: string;
-    organizationSlug?: string;
+    organizationSlug: string;
     averageRating: number;
     totalReviews: number;
 }) => {
@@ -61,7 +61,7 @@ const DealershipReviews = ({
         async (page: number) => {
             setLoading(true);
             try {
-                const response = await getDealershipReviews(organizationId, { page, limit: PER_PAGE });
+                const response = await getDealershipReviews(organizationSlug, { page, limit: PER_PAGE });
                 if (response.success) {
                     setReviews(response.data.reviews);
                     setRatingCounts(response.data.ratingCounts);
@@ -73,7 +73,7 @@ const DealershipReviews = ({
                 setLoading(false);
             }
         },
-        [organizationId]
+        [organizationSlug]
     );
 
     useEffect(() => {

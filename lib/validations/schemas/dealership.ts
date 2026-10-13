@@ -71,3 +71,39 @@ export const dealershipReviewSchema = z.object({
 export type OrganizationInput = z.infer<typeof organizationSchema>;
 export type OrganizationProfileInput = z.infer<typeof organizationProfileSchema>;
 export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
+
+/**
+ * A public dealership page's own reads (getDealershipCars, its filters, its
+ * reviews). The dealership is named by its slug and resolved server side to an
+ * active one — a request never names a dealership by id, or a suspended one's
+ * stock would be one call away.
+ */
+export const dealershipSlugSchema = z.string().trim().min(1).max(100);
+
+const word = z.string().trim().max(60);
+const amount = z.number().finite().min(0).optional();
+
+export const dealershipCarFiltersSchema = z.object({
+  search: z.string().trim().max(100).optional(),
+  make: word.optional(),
+  model: word.optional(),
+  minPrice: amount,
+  maxPrice: amount,
+  minYear: z.number().int().min(1900).max(2100).optional(),
+  maxYear: z.number().int().min(1900).max(2100).optional(),
+  // Comma-separated, as the page's multi-select sends them ("Sedan,SUV").
+  fuelType: z.string().trim().max(200).optional(),
+  transmission: z.string().trim().max(200).optional(),
+  bodyType: z.string().trim().max(200).optional(),
+  sortBy: z.enum(["newest", "createdAt", "priceAsc", "priceDesc", "price", "year", "mileage"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});
+
+/** A page of a public list: the page sizes the dealership page uses, with headroom. */
+export const publicPageSchema = z.object({
+  page: z.number().int().min(1).max(10_000).optional(),
+  limit: z.number().int().min(1).max(48).optional(),
+});
+
+export type DealershipCarFiltersInput = z.infer<typeof dealershipCarFiltersSchema>;
+export type PublicPageInput = z.infer<typeof publicPageSchema>;

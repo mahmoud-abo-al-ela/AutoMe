@@ -7,14 +7,20 @@ import { createSuccessResponse } from "@/lib/utils/response";
 import { withErrorHandling, withAuth } from "@/lib/middleware/with-auth";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
-import { dealershipReviewSchema } from "@/lib/validations/schemas";
+import {
+    dealershipCarFiltersSchema,
+    dealershipReviewSchema,
+    dealershipSlugSchema,
+    publicPageSchema,
+    type DealershipCarFiltersInput,
+    type PublicPageInput,
+} from "@/lib/validations/schemas";
 import { ValidationError } from "@/lib/utils/errors";
 import { assertBuyerAllowed } from "@/lib/auth/assert-buyer";
 import type {
     DealershipFilters,
     DealershipPagination,
 } from "@/lib/services/dealership/listing";
-import type { CarFilters, CarPagination } from "@/lib/services/car/listing";
 
 /**
  * Get dealerships with filters and pagination
@@ -60,40 +66,34 @@ export const getDealershipFilters = withErrorHandling(
 });
 
 /**
- * Get dealership cars
+ * A public dealership's cars on sale, one page at a time. The dealership is
+ * named by slug and resolved here to one the public may see; filters and the
+ * page size are validated, so a request cannot ask for another scope or for
+ * every car at once.
  */
 export const getDealershipCars = withErrorHandling(
-    async (
-        organizationId: string,
-        filters: CarFilters = {},
-        pagination: CarPagination = {}
-    ) => {
+    async (slug: string, filters: DealershipCarFiltersInput = {}, pagination: PublicPageInput = {}) => {
+    const organizationId = await dealershipService.resolvePublicDealershipId(validateAction(dealershipSlugSchema, slug));
     const result = await dealershipService.getDealershipCars(
         organizationId,
-        filters,
-        pagination
+        validateAction(dealershipCarFiltersSchema, filters),
+        validateAction(publicPageSchema, pagination)
     );
     return createSuccessResponse(result);
 });
 
-/**
- * Get filter options for a dealership's cars
- */
-export const getDealershipCarFilters = withErrorHandling(
-    async (organizationId: string) => {
+/** Filter options over a public dealership's cars on sale. */
+export const getDealershipCarFilters = withErrorHandling(async (slug: string) => {
+    const organizationId = await dealershipService.resolvePublicDealershipId(validateAction(dealershipSlugSchema, slug));
     const filters = await dealershipService.getDealershipCarFilters(organizationId);
     return createSuccessResponse(filters);
 });
 
-/**
- * Get dealership reviews
- */
+/** A public dealership's approved reviews, one page at a time. */
 export const getDealershipReviews = withErrorHandling(
-    async (organizationId: string, pagination: { page?: number; limit?: number } = {}) => {
-    const result = await dealershipService.getDealershipReviews(
-        organizationId,
-        pagination
-    );
+    async (slug: string, pagination: PublicPageInput = {}) => {
+    const organizationId = await dealershipService.resolvePublicDealershipId(validateAction(dealershipSlugSchema, slug));
+    const result = await dealershipService.getDealershipReviews(organizationId, validateAction(publicPageSchema, pagination));
     return createSuccessResponse(result);
 });
 

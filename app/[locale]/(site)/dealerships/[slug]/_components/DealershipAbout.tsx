@@ -35,14 +35,6 @@ export function DealershipAbout({ dealership }: { dealership: DealershipDetail }
                 <span dir="ltr">{dealership.phone}</span>
             ),
         },
-        dealership.email && {
-            label: t("about.email"),
-            value: (
-                <a href={`mailto:${dealership.email}`} className="break-all text-primary underline-offset-2 hover:underline">
-                    {dealership.email}
-                </a>
-            ),
-        },
         dealership.website && {
             label: t("about.website"),
             value: (
