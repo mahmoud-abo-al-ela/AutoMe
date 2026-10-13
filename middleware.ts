@@ -57,6 +57,12 @@ const isPublicApiRoute = createRouteMatcher([
 
 const intlMiddleware = createIntlMiddleware(routing);
 
+/** Where Clerk's Frontend API is proxied (see the clerkMiddleware options below). */
+const CLERK_PROXY_PATH = "/__clerk";
+// A path check, not createRouteMatcher (deprecated in Clerk 7): no locale, never intl.
+const isClerkProxy = (req: NextRequest) =>
+  req.nextUrl.pathname === CLERK_PROXY_PATH || req.nextUrl.pathname.startsWith(`${CLERK_PROXY_PATH}/`);
+
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost";
 
 function getSubdomain(request: NextRequest): string | null {
@@ -200,13 +206,19 @@ const clerk = clerkMiddleware(async (auth, req) => {
   }
 
   return response;
-});
+},
+// Clerk's Frontend API through this site at /__clerk — required for a
+// production instance on a vercel.app domain, which cannot carry Clerk's DNS
+// records. Only where NEXT_PUBLIC_CLERK_PROXY_URL is set (production); the
+// browser side reads the same variable. Clerk handles the path before the
+// handler above runs, with the keys from the environment.
+{ frontendApiProxy: { enabled: Boolean(process.env.NEXT_PUBLIC_CLERK_PROXY_URL), path: CLERK_PROXY_PATH } });
 
 export default async function middleware(
   req: NextRequest,
   event: NextFetchEvent
 ) {
-  if (isApiRoute(req) || isCrawlerFile(req) || isWellKnown(req)) {
+  if (isApiRoute(req) || isCrawlerFile(req) || isWellKnown(req) || isClerkProxy(req)) {
     return clerk(req, event);
   }
 
@@ -234,5 +246,7 @@ export const config = {
     "/((?!_next|monitoring|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
+    // Clerk's proxied Frontend API serves .js files, which the first pattern skips.
+    "/__clerk/(.*)",
   ],
 };

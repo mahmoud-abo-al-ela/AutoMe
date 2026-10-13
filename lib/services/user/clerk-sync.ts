@@ -21,10 +21,25 @@ export type ClerkUserEvent = {
     last_name?: string | null;
     image_url?: string | null;
     username?: string | null;
+    /** Set by AutoMe on an account copied from another Clerk instance: its ID there. */
+    external_id?: string | null;
   };
 };
 
 type ClerkUserData = ClerkUserEvent["data"];
+
+/**
+ * Give an account copied into this Clerk instance (scripts/clerk/migrate-users.ts)
+ * the row it had under its old ID. The copy carries that ID as its
+ * external_id, which only AutoMe sets — through Clerk's Backend API with the
+ * secret key — so a user cannot claim someone else's row with it. True if
+ * the row was moved to `clerkId`. Called wherever a new Clerk ID would
+ * otherwise get a new row: the user.created webhook and checkUser.
+ */
+export async function relinkMigratedUser(clerkId: string, externalId: string | null | undefined): Promise<boolean> {
+  if (!externalId || externalId === clerkId) return false;
+  return userRepository.relinkClerkId(externalId, clerkId);
+}
 
 /** First and last name, else the username, else "User". */
 function displayName({ first_name, last_name, username }: ClerkUserData) {
@@ -37,6 +52,13 @@ async function handleUserCreated(data: ClerkUserData) {
 
   // User is usually created by checkUser on the first request already.
   if (await userRepository.findUserByClerkId(data.id)) return;
+
+  // A copied account takes over its old row instead of getting a second one —
+  // which the unique email would refuse anyway.
+  if (await relinkMigratedUser(data.id, data.external_id)) {
+    await handleUserUpdated(data);
+    return;
+  }
 
   // Clerk can legitimately deliver a user.created with no email address at
   // all — phone-only and some passwordless signups. `User.email` is nullable
