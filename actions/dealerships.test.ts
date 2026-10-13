@@ -5,12 +5,22 @@ const service = vi.hoisted(() => ({
   getDealershipCars: vi.fn(),
   getDealershipCarFilters: vi.fn(),
   getDealershipReviews: vi.fn(),
+  getDealerships: vi.fn(),
+  searchDealerships: vi.fn(),
+  getDealershipFilters: vi.fn(),
 }));
 vi.mock("@/lib/services/dealership", () => service);
 vi.mock("@/lib/utils/revalidate", () => ({ revalidateRouteTree: vi.fn() }));
 vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceRateLimit: vi.fn() }));
 
-import { getDealershipCarFilters, getDealershipCars, getDealershipReviews } from "@/actions/dealerships";
+import {
+  getDealershipCarFilters,
+  getDealershipCars,
+  getDealershipFilters,
+  getDealershipReviews,
+  getDealerships,
+  searchDealerships,
+} from "@/actions/dealerships";
 
 /**
  * A public dealership page's reads name the dealership by slug; the id is
@@ -72,5 +82,28 @@ describe("getDealershipCarFilters and getDealershipReviews", () => {
   it("caps the reviews page size", async () => {
     expect(await getDealershipReviews("nile-motors", { limit: 500 })).toMatchObject({ success: false });
     expect(service.getDealershipReviews).not.toHaveBeenCalled();
+  });
+});
+
+describe("the dealerships list", () => {
+  it("passes on only what the list page can set — never a plan filter — and caps the page", async () => {
+    service.getDealerships.mockResolvedValue({ dealerships: [] });
+    await getDealerships({ city: "cairo", sort: "rating", planType: "ENTERPRISE", organizationId: "org-x" } as never, { page: 2, limit: 24 });
+    expect(service.getDealerships).toHaveBeenCalledWith({ city: "cairo", sort: "rating" }, { page: 2, limit: 24 });
+  });
+
+  it("falls back to the defaults for values a visitor typed into the URL", async () => {
+    service.getDealerships.mockResolvedValue({ dealerships: [] });
+    await getDealerships({ sort: "drop table", minRating: Number.NaN } as never, { limit: 500 });
+    expect(service.getDealerships).toHaveBeenCalledWith({}, {});
+  });
+
+  it("validates the search and the facet filters the same way", async () => {
+    service.searchDealerships.mockResolvedValue({ dealerships: [] });
+    service.getDealershipFilters.mockResolvedValue({});
+    await searchDealerships("nile", { planType: "PRO" } as never, { limit: 1_000 });
+    expect(service.searchDealerships).toHaveBeenCalledWith("nile", {}, {});
+    await getDealershipFilters({ planType: "PRO", region: "CAI" } as never);
+    expect(service.getDealershipFilters).toHaveBeenCalledWith({ region: "CAI" });
   });
 });

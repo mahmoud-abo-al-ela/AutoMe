@@ -9,6 +9,10 @@ import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import {
     dealershipCarFiltersSchema,
+    dealershipListFiltersSchema,
+    dealershipListPageSchema,
+    type DealershipListFiltersInput,
+    type DealershipListPageInput,
     dealershipReviewSchema,
     dealershipSlugSchema,
     publicPageSchema,
@@ -17,17 +21,18 @@ import {
 } from "@/lib/validations/schemas";
 import { ValidationError } from "@/lib/utils/errors";
 import { assertBuyerAllowed } from "@/lib/auth/assert-buyer";
-import type {
-    DealershipFilters,
-    DealershipPagination,
-} from "@/lib/services/dealership/listing";
 
 /**
- * Get dealerships with filters and pagination
+ * The public dealerships list. Filters and page size are reduced to what the
+ * list page can set (dealershipListFiltersSchema) — no plan filter, at most 48
+ * per page.
  */
 export const getDealerships = withErrorHandling(
-    async (filters: DealershipFilters = {}, pagination: DealershipPagination = {}) => {
-    const result = await dealershipService.getDealerships(filters, pagination);
+    async (filters: DealershipListFiltersInput = {}, pagination: DealershipListPageInput = {}) => {
+    const result = await dealershipService.getDealerships(
+        validateAction(dealershipListFiltersSchema, filters),
+        validateAction(dealershipListPageSchema, pagination)
+    );
     return createSuccessResponse(result);
 });
 
@@ -45,13 +50,13 @@ export const getDealershipBySlug = withErrorHandling(async (slug: string) => {
 export const searchDealerships = withErrorHandling(
     async (
         query: string,
-        filters: DealershipFilters = {},
-        pagination: DealershipPagination = {}
+        filters: DealershipListFiltersInput = {},
+        pagination: DealershipListPageInput = {}
     ) => {
     const result = await dealershipService.searchDealerships(
-        query,
-        filters,
-        pagination
+        validateAction(dealershipListFiltersSchema, { search: query }).search,
+        validateAction(dealershipListFiltersSchema, filters),
+        validateAction(dealershipListPageSchema, pagination)
     );
     return createSuccessResponse(result);
 });
@@ -60,8 +65,8 @@ export const searchDealerships = withErrorHandling(
  * Get dealership filters
  */
 export const getDealershipFilters = withErrorHandling(
-    async (filters: DealershipFilters = {}) => {
-    const options = await dealershipService.getDealershipFilters(filters);
+    async (filters: DealershipListFiltersInput = {}) => {
+    const options = await dealershipService.getDealershipFilters(validateAction(dealershipListFiltersSchema, filters));
     return createSuccessResponse(options);
 });
 
