@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { localizedPath, type Locale } from "@/i18n/routing";
 import { useFormatters } from "@/hooks/use-formatters";
 import { usePlaceNames } from "@/hooks/use-place-names";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
@@ -106,6 +107,9 @@ export const useDealershipsPage = (
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // The address keeps the page's language: written without it, a reload or a
+  // shared link opens in the default one (localizedPath).
+  const locale = useLocale() as Locale;
   const pushUrl = useCallback(
     (
       nextFilters: DealershipPageFilters,
@@ -113,13 +117,13 @@ export const useDealershipsPage = (
       nextPerPage: number,
       replace = false
     ) => {
-    const url = buildDealershipsUrl(nextFilters, nextPage, nextPerPage);
+    const url = localizedPath(locale, buildDealershipsUrl(nextFilters, nextPage, nextPerPage));
     if (replace) {
       window.history.replaceState(null, "", url);
     } else {
       window.history.pushState(null, "", url);
     }
-  }, []);
+  }, [locale]);
 
   const scrollToResults = useCallback(() => {
     if (typeof window === "undefined") return;
