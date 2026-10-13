@@ -10,6 +10,15 @@ import {
 } from "@/lib/utils/errors";
 
 /**
+ * The dealer's moves: confirm or decline a request; mark a confirmed one done
+ * or a no-show (CANCELLED). CANCELLED and COMPLETED are final.
+ */
+const TRANSITIONS: Record<string, readonly string[]> = {
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["COMPLETED", "CANCELLED"],
+};
+
+/**
  * Get test drives with filters (organization-scoped)
  * When organizationId is null (main domain), shows only the user's own test drives
  */
@@ -109,15 +118,17 @@ export async function updateTestDriveStatus(
     throw new AuthorizationError("You don't have access to this test drive");
   }
 
-  const validStatuses = [
-    "PENDING",
-    "CONFIRMED",
-    "COMPLETED",
-    "CANCELLED",
-    "NO_SHOW",
-  ];
-  if (!validStatuses.includes(status.toUpperCase())) {
-    throw new ValidationError(`Invalid status: ${status}`, "status");
+  // Where a booking may go from where it is (owner's decision, 2026-10-13).
+  // Nothing leads back to PENDING or CONFIRMED from CANCELLED or COMPLETED:
+  // a cancelled booking freed its slot, and reviving it would put it back on
+  // a day someone else may have taken since — without the slot check.
+  const next = status.toUpperCase();
+  if (!(TRANSITIONS[testDrive.status] ?? []).includes(next)) {
+    throw new ValidationError(
+      `A ${testDrive.status.toLowerCase()} test drive cannot become ${next.toLowerCase()}`,
+      "status",
+      { key: "errors.testDrive.invalidTransition" }
+    );
   }
 
   const updated = await testDriveRepository.updateTestDrive(testDriveId, {
