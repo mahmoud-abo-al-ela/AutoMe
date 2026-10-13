@@ -62,7 +62,7 @@ export async function runTool<Input extends z.ZodRawShape, Output extends z.ZodR
     };
   } catch (error) {
     errorCode = toolErrorCode(error);
-    logToolError(tool.name, error);
+    await logToolError(tool.name, error);
     return {
       isError: true,
       structuredContent: { error: errorCode },

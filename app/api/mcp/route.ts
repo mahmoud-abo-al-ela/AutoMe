@@ -3,6 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { enforceMcpPublicLimit } from "@/lib/middleware/with-rate-limit";
 import { createPublicMcpServer } from "@/lib/mcp/public/server";
 import { RateLimitError, ServiceUnavailableError, logError } from "@/lib/utils/errors";
+import { reportMcpFailure } from "@/lib/services/mcp/monitoring";
 
 /**
  * AutoMe's public MCP endpoint (Streamable HTTP, stateless, JSON responses):
@@ -10,7 +11,9 @@ import { RateLimitError, ServiceUnavailableError, logError } from "@/lib/utils/e
  * only what any visitor can see (repositories/car/visibility.ts).
  *
  * Off unless MCP_PUBLIC_ENABLED is "true": a deploy never opens it by
- * accident, and turning it off needs no deploy. Every request is size-checked
+ * accident, and turning it off needs no code change — set it in Vercel and
+ * redeploy, as Vercel applies an environment change only to new deployments
+ * (docs/mcp-runbook.md). Every request is size-checked
  * and rate-limited before its body is read; see plans/mcp (SECURITY §3) for the
  * layers and their provisional values.
  */
@@ -66,7 +69,11 @@ export async function POST(request: Request) {
     if (error instanceof RateLimitError) {
       return refuse(429, "rate_limited", error.retryAfter ? { "Retry-After": String(error.retryAfter) } : {});
     }
-    if (error instanceof ServiceUnavailableError) return refuse(503, "unavailable");
+    if (error instanceof ServiceUnavailableError) {
+      // The limiter could not decide (Arcjet down): every call is refused until it can.
+      await reportMcpFailure({ tool: "(rate-limit)", code: "unavailable", error });
+      return refuse(503, "unavailable");
+    }
     // Shield or a denied request: refused without saying why.
     return refuse(403, "forbidden");
   }
@@ -91,6 +98,7 @@ export async function POST(request: Request) {
     return new Response(response.body, { status: response.status, headers });
   } catch (error) {
     logError("MCP request failed", error);
+    await reportMcpFailure({ tool: "(request)", code: "internal", error });
     return refuse(500, "internal");
   } finally {
     await server.close();

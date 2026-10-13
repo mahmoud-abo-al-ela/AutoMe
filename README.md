@@ -56,7 +56,9 @@ AutoMe's cars for sale can be searched from any AI client that speaks the [Model
 - **What it shows:** exactly what any visitor sees — cars on sale from active dealerships, never hidden cars, a dealer's email or anything private. Searching uses words only: no AI model runs for it.
 - **Limits:** up to 20 results per page and 20 pages; requests are rate-limited per caller. Each call is measured (tool, duration, result count, error) without the query text, the caller's address or any user.
 
-Operators: the endpoint is off unless `MCP_PUBLIC_ENABLED=true`. `pnpm mcp:pilot-report --days 7` prints the pilot's numbers from the database `DATABASE_URL` points at; `pnpm mcp:load-test` checks the rate limits (it refuses production without `--production`).
+**In the browser (WebMCP).** In Chrome 149+ (origin trial, token in `NEXT_PUBLIC_WEBMCP_TRIAL_TOKEN`), pages also offer tools to an agent working in the visitor's own tab: `search_cars` and `open_car` on `/cars`, `get_car_details` on a car's page, `compare_cars` on `/compare`, and on the test-drive form `check_test_drive_availability` and `prepare_test_drive_booking` — which fills the form; only the person's Submit books. Locally, enable `chrome://flags/#enable-webmcp-testing`; in the console, `await document.modelContext.getTools()` lists a page's tools.
+
+Operators: the endpoint is off unless `MCP_PUBLIC_ENABLED=true`. `pnpm mcp:pilot-report --days 7` prints the pilot's numbers from the database `DATABASE_URL` points at; `pnpm mcp:load-test` checks the rate limits (it refuses production without `--production`). Switching off, limits, token rotation, alerts and incidents: [docs/mcp-runbook.md](docs/mcp-runbook.md).
 
 Developers: `pnpm -s mcp:ops` is a separate, internal MCP server over stdio for AI usage, errors, capacity, traces and evaluation runs. It runs only on a developer's machine, against a local database, as a read-only role it verifies at startup; setup and variables are in the header of `scripts/mcp/ai-ops/server.ts`, and `pnpm -s mcp:ops --check` tests them.
 

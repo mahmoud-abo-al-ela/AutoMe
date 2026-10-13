@@ -6,6 +6,7 @@
     { "path": "/api/cron/weekly-digest?at=0800", "schedule": "0 8 * * 6" },
     { "path": "/api/cron/weekly-digest?at=0900", "schedule": "0 9 * * 6" },
     { "path": "/api/cron/billing-renewals", "schedule": "0 5 * * *" },
-    { "path": "/api/cron/refresh-search-terms", "schedule": "30 3 * * *" }
+    { "path": "/api/cron/refresh-search-terms", "schedule": "30 3 * * *" },
+    { "path": "/api/cron/mcp-health", "schedule": "15 4 * * *" }
   ]
 }

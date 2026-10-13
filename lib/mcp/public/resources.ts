@@ -37,7 +37,7 @@ async function readResource(name: string, uri: URL, caller: CallerContext, read:
   } catch (error) {
     const code = toolErrorCode(error);
     errorCode = code;
-    logToolError(name, error);
+    await logToolError(name, error);
     throw new McpError(RPC_CODES[code], code);
   } finally {
     await recordToolCall({ tool: name, durationMs: Date.now() - started, resultCount: errorCode ? null : 1, errorCode, userAgent: caller.userAgent, ip: caller.ip });
