@@ -137,7 +137,8 @@ function limitFromEnv(name: string, fallback: number): number {
 /**
  * The public MCP endpoint (app/api/mcp). Its own client, so AI traffic never
  * spends a buyer's bucket. Every value is provisional — tuned from the pilot's
- * load test and data — and overridable without a deploy (MCP_RL_*).
+ * load test and data — and overridable without a code change (MCP_RL_*, then
+ * a redeploy: Vercel applies an environment change only to new deployments).
  *
  * No bot detection: MCP clients are programs by definition, and Arcjet's bot
  * rule errors on a request with no User-Agent — which this endpoint then
