@@ -315,6 +315,8 @@ export const useCarsPage = (
     optionsLoading,
     activeFilters: getActiveFilters(),
     handlers: {
+      // A whole set of filters at once — what an agent's search applies (WebMCP).
+      applyFilters,
       setFilter,
       toggleMulti,
       commitRange,
