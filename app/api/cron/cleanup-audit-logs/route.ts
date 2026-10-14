@@ -4,16 +4,12 @@ import { cleanupExpiredAuditLogs } from "@/lib/services/audit";
 import { logError } from "@/lib/utils/errors";
 
 /**
- * Cron job to clean up expired audit logs
- * Should be called daily via Vercel Cron or similar
+ * Enforce each plan's activity retention: delete audit entries whose
+ * retainUntil has passed (set from the dealership's plan when written).
+ * Entries with no retainUntil — super-admin actions, Enterprise — are kept.
  *
- * Add to vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/cleanup-audit-logs",
- *     "schedule": "0 0 * * *"
- *   }]
- * }
+ * Scheduled in vercel.json at 01:30 UTC (owner's decision, 2026-10-14).
+ * Deletion is permanent; running again only finds what has expired since.
  */
 export async function GET(request: Request) {
   const refused = refuseCronRequest(request, "audit-log cleanup");
