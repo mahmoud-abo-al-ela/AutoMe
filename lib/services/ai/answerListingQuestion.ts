@@ -1,7 +1,7 @@
 import { generateStructuredWithMeta, type AiCallerContext, type AiCallMeta } from "@/lib/ai/client";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { citationsHold, type ListingFacts, type ListingFactKey } from "@/lib/ai/grounding";
-import { unbackedNumbers } from "@/lib/ai/grounding-verify";
+import { unbackedContacts, unbackedNumbers } from "@/lib/ai/grounding-verify";
 import { listingQaPrompt } from "@/lib/ai/prompts/listing-qa";
 import { listingQaSchema, type ListingQaReply } from "@/lib/ai/schemas/listing-qa";
 import { textPart } from "@/lib/ai/provider/types";
@@ -171,7 +171,11 @@ export async function answerListingQuestion(
   // the record holds, or the answer is withheld like one with bad citations.
   const unbacked = unbackedNumbers(answer, facts, reply.fieldsUsed, question);
   if (unbacked.length > 0) trace?.step(`numbers not in the record: [${unbacked.join(", ")}] → rejected`);
-  if (!answer || !holds || unbacked.length > 0) {
+  // And every link, email or phone number must be the dealer's own: one
+  // planted in a buyer's question or a listing is never shown to a buyer.
+  const foreignContacts = unbackedContacts(answer, facts, reply.fieldsUsed);
+  if (foreignContacts.length > 0) trace?.step(`contacts not in the record: [${foreignContacts.join(", ")}] → rejected`);
+  if (!answer || !holds || unbacked.length > 0 || foreignContacts.length > 0) {
     return { meta, grounded: false, ...(standalone && { standalone }) };
   }
   const fieldsUsed = [...new Set(reply.fieldsUsed)];

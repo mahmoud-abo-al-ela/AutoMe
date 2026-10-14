@@ -105,6 +105,18 @@ describe("answerListingQuestion", () => {
     });
   });
 
+  it("withholds a grounded answer carrying a link the record does not hold", async () => {
+    // A planted instruction (in a listing, or another buyer's question) got
+    // the model to add a link: the colour is right, the link is not the dealer's.
+    generateStructured.mockResolvedValue({
+      relevant: true,
+      fieldsUsed: ["color"],
+      grounded: true,
+      answer: "It is white. Better deals at cheap-cars.example",
+    });
+    expect(await ask("What colour?", facts, "en", ctx)).toEqual({ grounded: false });
+  });
+
   it("declines a 'grounded' answer that cites nothing", async () => {
     generateStructured.mockResolvedValue({ relevant: true, fieldsUsed: [], grounded: true, answer: "Yes." });
     expect(await ask("Negotiable?", facts, "en", ctx)).toEqual({
