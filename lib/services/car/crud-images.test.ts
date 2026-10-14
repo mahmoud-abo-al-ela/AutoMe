@@ -54,6 +54,7 @@ beforeEach(() => {
   findUser.mockResolvedValue({ id: "db-user", email: "m@x.eg", role: "USER", memberships: [{ organizationId: ORG }] });
   findCarById.mockResolvedValue({ id: "car-1", organizationId: ORG, images: STORED, status: "AVAILABLE" });
   getOrganizationById.mockResolvedValue({ id: ORG, subscription: { plan: { maxImagesPerCar: 3 } } });
+  deleteCarImages.mockResolvedValue(undefined);
   uploadCarImages.mockImplementation(async (files: unknown[]) => files.map((_, i) => `https://cdn.test/cars/car-1/new-${i}.jpg`));
   updateCar.mockImplementation(async (id: string, _org: string, data: object) => ({ id, ...data }));
 });
@@ -81,7 +82,7 @@ describe("updateCarFull photos", () => {
 
     await updateCarFull("car-1", edit([STORED[1], DATA_URL, file]), "clerk_m", ORG);
 
-    expect(deleteCarImages).toHaveBeenCalledWith([STORED[0]]);
+    expect(deleteCarImages).toHaveBeenCalledWith([STORED[0]], "car-1");
     expect(uploadCarImages).toHaveBeenCalledWith([DATA_URL, file], "car-1", "car-images", 3);
     expect(updateCar).toHaveBeenCalledWith(
       "car-1",

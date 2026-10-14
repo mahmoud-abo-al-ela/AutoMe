@@ -123,7 +123,7 @@ export async function createCar(
   }, plan?.maxCars ?? 0);
   if (!car) {
     // Another save took the last place while this one uploaded its photos.
-    await storageService.deleteCarImages(imageUrls).catch((error: unknown) =>
+    await storageService.deleteCarImages(imageUrls, carId).catch((error: unknown) =>
       logError("Could not delete the photos of a car refused at its plan's limit", error)
     );
     throw new PlanLimitError({
@@ -236,7 +236,11 @@ export async function deleteCar(
   await searchTermsChanged();
 
   if (car.images && car.images.length > 0) {
-    await storageService.deleteCarImages(car.images);
+    // The car is gone from the database, which is what the dealer asked;
+    // a photo left in storage is only tidiness, so it must not fail the delete.
+    await storageService.deleteCarImages(car.images, carId).catch((error: unknown) =>
+      logError(`Could not delete the photos of deleted car ${carId}`, error)
+    );
   }
 
   return { message: "Car deleted successfully" };
@@ -330,7 +334,11 @@ export async function updateCarFull(
 
   // Delete removed images from storage
   if (deletedImages.length > 0) {
-    await storageService.deleteCarImages(deletedImages);
+    // Best effort, like a deleted car's: a photo left in storage must not
+    // fail the dealer's edit.
+    await storageService.deleteCarImages(deletedImages, carId).catch((error: unknown) =>
+      logError(`Could not delete removed photos of car ${carId}`, error)
+    );
   }
 
   // Upload new images to Supabase
