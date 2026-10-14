@@ -25,3 +25,22 @@ export function pathnameWithoutLocale(pathname: string): string {
 export function localeOf(pathname: string): string {
   return LEADING_LOCALE.exec(pathname)?.[1] ?? routing.defaultLocale;
 }
+
+const DASHBOARD_PATH = /^\/org\/([^/?#]+)/;
+
+/**
+ * The dealership a dashboard URL names: "/en/org/cairo-motors/cars" ->
+ * "cairo-motors". Null anywhere else. Server Actions post to the page they
+ * run on, so this is also the dealership an action from that page acts for.
+ * It only selects; membership is still required (lib/auth/context.ts).
+ */
+export function dashboardSlugOf(pathname: string): string | null {
+  const match = DASHBOARD_PATH.exec(pathnameWithoutLocale(pathname));
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    // A malformed escape names no dealership.
+    return null;
+  }
+}

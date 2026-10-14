@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { localeOf, pathnameWithoutLocale } from "./locale-path";
+import { dashboardSlugOf, localeOf, pathnameWithoutLocale } from "./locale-path";
 
 describe("pathnameWithoutLocale", () => {
   it("strips a leading locale segment", () => {
@@ -43,5 +43,24 @@ describe("localeOf", () => {
   it("does not read a locale out of a longer word", () => {
     expect(localeOf("/enterprise")).toBe("en"); // the default, not a match
     expect(localeOf("/arabica/cars")).toBe("en");
+  });
+});
+
+describe("dashboardSlugOf", () => {
+  it("reads the dealership out of a dashboard path, with or without a locale", () => {
+    expect(dashboardSlugOf("/en/org/cairo-motors/cars")).toBe("cairo-motors");
+    expect(dashboardSlugOf("/ar/org/cairo-motors")).toBe("cairo-motors");
+    expect(dashboardSlugOf("/org/cairo-motors/settings/team")).toBe("cairo-motors");
+  });
+
+  it("is null off the dashboard", () => {
+    expect(dashboardSlugOf("/en/cars")).toBeNull();
+    expect(dashboardSlugOf("/en/org")).toBeNull();
+    expect(dashboardSlugOf("/en/organizations/x")).toBeNull();
+    expect(dashboardSlugOf("/api/ai/car-listing")).toBeNull();
+  });
+
+  it("names no dealership for a malformed escape", () => {
+    expect(dashboardSlugOf("/en/org/%E0%A4%A")).toBeNull();
   });
 });

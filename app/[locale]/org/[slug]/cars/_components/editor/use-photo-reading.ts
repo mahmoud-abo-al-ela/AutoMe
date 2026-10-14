@@ -54,7 +54,7 @@ export function usePhotoReading({
           ? { kind: "exhausted" }
           : { kind: "ready", remaining, limit: usage && usage.limit !== -1 ? usage.limit : null };
 
-  const { progress, extract } = useCarListingStream();
+  const { progress, extract } = useCarListingStream(slug);
   const [reading, setReading] = useState(false);
   const [readError, setReadError] = useState<{ action?: ActionError; text?: string } | null>(null);
   const [aiFilled, setAiFilled] = useState<ReadonlySet<keyof CarFormValues>>(new Set());

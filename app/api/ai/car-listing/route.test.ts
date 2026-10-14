@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AuthenticationError, RateLimitError } from "@/lib/utils/errors";
+import { AuthenticationError, AuthorizationError, RateLimitError } from "@/lib/utils/errors";
 import type { AiProgressEvent } from "@/lib/ai/client";
 
 /**
@@ -63,6 +63,16 @@ beforeEach(() => {
 });
 
 describe("POST /api/ai/car-listing — refusals", () => {
+  it("asks for the dealership the dashboard passes, not the user's first one", async () => {
+    resolveTenantContext.mockRejectedValue(new AuthorizationError("No access to this organization"));
+    // Refused before the body is read, so none is needed.
+    const req = new Request("http://localhost/api/ai/car-listing?org=dealer-b", { method: "POST" });
+    const res = await POST(req);
+    expect(resolveTenantContext).toHaveBeenCalledWith({ organizationSlug: "dealer-b" });
+    expect(res.status).toBe(403);
+    expect(extractCarListing).not.toHaveBeenCalled();
+  });
+
   it("401s a signed-out caller", async () => {
     resolveTenantContext.mockRejectedValue(new AuthenticationError());
     const res = await POST(request());

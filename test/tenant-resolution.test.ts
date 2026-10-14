@@ -34,6 +34,8 @@ import {
   getUserOrganizations,
 } from "@/lib/org/resolve";
 import { checkOrganizationAccess, getUserMembership, requireOwner } from "@/lib/org/access";
+import { resolveTenantContext } from "@/lib/auth/context";
+import { AuthorizationError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
 
 /**
@@ -234,6 +236,24 @@ describe.skipIf(!hasTestDb)("tenant resolution (real Postgres)", () => {
       expect(await getUserMembership(ids.member, ORGS.b)).toBeNull();
       await expect(requireOwner(ids.owner, ORGS.a)).resolves.toMatchObject({ role: "OWNER" });
       await expect(requireOwner(ids.member, ORGS.a)).rejects.toThrow("Only owners");
+    });
+  });
+
+  describe("resolveTenantContext on a dashboard", () => {
+    it("acts for the dealership in the dashboard URL for a user of several", async () => {
+      // The owner belongs to A (OWNER) and B (MEMBER). On B's dashboard, B.
+      signIn(CLERK.owner, { "x-dashboard-org": "tenant-test-b" });
+      const ctx = await resolveTenantContext();
+      expect(ctx.organization.id).toBe(ORGS.b);
+      expect(ctx.membership).toMatchObject({ organizationId: ORGS.b, role: "MEMBER" });
+
+      signIn(CLERK.owner, { "x-dashboard-org": "tenant-test-a" });
+      expect((await resolveTenantContext()).organization.id).toBe(ORGS.a);
+    });
+
+    it("refuses a dashboard the user is not a member of", async () => {
+      signIn(CLERK.member, { "x-dashboard-org": "tenant-test-b" });
+      await expect(resolveTenantContext()).rejects.toBeInstanceOf(AuthorizationError);
     });
   });
 });

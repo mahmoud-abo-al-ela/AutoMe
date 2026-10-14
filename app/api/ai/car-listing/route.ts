@@ -78,7 +78,11 @@ export async function POST(request: Request) {
   let ctx;
   let images;
   try {
-    ctx = await resolveTenantContext();
+    // The dashboard passes its dealership: this URL (/api/…) names none.
+    // Selection only — resolveTenantContext still requires a membership.
+    ctx = await resolveTenantContext({
+      organizationSlug: new URL(request.url).searchParams.get("org"),
+    });
     await assertAiAllowed(ctx);
     // A read never saved costs no listing, so it has its own cap.
     await assertUnsavedReadsLeft(ctx);
