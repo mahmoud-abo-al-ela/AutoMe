@@ -13,7 +13,7 @@ vi.mock("@upstash/qstash", () => ({
 vi.mock("@/lib/services/car/image-alts", () => ({ refreshImageAlts }));
 
 import { enqueue, resetJobsForTests } from "@/lib/jobs";
-import { runJob } from "@/lib/jobs/registry";
+import { isValidJobPayload, runJob } from "@/lib/jobs/registry";
 
 const CAR = "6b0f9d3e-7d0a-4c6e-9e44-2a1f6f3c9a01";
 const payload = { carId: CAR, organizationId: "org-1", caller: { organizationId: "org-1", userId: "u-1", priority: "low" as const } };
@@ -92,5 +92,14 @@ describe("runJob", () => {
   it("throws when the work fails, so the queue retries it", async () => {
     refreshImageAlts.mockRejectedValue(new Error("AI busy"));
     await expect(runJob("image-alts", payload)).rejects.toThrow("AI busy");
+  });
+});
+
+describe("isValidJobPayload", () => {
+  it("accepts what the job's schema accepts, and nothing else", () => {
+    const carId = "6f9619ff-8b86-4011-b42d-00c04fc964ff";
+    expect(isValidJobPayload("car-embedding", { carId, organizationId: "org-1" })).toBe(true);
+    expect(isValidJobPayload("car-embedding", { carId: "not-a-uuid", organizationId: "org-1" })).toBe(false);
+    expect(isValidJobPayload("car-embedding", null)).toBe(false);
   });
 });

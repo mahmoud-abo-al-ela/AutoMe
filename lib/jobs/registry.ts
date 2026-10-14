@@ -35,11 +35,6 @@ export const JOBS = {
       refreshImageAlts(carId, organizationId, caller, { rethrow: true }),
   },
   /**
-   * Give a declined buyer question its meaning (a vector), folding it into
-   * the earlier question it repeats on the same car. Idempotent: skips a
-   * question already embedded by the current model, or gone.
-   */
-  /**
    * Give a car its meaning for search after a save. Idempotent: skips a car
    * whose text and embedding model have not changed since its last vector.
    */
@@ -52,6 +47,11 @@ export const JOBS = {
       await embedCar(carId, organizationId);
     },
   },
+  /**
+   * Give a declined buyer question its meaning (a vector), folding it into
+   * the earlier question it repeats on the same car. Idempotent: skips a
+   * question already embedded by the current model, or gone.
+   */
   "question-embedding": {
     schema: z.object({
       questionId: z.string().uuid(),
@@ -79,6 +79,15 @@ export type JobPayload<N extends JobName> = z.infer<(typeof JOBS)[N]["schema"]>;
 
 export function isJobName(value: string): value is JobName {
   return Object.prototype.hasOwnProperty.call(JOBS, value);
+}
+
+/**
+ * Whether a payload is one this job accepts. A payload that fails will fail
+ * the same way on every delivery, so the route tells the queue not to retry
+ * it rather than spending three more deliveries on it.
+ */
+export function isValidJobPayload(name: JobName, payload: unknown): boolean {
+  return JOBS[name].schema.safeParse(payload).success;
 }
 
 /** Validate and run one job. Throws on a bad payload or a failed run. */
