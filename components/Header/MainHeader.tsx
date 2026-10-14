@@ -96,9 +96,9 @@ function IconLink({
  * Site header (Figma: Header, MobileTopBar) — sticky and in normal flow, so
  * pages no longer guess its height with their own top margins.
  *
- * Phones get only the brand and the language toggle here: navigation lives in
- * the bottom tab bar (BottomTabBar), so nothing crowds — or clips at — the
- * screen edge.
+ * Phones get the brand, the language toggle and the account here (the avatar,
+ * or Sign in) — once each; navigation lives in the bottom tab bar
+ * (BottomTabBar), so nothing crowds — or clips at — the screen edge.
  */
 export default function MainHeader({
   user,
@@ -179,7 +179,7 @@ export default function MainHeader({
               </Link>
             )}
             {!onAuthPage && (
-              <Button variant="outline-strong" size="control" asChild className="hidden md:inline-flex">
+              <Button variant="outline-strong" size="control" asChild>
                 <Link href={signIn}>{t("signIn")}</Link>
               </Button>
             )}
@@ -200,9 +200,7 @@ export default function MainHeader({
                 </IconLink>
               </div>
             )}
-            <div className="hidden md:block">
-              <UserButton />
-            </div>
+            <UserButton />
           </Show>
         </div>
       </div>

@@ -15,7 +15,12 @@
     "analytics": "التحليلات",
     "openMenu": "فتح القائمة",
     "closeMenu": "إغلاق القائمة",
-    "backToSite": "العودة إلى الموقع"
+    "backToSite": "العودة إلى الموقع",
+    "groups": {
+      "platform": "المنصة",
+      "accounts": "الحسابات",
+      "oversight": "الرقابة"
+    }
   },
   "common": {
     "active": "نشط",

@@ -1,22 +1,24 @@
 "use client";
 
+import { useId } from "react";
 import { useTranslations } from "next-intl";
-import { Show, UserButton, useClerk } from "@clerk/nextjs";
-import { CarFront, ChevronRight, LogOut } from "lucide-react";
+import { ArrowRight, ChevronRight, Store } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { navItems, subdomainNavItems, adminNavItems } from "@/lib/HeaderConfig";
-import { useAuthRedirects } from "@/hooks/use-auth-redirects";
-import LanguageSwitcher from "./components/LanguageSwitcher";
 import { isCurrentSection, type HeaderOrganization, type HeaderUser } from "./MainHeader";
 import { useHeaderAccess } from "./use-header-access";
+import { mobileTabs } from "./mobile-tabs";
 import { cn } from "@/lib/utils";
 
+type Row = { href: string; label: string };
+
 /**
- * The phone "More" sheet, opened from the bottom tab bar: everything that is
- * not one of the four primary tabs — the remaining sections, the dashboard
- * for dealership members, language, and the account.
+ * The phone "More" sheet, opened from the bottom tab bar: the pages that are
+ * not one of the viewer's tabs (mobileTabs), in groups — the viewer's own
+ * activity, the marketplace, help — with the pitch to dealers as its own card
+ * at the foot rather than one more row. The account and the language are in
+ * the top bar, one of each; this sheet used to repeat both.
  *
  * A Radix sheet rather than the hand-rolled panel it replaces, so focus is
  * trapped, Escape closes it, focus returns to the More tab, and scroll lock
@@ -27,7 +29,6 @@ export default function MobileMenu({
   onOpenChange,
   user,
   organizationSlug,
-  organization,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,23 +38,46 @@ export default function MobileMenu({
 }) {
   const t = useTranslations("nav");
   const tFooter = useTranslations("footer");
-  const { signOut } = useClerk();
-  const { afterSignOut, signIn } = useAuthRedirects();
   const access = useHeaderAccess(user, organizationSlug);
   const close = () => onOpenChange(false);
+  const id = useId();
 
-  // Home and Browse are tabs already; the rest of the section nav lives here.
-  const sections = (access.showAdminNav ? adminNavItems : access.isOnSubdomain ? subdomainNavItems : navItems).filter(
-    (item) => item.href !== "/cars"
+  const onTabs = new Set(
+    mobileTabs(access.viewer, { onSubdomain: access.isOnSubdomain, dashboardHref: access.dashboardHref }).map((tab) => tab.href)
   );
-  const extra = access.isOnSubdomain
-    ? []
-    : [
-        { href: "/about", label: tFooter("aboutUs") },
-        { href: "/contact", label: tFooter("contactUs") },
-      ];
+  const notATab = (row: Row) => !onTabs.has(row.href);
 
-  const row = (href: string, label: string, icon?: React.ReactNode) => (
+  const sections: Row[] = (access.showAdminNav ? adminNavItems : access.isOnSubdomain ? subdomainNavItems : navItems).map(
+    (item) => ({ href: item.href, label: t(item.labelKey) })
+  );
+  const isFaq = (row: Row) => row.href === "/faq";
+
+  // A signed-in shopper's own pages. Owners and admins manage cars rather than
+  // buy them; a staff member who also shops finds them here, not on a tab.
+  const activity: Row[] =
+    access.viewer !== "guest" && !access.isOwner
+      ? [
+          { href: "/test-drive", label: t("testDrives") },
+          { href: "/wishlist", label: t("wishlist") },
+          { href: "/messages", label: t("messages") },
+        ]
+      : [];
+  const help: Row[] = [
+    ...sections.filter(isFaq),
+    ...(access.isOnSubdomain
+      ? []
+      : [
+          { href: "/about", label: tFooter("aboutUs") },
+          { href: "/contact", label: tFooter("contactUs") },
+        ]),
+  ];
+  const groups = [
+    { key: "activity", title: t("groups.activity"), rows: activity.filter(notATab) },
+    { key: "explore", title: t("groups.explore"), rows: sections.filter((row) => !isFaq(row)).filter(notATab) },
+    { key: "help", title: t("groups.help"), rows: help.filter(notATab) },
+  ].filter((group) => group.rows.length > 0);
+
+  const row = ({ href, label }: Row) => (
     <Link
       key={href}
       href={href}
@@ -64,7 +88,6 @@ export default function MobileMenu({
         isCurrentSection(access.pathname, href) && "bg-muted"
       )}
     >
-      {icon}
       <span className="flex-1">{label}</span>
       <ChevronRight aria-hidden className="size-4 text-muted-foreground rtl:rotate-180" />
     </Link>
@@ -76,55 +99,33 @@ export default function MobileMenu({
         <SheetTitle className="sr-only">{t("more")}</SheetTitle>
         <div aria-hidden className="mx-auto mt-3 h-1 w-10 rounded-full bg-border" />
 
-        <div className="overflow-y-auto px-4 pb-4 pt-3">
-          <Show when="signed-in">
-            <div className="mb-3 flex items-center gap-3 rounded-control bg-muted p-3">
-              <UserButton />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-caption font-semibold">{user?.name || t("welcomeBack")}</p>
-                {user?.email && <p dir="ltr" className="truncate text-micro text-muted-foreground rtl:text-right">{user.email}</p>}
-              </div>
-              <Button
-                variant="ghost"
-                size="icon-control"
-                aria-label={t("signOut")}
-                title={t("signOut")}
-                onClick={() => {
-                  close();
-                  signOut({ redirectUrl: afterSignOut });
-                }}
-              >
-                <LogOut className="size-5" />
-              </Button>
+        <nav aria-label={t("more")} className="flex flex-col gap-4 overflow-y-auto px-4 pb-5 pt-2">
+          {groups.map((group) => (
+            <div key={group.key} role="group" aria-labelledby={`${id}-${group.key}`} className="flex flex-col">
+              <h3 id={`${id}-${group.key}`} className="px-3 pb-1 text-micro font-semibold uppercase tracking-wide text-muted-foreground">
+                {group.title}
+              </h3>
+              {group.rows.map(row)}
             </div>
-          </Show>
+          ))}
 
-          {access.showDashboardLink && (
-            <Button variant="inverse" size="xl" asChild className="mb-3 w-full">
-              <Link href={access.isOnAdminPath ? "/" : access.dashboardHref} onClick={close}>
-                {access.isOnAdminPath ? t("viewStorefront") : t("dashboard")}
-              </Link>
-            </Button>
+          {access.showForDealers && (
+            <Link
+              href="/for-dealers"
+              onClick={close}
+              className="flex items-center gap-3 rounded-control border border-border bg-muted p-4 transition-colors hover:bg-muted/70"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-marker text-marker-foreground">
+                <Store aria-hidden className="size-5" />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="text-body font-semibold">{t("sellCta.title")}</span>
+                <span className="text-caption text-muted-foreground">{t("sellCta.body")}</span>
+              </span>
+              <ArrowRight aria-hidden className="size-5 shrink-0 rtl:rotate-180" />
+            </Link>
           )}
-
-          <nav aria-label={t("more")} className="flex flex-col">
-            {sections.map((item) => row(item.href, t(item.labelKey)))}
-            <Show when="signed-in">{!access.isOwner && row("/test-drive", t("testDrive"), <CarFront aria-hidden className="size-5" />)}</Show>
-            {extra.map((item) => row(item.href, item.label))}
-            {access.showForDealers && row("/for-dealers", t("forDealers"))}
-          </nav>
-
-          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-            <LanguageSwitcher className="h-11 rounded-control" onSwitch={close} />
-            <Show when="signed-out">
-              <Button variant="marker" size="xl" asChild>
-                <Link href={signIn} onClick={close}>
-                  {t("signIn")}
-                </Link>
-              </Button>
-            </Show>
-          </div>
-        </div>
+        </nav>
       </SheetContent>
     </Sheet>
   );

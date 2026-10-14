@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { usePathname } from "@/i18n/navigation";
 import { plateBandFor, showsDealerPitch } from "@/lib/org/client";
 import type { HeaderUser } from "./MainHeader";
+import type { Viewer } from "./mobile-tabs";
 
 /**
  * Who is looking at the site chrome, and what that entitles them to see.
@@ -31,12 +32,18 @@ export function useHeaderAccess(user: HeaderUser | undefined, organizationSlug?:
   const isOwner =
     isSuperAdmin || (hasOrgMembership && !!user?.memberships?.some((m) => m.role === "OWNER"));
 
+  // Signed in only once the server has said who: while Clerk loads, a guest
+  // has no `user`, and must not flash a buyer's tabs first.
+  const viewer: Viewer = !signedIn || !user ? "guest" : hasOrgMembership || isSuperAdmin ? "dealer" : "buyer";
+
   const userOrgSlug = organizationSlug || user?.memberships?.[0]?.organization?.slug;
   const isOnAdminPath = !!pathname?.startsWith("/super-admin");
   const isOnOrgPath = !!pathname?.startsWith("/org/");
 
   return {
     signedIn,
+    /** Whom the phone navigation is for: guest, buyer or dealer (mobile-tabs.ts). */
+    viewer,
     pathname,
     hasOrgMembership,
     isSuperAdmin,

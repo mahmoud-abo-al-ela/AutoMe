@@ -28,5 +28,14 @@
   "searchCars": "Search cars",
   "primaryNav": "Main",
   "goHome": "AutoMe home",
-  "unread": "Unread messages"
+  "unread": "Unread messages",
+  "groups": {
+    "activity": "My activity",
+    "explore": "Explore",
+    "help": "Help"
+  },
+  "sellCta": {
+    "title": "Sell cars on AutoMe",
+    "body": "Put your dealership’s cars in front of buyers across Egypt."
+  }
 }
