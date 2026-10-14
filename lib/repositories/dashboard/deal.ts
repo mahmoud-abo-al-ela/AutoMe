@@ -30,8 +30,10 @@ export async function findDealContext(organizationId: string, buyerId: string, c
           },
         })
       : null,
+    // Scoped like the car itself: unscoped, another dealership's car id told
+    // this one whether — and when — the buyer saved it.
     carId
-      ? db.savedCar.findFirst({ where: { userId: buyerId, carId }, select: { createdAt: true } })
+      ? db.savedCar.findFirst({ where: { userId: buyerId, carId, car: { organizationId } }, select: { createdAt: true } })
       : null,
     db.savedCar.count({
       where: { userId: buyerId, car: { organizationId }, ...(carId ? { carId: { not: carId } } : {}) },
