@@ -111,10 +111,17 @@ export async function bookSlot(request: SlotRequest, write: SlotWrite, check: Sl
         })
       );
     }
+    // Only a booking still PENDING moves, checked here under the lock: one
+    // confirmed or cancelled since the caller looked must not be revived to
+    // PENDING. Null tells the caller it no longer can be edited.
+    const { count } = await tx.testDrive.updateMany({
+      where: { id: write.testDriveId, status: "PENDING" },
+      data: { date: request.date, startTime: request.startTime, endTime: request.endTime, notes: write.notes },
+    });
+    if (count === 0) return null;
     return serializeTestDrive(
-      await tx.testDrive.update({
+      await tx.testDrive.findUniqueOrThrow({
         where: { id: write.testDriveId },
-        data: { date: request.date, startTime: request.startTime, endTime: request.endTime, notes: write.notes, status: "PENDING" },
         include: { car: { select: { make: true, model: true, year: true } } },
       })
     );

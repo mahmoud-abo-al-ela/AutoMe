@@ -87,6 +87,7 @@
     "notEditable": "Only pending test drives can be changed.",
     "notCancellable": "This test drive can no longer be cancelled.",
     "invalidTransition": "This test drive can no longer change to that status.",
+    "changed": "This test drive was just changed by someone else. Reload to see where it stands.",
     "slot": {
       "invalid": "That date or time isn’t valid.",
       "outsideWindow": "Test drives can be booked up to {days} days ahead.",
