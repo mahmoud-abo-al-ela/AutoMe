@@ -162,8 +162,12 @@ export function DealershipsList({ data }: { data: DealershipsPage }) {
           </div>
         ) : (
           <>
+            {/* The table from md, by column priority rather than one forced
+                width: it was min-w-[960px] from 768px, so a tablet scrolled
+                the last columns — the actions menu among them — out of view.
+                Team and test drives join from lg, the join date from xl. */}
             <div className="relative hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[960px] border-collapse text-caption">
+              <table className="w-full min-w-[640px] border-collapse text-caption">
                 <thead>
                   <tr className="whitespace-nowrap border-b border-border bg-muted/60 text-muted-foreground">
                     <th scope="col" className="w-12 px-4 py-3">
@@ -182,10 +186,10 @@ export function DealershipsList({ data }: { data: DealershipsPage }) {
                     <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.plan")}</th>
                     <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.status")}</th>
                     <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.cars")}</th>
-                    <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.team")}</th>
-                    <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.drives")}</th>
+                    <th scope="col" className="hidden px-3 py-3 text-center font-semibold lg:table-cell">{t("columns.team")}</th>
+                    <th scope="col" className="hidden px-3 py-3 text-center font-semibold lg:table-cell">{t("columns.drives")}</th>
                     <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.paid")}</th>
-                    <th scope="col" className="px-3 py-3 text-center font-semibold">{t("columns.joined")}</th>
+                    <th scope="col" className="hidden px-3 py-3 text-center font-semibold xl:table-cell">{t("columns.joined")}</th>
                     <th scope="col" className="w-14 px-3 py-3">
                       <span className="sr-only">{t("columns.actions")}</span>
                     </th>
@@ -224,12 +228,12 @@ export function DealershipsList({ data }: { data: DealershipsPage }) {
                         <td className="px-3 py-3 text-center">{display.plan(row)}</td>
                         <td className="px-3 py-3 text-center">{status(row)}</td>
                         <td className="px-3 py-3 text-center tabular-nums">{n(row.cars)}</td>
-                        <td className="px-3 py-3 text-center tabular-nums">{n(row.team)}</td>
-                        <td className="px-3 py-3 text-center tabular-nums">{n(row.recentDrives)}</td>
+                        <td className="hidden px-3 py-3 text-center tabular-nums lg:table-cell">{n(row.team)}</td>
+                        <td className="hidden px-3 py-3 text-center tabular-nums lg:table-cell">{n(row.recentDrives)}</td>
                         <td className={cn("px-3 py-3 text-center tabular-nums", !paid && "text-muted-foreground")}>
                           {paid ?? (row.plan && row.plan.type !== "STARTER" ? t("paidNone") : t("freePlan"))}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3 text-center text-muted-foreground">{display.day(row.createdAt)}</td>
+                        <td className="hidden whitespace-nowrap px-3 py-3 text-center text-muted-foreground xl:table-cell">{display.day(row.createdAt)}</td>
                         <td className="px-3 py-2 text-end">{menu(row)}</td>
                       </tr>
                     );
