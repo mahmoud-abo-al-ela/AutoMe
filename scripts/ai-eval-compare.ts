@@ -5,7 +5,8 @@
  *   pnpm eval:compare --update-baseline  # accept this run as the new baseline
  *
  * Exits 1 on a regression — a case that passed in the baseline and fails now —
- * or a baseline case a suite that ran no longer reports. A case no model could answer is inconclusive and never fails the run —
+ * or a baseline case a suite that ran no longer reports — and when there is no
+ * baseline at all, since then nothing could be caught. A case no model could answer is inconclusive and never fails the run —
  * a quota-starved night is not a quality regression. Paths can be overridden
  * with AI_EVAL_REPORT and AI_EVAL_BASELINE.
  */
@@ -69,6 +70,20 @@ if (process.argv.includes("--update-baseline")) {
   writeFileSync(baselinePath, `${JSON.stringify(nextBaseline(report, baseline), null, 2)}\n`);
   console.info(`\nBaseline updated: ${baselinePath}`);
   process.exit(0);
+}
+
+// With no baseline there is nothing to regress from, and a gate that cannot
+// fail is no gate: the nightly run stayed green whatever got worse. Fail until
+// a baseline is committed, and say how.
+if (!baseline) {
+  console.error(
+    `\nNo baseline at ${baselinePath}, so this run cannot catch a regression.\n` +
+      "Accept a run you have reviewed as the baseline:\n" +
+      "  1. download its eval-report artifact (Actions → AI evaluation → the run)\n" +
+      "  2. AI_EVAL_REPORT=eval-report.json pnpm eval:compare --update-baseline\n" +
+      `  3. commit ${baselinePath}`
+  );
+  process.exit(1);
 }
 
 process.exit(result.regressions.length > 0 || result.missing.length > 0 ? 1 : 0);
