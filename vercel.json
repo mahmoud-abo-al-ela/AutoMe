@@ -7,6 +7,9 @@
     { "path": "/api/cron/weekly-digest?at=0900", "schedule": "0 9 * * 6" },
     { "path": "/api/cron/billing-renewals", "schedule": "0 5 * * *" },
     { "path": "/api/cron/refresh-search-terms", "schedule": "30 3 * * *" },
-    { "path": "/api/cron/mcp-health", "schedule": "15 4 * * *" }
+    { "path": "/api/cron/mcp-health", "schedule": "15 4 * * *" },
+    { "path": "/api/cron/backfill-car-embeddings", "schedule": "0 2 * * *" },
+    { "path": "/api/cron/backfill-question-embeddings", "schedule": "15 2 * * *" },
+    { "path": "/api/cron/backfill-image-alts", "schedule": "30 2 * * *" }
   ]
 }
