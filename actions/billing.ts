@@ -12,6 +12,7 @@ import {
 } from "@/lib/services/billing/manage";
 import { confirmDealershipPayment } from "@/lib/services/billing/confirm";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -119,6 +120,7 @@ const planChangeSchema = z.object({
  */
 export const changePlan = withAuth(
   async (ctx, organizationId: string, planId: string, billingPeriod: string, locale: string) => {
+    refuseDuringSupportSession(ctx);
     await enforceRateLimit();
     const input = validateAction(planChangeSchema, { organizationId, planId, billingPeriod });
     const organization = await ownedOrganization(ctx.user.id, input.organizationId);
@@ -138,6 +140,7 @@ const uuidSchema = z.string().uuid();
 
 /** Pay for the next period now (a trial's first payment, or a renewal that is due). */
 export const payRenewal = withAuth(async (ctx, organizationId: string, locale: string) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   const { url } = await payRenewalService({
@@ -150,6 +153,7 @@ export const payRenewal = withAuth(async (ctx, organizationId: string, locale: s
 
 /** Stop renewing: the plan runs to the end of what is paid, then the free plan. */
 export const cancelPlan = withAuth(async (ctx, organizationId: string) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   const result = await cancelPlanService({ organization, actor: actorOf(ctx.user) });
@@ -158,6 +162,7 @@ export const cancelPlan = withAuth(async (ctx, organizationId: string) => {
 
 /** Undo a scheduled cancellation or plan change. */
 export const keepCurrentPlan = withAuth(async (ctx, organizationId: string) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   await keepCurrentPlanService({ organization });

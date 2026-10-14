@@ -9,6 +9,7 @@ import { createUnpaidOrganization } from "@/lib/services/billing/signup";
 import { confirmSignupPaymentFor } from "@/lib/services/billing/confirm";
 import { isSlugAvailable } from "@/lib/services/onboarding";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { validateAction } from "@/lib/middleware/with-validation";
@@ -26,6 +27,7 @@ export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
  * Paymob payment (lib/services/billing/settle.ts), whatever the client sends.
  */
 export const createOrganization = withAuth(async (ctx, input: OrganizationInput) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const data = validateAction(organizationSchema, input);
 

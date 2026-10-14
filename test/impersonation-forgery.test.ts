@@ -197,6 +197,10 @@ describe.skipIf(!hasTestDb)("forged impersonation (real Postgres, real actions)"
       expect(entry).toMatchObject({ userId: ids.admin });
       expect(entry?.metadata).toMatchObject({ impersonationSessionId: session.id });
 
+      // Edits yes, deletions no: those stay the dealership's own decision.
+      expect(await deleteCar(ids.carB)).toMatchObject({ success: false, error: { code: "AUTHORIZATION_ERROR" } });
+      expect(await carB()).toMatchObject({ organizationId: ORGS.b });
+
       // A session for B reaches nothing in C.
       expect(await updateCar(ids.carC, { status: "SOLD" })).toMatchObject({ success: false });
       expect(await db.car.findUnique({ where: { id: ids.carC } })).toMatchObject({ organizationId: ORGS.c, status: "AVAILABLE" });

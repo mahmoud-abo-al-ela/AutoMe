@@ -1,6 +1,7 @@
 "use server";
 import { after } from "next/server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { aiCallerFor } from "@/lib/ai/caller";
 import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as dealershipService from "@/lib/services/dealership";
@@ -104,6 +105,7 @@ export const getUsers = withOrgAuth(
 
 export const updateUserRole = withOrgAuth(
   async (ctx, targetUserId: string, role: UserRole) => {
+  refuseDuringSupportSession(ctx);
   await dealershipService.updateUserRole(targetUserId, role, ctx.userId, ctx.organization.id);
 
   revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
@@ -113,6 +115,7 @@ export const updateUserRole = withOrgAuth(
 });
 
 export const deleteUser = withOrgAuth(async (ctx, targetUserId: string) => {
+  refuseDuringSupportSession(ctx);
   await dealershipService.deleteUser(targetUserId, ctx.userId, ctx.organization.id);
 
   revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);

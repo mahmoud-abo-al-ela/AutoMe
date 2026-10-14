@@ -109,6 +109,7 @@
     "planHasPayments": "This plan has been paid for ({count} payments), so it can’t be deleted. Deactivate it instead.",
     "cannotDemoteSelf": "You can’t remove your own admin role.",
     "reasonTooShort": "The reason must be at least {min} characters.",
-    "targetNotMember": "That user isn’t a member of this organization."
+    "targetNotMember": "That user isn’t a member of this organization.",
+    "notInSupportSession": "This isn’t available during a support session. Billing, the team and deletions are left to the dealership."
   }
 }

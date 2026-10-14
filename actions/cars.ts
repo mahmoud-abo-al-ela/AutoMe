@@ -1,5 +1,6 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as carService from "@/lib/services/car";
 import { coachListing, translateListing, type ListingText, type ListingToCoach } from "@/lib/services/ai";
@@ -159,6 +160,7 @@ export const addCar = withOrgAuth(
 );
 
 export const deleteCar = withOrgAuth(async (ctx, carId: string) => {
+  refuseDuringSupportSession(ctx);
   await carService.deleteCar(carId, ctx.userId, ctx.organization.id);
 
   revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
