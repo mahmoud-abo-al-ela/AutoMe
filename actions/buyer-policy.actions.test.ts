@@ -58,7 +58,7 @@ vi.mock("@/lib/stream-chat", () => stream);
 
 const db = vi.hoisted(() => ({
   user: { findUnique: vi.fn() },
-  car: { findUnique: vi.fn() },
+  car: { findUnique: vi.fn(), findFirst: vi.fn() },
   organization: { findUnique: vi.fn() },
   testDrive: { findUnique: vi.fn() },
 }));
@@ -142,7 +142,7 @@ describe("toggleWishlist", () => {
 
 describe("startCarConversation", () => {
   beforeEach(() => {
-    db.car.findUnique.mockResolvedValue({ ...CAR, organization: { id: DEALER, memberships: [] } });
+    db.car.findFirst.mockResolvedValue({ ...CAR, organization: { id: DEALER, name: "Dealer", slug: "dealer", logo: null, memberships: [] } });
   });
 
   it.each([
@@ -163,6 +163,37 @@ describe("startCarConversation", () => {
     stream.createCarInquiryChannel.mockResolvedValue({ channelId: "ch-1" });
 
     expect(await startCarConversation(CAR.id)).toMatchObject({ success: true, data: { channelId: "ch-1" } });
+  });
+
+  it("looks the car up under the public rule, and opens nothing for one the public can't see", async () => {
+    signInAs(viewers.buyer);
+    db.user.findUnique.mockResolvedValue(viewers.buyer);
+    // A hidden car, or a suspended dealership's: the scoped read finds nothing.
+    db.car.findFirst.mockResolvedValue(null);
+
+    expect(await startCarConversation(CAR.id)).toMatchObject({ success: false });
+    expect(db.car.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          id: CAR.id,
+          status: { in: ["AVAILABLE", "SOLD"] },
+          organization: { is: { isActive: true, deletedAt: null } },
+        }),
+      }),
+    );
+    expect(stream.createCarInquiryChannel).not.toHaveBeenCalled();
+  });
+
+  it("puts dealership members on Stream with their name and picture only", async () => {
+    signInAs(viewers.buyer);
+    db.user.findUnique.mockResolvedValue(viewers.buyer);
+    stream.createCarInquiryChannel.mockResolvedValue({ channelId: "ch-1" });
+
+    await startCarConversation(CAR.id);
+
+    const include = db.car.findFirst.mock.calls[0][0].include;
+    expect(include.organization.include.memberships.include.user).toEqual({ select: { id: true, name: true, imageUrl: true } });
+    expect(stream.ensureOrgMembersInStream).toHaveBeenCalledWith([], "Dealer");
   });
 });
 

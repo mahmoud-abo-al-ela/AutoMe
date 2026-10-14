@@ -49,8 +49,12 @@ const ENDPOINT = "/api/ai/car-listing";
  * XMLHttpRequest rather than fetch: it is the only browser API that reports
  * UPLOAD progress, and it exposes the response as it grows, which is all a
  * newline-delimited stream needs.
+ *
+ * `organizationSlug` is the dealership whose dashboard asks: the route's own
+ * URL (/api/…) names none, and a user of several dealerships must be read for
+ * this one. The server still requires a membership in it.
  */
-export function useCarListingStream() {
+export function useCarListingStream(organizationSlug: string) {
   const [progress, setProgress] = useState<CarListingProgress | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
@@ -161,10 +165,10 @@ export function useCarListingStream() {
 
       const body = new FormData();
       for (const file of upload) body.append("file", file);
-      xhr.open("POST", ENDPOINT);
+      xhr.open("POST", `${ENDPOINT}?org=${encodeURIComponent(organizationSlug)}`);
       xhr.send(body);
     });
-  }, []);
+  }, [organizationSlug]);
 
   const reset = useCallback(() => {
     xhrRef.current?.abort();

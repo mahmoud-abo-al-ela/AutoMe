@@ -6,7 +6,7 @@ import {
   type NextRequest,
 } from "next/server";
 import { routing } from "@/i18n/routing";
-import { localeOf, pathnameWithoutLocale } from "@/lib/utils/locale-path";
+import { dashboardSlugOf, localeOf, pathnameWithoutLocale } from "@/lib/utils/locale-path";
 import { localizedPathMatcher, pathMatcher } from "@/lib/utils/route-matcher";
 import {
   MAIN_DOMAIN_ONLY_ROUTES,
@@ -101,6 +101,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
   // database row its cookie names, verified on the server
   // (lib/services/impersonation/active.ts), never something a request asserts.
   requestHeaders.delete("x-organization-slug");
+  requestHeaders.delete("x-dashboard-org");
   requestHeaders.delete("x-subdomain");
   requestHeaders.delete("x-impersonation-active");
   requestHeaders.delete("x-impersonated-org");
@@ -110,6 +111,15 @@ const clerk = clerkMiddleware(async (auth, req) => {
   if (subdomain) {
     requestHeaders.set("x-organization-slug", subdomain);
     requestHeaders.set("x-subdomain", subdomain);
+  }
+
+  // The dealership a dashboard page (/[locale]/org/[slug]/…) is for — and so
+  // the one its Server Actions act for, since they post to the page's URL.
+  // Separate from x-organization-slug, which brands a storefront: a dashboard
+  // is not one. Only resolveTenantContext reads it, and only with a membership.
+  const dashboardSlug = dashboardSlugOf(url.pathname);
+  if (dashboardSlug) {
+    requestHeaders.set("x-dashboard-org", dashboardSlug);
   }
 
   // Create response, forwarding the sanitized request headers downstream.

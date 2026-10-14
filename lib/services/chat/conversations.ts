@@ -41,7 +41,7 @@ async function openChannel({
   members: OrgMember[];
   car?: Parameters<typeof createCarInquiryChannel>[0]["carData"];
 }) {
-  await ensureOrgMembersInStream(members);
+  await ensureOrgMembersInStream(members, organization.name);
 
   const { channelId } = await createCarInquiryChannel({
     organizationId: organization.id,
@@ -67,15 +67,13 @@ async function openChannel({
 export async function getChatSession(clerkId: string) {
   const user = await signedInUser(clerkId);
 
+  // How they appear to whoever they chat with: name and picture only. A
+  // buyer without a name shows as "Buyer" in the dealer's inbox, not as an
+  // email address.
   await upsertStreamUser({
     id: user.id,
-    name: user.name || user.email,
+    name: user.name || null,
     image: user.imageUrl,
-    email: user.email,
-    custom: {
-      clerk_id: user.clerkId,
-      user_role: user.role,
-    },
   });
 
   return {

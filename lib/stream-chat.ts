@@ -1,22 +1,22 @@
 import { StreamChat, type ChannelData } from "stream-chat";
 
 /** The Stream user payload assembled from a local User row. */
+/**
+ * A Stream user: how a person appears in chat, and nothing more. Stream hands
+ * every channel member's user object — custom fields included — to every
+ * other member, so no email, Clerk id or platform role goes here.
+ */
 export interface StreamUserInput {
     id: string;
     name?: string | null;
     image?: string | null;
-    email?: string | null;
-    custom?: Record<string, unknown>;
 }
 
-/** A local User row, as far as ensureOrgMembersInStream reads it. */
+/** A dealership member, as far as ensureOrgMembersInStream reads it. */
 export interface OrgMemberInput {
     id: string;
     name?: string | null;
-    email?: string | null;
     imageUrl?: string | null;
-    clerkId?: string | null;
-    role?: string | null;
 }
 
 /** The car summary mirrored onto the channel. `price` may be a Decimal. */
@@ -72,16 +72,16 @@ export function generateStreamToken(userId: string): string {
 export async function upsertStreamUser(userData: StreamUserInput) {
     const client = getStreamServerClient();
 
+    // An upsert replaces the whole user, so this also clears fields older
+    // versions stored (email, clerk_id, user_role).
     const streamUser = {
         id: userData.id,
         name: userData.name,
         image: userData.image,
-        ...(userData.email && { email: userData.email }),
-        ...(userData.custom && userData.custom),
     };
 
-    // The SDK's UserResponse rejects nullable name/image and the spread-in
-    // custom keys, both of which the API accepts. Cast at the boundary.
+    // The SDK's UserResponse rejects a nullable name/image, which the API
+    // accepts. Cast at the boundary.
     await client.upsertUser(streamUser as Parameters<typeof client.upsertUser>[0]);
     return streamUser;
 }
@@ -107,17 +107,16 @@ function createShortHash(str: string): string {
     return Math.abs(hash).toString(36);
 }
 
-export async function ensureOrgMembersInStream(orgMembers: OrgMemberInput[]) {
+/**
+ * Put a dealership's members on Stream before a buyer's channel adds them.
+ * A member without a name appears under the dealership's — never their email.
+ */
+export async function ensureOrgMembersInStream(orgMembers: OrgMemberInput[], dealershipName: string) {
     for (const member of orgMembers) {
         await upsertStreamUser({
             id: member.id,
-            name: member.name || member.email,
+            name: member.name || dealershipName,
             image: member.imageUrl,
-            email: member.email,
-            custom: {
-                clerk_id: member.clerkId,
-                user_role: member.role,
-            },
         });
     }
 }

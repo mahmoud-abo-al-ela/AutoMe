@@ -14,7 +14,12 @@ vi.mock("@clerk/nextjs/server", () => ({
   auth: vi.fn(async () => ({ userId: session.userId })),
   currentUser: vi.fn(async () => session.clerkUser),
 }));
-vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
+// cookies too: the audit trail asks the request whether it is in a support
+// session (lib/services/impersonation/active.ts). None here.
+vi.mock("next/headers", () => ({
+  headers: vi.fn(async () => new Headers()),
+  cookies: vi.fn(async () => ({ get: () => undefined })),
+}));
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 

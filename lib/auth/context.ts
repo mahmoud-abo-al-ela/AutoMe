@@ -1,6 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { checkUser } from "@/lib/checkUser";
-import { getCurrentOrganization, getOrganizationById } from "@/lib/getOrganization";
+import {
+    getCurrentOrganization,
+    getDashboardOrganizationSlug,
+    getOrganizationById,
+    getOrganizationBySlug,
+} from "@/lib/getOrganization";
 import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
 import type { ActiveImpersonation } from "@/lib/services/impersonation/active";
 import type {
@@ -58,27 +63,49 @@ export async function resolveAuthContext(): Promise<AuthContext> {
 /**
  * The dealership this request acts on, and the caller's right to act there.
  *
- * Access is a membership of that dealership, or a support session the
- * database verified (checkUser) whose target is exactly that dealership.
- * Nothing else: not a cookie, not a header, and not the platform ADMIN role —
- * admins reach a tenant through a session, which is time-boxed, has a reason
- * and is audited, and see across tenants only on the super-admin pages.
+ * Which dealership, first match wins:
+ *   1. a support session the database verified — its target, and nothing else;
+ *   2. `organizationSlug`, for route handlers whose page passes its dealership
+ *      (their URL is /api/…, so it carries none);
+ *   3. the dashboard the request comes from (/[locale]/org/[slug] — Server
+ *      Actions post to their page), via middleware's x-dashboard-org;
+ *   4. the storefront subdomain;
+ *   5. the user's own membership, when nothing above names one.
+ *
+ * Access is a membership of that dealership, or the verified session whose
+ * target is exactly that dealership. Nothing else: not a cookie, not a header,
+ * and not the platform ADMIN role — admins reach a tenant through a session,
+ * which is time-boxed, has a reason and is audited, and see across tenants
+ * only on the super-admin pages. Steps 2–4 only *select*; a slug the caller
+ * has no membership in is refused, never silently swapped for another.
  */
-export async function resolveTenantContext(): Promise<TenantContext> {
+export async function resolveTenantContext(
+    options: { organizationSlug?: string | null } = {},
+): Promise<TenantContext> {
     const { user, userId } = await resolveAuthContext();
     const impersonation = user.isImpersonated ? user.impersonation ?? null : null;
+    const requestedSlug = options.organizationSlug || (await getDashboardOrganizationSlug());
 
-    // During a support session the session's dealership is the tenant,
-    // whatever the subdomain says. Otherwise: the subdomain (set by
-    // middleware), then the user's own membership.
-    let organization = impersonation
-        ? ((await getOrganizationById(impersonation.targetOrganizationId)) as OrganizationWithPlan | null)
-        : ((await getCurrentOrganization()) as OrganizationWithPlan | null);
+    let organization: OrganizationWithPlan | null;
+    if (impersonation) {
+        organization = (await getOrganizationById(impersonation.targetOrganizationId)) as OrganizationWithPlan | null;
+        // A session is for one dealership. A page or request naming another
+        // is refused rather than quietly acting on the session's.
+        if (organization && requestedSlug && requestedSlug !== organization.slug) {
+            throw new AuthorizationError("No access to this organization");
+        }
+    } else if (requestedSlug) {
+        organization = (await getOrganizationBySlug(requestedSlug)) as OrganizationWithPlan | null;
+        if (!organization) {
+            throw new AuthorizationError("No access to this organization");
+        }
+    } else {
+        organization = (await getCurrentOrganization()) as OrganizationWithPlan | null;
+    }
 
-    // Fallback: the user's own membership. Sort deterministically so that when a
-    // user belongs to several orgs and no subdomain selected one, the chosen org
-    // is at least predictable rather than arbitrary Prisma insertion order.
-    if (!organization && !impersonation && user.memberships && user.memberships.length > 0) {
+    // Fallback: the user's own membership, when no URL named a dealership.
+    // Sorted so a user of several is at least given the same one every time.
+    if (!organization && !impersonation && !requestedSlug && user.memberships && user.memberships.length > 0) {
         const [firstMembership] = [...user.memberships].sort((a, b) =>
             a.organizationId.localeCompare(b.organizationId),
         );
