@@ -274,7 +274,12 @@ export function renewalPeriodFor(
 }
 
 async function applyRenewal(tx: Prisma.TransactionClient, payment: PaymentForSettlement, now: Date) {
-  const { organizationId, subscription } = subscriptionOf(payment);
+  const { organizationId } = subscriptionOf(payment);
+  // Decide on the subscription as it is now, locked, not as it was read
+  // before the transaction: the daily job may have moved it to past-due or
+  // the free plan in between, which changes the period this payment buys.
+  const subscription = await paymentRepo.lockSubscriptionInTx(tx, organizationId);
+  if (!subscription) throw new SettlementError(payment.id, "the dealership's subscription is gone");
   const period = renewalPeriodFor(subscription, payment, now);
 
   if (period.start.getTime() <= now.getTime()) {

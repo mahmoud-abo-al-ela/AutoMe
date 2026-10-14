@@ -11,6 +11,7 @@ vi.mock("@/lib/repositories/payment", () => ({
   claimPaymentAsPaid: vi.fn(),
   recordPaymentPeriod: vi.fn(),
   updateSubscriptionInTx: vi.fn(),
+  lockSubscriptionInTx: vi.fn(),
   isSlugTaken: vi.fn(),
   completeOnboardingSessionInTx: vi.fn(),
   findOnboardingSessionData: vi.fn(),
@@ -104,8 +105,14 @@ const sessionData = {
   planId: "plan-pro",
 };
 
-const given = (p: ReturnType<typeof payment>) =>
+/**
+ * The payment as read before the transaction, and — unless a test says
+ * otherwise — its subscription unchanged when re-read under the lock inside it.
+ */
+const given = (p: ReturnType<typeof payment>) => {
   vi.mocked(paymentRepo.findPaymentForSettlement).mockResolvedValue(p as never);
+  vi.mocked(paymentRepo.lockSubscriptionInTx).mockResolvedValue((p.organization?.subscription ?? null) as never);
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -329,6 +336,25 @@ describe("settlePayment — renewal", () => {
         currentPeriodStart: november.start,
         currentPeriodEnd: november.end,
       })
+    );
+  });
+
+  it("decides on the subscription re-read under the lock, not the one read before", async () => {
+    // Read before the transaction: still Pro, in its grace. Re-read inside it:
+    // the daily job has just dropped it to the free plan. The payment must buy
+    // a fresh period from today, not continue a period that has ended.
+    given(payment({ purpose: "RENEWAL", organization: { id: "org-1", subscription: subscription({ status: "PAST_DUE" }) } }));
+    vi.mocked(paymentRepo.lockSubscriptionInTx).mockResolvedValue(
+      subscription({ planId: "plan-starter", plan: starterPlan }) as never
+    );
+    await settlePayment("payment-1", paidTx, new Date("2026-11-04T09:00:00Z"));
+
+    expect(paymentRepo.lockSubscriptionInTx).toHaveBeenCalledWith(tx, "org-1");
+    const fresh = periodFrom("2026-11-04", "MONTHLY");
+    expect(paymentRepo.updateSubscriptionInTx).toHaveBeenCalledWith(
+      tx,
+      "org-1",
+      expect.objectContaining({ planId: "plan-pro", currentPeriodStart: fresh.start, currentPeriodEnd: fresh.end })
     );
   });
 
