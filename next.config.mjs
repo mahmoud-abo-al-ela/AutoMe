@@ -14,7 +14,17 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : undefined;
 
+// On Vercel, `next build` skips its own type check and lint. CI runs both as
+// separate steps (pnpm typecheck, pnpm lint) on every pull request before the
+// merge that deploys, so these are repeats, and the repeat is what ran Vercel's
+// build container out of memory once Zod 4 was in: the build compiled, then was
+// killed (SIGKILL, OOM) during "Linting and checking validity of types"
+// (2026-10-14). Local and CI builds still check.
+const onVercel = process.env.VERCEL === "1";
+
 const nextConfig = {
+  typescript: { ignoreBuildErrors: onVercel },
+  eslint: { ignoreDuringBuilds: onVercel },
   experimental: {
     rootParams: true,
     serverActions: {
