@@ -111,7 +111,7 @@ export default async function DealershipDetailPage({ params, searchParams }: Pag
     // AI_FEATURES.dealershipProfileTranslation).
     if (dealershipTranslationPlan(dealership).length > 0) {
         after(() =>
-            dealershipService.syncDealershipProfileText(dealership.id, {
+            dealershipService.syncDealershipProfileTextFromStorefront(dealership.id, {
                 organizationId: dealership.id,
                 userId: null,
                 priority: "low",
