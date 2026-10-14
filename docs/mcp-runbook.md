@@ -67,13 +67,16 @@ Also fixed in code: 16 KB request body, 5 s per tool call, 20 results a page and
 - Not sent anywhere: `invalid_input`, `not_found`, `rate_limited` — a caller's ordinary
   refusals. They are in `McpToolCall` and the pilot report.
 
-**Alert rules to create in Sentry** (Alerts → Create alert → Issues, project of this app)
+**Sentry alerts** (in place since 2026-10-14; Monitors → Alerts, project `autome`, all
+environments, each emailing the owner). Sentry's alert builder shares one set of triggers
+across an alert's if/then blocks, so "first seen, or a spike" is two alerts:
 
-1. *MCP failures* — filter: the event's tag `surface` equals `mcp`, and tag `mcp.check` is
-   not set; when the issue is first seen, **or** an issue has more than 10 events in one
-   hour → email the owner.
-2. *MCP daily health* — filter: tag `mcp.check` equals `daily-health`; on every event →
-   email the owner.
+1. *MCP failures – new issue* — when a new issue is created or a resolved issue regresses;
+   if the event's tag `surface` equals `mcp` and tag `mcp.check` is not set. Every trigger.
+2. *MCP failures – spike* — when an event is captured; if the issue has more than 10 events
+   in one hour, `surface` equals `mcp` and `mcp.check` is not set. At most hourly per issue.
+3. *MCP daily health* — when an event is captured; if tag `mcp.check` equals
+   `daily-health`. Every trigger (the check runs once a day).
 
 **Reading the numbers**
 
