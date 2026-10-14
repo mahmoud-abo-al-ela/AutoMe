@@ -15,7 +15,7 @@ const MODERATED_EVENTS = new Set(["message.new", "message.updated"]);
 /** Only the envelope is checked here; the message is Stream's shape, read defensively by the service. */
 const eventSchema = z.object({
   type: z.string(),
-  message: z.record(z.unknown()).optional(),
+  message: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**

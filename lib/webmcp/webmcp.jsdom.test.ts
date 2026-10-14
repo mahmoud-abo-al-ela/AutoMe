@@ -62,7 +62,7 @@ describe("toDescriptor", () => {
       const reply = JSON.parse(await tool.execute(args));
       expect(reply.error, JSON.stringify(args)).toBe("invalid_input");
     }
-    expect(JSON.parse(await tool.execute({})).issues).toEqual([{ field: "make", message: "Required" }]);
+    expect(JSON.parse(await tool.execute({})).issues).toEqual([{ field: "make", message: "Invalid input: expected string, received undefined" }]);
     expect(run).not.toHaveBeenCalled();
   });
 

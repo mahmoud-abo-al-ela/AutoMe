@@ -17,7 +17,7 @@ export const latestEvalReportTool: OpsTool<Record<string, never>, Record<string,
   outputSchema: {
     run,
     totals,
-    models: z.record(z.number()),
+    models: z.record(z.string(), z.number()),
     failed: noted,
     failedCount: z.number(),
     advisoryFailures: noted,

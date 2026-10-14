@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { ZodType } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchema } from "@/lib/utils/json-schema";
 import { carListingSchema } from "@/lib/ai/schemas/car-listing";
 import { imageAltsSchema } from "@/lib/ai/schemas/image-alts";
 import { imageSearchSchema } from "@/lib/ai/schemas/image-search";
@@ -54,7 +54,7 @@ function enumArraysWithMaxItems(node: unknown, path = "$"): string[] {
 
 describe("AI response schemas", () => {
   it.each(Object.entries(SCHEMAS))("%s has no enum array with maxItems (Gemma rejects it)", (_, schema) => {
-    const json = zodToJsonSchema(schema, { $refStrategy: "none" });
+    const json = toJsonSchema(schema);
     expect(enumArraysWithMaxItems(json)).toEqual([]);
   });
 });

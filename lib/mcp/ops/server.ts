@@ -1,5 +1,5 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { z } from "zod";
+import { McpServer } from "@modelcontextprotocol/server";
+import { z } from "zod";
 import { runOpsTool, type OpsConfig, type OpsTool } from "./tool";
 import { breakerStatusTool } from "./tools/breaker";
 import { compareEvalRunsTool, latestEvalReportTool } from "./tools/eval-reports";
@@ -28,13 +28,13 @@ function register<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
     {
       title: tool.title,
       description: tool.description,
-      inputSchema: tool.inputSchema,
-      outputSchema: tool.outputSchema,
+      inputSchema: z.object(tool.inputSchema),
+      outputSchema: z.object(tool.outputSchema),
       annotations: READ_ONLY,
     },
     // The SDK validates the input against inputSchema before calling this; its
     // callback type cannot be inferred through this generic helper, hence the cast.
-    ((input: z.objectOutputType<Input, z.ZodTypeAny>) => runOpsTool(tool, input, config)) as never
+    ((input: z.output<z.ZodObject<Input>>) => runOpsTool(tool, input, config)) as never
   );
 }
 

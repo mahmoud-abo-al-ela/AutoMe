@@ -23,8 +23,8 @@ vi.mock("@/lib/utils/errors", async (importOriginal) => ({
   logError: vi.fn(),
 }));
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/client";
 import { createOpsMcpServer } from "./server";
 import type { OpsConfig } from "./tool";
 

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult } from "@modelcontextprotocol/server";
 import { enforceMcpCostlyLimit } from "@/lib/middleware/with-rate-limit";
 import { recordToolCall } from "@/lib/services/mcp/telemetry";
 import { ToolTimeoutError, logToolError, toolErrorCode } from "./errors";
@@ -21,12 +21,12 @@ export interface PublicTool<
   inputSchema: Input;
   outputSchema: Output;
   /** Whether a call spends the costly-call window (free text, deep pages, comparisons). */
-  costly?: (input: z.objectOutputType<Input, z.ZodTypeAny>) => boolean;
-  run: (input: z.objectOutputType<Input, z.ZodTypeAny>, caller: Caller) => Promise<ToolOutput<Output>>;
+  costly?: (input: z.output<z.ZodObject<Input>>) => boolean;
+  run: (input: z.output<z.ZodObject<Input>>, caller: Caller) => Promise<ToolOutput<Output>>;
 }
 
 export interface ToolOutput<Output extends z.ZodRawShape> {
-  structured: z.objectOutputType<Output, z.ZodTypeAny>;
+  structured: z.output<z.ZodObject<Output>>;
   /** How many results the answer holds, for the measures; omit when not a list. */
   count?: number;
 }
@@ -50,7 +50,7 @@ function withinBudget<T>(tool: string, work: Promise<T>): Promise<T> {
 
 export async function runTool<Input extends z.ZodRawShape, Output extends z.ZodRawShape, Caller extends CallerContext>(
   tool: PublicTool<Input, Output, Caller>,
-  input: z.objectOutputType<Input, z.ZodTypeAny>,
+  input: z.output<z.ZodObject<Input>>,
   caller: Caller
 ): Promise<CallToolResult> {
   const started = Date.now();

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchema } from "@/lib/utils/json-schema";
 import { carListingSchema } from "@/lib/ai/schemas/car-listing";
 import { imageSearchSchema } from "@/lib/ai/schemas/image-search";
 import { BODY_TYPES, CAR_COLOR_HEX, CAR_COLORS } from "@/lib/constants/car-options";
@@ -124,7 +124,7 @@ describe("the schema sent to the provider", () => {
   it("carries the allowlist as an enum, so the API constrains the model", () => {
     // Validating our side only would still let a bad value cost a request.
     // This asserts the constraint actually travels to Gemini.
-    const json = zodToJsonSchema(carListingSchema, { $refStrategy: "none" }) as {
+    const json = toJsonSchema(carListingSchema) as {
       properties: Record<string, { enum?: string[] }>;
     };
 
@@ -133,7 +133,7 @@ describe("the schema sent to the provider", () => {
   });
 
   it("omits $schema, which the API rejects rather than ignores", () => {
-    const json = zodToJsonSchema(carListingSchema, { $refStrategy: "none" }) as Record<
+    const json = toJsonSchema(carListingSchema) as Record<
       string,
       unknown
     >;
@@ -177,7 +177,7 @@ describe("bilingual listing copy", () => {
   });
 
   it("sends every language field to the provider as required", () => {
-    const json = zodToJsonSchema(carListingSchema, { $refStrategy: "none" }) as {
+    const json = toJsonSchema(carListingSchema) as {
       required: string[];
     };
 

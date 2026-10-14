@@ -20,8 +20,8 @@ vi.mock("@/lib/services/mcp/telemetry", () => ({ recordToolCall: vi.fn() }));
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/client";
 import { createPublicMcpServer } from "@/lib/mcp/public/server";
 import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { db } from "@/lib/prisma";
@@ -134,7 +134,7 @@ describe.skipIf(!hasTestDb)("public MCP tools (real Postgres)", () => {
     const dealership = await mcp.readResource({ uri: "autome://dealership/test-mcp-tools-a" });
     expect((dealership.contents[0] as { text: string }).text).not.toContain(SECRET_EMAIL);
     for (const uri of [`autome://car/${idOf["S:AVAILABLE"]}`, "autome://dealership/test-mcp-tools-s", "autome://dealership/test-mcp-tools-d"]) {
-      await expect(mcp.readResource({ uri }), uri).rejects.toMatchObject({ code: -32002 });
+      await expect(mcp.readResource({ uri }), uri).rejects.toMatchObject({ code: -32602 });
     }
   });
 

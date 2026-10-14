@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { Redis } from "@upstash/redis";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult } from "@modelcontextprotocol/server";
 import { AppError, NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 
 /**
@@ -26,7 +26,7 @@ export interface OpsTool<Input extends z.ZodRawShape, Output extends z.ZodRawSha
   description: string;
   inputSchema: Input;
   outputSchema: Output;
-  run: (input: z.objectOutputType<Input, z.ZodTypeAny>, config: OpsConfig) => Promise<z.objectOutputType<Output, z.ZodTypeAny>>;
+  run: (input: z.output<z.ZodObject<Input>>, config: OpsConfig) => Promise<z.output<z.ZodObject<Output>>>;
 }
 
 /** A tool needs something the server was not started with, e.g. a report path. */
@@ -63,7 +63,7 @@ function withinBudget<T>(work: Promise<T>): Promise<T> {
 
 export async function runOpsTool<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
   tool: OpsTool<Input, Output>,
-  input: z.objectOutputType<Input, z.ZodTypeAny>,
+  input: z.output<z.ZodObject<Input>>,
   config: OpsConfig
 ): Promise<CallToolResult> {
   const started = Date.now();

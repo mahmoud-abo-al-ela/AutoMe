@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { randomBytes } from "node:crypto";
 import path from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { Client } from "@modelcontextprotocol/client";
+import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 
 vi.hoisted(() => {
   if (process.env.TEST_DATABASE_URL) {

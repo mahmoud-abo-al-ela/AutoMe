@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 
 /**
  * Prompt templates a client can offer its user: how to use the tools well,
@@ -21,7 +21,7 @@ export function registerPublicPrompts(server: McpServer) {
     {
       title: "Find a car on AutoMe",
       description: "Search AutoMe's cars for sale in Egypt from a plain description of what the user wants.",
-      argsSchema: { request: z.string().max(500).describe("What the user is looking for, in their words.") },
+      argsSchema: z.object({ request: z.string().max(500).describe("What the user is looking for, in their words.") }),
     },
     ({ request }) => ({
       messages: [
@@ -45,7 +45,7 @@ export function registerPublicPrompts(server: McpServer) {
     {
       title: "Compare cars on AutoMe",
       description: "Compare 2 to 4 AutoMe cars side by side.",
-      argsSchema: { carIds: z.string().max(200).describe("2 to 4 car ids from search_cars, separated by commas.") },
+      argsSchema: z.object({ carIds: z.string().max(200).describe("2 to 4 car ids from search_cars, separated by commas.") }),
     },
     ({ carIds }) => ({
       messages: [

@@ -4,8 +4,8 @@ const { recordToolCall } = vi.hoisted(() => ({ recordToolCall: vi.fn() }));
 vi.mock("@/lib/services/mcp/telemetry", () => ({ recordToolCall }));
 vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceMcpCostlyLimit: vi.fn() }));
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/client";
 import { createPublicMcpServer } from "./server";
 
 /** A real MCP client talking to the server over the SDK's in-memory transport. */
@@ -71,7 +71,7 @@ describe("the public MCP server", () => {
 
   it("answers a malformed resource address as not found, with the code only", async () => {
     const error = await (await connect()).readResource({ uri: "autome://car/not-a-uuid" }).catch((e: { code: number; message: string }) => e);
-    expect(error).toMatchObject({ code: -32002 });
+    expect(error).toMatchObject({ code: -32602 });
     expect((error as { message: string }).message).toMatch(/not_found/);
   });
 

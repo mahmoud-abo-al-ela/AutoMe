@@ -36,8 +36,8 @@ export async function POST(request: Request) {
   const read = await readJsonBody(request);
   if ("refused" in read) return read.refused;
 
-  const server = createPublicMcpServer({ ip: callerIp(request), userAgent: request.headers.get("user-agent") });
-  return serveMcp(server, request, read.body);
+  const caller = { ip: callerIp(request), userAgent: request.headers.get("user-agent") };
+  return serveMcp(() => createPublicMcpServer(caller), request, read.body);
 }
 
 export const GET = methodNotAllowed;
