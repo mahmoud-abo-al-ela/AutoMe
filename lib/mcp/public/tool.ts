@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult } from "@modelcontextprotocol/server";
 import { enforceMcpCostlyLimit } from "@/lib/middleware/with-rate-limit";
 import { recordToolCall } from "@/lib/services/mcp/telemetry";
 import { ToolTimeoutError, logToolError, toolErrorCode } from "./errors";

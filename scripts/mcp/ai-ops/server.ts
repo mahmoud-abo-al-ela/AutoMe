@@ -57,7 +57,7 @@ async function main() {
 
   const { createOpsMcpServer } = await import("@/lib/mcp/ops/server");
   const { readOnlyRedis } = await import("@/lib/mcp/ops/redis");
-  const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
+  const { StdioServerTransport } = await import("@modelcontextprotocol/server/stdio");
   const file = (name: string) => (process.env[name] ? path.resolve(process.env[name]!) : undefined);
   const server = createOpsMcpServer({
     redis: readOnlyRedis(process.env),

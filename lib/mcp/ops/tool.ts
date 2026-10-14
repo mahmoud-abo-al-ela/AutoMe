@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { Redis } from "@upstash/redis";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult } from "@modelcontextprotocol/server";
 import { AppError, NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 
 /**

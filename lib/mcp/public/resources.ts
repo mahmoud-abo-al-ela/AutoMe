@@ -1,5 +1,5 @@
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ErrorCode, McpError, type ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
+import { ProtocolError, ProtocolErrorCode, type ReadResourceResult } from "@modelcontextprotocol/server";
 import { getPublicCar, getPublicDealership } from "@/lib/services/public-catalog";
 import { assertNotSweeping, noteMiss } from "@/lib/services/mcp/sweep-guard";
 import { recordToolCall } from "@/lib/services/mcp/telemetry";
@@ -13,16 +13,15 @@ import type { CallerContext } from "./tool";
  * reached through search_cars, not enumerated.
  */
 
-/** The MCP spec's code for a resource that does not exist. */
-const RESOURCE_NOT_FOUND = -32002;
-
 const RPC_CODES: Record<ToolErrorCode, number> = {
-  not_found: RESOURCE_NOT_FOUND,
-  invalid_input: ErrorCode.InvalidParams,
-  forbidden: ErrorCode.InvalidRequest,
-  rate_limited: ErrorCode.InvalidRequest,
-  unavailable: ErrorCode.InternalError,
-  internal: ErrorCode.InternalError,
+  // A resource that does not exist is invalid params under the 2026-07-28
+  // spec; SDK v2 sends -32602 even when -32002 (the 2025 code) is thrown.
+  not_found: ProtocolErrorCode.InvalidParams,
+  invalid_input: ProtocolErrorCode.InvalidParams,
+  forbidden: ProtocolErrorCode.InvalidRequest,
+  rate_limited: ProtocolErrorCode.InvalidRequest,
+  unavailable: ProtocolErrorCode.InternalError,
+  internal: ProtocolErrorCode.InternalError,
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -39,7 +38,7 @@ async function readResource(name: string, uri: URL, caller: CallerContext, read:
     const code = toolErrorCode(error);
     errorCode = code;
     await logToolError(name, error);
-    throw new McpError(RPC_CODES[code], code);
+    throw new ProtocolError(RPC_CODES[code], code);
   } finally {
     await recordToolCall({ tool: name, durationMs: Date.now() - started, resultCount: errorCode ? null : 1, errorCode, userAgent: caller.userAgent, ip: caller.ip });
   }

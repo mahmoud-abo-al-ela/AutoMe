@@ -1,5 +1,5 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { z } from "zod";
+import { McpServer } from "@modelcontextprotocol/server";
+import { z } from "zod";
 import { runTool, type CallerContext, type PublicTool } from "./tool";
 import { registerPublicPrompts } from "./prompts";
 import { registerPublicResources } from "./resources";
@@ -28,8 +28,8 @@ function register<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
     {
       title: tool.title,
       description: tool.description,
-      inputSchema: tool.inputSchema,
-      outputSchema: tool.outputSchema,
+      inputSchema: z.object(tool.inputSchema),
+      outputSchema: z.object(tool.outputSchema),
       annotations: READ_ONLY,
     },
     // The SDK validates the input against inputSchema before calling this; its

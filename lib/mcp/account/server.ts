@@ -1,5 +1,5 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { z } from "zod";
+import { McpServer } from "@modelcontextprotocol/server";
+import { z } from "zod";
 import { runTool, type PublicTool } from "../public/tool";
 import { listMyTestDrivesTool, listSavedCarsTool, saveCarTool, unsaveCarTool, type AccountCallerContext } from "./tools";
 import { cancelTestDriveTool, requestTestDriveTool } from "./test-drive-tools";
@@ -28,7 +28,7 @@ function register<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
 ) {
   server.registerTool(
     tool.name,
-    { title: tool.title, description: tool.description, inputSchema: tool.inputSchema, outputSchema: tool.outputSchema, annotations },
+    { title: tool.title, description: tool.description, inputSchema: z.object(tool.inputSchema), outputSchema: z.object(tool.outputSchema), annotations },
     // The SDK validates the input against inputSchema first; the callback type
     // cannot be inferred through this generic helper, hence the cast.
     ((input: z.output<z.ZodObject<Input>>) => runTool(tool, input, caller)) as never

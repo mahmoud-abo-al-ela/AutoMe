@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import {
+  WebStandardStreamableHTTPServerTransport,
+  createMcpHandler,
+  isLegacyRequest,
+  type McpServer,
+} from "@modelcontextprotocol/server";
 import { reportMcpFailure } from "@/lib/services/mcp/monitoring";
 import { RateLimitError, ServiceUnavailableError, logError } from "@/lib/utils/errors";
 
@@ -8,6 +12,8 @@ import { RateLimitError, ServiceUnavailableError, logError } from "@/lib/utils/e
  * What AutoMe's two MCP endpoints share over HTTP — the public one
  * (app/api/mcp) and the signed-in one (app/api/mcp/account): stateless,
  * JSON-only Streamable HTTP, small bodies, fixed error codes, nothing cached.
+ * Both protocol eras are served: 2026-07-28 clients, and the 2025 family
+ * (2025-11-25 and earlier) that most clients still speak.
  */
 
 /** The largest call is under 2 KB; anything near this is not a real client. */
@@ -25,7 +31,7 @@ export function parseError() {
 }
 
 /**
- * The request as the transport should see it. Streamable HTTP asks clients to
+ * The request as the 2025-era transport should see it. Streamable HTTP asks clients to
  * accept JSON and an event stream, and the SDK refuses one that accepts only
  * JSON (406) — but these servers only ever answer in JSON, so a client that can
  * read JSON is served. Anything that accepts neither is still refused.
@@ -79,12 +85,19 @@ export async function limitRefusal(error: unknown): Promise<Response> {
   return refuse(403, "forbidden");
 }
 
-/** Run one JSON-RPC request through a fresh server and the stateless transport. */
-export async function serveMcp(server: McpServer, request: Request, body: unknown): Promise<Response> {
-  const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+/**
+ * Run one JSON-RPC request through a fresh server. A 2026-07-28 request goes
+ * to the SDK's handler; a 2025-era one to the stateless transport as before.
+ * The SDK's own fallback for the older era answers in an event stream, and
+ * these endpoints answer in JSON only — a client that reads only JSON is
+ * served (see forTransport) — so the older era keeps its own path, the split
+ * the SDK documents for isLegacyRequest.
+ */
+export async function serveMcp(createServer: () => McpServer, request: Request, body: unknown): Promise<Response> {
   try {
-    await server.connect(transport);
-    const response = await transport.handleRequest(forTransport(request), { parsedBody: body });
+    const response = (await isLegacyRequest(request, body))
+      ? await serveLegacy(createServer(), request, body)
+      : await serveModern(createServer, request, body);
     const headers = new Headers(response.headers);
     headers.set("Cache-Control", "no-store");
     return new Response(response.body, { status: response.status, headers });
@@ -92,6 +105,27 @@ export async function serveMcp(server: McpServer, request: Request, body: unknow
     logError("MCP request failed", error);
     await reportMcpFailure({ tool: "(request)", code: "internal", error });
     return refuse(500, "internal");
+  }
+}
+
+async function serveModern(createServer: () => McpServer, request: Request, body: unknown): Promise<Response> {
+  const handler = createMcpHandler(() => createServer(), {
+    legacy: "reject",
+    responseMode: "json",
+    onerror: (error) => logError("MCP request failed", error),
+  });
+  try {
+    return await handler.fetch(request, { parsedBody: body });
+  } finally {
+    await handler.close();
+  }
+}
+
+async function serveLegacy(server: McpServer, request: Request, body: unknown): Promise<Response> {
+  const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+  try {
+    await server.connect(transport);
+    return await transport.handleRequest(forTransport(request), { parsedBody: body });
   } finally {
     await server.close();
   }
