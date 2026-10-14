@@ -45,6 +45,15 @@ describe.skipIf(!hasTestDb)("team management (real Postgres)", () => {
       const user = await db.user.create({ data: { clerkId, email: `team-${key}@test.local`, name: `Team ${key}` } });
       ids[key as keyof typeof CLERK] = user.id;
     }
+    // Inviting checks the plan's member limit at the insert, so the dealership
+    // needs a plan, as every real one has.
+    // Enterprise: no other suite uses it, and its seats are unlimited.
+    const plan = await db.plan.upsert({
+      where: { type: "ENTERPRISE" },
+      update: { maxMembers: -1 },
+      create: { name: "Enterprise", type: "ENTERPRISE", monthlyPrice: 1_500_000, yearlyPrice: 15_000_000, maxMembers: -1, features: {} },
+    });
+    await db.subscription.create({ data: { organizationId: ORG, planId: plan.id, status: "ACTIVE", billingPeriod: "MONTHLY" } });
     ids.ownerMembership = (await db.membership.create({ data: { userId: ids.owner, organizationId: ORG, role: "OWNER" } })).id;
     ids.memberMembership = (await db.membership.create({ data: { userId: ids.member, organizationId: ORG, role: "MEMBER" } })).id;
     ids.otherMembership = (await db.membership.create({ data: { userId: ids.other, organizationId: OTHER_ORG, role: "MEMBER" } })).id;

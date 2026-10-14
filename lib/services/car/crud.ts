@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import * as storageService from "@/lib/services/storage";
-import { AuthenticationError, NotFoundError, AuthorizationError, ValidationError } from "@/lib/utils/errors";
+import { AuthenticationError, NotFoundError, AuthorizationError, PlanLimitError, ValidationError, logError } from "@/lib/utils/errors";
+import { planInEffect } from "@/lib/services/billing/entitlements";
 import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
@@ -82,15 +83,18 @@ export async function createCar(
 
   await assertCanActIn(user, organizationId, "You don't have access to this organization");
 
-  // Get plan-based max images limit
+  // The plan in effect now: its photo and car limits.
   const organization = await getOrganizationById(organizationId);
-  const maxImagesPerCar = organization?.subscription?.plan?.maxImagesPerCar ?? 5;
+  const plan = organization ? await planInEffect(organization) : null;
+  const maxImagesPerCar = plan?.maxImagesPerCar ?? 5;
 
   const carId = uuidv4();
   const imageUrls = await storageService.uploadCarImages(carData.images, carId, "car-images", maxImagesPerCar);
   const status = toCarStatus(carData.status);
 
-  const car = await carRepository.createCar({
+  // The authoritative car-limit check, under the dealership's lock with the
+  // insert (withUsageLimit's earlier check is only the fast refusal).
+  const car = await carRepository.createCarWithinLimit({
     id: carId,
     organizationId,
     title: carData.title,
@@ -116,7 +120,20 @@ export async function createCar(
     status,
     featured: carData.featured,
     images: imageUrls,
-  });
+  }, plan?.maxCars ?? 0);
+  if (!car) {
+    // Another save took the last place while this one uploaded its photos.
+    await storageService.deleteCarImages(imageUrls).catch((error: unknown) =>
+      logError("Could not delete the photos of a car refused at its plan's limit", error)
+    );
+    throw new PlanLimitError({
+      resource: "cars",
+      planType: plan?.name,
+      limit: plan?.maxCars ?? 0,
+      upgradeUrl: organization ? `/org/${organization.slug}/billing` : undefined,
+      message: "Upgrade your plan to add more cars to your inventory.",
+    });
+  }
 
   await auditHelpers.logCarCreated({ ...car, organizationId }, actorOf(user));
   await searchTermsChanged();
@@ -300,7 +317,7 @@ export async function updateCarFull(
   }
 
   const organization = await getOrganizationById(organizationId);
-  const maxImagesPerCar = organization?.subscription?.plan?.maxImagesPerCar ?? 5;
+  const maxImagesPerCar = (organization ? await planInEffect(organization) : null)?.maxImagesPerCar ?? 5;
   if (existingImages.length + newImageFiles.length > maxImagesPerCar) {
     throw new ValidationError(`Maximum of ${maxImagesPerCar} images allowed`, "images", {
       key: "errors.upload.tooMany",
