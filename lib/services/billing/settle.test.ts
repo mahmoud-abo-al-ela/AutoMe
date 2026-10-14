@@ -86,6 +86,8 @@ const payment = (overrides: Record<string, unknown> = {}) => ({
   billingPeriod: "MONTHLY",
   amountCents: 150_000,
   currency: "EGP",
+  // The Paymob order this payment's checkout created — the signed order.id.
+  providerOrderId: "622803589",
   userId: "user-1",
   user: { email: "mona@example.com", name: "Mona" },
   plan: { id: "plan-pro", type: "PRO", name: "Pro" },
@@ -141,6 +143,31 @@ describe("settlePayment — what is never applied", () => {
     given(payment());
     const tx2 = { ...paidTx, order: { id: 1, merchant_order_id: "payment-2" } };
     expect(await settlePayment("payment-1", tx2, NOW)).toMatchObject({ status: "rejected", reason: "reference_mismatch" });
+    expect(runInTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects a signed transaction relabelled onto another payment: its order is not this payment's", async () => {
+    // Same amount, a real signed transaction — but for Paymob order 999, not
+    // the order payment-1's checkout created. merchant_order_id is unsigned.
+    given(payment());
+    const relabelled = { ...paidTx, order: { id: 999, merchant_order_id: "payment-1" } };
+
+    expect(await settlePayment("payment-1", relabelled, NOW)).toMatchObject({ status: "rejected", reason: "order_mismatch" });
+    expect(runInTransaction).not.toHaveBeenCalled();
+    expect(paymentRepo.markPaymentFailed).not.toHaveBeenCalled();
+  });
+
+  it("does not let a relabelled declined transaction mark another payment failed", async () => {
+    given(payment());
+    const declined = { ...paidTx, success: false, order: { id: 999, merchant_order_id: "payment-1" } };
+
+    expect(await settlePayment("payment-1", declined, NOW)).toMatchObject({ reason: "order_mismatch" });
+    expect(paymentRepo.markPaymentFailed).not.toHaveBeenCalled();
+  });
+
+  it("rejects a payment whose checkout never recorded its Paymob order", async () => {
+    given(payment({ providerOrderId: null }));
+    expect(await settlePayment("payment-1", paidTx, NOW)).toMatchObject({ status: "rejected", reason: "order_mismatch" });
     expect(runInTransaction).not.toHaveBeenCalled();
   });
 
