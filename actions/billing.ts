@@ -38,20 +38,6 @@ export const getPlanById = withErrorHandling(async (planId: string) => {
   return createSuccessResponse(plan);
 });
 
-
-/**
- * Get billing data for an organization
- */
-export const getBillingData = withAuth(async (ctx, organizationId: string) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  const data = await billingService.getBillingData(organization.id);
-  return createSuccessResponse(data);
-});
-
 /**
  * Get billing history for an organization
  */
@@ -65,32 +51,6 @@ export const getBillingHistory = withAuth(async (ctx, organizationId: string) =>
 
   const history = await billingService.getBillingHistory(organization.id);
   return createSuccessResponse({ history });
-});
-
-/**
- * Get current subscription for an organization
- */
-export const getCurrentSubscription = withAuth(async (ctx, organizationId: string) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  const subscription = await billingService.getActiveSubscription(organization.id);
-  return createSuccessResponse(subscription);
-});
-
-/**
- * Get usage stats for an organization
- */
-export const getUsageStats = withAuth(async (ctx, organizationId: string) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  const stats = await billingService.getUsageStats(organization.id);
-  return createSuccessResponse(stats);
 });
 
 // ---------------------------------------------------------------- managing the plan

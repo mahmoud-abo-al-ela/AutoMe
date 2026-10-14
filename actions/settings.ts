@@ -1,7 +1,6 @@
 "use server";
 import { after } from "next/server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
-import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { aiCallerFor } from "@/lib/ai/caller";
 import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate";
 import * as dealershipService from "@/lib/services/dealership";
@@ -12,7 +11,6 @@ import {
   emailPreferencesSchema,
   organizationProfileSchema,
 } from "@/lib/validations/schemas";
-import type { UserRole } from "@/lib/generated/prisma";
 import type { WorkingHourInput } from "@/lib/repositories/dealership/working-hours";
 
 export const getOrganizationProfile = withOrgAuth(async (ctx) => {
@@ -95,30 +93,4 @@ export const updateWorkingHours = withOrgAuth(
   revalidateLocalized("/");
 
   return createSuccessResponse(null, "Working hours updated successfully");
-});
-
-export const getUsers = withOrgAuth(
-  async (ctx, search: string = "", page: number = 1, limit: number = 10) => {
-  const result = await dealershipService.getUsers(search, { page, limit }, ctx.userId, ctx.organization.id);
-  return createSuccessResponse(result);
-});
-
-export const updateUserRole = withOrgAuth(
-  async (ctx, targetUserId: string, role: UserRole) => {
-  refuseDuringSupportSession(ctx);
-  await dealershipService.updateUserRole(targetUserId, role, ctx.userId, ctx.organization.id);
-
-  revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
-  revalidateLocalized("/");
-
-  return createSuccessResponse(null, "User role updated successfully");
-});
-
-export const deleteUser = withOrgAuth(async (ctx, targetUserId: string) => {
-  refuseDuringSupportSession(ctx);
-  await dealershipService.deleteUser(targetUserId, ctx.userId, ctx.organization.id);
-
-  revalidateLocalized(`/org/${ctx.organization.slug}/settings/team`);
-
-  return createSuccessResponse(null, "User deleted successfully");
 });

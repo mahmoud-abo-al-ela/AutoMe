@@ -22,8 +22,6 @@ vi.mock("@/lib/services/billing/signup", () => signup);
 vi.mock("@/lib/services/onboarding", () => ({ isSlugAvailable: vi.fn() }));
 const carService = vi.hoisted(() => ({ deleteCar: vi.fn() }));
 vi.mock("@/lib/services/car", () => carService);
-const dealershipService = vi.hoisted(() => ({ updateUserRole: vi.fn(), deleteUser: vi.fn() }));
-vi.mock("@/lib/services/dealership", () => dealershipService);
 
 import { resolveAuthContext, resolveTenantContext } from "@/lib/auth";
 import type { TenantContext } from "@/lib/auth/context";
@@ -32,7 +30,6 @@ import { createSignupCheckout } from "@/actions/payment";
 import { createOrganization } from "@/actions/onboarding";
 import { inviteTeamMember, removeMember, updateMemberRole } from "@/actions/team";
 import { deleteCar } from "@/actions/cars";
-import { deleteUser, updateUserRole } from "@/actions/settings";
 
 const ORG_ID = "6f9619ff-8b86-4011-b42d-00c04fc964ff";
 const MEMBER_ID = "0e5d7c1a-1f1f-4b8a-9a0b-2d3c4e5f6a7b";
@@ -68,8 +65,6 @@ const guarded: Array<[string, () => Promise<unknown>, () => unknown[]]> = [
   ["updateMemberRole", () => updateMemberRole({ memberId: MEMBER_ID, newRole: "MEMBER" }), () => teamService.changeMemberRole.mock.calls],
   ["removeMember", () => removeMember({ memberId: MEMBER_ID }), () => teamService.removeTeamMember.mock.calls],
   ["deleteCar", () => deleteCar("car-1"), () => carService.deleteCar.mock.calls],
-  ["updateUserRole", () => updateUserRole("someone", "ADMIN"), () => dealershipService.updateUserRole.mock.calls],
-  ["deleteUser", () => deleteUser("someone"), () => dealershipService.deleteUser.mock.calls],
 ];
 
 beforeEach(() => {
