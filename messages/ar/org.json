@@ -13,7 +13,12 @@
     "openMenu": "فتح القائمة",
     "requests": "الطلبات",
     "insights": "الإحصاءات",
-    "more": "المزيد"
+    "more": "المزيد",
+    "groups": {
+      "work": "العمل اليومي",
+      "insight": "التحليلات",
+      "dealership": "معرضك"
+    }
   },
   "meta": {
     "notFoundTitle": "المعرض غير موجود",

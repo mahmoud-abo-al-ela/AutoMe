@@ -75,7 +75,12 @@ export function MetricExplorer({
 
   return (
     <section aria-label={t("metrics.label")} className="overflow-hidden rounded-[20px] border border-border bg-card">
-      <div role="tablist" aria-label={t("metrics.label")} className="flex overflow-x-auto border-b border-border [scrollbar-width:none] lg:grid lg:grid-cols-5 [&::-webkit-scrollbar]:hidden">
+      {/* A grid at every width — two columns on a phone, three on a small
+          tablet, all five in a row from lg — so every figure is on screen at
+          once; it was a sideways strip under lg that showed one and a half.
+          The 1px gap over the border colour draws the dividers, and the last
+          tile spans what its row has left, so no gap shows as an empty cell. */}
+      <div role="tablist" aria-label={t("metrics.label")} className="grid grid-cols-2 gap-px border-b border-border bg-border sm:grid-cols-3 lg:grid-cols-5">
         {OVERVIEW_METRICS.map((metric, i) => {
           const on = metric === selected;
           const moved = change(metrics[metric].value, metrics[metric].previous);
@@ -94,9 +99,13 @@ export function MetricExplorer({
               onClick={() => setSelected(metric)}
               onKeyDown={(event) => onKeyDown(event, i)}
               className={cn(
-                "relative flex min-w-[168px] shrink-0 flex-col gap-0.5 border-border px-4 pb-3.5 pt-4 text-start transition-colors sm:px-5 lg:min-w-0",
-                "border-s first:border-s-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                on ? "bg-muted/50 shadow-[inset_0_-3px_0_var(--chart-1)]" : "hover:bg-muted/30",
+                "relative flex min-w-0 flex-col gap-0.5 px-4 pb-3.5 pt-4 text-start transition-colors last:col-span-2 sm:px-5 lg:last:col-span-1",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                // Opaque mixes rather than muted/50: the cell sits over the
+                // border-coloured gap, which a translucent fill would show.
+                on
+                  ? "bg-[color-mix(in_oklab,var(--muted)_50%,var(--card))] shadow-[inset_0_-3px_0_var(--chart-1)]"
+                  : "bg-card hover:bg-[color-mix(in_oklab,var(--muted)_30%,var(--card))]",
               )}
             >
               <span className="text-caption text-muted-foreground">{t(`metrics.${metric}`)}</span>

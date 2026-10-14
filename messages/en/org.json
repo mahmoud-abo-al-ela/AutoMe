@@ -13,7 +13,12 @@
     "openMenu": "Open menu",
     "requests": "Requests",
     "insights": "Insights",
-    "more": "More"
+    "more": "More",
+    "groups": {
+      "work": "Daily work",
+      "insight": "Insight",
+      "dealership": "Your dealership"
+    }
   },
   "meta": {
     "notFoundTitle": "Organization not found",

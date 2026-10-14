@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Heart, Home, LayoutDashboard, Menu, MessageSquare, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { UnreadBadge } from "@/components/StreamChat";
 import MobileMenu from "./MobileMenu";
 import { isCurrentSection, type HeaderOrganization, type HeaderUser } from "./MainHeader";
 import { useHeaderAccess } from "./use-header-access";
+import { mobileTabs } from "./mobile-tabs";
 import { cn } from "@/lib/utils";
 
 /**
@@ -65,7 +66,9 @@ function Tab({
 
 /**
  * Phone navigation (Figma: BottomTabBar). Asphalt bar, the current tab in a
- * marker pill. Flex order follows the page direction, so Home sits at the
+ * marker pill. Its tabs depend on who is looking (mobileTabs): browsing for a
+ * guest, saved cars and messages for a buyer, the dashboard for a dealer;
+ * everything else is under More. Flex order follows the page direction, so Home sits at the
  * reading start in both languages without a separate RTL layout.
  *
  * Renders an in-flow spacer as well as the fixed bar, so the end of every
@@ -84,6 +87,7 @@ export default function BottomTabBar({
   const access = useHeaderAccess(user, organizationSlug);
   const [moreOpen, setMoreOpen] = useState(false);
   const { pathname } = access;
+  const tabs = mobileTabs(access.viewer, { onSubdomain: access.isOnSubdomain, dashboardHref: access.dashboardHref });
 
   if (pathname && HIDDEN_ON.some((pattern) => pattern.test(pathname))) return null;
 
@@ -94,22 +98,16 @@ export default function BottomTabBar({
         aria-label={t("primaryNav")}
         className="fixed inset-x-0 bottom-0 z-40 flex bg-inverse px-2 pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        <Tab href="/" label={t("home")} icon={Home} active={isCurrentSection(pathname, "/")} />
-        <Tab href="/cars" label={t("search")} icon={Search} active={isCurrentSection(pathname, "/cars")} />
-        {access.isOwner ? (
-          <Tab href={access.dashboardHref} label={t("dashboard")} icon={LayoutDashboard} active={false} />
-        ) : (
-          <>
-            <Tab href="/wishlist" label={t("saved")} icon={Heart} active={isCurrentSection(pathname, "/wishlist")} />
-            <Tab
-              href="/messages"
-              label={t("messages")}
-              icon={MessageSquare}
-              active={isCurrentSection(pathname, "/messages")}
-              badge={<UnreadBadge className="absolute -top-1 -end-0.5" organizationId={organization?.id} />}
-            />
-          </>
-        )}
+        {tabs.map((tab) => (
+          <Tab
+            key={tab.href}
+            href={tab.href}
+            label={t(tab.labelKey)}
+            icon={tab.icon}
+            active={isCurrentSection(pathname, tab.href)}
+            badge={tab.unread ? <UnreadBadge className="absolute -top-1 -end-0.5" organizationId={organization?.id} /> : undefined}
+          />
+        ))}
         <Tab onClick={() => setMoreOpen(true)} label={t("more")} icon={Menu} active={moreOpen} />
       </nav>
       <MobileMenu

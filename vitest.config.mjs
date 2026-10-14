@@ -37,9 +37,23 @@ export default defineConfig({
             "actions/**/*.test.{js,jsx,ts,tsx}",
             "app/**/*.test.{js,jsx,ts,tsx}",
             "i18n/**/*.test.{js,jsx,ts,tsx}",
-            "test/**/*.test.{js,jsx,ts,tsx}",
           ],
           exclude: [...sharedExclude, "**/*.jsdom.test.{js,jsx,ts,tsx}"],
+        },
+      },
+      {
+        // The DB-backed suites share one database, and some read or wipe a
+        // whole table (platform AI usage, traces). Run side by side, one
+        // file's clean-up removed rows another had just written. One file at
+        // a time; without TEST_DATABASE_URL they skip, so it costs nothing.
+        resolve: { alias },
+        oxc,
+        test: {
+          name: "db",
+          environment: "node",
+          include: ["test/**/*.test.{js,jsx,ts,tsx}"],
+          exclude: sharedExclude,
+          fileParallelism: false,
         },
       },
       {

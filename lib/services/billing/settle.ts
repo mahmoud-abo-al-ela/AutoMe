@@ -9,6 +9,7 @@ import { resolveLogoUrl } from "@/lib/services/onboarding/logo";
 import type { OnboardingSessionData } from "@/lib/services/onboarding/session";
 import { transactionOutcome, type PaymobTransaction } from "@/lib/services/paymob";
 import { logError } from "@/lib/utils/errors";
+import { reportSignal } from "@/lib/observability/report";
 import {
   periodStartingToday,
   renewalPeriod,
@@ -60,6 +61,21 @@ export class SettlementError extends Error {
   }
 }
 
+type RejectReason = Extract<SettlementResult, { status: "rejected" }>["reason"];
+
+/**
+ * A signed transaction that does not match the payment it names: never
+ * applied, logged, and sent to Sentry as its own signal by reason — a
+ * mismatch is either a bug in checkout or someone relabelling a payment, and
+ * both need a person.
+ */
+function rejected(paymentId: string, reason: RejectReason, detail: string): SettlementResult {
+  const error = new Error(detail);
+  void reportSignal({ name: "billing.payment-rejected", level: "error", tags: { "payment.id": paymentId, reason }, groupBy: reason, error });
+  logError(error);
+  return { status: "rejected", paymentId, reason };
+}
+
 const card = (tx: PaymobTransaction) => ({
   method: tx.source_data?.type ?? null,
   maskedPan: tx.source_data?.pan ?? null,
@@ -79,7 +95,7 @@ export async function settlePayment(
 
   const reference = transaction.order?.merchant_order_id;
   if (reference && reference !== payment.id) {
-    return { status: "rejected", paymentId, reason: "reference_mismatch" };
+    return rejected(paymentId, "reference_mismatch", `Paymob transaction ${transaction.id} names payment ${reference}, delivered for ${paymentId}; not applied`);
   }
 
   // Which payment a transaction settles is named by merchant_order_id, which
@@ -89,10 +105,11 @@ export async function settlePayment(
   // cannot be relabelled onto another pending payment — to mark it paid, or
   // failed. Before anything is written.
   if (!payment.providerOrderId || String(transaction.order?.id) !== payment.providerOrderId) {
-    logError(
+    return rejected(
+      paymentId,
+      "order_mismatch",
       `Paymob transaction ${transaction.id} for order ${transaction.order?.id} names payment ${paymentId}, whose order is ${payment.providerOrderId ?? "unknown"}; not applied, needs review`
     );
-    return { status: "rejected", paymentId, reason: "order_mismatch" };
   }
 
   if (payment.status === "PAID") {
@@ -121,14 +138,14 @@ export async function settlePayment(
 
   // Paid. The signature proves Paymob sent it; these prove it paid for this.
   if (transaction.amount_cents !== payment.amountCents) {
-    logError(
+    return rejected(
+      paymentId,
+      "amount_mismatch",
       `Paymob paid ${transaction.amount_cents} for payment ${paymentId} priced ${payment.amountCents}; not applied, needs review`
     );
-    return { status: "rejected", paymentId, reason: "amount_mismatch" };
   }
   if (transaction.currency !== payment.currency) {
-    logError(`Paymob paid in ${transaction.currency} for ${payment.currency} payment ${paymentId}; not applied`);
-    return { status: "rejected", paymentId, reason: "currency_mismatch" };
+    return rejected(paymentId, "currency_mismatch", `Paymob paid in ${transaction.currency} for ${payment.currency} payment ${paymentId}; not applied`);
   }
 
   // Outside the transaction: uploads and reads that must not hold it open.

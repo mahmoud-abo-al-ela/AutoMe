@@ -83,6 +83,13 @@ export default async function OrganizationLayout({
     const hasOrgAccess = !!membership;
 
     if (!isImpersonating && !hasOrgAccess) {
+        // A platform admin with no session here — most often one who just
+        // ended a support session: ending it re-renders the dashboard they
+        // were on before the banner's own redirect runs, and a 404 met them.
+        // Their place is the super-admin area. Anyone else: not found.
+        if (user.role === "ADMIN") {
+            redirect({ href: "/super-admin", locale });
+        }
         notFound();
     }
 

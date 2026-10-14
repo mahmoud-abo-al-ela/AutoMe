@@ -1,5 +1,7 @@
 // Standardized error handling
 
+import { reportSignal, reportUnexpected } from "@/lib/observability/report";
+
 export type MessageParams = Record<string, string | number>;
 
 /**
@@ -169,7 +171,11 @@ export function isOperationalError(error: unknown): boolean {
 }
 
 /**
- * Log error with appropriate level
+ * Log an error at its level, and tell Sentry what someone must look at
+ * (lib/observability/report.ts): every error that is not an expected, typed
+ * one, and every refused access — one refusal is a stale tab, a run of them is
+ * someone trying ids that are not theirs. Other expected errors (validation,
+ * plan limits, rate limits) stay in the log.
  */
 export function logError(errorOrMessage: unknown, ...args: unknown[]): void {
     let actualError: unknown = errorOrMessage;
@@ -194,6 +200,9 @@ export function logError(errorOrMessage: unknown, ...args: unknown[]): void {
 
     if (isOperationalError(actualError)) {
         const opError = actualError as AppError;
+        if (opError.code === "AUTHORIZATION_ERROR") {
+            void reportSignal({ name: "authz.refused", level: "warning", tags: { code: opError.code } });
+        }
         console.warn(context || "Operational error:", {
             message: opError.message,
             code: opError.code,
@@ -202,6 +211,7 @@ export function logError(errorOrMessage: unknown, ...args: unknown[]): void {
         });
     } else {
         const err = actualError as Error;
+        if (err instanceof Error) void reportUnexpected(err, context);
         console.error(context || "Programming error:", {
             message: err.message || String(actualError),
             stack: err.stack,

@@ -1,97 +1,91 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn, MAX_COMPARE_CARS } from "@/lib/utils";
 import { specCategories } from "./utils";
 
 /**
- * Content-aware loading skeleton that mimics the actual compare table layout.
- * Shows a header skeleton, 2–3 car card placeholders, and spec row skeletons
- * matching the real category structure.
+ * A bar on a muted cell. The skeleton's own colour (--accent) is the muted
+ * colour itself, so on the label column and the section headers a plain
+ * Skeleton drew nothing and those cells loaded as blank blocks.
+ */
+const OnMuted = ({ className }: { className?: string }) => <Skeleton className={cn("bg-foreground/10", className)} />;
+
+/** The rows of the first tab, which is the one the comparison opens on. */
+const FIRST_TAB = specCategories[0];
+
+/**
+ * The compare page as it will load, shape for shape (ComparePageHeader and
+ * CompareTable): the title with its count and controls, the three car columns
+ * across the full width, the tab strip, and the first tab's rows. It drew a
+ * 250px label column beside the cards and every category at once — a page
+ * two screens taller than the one that replaced it.
  */
 const ComparePageSkeleton = () => {
     return (
-        <div className="space-y-6">
-            {/* ── Header skeleton ─────────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="space-y-2">
-                    <Skeleton className="h-8 w-48" />
-                    <Skeleton className="h-4 w-72" />
+        <div>
+            {/* ── Header, as ComparePageHeader; bar heights are its line heights ────────────────────────────────── */}
+            <div className="mb-6 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        <Skeleton className="h-[46px] w-72 max-w-[60vw]" />
+                        <Skeleton className="h-[25px] w-14 rounded-full" />
+                    </div>
+                    <Skeleton className="h-[26px] w-[34rem] max-w-full" />
                 </div>
                 <div className="flex items-center gap-2">
-                    <Skeleton className="h-9 w-24 rounded-md" />
-                    <Skeleton className="h-9 w-9 rounded-md" />
-                    <Skeleton className="h-9 w-9 rounded-md" />
-                    <Skeleton className="h-9 w-20 rounded-md" />
+                    <Skeleton className="me-2 h-5 w-44 max-sm:w-10" />
+                    <Skeleton className="size-10 rounded-control" />
+                    <Skeleton className="size-10 rounded-control" />
+                    <Skeleton className="h-10 w-28 rounded-control" />
                 </div>
             </div>
 
-            {/* ── Car cards skeleton (desktop) ────────────────────────────────── */}
+            {/* ── Table, as CompareTable (desktop) ────────────────────────────── */}
             <div className="hidden md:block">
-                <div className="bg-card rounded-lg overflow-hidden">
-                    {/* Car cards row */}
-                    <div className="grid grid-cols-[250px_1fr]">
-                        <div className="p-4 bg-muted border-b border-e">
-                            <Skeleton className="h-6 w-28" />
-                        </div>
-                        <div className="grid grid-cols-3 border-b">
-                            {Array.from({ length: 3 }).map((_, i) => (
-                                <div
-                                    key={`card-${i}`}
-                                    className="p-4 border-e last:border-e-0"
-                                >
-                                    {/* Image placeholder */}
-                                    <Skeleton className="aspect-[4/3] w-full rounded-md mb-3" />
-                                    {/* Title */}
-                                    <Skeleton className="h-5 w-3/4 mb-2" />
-                                    {/* Price + year badges */}
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <Skeleton className="h-5 w-20 rounded-full" />
-                                        <Skeleton className="h-5 w-12 rounded-full" />
-                                    </div>
-                                    {/* Button */}
-                                    <Skeleton className="h-8 w-full rounded-md" />
+                <div className="overflow-hidden rounded-lg bg-card">
+                    {/* The car columns: always three, cars then "Add a car" slots. */}
+                    <div className="grid grid-cols-3 gap-4 border-b p-4">
+                        {Array.from({ length: MAX_COMPARE_CARS }).map((_, i) => (
+                            <div key={`card-${i}`} className="flex flex-col overflow-hidden rounded-control border border-border bg-card">
+                                <Skeleton className="aspect-[3/2] w-full rounded-none" />
+                                <div className="flex flex-col gap-3 p-4">
+                                    <Skeleton className="h-[26px] w-3/4" />
+                                    <Skeleton className="h-[41px] w-36" />
+                                    <Skeleton className="h-[19px] w-1/2" />
+                                    <Skeleton className="h-10 w-full rounded-control" />
                                 </div>
-                            ))}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Tab strip */}
+                    <div className="flex gap-1 border-b bg-muted/80 px-4 pt-3">
+                        <div className="flex h-10 w-44 items-center rounded-t-md bg-card px-4">
+                            <Skeleton className="h-4 w-full" />
+                        </div>
+                        <div className="flex h-10 w-64 items-center px-4">
+                            <OnMuted className="h-4 w-full" />
+                        </div>
+                        <div className="flex h-10 w-28 items-center px-4">
+                            <OnMuted className="h-4 w-full" />
                         </div>
                     </div>
 
-                    {/* Spec rows skeleton */}
-                    {specCategories.map((category) => (
-                        <div key={category.id}>
-                            {/* Category header */}
-                            <div className="grid grid-cols-[250px_1fr] bg-muted">
-                                <div className="p-3 border-b border-e">
-                                    <Skeleton className="h-5 w-40" />
-                                </div>
-                                <div className="grid grid-cols-3 border-b">
-                                    {Array.from({ length: 3 }).map((_, i) => (
-                                        <div
-                                            key={`cat-header-${i}`}
-                                            className="p-3 border-e last:border-e-0"
-                                        />
-                                    ))}
-                                </div>
+                    {/* The first tab's section header and rows */}
+                    <div className="border-b border-border bg-muted px-4 py-2.5">
+                        <OnMuted className="h-4 w-36" />
+                    </div>
+                    {FIRST_TAB.specs.map((spec, index) => (
+                        <div key={spec.key} className="grid grid-cols-[250px_1fr] border-b last:border-b-0">
+                            <div className={cn("flex items-center border-e p-3", index % 2 === 0 ? "bg-muted/80" : "bg-muted")}>
+                                <OnMuted className="h-4 w-20" />
                             </div>
-
-                            {/* Spec rows */}
-                            {category.specs.map((spec) => (
-                                <div
-                                    key={spec.key}
-                                    className="grid grid-cols-[250px_1fr] border-b last:border-b-0"
-                                >
-                                    <div className="p-3 border-e bg-muted">
-                                        <Skeleton className="h-4 w-20" />
+                            <div className="grid grid-cols-3">
+                                {Array.from({ length: MAX_COMPARE_CARS }).map((_, i) => (
+                                    <div key={`${spec.key}-${i}`} className="border-e p-3 last:border-e-0">
+                                        <Skeleton className="h-5 w-24" />
                                     </div>
-                                    <div className="grid grid-cols-3">
-                                        {Array.from({ length: 3 }).map((_, i) => (
-                                            <div
-                                                key={`${spec.key}-${i}`}
-                                                className="p-3 border-e last:border-e-0"
-                                            >
-                                                <Skeleton className="h-4 w-24" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     ))}
                 </div>

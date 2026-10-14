@@ -9,9 +9,17 @@ import { Logo, useRememberPlateBand } from "@/components/brand";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
+import { DrawerNavGroups } from "@/components/dashboard/DrawerNavGroups";
 import { ADMIN_SECTIONS as SECTIONS } from "./admin-sections";
 
 const BASE = "/super-admin";
+
+/** The phone menu's groups (DrawerNavGroups): the platform's pulse, the accounts on it, and the oversight of what admins do there. */
+const MENU_GROUPS = [
+  { key: "platform", keys: ["overview", "analytics"] },
+  { key: "accounts", keys: ["organizations", "users", "plans"] },
+  { key: "oversight", keys: ["impersonation", "auditLogs"] },
+] as const;
 
 /** Overview is current only on its own page; every other section also on the pages under it. */
 function isCurrent(pathname: string, path: string) {
@@ -53,32 +61,21 @@ export function AdminTopBar() {
             <div className="flex h-16 items-center border-b border-inverse-foreground/10 px-4 pe-12">
               <SheetTitle className="truncate text-body font-semibold text-inverse-foreground">{t("brand")}</SheetTitle>
             </div>
-            <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 py-3">
-              <ul className="flex flex-col gap-1">
-                {SECTIONS.map(({ key, path }) => {
-                  const current = isCurrent(pathname, path);
-                  return (
-                    <li key={key}>
-                      <Link
-                        href={`${BASE}${path}`}
-                        onClick={() => setMenuOpen(false)}
-                        aria-current={current ? "page" : undefined}
-                        className={cn(
-                          "relative flex h-12 items-center rounded-control px-4 text-body transition-colors",
-                          current
-                            ? "bg-inverse-hover font-semibold"
-                            : "text-inverse-foreground/75 hover:bg-inverse-hover hover:text-inverse-foreground",
-                        )}
-                      >
-                        {current && <span aria-hidden className="absolute inset-y-2 start-0 w-1 rounded-e-full bg-inverse-foreground" />}
-                        {t(key)}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-            <div className="flex flex-col gap-1 border-t border-inverse-foreground/10 p-3">
+            <DrawerNavGroups
+              label={t("label")}
+              onNavigate={() => setMenuOpen(false)}
+              indicatorClassName="bg-inverse-foreground"
+              groups={MENU_GROUPS.map((group) => ({
+                key: group.key,
+                title: t(`groups.${group.key}`),
+                items: SECTIONS.filter(({ key }) => (group.keys as readonly string[]).includes(key)).map(({ key, path }) => ({
+                  href: `${BASE}${path}`,
+                  label: t(key),
+                  current: isCurrent(pathname, path),
+                })),
+              }))}
+            />
+            <div className="border-t border-inverse-foreground/10 p-3">
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
@@ -87,10 +84,6 @@ export function AdminTopBar() {
                 <ArrowUpRight aria-hidden className="size-5 rtl:-scale-x-100" />
                 {t("backToSite")}
               </Link>
-              <LanguageSwitcher
-                onSwitch={() => setMenuOpen(false)}
-                className="h-12 w-full justify-start gap-3 rounded-control px-4 text-inverse-foreground/75 hover:bg-inverse-hover hover:text-inverse-foreground [&_svg]:size-5"
-              />
             </div>
           </SheetContent>
         </Sheet>
@@ -111,9 +104,10 @@ export function AdminTopBar() {
             {t("backToSite")}
             <ArrowUpRight aria-hidden className="size-4 rtl:-scale-x-100" />
           </Link>
+          {/* Phones too: the menu no longer repeats it. */}
           <LanguageSwitcher
             showLabel={false}
-            className="hidden size-11 text-inverse-foreground/80 hover:bg-inverse-hover hover:text-inverse-foreground md:inline-flex [&_svg]:size-5"
+            className="inline-flex size-11 text-inverse-foreground/80 hover:bg-inverse-hover hover:text-inverse-foreground [&_svg]:size-5"
           />
           <span className="flex size-11 items-center justify-center">
             <UserButton />

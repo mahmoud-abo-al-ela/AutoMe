@@ -20,9 +20,9 @@ export function OverviewSkeleton() {
       </div>
 
       <div className="overflow-hidden rounded-[20px] border border-border bg-card">
-        <div className="flex overflow-hidden border-b border-border lg:grid lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-px border-b border-border bg-border sm:grid-cols-3 lg:grid-cols-5">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex min-w-[168px] flex-col gap-2 border-s border-border px-4 pb-3.5 pt-4 first:border-s-0 sm:px-5 lg:min-w-0">
+            <div key={i} className="flex min-w-0 flex-col gap-2 bg-card px-4 pb-3.5 pt-4 last:col-span-2 sm:px-5 lg:last:col-span-1">
               <span className="skeleton-shimmer h-3.5 w-28 rounded" />
               <span className="skeleton-shimmer h-7 w-24 rounded" />
               <span className="skeleton-shimmer h-3 w-16 rounded" />

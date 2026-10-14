@@ -8,6 +8,7 @@ import {
 } from "./cookie";
 import { getRequestMetadata } from "./metadata";
 import { lifetimeStart } from "./active";
+import { reportSignal } from "@/lib/observability/report";
 
 /**
  * Impersonation service for Super Admins to view organizations as specific users
@@ -67,6 +68,13 @@ export async function startImpersonation({
 
   // Log the impersonation start
   await auditHelpers.logImpersonationStarted(session, superAdminEmail);
+  // Every session is worth a glance: an admin acting as a dealer. Ids only;
+  // the reason is in the audit log.
+  void reportSignal({
+    name: "support-session.started",
+    level: "info",
+    tags: { "session.id": session.id, "organization.id": targetOrganizationId, "admin.id": superAdminId },
+  });
 
   // Set cookies for impersonation context
   await setImpersonationCookies(
@@ -96,6 +104,11 @@ export async function endImpersonation(
 
   // Log the impersonation end
   await auditHelpers.logImpersonationEnded(session, superAdminEmail);
+  void reportSignal({
+    name: "support-session.ended",
+    level: "info",
+    tags: { "session.id": session.id, "organization.id": session.targetOrganizationId },
+  });
 
   // Only the caller's own session lives in their cookies. Ending someone
   // else's from the super-admin sessions list must not sign this admin out

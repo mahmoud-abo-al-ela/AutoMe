@@ -15,7 +15,12 @@
     "analytics": "Analytics",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "backToSite": "Back to site"
+    "backToSite": "Back to site",
+    "groups": {
+      "platform": "Platform",
+      "accounts": "Accounts",
+      "oversight": "Oversight"
+    }
   },
   "common": {
     "active": "Active",

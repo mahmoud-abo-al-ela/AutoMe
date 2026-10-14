@@ -22,6 +22,7 @@ import {
 import LanguageSwitcher from "@/components/Header/components/LanguageSwitcher";
 import { OrgUnreadBadge } from "@/components/StreamChat";
 import { sidebarItems } from "@/lib/SidebarConfig";
+import { DrawerNavGroups } from "@/components/dashboard/DrawerNavGroups";
 import { cn } from "@/lib/utils";
 import { plateBandForMemberRole } from "@/lib/org/client";
 import type { MemberRole, Organization } from "@/lib/generated/prisma";
@@ -46,9 +47,24 @@ const PRIMARY = new Set<string>([
   "insights",
 ]);
 
-/** A square 44px control on the asphalt bar. */
+/**
+ * The phone menu's groups (DrawerNavGroups), in the order a dealer reaches
+ * for them: the day's work, what it tells them, and the dealership itself —
+ * that last one the owner's alone (OWNER_ONLY), so a member never sees it.
+ */
+const MENU_GROUPS = [
+  { key: "work", names: ["dashboard", "requests", "cars", "test-drives", "messages"] },
+  { key: "insight", names: ["insights", "questions"] },
+  { key: "dealership", names: ["billing", "audit-logs", "settings"] },
+] as const;
+
+/**
+ * A square control on the asphalt bar: 44px, and 40px on a phone, where the
+ * menu, messages, language and account share the row with the dealership's
+ * name — at 44px a 375px screen cut "Red Sea Motors" short.
+ */
 const barIcon =
-  "relative flex size-11 shrink-0 items-center justify-center rounded-control text-inverse-foreground transition-colors hover:bg-inverse-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker";
+  "relative flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-control text-inverse-foreground transition-colors hover:bg-inverse-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker";
 
 export function OrgTopBar({
   organization,
@@ -81,7 +97,7 @@ export function OrgTopBar({
 
   return (
     <header className="sticky top-0 z-40 bg-inverse text-inverse-foreground">
-      <div className="mx-auto flex w-full max-w-[1760px] flex-wrap items-center gap-x-2 px-2 sm:px-6 md:gap-x-6 md:px-8">
+      <div className="mx-auto flex w-full max-w-[1760px] flex-wrap items-center gap-x-1 px-2 sm:gap-x-2 sm:px-6 md:gap-x-6 md:px-8">
         {/* Phones: the sections are in a sheet. */}
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
@@ -102,48 +118,22 @@ export function OrgTopBar({
                 {name}
               </SheetTitle>
             </div>
-            <nav
-              aria-label={t("navLabel")}
-              className="flex-1 overflow-y-auto px-3 py-3"
-            >
-              <ul className="flex flex-col gap-1">
-                {items.map((item) => {
-                  const current = isCurrent(pathname, item.href);
-                  return (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        aria-current={current ? "page" : undefined}
-                        className={cn(
-                          "relative flex h-12 items-center gap-3 rounded-control px-4 text-body transition-colors",
-                          current
-                            ? "bg-inverse-hover font-semibold"
-                            : "text-inverse-foreground/75 hover:bg-inverse-hover hover:text-inverse-foreground",
-                        )}
-                      >
-                        {current && (
-                          <span
-                            aria-hidden
-                            className="absolute inset-y-2 start-0 w-1 rounded-e-full bg-marker"
-                          />
-                        )}
-                        <span className="flex-1">{t(item.labelKey)}</span>
-                        {item.name === "messages" &&
-                          item.showUnreadBadge &&
-                          unread()}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-            <div className="border-t border-inverse-foreground/10 p-3">
-              <LanguageSwitcher
-                onSwitch={() => setMenuOpen(false)}
-                className="h-12 w-full justify-start gap-3 rounded-control px-4 text-inverse-foreground/75 hover:bg-inverse-hover hover:text-inverse-foreground [&_svg]:size-5"
-              />
-            </div>
+            <DrawerNavGroups
+              label={t("navLabel")}
+              onNavigate={() => setMenuOpen(false)}
+              groups={MENU_GROUPS.map((group) => ({
+                key: group.key,
+                title: t(`groups.${group.key}`),
+                items: items
+                  .filter((item) => (group.names as readonly string[]).includes(item.name))
+                  .map((item) => ({
+                    href: item.href,
+                    label: t(item.labelKey),
+                    current: isCurrent(pathname, item.href),
+                    badge: item.name === "messages" ? unread() : undefined,
+                  })),
+              }))}
+            />
           </SheetContent>
         </Sheet>
 
@@ -166,7 +156,7 @@ export function OrgTopBar({
           <span className="sr-only">{t("dashboard")}</span>
         </Link>
 
-        <div className="order-3 ms-auto flex items-center gap-1 sm:gap-2 md:order-3 xl:order-4 xl:ms-0">
+        <div className="order-3 ms-auto flex items-center gap-0 sm:gap-2 md:order-3 xl:order-4 xl:ms-0">
           <Link
             href={`${base}/messages`}
             aria-label={t("messages")}
@@ -175,11 +165,12 @@ export function OrgTopBar({
             <MessageSquare aria-hidden className="size-[22px]" />
             {unread("absolute -top-0.5 -end-0.5")}
           </Link>
+          {/* Phones too: the menu no longer repeats it. */}
           <LanguageSwitcher
             showLabel={false}
-            className="hidden size-11 text-inverse-foreground/80 hover:bg-inverse-hover hover:text-inverse-foreground md:inline-flex [&_svg]:size-5"
+            className="inline-flex size-10 text-inverse-foreground/80 sm:size-11 hover:bg-inverse-hover hover:text-inverse-foreground [&_svg]:size-5"
           />
-          <span className="flex size-11 items-center justify-center">
+          <span className="flex size-10 items-center justify-center sm:size-11">
             <UserButton />
           </span>
         </div>
