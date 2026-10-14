@@ -1,6 +1,7 @@
 import { PlanLimitError } from "@/lib/utils/errors";
 import { RESOURCE_CONFIG } from "./plan-limits";
 import type { TenantContext } from "@/lib/auth/context";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 
 // Shape of a RESOURCE_CONFIG entry (plan-limits.js is still JS). One of
 // planField / featureKey is set per resource.
@@ -22,7 +23,8 @@ export function withUsageLimit<TArgs extends unknown[], TResult>(
       throw new Error(`Unknown resource limit check: ${resource}`);
     }
 
-    const plan = ctx.organization?.subscription?.plan;
+    // The plan in effect now: a paid plan past its grace counts as the free plan.
+    const plan = await planInEffect(ctx.organization);
     if (!plan) {
       throw new PlanLimitError({
         resource,
@@ -34,12 +36,7 @@ export function withUsageLimit<TArgs extends unknown[], TResult>(
     if (config.planField) {
       limit = (plan as Record<string, unknown>)[config.planField] as number | null | undefined;
     } else if (config.featureKey) {
-      const features = (plan.features ?? {}) as Record<string, unknown>;
-      const featureConfig = features[config.featureKey];
-      limit =
-        typeof featureConfig === "object" && featureConfig !== null
-          ? (featureConfig as { limit?: number }).limit
-          : 0;
+      limit = planFeature(plan, config.featureKey).limit;
     }
 
     if (limit === undefined || limit === null) {

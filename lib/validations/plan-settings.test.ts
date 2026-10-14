@@ -11,7 +11,6 @@ const professional = {
   auditLogRetentionDays: 365,
   aiProcessing: { enabled: true, limit: 100 },
   aiAssistant: true,
-  chat: true,
   prioritySupport: true,
 };
 

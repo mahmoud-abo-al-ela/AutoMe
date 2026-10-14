@@ -1,12 +1,18 @@
 import { PlanLimitError } from "@/lib/utils/errors";
 import type { TenantContext } from "@/lib/auth/context";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 
+/**
+ * Refuse an action the dealership's plan does not include. Reads the plan in
+ * effect now (a lapsed paid plan is the free plan) and the feature through
+ * the one reader, lib/services/billing/entitlements.ts.
+ */
 export function withPlanGate<TArgs extends unknown[], TResult>(
   feature: string,
   action: (ctx: TenantContext, ...args: TArgs) => Promise<TResult>,
 ): (ctx: TenantContext, ...args: TArgs) => Promise<TResult> {
   return async (ctx, ...args) => {
-    const plan = ctx.organization?.subscription?.plan;
+    const plan = await planInEffect(ctx.organization);
 
     if (!plan) {
       throw new PlanLimitError({
@@ -15,15 +21,7 @@ export function withPlanGate<TArgs extends unknown[], TResult>(
       });
     }
 
-    // plan.features is a Prisma Json column — narrow it to an object map.
-    const features = (plan.features ?? {}) as Record<string, unknown>;
-    const featureConfig = features[feature];
-    const isEnabled =
-      typeof featureConfig === "object" && featureConfig !== null
-        ? (featureConfig as { enabled?: boolean }).enabled
-        : featureConfig;
-
-    if (!isEnabled) {
+    if (!planFeature(plan, feature).enabled) {
       throw new PlanLimitError({
         resource: feature,
         planType: plan.name,

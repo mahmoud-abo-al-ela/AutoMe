@@ -4,6 +4,7 @@ import { withOrgAuth } from "@/lib/middleware/with-auth";
 import { RESOURCE_CONFIG } from "@/lib/middleware/plan-limits";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { ValidationError } from "@/lib/utils/errors";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 
 export const getPlanGateStatus = withOrgAuth(async (ctx, resource: string) => {
   const config = RESOURCE_CONFIG[resource];
@@ -11,7 +12,9 @@ export const getPlanGateStatus = withOrgAuth(async (ctx, resource: string) => {
     throw new ValidationError(`Unknown resource: ${resource}`, "resource");
   }
 
-  const plan = ctx.organization?.subscription?.plan;
+  // The same reader and plan-in-effect the gates use, so the UI says what
+  // the server will actually allow.
+  const plan = await planInEffect(ctx.organization);
   if (!plan) {
     return createSuccessResponse({
       allowed: false,
@@ -26,13 +29,9 @@ export const getPlanGateStatus = withOrgAuth(async (ctx, resource: string) => {
   if (config.planField) {
     limit = plan[config.planField];
   } else if (config.featureKey) {
-    // Plan.features is free-form JSON; narrow before reading the nested limit.
-    const features = (plan.features ?? {}) as Record<string, unknown>;
-    const featureConfig = features[config.featureKey];
-    limit =
-      featureConfig && typeof featureConfig === "object"
-        ? (featureConfig as { limit?: number }).limit
-        : 0;
+    // A disabled feature allows nothing, whatever limit it still stores.
+    const feature = planFeature(plan, config.featureKey);
+    limit = feature.enabled ? feature.limit : 0;
   }
 
   if (limit === undefined || limit === null) {

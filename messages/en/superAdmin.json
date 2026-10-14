@@ -713,7 +713,6 @@
       "activity": "Activity kept",
       "aiListing": "AI listing help a month",
       "aiAssistant": "AI buyer assistant",
-      "chat": "Chat with buyers",
       "priority": "Priority support"
     },
     "values": {
@@ -749,7 +748,6 @@
       "aiListing": "AI listing help",
       "aiLimit": "Listings a month",
       "aiAssistant": "AI buyer assistant",
-      "chat": "Chat with buyers",
       "priority": "Priority support",
       "errors": {
         "whole": "Enter a whole number.",

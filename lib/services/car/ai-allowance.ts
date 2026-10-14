@@ -3,6 +3,7 @@ import { DEALER_METERED_FEATURES } from "@/lib/middleware/plan-limits";
 import { AI_FEATURES } from "@/lib/ai/features";
 import { PlanLimitError, logError } from "@/lib/utils/errors";
 import type { TenantContext } from "@/lib/auth/context";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 
 /**
  * A plan's AI allowance counts cars, not calls (the owner's decision,
@@ -48,8 +49,7 @@ export async function claimAiUsageForCar(ctx: TenantContext, carId: string): Pro
  * with its listings used up.
  */
 export async function assertUnsavedReadsLeft(ctx: TenantContext): Promise<void> {
-  const features = (ctx.organization.subscription?.plan?.features ?? {}) as Record<string, unknown>;
-  const limit = (features.aiProcessing as { limit?: number } | undefined)?.limit ?? 0;
+  const limit = planFeature(await planInEffect(ctx.organization), "aiProcessing").limit ?? 0;
   if (limit === -1) return;
 
   const cap = Math.max(limit, 1) * UNSAVED_READS_PER_LISTING;
