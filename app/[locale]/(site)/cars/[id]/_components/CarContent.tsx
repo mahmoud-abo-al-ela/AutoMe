@@ -41,27 +41,28 @@ async function assistantOffered(organizationId: string): Promise<boolean> {
 const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: string | null }) => {
   // Server component: getTranslations, not the useTranslations hook.
   const t = await getTranslations("carDetail.errors");
-  let car: CarDetail;
-  try {
-    const response = await getCarById(id);
-    if (!response.success) {
-      throw new Error(response.error.message || t("fetchFailed"));
-    }
-    car = response.data;
-  } catch (error) {
-    console.error("Error fetching car:", error);
-    const errorMessage = error instanceof Error ? error.message : t("fetchError");
+  // withErrorHandling has already logged a failure; it answers, never throws.
+  const response = await getCarById(id);
+
+  // A car that does not exist, is hidden, or belongs to another dealership's
+  // storefront is the not-found page (noindex, the site's own 404 copy) — not
+  // an error box saying a fetch failed, which is what a deleted listing's old
+  // link used to show.
+  if (!response.success && response.error.code === "NOT_FOUND") notFound();
+
+  if (!response.success) {
     return (
       <div className="mx-auto w-full max-w-xl px-4 py-16">
         <div role="alert" className="flex flex-col gap-2 rounded-control border border-destructive bg-destructive-soft p-5">
           <p className="font-semibold">{t("fetchError")}</p>
-          <p className="text-caption text-muted-foreground">{errorMessage}</p>
+          <p className="text-caption text-muted-foreground">{response.error.message || t("fetchFailed")}</p>
         </div>
       </div>
     );
   }
 
-  if (!car) return notFound();
+  const car: CarDetail = response.data;
+  if (!car) notFound();
 
   // A visit from an MCP answer's link, counted after the response — only now
   // that the car is found, so a made-up id counts nothing.
