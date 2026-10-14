@@ -5,10 +5,14 @@ vi.mock("@/lib/ai/embeddings", () => ({ embedTexts }));
 const findManyCars = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/repositories/car", () => ({ findManyCars }));
 vi.mock("@/lib/repositories/user", () => ({ findUserByClerkIdWithMemberships: vi.fn() }));
+const enforceSearchMeaningLimit = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/middleware/with-rate-limit", () => ({ enforceSearchMeaningLimit }));
+const logError = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/utils/errors", async (orig) => ({ ...(await orig<object>()), logError }));
 
 import { searchMeaning } from "@/lib/services/car/search-meaning";
 import { getCars } from "@/lib/services/car/listing";
-import { ServiceUnavailableError } from "@/lib/utils/errors";
+import { RateLimitError, ServiceUnavailableError } from "@/lib/utils/errors";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -26,6 +30,17 @@ describe("searchMeaning", () => {
       timeoutMs: 1_500,
       ctx: { priority: "low" },
     });
+  });
+
+  it("limits new phrases per visitor, before the request — not cached repeats", async () => {
+    await searchMeaning("family car");
+    expect(embedTexts.mock.calls[0][0].beforeRequest).toBe(enforceSearchMeaningLimit);
+  });
+
+  it("over the visitor's limit, searches by words — quietly, it is not a fault", async () => {
+    embedTexts.mockRejectedValue(new RateLimitError());
+    expect(await searchMeaning("family car")).toBeNull();
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it("asks for nothing without search text", async () => {

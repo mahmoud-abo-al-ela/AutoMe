@@ -82,3 +82,51 @@ export const AI_FEATURES = {
 } as const;
 
 export type AiFeature = (typeof AI_FEATURES)[keyof typeof AI_FEATURES];
+
+/**
+ * Who may call a feature, what it costs whom, and how urgently it runs — the
+ * one place these are decided, read by authorizeDealerAiFeature and
+ * publicAiCaller (lib/services/ai/authorize.ts). Before this the answers were
+ * scattered through each entry point's hand-stacked gates, and they drifted:
+ * the anonymous photo search ran at the priority reserved for paying dealers.
+ */
+export interface AiFeaturePolicy {
+  /** A dealer acting for their dealership, a buyer (often anonymous), or the platform itself. */
+  audience: "dealer" | "buyer" | "platform";
+  /** The plan feature a dealer's call needs switched on; null when none. */
+  planGate: "aiProcessing" | null;
+  /** Counted against the dealer's monthly AI listing allowance (cars saved with AI help). */
+  billedToDealer: boolean;
+  /** Capacity priority: "plan" is standard on a paid plan in effect, low on the free plan. */
+  priority: "plan" | "standard" | "low";
+}
+
+const DEALER_BILLED: AiFeaturePolicy = { audience: "dealer", planGate: "aiProcessing", billedToDealer: true, priority: "plan" };
+const PUBLIC_LOW: AiFeaturePolicy = { audience: "buyer", planGate: null, billedToDealer: false, priority: "low" };
+const PLATFORM_LOW: AiFeaturePolicy = { audience: "platform", planGate: null, billedToDealer: false, priority: "low" };
+
+export const AI_FEATURE_POLICY: Record<AiFeature, AiFeaturePolicy> = {
+  carListingFromImage: DEALER_BILLED,
+  listingTranslation: DEALER_BILLED,
+  listingQualityCoach: DEALER_BILLED,
+  // Anonymous visitors must never take the capacity paying dealers wait on.
+  searchFiltersFromImage: PUBLIC_LOW,
+  searchFiltersFromText: PUBLIC_LOW,
+  carSearchQuery: PUBLIC_LOW,
+  // Gated by the dealership's `aiAssistant`, never billed; the priority
+  // follows the dealer's plan (lib/services/car/listing-assistant.ts).
+  listingQA: { audience: "buyer", planGate: null, billedToDealer: false, priority: "plan" },
+  chatTranslation: PUBLIC_LOW,
+  chatModeration: PLATFORM_LOW,
+  carImageAltText: PLATFORM_LOW,
+  dealershipProfileTranslation: PLATFORM_LOW,
+  weeklyDigest: PLATFORM_LOW,
+  questionEmbedding: PLATFORM_LOW,
+  carEmbedding: PLATFORM_LOW,
+  evalJudge: PLATFORM_LOW,
+};
+
+/** The features a dealer's monthly AI allowance counts — derived, so it cannot drift from the policy. */
+export const DEALER_BILLED_FEATURES: AiFeature[] = (Object.keys(AI_FEATURE_POLICY) as AiFeature[]).filter(
+  (feature) => AI_FEATURE_POLICY[feature].billedToDealer
+);

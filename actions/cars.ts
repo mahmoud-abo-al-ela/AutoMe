@@ -27,9 +27,10 @@ import {
   updateCarSchema,
   updateCarFullSchema,
 } from "@/lib/validations/schemas";
-import { enforceDealerAiLimit } from "@/lib/middleware/with-rate-limit";
-import { withPlanGate } from "@/lib/middleware/with-plan-gate";
 import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
+import { authorizeDealerAiFeature } from "@/lib/services/ai/authorize";
+import { AI_FEATURES } from "@/lib/ai/features";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 
 
 /*
@@ -40,13 +41,10 @@ import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
  */
 
 export const getCarPlanLimits = withOrgAuth(async (ctx) => {
-  const plan = ctx.organization.subscription?.plan;
+  // The plan in effect and the one feature reader — what the server will allow.
+  const plan = await planInEffect(ctx.organization);
   const maxImages = plan?.maxImagesPerCar ?? 5;
-  // Plan.features is free-form JSON; narrow before reading the AI entitlement.
-  const features = (plan?.features ?? {}) as {
-    aiProcessing?: { enabled?: boolean };
-  };
-  const aiProcessingEnabled = features.aiProcessing?.enabled ?? false;
+  const aiProcessingEnabled = planFeature(plan, "aiProcessing").enabled;
 
   return createSuccessResponse({
     maxImagesPerCar: maxImages,
@@ -60,20 +58,14 @@ export async function getMaxImagesPerCar() {
 }
 
 /**
- * The same gates as the photo extraction: AI on the plan, quota left, rate
- * limit. Deliberately NOT exported — every export of a "use server" module is a
+ * The same authorization as the photo extraction (authorizeDealerAiFeature).
+ * Deliberately NOT exported — every export of a "use server" module is a
  * callable endpoint, and this one must only run inside a save.
  */
-const translateGated = withPlanGate(
-  "aiProcessing",
-  withUsageLimit(
-    "aiProcessing",
-    async (ctx: TenantContext, source: ListingText, from: Locale) => {
-      await enforceDealerAiLimit();
-      return translateListing(source, from, aiCallerFor(ctx));
-    }
-  )
-);
+async function translateGated(ctx: TenantContext, source: ListingText, from: Locale) {
+  const caller = await authorizeDealerAiFeature(ctx, AI_FEATURES.listingTranslation);
+  return translateListing(source, from, caller);
+}
 
 /** Whether the save wrote the other language, for the client to say so. */
 type TranslationOutcome = "none" | "done" | "skipped";
@@ -234,24 +226,13 @@ export const updateCarFull = withOrgAuth(
 });
 
 /**
- * Same gates as every dealer AI call. Not exported: it only runs inside
- * reviewListingQuality, never as its own endpoint.
+ * The same authorization as every dealer AI call. Not exported: it only runs
+ * inside reviewListingQuality, never as its own endpoint.
  */
-const coachGated = withPlanGate(
-  "aiProcessing",
-  withUsageLimit(
-    "aiProcessing",
-    async (
-      ctx: TenantContext,
-      listing: ListingToCoach,
-      codes: ListingIssueCode[],
-      language: Locale
-    ) => {
-      await enforceDealerAiLimit();
-      return coachListing(listing, codes, language, aiCallerFor(ctx));
-    }
-  )
-);
+async function coachGated(ctx: TenantContext, listing: ListingToCoach, codes: ListingIssueCode[], language: Locale) {
+  const caller = await authorizeDealerAiFeature(ctx, AI_FEATURES.listingQualityCoach);
+  return coachListing(listing, codes, language, caller);
+}
 
 /**
  * Review a listing before it is published: the rule-based score and issues

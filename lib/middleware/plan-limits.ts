@@ -1,18 +1,13 @@
 import * as aiUsageRepository from "@/lib/repositories/ai-usage";
 import * as carRepository from "@/lib/repositories/car";
 import * as teamRepository from "@/lib/repositories/team";
+import { DEALER_BILLED_FEATURES } from "@/lib/ai/features";
 
-// Only dealer-side, entitlement-bound features consume the org's plan quota.
-// Public marketplace search (searchFiltersFrom*) is metered but never billed to a
-// tenant, so it is excluded here.
-// carImageAltText is metered but deliberately absent: the platform pays for it.
-// listingQA is absent too: answers to buyers have no monthly cap. They are
-// metered for reporting, and gated only by the plan's `aiAssistant.enabled`.
-export const DEALER_METERED_FEATURES = [
-  "carListingFromImage",
-  "listingTranslation",
-  "listingQualityCoach",
-];
+// The features a dealer's monthly allowance counts: those AI_FEATURE_POLICY
+// marks billedToDealer (photo reads, listing translation, the listing coach).
+// Public search, buyer answers and platform housekeeping are metered, never
+// billed to a dealership.
+export const DEALER_METERED_FEATURES: string[] = DEALER_BILLED_FEATURES;
 
 /**
  * One gateable resource. `planField` names the Plan column holding the limit,

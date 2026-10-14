@@ -52,6 +52,23 @@ describe("embedTexts", () => {
     });
   });
 
+  it("asks beforeRequest only when something missed the cache — a limit cached repeats never spend", async () => {
+    const beforeRequest = vi.fn(async () => undefined);
+    const ask = () => embedTexts({ feature: AI_FEATURES.carSearchQuery, texts: ["family car"], task: "query", beforeRequest });
+    await ask();
+    await ask();
+    expect(beforeRequest).toHaveBeenCalledTimes(1);
+    expect(embed).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends nothing when beforeRequest refuses", async () => {
+    const refusal = new Error("over the limit");
+    await expect(
+      embedTexts({ feature: AI_FEATURES.carSearchQuery, texts: ["new phrase"], task: "query", beforeRequest: async () => { throw refusal; } })
+    ).rejects.toBe(refusal);
+    expect(embed).not.toHaveBeenCalled();
+  });
+
   it("answers a repeated text from the cache, without a request", async () => {
     await run(["same question"]);
     await run(["same question"]);

@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { resolveTenantContext } from "@/lib/auth";
-import { enforceDealerAiLimit } from "@/lib/middleware/with-rate-limit";
-import { withPlanGate } from "@/lib/middleware/with-plan-gate";
-import { withUsageLimit } from "@/lib/middleware/with-usage-limit";
-import { aiCallerFor } from "@/lib/ai/caller";
+import { authorizeDealerAiFeature } from "@/lib/services/ai/authorize";
+import { AI_FEATURES } from "@/lib/ai/features";
+import type { AiCallerContext } from "@/lib/ai/client";
 import { assertUnsavedReadsLeft } from "@/lib/services/car/ai-allowance";
 import type { AiProgressEvent } from "@/lib/ai/client";
 import {
@@ -64,18 +63,13 @@ const FIRST_TOKEN_MS = 45_000;
 /** Keeps proxies from closing a connection that is silent while Google queues it. */
 const HEARTBEAT_MS = 15_000;
 
-/** Plan enables AI and there is quota left — the same gates the action had. */
-const assertAiAllowed = withPlanGate(
-  "aiProcessing",
-  withUsageLimit("aiProcessing", async () => undefined)
-);
-
 function errorStatus(error: unknown): number {
   return error instanceof AppError ? error.statusCode : 500;
 }
 
 export async function POST(request: Request) {
   let ctx;
+  let caller: AiCallerContext;
   let images;
   try {
     // The dashboard passes its dealership: this URL (/api/…) names none.
@@ -83,10 +77,11 @@ export async function POST(request: Request) {
     ctx = await resolveTenantContext({
       organizationSlug: new URL(request.url).searchParams.get("org"),
     });
-    await assertAiAllowed(ctx);
+    // The plan in effect has AI, this month's allowance has room, the
+    // dealer-AI rate limit — and who the call is billed to, at what priority.
+    caller = await authorizeDealerAiFeature(ctx, AI_FEATURES.carListingFromImage);
     // A read never saved costs no listing, so it has its own cap.
     await assertUnsavedReadsLeft(ctx);
-    await enforceDealerAiLimit();
 
     const formData = await request.formData();
     const files = formData.getAll("file");
@@ -107,7 +102,6 @@ export async function POST(request: Request) {
     return NextResponse.json(createErrorResponse(error), { status: errorStatus(error) });
   }
 
-  const caller = aiCallerFor(ctx);
   const preparedImages = images;
   const encoder = new TextEncoder();
 
