@@ -7,6 +7,8 @@ import { extractSearchFilters, extractTextSearchFilters } from "@/lib/services/a
 import { validateAction } from "@/lib/middleware/with-validation";
 import { describedSearchSchema } from "@/lib/validations/schemas";
 import { getCurrentOrganization } from "@/lib/getOrganization";
+import { publicAiCaller } from "@/lib/services/ai/authorize";
+import { AI_FEATURES } from "@/lib/ai/features";
 
 export const getFeaturedCars = withErrorHandling(async (limit: number = 4) => {
   const organization = await getCurrentOrganization();
@@ -36,12 +38,13 @@ export const processImagesSearch = withErrorHandling(async (file: File) => {
   // on the main marketplace, which AiUsage.organizationId permits.
   const organization = await getCurrentOrganization();
 
-  const filters = await extractSearchFilters(file, {
-    organizationId: organization?.id ?? null,
-    // No resolved User row on the public path, and AiUsage.userId is a foreign
-    // key to User.id rather than a Clerk id — attribution stops at the org.
-    userId: null,
-  });
+  // Billed to no one, attributed to the storefront it was made on, and at low
+  // priority: an anonymous visitor must never take the capacity paying
+  // dealers wait on. (It ran at standard priority before AI_FEATURE_POLICY.)
+  const filters = await extractSearchFilters(
+    file,
+    publicAiCaller(AI_FEATURES.searchFiltersFromImage, organization?.id ?? null)
+  );
 
   return createSuccessResponse(filters);
 });
@@ -57,12 +60,11 @@ export const describeSearch = withErrorHandling(async (input: unknown) => {
   await enforceRateLimit();
 
   const organization = await getCurrentOrganization();
-  const filters = await extractTextSearchFilters(query, {
-    organizationId: organization?.id ?? null,
-    userId: null,
-    // Anonymous: it yields to dealers' AI within the shared caps.
-    priority: "low",
-  });
+  // Anonymous: billed to no one, and it yields to dealers' AI within the shared caps.
+  const filters = await extractTextSearchFilters(
+    query,
+    publicAiCaller(AI_FEATURES.searchFiltersFromText, organization?.id ?? null)
+  );
 
   return createSuccessResponse(filters);
 });

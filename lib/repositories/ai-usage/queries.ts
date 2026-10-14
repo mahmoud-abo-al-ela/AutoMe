@@ -1,13 +1,16 @@
 // AI usage repository - Data access layer for AI usage queries
 import { db } from "@/lib/prisma";
+import { cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 
 /**
- * Start of the current calendar month in UTC. Plan quotas reset monthly, so the
- * per-org count is bounded from here.
+ * Midnight in Cairo on the first of the current month. A dealer's AI
+ * allowance resets with their month — the same calendar billing keeps — not
+ * at UTC midnight, which is 2–3 hours into the 1st in Cairo and 10 pm on the
+ * last day of the month before. (The provider caps keep UTC months:
+ * lib/ai/breaker-windows.ts, the provider's own billing month.)
  */
-function startOfCurrentMonthUtc() {
-    const now = new Date();
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+export function startOfCurrentMonthCairo(now: Date = new Date()): Date {
+    return cairoMidnight(`${cairoDate(now).slice(0, 7)}-01`);
 }
 
 /**
@@ -28,7 +31,7 @@ export async function countOrgAiCarsThisMonth(organizationId: string, features: 
             success: true,
             feature: { in: features },
             carId: { not: null },
-            createdAt: { gte: startOfCurrentMonthUtc() },
+            createdAt: { gte: startOfCurrentMonthCairo() },
         },
         distinct: ["carId"],
         select: { carId: true },
@@ -48,7 +51,7 @@ export async function countOrgUnsavedAiCallsThisMonth(organizationId: string, fe
             success: true,
             feature,
             carId: null,
-            createdAt: { gte: startOfCurrentMonthUtc() },
+            createdAt: { gte: startOfCurrentMonthCairo() },
         },
     });
 }

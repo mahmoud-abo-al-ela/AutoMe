@@ -1,6 +1,8 @@
 import { embedTexts } from "@/lib/ai/embeddings";
 import { AI_FEATURES } from "@/lib/ai/features";
-import { logError } from "@/lib/utils/errors";
+import { RateLimitError, logError } from "@/lib/utils/errors";
+import { enforceSearchMeaningLimit } from "@/lib/middleware/with-rate-limit";
+import { publicAiCaller } from "@/lib/services/ai/authorize";
 
 /** A search's text as a vector, and the model that made it — to compare with cars by the same model. */
 export interface SearchMeaning {
@@ -25,12 +27,15 @@ export async function searchMeaning(search: string | undefined): Promise<SearchM
       feature: AI_FEATURES.carSearchQuery,
       texts: [text],
       task: "query",
-      ctx: { organizationId: null, userId: null, priority: "low" },
+      ctx: publicAiCaller(AI_FEATURES.carSearchQuery),
       timeoutMs: WAIT_MS,
+      // Per visitor, and only for a phrase not already cached.
+      beforeRequest: enforceSearchMeaningLimit,
     });
     return { vector: vectors[0], model };
   } catch (error) {
-    logError("Search meaning unavailable; ranking by words alone", error);
+    // Over the visitor's limit is expected, not a fault: no log line.
+    if (!(error instanceof RateLimitError)) logError("Search meaning unavailable; ranking by words alone", error);
     return null;
   }
 }

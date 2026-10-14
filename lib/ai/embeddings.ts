@@ -50,6 +50,11 @@ export interface EmbedInput {
   ctx?: AiCallerContext | null;
   /** Per-request ceiling; shorter where a person is waiting. */
   timeoutMs?: number;
+  /**
+   * Runs once before any provider request, only when some text missed the
+   * cache — a rate limit that cached repeats never spend. Throw to refuse.
+   */
+  beforeRequest?: () => Promise<void>;
 }
 
 export interface Embeddings {
@@ -76,6 +81,7 @@ export async function embedTexts(input: EmbedInput): Promise<Embeddings> {
     })
   );
   const missing = input.texts.map((_, i) => i).filter((i) => vectors[i] === undefined);
+  if (missing.length > 0 && input.beforeRequest) await input.beforeRequest();
 
   for (let start = 0; start < missing.length; start += BATCH) {
     const batch = missing.slice(start, start + BATCH);

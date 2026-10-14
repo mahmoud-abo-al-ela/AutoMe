@@ -55,6 +55,13 @@ describe("moderateMessage", () => {
     );
   });
 
+  it("logs the category of a flagged message, never the model's account of what it says", async () => {
+    await moderateMessage(message());
+    const logged = vi.mocked(console.info).mock.calls.map((call) => call.join(" ")).join("\n");
+    expect(logged).toContain("flagged scam");
+    expect(logged).not.toContain("deposit");
+  });
+
   it("tells the model a message from the conversation's creator is the buyer's", async () => {
     await moderateMessage(message({ user: { id: "buyer" } }));
     expect(moderateChatMessage.mock.calls[0][1]).toBe("buyer");

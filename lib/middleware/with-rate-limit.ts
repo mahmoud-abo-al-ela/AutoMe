@@ -3,6 +3,7 @@ import aj, {
   ajDealerAi,
   ajListingQuestions,
   ajSearchSuggest,
+  ajSearchMeaning,
   ajMcpPublic,
   ajMcpCostly,
   ajMcpAccount,
@@ -118,6 +119,15 @@ export async function enforceDealerAiLimit(requested = 1) {
  */
 export async function enforceSuggestLimit() {
   return enforce(ajSearchSuggest, 1);
+}
+
+/**
+ * Enforce the search-meaning bucket (see ajSearchMeaning): one token per new
+ * phrase embedded for a public search. Callers degrade on a refusal — the
+ * search runs on its words — rather than refuse the search.
+ */
+export async function enforceSearchMeaningLimit() {
+  return enforce(ajSearchMeaning, 1);
 }
 
 /**

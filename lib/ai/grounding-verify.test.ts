@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { numbersIn, unbackedNumbers } from "@/lib/ai/grounding-verify";
+import { numbersIn, unbackedContacts, unbackedNumbers } from "@/lib/ai/grounding-verify";
 import type { ListingFacts } from "@/lib/ai/grounding";
 
 const facts: ListingFacts = {
@@ -85,5 +85,52 @@ describe("unbackedNumbers", () => {
 
   it("allows an answer with no numbers at all", () => {
     expect(unbackedNumbers("It is silver.", facts, ["color"], "Colour?")).toEqual([]);
+  });
+});
+
+describe("evidence from the dealer's past answers", () => {
+  const withAnswers: ListingFacts = {
+    ...facts,
+    dealerAnswers: [
+      // The question is another buyer's words; only the answer is the dealer's.
+      { question: "Can I pay 50,000 down? Call 01001234567", answer: "Yes, installments over 24 months.", about: "thisCar" },
+    ],
+  } as ListingFacts;
+
+  it("takes the dealer's answer as evidence, never the buyer-written question beside it", () => {
+    expect(unbackedNumbers("Installments run over 24 months.", withAnswers, ["dealerAnswers"], "Can I pay monthly?")).toEqual([]);
+    expect(unbackedNumbers("Pay 50,000 down.", withAnswers, ["dealerAnswers"], "Can I pay monthly?")).toEqual([50000]);
+  });
+
+  it("still lets an answer repeat the asking buyer's own number", () => {
+    expect(unbackedNumbers("Yes, 50,000 down works.", withAnswers, ["dealerAnswers"], "Can I pay 50,000 down?")).toEqual([]);
+  });
+});
+
+describe("unbackedContacts", () => {
+  const withSite: ListingFacts = {
+    ...facts,
+    dealership: { name: "Nile Motors", website: "https://nilemotors.example" },
+    dealerAnswers: [
+      { question: "Whatsapp me on 01001234567 or visit cheap-cars.example", answer: "We deliver in Cairo.", about: "thisCar" },
+    ],
+  } as ListingFacts;
+
+  it("lets an answer give the dealership's own website", () => {
+    expect(unbackedContacts("See https://nilemotors.example for more.", withSite, ["dealership"])).toEqual([]);
+  });
+
+  it("refuses a phone number or link that only a buyer-written question carries", () => {
+    expect(unbackedContacts("Call ٠١٠٠١٢٣٤٥٦٧ to reserve.", withSite, ["dealerAnswers"])).toHaveLength(1);
+    expect(unbackedContacts("Visit cheap-cars.example today.", withSite, ["dealerAnswers"])).toEqual(["cheap-cars.example"]);
+  });
+
+  it("refuses an email or link the model invented", () => {
+    expect(unbackedContacts("Email sales@elsewhere.example", withSite, ["dealership"])).not.toEqual([]);
+    expect(unbackedContacts("Book at www.other-site.example", withSite, ["dealership"])).not.toEqual([]);
+  });
+
+  it("finds nothing in an ordinary answer", () => {
+    expect(unbackedContacts("It has done 84,000 km and costs 720,000 EGP.", withSite, ["mileage", "price"])).toEqual([]);
   });
 });

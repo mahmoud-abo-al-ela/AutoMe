@@ -128,6 +128,26 @@ export const ajSearchSuggest = arcjet({
   ],
 });
 
+/**
+ * Search by meaning: one embedding request per new phrase a visitor searches
+ * (repeats are answered from the cache and spend nothing). Public and
+ * anonymous, so without a bucket one visitor could spend the whole embedding
+ * pool's share for everyone. Over it, the search still runs — ranked by its
+ * words alone, as when the pool is busy.
+ */
+export const ajSearchMeaning = arcjet({
+  key: process.env.ARCJET_KEY ?? "",
+  characteristics: ["ip.src"],
+  rules: [
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 30,
+      interval: 3600,
+      capacity: 30,
+    }),
+  ],
+});
+
 /** A positive whole number from the environment, or the default. */
 function limitFromEnv(name: string, fallback: number): number {
   const value = Number(process.env[name]);

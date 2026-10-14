@@ -64,6 +64,8 @@ export async function moderateMessage(message: MessageResponse | undefined): Pro
 
   const safetyFlag: StoredModeration = { category: verdict.category, source: text };
   await client.partialUpdateMessage(message.id, { set: { safety_flag: safetyFlag } }, authorId);
-  console.info(`[chat-moderation] ${message.id} flagged ${verdict.category}: ${verdict.reason}`);
+  // The category only: the model's reason describes a private message, and
+  // logs are read far more widely than the conversation.
+  console.info(`[chat-moderation] ${message.id} flagged ${verdict.category}`);
   return "flagged";
 }

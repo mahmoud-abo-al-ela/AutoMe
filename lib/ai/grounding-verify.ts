@@ -18,6 +18,8 @@ import { toLatinDigits } from "@/lib/utils/phone";
  *   silver", "Auto 2000 opens at 10");
  * - the buyer's own question: "is it under 800k?" may be answered with 800k.
  * Never the conversation so far: the page sends it, so it is not evidence.
+ * Never the questions *other* buyers asked, kept beside the dealer's answers:
+ * a buyer wrote them, so a number planted in one is not the record's.
  */
 
 /**
@@ -91,9 +93,58 @@ export function unbackedNumbers(
   question: string
 ): number[] {
   const allowed = [
-    ...numbersOf(cited.map((key) => facts[key])),
+    ...numbersOf(citedRecord(facts, cited)),
     ...numbersOf([facts.year, facts.make, facts.model, (facts.dealership as { name?: string } | undefined)?.name]),
     ...numbersIn(question),
   ];
   return numbersIn(answer).filter((claimed) => !matches(claimed, allowed));
+}
+
+/**
+ * The cited facts as evidence: what the dealer and the listing say. The
+ * question beside each of the dealer's past answers is dropped — another
+ * buyer wrote it, so nothing in it is the record's word.
+ */
+function citedRecord(facts: ListingFacts, cited: readonly ListingFactKey[]): unknown[] {
+  return cited.map((key) => {
+    const value = facts[key];
+    if (key !== "dealerAnswers" || !Array.isArray(value)) return value;
+    return value.map((entry) => (entry && typeof entry === "object" ? { ...entry, question: undefined } : entry));
+  });
+}
+
+/** Links, domains, emails and phone numbers: what a planted instruction would put in front of a buyer. */
+const CONTACT_PATTERNS = [
+  /https?:\/\/[^\s)]+/gi,
+  /\bwww\.[^\s)]+/gi,
+  /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g,
+  // Any word.word with a letters-only ending, as declines are checked: an
+  // answer about a car rarely needs a domain, and a false positive only
+  // withholds the answer.
+  /\b[a-z0-9-]{2,}\.[a-z]{2,}\b/gi,
+  /[+0-9٠-٩][0-9٠-٩\s-]{6,}[0-9٠-٩]/g,
+];
+
+/** A contact as compared: lower case; a phone number as its digits alone. */
+function normalizeContact(text: string): string {
+  const latin = toLatinDigits(text).toLowerCase();
+  return /^[+\d\s-]+$/.test(latin) ? latin.replace(/\D/g, "") : latin;
+}
+
+/**
+ * The links, emails and phone numbers an answer states that the dealer's own
+ * record does not — empty when there are none. A grounded answer may repeat
+ * the dealership's phone or website (a buyer asked for it); it may not carry
+ * one that only a buyer-written question, a planted instruction or the model
+ * itself supplied. The caller treats any as failed grounding: no answer.
+ */
+export function unbackedContacts(answer: string, facts: ListingFacts, cited: readonly ListingFactKey[]): string[] {
+  const record = JSON.stringify([citedRecord(facts, cited), facts.dealership]) ?? "";
+  const known = normalizeContact(record);
+  const knownDigits = toLatinDigits(record).replace(/\D/g, "");
+  const found = CONTACT_PATTERNS.flatMap((pattern) => answer.match(pattern) ?? []);
+  return found.filter((contact) => {
+    const normal = normalizeContact(contact);
+    return /^\d+$/.test(normal) ? !knownDigits.includes(normal) : !known.includes(normal);
+  });
 }

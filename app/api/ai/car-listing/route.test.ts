@@ -33,7 +33,8 @@ function ctxWithAi(ai: { enabled: boolean; limit?: number }) {
     organization: {
       id: "org-1",
       slug: "mo-motors",
-      subscription: { plan: { name: "Starter", monthlyPrice: 0, features: { aiProcessing: ai } } },
+      // A real plan carries both prices; the free-plan rule reads both.
+      subscription: { plan: { name: "Starter", monthlyPrice: 0, yearlyPrice: 0, features: { aiProcessing: ai } } },
     },
   };
 }
