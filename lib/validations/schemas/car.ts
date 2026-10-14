@@ -114,7 +114,10 @@ export const updateCarFullSchema = z.object({
   status: carStatus,
   featured: z.boolean().optional(),
   features: z.array(z.string()).optional(),
-  images: z.array(z.any()),
+  // The car's stored photo URLs it keeps, and new uploads (Files or data:
+  // URLs). Which strings are really this car's, and the plan's photo limit,
+  // are checked in updateCarFull (lib/services/car/crud.ts).
+  images: z.array(z.union([z.string().min(1), z.instanceof(File)])),
 }).superRefine(requireOneDescription);
 
 export type CarInput = z.infer<typeof carSchema>;

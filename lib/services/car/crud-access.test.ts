@@ -36,6 +36,7 @@ beforeEach(() => {
     id === "car-x" ? { id, organizationId: ORG_X, images: [] } : { id, organizationId: ORG_Y, images: [] },
   );
   updateCar.mockResolvedValue({ id: "car-x" });
+  deleteCarById.mockResolvedValue(1);
   isImpersonatingOrganization.mockResolvedValue(false);
 });
 
@@ -65,7 +66,7 @@ describe("car changes need a membership or a verified session for that dealershi
 
     await updateCarService("car-x", { status: "SOLD" }, "clerk_admin", ORG_X);
 
-    expect(updateCar).toHaveBeenCalledWith("car-x", { status: "SOLD" });
+    expect(updateCar).toHaveBeenCalledWith("car-x", ORG_X, { status: "SOLD" });
   });
 
   it("refuses a non-member whose request names the victim's dealership — the forged-cookie case", async () => {

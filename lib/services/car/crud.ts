@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import * as storageService from "@/lib/services/storage";
-import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
+import { AuthenticationError, NotFoundError, AuthorizationError, ValidationError } from "@/lib/utils/errors";
 import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
@@ -152,7 +152,8 @@ export async function updateCar(
   // stays absent (this is a partial update), rather than becoming AVAILABLE.
   const dataToUpdate: UpdateCarInput = { ...updateData };
 
-  const updated = await carRepository.updateCar(carId, dataToUpdate);
+  const updated = await carRepository.updateCar(carId, organizationId, dataToUpdate);
+  if (!updated) throw new NotFoundError("Car");
   await auditHelpers.logCarChanged(existingCar, { ...existingCar, ...dataToUpdate }, actorOf(user));
   // A status decides whether the car is listed; featured changes no word.
   if (dataToUpdate.status !== undefined) await searchTermsChanged();
@@ -211,7 +212,9 @@ export async function deleteCar(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  await carRepository.deleteCarById(carId);
+  if ((await carRepository.deleteCarById(carId, organizationId)) === 0) {
+    throw new NotFoundError("Car");
+  }
   await auditHelpers.logCarDeleted(car, actorOf(user));
   await searchTermsChanged();
 
@@ -246,7 +249,8 @@ export async function toggleFeatured(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  const updated = await carRepository.updateCar(carId, { featured: !car.featured });
+  const updated = await carRepository.updateCar(carId, organizationId, { featured: !car.featured });
+  if (!updated) throw new NotFoundError("Car");
   await auditHelpers.logCarChanged(car, { ...car, featured: !car.featured }, actorOf(user));
   return updated;
 }
@@ -276,9 +280,33 @@ export async function updateCarFull(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  // Separate existing image URLs and new files
-  const existingImages = carData.images.filter(img => typeof img === "string");
-  const newImageFiles = carData.images.filter(img => typeof img !== "string");
+  // Every photo is either one this car already has — by its stored URL — or
+  // a new upload. A URL the car doesn't have (another listing's, another
+  // dealership's, anywhere on the web) is refused, and the plan's photo limit
+  // counts kept and new together. All checked before anything is deleted.
+  const stored = new Set(existingCar.images || []);
+  const existingImages: string[] = [];
+  const newImageFiles: Array<File | string> = [];
+  for (const image of carData.images) {
+    if (typeof image === "string" && stored.has(image)) {
+      existingImages.push(image);
+    } else if (image instanceof File || (typeof image === "string" && image.startsWith("data:image/"))) {
+      newImageFiles.push(image);
+    } else {
+      throw new ValidationError("A photo must be one of this car's or a new upload", "images", {
+        key: "errors.upload.notThisCar",
+      });
+    }
+  }
+
+  const organization = await getOrganizationById(organizationId);
+  const maxImagesPerCar = organization?.subscription?.plan?.maxImagesPerCar ?? 5;
+  if (existingImages.length + newImageFiles.length > maxImagesPerCar) {
+    throw new ValidationError(`Maximum of ${maxImagesPerCar} images allowed`, "images", {
+      key: "errors.upload.tooMany",
+      params: { max: maxImagesPerCar },
+    });
+  }
 
   // Determine deleted images: images that were in existingCar.images but are not in existingImages
   const deletedImages = (existingCar.images || []).filter(img => !existingImages.includes(img));
@@ -291,10 +319,6 @@ export async function updateCarFull(
   // Upload new images to Supabase
   let newImageUrls: string[] = [];
   if (newImageFiles.length > 0) {
-    const organization = await getOrganizationById(organizationId);
-    const maxImagesPerCar = organization?.subscription?.plan?.maxImagesPerCar ?? 5;
-    
-    // Upload new images
     newImageUrls = await storageService.uploadCarImages(newImageFiles, carId, "car-images", maxImagesPerCar);
   }
 
@@ -303,7 +327,7 @@ export async function updateCarFull(
 
   const status = toCarStatus(carData.status);
 
-  const updatedCar = await carRepository.updateCar(carId, {
+  const updatedCar = await carRepository.updateCar(carId, organizationId, {
     title: carData.title,
     make: carData.make,
     model: carData.model,
@@ -328,6 +352,7 @@ export async function updateCarFull(
     featured: carData.featured,
     images: finalImages,
   });
+  if (!updatedCar) throw new NotFoundError("Car");
 
   await auditHelpers.logCarChanged(
     existingCar,
