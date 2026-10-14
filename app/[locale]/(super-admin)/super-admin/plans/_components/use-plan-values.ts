@@ -14,12 +14,11 @@ export function planFeatures(plan: PlanRow) {
   return {
     aiProcessing: { enabled: ai.enabled === true, limit: typeof ai.limit === "number" ? ai.limit : 0 },
     aiAssistant: assistant.enabled === true,
-    chat: raw.chat === true,
     prioritySupport: raw.prioritySupport === true,
   };
 }
 
-export const PLAN_ROWS = ["price", "yearly", "trial", "cars", "team", "photos", "activity", "aiListing", "aiAssistant", "chat", "priority"] as const;
+export const PLAN_ROWS = ["price", "yearly", "trial", "cars", "team", "photos", "activity", "aiListing", "aiAssistant", "priority"] as const;
 export type PlanRowKey = (typeof PLAN_ROWS)[number];
 
 /**
@@ -67,8 +66,6 @@ export function usePlanValues() {
         return features.aiProcessing.enabled ? limit(features.aiProcessing.limit) : t("values.off");
       case "aiAssistant":
         return features.aiAssistant;
-      case "chat":
-        return features.chat;
       case "priority":
         return features.prioritySupport;
     }

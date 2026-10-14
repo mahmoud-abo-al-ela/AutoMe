@@ -486,6 +486,19 @@ describe("generateStructured — the wall-clock budget", () => {
     expect(generate.mock.calls.length).toBeLessThan(3);
   });
 
+  it("does not start a fallback with only a sliver of the budget left", async () => {
+    // The first model fails fast, leaving ~500 ms: under the margin a
+    // follow-up needs (MIN_FOLLOW_UP_MS), so no second request is spent.
+    // Deterministic, unlike a race against the deadline itself.
+    generate.mockImplementation(
+      () => new Promise((_, reject) => setTimeout(() => reject(httpError(503)), 100))
+    );
+
+    await expect(call({ budgetMs: 600, timeoutMs: 5_000 })).rejects.toBeInstanceOf(ServiceUnavailableError);
+
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
   it("refuses rather than spending a request it cannot hear the answer to", async () => {
     generate.mockResolvedValue(ok('{"make":"Audi","year":2020}'));
 

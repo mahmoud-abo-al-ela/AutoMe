@@ -4,7 +4,7 @@ vi.mock("@/lib/repositories/billing", () => ({
   findPlanByType: vi.fn(),
   findSubscriptionsEndingBy: vi.fn(),
   findPaidRenewalAhead: vi.fn(),
-  updateSubscription: vi.fn(),
+  updateSubscriptionIfUnchanged: vi.fn(),
   findStalePendingPayments: vi.fn(),
   markPaymentExpired: vi.fn(),
 }));
@@ -36,8 +36,12 @@ const november = periodFrom("2026-11-01", "MONTHLY");
 // Noon in Cairo on a date (UTC+2 from 30 Oct).
 const noon = (date: string, offset = 2) => new Date(new Date(`${date}T12:00:00Z`).getTime() - offset * 3_600_000);
 
+/** When the run read the subscription: its writes are compare-and-set on this. */
+const SEEN = new Date("2026-10-30T08:00:00Z");
+
 const subscription = (overrides: Record<string, unknown> = {}) => ({
   id: "sub-1",
+  updatedAt: SEEN,
   organizationId: "org-1",
   organization: { id: "org-1", deletedAt: null },
   planId: "pro",
@@ -64,6 +68,7 @@ beforeEach(() => {
   vi.mocked(billingRepo.findPaidRenewalAhead).mockResolvedValue(null);
   vi.mocked(billingRepo.findStalePendingPayments).mockResolvedValue([]);
   vi.mocked(emailOwners).mockResolvedValue(1);
+  vi.mocked(billingRepo.updateSubscriptionIfUnchanged).mockResolvedValue(true);
   given();
 });
 
@@ -78,7 +83,7 @@ describe("renewal emails", () => {
       { kind: "renewal_due", periodEnd: period.end }
     );
     expect(report.reminded).toBe(1);
-    expect(billingRepo.updateSubscription).not.toHaveBeenCalled();
+    expect(billingRepo.updateSubscriptionIfUnchanged).not.toHaveBeenCalled();
   });
 
   it("reminds three days before, for the plan and period coming next", async () => {
@@ -122,8 +127,9 @@ describe("when a period ends", () => {
 
     const report = await run(noon("2026-11-01"));
 
-    expect(billingRepo.updateSubscription).toHaveBeenCalledWith(
+    expect(billingRepo.updateSubscriptionIfUnchanged).toHaveBeenCalledWith(
       "org-1",
+      SEEN,
       expect.objectContaining({
         planId: "pro",
         status: "ACTIVE",
@@ -141,7 +147,7 @@ describe("when a period ends", () => {
     const now = noon("2026-11-01");
     const report = await run(now);
 
-    expect(billingRepo.updateSubscription).toHaveBeenCalledWith("org-1", { status: "PAST_DUE", pastDueSince: now });
+    expect(billingRepo.updateSubscriptionIfUnchanged).toHaveBeenCalledWith("org-1", SEEN, { status: "PAST_DUE", pastDueSince: now });
     expect(emailOwners).toHaveBeenCalledWith(
       "org-1",
       { kind: "pastDue", plan: pro, payBy: cairoMidnight("2026-11-08") },
@@ -153,7 +159,7 @@ describe("when a period ends", () => {
   it("leaves a past-due subscription alone during the grace", async () => {
     given(subscription({ status: "PAST_DUE" }));
     await run(noon("2026-11-05"));
-    expect(billingRepo.updateSubscription).not.toHaveBeenCalled();
+    expect(billingRepo.updateSubscriptionIfUnchanged).not.toHaveBeenCalled();
   });
 
   it("moves to the free plan after the grace", async () => {
@@ -161,8 +167,9 @@ describe("when a period ends", () => {
     const now = noon("2026-11-08");
     const report = await run(now);
 
-    expect(billingRepo.updateSubscription).toHaveBeenCalledWith(
+    expect(billingRepo.updateSubscriptionIfUnchanged).toHaveBeenCalledWith(
       "org-1",
+      SEEN,
       expect.objectContaining({ planId: "starter", status: "ACTIVE", currentPeriodEnd: null, pastDueSince: null })
     );
     expect(emailOwners).toHaveBeenCalledWith(
@@ -176,7 +183,7 @@ describe("when a period ends", () => {
   it("moves a canceled plan to the free plan at once, without a grace", async () => {
     given(subscription({ cancelAtPeriodEnd: true }));
     await run(noon("2026-11-01"));
-    expect(billingRepo.updateSubscription).toHaveBeenCalledWith("org-1", expect.objectContaining({ planId: "starter" }));
+    expect(billingRepo.updateSubscriptionIfUnchanged).toHaveBeenCalledWith("org-1", SEEN, expect.objectContaining({ planId: "starter" }));
     expect(emailOwners).toHaveBeenCalledWith("org-1", { kind: "downgradedCanceled", plan: pro }, expect.anything());
   });
 
@@ -186,12 +193,12 @@ describe("when a period ends", () => {
       subscription({ organization: { id: "org-1", deletedAt: new Date() } })
     );
     await run(noon("2026-11-10"));
-    expect(billingRepo.updateSubscription).not.toHaveBeenCalled();
+    expect(billingRepo.updateSubscriptionIfUnchanged).not.toHaveBeenCalled();
   });
 
   it("keeps going past one dealership that fails", async () => {
     given(subscription({ organizationId: "org-bad" }), subscription({ organizationId: "org-2" }));
-    vi.mocked(billingRepo.updateSubscription).mockRejectedValueOnce(new Error("db"));
+    vi.mocked(billingRepo.updateSubscriptionIfUnchanged).mockRejectedValueOnce(new Error("db"));
     const report = await run(noon("2026-11-01"));
     expect(report.failed).toBe(1);
     expect(report.pastDue).toBe(1);
@@ -201,7 +208,7 @@ describe("when a period ends", () => {
     given(subscription());
     const report = await run(noon("2026-11-01"), Date.now() - 1);
     expect(report.stoppedEarly).toBe(true);
-    expect(billingRepo.updateSubscription).not.toHaveBeenCalled();
+    expect(billingRepo.updateSubscriptionIfUnchanged).not.toHaveBeenCalled();
   });
 });
 
@@ -231,5 +238,42 @@ describe("payments the callback never reported", () => {
     expect(billingRepo.markPaymentExpired).toHaveBeenCalledTimes(1);
     expect(billingRepo.markPaymentExpired).toHaveBeenCalledWith("old");
     expect(report.paymentsExpired).toBe(1);
+  });
+});
+
+describe("a payment that settles while the run is deciding", () => {
+  // The compare-and-set finds the subscription changed: the payment wins.
+  beforeEach(() => vi.mocked(billingRepo.updateSubscriptionIfUnchanged).mockResolvedValue(false));
+
+  it("is not marked past due, emailed or counted", async () => {
+    given(subscription());
+    const report = await run(noon("2026-11-01"));
+
+    expect(billingRepo.updateSubscriptionIfUnchanged).toHaveBeenCalledWith("org-1", SEEN, expect.objectContaining({ status: "PAST_DUE" }));
+    expect(emailOwners).not.toHaveBeenCalled();
+    expect(report.pastDue).toBe(0);
+  });
+
+  it("is not dropped to the free plan, emailed, logged or counted", async () => {
+    given(subscription({ status: "PAST_DUE" }));
+    const report = await run(noon("2026-11-08"));
+
+    expect(emailOwners).not.toHaveBeenCalled();
+    expect(report.downgraded).toBe(0);
+    expect(report.failed).toBe(0);
+  });
+
+  it("is not rolled onto the renewal twice", async () => {
+    given(subscription());
+    vi.mocked(billingRepo.findPaidRenewalAhead).mockResolvedValue({
+      id: "renewal-1",
+      periodStart: november.start,
+      periodEnd: november.end,
+      billingPeriod: "MONTHLY",
+      plan: { id: "pro", name: "Pro", type: "PRO" },
+    } as never);
+
+    const report = await run(noon("2026-11-01"));
+    expect(report.rolledOver).toBe(0);
   });
 });

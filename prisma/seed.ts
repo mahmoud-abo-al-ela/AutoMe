@@ -998,7 +998,8 @@ async function main() {
         // Answers to buyers' questions on this dealer's listings: no monthly cap.
         aiAssistant: { enabled: true },
         analytics: "basic",
-        chat: false,
+        // Every plan: buyers can message any dealership.
+        chat: true,
         apiAccess: false,
         whiteLabel: false,
         webhooks: false,

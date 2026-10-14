@@ -55,7 +55,6 @@ export type DbPlan = {
 
 /** The flags `mapDbPlanToUi` looks for inside the features JSON. */
 type PlanFeatureFlags = {
-  chat?: boolean;
   aiProcessing?: { enabled?: boolean; limit?: number };
   aiAssistant?: { enabled?: boolean };
   prioritySupport?: boolean;
@@ -103,7 +102,7 @@ export const defaultPlans: UiPlan[] = [
       { key: "teamMembers", params: { count: 3 }, included: true },
       { key: "imagesPerCar", params: { count: 5 }, included: true },
       { key: "auditLogs", params: { count: 30 }, included: true },
-      { key: "liveChat", included: false },
+      { key: "liveChat", included: true },
       { key: "aiProcessingMonthly", params: { count: 5 }, included: true },
       { key: "aiAssistantUnlimited", included: true },
       { key: "prioritySupport", included: false },
@@ -180,7 +179,9 @@ export function planFeatureKeys(plan: DbPlan): PlanFeature[] {
     plan.auditLogRetentionDays
       ? { key: "auditLogs", params: { count: plan.auditLogRetentionDays }, included: true }
       : { key: "auditLogsUnlimited", included: true },
-    { key: "liveChat", included: !!f.chat },
+    // Buyers can message every dealership: chat is part of every plan, not a
+    // plan feature (owner's decision, 2026-10-14). A stored `chat` flag is ignored.
+    { key: "liveChat", included: true },
     aiProcessingFeature(f.aiProcessing),
     aiAssistantFeature(f.aiAssistant),
     { key: "prioritySupport", included: !!f.prioritySupport },

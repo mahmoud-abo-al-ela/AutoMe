@@ -121,7 +121,6 @@ export type PlanSettings = {
   auditLogRetentionDays: number | null;
   aiProcessing: { enabled: boolean; limit: number };
   aiAssistant: boolean;
-  chat: boolean;
   prioritySupport: boolean;
 };
 
@@ -147,7 +146,6 @@ export async function updatePlanSettings(planId: string, settings: PlanSettings)
       ...features,
       aiProcessing: { enabled: settings.aiProcessing.enabled, limit: settings.aiProcessing.limit },
       aiAssistant: { ...assistant, enabled: settings.aiAssistant },
-      chat: settings.chat,
       prioritySupport: settings.prioritySupport,
     } as Prisma.InputJsonValue,
   });

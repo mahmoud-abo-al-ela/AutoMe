@@ -42,6 +42,15 @@ describe("claimAiUsageForCar", () => {
     expect(window).toBeGreaterThan(24 * 60 * 60 * 1000 - 5_000);
   });
 
+  it("claims only an edit's own calls: a counted car can't soak up reads made for another", async () => {
+    const requestStartedAt = new Date("2026-10-14T12:00:00Z");
+    await claimAiUsageForCar(ctx(5), "car-1", { requestStartedAt });
+    const claim = attributeAiUsageToCar.mock.calls[0][0];
+    // From the edit's start (less two seconds of clock slack), not a day back:
+    // a photo read made earlier for another car stays unclaimed, for that car.
+    expect(claim.since).toEqual(new Date("2026-10-14T11:59:58Z"));
+  });
+
   it("never fails the save it follows", async () => {
     attributeAiUsageToCar.mockRejectedValue(new Error("db down"));
     await expect(claimAiUsageForCar(ctx(5), "car-1")).resolves.toBeUndefined();

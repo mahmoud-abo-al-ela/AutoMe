@@ -16,6 +16,7 @@ import {
   NotFoundError,
   ValidationError,
   AuthorizationError,
+  ConflictError,
 } from "@/lib/utils/errors";
 
 interface TestDriveFormData {
@@ -139,7 +140,7 @@ export async function editTestDrive(testDriveId: string, updateData: Omit<TestDr
   }
 
   const check = await slotCheck({ ...updateData, organizationId: existingTestDrive.organizationId });
-  return await testDriveRepository.bookSlot(
+  const moved = await testDriveRepository.bookSlot(
     {
       carId: existingTestDrive.carId,
       date: dateOnlyToUtc(updateData.date),
@@ -150,6 +151,14 @@ export async function editTestDrive(testDriveId: string, updateData: Omit<TestDr
     { kind: "move", testDriveId, notes: updateData.notes || "" },
     check
   );
+  // The PENDING check above ran before the lock; bookSlot repeats it under the
+  // lock, and refuses a booking confirmed or cancelled in between.
+  if (!moved) {
+    throw new ValidationError("Only pending test drives can be edited", "status", {
+      key: "errors.testDrive.notEditable",
+    });
+  }
+  return moved;
 }
 
 /**
@@ -187,9 +196,16 @@ export async function cancelTestDrive(testDriveId: string, userId: string) {
     );
   }
 
-  return await testDriveRepository.updateTestDrive(testDriveId, {
-    status: "CANCELLED",
-  });
+  const cancelled = await testDriveRepository.transitionTestDrive(
+    testDriveId,
+    testDrive.organizationId,
+    ["PENDING", "CONFIRMED"],
+    { status: "CANCELLED" }
+  );
+  if (!cancelled) {
+    throw new ConflictError("The test drive changed meanwhile", { key: "errors.testDrive.changed" });
+  }
+  return cancelled;
 }
 
 /**

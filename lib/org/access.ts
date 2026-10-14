@@ -1,5 +1,4 @@
 import type { MemberRole } from "@/lib/generated/prisma";
-import type { OrganizationWithPlan } from "@/lib/auth/context";
 import * as tenantRepository from "@/lib/repositories/tenant";
 import { AuthorizationError } from "@/lib/utils/errors";
 
@@ -36,55 +35,4 @@ export async function requireOwner(userId: string, organizationId: string) {
     throw new AuthorizationError("Only owners can perform this action");
   }
   return membership;
-}
-
-export function checkPlanFeature(
-  organization: OrganizationWithPlan | null | undefined,
-  featureName: string
-): boolean {
-  if (!organization?.subscription?.plan?.features) {
-    return false;
-  }
-
-  // Plan.features is free-form JSON; narrow to an object before indexing.
-  const features = organization.subscription.plan.features;
-  if (typeof features !== "object" || Array.isArray(features)) {
-    return false;
-  }
-
-  return Boolean((features as Record<string, unknown>)[featureName] ?? false);
-}
-
-export function checkPlanLimit(
-  organization: OrganizationWithPlan | null | undefined,
-  limitName: "maxCars" | "maxMembers" | "maxImagesPerCar",
-  currentCount: number
-): boolean {
-  if (!organization?.subscription?.plan) {
-    return false;
-  }
-
-  const limit = organization.subscription.plan[limitName];
-
-  if (limit === -1) return true;
-
-  return currentCount < limit;
-}
-
-export function getPlanLimits(organization: OrganizationWithPlan | null | undefined) {
-  if (!organization?.subscription?.plan) {
-    return {
-      maxCars: 0,
-      maxMembers: 0,
-      maxImagesPerCar: 0,
-    };
-  }
-
-  const plan = organization.subscription.plan;
-  return {
-    maxCars: plan.maxCars,
-    maxMembers: plan.maxMembers,
-    maxImagesPerCar: plan.maxImagesPerCar,
-    features: plan.features,
-  };
 }

@@ -43,6 +43,5 @@ export const planSettingsSchema = z.object({
   auditLogRetentionDays: z.number().int().min(1).max(3650).nullable(),
   aiProcessing: z.object({ enabled: z.boolean(), limit: planLimit.or(z.literal(0)) }),
   aiAssistant: z.boolean(),
-  chat: z.boolean(),
   prioritySupport: z.boolean(),
 });

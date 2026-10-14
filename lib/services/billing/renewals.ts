@@ -26,6 +26,11 @@ import { freePlanState, paidPeriodState } from "./transitions";
  * Every step is safe to run twice: each acts only on the state it finds, and
  * each email is claimed once per period. A run that stops at its deadline is
  * finished by the next one.
+ *
+ * Every write is a compare-and-set on the subscription the run read
+ * (updateSubscriptionIfUnchanged). A payment that settles between the read and
+ * the write wins: the write is skipped, nothing is emailed or logged for it,
+ * and the next run decides on the subscription as the payment left it.
  */
 
 export interface RenewalRunReport {
@@ -97,10 +102,12 @@ async function renewOne(
   const ahead = await billingRepo.findPaidRenewalAhead(organizationId, end);
   if (ahead) {
     if (ended && ahead.periodStart && ahead.periodEnd && ahead.periodStart.getTime() <= now.getTime()) {
-      await billingRepo.updateSubscription(
+      const moved = await billingRepo.updateSubscriptionIfUnchanged(
         organizationId,
+        subscription.updatedAt,
         paidPeriodState(ahead.plan.id, ahead.billingPeriod, { start: ahead.periodStart, end: ahead.periodEnd })
       );
+      if (!moved) return;
       await logChange(subscription, ahead.plan.id, "SUBSCRIPTION_RENEWED");
       report.rolledOver += 1;
     }
@@ -137,13 +144,16 @@ async function renewOne(
   if (!freePlanId) throw new Error("The free Starter plan is missing; cannot end a subscription");
 
   if (endingToFree) {
-    await moveToFree(subscription, freePlanId, now, "downgradedCanceled");
-    report.downgraded += 1;
+    if (await moveToFree(subscription, freePlanId, now, "downgradedCanceled")) report.downgraded += 1;
     return;
   }
 
   if (subscription.status !== "PAST_DUE") {
-    await billingRepo.updateSubscription(organizationId, { status: "PAST_DUE", pastDueSince: now });
+    const marked = await billingRepo.updateSubscriptionIfUnchanged(organizationId, subscription.updatedAt, {
+      status: "PAST_DUE",
+      pastDueSince: now,
+    });
+    if (!marked) return;
     await emailOwners(
       organizationId,
       { kind: "pastDue", plan: subscription.plan, payBy: cairoMidnight(graceEndsOn(end)) },
@@ -154,25 +164,31 @@ async function renewOne(
   }
 
   if (renewalStage(end, now) === "expired") {
-    await moveToFree(subscription, freePlanId, now, "downgradedUnpaid");
-    report.downgraded += 1;
+    if (await moveToFree(subscription, freePlanId, now, "downgradedUnpaid")) report.downgraded += 1;
   }
 }
 
+/** Move to the free plan; false (and nothing done) if a payment changed the subscription since it was read. */
 async function moveToFree(
   subscription: RenewalSubscription,
   freePlanId: string,
   now: Date,
   email: "downgradedCanceled" | "downgradedUnpaid"
-): Promise<void> {
+): Promise<boolean> {
   const end = subscription.currentPeriodEnd!;
-  await billingRepo.updateSubscription(subscription.organizationId, freePlanState(freePlanId, now));
+  const moved = await billingRepo.updateSubscriptionIfUnchanged(
+    subscription.organizationId,
+    subscription.updatedAt,
+    freePlanState(freePlanId, now)
+  );
+  if (!moved) return false;
   await logChange(subscription, freePlanId, "SUBSCRIPTION_DOWNGRADED");
   await emailOwners(
     subscription.organizationId,
     { kind: email, plan: subscription.plan },
     { kind: "downgraded", periodEnd: end }
   );
+  return true;
 }
 
 async function logChange(

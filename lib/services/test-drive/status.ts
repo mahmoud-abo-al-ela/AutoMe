@@ -7,6 +7,7 @@ import {
   NotFoundError,
   ValidationError,
   AuthorizationError,
+  ConflictError,
 } from "@/lib/utils/errors";
 import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 
@@ -131,9 +132,17 @@ export async function updateTestDriveStatus(
     );
   }
 
-  const updated = await testDriveRepository.updateTestDrive(testDriveId, {
-    status: status.toUpperCase(),
-  });
+  // From the status just validated, or not at all: a booking the buyer
+  // cancelled while the dealer was confirming stays cancelled.
+  const updated = await testDriveRepository.transitionTestDrive(
+    testDriveId,
+    testDrive.organizationId,
+    [testDrive.status],
+    { status: next }
+  );
+  if (!updated) {
+    throw new ConflictError("The test drive changed meanwhile", { key: "errors.testDrive.changed" });
+  }
   await auditHelpers.logTestDriveStatusChanged(
     {
       id: testDrive.id,

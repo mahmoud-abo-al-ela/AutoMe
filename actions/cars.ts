@@ -206,6 +206,8 @@ export const updateCarFull = withOrgAuth(
     payload: { data?: unknown } & Record<string, unknown>,
     options?: { editedLocale?: unknown }
   ) => {
+  // An edit claims only the AI calls made during it (see claimAiUsageForCar).
+  const requestStartedAt = new Date();
   const rawData = payload.data || payload;
   const validated = validateAction(updateCarFullSchema, rawData);
   const { car: carData, translation } = await fillOtherLanguage(
@@ -220,9 +222,10 @@ export const updateCarFull = withOrgAuth(
     ctx.userId,
     ctx.organization.id
   );
-  // After the update, which proved the car is this dealership's. A car
-  // already counted this month is claimed again, and still counts once.
-  await claimAiUsageForCar(ctx, carId);
+  // After the update, which proved the car is this dealership's. Only this
+  // edit's own calls (its translation): a car already counted this month
+  // still counts once, and absorbs nothing made for another car.
+  await claimAiUsageForCar(ctx, carId, { requestStartedAt });
   // Also after an edit: new photos need describing, removed ones pruning.
   await enrichAfterSave(ctx, carId);
 

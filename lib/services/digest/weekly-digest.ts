@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import * as digestRepository from "@/lib/repositories/digest";
 import * as aiUsageRepository from "@/lib/repositories/ai-usage";
 import { findActiveSubscription } from "@/lib/repositories/billing";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 import { DEALER_METERED_FEATURES } from "@/lib/middleware/plan-limits";
 import { writeWeeklySummary } from "@/lib/services/ai";
 import { buildWeeklyDigestEmail } from "@/lib/services/notification/weekly-digest-template";
@@ -30,9 +31,8 @@ async function aiListings(organizationId: string) {
     aiUsageRepository.countOrgAiCarsThisMonth(organizationId, DEALER_METERED_FEATURES),
     findActiveSubscription(organizationId),
   ]);
-  const feature = (subscription?.plan?.features as { aiProcessing?: { enabled?: boolean; limit?: number } } | null)
-    ?.aiProcessing;
-  const limit = feature?.enabled ? (feature.limit ?? null) : null;
+  const feature = planFeature(await planInEffect({ id: organizationId, subscription }), "aiProcessing");
+  const limit = feature.enabled ? feature.limit : null;
   return { aiListingsUsed: used, aiListingsLimit: limit };
 }
 

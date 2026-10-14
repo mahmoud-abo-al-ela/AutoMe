@@ -79,6 +79,17 @@ export async function recordPaymentPeriod(
   await tx.payment.update({ where: { id }, data });
 }
 
+/**
+ * The subscription, read inside the settling transaction under a row lock
+ * (FOR UPDATE): a decision made on it holds until the transaction commits,
+ * and the daily renewal job's compare-and-set write waits for it rather than
+ * landing in between.
+ */
+export async function lockSubscriptionInTx(tx: Prisma.TransactionClient, organizationId: string) {
+  await tx.$queryRaw`SELECT "id" FROM "Subscription" WHERE "organizationId" = ${organizationId} FOR UPDATE`;
+  return tx.subscription.findUnique({ where: { organizationId }, include: { plan: true } });
+}
+
 export async function updateSubscriptionInTx(
   tx: Prisma.TransactionClient,
   organizationId: string,

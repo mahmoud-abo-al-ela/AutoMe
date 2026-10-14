@@ -31,7 +31,6 @@ type Form = {
   aiLimit: string;
   aiUnlimited: boolean;
   aiAssistant: boolean;
-  chat: boolean;
   prioritySupport: boolean;
 };
 
@@ -52,7 +51,6 @@ const formFor = (plan: PlanRow): Form => {
     aiLimit: f.aiProcessing.limit < 0 ? "" : String(f.aiProcessing.limit),
     aiUnlimited: f.aiProcessing.limit < 0,
     aiAssistant: f.aiAssistant,
-    chat: f.chat,
     prioritySupport: f.prioritySupport,
   };
 };
@@ -136,7 +134,6 @@ export function PlanEditor({ plan, onClose }: { plan: PlanRow | null; onClose: (
         auditLogRetentionDays: form.activityAlways ? null : n.activityDays,
         aiProcessing: { enabled: form.aiEnabled, limit: form.aiEnabled ? n.aiLimit : planFeatures(plan).aiProcessing.limit },
         aiAssistant: form.aiAssistant,
-        chat: form.chat,
         prioritySupport: form.prioritySupport,
       });
       if (result.success) {
@@ -223,7 +220,6 @@ export function PlanEditor({ plan, onClose }: { plan: PlanRow | null; onClose: (
             {toggle("aiEnabled", t("aiListing"))}
             {form.aiEnabled && number("aiLimit", t("aiLimit"), { disabled: form.aiUnlimited, unlimited: { key: "aiUnlimited", label: t("noLimit") } })}
             {toggle("aiAssistant", t("aiAssistant"))}
-            {toggle("chat", t("chat"))}
             {toggle("prioritySupport", t("priority"))}
           </section>
         </form>

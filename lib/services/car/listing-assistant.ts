@@ -1,5 +1,6 @@
 import * as carRepository from "@/lib/repositories/car";
 import * as billingRepository from "@/lib/repositories/billing";
+import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 import { MAX_OTHER_CARS, buildListingFacts, closestByPrice, type OtherCar } from "@/lib/ai/grounding";
 // Shared with the site's fair-price gauge, so the two never disagree.
 import { marketPricesFor } from "./market-price";
@@ -87,16 +88,14 @@ interface Allowance {
  */
 async function allowanceFor(organizationId: string): Promise<Allowance> {
   const subscription = await billingRepository.findActiveSubscription(organizationId);
-  const plan = subscription?.plan;
+  const plan = await planInEffect({ id: organizationId, subscription });
   // Free-plan dealers run at low priority, so buyers on their listings cannot
   // push paying dealers into "AI busy" — the same rule as aiCallerFor.
   const priority: CapacityPriority = plan?.monthlyPrice ? "standard" : "low";
 
-  const features = (plan?.features ?? {}) as Record<string, unknown>;
   // Any stored `limit` is ignored: plans saved before the cap was removed
   // still carry one.
-  const config = features.aiAssistant as { enabled?: boolean } | undefined;
-  return { offered: Boolean(config?.enabled), priority };
+  return { offered: planFeature(plan, "aiAssistant").enabled, priority };
 }
 
 /** Whether the listing page should show the assistant at all. */

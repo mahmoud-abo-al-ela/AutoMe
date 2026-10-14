@@ -2,8 +2,9 @@ import type { MemberRole } from "@/lib/generated/prisma";
 import * as teamRepo from "@/lib/repositories/team";
 import * as billingRepo from "@/lib/repositories/billing/queries";
 import { auditHelpers } from "@/lib/services/audit/audit";
-import { getUserMembership } from "@/lib/getOrganization";
-import { AuthorizationError, ConflictError, NotFoundError, ValidationError } from "@/lib/utils/errors";
+import { getOrganizationById, getUserMembership } from "@/lib/getOrganization";
+import { planInEffect } from "@/lib/services/billing/entitlements";
+import { AuthorizationError, ConflictError, NotFoundError, PlanLimitError, ValidationError } from "@/lib/utils/errors";
 
 /** The signed-in member doing the change, as the audit log records them. */
 export interface TeamActor {
@@ -45,7 +46,23 @@ export async function inviteTeamMember(
     throw new ConflictError("This user is already a member");
   }
 
-  const membership = await teamRepo.createMembership({ userId: invitedUser.id, organizationId, role });
+  // The authoritative member-limit check, under the dealership's lock with
+  // the insert (withUsageLimit's earlier check is only the fast refusal).
+  const organization = await getOrganizationById(organizationId);
+  const plan = organization ? await planInEffect(organization) : null;
+  const membership = await teamRepo.createMembershipWithinLimit(
+    { userId: invitedUser.id, organizationId, role },
+    plan?.maxMembers ?? 0
+  );
+  if (!membership) {
+    throw new PlanLimitError({
+      resource: "members",
+      planType: plan?.name,
+      limit: plan?.maxMembers ?? 0,
+      upgradeUrl: organization ? `/org/${organization.slug}/billing` : undefined,
+      message: "Upgrade your plan to invite more team members.",
+    });
+  }
   await auditHelpers.logMemberInvited(membership, actor.id, actor.email);
 }
 

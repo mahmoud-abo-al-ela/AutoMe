@@ -143,4 +143,37 @@ describe.skipIf(!hasTestDb)("test-drive booking under concurrency (real Postgres
     ).rejects.toBeTruthy();
     expect(await db.testDrive.count({ where: { carId: hiddenCarId } })).toBe(0);
   });
+
+  const statusOf = async (id: string) => (await db.testDrive.findUniqueOrThrow({ where: { id } })).status;
+
+  it("a buyer's cancel and the dealer's confirm at the same moment: a cancel that succeeds always sticks", async () => {
+    // Before the compare-and-set, both read PENDING and both wrote: the buyer
+    // was told it was cancelled, the slot was freed, and the confirm landed on
+    // top — a confirmed booking on a slot someone else could now take.
+    for (const [start, end] of [["09:00", "10:00"], ["11:00", "12:00"], ["13:00", "14:00"], ["15:00", "16:00"]]) {
+      const drive = (await ask(BUYERS[8], start, end))!;
+      const [cancel, confirm] = await Promise.allSettled([
+        cancelTestDrive(drive.id, clerk(BUYERS[8])),
+        updateTestDriveStatus(drive.id, "CONFIRMED", clerk(OWNER), ORG),
+      ]);
+      const final = await statusOf(drive.id);
+      if (cancel.status === "fulfilled") expect(final).toBe("CANCELLED");
+      else expect(confirm.status === "fulfilled" && final === "CONFIRMED").toBe(true);
+    }
+  });
+
+  it("an edit and the dealer's confirm at the same moment: a confirmed booking is never revived to PENDING", async () => {
+    for (const [start, end, moveStart, moveEnd] of [
+      ["09:00", "10:00", "13:00", "14:00"],
+      ["10:00", "11:00", "14:00", "15:00"],
+      ["11:00", "12:00", "15:00", "16:00"],
+    ]) {
+      const drive = (await ask(BUYERS[9], start, end))!;
+      const [, confirm] = await Promise.allSettled([
+        editTestDrive(drive.id, { date: DAY, startTime: moveStart, endTime: moveEnd }, clerk(BUYERS[9])),
+        updateTestDriveStatus(drive.id, "CONFIRMED", clerk(OWNER), ORG),
+      ]);
+      if (confirm.status === "fulfilled") expect(await statusOf(drive.id)).toBe("CONFIRMED");
+    }
+  });
 });

@@ -23,6 +23,11 @@ import type { PaymobTransaction } from "@/lib/services/paymob";
 
 const RUN = `paymob-test-${Date.now()}`;
 const SLUG = `${RUN}-motors`;
+/**
+ * The Paymob order this payment's checkout created. Settlement accepts only a
+ * transaction whose signed order.id is it (see settlePayment), as in production.
+ */
+const ORDER_ID = 900_000_001;
 
 const paidTx = (paymentId: string, amount: number): PaymobTransaction => ({
   id: Date.now(),
@@ -41,7 +46,7 @@ const paidTx = (paymentId: string, amount: number): PaymobTransaction => ({
   is_standalone_payment: true,
   is_voided: false,
   owner: 1,
-  order: { id: 1, merchant_order_id: paymentId },
+  order: { id: ORDER_ID, merchant_order_id: paymentId },
   source_data: { pan: "2346", sub_type: "MasterCard", type: "card" },
 });
 
@@ -79,6 +84,7 @@ describe.skipIf(!hasTestDb)("settlePayment against Postgres", () => {
         planId,
         billingPeriod: "MONTHLY",
         amountCents: plan.monthlyPrice,
+        providerOrderId: String(ORDER_ID),
         userId,
         onboardingSessionId: session.id,
       },
@@ -120,6 +126,11 @@ describe.skipIf(!hasTestDb)("settlePayment against Postgres", () => {
 
   it("does nothing on a repeat after the payment is settled", async () => {
     const payment = await db.payment.findUniqueOrThrow({ where: { id: paymentId } });
+    // Settled here if the race test above did not run (or failed), so this
+    // test stands on its own; a repeat is what it checks.
+    const first = await settlePayment(paymentId, paidTx(paymentId, payment.amountCents));
+    expect(["paid", "already_paid"]).toContain(first.status);
+
     const result = await settlePayment(paymentId, paidTx(paymentId, payment.amountCents));
     expect(result.status).toBe("already_paid");
     expect(await db.organization.count({ where: { slug: { startsWith: RUN } } })).toBe(1);

@@ -46,7 +46,7 @@ export type SettlementResult =
   | {
       status: "rejected";
       paymentId: string;
-      reason: "amount_mismatch" | "currency_mismatch" | "reference_mismatch";
+      reason: "amount_mismatch" | "currency_mismatch" | "reference_mismatch" | "order_mismatch";
     };
 
 /** A paid payment that cannot be applied: needs a person, so it is thrown and logged. */
@@ -80,6 +80,19 @@ export async function settlePayment(
   const reference = transaction.order?.merchant_order_id;
   if (reference && reference !== payment.id) {
     return { status: "rejected", paymentId, reason: "reference_mismatch" };
+  }
+
+  // Which payment a transaction settles is named by merchant_order_id, which
+  // Paymob's HMAC does not sign; order.id is signed. Bind them through the
+  // order this payment's own checkout created (providerOrderId, saved before
+  // the buyer ever gets a payment page), so a validly signed transaction
+  // cannot be relabelled onto another pending payment — to mark it paid, or
+  // failed. Before anything is written.
+  if (!payment.providerOrderId || String(transaction.order?.id) !== payment.providerOrderId) {
+    logError(
+      `Paymob transaction ${transaction.id} for order ${transaction.order?.id} names payment ${paymentId}, whose order is ${payment.providerOrderId ?? "unknown"}; not applied, needs review`
+    );
+    return { status: "rejected", paymentId, reason: "order_mismatch" };
   }
 
   if (payment.status === "PAID") {
@@ -274,7 +287,12 @@ export function renewalPeriodFor(
 }
 
 async function applyRenewal(tx: Prisma.TransactionClient, payment: PaymentForSettlement, now: Date) {
-  const { organizationId, subscription } = subscriptionOf(payment);
+  const { organizationId } = subscriptionOf(payment);
+  // Decide on the subscription as it is now, locked, not as it was read
+  // before the transaction: the daily job may have moved it to past-due or
+  // the free plan in between, which changes the period this payment buys.
+  const subscription = await paymentRepo.lockSubscriptionInTx(tx, organizationId);
+  if (!subscription) throw new SettlementError(payment.id, "the dealership's subscription is gone");
   const period = renewalPeriodFor(subscription, payment, now);
 
   if (period.start.getTime() <= now.getTime()) {
