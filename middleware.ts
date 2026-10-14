@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import createIntlMiddleware from "next-intl/middleware";
 import {
   NextResponse,
@@ -6,11 +6,8 @@ import {
   type NextRequest,
 } from "next/server";
 import { routing } from "@/i18n/routing";
-import {
-  localized,
-  localeOf,
-  pathnameWithoutLocale,
-} from "@/lib/utils/locale-path";
+import { localeOf, pathnameWithoutLocale } from "@/lib/utils/locale-path";
+import { localizedPathMatcher, pathMatcher } from "@/lib/utils/route-matcher";
 import {
   MAIN_DOMAIN_ONLY_ROUTES,
   PROTECTED_ROUTES,
@@ -18,36 +15,34 @@ import {
   SUPER_ADMIN_ROUTES,
 } from "@/lib/route-policy";
 
-const isProtectedRoute = createRouteMatcher(localized(PROTECTED_ROUTES));
+const isProtectedRoute = localizedPathMatcher(PROTECTED_ROUTES);
 
-const isSuperAdminRoute = createRouteMatcher(localized(SUPER_ADMIN_ROUTES));
+const isSuperAdminRoute = localizedPathMatcher(SUPER_ADMIN_ROUTES);
 
-const isMainDomainOnlyRoute = createRouteMatcher(
-  localized(MAIN_DOMAIN_ONLY_ROUTES)
-);
+const isMainDomainOnlyRoute = localizedPathMatcher(MAIN_DOMAIN_ONLY_ROUTES);
 
 // Routes that should redirect to the dealership home on subdomains
-const isSubdomainRedirectToHomeRoute = createRouteMatcher(
-  localized(SUBDOMAIN_REDIRECT_TO_HOME_ROUTES)
+const isSubdomainRedirectToHomeRoute = localizedPathMatcher(
+  SUBDOMAIN_REDIRECT_TO_HOME_ROUTES
 );
 
 // API routes are not localized — they carry no locale prefix and must bypass
 // the intl middleware entirely, or every fetch gains a redirect hop.
-const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"]);
+const isApiRoute = pathMatcher(["/api(.*)", "/trpc(.*)"]);
 
 // Crawler files are per host, not per language, and live at the root. The
 // intl middleware would redirect /sitemap.xml to /en/sitemap.xml, which does
 // not exist. They still go through Clerk's handler, which is what sets the
 // sanitized x-subdomain header they read to tell a storefront from the
 // marketplace.
-const isCrawlerFile = createRouteMatcher(["/sitemap.xml", "/robots.txt"]);
+const isCrawlerFile = pathMatcher(["/sitemap.xml", "/robots.txt"]);
 
 // Discovery documents (OAuth for MCP clients, among others) live at the root,
 // per host. Localized, they were redirected to /en/.well-known/… and answered
 // with an HTML page where a client expects a plain 404.
-const isWellKnown = createRouteMatcher(["/.well-known/(.*)"]);
+const isWellKnown = pathMatcher(["/.well-known/(.*)"]);
 
-const isPublicApiRoute = createRouteMatcher([
+const isPublicApiRoute = pathMatcher([
   "/api/webhooks(.*)",
   "/api/cron(.*)",
   // Background jobs, delivered by QStash; each request proves itself with a
@@ -59,9 +54,8 @@ const intlMiddleware = createIntlMiddleware(routing);
 
 /** Where Clerk's Frontend API is proxied (see the clerkMiddleware options below). */
 const CLERK_PROXY_PATH = "/__clerk";
-// A path check, not createRouteMatcher (deprecated in Clerk 7): no locale, never intl.
-const isClerkProxy = (req: NextRequest) =>
-  req.nextUrl.pathname === CLERK_PROXY_PATH || req.nextUrl.pathname.startsWith(`${CLERK_PROXY_PATH}/`);
+// No locale, never intl.
+const isClerkProxy = pathMatcher([CLERK_PROXY_PATH, `${CLERK_PROXY_PATH}/(.*)`]);
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost";
 
@@ -153,7 +147,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
   const response = NextResponse.next({ request: { headers: requestHeaders } });
 
   // Skip auth for public API routes (webhooks, cron)
-  if (isPublicApiRoute(req)) {
+  if (isPublicApiRoute(url.pathname)) {
     return response;
   }
 
@@ -167,7 +161,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
   };
 
   // Block main-domain-only routes on subdomains
-  if (subdomain && isMainDomainOnlyRoute(req)) {
+  if (subdomain && isMainDomainOnlyRoute(url.pathname)) {
     // Becoming a dealer — the pitch and onboarding — continues on the main
     // domain; anything else returns to this storefront's home.
     const path = pathnameWithoutLocale(url.pathname);
@@ -182,12 +176,12 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   // Redirect dealership-listing routes to home on subdomains
   // (on a subdomain, the user is already on a specific dealership)
-  if (subdomain && isSubdomainRedirectToHomeRoute(req)) {
+  if (subdomain && isSubdomainRedirectToHomeRoute(url.pathname)) {
     return NextResponse.redirect(new URL(localeHome, req.url));
   }
 
   // Admin routes (platform admin): require auth and ADMIN role (checked in layout)
-  if (isSuperAdminRoute(req)) {
+  if (isSuperAdminRoute(url.pathname)) {
     if (!userId) {
       return redirectToLocalizedSignIn();
     }
@@ -196,12 +190,12 @@ const clerk = clerkMiddleware(async (auth, req) => {
   }
 
   // Protected routes: require auth
-  if (!userId && isProtectedRoute(req)) {
+  if (!userId && isProtectedRoute(url.pathname)) {
     return redirectToLocalizedSignIn();
   }
 
   // For org admin routes on subdomains, ensure user has access (checked in layout)
-  if (subdomain && isProtectedRoute(req) && !userId) {
+  if (subdomain && isProtectedRoute(url.pathname) && !userId) {
     return redirectToLocalizedSignIn();
   }
 
@@ -218,7 +212,8 @@ export default async function middleware(
   req: NextRequest,
   event: NextFetchEvent
 ) {
-  if (isApiRoute(req) || isCrawlerFile(req) || isWellKnown(req) || isClerkProxy(req)) {
+  const { pathname } = req.nextUrl;
+  if (isApiRoute(pathname) || isCrawlerFile(pathname) || isWellKnown(pathname) || isClerkProxy(pathname)) {
     return clerk(req, event);
   }
 

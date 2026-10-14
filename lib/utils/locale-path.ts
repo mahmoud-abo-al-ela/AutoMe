@@ -12,18 +12,6 @@ import { routing } from "@/i18n/routing";
 const LOCALE_SEGMENT = `(${routing.locales.join("|")})`;
 const LEADING_LOCALE = new RegExp(`^/${LOCALE_SEGMENT}(?=/|$)`);
 
-/**
- * Expand route patterns to match both the prefixed and unprefixed forms.
- *
- * Once every page URL carries a locale, a matcher written as
- * `/super-admin(.*)` matches nothing on `/en/super-admin`. The unprefixed form
- * is still needed because matchers run on the request as it arrives, before the
- * intl redirect has had a chance to add the prefix.
- */
-export function localized(paths: string[]): string[] {
-  return paths.flatMap((p) => [p, `/${LOCALE_SEGMENT}${p}`]);
-}
-
 /** Strip a leading locale segment: "/en/cars" -> "/cars", "/en" -> "/". */
 export function pathnameWithoutLocale(pathname: string): string {
   const match = LEADING_LOCALE.exec(pathname);
