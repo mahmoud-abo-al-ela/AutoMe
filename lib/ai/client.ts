@@ -22,7 +22,7 @@ import { aiSpan } from "@/lib/ai/tracing";
 import { shouldTrace } from "@/lib/ai/trace";
 import { ServiceUnavailableError, AppError, logError } from "@/lib/utils/errors";
 import { toJsonSchema } from "@/lib/utils/json-schema";
-import { KeyCappedError, QueueTimeoutError, attemptModel, devLog, isUnreadableReply } from "@/lib/ai/attempt";
+import { KeyCappedError, QueueTimeoutError, attemptModel, devLog, followUpFits, isUnreadableReply } from "@/lib/ai/attempt";
 import { announce, type AiCallMeta } from "@/lib/ai/call-listeners";
 
 export { subscribeAiCalls, type AiCallMeta, type AiCallRecord } from "@/lib/ai/call-listeners";
@@ -414,7 +414,7 @@ async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ da
           deadKeys.get(entry.provider)!.add(keyIndex);
           continue;
         }
-        if (isRateLimitError(caught) && deadline - Date.now() > 0) continue;
+        if (isRateLimitError(caught) && followUpFits(deadline)) continue;
         break;
       }
     }
@@ -438,8 +438,9 @@ async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ da
     // vendor, and one slow model says nothing about the next (measured: GPT-5.6
     // Luna starts answering ~3 s sooner than Gemini 3.7 Flash).
     const next = anotherModelMightWork || isAbortError(error) ? nextUsable(index) : -1;
-    // Falling back is only worth it if there is time to hear the answer.
-    const timeLeft = deadline - Date.now() > 0;
+    // Falling back is only worth it if there is time to hear the answer —
+    // a useful margin, not a sliver (see MIN_FOLLOW_UP_MS).
+    const timeLeft = followUpFits(deadline);
 
     if (next < 0 || !timeLeft) throw toPublicError(error);
 

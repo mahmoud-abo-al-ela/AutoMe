@@ -152,6 +152,22 @@ export function isUnreadableReply(error: unknown): boolean {
   return error instanceof ValidationError && error.messageKey === "errors.ai.unreadable";
 }
 
+/**
+ * The least budget worth starting a follow-up request with — a retry, the
+ * next key, the next model. No model answers a structured request in less;
+ * starting one would spend a request (billed, metered, rate-limited) whose
+ * answer cannot arrive. Checking only for "any time left" let a follow-up
+ * start with a millisecond or two to spare, when our own budget timer fired
+ * a hair before the clock read the deadline. The first attempt of a call
+ * needs only some time left: the caller asked for that one.
+ */
+export const MIN_FOLLOW_UP_MS = 1_000;
+
+/** Whether a follow-up request is still worth starting before `deadline`. */
+export function followUpFits(deadline: number): boolean {
+  return deadline - Date.now() >= MIN_FOLLOW_UP_MS;
+}
+
 /** How long an attempt may take: its own ceiling, or whatever budget is left. */
 function remainingFor(input: { timeoutMs: number; deadline: number }): number {
   return Math.min(input.timeoutMs, input.deadline - Date.now());
@@ -180,7 +196,8 @@ export async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T
     const allowance = remainingFor(input);
     // Starting an attempt with no budget left would spend a request the caller
     // can never receive — the function is killed before the reply arrives.
-    if (allowance <= 0) throw budgetExhausted();
+    // A retry needs a useful margin, not just a sliver (MIN_FOLLOW_UP_MS).
+    if (allowance <= 0 || (attempt > 1 && !followUpFits(input.deadline))) throw budgetExhausted();
     // Before anything is sent, so a refused slot costs no request, no row.
     if (!(await reserveRequest(providerId, input.keyIndex, input.ctx?.priority))) throw new KeyCappedError();
 
