@@ -11,6 +11,7 @@ export const maxDuration = 60;
 import { checkUser } from "@/lib/checkUser";
 import { getOrganizationBySlug, getUserMembership } from "@/lib/getOrganization";
 import { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
+import { resolveActiveImpersonation } from "@/lib/services/impersonation/active";
 import BackToTop from "@/components/BackToTop";
 import { Suspense } from "react";
 import { RoadLoader } from "@/components/brand";
@@ -69,16 +70,19 @@ export default async function OrganizationLayout({
         notFound();
     }
 
-    // Check if user is impersonating
-    const impersonationSession = await getCurrentImpersonationSession();
-    const isImpersonating = !!impersonationSession;
+    // A support session counts only as the database verifies it, and only for
+    // the dealership it targets. The platform ADMIN role alone opens no
+    // dashboard: admins come in through a session (ImpersonateModal).
+    const impersonation = await resolveActiveImpersonation();
+    const isImpersonating = impersonation?.targetOrganizationId === organization.id;
+    // The banner's details (who, since when); only for a verified session.
+    const impersonationSession = isImpersonating ? await getCurrentImpersonationSession() : null;
 
     // Get user's membership in this organization
     const membership = await getUserMembership(user.id, organization.id);
-    const isAdmin = user.role === "ADMIN";
     const hasOrgAccess = !!membership;
 
-    if (!isAdmin && !isImpersonating && !hasOrgAccess) {
+    if (!isImpersonating && !hasOrgAccess) {
         notFound();
     }
 

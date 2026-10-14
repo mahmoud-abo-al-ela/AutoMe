@@ -10,12 +10,18 @@ const session = vi.hoisted(() => ({
   clerkId: null as string | null,
   clerkUser: null as unknown,
   headers: {} as Record<string, string>,
+  cookies: {} as Record<string, string>,
 }));
 vi.mock("@clerk/nextjs/server", () => ({
   auth: vi.fn(async () => ({ userId: session.clerkId })),
   currentUser: vi.fn(async () => session.clerkUser),
 }));
-vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers(session.headers)) }));
+vi.mock("next/headers", () => ({
+  headers: vi.fn(async () => new Headers(session.headers)),
+  cookies: vi.fn(async () => ({
+    get: (name: string) => (name in session.cookies ? { name, value: session.cookies[name] } : undefined),
+  })),
+}));
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
@@ -48,9 +54,17 @@ const CLERK = {
 const HEIR_EMAIL = "tenant-heir@test.local";
 const ids: Record<string, string> = {};
 
-function signIn(clerkId: string | null, headers: Record<string, string> = {}) {
+function signIn(clerkId: string | null, headers: Record<string, string> = {}, cookies: Record<string, string> = {}) {
   session.clerkId = clerkId;
   session.headers = headers;
+  session.cookies = cookies;
+}
+
+/** A support session row, as startImpersonation writes it. */
+async function supportSession(targetUserId: string, organizationId: string) {
+  return db.impersonationSession.create({
+    data: { superAdminId: ids.admin, targetUserId, targetOrganizationId: organizationId, reason: "tenant resolution test" },
+  });
 }
 
 describe.skipIf(!hasTestDb)("tenant resolution (real Postgres)", () => {
@@ -128,15 +142,40 @@ describe.skipIf(!hasTestDb)("tenant resolution (real Postgres)", () => {
       expect(user).toMatchObject({ email: null, memberships: [] });
     });
 
-    it("lets an admin view as another user, keeping who they really are", async () => {
-      signIn(CLERK.admin, { "x-impersonation-active": "true", "x-impersonated-user": ids.member });
+    it("lets an admin view as another user inside a verified session, keeping who they really are", async () => {
+      const row = await supportSession(ids.member, ORGS.a);
+      // The cookies name someone else; the session row decides who.
+      signIn(CLERK.admin, {}, { "x-impersonation-session": row.id, "x-impersonated-user": ids.owner });
       const user = await checkUser();
       expect(user).toMatchObject({ id: ids.member, isImpersonated: true, actualUser: { id: ids.admin, role: "ADMIN" } });
+      expect(user?.impersonation).toMatchObject({ sessionId: row.id, targetOrganizationId: ORGS.a });
       expect(await getActualUser()).toMatchObject({ id: ids.admin });
     });
 
-    it("ignores impersonation headers from anyone but an admin", async () => {
-      signIn(CLERK.member, { "x-impersonation-active": "true", "x-impersonated-user": ids.owner });
+    it("stops impersonating on the next request once the session is ended", async () => {
+      const row = await supportSession(ids.member, ORGS.a);
+      await db.impersonationSession.update({ where: { id: row.id }, data: { endedAt: new Date() } });
+      signIn(CLERK.admin, {}, { "x-impersonation-session": row.id });
+      const user = await checkUser();
+      expect(user?.id).toBe(ids.admin);
+      expect(user?.isImpersonated).toBeUndefined();
+    });
+
+    it("ignores impersonation headers and a made-up session cookie, from an admin or anyone else", async () => {
+      const forged = { "x-impersonation-active": "true", "x-impersonated-user": ids.owner };
+      signIn(CLERK.admin, forged, { "x-impersonation-session": "made-up", "x-impersonated-user": ids.owner });
+      expect((await checkUser())?.id).toBe(ids.admin);
+
+      signIn(CLERK.member, forged, { "x-impersonation-session": "made-up", "x-impersonated-user": ids.owner });
+      const user = await checkUser();
+      expect(user?.id).toBe(ids.member);
+      expect(user?.isImpersonated).toBeUndefined();
+    });
+
+    it("ignores another admin's real session id", async () => {
+      const row = await supportSession(ids.member, ORGS.a);
+      // The member somehow holds the admin's session id: it is not theirs.
+      signIn(CLERK.member, {}, { "x-impersonation-session": row.id });
       const user = await checkUser();
       expect(user?.id).toBe(ids.member);
       expect(user?.isImpersonated).toBeUndefined();

@@ -8,6 +8,7 @@ import {
   ValidationError,
   AuthorizationError,
 } from "@/lib/utils/errors";
+import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 
 /**
  * The dealer's moves: confirm or decline a request; mark a confirmed one done
@@ -39,13 +40,13 @@ export async function getTestDrives(
     // On a subdomain: scope to the organization
     queryFilters.organizationId = organizationId;
 
-    const isAdmin = user.role === "ADMIN";
     const hasOrgAccess = user.memberships?.some(
       (m) => m.organizationId === organizationId && m.role === "OWNER",
     );
 
-    // Non-admins without org access only see their own test drives
-    if (!isAdmin && !hasOrgAccess) {
+    // Without the dealership's access (its owner, or an admin in a verified
+    // support session for it) a caller sees only their own test drives.
+    if (!hasOrgAccess && !(await isImpersonatingOrganization(organizationId))) {
       queryFilters.userId = user.id;
     }
   } else {
@@ -70,15 +71,15 @@ export async function getTestDriveById(testDriveId: string, userId: string) {
     throw new NotFoundError("Test drive");
   }
 
-  // Only the customer who booked it, platform admins, or staff of the test
-  // drive's own dealership may view it — the record includes customer PII.
-  // Throw NotFound (not Forbidden) so ids can't be enumerated.
-  const isAdmin = user.role === "ADMIN";
+  // Only the customer who booked it, staff of the test drive's own dealership,
+  // or an admin in a verified support session for that dealership may view it
+  // — the record includes customer PII. Throw NotFound (not Forbidden) so ids
+  // can't be enumerated.
   const isOwnerOfRecord = testDrive.userId === user.id;
   const hasOrgAccess = user.memberships?.some(
     (m) => m.organizationId === testDrive.organizationId,
   );
-  if (!isOwnerOfRecord && !isAdmin && !hasOrgAccess) {
+  if (!isOwnerOfRecord && !hasOrgAccess && !(await isImpersonatingOrganization(testDrive.organizationId))) {
     throw new NotFoundError("Test drive");
   }
 
@@ -99,12 +100,11 @@ export async function updateTestDriveStatus(
     throw new AuthenticationError("User not found");
   }
 
-  const isAdmin = user.role === "ADMIN";
   const hasOrgAccess = user.memberships?.some(
     (m) => m.organizationId === organizationId && m.role === "OWNER",
   );
 
-  if (!isAdmin && !hasOrgAccess) {
+  if (!hasOrgAccess && !(organizationId && (await isImpersonatingOrganization(organizationId)))) {
     throw new AuthorizationError("Only admins can update test drive status");
   }
 
@@ -114,7 +114,7 @@ export async function updateTestDriveStatus(
   }
 
   // Verify test drive belongs to the organization
-  if (testDrive.organizationId !== organizationId && !isAdmin) {
+  if (testDrive.organizationId !== organizationId) {
     throw new AuthorizationError("You don't have access to this test drive");
   }
 

@@ -12,6 +12,7 @@ import {
 } from "@/lib/services/billing/manage";
 import { confirmDealershipPayment } from "@/lib/services/billing/confirm";
 import { withAuth, withErrorHandling } from "@/lib/middleware/with-auth";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { enforceRateLimit } from "@/lib/middleware/with-rate-limit";
 import { validateAction } from "@/lib/middleware/with-validation";
 import { createSuccessResponse } from "@/lib/utils/response";
@@ -37,20 +38,6 @@ export const getPlanById = withErrorHandling(async (planId: string) => {
   return createSuccessResponse(plan);
 });
 
-
-/**
- * Get billing data for an organization
- */
-export const getBillingData = withAuth(async (ctx, organizationId: string) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  const data = await billingService.getBillingData(organization.id);
-  return createSuccessResponse(data);
-});
-
 /**
  * Get billing history for an organization
  */
@@ -64,32 +51,6 @@ export const getBillingHistory = withAuth(async (ctx, organizationId: string) =>
 
   const history = await billingService.getBillingHistory(organization.id);
   return createSuccessResponse({ history });
-});
-
-/**
- * Get current subscription for an organization
- */
-export const getCurrentSubscription = withAuth(async (ctx, organizationId: string) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  const subscription = await billingService.getActiveSubscription(organization.id);
-  return createSuccessResponse(subscription);
-});
-
-/**
- * Get usage stats for an organization
- */
-export const getUsageStats = withAuth(async (ctx, organizationId: string) => {
-  const organization = await getOrganizationById(organizationId);
-  if (!organization) {
-    throw new NotFoundError("Organization");
-  }
-
-  const stats = await billingService.getUsageStats(organization.id);
-  return createSuccessResponse(stats);
 });
 
 // ---------------------------------------------------------------- managing the plan
@@ -119,6 +80,7 @@ const planChangeSchema = z.object({
  */
 export const changePlan = withAuth(
   async (ctx, organizationId: string, planId: string, billingPeriod: string, locale: string) => {
+    refuseDuringSupportSession(ctx);
     await enforceRateLimit();
     const input = validateAction(planChangeSchema, { organizationId, planId, billingPeriod });
     const organization = await ownedOrganization(ctx.user.id, input.organizationId);
@@ -138,6 +100,7 @@ const uuidSchema = z.string().uuid();
 
 /** Pay for the next period now (a trial's first payment, or a renewal that is due). */
 export const payRenewal = withAuth(async (ctx, organizationId: string, locale: string) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   const { url } = await payRenewalService({
@@ -150,6 +113,7 @@ export const payRenewal = withAuth(async (ctx, organizationId: string, locale: s
 
 /** Stop renewing: the plan runs to the end of what is paid, then the free plan. */
 export const cancelPlan = withAuth(async (ctx, organizationId: string) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   const result = await cancelPlanService({ organization, actor: actorOf(ctx.user) });
@@ -158,6 +122,7 @@ export const cancelPlan = withAuth(async (ctx, organizationId: string) => {
 
 /** Undo a scheduled cancellation or plan change. */
 export const keepCurrentPlan = withAuth(async (ctx, organizationId: string) => {
+  refuseDuringSupportSession(ctx);
   await enforceRateLimit();
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   await keepCurrentPlanService({ organization });

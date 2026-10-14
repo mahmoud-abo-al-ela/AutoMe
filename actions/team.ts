@@ -12,9 +12,11 @@ import {
   memberIdSchema,
 } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 
 export const inviteTeamMember = withOrgAuth(
   withUsageLimit("members", async (ctx, input) => {
+    refuseDuringSupportSession(ctx);
     await enforceRateLimit();
     // organizationId in the payload is ignored for security; we always use
     // ctx.organization.id.
@@ -28,6 +30,7 @@ export const inviteTeamMember = withOrgAuth(
 );
 
 export const updateMemberRole = withOrgAuth(async (ctx, input) => {
+  refuseDuringSupportSession(ctx);
   const { memberId, newRole } = validateAction(updateMemberRoleSchema, input);
 
   await teamService.changeMemberRole(ctx.user, ctx.organization.id, { memberId, newRole });
@@ -37,6 +40,7 @@ export const updateMemberRole = withOrgAuth(async (ctx, input) => {
 });
 
 export const removeMember = withOrgAuth(async (ctx, input) => {
+  refuseDuringSupportSession(ctx);
   const { memberId } = validateAction(memberIdSchema, input);
 
   await teamService.removeTeamMember(ctx.user, ctx.organization.id, memberId);

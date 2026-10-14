@@ -3,6 +3,7 @@ import * as workingHoursRepository from "@/lib/repositories/dealership/working-h
 import * as dealershipRepository from "@/lib/repositories/dealership";
 import * as userRepository from "@/lib/repositories/user";
 import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
+import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 import type {
   DealershipTermsInput,
   EmailPreferencesInput,
@@ -40,7 +41,7 @@ async function getAuthorizedUser(
     return ownerOnly ? membership.role === "OWNER" : true;
   });
 
-  if (!hasAccess && user.role !== "ADMIN") {
+  if (!hasAccess && !(await isImpersonatingOrganization(organizationId))) {
     throw new AuthorizationError(
       ownerOnly
         ? "Only organization owners can update organization profile"
@@ -143,7 +144,7 @@ export async function getWorkingHours(userId: string, organizationId: string) {
 
   // Verify user has access to this organization
   const hasAccess = user.memberships?.some(m => m.organizationId === organizationId);
-  if (!hasAccess && user.role !== "ADMIN") {
+  if (!hasAccess && !(await isImpersonatingOrganization(organizationId))) {
     throw new AuthorizationError("You don't have access to this organization");
   }
 
@@ -169,7 +170,7 @@ export async function updateWorkingHours(
   const hasOwnerAccess = user.memberships?.some(
     m => m.organizationId === organizationId && m.role === "OWNER"
   );
-  if (!hasOwnerAccess && user.role !== "ADMIN") {
+  if (!hasOwnerAccess && !(await isImpersonatingOrganization(organizationId))) {
     throw new AuthorizationError("Only organization owners can update working hours");
   }
 

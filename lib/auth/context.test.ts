@@ -1,18 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthorizationError } from "@/lib/utils/errors";
 
-// context.js reads all of its inputs through these four modules. Mocking them
-// lets us drive resolveTenantContext without a database or a live Clerk session
-// — the whole tenant-selection bug class lives in what they return.
+// context.ts reads all of its inputs through these modules. Mocking them lets
+// us drive resolveTenantContext without a database or a live Clerk session —
+// the whole tenant-selection bug class lives in what they return. next/headers
+// is mocked too: context.ts must not read impersonation from request headers,
+// and the forged-header tests below prove that it doesn't.
 vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("@/lib/checkUser", () => ({ checkUser: vi.fn() }));
-vi.mock("@/lib/getOrganization", () => ({ getCurrentOrganization: vi.fn() }));
+vi.mock("@/lib/getOrganization", () => ({ getCurrentOrganization: vi.fn(), getOrganizationById: vi.fn() }));
 
 import { auth } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { checkUser } from "@/lib/checkUser";
-import { getCurrentOrganization } from "@/lib/getOrganization";
+import { getCurrentOrganization, getOrganizationById } from "@/lib/getOrganization";
 import { resolveTenantContext } from "@/lib/auth/context";
 
 // vi.mock replaces these with mocks; re-view them as such to configure per test.
@@ -20,29 +22,43 @@ import { resolveTenantContext } from "@/lib/auth/context";
 // resolution reads — so each is asserted through unknown.
 const mockAuth = vi.mocked(auth as unknown as () => Promise<unknown>);
 const mockHeaders = vi.mocked(headers as unknown as () => Promise<Headers>);
-const mockCheckUser = vi.mocked(
-  checkUser as unknown as () => Promise<unknown>
-);
-const mockGetCurrentOrganization = vi.mocked(
-  getCurrentOrganization as unknown as () => Promise<unknown>
-);
+const mockCheckUser = vi.mocked(checkUser as unknown as () => Promise<unknown>);
+const mockGetCurrentOrganization = vi.mocked(getCurrentOrganization as unknown as () => Promise<unknown>);
+const mockGetOrganizationById = vi.mocked(getOrganizationById as unknown as (id: string) => Promise<unknown>);
 
 const orgA = { id: "org-aaa", slug: "dealer-a" };
 const orgB = { id: "org-bbb", slug: "dealer-b" };
 const orgC = { id: "org-ccc", slug: "dealer-c" };
+const orgsById: Record<string, unknown> = { [orgA.id]: orgA, [orgB.id]: orgB, [orgC.id]: orgC };
 
 function membership(org: { id: string; slug: string }, role = "OWNER") {
   return { id: `mem-${org.id}`, organizationId: org.id, role, organization: org };
 }
 
-function setHeaders(map: Record<string, string> = {}) {
-  mockHeaders.mockResolvedValue(new Headers(map));
+/** The verified support session checkUser attaches during impersonation. */
+function session(targetOrganizationId: string) {
+  return {
+    sessionId: "session-1",
+    superAdmin: { id: "admin-user", email: "a@x.eg", name: "Admin" },
+    targetUserId: "target-user",
+    targetOrganizationId,
+  };
 }
+
+/** What a forger sends: every impersonation header middleware used to set, naming org C. */
+const FORGED = {
+  "x-impersonation-active": "true",
+  "x-impersonated-org": orgC.slug,
+  "x-impersonated-user": "victim-user",
+  "x-impersonation-session": "made-up",
+  "x-organization-slug": orgC.slug,
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockAuth.mockResolvedValue({ userId: "clerk_user_1" });
-  setHeaders();
+  mockHeaders.mockResolvedValue(new Headers());
+  mockGetOrganizationById.mockImplementation(async (id) => orgsById[id] ?? null);
 });
 
 describe("resolveTenantContext", () => {
@@ -52,39 +68,60 @@ describe("resolveTenantContext", () => {
       role: "USER",
       memberships: [membership(orgA), membership(orgB)],
     });
-    // Middleware resolved the subdomain/header to dealer-b.
+    // Middleware resolved the subdomain to dealer-b.
     mockGetCurrentOrganization.mockResolvedValue(orgB);
 
     const ctx = await resolveTenantContext();
 
     expect(ctx.organization.id).toBe(orgB.id);
     expect(ctx.membership?.organizationId).toBe(orgB.id);
+    expect(ctx.isImpersonating).toBe(false);
   });
 
-  it("rejects a forged x-organization-slug for a non-member org", async () => {
-    // User belongs to org A only...
-    mockCheckUser.mockResolvedValue({
-      id: "user-1",
-      role: "USER",
-      memberships: [membership(orgA)],
-    });
-    // ...but a forged header resolved org C, which they have no membership in.
+  it("rejects an organization the user has no membership in", async () => {
+    mockCheckUser.mockResolvedValue({ id: "user-1", role: "USER", memberships: [membership(orgA)] });
     mockGetCurrentOrganization.mockResolvedValue(orgC);
 
     await expect(resolveTenantContext()).rejects.toBeInstanceOf(AuthorizationError);
   });
 
-  it("resolves to the target user during impersonation, keeping the admin as actualUser", async () => {
-    // checkUser returns the impersonated target (verified against ADMIN there).
+  it("rejects a non-member who forges every impersonation header and cookie value", async () => {
+    // The forger is a member of A only. Before the fix, middleware turned the
+    // forged cookies into x-impersonation-active + x-organization-slug: dealer-c,
+    // and this resolved org C with no membership.
+    mockCheckUser.mockResolvedValue({ id: "user-1", role: "USER", memberships: [membership(orgA)] });
+    mockHeaders.mockResolvedValue(new Headers(FORGED));
+    mockGetCurrentOrganization.mockResolvedValue(orgC);
+
+    await expect(resolveTenantContext()).rejects.toBeInstanceOf(AuthorizationError);
+  });
+
+  it("refuses a platform ADMIN with no verified session in an org they are not a member of", async () => {
+    mockCheckUser.mockResolvedValue({ id: "admin-user", role: "ADMIN", memberships: [] });
+    mockGetCurrentOrganization.mockResolvedValue(orgC);
+
+    await expect(resolveTenantContext()).rejects.toBeInstanceOf(AuthorizationError);
+  });
+
+  it("refuses a platform ADMIN with no session even when they forge the impersonation headers", async () => {
+    mockCheckUser.mockResolvedValue({ id: "admin-user", role: "ADMIN", memberships: [] });
+    mockHeaders.mockResolvedValue(new Headers(FORGED));
+    mockGetCurrentOrganization.mockResolvedValue(orgC);
+
+    await expect(resolveTenantContext()).rejects.toBeInstanceOf(AuthorizationError);
+  });
+
+  it("acts on the session's dealership during a verified support session, whatever the subdomain says", async () => {
+    // checkUser returns the impersonated target, with the session it verified.
     mockCheckUser.mockResolvedValue({
       id: "target-user",
       role: "USER",
       memberships: [membership(orgB)],
       isImpersonated: true,
+      impersonation: session(orgB.id),
       actualUser: { id: "admin-user", role: "ADMIN" },
     });
-    mockGetCurrentOrganization.mockResolvedValue(orgB);
-    setHeaders({ "x-impersonation-active": "true" });
+    mockGetCurrentOrganization.mockResolvedValue(orgC);
 
     const ctx = await resolveTenantContext();
 
@@ -92,5 +129,22 @@ describe("resolveTenantContext", () => {
     expect(ctx.organization.id).toBe(orgB.id);
     expect(ctx.actualUser?.id).toBe("admin-user");
     expect(ctx.isImpersonating).toBe(true);
+    expect(mockGetCurrentOrganization).not.toHaveBeenCalled();
+  });
+
+  it("keeps a session for one dealership out of another", async () => {
+    // The session targets B; B is gone (suspended), so nothing may fall back
+    // to the target user's other memberships.
+    mockCheckUser.mockResolvedValue({
+      id: "target-user",
+      role: "USER",
+      memberships: [membership(orgA)],
+      isImpersonated: true,
+      impersonation: session(orgB.id),
+      actualUser: { id: "admin-user", role: "ADMIN" },
+    });
+    mockGetOrganizationById.mockResolvedValue(null);
+
+    await expect(resolveTenantContext()).rejects.toThrow();
   });
 });

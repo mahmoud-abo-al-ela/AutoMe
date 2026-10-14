@@ -4,6 +4,7 @@ import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import * as storageService from "@/lib/services/storage";
 import { AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/utils/errors";
+import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { getOrganizationById } from "@/lib/getOrganization";
 import { auditHelpers } from "@/lib/services/audit/audit";
@@ -11,6 +12,22 @@ import { searchTermsChanged } from "@/lib/jobs/search-terms";
 import type { CarStatus } from "@/lib/generated/prisma";
 import { licenseMonthToDate } from "@/lib/utils/car-disclosures";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
+
+/**
+ * The caller may act in this dealership: a member of it, or a platform admin
+ * in a verified support session for exactly this dealership. The ADMIN role
+ * alone is not enough — sessions are how admins act, time-boxed and audited.
+ */
+async function assertCanActIn(
+  user: { memberships?: { organizationId: string }[] | null },
+  organizationId: string,
+  message: string
+) {
+  const isMember = user.memberships?.some((m) => m.organizationId === organizationId);
+  if (!isMember && !(await isImpersonatingOrganization(organizationId))) {
+    throw new AuthorizationError(message);
+  }
+}
 
 /** Who the Activity page credits with a change: the database user. */
 const actorOf = (user: { id?: string | null; email?: string | null }) => ({ id: user.id, email: user.email });
@@ -63,11 +80,7 @@ export async function createCar(
     throw new AuthenticationError("User not found");
   }
 
-  // Verify user has access to this organization
-  const hasAccess = user.memberships?.some(m => m.organizationId === organizationId);
-  if (!hasAccess && user.role !== "ADMIN") {
-    throw new AuthorizationError("You don't have access to this organization");
-  }
+  await assertCanActIn(user, organizationId, "You don't have access to this organization");
 
   // Get plan-based max images limit
   const organization = await getOrganizationById(organizationId);
@@ -129,8 +142,9 @@ export async function updateCar(
     throw new NotFoundError("Car");
   }
 
-  // Verify car belongs to user's organization
-  if (existingCar.organizationId !== organizationId && user.role !== "ADMIN") {
+  // The car must be this dealership's — whoever asks, admins included.
+  await assertCanActIn(user, organizationId, "You don't have access to this car");
+  if (existingCar.organizationId !== organizationId) {
     throw new AuthorizationError("You don't have access to this car");
   }
 
@@ -161,10 +175,7 @@ export async function updateCars(
   if (!user) {
     throw new AuthenticationError("User not found");
   }
-  const isMember = user.memberships?.some((m) => m.organizationId === organizationId);
-  if (!isMember && user.role !== "ADMIN") {
-    throw new AuthorizationError("You don't have access to these cars");
-  }
+  await assertCanActIn(user, organizationId, "You don't have access to these cars");
 
   const before = await carRepository.findCarsByIds(carIds, organizationId);
   const changed = await carRepository.updateManyCars(carIds, organizationId, { ...updateData });
@@ -194,8 +205,9 @@ export async function deleteCar(
     throw new NotFoundError("Car");
   }
 
-  // Verify car belongs to user's organization
-  if (car.organizationId !== organizationId && user.role !== "ADMIN") {
+  // The car must be this dealership's — whoever asks, admins included.
+  await assertCanActIn(user, organizationId, "You don't have access to this car");
+  if (car.organizationId !== organizationId) {
     throw new AuthorizationError("You don't have access to this car");
   }
 
@@ -228,8 +240,9 @@ export async function toggleFeatured(
     throw new NotFoundError("Car");
   }
 
-  // Verify car belongs to user's organization
-  if (car.organizationId !== organizationId && user.role !== "ADMIN") {
+  // The car must be this dealership's — whoever asks, admins included.
+  await assertCanActIn(user, organizationId, "You don't have access to this car");
+  if (car.organizationId !== organizationId) {
     throw new AuthorizationError("You don't have access to this car");
   }
 
@@ -257,8 +270,9 @@ export async function updateCarFull(
     throw new NotFoundError("Car");
   }
 
-  // Verify car belongs to user's organization
-  if (existingCar.organizationId !== organizationId && user.role !== "ADMIN") {
+  // The car must be this dealership's — whoever asks, admins included.
+  await assertCanActIn(user, organizationId, "You don't have access to this car");
+  if (existingCar.organizationId !== organizationId) {
     throw new AuthorizationError("You don't have access to this car");
   }
 

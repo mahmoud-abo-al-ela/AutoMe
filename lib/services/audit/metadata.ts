@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { findAuditRetentionDays } from "@/lib/repositories/audit";
-import { findSessionSuperAdminId } from "@/lib/repositories/impersonation";
+import { resolveActiveImpersonation } from "@/lib/services/impersonation/active";
 
 /**
  * Get request metadata (IP, user agent, impersonation info)
@@ -13,28 +13,16 @@ export async function getRequestMetadata() {
                     "unknown";
   const userAgent = headersList.get("user-agent") || "unknown";
   
-  // Check for impersonation
-  const impersonatedBy = headersList.get("x-impersonation-active") === "true"
-    ? headersList.get("x-impersonated-user")
-    : null;
-
-  // Get actual super admin ID if impersonating
-  let actualSuperAdminId: string | null | undefined = null;
-  if (impersonatedBy) {
-    const sessionId = headersList.get("x-impersonation-session");
-    if (sessionId) {
-      actualSuperAdminId = await findSessionSuperAdminId(sessionId);
-    }
-  }
+  // Impersonation only as the database verifies it — the request's own
+  // cookies and headers say nothing about who is really acting.
+  const impersonation = await resolveActiveImpersonation();
 
   return {
     ipAddress,
     userAgent,
-    impersonatedBy,
-    actualSuperAdminId,
-    impersonationSessionId: impersonatedBy 
-      ? headersList.get("x-impersonation-session") 
-      : null,
+    impersonatedBy: impersonation?.targetUserId ?? null,
+    actualSuperAdminId: impersonation?.superAdmin.id ?? null,
+    impersonationSessionId: impersonation?.sessionId ?? null,
   };
 }
 

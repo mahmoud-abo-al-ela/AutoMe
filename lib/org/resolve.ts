@@ -48,19 +48,6 @@ export async function getCurrentOrganization() {
   return getOrganizationBySlug(slug);
 }
 
-export async function getImpersonationContext() {
-  const headersList = await headers();
-
-  const isActive = headersList.get("x-impersonation-active") === "true";
-  if (!isActive) return null;
-
-  return {
-    organizationSlug: headersList.get("x-impersonated-org"),
-    userId: headersList.get("x-impersonated-user"),
-    sessionId: headersList.get("x-impersonation-session"),
-  };
-}
-
 export async function getUserOrganizations(userId: string) {
   const memberships = await tenantRepository.findMembershipsWithOrganizations(userId);
 

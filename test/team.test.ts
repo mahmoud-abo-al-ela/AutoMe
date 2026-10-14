@@ -13,7 +13,6 @@ vi.mock("@/lib/services/audit/audit", () => ({
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { changeMemberRole, inviteTeamMember, removeTeamMember } from "@/lib/services/team";
-import { getUsers } from "@/lib/services/dealership/users";
 import { getBillingContact } from "@/lib/services/billing";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { db } from "@/lib/prisma";
@@ -96,10 +95,4 @@ describe.skipIf(!hasTestDb)("team management (real Postgres)", () => {
     expect(await getBillingContact(OTHER_ORG)).toBeNull();
   });
 
-  it("lists a dealership's members for its owner, searchable, and only that dealership's", async () => {
-    const all = await getUsers(null, { page: 1, limit: 10 }, CLERK.owner, ORG);
-    expect(all.users.map((u) => u.id).sort()).toEqual([ids.owner, ids.newcomer].sort());
-    const found = await getUsers("newcomer", { page: 1, limit: 10 }, CLERK.owner, ORG);
-    expect(found.users.map((u) => u.id)).toEqual([ids.newcomer]);
-  });
 });

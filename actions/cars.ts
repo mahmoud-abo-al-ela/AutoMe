@@ -1,5 +1,6 @@
 "use server";
 import { withOrgAuth } from "@/lib/middleware/with-auth";
+import { refuseDuringSupportSession } from "@/lib/auth/support-session";
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import * as carService from "@/lib/services/car";
 import { coachListing, translateListing, type ListingText, type ListingToCoach } from "@/lib/services/ai";
@@ -159,6 +160,7 @@ export const addCar = withOrgAuth(
 );
 
 export const deleteCar = withOrgAuth(async (ctx, carId: string) => {
+  refuseDuringSupportSession(ctx);
   await carService.deleteCar(carId, ctx.userId, ctx.organization.id);
 
   revalidateLocalized(`/org/${ctx.organization.slug}/cars`);
@@ -188,11 +190,10 @@ export const getCarForEdit = withOrgAuth(async (ctx, carId: string) => {
   if (!car) {
     throw new NotFoundError("Car");
   }
-  // Verify car belongs to user's organization
-  // Platform admins (UserRole.ADMIN) may reach across orgs for support; regular
-  // members may not. `ctx.role` never existed, and MemberRole has no ADMIN value,
-  // so the escape hatch has to read the platform role off ctx.user.
-  if (car.organizationId !== ctx.organization.id && ctx.user?.role !== "ADMIN") {
+  // The car must belong to the dealership this request acts for. ctx already
+  // proves the caller may act there (a membership, or a verified support
+  // session for it); no platform role reaches past it into another dealership.
+  if (car.organizationId !== ctx.organization.id) {
     throw new AuthorizationError("You don't have access to this car");
   }
   return createSuccessResponse(car);
