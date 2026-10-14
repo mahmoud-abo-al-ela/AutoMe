@@ -207,8 +207,11 @@ export function SessionsList({ data, currentAdminId }: { data: SessionsPage; cur
               ))}
             </ul>
 
+            {/* The table from lg, where its box is 944px at the narrowest; a 1000px
+                minimum scrolled the last columns — the row's own button among them —
+                out of view there. Longer cells wrap instead. */}
             <div className="relative hidden overflow-x-auto lg:block">
-              <table className="w-full min-w-[1000px] border-collapse text-caption">
+              <table className="w-full min-w-[900px] border-collapse text-caption">
                 <thead>
                   <tr className="whitespace-nowrap border-b border-border bg-muted/60 text-muted-foreground">
                     <th scope="col" className={th}>{t("columns.started")}</th>
