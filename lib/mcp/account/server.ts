@@ -31,7 +31,7 @@ function register<Input extends z.ZodRawShape, Output extends z.ZodRawShape>(
     { title: tool.title, description: tool.description, inputSchema: tool.inputSchema, outputSchema: tool.outputSchema, annotations },
     // The SDK validates the input against inputSchema first; the callback type
     // cannot be inferred through this generic helper, hence the cast.
-    ((input: z.objectOutputType<Input, z.ZodTypeAny>) => runTool(tool, input, caller)) as never
+    ((input: z.output<z.ZodObject<Input>>) => runTool(tool, input, caller)) as never
   );
 }
 

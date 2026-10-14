@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { toJsonSchema } from "@/lib/utils/json-schema";
 import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 import type { JsonSchemaObject, WebMcpAnnotations, WebMcpToolDescriptor } from "./types";
 
@@ -42,8 +42,7 @@ export type WebMcpErrorCode = "invalid_input" | "not_found" | "failed";
 const failure = (error: WebMcpErrorCode, extra: Record<string, unknown> = {}) => JSON.stringify({ error, ...extra });
 
 export function inputSchemaOf(input: z.ZodTypeAny): JsonSchemaObject {
-  const { $schema: _ignored, ...schema } = zodToJsonSchema(input, { $refStrategy: "none" }) as Record<string, unknown>;
-  return schema as JsonSchemaObject;
+  return toJsonSchema(input) as JsonSchemaObject;
 }
 
 /** Arguments as Chrome passes them: an object, or (deprecated from 155) a JSON string. */

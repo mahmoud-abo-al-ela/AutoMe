@@ -19,6 +19,7 @@ export const organizationSchema = z.object({
   logo: z.string().optional().nullable(),
   planId: z.string().min(1, "Plan ID is required"),
   workingHours: z.record(
+    z.string(),
     z.object({
       open: z.string(),
       close: z.string(),

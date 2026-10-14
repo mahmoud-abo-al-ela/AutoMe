@@ -17,7 +17,7 @@ export function validateAction<S extends z.ZodTypeAny>(
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       const path = firstError.path.join(".");
       // The schema messages are English and name fields by their code
       // path, so the reader gets a translated generic and the specific

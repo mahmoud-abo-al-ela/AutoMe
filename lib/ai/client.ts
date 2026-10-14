@@ -1,5 +1,4 @@
 import type { ZodType } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import type { AiPart } from "@/lib/ai/provider/types";
 import {
   errorCodeOf,
@@ -22,6 +21,7 @@ import * as cache from "@/lib/ai/cache";
 import { aiSpan } from "@/lib/ai/tracing";
 import { shouldTrace } from "@/lib/ai/trace";
 import { ServiceUnavailableError, AppError, logError } from "@/lib/utils/errors";
+import { toJsonSchema } from "@/lib/utils/json-schema";
 import { KeyCappedError, QueueTimeoutError, attemptModel, devLog, isUnreadableReply } from "@/lib/ai/attempt";
 import { announce, type AiCallMeta } from "@/lib/ai/call-listeners";
 
@@ -182,14 +182,7 @@ function jsonSchemaFor(schema: ZodType<unknown>): unknown {
   const cached = schemaCache.get(schema as object);
   if (cached) return cached;
 
-  // `$refStrategy: "none"` inlines definitions. Gemini accepts `$ref`/`$defs`
-  // only in a limited form, and an inlined schema sidesteps the question.
-  const json = zodToJsonSchema(schema, { $refStrategy: "none" }) as Record<
-    string,
-    unknown
-  >;
-  // `$schema` is not in the subset the API documents; it is rejected, not ignored.
-  delete json.$schema;
+  const json = toJsonSchema(schema);
 
   schemaCache.set(schema as object, json);
   return json;

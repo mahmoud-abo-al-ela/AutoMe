@@ -63,7 +63,7 @@ export const createCarFormSchema = (
 ) => {
     // An empty number input reaches the schema as NaN (valueAsNumber) or "";
     // either is the same mistake as an out-of-range value, and says so.
-    const numberField = (message: string) => z.number({ invalid_type_error: message, required_error: message });
+    const numberField = (message: string) => z.number({ error: message });
     // Years read as years: "1900", never "1,900".
     const yearMessage = t("yearInvalid", {
         min: n(VALIDATION_RULES.CAR.YEAR_MIN, { useGrouping: false }),

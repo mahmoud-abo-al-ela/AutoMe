@@ -29,7 +29,7 @@ const outputSchema = {
   limits: z.object({ maxResultsPerPage: z.number(), maxPage: z.number(), maxResults: z.number() }),
 };
 
-type Options = z.objectOutputType<typeof outputSchema, z.ZodTypeAny>;
+type Options = z.output<z.ZodObject<typeof outputSchema>>;
 
 function specsOf(kind: SpecKind, locale: "en" | "ar") {
   return SPECS.filter((spec) => spec.kind === kind).map((spec) => ({ value: spec.value, label: locale === "ar" ? spec.ar : spec.en }));
