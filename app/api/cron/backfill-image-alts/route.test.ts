@@ -8,7 +8,7 @@ const { findCarsMissingImageAlts, countCarsMissingImageAlts, refreshImageAlts } 
 vi.mock("@/lib/repositories/car", () => ({ findCarsMissingImageAlts, countCarsMissingImageAlts }));
 vi.mock("@/lib/services/car/image-alts", () => ({ refreshImageAlts }));
 
-import { POST } from "@/app/api/cron/backfill-image-alts/route";
+import { GET, POST } from "@/app/api/cron/backfill-image-alts/route";
 
 const AFTER = "0b7c9f0e-1a2b-4c3d-8e9f-a0b1c2d3e4f5";
 const call = (query = "", auth: string | null = "Bearer s3cret") =>
@@ -60,5 +60,32 @@ describe("POST /api/cron/backfill-image-alts", () => {
   it("reports nothing left when the walk is done", async () => {
     findCarsMissingImageAlts.mockResolvedValue([]);
     expect(await (await call()).json()).toEqual({ processed: 0, next: null, remaining: 0 });
+  });
+});
+
+describe("GET /api/cron/backfill-image-alts — the daily run", () => {
+  const run = (auth = "Bearer s3cret") =>
+    GET(new Request("http://localhost/api/cron/backfill-image-alts", { headers: { authorization: auth } }));
+
+  it("refuses without the cron secret", async () => {
+    expect((await run("Bearer nope")).status).toBe(401);
+    expect(refreshImageAlts).not.toHaveBeenCalled();
+  });
+
+  it("walks past cars it can't describe to the end, rather than stalling on them", async () => {
+    // Page 1: two cars (one may fail inside refreshImageAlts — it never throws);
+    // page 2, after the last of them: nothing left.
+    findCarsMissingImageAlts
+      .mockResolvedValueOnce([{ id: "car-a", organizationId: "org-1" }, { id: "car-b", organizationId: "org-2" }])
+      .mockResolvedValueOnce([]);
+
+    const response = await run();
+
+    expect(findCarsMissingImageAlts.mock.calls).toEqual([
+      [{ take: 10, afterId: undefined }],
+      [{ take: 10, afterId: "car-b" }],
+    ]);
+    expect(refreshImageAlts).toHaveBeenCalledTimes(2);
+    expect(await response.json()).toEqual({ processed: 2, pages: 2, finished: true });
   });
 });

@@ -2,13 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const verify = vi.hoisted(() => vi.fn());
 const runJob = vi.hoisted(() => vi.fn());
+const isValidJobPayload = vi.hoisted(() => vi.fn());
 
 vi.mock("@upstash/qstash", () => ({
   Receiver: class {
     verify = verify;
   },
 }));
-vi.mock("@/lib/jobs/registry", () => ({ isJobName: (name: string) => name === "image-alts", runJob }));
+vi.mock("@/lib/jobs/registry", () => ({ isJobName: (name: string) => name === "image-alts", isValidJobPayload, runJob }));
+vi.mock("@/lib/utils/errors", async (orig) => ({ ...(await orig<object>()), logError: vi.fn() }));
 
 import { POST } from "./route";
 
@@ -25,7 +27,14 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_APP_URL = "https://autome.example";
   verify.mockResolvedValue(true);
   runJob.mockResolvedValue(undefined);
+  isValidJobPayload.mockReturnValue(true);
 });
+
+/** QStash's signal to stop retrying: 489 with Upstash-NonRetryable-Error. */
+const expectNotRetried = (response: Response) => {
+  expect(response.status).toBe(489);
+  expect(response.headers.get("Upstash-NonRetryable-Error")).toBe("true");
+};
 
 describe("POST /api/jobs/[name]", () => {
   it("refuses everything when the signing keys are missing — fail closed", async () => {
@@ -59,7 +68,29 @@ describe("POST /api/jobs/[name]", () => {
     expect((await call()).status).toBe(500);
   });
 
-  it("answers 404 for a job that does not exist", async () => {
-    expect((await call("drop-tables")).status).toBe(404);
+  it("tells the queue not to retry a job that does not exist", async () => {
+    expectNotRetried(await call("drop-tables"));
+    expect(runJob).not.toHaveBeenCalled();
+  });
+
+  it("tells the queue not to retry a payload the job's schema refuses — it would fail every time", async () => {
+    isValidJobPayload.mockReturnValue(false);
+    expectNotRetried(await call());
+    expect(runJob).not.toHaveBeenCalled();
+  });
+
+  it("tells the queue not to retry a body that is not JSON", async () => {
+    const response = await POST(
+      new Request("https://deploy.vercel.app/api/jobs/image-alts", { method: "POST", body: "{not json", headers: { "upstash-signature": "sig" } }),
+      { params: Promise.resolve({ name: "image-alts" }) }
+    );
+    expectNotRetried(response);
+  });
+
+  it("still answers 500 (retried) when a valid job fails — an AI busy is worth another try", async () => {
+    runJob.mockRejectedValue(new Error("AI busy"));
+    const response = await call();
+    expect(response.status).toBe(500);
+    expect(response.headers.get("Upstash-NonRetryable-Error")).toBeNull();
   });
 });

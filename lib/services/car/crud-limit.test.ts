@@ -51,7 +51,7 @@ describe("createCar at the plan's car limit", () => {
     createCarWithinLimit.mockResolvedValue(null);
 
     await expect(createCar(input, "clerk_m", ORG)).rejects.toBeInstanceOf(PlanLimitError);
-    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/x/1.jpg"]);
+    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/x/1.jpg"], expect.any(String));
     expect(logCarCreated).not.toHaveBeenCalled();
   });
 

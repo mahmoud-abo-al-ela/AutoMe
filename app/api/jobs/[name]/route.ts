@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
-import { isJobName, runJob } from "@/lib/jobs/registry";
+import { isJobName, isValidJobPayload, runJob } from "@/lib/jobs/registry";
 import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
 
@@ -14,8 +14,17 @@ import { logError } from "@/lib/utils/errors";
  *
  * Status codes drive the queue: 2xx is done; anything else is retried with
  * backoff. So a failed run answers 500 — that is how an "AI busy" becomes a
- * retry — and a request the queue did not sign answers 401.
+ * retry — and a request the queue did not sign answers 401. A signed job that
+ * can never succeed — an unknown name, an unreadable body, a payload its
+ * schema refuses — answers 489 with Upstash-NonRetryable-Error, QStash's
+ * signal to stop retrying and move it to the dead-letter queue, where it can
+ * be inspected rather than delivered three more times.
  */
+
+/** QStash's "do not retry this one" answer. */
+function nonRetryable(error: string) {
+  return NextResponse.json({ error }, { status: 489, headers: { "Upstash-NonRetryable-Error": "true" } });
+}
 
 export const runtime = "nodejs";
 /** Long enough for a vision call; needs Fluid compute, like the AI routes. */
@@ -49,13 +58,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ nam
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isJobName(name)) return NextResponse.json({ error: "Unknown job" }, { status: 404 });
+  if (!isJobName(name)) {
+    logError(`Background job "${name}" is not one this deploy runs; not retried`);
+    return nonRetryable("Unknown job");
+  }
 
   let payload: unknown;
   try {
     payload = JSON.parse(body);
   } catch {
-    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+    logError(`Background job ${name} arrived with an unreadable body; not retried`);
+    return nonRetryable("Invalid body");
+  }
+  if (!isValidJobPayload(name, payload)) {
+    logError(`Background job ${name} arrived with a payload its schema refuses; not retried`);
+    return nonRetryable("Invalid payload");
   }
 
   try {

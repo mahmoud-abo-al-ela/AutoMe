@@ -5,6 +5,7 @@ import * as dealershipRepo from "@/lib/repositories/dealership";
 import { translateDealershipProfile, type DealershipProfileText } from "@/lib/services/ai/translateDealershipProfile";
 import { dealershipTranslationPlan, languageColumn, type DealershipTextField } from "@/lib/utils/dealership-text";
 import { logError } from "@/lib/utils/errors";
+import { getRedis } from "@/lib/redis";
 
 /**
  * Write the dealership's description and address in the language the dealer
@@ -54,4 +55,54 @@ export async function syncDealershipProfileText(organizationId: string, caller: 
       logError(`Dealership profile translation (${from}) skipped`, error);
     }
   }
+}
+
+/** How long one storefront visit's claim on a dealership's translation holds. */
+const STOREFRONT_CLAIM_SECONDS = 10 * 60;
+
+/** Claims held in this instance, for when Redis is not configured (local, CI). */
+const localClaims = new Map<string, number>();
+
+/**
+ * Whether this storefront visit is the one that translates the dealership's
+ * text. Without a claim, every visit while a translation was pending — or
+ * after one failed — started another model call for the same text. One visit
+ * per dealership per ten minutes now does; a failure is retried after that,
+ * not on every visit. Redis (SET NX) holds the claim across instances; if it
+ * is not configured or does not answer, a claim in this instance still keeps
+ * one instance from stampeding.
+ */
+async function claimStorefrontTranslation(organizationId: string): Promise<boolean> {
+  const key = `dealership-translation:${organizationId}`;
+  const redis = getRedis();
+  if (redis) {
+    try {
+      return (await redis.set(key, "1", { nx: true, ex: STOREFRONT_CLAIM_SECONDS })) === "OK";
+    } catch (error) {
+      logError("Storefront translation claim unavailable; claiming in this instance", error);
+    }
+  }
+  const now = Date.now();
+  if ((localClaims.get(key) ?? 0) > now) return false;
+  localClaims.set(key, now + STOREFRONT_CLAIM_SECONDS * 1000);
+  return true;
+}
+
+/**
+ * The storefront's trigger: translate untranslated text found on a view, once
+ * per dealership per claim window however many people are looking. A profile
+ * save calls syncDealershipProfileText directly — the dealer just changed the
+ * text, so it always runs.
+ */
+export async function syncDealershipProfileTextFromStorefront(
+  organizationId: string,
+  caller: AiCallerContext
+): Promise<void> {
+  if (!(await claimStorefrontTranslation(organizationId))) return;
+  await syncDealershipProfileText(organizationId, caller);
+}
+
+/** Test seam: forget this instance's claims. */
+export function resetStorefrontTranslationClaimsForTests(): void {
+  localClaims.clear();
 }

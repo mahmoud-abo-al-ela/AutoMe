@@ -5,7 +5,7 @@ const embedTexts = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/repositories/buyer-question", () => repo);
 vi.mock("@/lib/ai/embeddings", () => ({ embedTexts, embeddingModel: () => "gemini-embedding-2" }));
 
-import { POST } from "./route";
+import { GET, POST } from "./route";
 
 const call = (query = "", auth = "Bearer s3cret") =>
   POST(new Request(`https://x/api/cron/backfill-question-embeddings${query}`, { method: "POST", headers: { authorization: auth } }));
@@ -52,5 +52,34 @@ describe("POST /api/cron/backfill-question-embeddings", () => {
     embedTexts.mockRejectedValue(new Error("busy"));
     expect((await call()).status).toBe(500);
     expect(repo.setQuestionEmbedding).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/cron/backfill-question-embeddings — the daily run", () => {
+  const run = (auth = "Bearer s3cret") =>
+    GET(new Request("https://x/api/cron/backfill-question-embeddings", { headers: { authorization: auth } }));
+  const q = (id: string) => ({ id, organizationId: "org-1", question: "Is it available?" });
+
+  it("refuses without the cron secret", async () => {
+    expect((await run("Bearer nope")).status).toBe(401);
+    expect(repo.findQuestionsMissingEmbedding).not.toHaveBeenCalled();
+  });
+
+  it("embeds every page from the start until none is left, and totals the work", async () => {
+    // A full page of 100, then a last page of 1.
+    const first = Array.from({ length: 100 }, (_, i) => q(`q${i}`));
+    repo.findQuestionsMissingEmbedding.mockResolvedValueOnce(first).mockResolvedValueOnce([q("q100")]);
+    embedTexts.mockImplementation(async ({ texts }: { texts: string[] }) => ({ model: "gemini-embedding-2", vectors: texts.map(() => [0.1]) }));
+
+    const response = await run();
+
+    expect(repo.findQuestionsMissingEmbedding.mock.calls.map((c) => c[2])).toEqual([undefined, "q99"]);
+    expect(await response.json()).toEqual({ embedded: 101, pages: 2, finished: true });
+  });
+
+  it("answers 500 when a page fails", async () => {
+    repo.findQuestionsMissingEmbedding.mockResolvedValue([q("q1")]);
+    embedTexts.mockRejectedValue(new Error("busy"));
+    expect((await run()).status).toBe(500);
   });
 });
