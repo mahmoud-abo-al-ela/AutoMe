@@ -7,7 +7,12 @@ vi.hoisted(() => {
 });
 
 // createAuditLog reads the request's IP and user agent; there is no request here.
-vi.mock("next/headers", () => ({ headers: async () => new Headers({ "user-agent": "vitest" }) }));
+// cookies too: the audit trail asks the request whether it is in a support
+// session (lib/services/impersonation/active.ts). None here.
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ "user-agent": "vitest" }),
+  cookies: async () => ({ get: () => undefined }),
+}));
 
 const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 

@@ -5,7 +5,12 @@ vi.hoisted(() => {
     process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
   }
 });
-vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
+// cookies too: the audit trail asks the request whether it is in a support
+// session (lib/services/impersonation/active.ts). None here.
+vi.mock("next/headers", () => ({
+  headers: vi.fn(async () => new Headers()),
+  cookies: vi.fn(async () => ({ get: () => undefined })),
+}));
 const mail = vi.hoisted(() => ({ confirmation: vi.fn(async () => null), dealer: vi.fn(async () => null) }));
 vi.mock("@/lib/services/notification", async (importOriginal) => ({
   ...(await importOriginal<object>()),
