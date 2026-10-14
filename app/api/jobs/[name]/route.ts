@@ -3,6 +3,7 @@ import { Receiver } from "@upstash/qstash";
 import { isJobName, isValidJobPayload, runJob } from "@/lib/jobs/registry";
 import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
+import { reportSignal } from "@/lib/observability/report";
 
 /**
  * A background job, delivered by Upstash QStash (see lib/jobs).
@@ -79,6 +80,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ nam
     await runJob(name, payload);
     return NextResponse.json({ done: true });
   } catch (error) {
+    // One Sentry issue per job, tagged with its name, for the failure-rate
+    // alert (docs/observability-runbook.md); QStash retries regardless.
+    void reportSignal({ name: "job.failed", level: "error", tags: { job: name }, groupBy: name, error });
     logError(`Background job ${name} failed; the queue will retry it`, error);
     return NextResponse.json({ error: "Job failed" }, { status: 500 });
   }

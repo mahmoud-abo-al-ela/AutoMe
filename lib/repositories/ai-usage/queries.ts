@@ -271,3 +271,22 @@ export async function findRecentFailures(since: Date, limit: number): Promise<Re
         select: { id: true, createdAt: true, feature: true, provider: true, model: true, errorCode: true, latencyMs: true },
     });
 }
+
+/**
+ * Dealerships with more than `limit` AI calls since `since`, busiest first:
+ * the daily usage watch (lib/services/ai/usage-watch.ts). Calls, not cost —
+ * costMicroUsd is 0 on the free tier, so a runaway shows in the count.
+ */
+export async function findOrganizationsOverCallCount(
+    since: Date,
+    limit: number
+): Promise<{ organizationId: string; calls: number }[]> {
+    const rows = await db.aiUsage.groupBy({
+        by: ["organizationId"],
+        where: { createdAt: { gte: since }, organizationId: { not: null } },
+        _count: { _all: true },
+        having: { organizationId: { _count: { gt: limit } } },
+        orderBy: { _count: { organizationId: "desc" } },
+    });
+    return rows.map((row) => ({ organizationId: row.organizationId!, calls: row._count._all }));
+}

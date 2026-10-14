@@ -3,6 +3,7 @@ import { Client } from "@upstash/qstash";
 import { runJob, JOBS, type JobName, type JobPayload } from "@/lib/jobs/registry";
 import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
+import { reportSignal } from "@/lib/observability/report";
 
 /**
  * Background work that must not be lost: a job is handed to Upstash QStash,
@@ -33,7 +34,12 @@ function qstash(): Client | null {
  * to wait for (a script, a test): `after()` only exists inside a request.
  */
 async function runWithoutQueue<N extends JobName>(name: N, payload: JobPayload<N>): Promise<void> {
-  const run = () => runJob(name, payload).catch((error) => logError(`Job ${name} failed`, error));
+  const run = () =>
+    runJob(name, payload).catch((error) => {
+      // Tagged as the queued path is (app/api/jobs/[name]), so one alert sees both.
+      void reportSignal({ name: "job.failed", level: "error", tags: { job: name, path: "after" }, groupBy: name, error });
+      logError(`Job ${name} failed`, error);
+    });
   try {
     after(run);
   } catch {

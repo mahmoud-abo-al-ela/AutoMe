@@ -1,3 +1,4 @@
+import { reportSignal } from "@/lib/observability/report";
 import * as billingRepo from "@/lib/repositories/billing";
 import type { RenewalSubscription } from "@/lib/repositories/billing";
 import { auditHelpers } from "@/lib/services/audit/audit";
@@ -154,6 +155,7 @@ async function renewOne(
       pastDueSince: now,
     });
     if (!marked) return;
+    void reportSignal({ name: "billing.past-due", level: "warning", tags: { "organization.id": organizationId } });
     await emailOwners(
       organizationId,
       { kind: "pastDue", plan: subscription.plan, payBy: cairoMidnight(graceEndsOn(end)) },
@@ -183,6 +185,12 @@ async function moveToFree(
   );
   if (!moved) return false;
   await logChange(subscription, freePlanId, "SUBSCRIPTION_DOWNGRADED");
+  void reportSignal({
+    name: "billing.downgraded",
+    // Unpaid is revenue lost; a cancellation the owner chose is only news.
+    level: email === "downgradedUnpaid" ? "warning" : "info",
+    tags: { "organization.id": subscription.organizationId, reason: email === "downgradedUnpaid" ? "unpaid" : "canceled" },
+  });
   await emailOwners(
     subscription.organizationId,
     { kind: email, plan: subscription.plan },

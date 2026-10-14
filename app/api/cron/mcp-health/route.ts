@@ -24,7 +24,8 @@ export async function GET(request: Request) {
   try {
     const health = await mcpHealth();
     if (health.breaches.length > 0) {
-      logError(`MCP below target over ${health.calls} calls`, { breaches: health.breaches });
+      // A warning line, not logError: reportMcpHealthBreach is its one Sentry event.
+      console.warn(`MCP below target over ${health.calls} calls`, { breaches: health.breaches });
       await reportMcpHealthBreach(health);
     }
     return NextResponse.json(health);
