@@ -188,11 +188,10 @@ export const getCarForEdit = withOrgAuth(async (ctx, carId: string) => {
   if (!car) {
     throw new NotFoundError("Car");
   }
-  // Verify car belongs to user's organization
-  // Platform admins (UserRole.ADMIN) may reach across orgs for support; regular
-  // members may not. `ctx.role` never existed, and MemberRole has no ADMIN value,
-  // so the escape hatch has to read the platform role off ctx.user.
-  if (car.organizationId !== ctx.organization.id && ctx.user?.role !== "ADMIN") {
+  // The car must belong to the dealership this request acts for. ctx already
+  // proves the caller may act there (a membership, or a verified support
+  // session for it); no platform role reaches past it into another dealership.
+  if (car.organizationId !== ctx.organization.id) {
     throw new AuthorizationError("You don't have access to this car");
   }
   return createSuccessResponse(car);

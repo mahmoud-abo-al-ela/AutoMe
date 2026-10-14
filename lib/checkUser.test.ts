@@ -14,10 +14,14 @@ const { db } = vi.hoisted(() => ({
 vi.mock("@/lib/prisma", () => ({ db }));
 vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn(), currentUser: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
+// The one way in: a support session the database verified. Its own rules are
+// tested in lib/services/impersonation/active.test.ts.
+vi.mock("@/lib/services/impersonation/active", () => ({ resolveActiveImpersonation: vi.fn() }));
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { checkUser } from "@/lib/checkUser";
+import { resolveActiveImpersonation } from "@/lib/services/impersonation/active";
 
 // vi.mock replaces these with mock functions; the imported types still describe
 // the real implementations, so re-view them as mocks to configure per test.
@@ -26,6 +30,23 @@ const mockHeaders = vi.mocked(headers as unknown as () => Promise<Headers>);
 const mockCurrentUser = vi.mocked(
   currentUser as unknown as () => Promise<unknown>,
 );
+const mockResolveActiveImpersonation = vi.mocked(resolveActiveImpersonation);
+
+const admin = {
+  id: "admin-1",
+  clerkId: "clerk_admin",
+  role: "ADMIN",
+  email: "admin@example.com",
+  name: "Admin",
+  memberships: [],
+};
+const target = { id: "target-user", clerkId: "clerk_target", role: "USER", email: "t@x.eg", name: "Target", memberships: [] };
+const verifiedSession = {
+  sessionId: "session-1",
+  superAdmin: { id: admin.id, email: admin.email, name: admin.name },
+  targetUserId: target.id,
+  targetOrganizationId: "org-b",
+};
 
 const nonAdmin = {
   id: "nonadmin-1",
@@ -41,6 +62,7 @@ beforeEach(() => {
   mockAuth.mockResolvedValue({ userId: "clerk_nonadmin" });
   db.user.findUnique.mockResolvedValue(nonAdmin);
   db.organization.findMany.mockResolvedValue([]); // no pending orgs to auto-assign
+  mockResolveActiveImpersonation.mockResolvedValue(null);
 });
 
 describe("checkUser impersonation backstop", () => {
@@ -62,6 +84,51 @@ describe("checkUser impersonation backstop", () => {
     expect(result.isImpersonated).toBeFalsy();
     // Only the initial self-lookup ran; the impersonated user was never fetched.
     expect(db.user.findUnique).toHaveBeenCalledTimes(1);
+    // A non-admin never even asks for a session.
+    expect(mockResolveActiveImpersonation).not.toHaveBeenCalled();
+  });
+
+  it("ignores the impersonation headers for an admin with no verified session", async () => {
+    mockAuth.mockResolvedValue({ userId: admin.clerkId });
+    db.user.findUnique.mockResolvedValue(admin);
+    mockHeaders.mockResolvedValue(
+      new Headers({ "x-impersonation-active": "true", "x-impersonated-user": target.id }),
+    );
+
+    const result = await checkUser();
+
+    expect(result?.id).toBe(admin.id);
+    expect(result?.isImpersonated).toBeFalsy();
+    expect(db.user.findUnique).toHaveBeenCalledTimes(1);
+  });
+
+  it("becomes the session's target — from the verified row, not the cookie — keeping the admin as actualUser", async () => {
+    mockAuth.mockResolvedValue({ userId: admin.clerkId });
+    db.user.findUnique.mockImplementation(async ({ where }: { where: { clerkId?: string; id?: string } }) =>
+      where.clerkId === admin.clerkId ? admin : where.id === target.id ? target : null,
+    );
+    mockResolveActiveImpersonation.mockResolvedValue(verifiedSession);
+
+    const result = await checkUser();
+
+    expect(result?.id).toBe(target.id);
+    expect(result?.isImpersonated).toBe(true);
+    expect(result?.impersonation).toEqual(verifiedSession);
+    expect(result?.actualUser).toEqual({ id: admin.id, email: admin.email, name: admin.name, role: "ADMIN" });
+  });
+
+  it("does not swap on a session another admin runs", async () => {
+    mockAuth.mockResolvedValue({ userId: admin.clerkId });
+    db.user.findUnique.mockResolvedValue(admin);
+    mockResolveActiveImpersonation.mockResolvedValue({
+      ...verifiedSession,
+      superAdmin: { id: "another-admin", email: null, name: null },
+    });
+
+    const result = await checkUser();
+
+    expect(result?.id).toBe(admin.id);
+    expect(result?.isImpersonated).toBeFalsy();
   });
 });
 

@@ -7,15 +7,11 @@ import {
   getSessionIdFromCookies,
 } from "./cookie";
 import { getRequestMetadata } from "./metadata";
+import { lifetimeStart } from "./active";
 
 /**
  * Impersonation service for Super Admins to view organizations as specific users
  */
-
-/** A support session ends on its own this long after it starts. */
-const SESSION_LIFETIME_MS = 4 * 60 * 60 * 1000;
-
-const lifetimeStart = () => new Date(Date.now() - SESSION_LIFETIME_MS);
 
 export const getImpersonationSessions = impersonationRepo.getImpersonationSessions;
 

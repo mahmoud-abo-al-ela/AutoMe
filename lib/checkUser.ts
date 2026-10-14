@@ -1,19 +1,20 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
 import * as tenantRepository from "@/lib/repositories/tenant";
 import type { UserWithOrganizations } from "@/lib/repositories/tenant";
 import { createAuditLogEntry } from "@/lib/repositories/audit";
 import { relinkMigratedUser } from "@/lib/services/user/clerk-sync";
+import { resolveActiveImpersonation, type ActiveImpersonation } from "@/lib/services/impersonation/active";
 
 export type { UserWithOrganizations };
 
 /**
  * What checkUser resolves to: the user row, plus the impersonation marker when
- * an admin is viewing as someone else. Both extras are optional because the
+ * an admin is viewing as someone else. The extras are optional because the
  * non-impersonating path returns the row unchanged.
  */
 export type CurrentUser = UserWithOrganizations & {
   isImpersonated?: boolean;
+  impersonation?: ActiveImpersonation;
   actualUser?: Pick<UserWithOrganizations, "id" | "email" | "name" | "role">;
 };
 
@@ -146,29 +147,33 @@ async function assignPendingOrganizations(
   return (await tenantRepository.findUserWithOrganizationsById(userData.id)) as UserWithOrganizations;
 }
 
+/**
+ * Swap to the impersonated member only inside a support session the database
+ * verifies (lib/services/impersonation/active.ts) — never on a cookie or header
+ * alone. The target comes from the session row, and the verified session rides
+ * along as `impersonation`, so tenant resolution decides on the same session
+ * this swap used rather than reading it a second time.
+ */
 async function resolveImpersonation(
   userData: UserWithOrganizations
 ): Promise<CurrentUser> {
-  const headersList = await headers();
-  const isImpersonating = headersList.get("x-impersonation-active") === "true";
-  const impersonatedUserId = headersList.get("x-impersonated-user");
+  if (userData.role !== "ADMIN") return userData;
 
-  if (isImpersonating && userData.role === "ADMIN" && impersonatedUserId) {
-    const impersonatedUser = await tenantRepository.findUserWithOrganizationsById(impersonatedUserId);
+  const impersonation = await resolveActiveImpersonation();
+  if (!impersonation || impersonation.superAdmin.id !== userData.id) return userData;
 
-    if (impersonatedUser) {
-      return {
-        ...impersonatedUser,
-        isImpersonated: true,
-        actualUser: {
-          id: userData.id,
-          email: userData.email,
-          name: userData.name,
-          role: userData.role,
-        },
-      };
-    }
-  }
+  const impersonatedUser = await tenantRepository.findUserWithOrganizationsById(impersonation.targetUserId);
+  if (!impersonatedUser) return userData;
 
-  return userData;
+  return {
+    ...impersonatedUser,
+    isImpersonated: true,
+    impersonation,
+    actualUser: {
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      role: userData.role,
+    },
+  };
 }

@@ -2,6 +2,7 @@
 import * as testDriveRepository from "@/lib/repositories/test-drive";
 import * as userRepository from "@/lib/repositories/user";
 import * as carRepository from "@/lib/repositories/car";
+import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 import * as workingHoursRepository from "@/lib/repositories/dealership/working-hours";
 import { formatWorkingHours } from "@/lib/utils/working-hours";
 import {
@@ -112,16 +113,20 @@ export async function editTestDrive(testDriveId: string, updateData: Omit<TestDr
     throw new NotFoundError("Test drive");
   }
 
-  const isAdmin = user.role === "ADMIN";
   // Org access must be scoped to THIS test drive's organization — being an OWNER
-  // of some other dealership must not grant access across tenants.
+  // of some other dealership must not grant access across tenants, and neither
+  // does the platform ADMIN role without a verified support session for it.
   const isOrgOwner = user.memberships?.some(
     (m) =>
       m.organizationId === existingTestDrive.organizationId &&
       m.role === "OWNER",
   );
 
-  if (existingTestDrive.userId !== user.id && !isAdmin && !isOrgOwner) {
+  if (
+    existingTestDrive.userId !== user.id &&
+    !isOrgOwner &&
+    !(await isImpersonatingOrganization(existingTestDrive.organizationId))
+  ) {
     throw new AuthorizationError("You can only edit your own test drives");
   }
 
@@ -161,13 +166,16 @@ export async function cancelTestDrive(testDriveId: string, userId: string) {
     throw new NotFoundError("Test drive");
   }
 
-  const isAdmin = user.role === "ADMIN";
   // Org access must be scoped to THIS test drive's organization (see editTestDrive).
   const isOrgOwner = user.memberships?.some(
     (m) => m.organizationId === testDrive.organizationId && m.role === "OWNER",
   );
 
-  if (testDrive.userId !== user.id && !isAdmin && !isOrgOwner) {
+  if (
+    testDrive.userId !== user.id &&
+    !isOrgOwner &&
+    !(await isImpersonatingOrganization(testDrive.organizationId))
+  ) {
     throw new AuthorizationError("You can only cancel your own test drives");
   }
 

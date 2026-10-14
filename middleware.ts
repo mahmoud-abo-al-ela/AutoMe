@@ -85,24 +85,6 @@ function getSubdomain(request: NextRequest): string | null {
   return null;
 }
 
-function getImpersonationContext(request: NextRequest) {
-  const impersonatedOrg = request.cookies.get("x-impersonated-org")?.value;
-  const impersonatedUser = request.cookies.get("x-impersonated-user")?.value;
-  const impersonationSessionId = request.cookies.get(
-    "x-impersonation-session",
-  )?.value;
-
-  if (impersonatedOrg && impersonatedUser && impersonationSessionId) {
-    return {
-      organizationSlug: impersonatedOrg,
-      userId: impersonatedUser,
-      sessionId: impersonationSessionId,
-    };
-  }
-
-  return null;
-}
-
 const clerk = clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
   const url = new URL(req.url);
@@ -110,16 +92,14 @@ const clerk = clerkMiddleware(async (auth, req) => {
   // Parse subdomain
   const subdomain = getSubdomain(req);
 
-  // Check for impersonation context
-  const impersonation = getImpersonationContext(req);
-
-  // Determine effective organization slug
-  const effectiveOrgSlug = impersonation?.organizationSlug || subdomain;
   const requestHeaders = new Headers(req.headers);
 
   // A client can send any header it likes. Strip our internal ones before we
   // trust anything downstream — otherwise forwarding them turns
-  // x-organization-slug into a client-controlled tenant selector.
+  // x-organization-slug into a client-controlled tenant selector. The
+  // impersonation ones are no longer set at all: a support session is the
+  // database row its cookie names, verified on the server
+  // (lib/services/impersonation/active.ts), never something a request asserts.
   requestHeaders.delete("x-organization-slug");
   requestHeaders.delete("x-subdomain");
   requestHeaders.delete("x-impersonation-active");
@@ -127,20 +107,9 @@ const clerk = clerkMiddleware(async (auth, req) => {
   requestHeaders.delete("x-impersonated-user");
   requestHeaders.delete("x-impersonation-session");
 
-  if (effectiveOrgSlug) {
-    requestHeaders.set("x-organization-slug", effectiveOrgSlug);
-  }
-
   if (subdomain) {
+    requestHeaders.set("x-organization-slug", subdomain);
     requestHeaders.set("x-subdomain", subdomain);
-  }
-
-  // Set impersonation headers if active
-  if (impersonation) {
-    requestHeaders.set("x-impersonation-active", "true");
-    requestHeaders.set("x-impersonated-org", impersonation.organizationSlug);
-    requestHeaders.set("x-impersonated-user", impersonation.userId);
-    requestHeaders.set("x-impersonation-session", impersonation.sessionId);
   }
 
   // Create response, forwarding the sanitized request headers downstream.

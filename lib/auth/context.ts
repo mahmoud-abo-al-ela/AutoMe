@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
 import { checkUser } from "@/lib/checkUser";
-import { getCurrentOrganization } from "@/lib/getOrganization";
+import { getCurrentOrganization, getOrganizationById } from "@/lib/getOrganization";
 import { AuthenticationError, AuthorizationError } from "@/lib/utils/errors";
+import type { ActiveImpersonation } from "@/lib/services/impersonation/active";
 import type {
     User,
     Organization,
@@ -18,12 +18,14 @@ export type OrganizationWithPlan = Organization & {
 
 /**
  * What `checkUser()` returns: the user row with memberships joined, plus the
- * impersonation fields layered on in resolveImpersonation. Declared here because
- * checkUser.js is still JavaScript; this is the shape resolveTenantContext relies on.
+ * impersonation fields layered on in resolveImpersonation — `impersonation` is
+ * the support session the database verified, present only while an admin is
+ * signed in as someone else.
  */
 export type SessionUser = User & {
     memberships?: Array<Membership & { organization: OrganizationWithPlan }>;
     isImpersonated?: boolean;
+    impersonation?: ActiveImpersonation;
     actualUser?: Pick<User, "id" | "email" | "name" | "role"> | null;
 };
 
@@ -45,7 +47,6 @@ export async function resolveAuthContext(): Promise<AuthContext> {
         throw new AuthenticationError();
     }
 
-    // checkUser is still JS — assert the shape we depend on at this boundary.
     const user = (await checkUser()) as SessionUser | null;
     if (!user) {
         throw new AuthenticationError("User not found");
@@ -54,16 +55,30 @@ export async function resolveAuthContext(): Promise<AuthContext> {
     return { user, userId };
 }
 
+/**
+ * The dealership this request acts on, and the caller's right to act there.
+ *
+ * Access is a membership of that dealership, or a support session the
+ * database verified (checkUser) whose target is exactly that dealership.
+ * Nothing else: not a cookie, not a header, and not the platform ADMIN role —
+ * admins reach a tenant through a session, which is time-boxed, has a reason
+ * and is audited, and see across tenants only on the super-admin pages.
+ */
 export async function resolveTenantContext(): Promise<TenantContext> {
     const { user, userId } = await resolveAuthContext();
+    const impersonation = user.isImpersonated ? user.impersonation ?? null : null;
 
-    // Try to get organization from subdomain (set by middleware)
-    let organization = (await getCurrentOrganization()) as OrganizationWithPlan | null;
+    // During a support session the session's dealership is the tenant,
+    // whatever the subdomain says. Otherwise: the subdomain (set by
+    // middleware), then the user's own membership.
+    let organization = impersonation
+        ? ((await getOrganizationById(impersonation.targetOrganizationId)) as OrganizationWithPlan | null)
+        : ((await getCurrentOrganization()) as OrganizationWithPlan | null);
 
     // Fallback: the user's own membership. Sort deterministically so that when a
     // user belongs to several orgs and no subdomain selected one, the chosen org
     // is at least predictable rather than arbitrary Prisma insertion order.
-    if (!organization && user.memberships && user.memberships.length > 0) {
+    if (!organization && !impersonation && user.memberships && user.memberships.length > 0) {
         const [firstMembership] = [...user.memberships].sort((a, b) =>
             a.organizationId.localeCompare(b.organizationId),
         );
@@ -75,21 +90,11 @@ export async function resolveTenantContext(): Promise<TenantContext> {
     }
     const org = organization; // non-null from here (also stable inside closures)
 
-    // Find user's membership in this organization
     const membership =
         user.memberships?.find((m) => m.organizationId === org.id) ?? null;
 
-    // Check impersonation context
-    const headersList = await headers();
-    const isImpersonating =
-        headersList.get("x-impersonation-active") === "true";
-
-    // The header must not be the only thing standing between a caller and a
-    // tenant. If the resolved org is one the user has no membership in — e.g. a
-    // forged x-organization-slug for an org they don't belong to — reject.
-    // Impersonation (verified in checkUser against the ADMIN role) and platform
-    // ADMINs are the only ways to act without a membership.
-    if (!membership && !isImpersonating && !user.isImpersonated && user.role !== "ADMIN") {
+    const inSessionForThisOrg = impersonation?.targetOrganizationId === org.id;
+    if (!membership && !inSessionForThisOrg) {
         throw new AuthorizationError("No access to this organization");
     }
 
@@ -98,7 +103,7 @@ export async function resolveTenantContext(): Promise<TenantContext> {
         userId,
         organization: org,
         membership,
-        isImpersonating: isImpersonating || !!user.isImpersonated,
+        isImpersonating: !!impersonation,
         actualUser: user.actualUser ?? null,
     };
 }

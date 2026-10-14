@@ -6,5 +6,6 @@ export {
   endImpersonationSession,
   findSessionWithParticipants,
   findSessionSuperAdminId,
+  findSessionForAuthorization,
   type ImpersonationSessionFilters,
 } from "./sessions";

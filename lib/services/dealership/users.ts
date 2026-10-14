@@ -8,6 +8,7 @@ import {
   NotFoundError,
   AuthorizationError,
 } from "@/lib/utils/errors";
+import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 
 /**
  * Get organization members with search and pagination
@@ -27,7 +28,7 @@ export async function getUsers(
   const hasOwnerAccess = user.memberships?.some(
     m => m.organizationId === organizationId && m.role === "OWNER"
   );
-  if (!hasOwnerAccess && user.role !== "ADMIN") {
+  if (!hasOwnerAccess && !(await isImpersonatingOrganization(organizationId))) {
     throw new AuthorizationError("Only organization owners can view members");
   }
 
@@ -78,7 +79,7 @@ export async function updateUserRole(
   const hasOwnerAccess = user.memberships?.some(
     m => m.organizationId === organizationId && m.role === "OWNER"
   );
-  if (!hasOwnerAccess && user.role !== "ADMIN") {
+  if (!hasOwnerAccess && !(await isImpersonatingOrganization(organizationId))) {
     throw new AuthorizationError("Only organization owners can update member roles");
   }
 
@@ -110,7 +111,7 @@ export async function deleteUser(
   const hasOwnerAccess = adminUser.memberships?.some(
     m => m.organizationId === organizationId && m.role === "OWNER"
   );
-  if (!hasOwnerAccess && adminUser.role !== "ADMIN") {
+  if (!hasOwnerAccess && !(await isImpersonatingOrganization(organizationId))) {
     throw new AuthorizationError("Only organization owners can remove members");
   }
 
