@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as carRepository from "@/lib/repositories/car";
 import * as userRepository from "@/lib/repositories/user";
 import * as storageService from "@/lib/services/storage";
-import { AuthenticationError, NotFoundError, AuthorizationError, PlanLimitError, logError } from "@/lib/utils/errors";
+import { AuthenticationError, ConflictError, NotFoundError, AuthorizationError, PlanLimitError, logError } from "@/lib/utils/errors";
 import { planInEffect } from "@/lib/services/billing/entitlements";
 import { isImpersonatingOrganization } from "@/lib/services/impersonation/active";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
@@ -319,7 +319,8 @@ export async function updateCarFull(
   const finalImages = [...existingImages, ...newImageUrls];
   const status = toCarStatus(carData.status);
 
-  const updatedCar = await carRepository.updateCar(carId, organizationId, {
+  // Lands only if the photos are still the ones this edit was sorted against.
+  const write = await carRepository.updateCarIfPhotosUnchanged(carId, organizationId, existingCar.images || [], {
     title: carData.title,
     make: carData.make,
     model: carData.model,
@@ -347,10 +348,12 @@ export async function updateCarFull(
     await discardUploads(newImageUrls, carId);
     throw error;
   });
-  if (!updatedCar) {
+  if (write.status !== "updated") {
     await discardUploads(newImageUrls, carId);
-    throw new NotFoundError("Car");
+    if (write.status === "notFound") throw new NotFoundError("Car");
+    throw new ConflictError("The car's photos changed meanwhile", { key: "errors.upload.photosChanged" });
   }
+  const updatedCar = write.car;
 
   if (deletedImages.length > 0) {
     // Best effort, like a deleted car's: a photo left in storage must not

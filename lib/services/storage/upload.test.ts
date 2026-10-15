@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 
-// The Supabase client is not reached by these cases, and its module refuses to
-// load without env; the storage write itself is out of scope here.
-vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+// The real module refuses to load without env. Each case that reaches storage
+// sets the clients up itself.
+vi.mock("@/lib/supabase", () => ({ createClient: vi.fn(), createAdminClient: vi.fn() }));
 
-import { processImageFile } from "@/lib/services/storage/upload";
+import { createAdminClient, createClient } from "@/lib/supabase";
+import { processImageFile, uploadCarImages } from "@/lib/services/storage/upload";
 import { ValidationError } from "@/lib/utils/errors";
 import { carSchema } from "@/lib/validations/schemas";
 
@@ -65,5 +66,44 @@ describe("adding a car with photo files", () => {
       images: [new File([new Uint8Array(JPEG)], "car.jpg", { type: "image/jpeg" })],
     });
     expect(result.success).toBe(true);
+  });
+});
+
+/**
+ * A car's photos upload together. When one fails, the ones that made it must
+ * not stay in storage with no car listing them.
+ */
+describe("uploadCarImages when one photo fails", () => {
+  const png = () => new File([new Uint8Array(PNG)], "car.png", { type: "image/png" });
+
+  it("removes the photos that did upload, then throws the failure", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://cdn.test");
+    const upload = vi.fn(async (path: string) =>
+      path.endsWith("-1.png") ? { error: { message: "storage unavailable" } } : { error: null }
+    );
+    const remove = vi.fn(async (_paths: string[]) => ({ error: null }));
+    vi.mocked(createClient).mockResolvedValue({ storage: { from: () => ({ upload }) } } as never);
+    vi.mocked(createAdminClient).mockReturnValue({ storage: { from: () => ({ remove }) } } as never);
+
+    await expect(uploadCarImages([png(), png(), png()], "car-1")).rejects.toThrow("Upload failed: storage unavailable");
+
+    expect(upload).toHaveBeenCalledTimes(3);
+    expect(remove).toHaveBeenCalledTimes(1);
+    const removed = remove.mock.calls[0][0];
+    expect(removed).toHaveLength(2);
+    expect(removed.every((path) => path.startsWith("cars/car-1/") && !path.endsWith("-1.png"))).toBe(true);
+    vi.unstubAllEnvs();
+  });
+
+  it("still throws the upload's failure when the cleanup fails too", async () => {
+    const upload = vi.fn(async (path: string) =>
+      path.endsWith("-0.png") ? { error: { message: "storage unavailable" } } : { error: null }
+    );
+    vi.mocked(createClient).mockResolvedValue({ storage: { from: () => ({ upload }) } } as never);
+    vi.mocked(createAdminClient).mockReturnValue({
+      storage: { from: () => ({ remove: async () => ({ error: { message: "also down" } }) }) },
+    } as never);
+
+    await expect(uploadCarImages([png(), png()], "car-1")).rejects.toThrow("Upload failed: storage unavailable");
   });
 });
