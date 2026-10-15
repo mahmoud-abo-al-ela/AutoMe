@@ -1,5 +1,5 @@
 import type { PrismaClient, DayOfWeek } from "../../lib/generated/prisma";
-import { findCity } from "../../lib/locations/data";
+import { findCity, findGovernorate } from "../../lib/locations/data";
 import { questionKey } from "../../lib/utils/question-key";
 import { BUYERS, DEALERSHIPS } from "./dealerships";
 import { carRow, QUESTIONS, REVIEWS } from "./cars";
@@ -36,7 +36,14 @@ export async function createDemo(db: PrismaClient, now: Date) {
   const available: { id: string; organizationId: string }[] = [];
   for (const [d, dealer] of DEALERSHIPS.entries()) {
     const city = findCity(dealer.city);
-    if (!city) throw new Error(`Unknown city ${dealer.city}`);
+    const governorate = findGovernorate(city?.governorate);
+    if (!city || !governorate) throw new Error(`Unknown city ${dealer.city}`);
+    // Street, city, governorate — the whole address, as the directions link
+    // and the About tab show it; never a city without its governorate.
+    const address = {
+      en: `${dealer.street.en}, ${city.en}, ${governorate.en}`,
+      ar: `${dealer.street.ar}، ${city.ar}، ${governorate.ar}`,
+    };
     const owner = await person(dealer.owner.key, dealer.owner.name);
     const staff = dealer.staff ? await person(dealer.staff.key, dealer.staff.name) : null;
 
@@ -45,9 +52,9 @@ export async function createDemo(db: PrismaClient, now: Date) {
         name: dealer.name,
         slug: dealer.slug,
         email: `${dealer.slug}@example.com`,
-        address: dealer.address.en,
-        addressEn: dealer.address.en,
-        addressAr: dealer.address.ar,
+        address: address.en,
+        addressEn: address.en,
+        addressAr: address.ar,
         description: dealer.about.en,
         descriptionEn: dealer.about.en,
         descriptionAr: dealer.about.ar,
@@ -56,6 +63,10 @@ export async function createDemo(db: PrismaClient, now: Date) {
         country: "EG",
         isActive: true,
         ...dealer.terms,
+        // Written in English, its Arabic as the profile translation stores it.
+        financingNote: dealer.terms.financingNote?.en ?? null,
+        financingNoteEn: dealer.terms.financingNote?.en ?? null,
+        financingNoteAr: dealer.terms.financingNote?.ar ?? null,
         subscription: {
           create: {
             planId: planId(dealer.plan),

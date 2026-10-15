@@ -1,4 +1,4 @@
-// Dealership repository - the dealer's own words (description, address) in both languages
+// Dealership repository - the dealer's own words (description, address, financing note) in both languages
 import { db } from "@/lib/prisma";
 import type { DealershipTextField } from "@/lib/utils/dealership-text";
 
@@ -9,6 +9,9 @@ const PROFILE_TEXT_SELECT = {
   address: true,
   addressEn: true,
   addressAr: true,
+  financingNote: true,
+  financingNoteEn: true,
+  financingNoteAr: true,
 } as const;
 
 /** `organizationId` is server-sourced (ctx or the dealership's own row), never client input. */
@@ -25,7 +28,7 @@ export async function findDealershipProfileText(organizationId: string) {
 export async function saveDealershipProfileLanguages(
   organizationId: string,
   translatedFrom: Partial<Record<DealershipTextField, string>>,
-  data: Partial<Record<"descriptionEn" | "descriptionAr" | "addressEn" | "addressAr", string>>
+  data: Partial<Record<`${DealershipTextField}${"En" | "Ar"}`, string>>
 ) {
   const { count } = await db.organization.updateMany({
     where: { id: organizationId, ...translatedFrom },

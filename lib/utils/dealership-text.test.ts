@@ -69,6 +69,16 @@ describe("dealershipTranslationPlan", () => {
     expect(dealershipTranslationPlan(edited)).toMatchObject([{ field: "description", from: "en", to: "ar" }]);
   });
 
+  it("includes the financing note, judged like the other fields", () => {
+    const note = "Instalments through partner banks";
+    expect(dealershipTranslationPlan({ financingNote: note })).toEqual([
+      { field: "financingNote", source: note, from: "en", to: "ar" },
+    ]);
+    const translated = { financingNote: note, financingNoteEn: note, financingNoteAr: "تقسيط عبر البنوك الشريكة" };
+    expect(dealershipTranslationPlan(translated)).toEqual([]);
+    expect(resolveDealershipText(translated, "financingNote", "ar")?.text).toBe("تقسيط عبر البنوك الشريكة");
+  });
+
   it("sends nothing without text or without letters", () => {
     expect(dealershipTranslationPlan({ description: null, address: "15" })).toEqual([]);
   });

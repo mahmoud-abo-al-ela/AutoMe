@@ -172,7 +172,8 @@ export async function askAboutListing(
       ...car,
       licenseValidUntil: licenseMonth(car.licenseValidUntil),
     }),
-    terms: statedTerms(organization),
+    // The note in the buyer's language, as the rest of the record is.
+    terms: statedTerms(organization, locale),
     otherCars,
     marketPrices,
     dealerAnswers,

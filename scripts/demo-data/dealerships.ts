@@ -26,9 +26,17 @@ export type DemoDealership = {
   /** lib/locations city slug; the governorate is looked up from it. */
   city: string;
   plan: "STARTER" | "PRO" | "ENTERPRISE";
-  address: { en: string; ar: string };
+  /** The street only: the city and governorate are added from the location table (create-demo.ts). */
+  street: { en: string; ar: string };
   about: { en: string; ar: string };
-  terms: { offersFinancing: boolean; financingNote: string | null; acceptsTradeIn: boolean; allowsInspection: boolean; offersDelivery: boolean };
+  /** The financing note in both languages, as the profile translation would store it. */
+  terms: {
+    offersFinancing: boolean;
+    financingNote: { en: string; ar: string } | null;
+    acceptsTradeIn: boolean;
+    allowsInspection: boolean;
+    offersDelivery: boolean;
+  };
   owner: { name: string; key: string };
   staff?: { name: string; key: string };
   stock: StockItem[];
@@ -40,12 +48,12 @@ export const DEALERSHIPS: DemoDealership[] = [
     name: "Nile Crest Motors",
     city: "new-cairo",
     plan: "ENTERPRISE",
-    address: { en: "90th Street, Fifth Settlement, New Cairo", ar: "شارع التسعين، التجمع الخامس، القاهرة الجديدة" },
+    street: { en: "90th Street, Fifth Settlement", ar: "شارع التسعين، التجمع الخامس" },
     about: {
       en: "Inspected used cars from mainstream and premium brands, each with a 150-point check report.",
       ar: "سيارات مستعملة مفحوصة من العلامات الشائعة والفاخرة، ولكل سيارة تقرير فحص من 150 نقطة.",
     },
-    terms: { offersFinancing: true, financingNote: "Bank financing over up to 5 years, from 30% down", acceptsTradeIn: true, allowsInspection: true, offersDelivery: true },
+    terms: { offersFinancing: true, financingNote: { en: "Bank financing over up to 5 years, from 30% down", ar: "تمويل بنكي حتى ٥ سنوات بمقدم يبدأ من ٣٠٪" }, acceptsTradeIn: true, allowsInspection: true, offersDelivery: true },
     owner: { name: "Karim Abdelaziz", key: "nile-crest-owner" },
     staff: { name: "Nour Hamdy", key: "nile-crest-sales" },
     stock: [
@@ -66,12 +74,12 @@ export const DEALERSHIPS: DemoDealership[] = [
     name: "Zayed Auto House",
     city: "sheikh-zayed",
     plan: "PRO",
-    address: { en: "Beverly Hills Road, Sheikh Zayed", ar: "طريق بيفرلي هيلز، الشيخ زايد" },
+    street: { en: "Beverly Hills Road", ar: "طريق بيفرلي هيلز" },
     about: {
       en: "Family SUVs and sedans for West Cairo, with an independent inspection welcome on every car.",
       ar: "سيارات عائلية رياضية وسيدان لسكان غرب القاهرة، ونرحب بالفحص المستقل لأي سيارة.",
     },
-    terms: { offersFinancing: true, financingNote: "Instalments through partner banks", acceptsTradeIn: true, allowsInspection: true, offersDelivery: false },
+    terms: { offersFinancing: true, financingNote: { en: "Instalments through partner banks", ar: "تقسيط عبر البنوك الشريكة" }, acceptsTradeIn: true, allowsInspection: true, offersDelivery: false },
     owner: { name: "Hoda El-Sayed", key: "zayed-owner" },
     stock: [
       { model: "tucson-nx4", year: 2022, km: 41_000, price: 2_150_000, owners: 1, service: "FULL", featured: true, listed: 8 },
@@ -91,7 +99,7 @@ export const DEALERSHIPS: DemoDealership[] = [
     name: "Smouha Car Center",
     city: "smouha",
     plan: "PRO",
-    address: { en: "Victor Emmanuel Square, Smouha, Alexandria", ar: "ميدان فيكتور عمانويل، سموحة، الإسكندرية" },
+    street: { en: "Victor Emmanuel Square", ar: "ميدان فيكتور عمانويل" },
     about: {
       en: "Alexandria's everyday-car specialist: economical sedans and family SUVs, all with known history.",
       ar: "متخصصون في السيارات اليومية بالإسكندرية: سيدان اقتصادية وسيارات عائلية رياضية، وكلها معروفة التاريخ.",
@@ -117,7 +125,7 @@ export const DEALERSHIPS: DemoDealership[] = [
     name: "Delta Drive",
     city: "mansoura",
     plan: "STARTER",
-    address: { en: "El Gomhoreya Street, Mansoura", ar: "شارع الجمهورية، المنصورة" },
+    street: { en: "El Gomhoreya Street", ar: "شارع الجمهورية" },
     about: {
       en: "Affordable, honest cars for the Delta, priced to sell and ready to drive away.",
       ar: "سيارات بأسعار معقولة وبوصف صادق لأهل الدلتا، جاهزة للاستلام فورًا.",
@@ -142,12 +150,12 @@ export const DEALERSHIPS: DemoDealership[] = [
     name: "Canal Motors",
     city: "ismailia-city",
     plan: "STARTER",
-    address: { en: "Mohamed Ali Street, Ismailia", ar: "شارع محمد علي، الإسماعيلية" },
+    street: { en: "Mohamed Ali Street", ar: "شارع محمد علي" },
     about: {
       en: "Serving Ismailia, Port Said and Suez with checked used cars and straightforward prices.",
       ar: "نخدم الإسماعيلية وبورسعيد والسويس بسيارات مستعملة مفحوصة وأسعار واضحة.",
     },
-    terms: { offersFinancing: true, financingNote: "Instalments over up to 3 years", acceptsTradeIn: false, allowsInspection: true, offersDelivery: true },
+    terms: { offersFinancing: true, financingNote: { en: "Instalments over up to 3 years", ar: "تقسيط حتى ٣ سنوات" }, acceptsTradeIn: false, allowsInspection: true, offersDelivery: true },
     owner: { name: "Yasser Abdelrahman", key: "canal-owner" },
     stock: [
       { model: "sunny-n17", year: 2023, km: 21_000, price: 760_000, owners: 1, service: "FULL", featured: true, listed: 4 },
@@ -166,7 +174,7 @@ export const DEALERSHIPS: DemoDealership[] = [
     name: "Luxor Auto Point",
     city: "luxor-city",
     plan: "STARTER",
-    address: { en: "Television Street, Luxor", ar: "شارع التلفزيون، الأقصر" },
+    street: { en: "Television Street", ar: "شارع التلفزيون" },
     about: {
       en: "Upper Egypt's place for tough, easy-to-service cars that handle the heat and long distances.",
       ar: "وجهة الصعيد للسيارات المتينة سهلة الصيانة، التي تتحمل الحرارة والمسافات الطويلة.",

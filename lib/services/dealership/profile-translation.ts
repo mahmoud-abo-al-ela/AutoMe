@@ -8,7 +8,7 @@ import { logError } from "@/lib/utils/errors";
 import { getRedis } from "@/lib/redis";
 
 /**
- * Write the dealership's description and address in the language the dealer
+ * Write the dealership's description, address and financing note in the language the dealer
  * did not, where missing or made from older text. Fields written in the same
  * language go in one call; a dealer who mixes languages costs at most two.
  * Run after a profile save, and after a storefront view finds a field
@@ -35,7 +35,7 @@ export async function syncDealershipProfileText(organizationId: string, caller: 
     if (items.length === 0) continue;
 
     try {
-      const text: DealershipProfileText = { description: "", address: "" };
+      const text: DealershipProfileText = { description: "", address: "", financingNote: "" };
       for (const item of items) text[item.field] = item.source;
       const translated = await translateDealershipProfile(text, from, caller);
 

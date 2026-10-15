@@ -6,9 +6,11 @@
  * not a listing claiming there were none. Every reader of these fields — the
  * listing page, the buyer assistant — shows or cites only what was stated.
  *
- * Pure and dependency-free: the dealer form, the server schema, the listing
+ * Pure (its one import, dealership-text, is too): the dealer form, the server schema, the listing
  * page and the assistant's grounding all read it.
  */
+import type { Locale } from "@/i18n/routing";
+import { resolveDealershipText } from "./dealership-text";
 
 export const SERVICE_HISTORY = ["FULL", "PARTIAL", "NONE"] as const;
 export type ServiceHistoryValue = (typeof SERVICE_HISTORY)[number];
@@ -40,6 +42,9 @@ export interface DealershipTerms {
   offersFinancing: boolean | null;
   /** Banks, years, down payment — in the dealer's own words. */
   financingNote: string | null;
+  /** The note in each language (lib/utils/dealership-text); dropped once resolved for a reader. */
+  financingNoteEn?: string | null;
+  financingNoteAr?: string | null;
   acceptsTradeIn: boolean | null;
   allowsInspection: boolean | null;
   offersDelivery: boolean | null;
@@ -142,13 +147,26 @@ export function statedDisclosures(car: Partial<CarDisclosures>): Partial<CarDisc
   return stated;
 }
 
-export function statedTerms(terms: Partial<DealershipTerms>): Partial<DealershipTerms> {
+/**
+ * The terms the dealer stated. With a locale, the financing note is in that
+ * reader's language (the dealer's own words until a translation exists) and
+ * the per-language columns are dropped; without one — a car serialized before
+ * anyone knows who reads it — the columns ride along for the page to resolve.
+ */
+export function statedTerms(terms: Partial<DealershipTerms>, locale?: Locale): Partial<DealershipTerms> {
   const stated: Partial<DealershipTerms> = {};
   for (const key of DEALERSHIP_TERM_FLAGS) {
     if (typeof terms[key] === "boolean") stated[key] = terms[key];
   }
   const note = terms.financingNote?.trim();
   // A financing note only means something next to "offers financing: yes".
-  if (note && terms.offersFinancing) stated.financingNote = note;
+  if (!note || !terms.offersFinancing) return stated;
+  if (locale) {
+    stated.financingNote = resolveDealershipText(terms, "financingNote", locale)?.text ?? note;
+  } else {
+    stated.financingNote = note;
+    if (terms.financingNoteEn) stated.financingNoteEn = terms.financingNoteEn;
+    if (terms.financingNoteAr) stated.financingNoteAr = terms.financingNoteAr;
+  }
   return stated;
 }

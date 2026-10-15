@@ -78,7 +78,7 @@ export async function getPublicDealership(slug: string, locale: Locale, from?: L
     address: address?.text ?? null,
     website: dealership.website ?? null,
     about: about ? { text: about.text.slice(0, 1500), locale: about.locale } : null,
-    terms: statedTerms(dealership),
+    terms: statedTerms(dealership, locale),
     workingHours: ((dealership.workingHours ?? []) as HoursRow[]).map((row) => ({
       day: row.dayKey,
       open: Boolean(row.isOpen),
