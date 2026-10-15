@@ -5,7 +5,9 @@ import { getDealershipCars } from "@/actions/dealerships";
 import { BuyerTargetProvider } from "@/components/BuyerAccess";
 import { DealershipIdentity } from "./DealershipIdentity";
 import { VisitCard } from "./VisitCard";
+import { VisitActions } from "./VisitActions";
 import { DealershipTabs } from "./DealershipTabs";
+import { cn } from "@/lib/utils";
 import {
     DEALERSHIP_CARS_PER_PAGE,
     type DealershipCar,
@@ -94,16 +96,32 @@ export function DealershipPage({
             target={{ organizationId: dealership.id, organizationSlug: dealership.slug }}
         >
             <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-4 sm:px-6 md:pt-6 xl:px-0">
-                <DealershipIdentity dealership={dealership} />
+                <DealershipIdentity
+                    dealership={dealership}
+                    actions={
+                        // The About tab has no visit card: its actions move up here.
+                        tab === "about" && (
+                            <VisitActions dealership={dealership} newestCars={initialCars} onShowAllCars={showAllCars} inline />
+                        )
+                    }
+                />
 
-                <div className="mt-6 grid items-start gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
-                    <VisitCard
-                        dealership={dealership}
-                        newestCars={initialCars}
-                        onShowAllCars={showAllCars}
-                        compact={tab === "about"}
-                        className="lg:sticky lg:top-[96px] lg:col-start-2 lg:row-start-1"
-                    />
+                {/* On the About tab Message and Directions are in the header, so
+                    the tab takes the full width and the visit card is left out. */}
+                <div
+                    className={cn(
+                        "mt-6 grid items-start gap-6 lg:mt-8 lg:gap-8",
+                        tab !== "about" && "lg:grid-cols-[minmax(0,1fr)_360px]"
+                    )}
+                >
+                    {tab !== "about" && (
+                        <VisitCard
+                            dealership={dealership}
+                            newestCars={initialCars}
+                            onShowAllCars={showAllCars}
+                            className="lg:sticky lg:top-[96px] lg:col-start-2 lg:row-start-1"
+                        />
+                    )}
                     <div id="dealership-tabs" className="min-w-0 scroll-mt-24 lg:col-start-1 lg:row-start-1">
                         <DealershipTabs
                             value={tab}
