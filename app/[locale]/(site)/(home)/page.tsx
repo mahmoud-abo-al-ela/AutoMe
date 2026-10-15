@@ -28,6 +28,8 @@ import type { Locale } from "@/i18n/routing";
 import { formatNumber } from "@/lib/utils/number";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { cn } from "@/lib/utils";
+import { StructuredData } from "@/lib/utils/seo";
+import { siteStructuredData } from "@/lib/utils/structured-data";
 
 /**
  * The tab title comes from the root layout's `title.default` (the
@@ -46,16 +48,16 @@ export async function generateMetadata({
     tenantScoped: true,
   });
 
+  // Mirrors the root layout's tab title and description.
+  const title = organization?.name ?? t("title");
+  const description = organization
+    ? resolveDealershipText(organization, "description", locale as Locale)?.text || `${organization.name} — AutoMe`
+    : t("description");
+
   return {
     ...meta,
-    openGraph: {
-      ...meta.openGraph,
-      // Mirrors the root layout's tab title and description.
-      title: organization?.name ?? t("title"),
-      description: organization
-        ? resolveDealershipText(organization, "description", locale as Locale)?.text || `${organization.name} — AutoMe`
-        : t("description"),
-    },
+    openGraph: { ...meta.openGraph, title, description },
+    twitter: { ...meta.twitter, title, description },
   };
 }
 
@@ -88,6 +90,11 @@ export default async function Home({
   // all switched off under reduced motion.
   return (
     <MotionRoot>
+      {/* Who publishes the marketplace, and its search box. A dealership's
+          storefront is not the marketplace, so it does not claim to be. */}
+      {!isOnSubdomain && (
+        <StructuredData data={siteStructuredData(locale, { name: "AutoMe", description: t("meta.description") })} />
+      )}
       <div className="flex flex-col pb-16 sm:pb-24">
         <Hero summary={summary} />
 

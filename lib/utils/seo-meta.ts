@@ -35,6 +35,11 @@ function pathSuffix(path: string): string {
   return clean === "/" ? "" : clean;
 }
 
+/** A page's absolute URL in one locale: `https://…/ar/cars/x`. */
+export function localizedUrl(path: string, locale: Locale, origin: string = mainOrigin()): string {
+  return `${origin}/${locale}${pathSuffix(path)}`;
+}
+
 /** hreflang → URL for every locale, plus `x-default`. */
 function languageUrls(path: string, origin: string): Record<string, string> {
   const suffix = pathSuffix(path);
@@ -133,6 +138,18 @@ export function openGraphLocale(locale: Locale): string {
 
 export function openGraphAlternateLocales(locale: Locale): string[] {
   return routing.locales.filter((l) => l !== locale).map((l) => OG_LOCALE[l]);
+}
+
+/**
+ * Whether a page title still fits a results line (about 60 characters) once
+ * the root layout's " | AutoMe" template is appended. A longer one is cut off
+ * mid-word in results, so callers fall back to a shorter form instead.
+ */
+export const TITLE_LIMIT = 60;
+const TITLE_SUFFIX = " | AutoMe";
+
+export function fitsTitle(title: string): boolean {
+  return title.length + TITLE_SUFFIX.length <= TITLE_LIMIT;
 }
 
 /** Meta descriptions are truncated around 155-160 characters in results. */

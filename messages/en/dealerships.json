@@ -1,14 +1,15 @@
 {
   "meta": {
-    "title": "Browse Dealerships",
-    "description": "Find the perfect dealership for your next vehicle purchase. Browse our directory of automotive dealerships with ratings, reviews, and available cars.",
+    "title": "Car dealerships in Egypt",
+    "description": "Car dealerships across Egypt with buyer ratings and reviews, opening hours and the cars each one has in stock.",
     "ogDescription": "Find the perfect dealership for your next vehicle purchase",
     "notFoundTitle": "Dealership Not Found",
     "notFoundDescription": "The requested dealership could not be found.",
     "detailDescription": "View {name}'s inventory, reviews, and contact information. {count, plural, =0 {No cars} one {{value} car} other {{value} cars}} available.",
     "keywords": "dealerships, car dealerships, automotive, buy cars, car sales, vehicle dealership",
     "fallbackTitle": "Dealership",
-    "fallbackDescription": "View dealership information on AutoMe"
+    "fallbackDescription": "View dealership information on AutoMe",
+    "detailTitle": "{name} — car dealership in {place}"
   },
   "hero": {
     "title": "Browse Dealerships",

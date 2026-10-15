@@ -8,6 +8,8 @@ import {
   crawlDisallowPaths,
   truncateForMeta,
   META_DESCRIPTION_LIMIT,
+  fitsTitle,
+  localizedUrl,
 } from "@/lib/utils/seo-meta";
 
 const original = process.env.NEXT_PUBLIC_APP_URL;
@@ -195,5 +197,20 @@ describe("truncateForMeta", () => {
 
     expect(result.length).toBeLessThanOrEqual(META_DESCRIPTION_LIMIT + 1);
     expect(result.endsWith("…")).toBe(true);
+  });
+});
+
+describe("fitsTitle", () => {
+  it("counts the brand the title template appends", () => {
+    // 51 + " | AutoMe" (9) = 60: the most a results line shows.
+    expect(fitsTitle("x".repeat(51))).toBe(true);
+    expect(fitsTitle("x".repeat(52))).toBe(false);
+  });
+});
+
+describe("localizedUrl", () => {
+  it("is absolute, in the locale, with no trailing slash on the home page", () => {
+    expect(localizedUrl("/", "ar")).toBe("https://autome.test/ar");
+    expect(localizedUrl("/cars/x", "en")).toBe("https://autome.test/en/cars/x");
   });
 });

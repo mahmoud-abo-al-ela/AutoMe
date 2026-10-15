@@ -72,6 +72,9 @@ function serializeCarInner(car: CarInput) {
         : car.updatedAt,
     // A month, not an instant: "2027-03", so no reader's timezone can shift it.
     licenseValidUntil: licenseMonth(car.licenseValidUntil),
+    // The cover photo described, both languages: a card's image alt (and what
+    // image search indexes). Null until the photo has been described.
+    coverAlt: car.images?.[0] ? (parseImageAlts(car.imageAlts)[car.images[0]] ?? null) : null,
     // Pass through organization data if included in the query
     ...(car.organization && {
       organization: {

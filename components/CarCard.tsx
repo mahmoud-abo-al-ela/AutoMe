@@ -75,7 +75,9 @@ const CarCard = ({
         {car.images?.[0] && !imageError ? (
           <Image
             src={car.images[0]}
-            alt=""
+            // The photo described (Car.imageAlts), not the title again: the
+            // title below is the link's name. Empty until it is described.
+            alt={car.coverAlt?.[locale] ?? ""}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
             className={cn(
