@@ -6,6 +6,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { FaqAccordion, PageHeader } from "@/components/brand";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
+import { StructuredData } from "@/lib/utils/seo";
+import { faqStructuredData } from "@/lib/utils/structured-data";
 import { formatNumber } from "@/lib/utils/number";
 import { MAX_COMPARE_CARS } from "@/lib/utils";
 import { FAQ_AI_POINTS, FAQ_CATEGORIES, type FaqItemKey } from "./_lib/faq-items";
@@ -65,8 +67,33 @@ export default async function FAQ({ params }: Props) {
     }
   };
 
+  // The same answers as plain text, for the FAQPage markup: the link in the
+  // security answer keeps its words, the AI answer its list as sentences.
+  const answerText = (key: FaqItemKey): string => {
+    switch (key) {
+      case "compare":
+        return t("items.compare.a", {
+          count: MAX_COMPARE_CARS,
+          max: formatNumber(MAX_COMPARE_CARS, locale as Locale),
+        });
+      case "security":
+        return t.markup("items.security.a", { brand, link: (chunks) => chunks });
+      case "ai":
+        return [t("items.ai.a", { brand }), ...FAQ_AI_POINTS.map((point) => t(`items.ai.points.${point}`))].join(" ");
+      default:
+        return t(`items.${key}.a`, { brand });
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">
+      <StructuredData
+        data={faqStructuredData(
+          FAQ_CATEGORIES.flatMap((category) =>
+            category.items.map((key) => ({ question: t(`items.${key}.q`, { brand }), answer: answerText(key) }))
+          )
+        )}
+      />
       <PageHeader title={t("title")} subtitle={t("subtitle", { brand })} />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16">

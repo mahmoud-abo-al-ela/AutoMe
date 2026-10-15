@@ -29,6 +29,16 @@ async function subdomainOrigin(): Promise<string | null> {
   return `${proto}://${host}`;
 }
 
+/**
+ * The site's share card (app/[locale]/opengraph-image.tsx) for a page with no
+ * image of its own. Named outright because Next replaces a page's whole
+ * `openGraph`, it does not merge it: a page that sets its title there loses
+ * the image the file convention attached higher up.
+ */
+export function defaultShareImage(locale: Locale) {
+  return { url: `${mainOrigin()}/${locale}/opengraph-image`, width: 1200, height: 630, alt: "AutoMe" };
+}
+
 /** The origin this request is being served on. */
 export async function requestOrigin(): Promise<string> {
   return (await subdomainOrigin()) ?? mainOrigin();
@@ -54,6 +64,10 @@ export async function requestOrigin(): Promise<string> {
  * dealership's, as it is in the tab title.
  *
  * Omit `title` to keep the root layout's `title.default` (the home page).
+ *
+ * Twitter (X) reads its own tags; the card type is the one thing it cannot
+ * take from Open Graph, and without it a link shows as a bare URL there. The
+ * image comes from Open Graph — the page's own, or app/[locale]/opengraph-image.
  */
 export async function localizedPageMetadata(
   path: string,
@@ -80,6 +94,12 @@ export async function localizedPageMetadata(
       siteName: organization?.name ?? "AutoMe",
       locale: openGraphLocale(locale),
       alternateLocale: openGraphAlternateLocales(locale),
+      images: [defaultShareImage(locale)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      ...(copy.title && { title: copy.title }),
+      ...(copy.description && { description: copy.description }),
     },
   } satisfies Metadata;
 }

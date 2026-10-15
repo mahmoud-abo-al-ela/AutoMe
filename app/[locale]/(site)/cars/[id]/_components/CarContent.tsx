@@ -1,4 +1,3 @@
-import { getCarById } from "@/actions/cars-listing";
 import {
   CarImageGallery,
   CarInfoCard,
@@ -23,6 +22,9 @@ import { marketPricesFor, toMarketPosition } from "@/lib/services/car/market-pri
 import { logError } from "@/lib/utils/errors";
 import { after } from "next/server";
 import { recordMcpReferral } from "@/lib/services/mcp/referrals";
+import { StructuredData } from "@/lib/utils/seo";
+import { breadcrumbStructuredData, carStructuredData } from "@/lib/utils/structured-data";
+import { carPageText, loadCar } from "../_lib/car-seo";
 
 /**
  * Whether this dealer's plan offers buyers the assistant, with answers left
@@ -42,7 +44,8 @@ const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: st
   // Server component: getTranslations, not the useTranslations hook.
   const t = await getTranslations("carDetail.errors");
   // withErrorHandling has already logged a failure; it answers, never throws.
-  const response = await getCarById(id);
+  // Cached: generateMetadata made the same read for this request.
+  const response = await loadCar(id);
 
   // A car that does not exist, is hidden, or belongs to another dealership's
   // storefront is the not-found page (noindex, the site's own 404 copy) — not
@@ -71,11 +74,14 @@ const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: st
     after(() => recordMcpReferral("car", car.id, medium));
   }
 
-  const [showAssistant, marketPrices] = await Promise.all([
+  const locale = (await getLocale()) as Locale;
+  const [showAssistant, marketPrices, text, tCrumb] = await Promise.all([
     assistantOffered(car.organizationId),
     // Same comparison the listing assistant quotes; null when there are too
     // few comparable listings, or the read fails (best effort).
     marketPricesFor(car),
+    carPageText(car, locale),
+    getTranslations("carDetail.breadcrumb"),
   ]);
   const market = marketPrices ? toMarketPosition(marketPrices) : null;
 
@@ -85,6 +91,18 @@ const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: st
       target={{ organizationId: car.organizationId, organizationSlug: car.organization?.slug, carId: car.id }}
     >
     <div className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-4 sm:px-6 md:pt-6 xl:px-0">
+      {/* The listing as schema.org Car + Offer, in the same words as its metadata. */}
+      <StructuredData data={carStructuredData(car, locale, { name: text.headline, description: text.description })} />
+      <StructuredData
+        data={breadcrumbStructuredData(
+          [
+            { name: tCrumb("home"), path: "/" },
+            { name: tCrumb("cars"), path: "/cars" },
+            { name: text.headline, path: `/cars/${car.id}` },
+          ],
+          locale
+        )}
+      />
       <Breadcrumbs car={car} />
 
       {/*
@@ -111,7 +129,7 @@ const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: st
       <MobileStickyBar car={car} />
 
       {/* The car, offered to a browser agent (WebMCP) where the browser has it. */}
-      <CarWebMcpTools summary={carToolSummary(car, (await getLocale()) as Locale)} />
+      <CarWebMcpTools summary={carToolSummary(car, locale)} />
 
       {/* Opens this car's chat when the page is reached back from sign-in. */}
       <Suspense fallback={null}>

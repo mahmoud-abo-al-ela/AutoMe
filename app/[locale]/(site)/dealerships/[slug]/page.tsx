@@ -10,11 +10,10 @@ import { mcpReferralMedium, recordMcpReferral } from "@/lib/services/mcp/referra
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 import { localizedPageMetadata } from "@/lib/utils/page-seo";
 import { dealershipTranslationPlan, resolveDealershipText } from "@/lib/utils/dealership-text";
-import {
-    generateBreadcrumbStructuredData,
-    generateDealershipStructuredData,
-    StructuredData,
-} from "@/lib/utils/seo";
+import { StructuredData } from "@/lib/utils/seo";
+import { breadcrumbStructuredData, dealershipStructuredData } from "@/lib/utils/structured-data";
+import { cityName, governorateName } from "@/lib/locations/names";
+import { fitsTitle } from "@/lib/utils/seo-meta";
 import { DealershipPage } from "./_components/DealershipPage";
 import {
     DEALERSHIP_CARS_PER_PAGE,
@@ -48,15 +47,23 @@ export async function generateMetadata({ params }: Pick<PageProps, "params">): P
     const dealership = await loadDealership(slug);
 
     if (!dealership) {
-        return { title: t("notFoundTitle"), description: t("notFoundDescription") };
+        // Said outright, not left to the not-found page: the response may
+        // already be a 200 by the time it renders (the layout streams).
+        return { title: t("notFoundTitle"), description: t("notFoundDescription"), robots: { index: false } };
     }
 
     const { name, city, region, logo, carCount } = dealership;
     // In the page's language when the translation exists.
     const description = resolveDealershipText(dealership, "description", locale as Locale)?.text;
+    // "Nile Crest Motors — car dealership in New Cairo": what the business is
+    // and where, the two things a search for a dealer near you matches on. The
+    // bare name when there is no city, or when the result would be cut off.
+    const place = cityName(city, locale as Locale);
+    const placed = place ? t("detailTitle", { name, place }) : name;
+    const title = fitsTitle(placed) ? placed : name;
     // The tab title gets the brand from the root title.template; og/twitter
     // titles do not inherit it, so they spell the brand out themselves.
-    const socialTitle = name + " | AutoMe";
+    const socialTitle = title + " | AutoMe";
     const desc =
         description ||
         t("detailDescription", {
@@ -66,7 +73,7 @@ export async function generateMetadata({ params }: Pick<PageProps, "params">): P
         });
 
     const meta = await localizedPageMetadata(`/dealerships/${slug}`, locale as Locale, {
-        title: name,
+        title,
         description: desc,
     });
 
@@ -78,13 +85,14 @@ export async function generateMetadata({ params }: Pick<PageProps, "params">): P
             title: socialTitle,
             description: desc,
             type: "website",
-            images: [{ url: logo || "/og-image.jpg", width: 1200, height: 630, alt: `${name} logo` }],
+            // Without a logo the site's default share image (opengraph-image) applies.
+            ...(logo && { images: [{ url: logo, alt: name }] }),
         },
         twitter: {
-            card: "summary_large_image",
+            ...meta.twitter,
             title: socialTitle,
             description: desc,
-            images: [logo || "/og-image.jpg"],
+            ...(logo && { images: [logo] }),
         },
     };
 }
@@ -136,13 +144,27 @@ export default async function DealershipDetailPage({ params, searchParams }: Pag
 
     return (
         <>
-            <StructuredData data={generateDealershipStructuredData(dealership)} />
             <StructuredData
-                data={generateBreadcrumbStructuredData([
-                    { name: t("home"), url: "/" },
-                    { name: t("dealerships"), url: "/dealerships" },
-                    { name: dealership.name, url: `/dealerships/${dealership.slug}` },
-                ])}
+                data={dealershipStructuredData(
+                    {
+                        ...dealership,
+                        description: resolveDealershipText(dealership, "description", locale as Locale)?.text,
+                        address: resolveDealershipText(dealership, "address", locale as Locale)?.text,
+                        city: cityName(dealership.city, locale as Locale),
+                        region: governorateName(dealership.region, locale as Locale),
+                    },
+                    locale as Locale
+                )}
+            />
+            <StructuredData
+                data={breadcrumbStructuredData(
+                    [
+                        { name: t("home"), path: "/" },
+                        { name: t("dealerships"), path: "/dealerships" },
+                        { name: dealership.name, path: `/dealerships/${dealership.slug}` },
+                    ],
+                    locale as Locale
+                )}
             />
             <DealershipPage
                 dealership={dealership}

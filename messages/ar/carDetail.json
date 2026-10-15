@@ -113,8 +113,9 @@
   "meta": {
     "notFoundTitle": "السيارة غير موجودة",
     "notFoundDescription": "هذا الإعلان لم يعد متاحًا. تصفّح باقي السيارات المعروضة للبيع في مصر.",
-    "generatedTitle": "{make} {model} {year} للبيع",
-    "generatedDescription": "{make} {model} موديل {year} للبيع في مصر. شاهد الصور والمواصفات والسعر وبيانات المعرض على أوتومي."
+    "generatedDescription": "{make} {model} موديل {year} للبيع في مصر. شاهد الصور والمواصفات والسعر وبيانات المعرض على أوتومي.",
+    "titleForSale": "{title} للبيع في {place}",
+    "titleForSaleNoPlace": "{title} للبيع"
   },
   "history": {
     "title": "تاريخ السيارة والشروط",

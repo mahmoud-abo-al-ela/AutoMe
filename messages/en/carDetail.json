@@ -113,8 +113,9 @@
   "meta": {
     "notFoundTitle": "Car not found",
     "notFoundDescription": "This listing is no longer available. Browse our other cars for sale in Egypt.",
-    "generatedTitle": "{year} {make} {model} for sale",
-    "generatedDescription": "{year} {make} {model} for sale in Egypt. See photos, specifications, price and dealership details on AutoMe."
+    "generatedDescription": "{year} {make} {model} for sale in Egypt. See photos, specifications, price and dealership details on AutoMe.",
+    "titleForSale": "{title} for sale in {place}",
+    "titleForSaleNoPlace": "{title} for sale"
   },
   "history": {
     "title": "History & terms",

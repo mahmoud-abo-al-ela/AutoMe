@@ -43,7 +43,9 @@ export function ListingRow({ car, index = 0 }: { car: ListingRowCar; index?: num
         {car.images?.[0] && !imageError ? (
           <Image
             src={car.images[0]}
-            alt=""
+            // The photo described (Car.imageAlts), not the title again: the
+            // title below is the link's name. Empty until it is described.
+            alt={car.coverAlt?.[locale] ?? ""}
             fill
             sizes="200px"
             className="object-cover"
