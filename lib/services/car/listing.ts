@@ -13,6 +13,8 @@ export interface CarFilters {
   organizationId?: string;
   dealership?: string;
   city?: string;
+  /** A governorate code; covers every city in it. */
+  region?: string;
   status?: string;
   onlyAvailable?: boolean;
   search?: string;

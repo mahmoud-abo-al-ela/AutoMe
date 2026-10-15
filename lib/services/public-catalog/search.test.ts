@@ -30,6 +30,14 @@ describe("searchPublicCars", () => {
     expect(pagination).toEqual({ page: 2, limit: 5 });
   });
 
+  it("filters by the place a reader names, as the columns store it", async () => {
+    await searchPublicCars({ city: "New Cairo" }, "en");
+    expect(findManyCars.mock.calls[0][0]).toMatchObject({ city: "new-cairo" });
+    await searchPublicCars({ city: "Cairo" }, "en");
+    expect(findManyCars.mock.calls[1][0]).toMatchObject({ region: "CAI" });
+    expect(findManyCars.mock.calls[1][0].city).toBeUndefined();
+  });
+
   it("leaves 'best' to each path's own default order", async () => {
     await searchPublicCars({ query: "corolla", sort: "best" }, "en");
     expect(findManyCars.mock.calls[0][0].sortBy).toBeUndefined();

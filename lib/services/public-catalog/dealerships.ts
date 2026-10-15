@@ -4,6 +4,7 @@ import { resolveDealershipText } from "@/lib/utils/dealership-text";
 import { statedTerms, type DealershipTerms } from "@/lib/utils/car-disclosures";
 import { ValidationError } from "@/lib/utils/errors";
 import { publicDealership, type DealerText, type PublicDealership, type PublicDealershipRow } from "./projections";
+import { resolvePlace } from "./place";
 import type { LinkSource } from "./urls";
 
 /**
@@ -49,7 +50,7 @@ export async function listPublicDealerships(input: PublicDealershipSearch, local
     throw new ValidationError(`page is beyond the first ${window} results`, "page");
   }
 
-  const result = await getDealerships({ search: input.query?.trim() || undefined, city: input.city?.trim() || undefined }, { page, limit });
+  const result = await getDealerships({ search: input.query?.trim() || undefined, ...resolvePlace(input.city) }, { page, limit });
   const total = Math.min(result.pagination.total, window);
   return {
     dealerships: result.dealerships.map((row: PublicDealershipRow) => publicDealership(row, locale, from)),
