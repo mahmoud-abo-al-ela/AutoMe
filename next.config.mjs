@@ -52,6 +52,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        // The demo cars' photos (scripts/demo-data/photos.ts), from Wikimedia Commons.
+        protocol: "https",
+        hostname: "thumb.wikimedia.org",
+      },
     ],
   },
 

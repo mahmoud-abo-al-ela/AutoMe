@@ -960,6 +960,12 @@ function generateReview() {
 // ============ MAIN SEED FUNCTION ============
 
 async function main() {
+  // It empties every table first — dealerships, people, payments. Only ever on
+  // a database on this machine; real ones get scripts/demo-data (pnpm demo:reset).
+  const target = new URL(process.env.DATABASE_URL ?? "postgres://localhost");
+  if (!["localhost", "127.0.0.1", "::1"].includes(target.hostname)) {
+    throw new Error(`Refusing to seed ${target.hostname}: prisma/seed.ts wipes every table. Use pnpm demo:reset.`);
+  }
   console.log("🌱 Starting seed...\n");
 
   // Clean existing data (order matters for FK constraints)
