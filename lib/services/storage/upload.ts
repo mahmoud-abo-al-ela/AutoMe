@@ -122,8 +122,7 @@ export async function uploadCarImages(
     return results.map((result) => (result as PromiseFulfilledResult<string>).value);
   }
 
-  // One photo failed: the ones that made it would sit in storage with no car
-  // listing them. Removed best effort — the upload's own error is the answer.
+  // Otherwise the photos that did upload sit in storage with no car listing them.
   const uploaded = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
   await deleteCarImages(uploaded, carId, bucketName).catch((error: unknown) =>
     logError(`Could not delete the partial upload of car ${carId}`, error)

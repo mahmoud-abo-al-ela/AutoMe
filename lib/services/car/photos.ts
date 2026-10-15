@@ -2,21 +2,12 @@ import * as storageService from "@/lib/services/storage";
 import { ValidationError, logError } from "@/lib/utils/errors";
 
 export interface EditedPhotos {
-  /** Photos the car already has, by stored URL, in the order the edit lists them. */
   kept: string[];
-  /** New uploads: files or data: URLs. */
   added: Array<File | string>;
-  /** Stored photos the edit dropped. */
   removed: string[];
 }
 
-/**
- * Sort an edit's photo list against the car's stored photos. Every photo is
- * either one this car already has — by its stored URL — or a new upload. A URL
- * the car doesn't have (another listing's, another dealership's, anywhere on
- * the web) is refused, and the plan's photo limit counts kept and new
- * together. Pure: nothing is uploaded or deleted here.
- */
+/** A URL the car doesn't already have is refused, so an edit can't attach another listing's photo. */
 export function sortEditedPhotos(
   stored: string[] | null | undefined,
   images: Array<File | string>,
@@ -48,10 +39,7 @@ export function sortEditedPhotos(
   return { kept, added, removed };
 }
 
-/**
- * Photos uploaded for an edit whose write did not land. Best effort: the
- * write's own error is what the dealer needs to see, not a cleanup failure.
- */
+/** Best effort: the failed write's error is what the dealer should see, not this one's. */
 export async function discardUploads(urls: string[], carId: string) {
   if (urls.length === 0) return;
   await storageService.deleteCarImages(urls, carId).catch((error: unknown) =>

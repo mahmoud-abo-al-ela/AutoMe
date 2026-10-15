@@ -100,10 +100,6 @@ describe("updateCarFull photos", () => {
   });
 });
 
-/**
- * A removed photo is deleted only after the car row stops listing it, so an
- * edit that fails part-way never leaves the car pointing at deleted files.
- */
 describe("updateCarFull photo order", () => {
   it("deletes a removed photo only after the write", async () => {
     await updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG);
@@ -143,7 +139,7 @@ describe("updateCarFull photo order", () => {
       statusCode: 409,
       messageKey: "errors.upload.photosChanged",
     });
-    // Only this edit's own uploads go; STORED[0], which it meant to drop, stays.
+    // STORED[0], which this edit meant to drop, must stay.
     expect(deleteCarImages).toHaveBeenCalledTimes(1);
     expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/car-1/new-0.jpg"], "car-1");
   });

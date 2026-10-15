@@ -302,15 +302,12 @@ export async function updateCarFull(
     throw new AuthorizationError("You don't have access to this car");
   }
 
-  // The whole photo list is checked before anything is uploaded or deleted.
   const organization = await getOrganizationById(organizationId);
   const maxImagesPerCar = (organization ? await planInEffect(organization) : null)?.maxImagesPerCar ?? 5;
   const { kept: existingImages, added: newImageFiles, removed: deletedImages } =
     sortEditedPhotos(existingCar.images, carData.images, maxImagesPerCar);
 
-  // Upload, then write, then delete what the edit dropped. Deleting first
-  // meant a failed upload or write left the car pointing at files that were
-  // already gone.
+  // Delete dropped photos only after the write, so a failure never leaves the car pointing at missing files.
   let newImageUrls: string[] = [];
   if (newImageFiles.length > 0) {
     newImageUrls = await storageService.uploadCarImages(newImageFiles, carId, "car-images", maxImagesPerCar);
@@ -319,7 +316,6 @@ export async function updateCarFull(
   const finalImages = [...existingImages, ...newImageUrls];
   const status = toCarStatus(carData.status);
 
-  // Lands only if the photos are still the ones this edit was sorted against.
   const write = await carRepository.updateCarIfPhotosUnchanged(carId, organizationId, existingCar.images || [], {
     title: carData.title,
     make: carData.make,

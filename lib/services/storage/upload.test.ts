@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 
-// The real module refuses to load without env. Each case that reaches storage
-// sets the clients up itself.
+// The real module refuses to load without env.
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn(), createAdminClient: vi.fn() }));
 
 import { createAdminClient, createClient } from "@/lib/supabase";
@@ -69,10 +68,6 @@ describe("adding a car with photo files", () => {
   });
 });
 
-/**
- * A car's photos upload together. When one fails, the ones that made it must
- * not stay in storage with no car listing them.
- */
 describe("uploadCarImages when one photo fails", () => {
   const png = () => new File([new Uint8Array(PNG)], "car.png", { type: "image/png" });
 

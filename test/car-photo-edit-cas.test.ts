@@ -12,11 +12,7 @@ const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 import { updateCarIfPhotosUnchanged, updateCarImageAlts } from "@/lib/repositories/car";
 import { db } from "@/lib/prisma";
 
-/**
- * A full car edit's write, against real Postgres: it lands only while the
- * car's photos are still the list the edit read. The service's handling of
- * each outcome is unit-tested; this pins the SQL it relies on.
- */
+// Pins the SQL behind updateCarIfPhotosUnchanged; the service side is unit-tested.
 
 const ORG = "org_test_car_photo_cas";
 const OTHER_ORG = "org_test_car_photo_cas_other";
@@ -75,10 +71,8 @@ describe.skipIf(!hasTestDb)("car photo-edit compare-and-set (real Postgres)", ()
     const car = await newCar([A, B]);
     const seen = car.images;
 
-    // The other edit lands first: it keeps A and adds C.
     expect((await updateCarIfPhotosUnchanged(car.id, ORG, seen, { images: [A, C] })).status).toBe("updated");
 
-    // This edit, sorted against [A, B], would drop C and delete A.
     const write = await updateCarIfPhotosUnchanged(car.id, ORG, seen, { images: [B], mileage: 99 });
 
     expect(write).toEqual({ status: "photosChanged" });

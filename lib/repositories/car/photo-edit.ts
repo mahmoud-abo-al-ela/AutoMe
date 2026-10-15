@@ -8,17 +8,7 @@ export type PhotoEditWrite =
   | { status: "notFound" }
   | { status: "photosChanged" };
 
-/**
- * Update one of a dealership's cars only while its photos are still
- * `expectedImages` — the list the edit was computed from. A compare-and-set:
- * if another edit changed the photos in between, nothing is written, so this
- * edit can neither drop photos the other added nor go on to delete photos the
- * row still lists.
- *
- * Keyed on `images`, not `updatedAt`: the alt-text job writes the car right
- * after every save, and would make a dealer's next quick edit lose for nothing.
- * Scoped by organization in the WHERE as well.
- */
+/** Writes only if the photos are still `expectedImages`. Not keyed on updatedAt: the alt-text job bumps it after every save. */
 export async function updateCarIfPhotosUnchanged(
   id: string,
   organizationId: string,
