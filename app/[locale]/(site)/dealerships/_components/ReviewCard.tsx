@@ -33,7 +33,7 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
                     )}
                 </span>
                 <div className="min-w-0 flex-1">
-                    <p dir="auto" className="truncate font-semibold">
+                    <p className="truncate font-semibold">
                         {name}
                     </p>
                     <p className="text-micro text-muted-foreground">
@@ -46,14 +46,16 @@ const ReviewCard = ({ review }: { review: DealershipReview }) => {
                 </span>
             </div>
 
-            {/* The buyer's own words, in whatever language they wrote them. */}
+            {/* The buyer's own words, in whatever language they wrote them — set in the
+                page's direction, so a card reads one way: an English review on the
+                Arabic page runs right to left with the rest of it. */}
             {title && (
-                <h3 dir="auto" className="mt-1 text-body font-semibold">
+                <h3 className="mt-1 text-body font-semibold">
                     {title}
                 </h3>
             )}
             {comment && (
-                <p dir="auto" className="text-body text-muted-foreground">
+                <p className="text-body text-muted-foreground">
                     {comment}
                 </p>
             )}

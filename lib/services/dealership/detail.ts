@@ -51,6 +51,8 @@ export async function getDealershipBySlug(slug: string | null | undefined) {
         // The standing terms buyers read on every listing (null = not stated).
         offersFinancing: dealership.offersFinancing,
         financingNote: dealership.financingNote,
+        financingNoteEn: dealership.financingNoteEn,
+        financingNoteAr: dealership.financingNoteAr,
         acceptsTradeIn: dealership.acceptsTradeIn,
         allowsInspection: dealership.allowsInspection,
         offersDelivery: dealership.offersDelivery,

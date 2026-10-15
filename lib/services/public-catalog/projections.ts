@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { dealershipPlaceName } from "@/lib/locations/names";
 import { resolveCarDescription, resolveCarFeatures, resolveCarTitle } from "@/lib/utils/car-text";
-import { statedDisclosures, type CarDisclosures, type DealershipTerms } from "@/lib/utils/car-disclosures";
+import { statedDisclosures, statedTerms, type CarDisclosures, type DealershipTerms } from "@/lib/utils/car-disclosures";
 import { carUrl, dealershipUrl, type LinkSource } from "./urls";
 
 /**
@@ -160,7 +160,8 @@ export function publicCarDetail(car: PublicCarRow, locale: Locale, from?: LinkSo
       url: dealershipUrl(organization.slug, locale, from),
       phone: organization.phone ?? null,
       address: organization.address ?? null,
-      terms: organization.terms ?? {},
+      // Stated already (the serializer); this puts the note in the reader's language.
+      terms: statedTerms(organization.terms ?? {}, locale),
     },
   };
 }

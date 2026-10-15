@@ -67,6 +67,23 @@ describe("car disclosures", () => {
     });
   });
 
+  it("puts the financing note in the reader's language when given one", () => {
+    const terms = {
+      offersFinancing: true,
+      financingNote: "Instalments through partner banks",
+      financingNoteEn: "Instalments through partner banks",
+      financingNoteAr: "تقسيط عبر البنوك الشريكة",
+    };
+    expect(statedTerms(terms, "ar")).toEqual({ offersFinancing: true, financingNote: "تقسيط عبر البنوك الشريكة" });
+    // Without a locale the languages ride along, for the page to choose.
+    expect(statedTerms(terms)).toEqual(terms);
+    // No translation yet: the dealer's own words.
+    expect(statedTerms({ offersFinancing: true, financingNote: "NBE loans" }, "ar")).toEqual({
+      offersFinancing: true,
+      financingNote: "NBE loans",
+    });
+  });
+
   it("is accepted by the server schema exactly as the form sends it", () => {
     // Guards the licence regex: a lost backslash once made it reject every month.
     const car = {

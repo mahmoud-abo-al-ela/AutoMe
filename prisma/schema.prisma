@@ -181,6 +181,10 @@ model Organization {
   // every car it sells. Null means "not stated", as on the car's own fields.
   offersFinancing  Boolean?
   financingNote    String? // banks, years, down payment — the dealer's words
+  // The note in each language: the dealer's words in their own language's
+  // column, the translation in the other (lib/utils/dealership-text).
+  financingNoteEn  String?
+  financingNoteAr  String?
   acceptsTradeIn   Boolean?
   allowsInspection Boolean? // an independent mechanic may look at the car
   offersDelivery   Boolean?

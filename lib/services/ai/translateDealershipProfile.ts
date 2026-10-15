@@ -9,10 +9,12 @@ import { textPart } from "@/lib/ai/provider/types";
 export interface DealershipProfileText {
   description: string;
   address: string;
+  financingNote: string;
 }
 
 /**
- * Write a dealership's description and/or address in the other language.
+ * Write a dealership's description, address and/or financing note in the
+ * other language.
  *
  * Metered and cached through the one AI client like every other call; the
  * text and direction are the cache key, so saving the profile again without
@@ -35,5 +37,9 @@ export async function translateDealershipProfile(
     cacheBytes: source,
     thinking: "low",
   });
-  return { description: translated.description.trim(), address: translated.address.trim() };
+  return {
+    description: translated.description.trim(),
+    address: translated.address.trim(),
+    financingNote: translated.financingNote.trim(),
+  };
 }

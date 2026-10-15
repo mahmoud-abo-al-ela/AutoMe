@@ -53,6 +53,11 @@ export const updateDealershipTerms = withOrgAuth(async (ctx, payload: unknown) =
     ctx.organization.id
   );
 
+  // The financing note in the other language, as for the profile: after the
+  // save has answered, and a failure only delays it.
+  const caller = { ...aiCallerFor(ctx), priority: "low" as const };
+  after(() => dealershipService.syncDealershipProfileText(ctx.organization.id, caller));
+
   // Shown on every one of the dealership's listings, and cited by the assistant.
   revalidateLocalized(`/org/${ctx.organization.slug}/settings`);
   revalidateLocalized(`/dealerships/${ctx.organization.slug}`);

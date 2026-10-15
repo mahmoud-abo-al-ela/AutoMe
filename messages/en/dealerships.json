@@ -217,12 +217,7 @@
     },
     "about": {
       "hours": "Opening hours",
-      "contact": "Contact and location",
-      "address": "Address",
-      "phone": "Phone",
-      "website": "Website",
-      "getDirections": "Get directions",
-      "noContact": "No contact details yet."
+      "website": "Website"
     }
   }
 }

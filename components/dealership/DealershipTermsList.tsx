@@ -1,6 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { resolveDealershipText } from "@/lib/utils/dealership-text";
 import { CheckCircle2, MinusCircle } from "lucide-react";
 import { DEALERSHIP_TERM_FLAGS, type DealershipTerms } from "@/lib/utils/car-disclosures";
 
@@ -40,6 +42,9 @@ export function DealershipTermsList({
   className?: string;
 }) {
   const t = useTranslations("carDetail.history");
+  // In the reader's language once translated; the dealer's own words until then.
+  const locale = useLocale() as Locale;
+  const note = terms.offersFinancing ? resolveDealershipText(terms, "financingNote", locale) : null;
   const lines: DisclosureLine[] = DEALERSHIP_TERM_FLAGS.filter((flag) => typeof terms[flag] === "boolean").map((flag) => ({
     key: flag,
     text: t(`terms.${flag}.${terms[flag] ? "yes" : "no"}`),
@@ -50,11 +55,11 @@ export function DealershipTermsList({
   return (
     <div className={className}>
       <DisclosureList lines={lines} stacked={stacked} />
-      {terms.offersFinancing && terms.financingNote && (
-        // The dealer's own words, in whatever language they wrote them.
-        <p dir="auto" className="mt-2 text-sm text-muted-foreground">
-          {terms.financingNote}
-        </p>
+      {note && (
+        // Set in the page's direction, like the list above it — also while it
+        // falls back to the dealer's words in the other language — not flipped
+        // to the other side of the card by dir="auto".
+        <p className="mt-2 text-sm text-muted-foreground">{note.text}</p>
       )}
     </div>
   );

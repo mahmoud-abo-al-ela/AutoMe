@@ -20,6 +20,29 @@ const ADDRESS_AR = "شارع البحر، طنطا";
 beforeEach(() => vi.resetAllMocks());
 
 describe("syncDealershipProfileText", () => {
+  it("translates the financing note with the rest of the profile", async () => {
+    repo.findDealershipProfileText.mockResolvedValue({ address: ADDRESS_EN, financingNote: "Instalments through partner banks" });
+    ai.translateDealershipProfile.mockResolvedValue({ description: "", address: ADDRESS_AR, financingNote: "تقسيط عبر البنوك الشريكة" });
+
+    await syncDealershipProfileText("org-1", caller);
+
+    expect(ai.translateDealershipProfile).toHaveBeenCalledWith(
+      { description: "", address: ADDRESS_EN, financingNote: "Instalments through partner banks" },
+      "en",
+      caller
+    );
+    expect(repo.saveDealershipProfileLanguages).toHaveBeenCalledWith(
+      "org-1",
+      { address: ADDRESS_EN, financingNote: "Instalments through partner banks" },
+      {
+        addressEn: ADDRESS_EN,
+        addressAr: ADDRESS_AR,
+        financingNoteEn: "Instalments through partner banks",
+        financingNoteAr: "تقسيط عبر البنوك الشريكة",
+      }
+    );
+  });
+
   it("translates fields written in one language in one call, and stores each pair", async () => {
     repo.findDealershipProfileText.mockResolvedValue({ description: `${EN} `, address: ADDRESS_EN });
     ai.translateDealershipProfile.mockResolvedValue({ description: AR, address: ADDRESS_AR });
@@ -27,7 +50,7 @@ describe("syncDealershipProfileText", () => {
     await syncDealershipProfileText("org-1", caller);
 
     expect(ai.translateDealershipProfile).toHaveBeenCalledTimes(1);
-    expect(ai.translateDealershipProfile).toHaveBeenCalledWith({ description: EN, address: ADDRESS_EN }, "en", caller);
+    expect(ai.translateDealershipProfile).toHaveBeenCalledWith({ description: EN, address: ADDRESS_EN, financingNote: "" }, "en", caller);
     // Guarded by the columns as stored, trailing space and all.
     expect(repo.saveDealershipProfileLanguages).toHaveBeenCalledWith(
       "org-1",
@@ -44,8 +67,8 @@ describe("syncDealershipProfileText", () => {
 
     await syncDealershipProfileText("org-1", caller);
 
-    expect(ai.translateDealershipProfile).toHaveBeenNthCalledWith(1, { description: "", address: ADDRESS_EN }, "en", caller);
-    expect(ai.translateDealershipProfile).toHaveBeenNthCalledWith(2, { description: AR, address: "" }, "ar", caller);
+    expect(ai.translateDealershipProfile).toHaveBeenNthCalledWith(1, { description: "", address: ADDRESS_EN, financingNote: "" }, "en", caller);
+    expect(ai.translateDealershipProfile).toHaveBeenNthCalledWith(2, { description: AR, address: "", financingNote: "" }, "ar", caller);
     expect(repo.saveDealershipProfileLanguages).toHaveBeenCalledWith("org-1", { address: ADDRESS_EN }, { addressEn: ADDRESS_EN, addressAr: ADDRESS_AR });
     expect(repo.saveDealershipProfileLanguages).toHaveBeenCalledWith("org-1", { description: AR }, { descriptionAr: AR, descriptionEn: EN });
   });

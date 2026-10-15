@@ -2,8 +2,8 @@ import type { Locale } from "@/i18n/routing";
 import { detectTextLanguage } from "./text-language";
 
 /**
- * A dealership's own words — its description and address — in the reader's
- * language.
+ * A dealership's own words — its description, address and financing note —
+ * in the reader's language.
  *
  * The dealer writes each in whichever language they like; it is kept as
  * written (`description`, `address`), and after a save the other language is
@@ -18,7 +18,7 @@ import { detectTextLanguage } from "./text-language";
  * of the other language get the new text untranslated until the translation
  * catches up (the rule car text follows: fall back, never blank, never stale).
  */
-export const DEALERSHIP_TEXT_FIELDS = ["description", "address"] as const;
+export const DEALERSHIP_TEXT_FIELDS = ["description", "address", "financingNote"] as const;
 export type DealershipTextField = (typeof DEALERSHIP_TEXT_FIELDS)[number];
 
 export type BilingualDealershipText = Partial<

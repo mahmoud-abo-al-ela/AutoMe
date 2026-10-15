@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { ChevronRight, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -20,15 +21,19 @@ const initialsOf = (name: string) =>
 /**
  * Who the dealership is: the breadcrumb (desktop, as on a car's page), the
  * logo — or its initials on the marker yellow — the name, one line of facts
- * and the dealer's own description.
+ * (the full address among them) and the dealer's own description. `actions`
+ * sit at the header's end: the About tab puts Message and Directions there.
  */
-export function DealershipIdentity({ dealership }: { dealership: DealershipDetail }) {
+export function DealershipIdentity({ dealership, actions }: { dealership: DealershipDetail; actions?: ReactNode }) {
     const t = useTranslations("dealerships");
     const fmt = useFormatters();
     const place = usePlaceNames();
     const separator = <ChevronRight aria-hidden className="size-3.5 shrink-0 rtl:rotate-180" />;
     const description = resolveDealershipText(dealership, "description", fmt.locale);
-    // "Tanta, Gharbia"; the region is dropped when it repeats the city (Cairo).
+    // The street address in the reader's language — it carries the city and
+    // governorate; without one, "Tanta, Gharbia" (the region dropped when it
+    // repeats the city, as for Cairo).
+    const address = resolveDealershipText(dealership, "address", fmt.locale);
     const where = [...new Set([place.city(dealership.city), place.region(dealership.region)].filter(Boolean))].join(
         fmt.locale === "ar" ? "، " : ", "
     );
@@ -49,7 +54,7 @@ export function DealershipIdentity({ dealership }: { dealership: DealershipDetai
                 </span>
             </nav>
 
-            <header className="flex items-center gap-4 sm:gap-6">
+            <header className="flex flex-wrap items-center gap-4 sm:gap-6">
                 {dealership.logo ? (
                     // Dealership logos are arbitrary remote URLs (see MainHeader).
                     // eslint-disable-next-line @next/next/no-img-element
@@ -66,7 +71,7 @@ export function DealershipIdentity({ dealership }: { dealership: DealershipDetai
                         {initialsOf(dealership.name)}
                     </span>
                 )}
-                <div className="flex min-w-0 flex-col gap-1.5">
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <h1 className="text-h1 font-black">{dealership.name}</h1>
                     <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-caption text-muted-foreground">
                         {dealership.totalReviews > 0 ? (
@@ -84,8 +89,8 @@ export function DealershipIdentity({ dealership }: { dealership: DealershipDetai
                         ) : (
                             <span>{t("detail.noReviewsYet")}</span>
                         )}
-                        {where && <span aria-hidden>·</span>}
-                        {where && <span>{where}</span>}
+                        {(address || where) && <span aria-hidden>·</span>}
+                        {address ? <span {...textDirection(address)}>{address.text}</span> : where && <span>{where}</span>}
                         <span aria-hidden>·</span>
                         <span>
                             {t("detail.memberSince", {
@@ -95,6 +100,7 @@ export function DealershipIdentity({ dealership }: { dealership: DealershipDetai
                         </span>
                     </p>
                 </div>
+                {actions && <div className="w-full md:ms-auto md:w-72">{actions}</div>}
             </header>
 
             {description && (
