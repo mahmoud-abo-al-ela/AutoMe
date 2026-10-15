@@ -291,7 +291,11 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
     dealership: {
       name: source.dealership.name,
       ...(clip(source.dealership.about) && { about: clip(source.dealership.about) }),
-      ...(source.dealership.rating && { rating: source.dealership.rating }),
+      // With its scale: reviews are 1 to 5, and an answer that says "4.6 out of
+      // 5" names a number the record must hold, or the check withholds it.
+      ...(source.dealership.rating && {
+        rating: { average: source.dealership.rating.average, outOf: 5, reviews: source.dealership.rating.reviews },
+      }),
       ...(source.dealership.website && { website: source.dealership.website }),
       ...(source.dealership.place && { place: source.dealership.place }),
       ...(source.dealership.address && { address: source.dealership.address }),
