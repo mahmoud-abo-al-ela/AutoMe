@@ -98,3 +98,47 @@ describe("updateCarFull photos", () => {
     await expect(updateCarFull("car-1", edit([STORED[0]]), "clerk_m", ORG)).rejects.toBeInstanceOf(NotFoundError);
   });
 });
+
+/**
+ * A removed photo is deleted only after the car row stops listing it, so an
+ * edit that fails part-way never leaves the car pointing at deleted files.
+ */
+describe("updateCarFull photo order", () => {
+  it("deletes a removed photo only after the write", async () => {
+    await updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG);
+
+    expect(uploadCarImages.mock.invocationCallOrder[0]).toBeLessThan(updateCar.mock.invocationCallOrder[0]);
+    expect(updateCar.mock.invocationCallOrder[0]).toBeLessThan(deleteCarImages.mock.invocationCallOrder[0]);
+  });
+
+  it("leaves storage and the car untouched when the upload fails", async () => {
+    uploadCarImages.mockRejectedValue(new Error("Upload failed: storage unavailable"));
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toThrow("Upload failed");
+    expect(deleteCarImages).not.toHaveBeenCalled();
+    expect(updateCar).not.toHaveBeenCalled();
+  });
+
+  it("keeps the car's photos and discards the new uploads when the write fails", async () => {
+    updateCar.mockRejectedValue(new Error("connection reset"));
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toThrow("connection reset");
+    expect(deleteCarImages).toHaveBeenCalledTimes(1);
+    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/car-1/new-0.jpg"], "car-1");
+  });
+
+  it("discards the new uploads when the write matches no car", async () => {
+    updateCar.mockResolvedValue(null);
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toBeInstanceOf(NotFoundError);
+    expect(deleteCarImages).toHaveBeenCalledTimes(1);
+    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/car-1/new-0.jpg"], "car-1");
+  });
+
+  it("still reports the write's error when discarding the uploads fails too", async () => {
+    updateCar.mockRejectedValue(new Error("connection reset"));
+    deleteCarImages.mockRejectedValue(new Error("Delete failed"));
+
+    await expect(updateCarFull("car-1", edit([DATA_URL]), "clerk_m", ORG)).rejects.toThrow("connection reset");
+  });
+});
