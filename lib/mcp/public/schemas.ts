@@ -25,7 +25,7 @@ export const searchCarsInput = {
   fuelType: choice(FUEL_TYPES as unknown as [string, ...string[]], "Fuel types"),
   transmission: choice(TRANSMISSIONS as unknown as [string, ...string[]], "Gearboxes"),
   color: z.string().trim().max(40).optional().describe("A colour, e.g. White."),
-  city: z.string().trim().max(60).optional().describe("A city the dealership is in."),
+  city: z.string().trim().max(60).optional().describe("Where the dealership is: a city (\"New Cairo\") or a governorate (\"Cairo\", covering its cities), in English or Arabic."),
   dealership: z.string().trim().max(100).optional().describe("A dealership's slug, from list_dealerships or a car's dealership."),
   minPrice: amount("Lowest price, in Egyptian pounds (EGP)."),
   maxPrice: amount("Highest price, in Egyptian pounds (EGP)."),
@@ -108,7 +108,7 @@ export const carDetailOutput = {
 
 export const listDealershipsInput = {
   query: z.string().trim().max(100).optional().describe("Words from a dealership's name or description."),
-  city: z.string().trim().max(60).optional().describe("A city."),
+  city: z.string().trim().max(60).optional().describe("A city (\"New Cairo\") or a governorate (\"Cairo\", covering its cities), in English or Arabic."),
   page: z.number().int().min(1).max(DEALERSHIP_LIST_LIMITS.maxPage).default(1),
   limit: z.number().int().min(1).max(DEALERSHIP_LIST_LIMITS.maxLimit).default(DEALERSHIP_LIST_LIMITS.defaultLimit),
   locale: localeInput,

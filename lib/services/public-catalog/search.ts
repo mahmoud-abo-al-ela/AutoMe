@@ -3,6 +3,7 @@ import * as carRepository from "@/lib/repositories/car";
 import type { CarFilters } from "@/lib/services/car/listing";
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 import { publicCarDetail, publicCarSummary, type PublicCarDetail, type PublicCarRow, type PublicCarSummary } from "./projections";
+import { resolvePlace } from "./place";
 import type { LinkSource } from "./urls";
 
 /**
@@ -87,7 +88,7 @@ export async function searchPublicCars(input: PublicCarSearch, locale: Locale, f
     fuelType: input.fuelType,
     transmission: input.transmission,
     color: input.color,
-    city: input.city,
+    ...resolvePlace(input.city),
     dealership: input.dealership,
     minPrice: input.minPrice,
     maxPrice: input.maxPrice,
