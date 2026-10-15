@@ -1,6 +1,7 @@
 // Storage upload functions
 import { createClient } from "@/lib/supabase";
-import { ValidationError } from "@/lib/utils/errors";
+import { ValidationError, logError } from "@/lib/utils/errors";
+import { deleteCarImages } from "./delete";
 import { VALIDATION_RULES } from "@/lib/constants/validation";
 import { IMAGE_EXTENSION, sniffImageType } from "@/lib/utils/image-type";
 
@@ -112,11 +113,21 @@ export async function uploadCarImages(
   }
 
   const folderPath = `cars/${carId}`;
-  const uploadPromises = images.map((image, index) =>
-    uploadImage(image, folderPath, index, bucketName)
+  const results = await Promise.allSettled(
+    images.map((image, index) => uploadImage(image, folderPath, index, bucketName))
   );
 
-  return await Promise.all(uploadPromises);
+  const failed = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+  if (!failed) {
+    return results.map((result) => (result as PromiseFulfilledResult<string>).value);
+  }
+
+  // Otherwise the photos that did upload sit in storage with no car listing them.
+  const uploaded = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  await deleteCarImages(uploaded, carId, bucketName).catch((error: unknown) =>
+    logError(`Could not delete the partial upload of car ${carId}`, error)
+  );
+  throw failed.reason;
 }
 
 /**

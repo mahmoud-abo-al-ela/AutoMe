@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 
-const { findCarById, updateCar, findUser, getOrganizationById, deleteCarImages, uploadCarImages } = vi.hoisted(() => ({
+const { findCarById, updateCarIfPhotosUnchanged, findUser, getOrganizationById, deleteCarImages, uploadCarImages } = vi.hoisted(() => ({
   findCarById: vi.fn(),
-  updateCar: vi.fn(),
+  updateCarIfPhotosUnchanged: vi.fn(),
   findUser: vi.fn(),
   getOrganizationById: vi.fn(),
   deleteCarImages: vi.fn(),
   uploadCarImages: vi.fn(),
 }));
-vi.mock("@/lib/repositories/car", () => ({ findCarById, updateCar }));
+vi.mock("@/lib/repositories/car", () => ({ findCarById, updateCarIfPhotosUnchanged }));
 vi.mock("@/lib/repositories/user", () => ({ findUserByClerkIdWithMemberships: findUser }));
 vi.mock("@/lib/services/impersonation/active", () => ({ isImpersonatingOrganization: vi.fn(async () => false) }));
 vi.mock("@/lib/services/audit/audit", () => ({ auditHelpers: { logCarChanged: vi.fn() } }));
@@ -56,7 +56,7 @@ beforeEach(() => {
   getOrganizationById.mockResolvedValue({ id: ORG, subscription: { plan: { maxImagesPerCar: 3 } } });
   deleteCarImages.mockResolvedValue(undefined);
   uploadCarImages.mockImplementation(async (files: unknown[]) => files.map((_, i) => `https://cdn.test/cars/car-1/new-${i}.jpg`));
-  updateCar.mockImplementation(async (id: string, _org: string, data: object) => ({ id, ...data }));
+  updateCarIfPhotosUnchanged.mockImplementation(async (id: string, _org: string, _expected: string[], data: object) => ({ status: "updated", car: { id, ...data } }));
 });
 
 describe("updateCarFull photos", () => {
@@ -66,7 +66,7 @@ describe("updateCarFull photos", () => {
     });
     expect(deleteCarImages).not.toHaveBeenCalled();
     expect(uploadCarImages).not.toHaveBeenCalled();
-    expect(updateCar).not.toHaveBeenCalled();
+    expect(updateCarIfPhotosUnchanged).not.toHaveBeenCalled();
   });
 
   it("counts kept and new photos together against the plan's limit", async () => {
@@ -84,9 +84,10 @@ describe("updateCarFull photos", () => {
 
     expect(deleteCarImages).toHaveBeenCalledWith([STORED[0]], "car-1");
     expect(uploadCarImages).toHaveBeenCalledWith([DATA_URL, file], "car-1", "car-images", 3);
-    expect(updateCar).toHaveBeenCalledWith(
+    expect(updateCarIfPhotosUnchanged).toHaveBeenCalledWith(
       "car-1",
       ORG,
+      STORED,
       expect.objectContaining({
         images: [STORED[1], "https://cdn.test/cars/car-1/new-0.jpg", "https://cdn.test/cars/car-1/new-1.jpg"],
       }),
@@ -94,7 +95,59 @@ describe("updateCarFull photos", () => {
   });
 
   it("is NotFound when the scoped write matches no car of this dealership", async () => {
-    updateCar.mockResolvedValue(null);
+    updateCarIfPhotosUnchanged.mockResolvedValue({ status: "notFound" });
     await expect(updateCarFull("car-1", edit([STORED[0]]), "clerk_m", ORG)).rejects.toBeInstanceOf(NotFoundError);
+  });
+});
+
+describe("updateCarFull photo order", () => {
+  it("deletes a removed photo only after the write", async () => {
+    await updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG);
+
+    expect(uploadCarImages.mock.invocationCallOrder[0]).toBeLessThan(updateCarIfPhotosUnchanged.mock.invocationCallOrder[0]);
+    expect(updateCarIfPhotosUnchanged.mock.invocationCallOrder[0]).toBeLessThan(deleteCarImages.mock.invocationCallOrder[0]);
+  });
+
+  it("leaves storage and the car untouched when the upload fails", async () => {
+    uploadCarImages.mockRejectedValue(new Error("Upload failed: storage unavailable"));
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toThrow("Upload failed");
+    expect(deleteCarImages).not.toHaveBeenCalled();
+    expect(updateCarIfPhotosUnchanged).not.toHaveBeenCalled();
+  });
+
+  it("keeps the car's photos and discards the new uploads when the write fails", async () => {
+    updateCarIfPhotosUnchanged.mockRejectedValue(new Error("connection reset"));
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toThrow("connection reset");
+    expect(deleteCarImages).toHaveBeenCalledTimes(1);
+    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/car-1/new-0.jpg"], "car-1");
+  });
+
+  it("discards the new uploads when the write matches no car", async () => {
+    updateCarIfPhotosUnchanged.mockResolvedValue({ status: "notFound" });
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toBeInstanceOf(NotFoundError);
+    expect(deleteCarImages).toHaveBeenCalledTimes(1);
+    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/car-1/new-0.jpg"], "car-1");
+  });
+
+  it("refuses with a conflict, deleting nothing the car lists, when another edit changed the photos first", async () => {
+    updateCarIfPhotosUnchanged.mockResolvedValue({ status: "photosChanged" });
+
+    await expect(updateCarFull("car-1", edit([STORED[1], DATA_URL]), "clerk_m", ORG)).rejects.toMatchObject({
+      statusCode: 409,
+      messageKey: "errors.upload.photosChanged",
+    });
+    // STORED[0], which this edit meant to drop, must stay.
+    expect(deleteCarImages).toHaveBeenCalledTimes(1);
+    expect(deleteCarImages).toHaveBeenCalledWith(["https://cdn.test/cars/car-1/new-0.jpg"], "car-1");
+  });
+
+  it("still reports the write's error when discarding the uploads fails too", async () => {
+    updateCarIfPhotosUnchanged.mockRejectedValue(new Error("connection reset"));
+    deleteCarImages.mockRejectedValue(new Error("Delete failed"));
+
+    await expect(updateCarFull("car-1", edit([DATA_URL]), "clerk_m", ORG)).rejects.toThrow("connection reset");
   });
 });

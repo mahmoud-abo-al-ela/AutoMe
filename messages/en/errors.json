@@ -80,7 +80,8 @@
     "unsupportedType": "Only JPEG, PNG and WebP images are allowed.",
     "required": "Add at least one image.",
     "tooMany": "You can add at most {max} images.",
-    "notThisCar": "One of the photos isn’t this car’s. Remove it and upload it again."
+    "notThisCar": "One of the photos isn’t this car’s. Remove it and upload it again.",
+    "photosChanged": "Someone else just changed this car’s photos. Reload the page and make your edit again."
   },
   "testDrive": {
     "carUnavailable": "This car isn’t available for test drives.",
