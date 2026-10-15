@@ -9,6 +9,7 @@ import {
   type ListingSource,
   type OtherCar,
 } from "@/lib/ai/grounding";
+import { unbackedNumbers } from "@/lib/ai/grounding-verify";
 
 const source: ListingSource = {
   make: "Toyota",
@@ -107,7 +108,7 @@ describe("what AutoMe already knows", () => {
       otherCars: [{ year: 2020, make: "Toyota", model: "Corolla", color: "Black", price: 900000, mileage: 50000, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" }],
     });
     expect(facts.photos).toEqual(["Black leather seats"]);
-    expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, reviews: 12 });
+    expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, outOf: 5, reviews: 12 });
     expect((facts.otherCars as { price: unknown }[])[0].price).toEqual({ amount: 900000, currency: "EGP" });
   });
 
@@ -120,6 +121,23 @@ describe("what AutoMe already knows", () => {
     const cars = buildListingFacts({ ...source, otherCars: rows }).otherCars as Record<string, unknown>[];
     expect(cars.map((car) => car.ref)).toEqual([1, 2]);
     expect(JSON.stringify(cars)).not.toMatch(/car-a|img\/a|"id"|"image"/);
+  });
+});
+
+describe("the dealership rating", () => {
+  const rated = buildListingFacts({ ...source, dealership: { ...source.dealership, rating: { average: 4.6, reviews: 23 } } });
+
+  it("states its scale, so an honest \"4.6 out of 5\" is backed by the record", () => {
+    // Reviews are 1 to 5, and the prompt says so: an answer naming the scale
+    // was withheld as an unbacked number (the nightly eval, 2026-10-15).
+    expect(rated.dealership).toMatchObject({ rating: { average: 4.6, outOf: 5, reviews: 23 } });
+    expect(
+      unbackedNumbers("Nile Motors is rated 4.6 out of 5 from 23 reviews on AutoMe.", rated, ["dealership"], "Is this dealer trustworthy?")
+    ).toEqual([]);
+  });
+
+  it("still refuses a rating the record does not hold", () => {
+    expect(unbackedNumbers("Rated 4.9 out of 5 from 40 reviews.", rated, ["dealership"], "Trustworthy?")).toEqual([4.9, 40]);
   });
 });
 
