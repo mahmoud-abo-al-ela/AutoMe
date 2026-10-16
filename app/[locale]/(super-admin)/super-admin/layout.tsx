@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { checkUser } from "@/lib/checkUser";
 import type { Locale } from "@/i18n/routing";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SiteToaster } from "@/components/brand/SiteToaster";
 import { AdminFrame } from "./_components/AdminFrame";
+import { supportSessionHome } from "./_lib/support-session-home";
 
 // Super-admin pages query the database during server render but, unlike tenant
 // pages, never call getCurrentOrganization() (which reads headers() and forces
@@ -36,6 +37,14 @@ export default async function SuperAdminLayout({
   // Must be authenticated
   if (!user) {
     notFound();
+  }
+
+  // Starting a support session sets its cookie in a Server Action, and Next
+  // re-renders the page the admin is on with it — as the dealer, which flashed
+  // the not-found below before the dashboard opened. Send them there instead.
+  const sessionHome = supportSessionHome(user, locale);
+  if (sessionHome) {
+    redirect(sessionHome);
   }
 
   // Must be Admin
