@@ -16,7 +16,7 @@ Dealerships subscribe, showcase their new and used cars on a branded storefront,
 [![Paymob](https://img.shields.io/badge/Billing-Paymob-0b5fff)](https://paymob.com)
 [![Vitest](https://img.shields.io/badge/tests-Vitest_%2B_live_AI_evals-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev)
 
-[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Getting started](#getting-started) • [CI/CD](#cicd)
+[AI capabilities](#ai-capabilities) • [SaaS model](#saas-model) • [Architecture](#architecture) • [Design decisions](#key-design-decisions) • [Design](#design) • [Getting started](#getting-started) • [CI/CD](#cicd)
 
 </div>
 
@@ -26,12 +26,12 @@ AutoMe is a multi-tenant marketplace and dealership platform built for the Egypt
 
 - **Buyers** search, compare and save cars, chat with dealers, book test drives, and ask an AI assistant anything about a listing.
 - **Dealerships** run inventory, team, test drives, billing and buyer conversations from one dashboard, and publish a storefront on their own subdomain.
-- **The platform team** manages dealerships, plans and support from a super-admin console with audit logs and impersonation.
+- **The platform team** runs the marketplace from a super-admin console: an overview and analytics, dealerships, accounts and plans, a log of every change, and support sessions — signing in as a dealership member with a stated reason, for at most four hours, never able to touch billing or the team.
 
 AI is not a feature bolted onto the side — it is how a car gets listed, how a listing reaches both halves of a bilingual market, and how a buyer's question gets answered at 2 a.m. It runs through one metered, provider-agnostic client, and every output that reaches a buyer is checked against data before it is shown.
 
 > [!NOTE]
-> One market, done properly: prices in Egyptian pounds (EGP), Arabic as a first-class language (right-to-left layout, Arabic-Indic digits, Egyptian phrasing, Arabic-aware search), and English alongside it.
+> One market, done properly: prices in Egyptian pounds (EGP), Arabic as a first-class language (right-to-left layout, Arabic-Indic digits, Modern Standard Arabic that reads naturally in Egypt, Arabic-aware search), and English alongside it.
 
 ## AI capabilities
 
@@ -41,10 +41,14 @@ AI is not a feature bolted onto the side — it is how a car gets listed, how a 
 | **Buyer listing assistant** | Answers buyers' questions on the car page with directions, call and test-drive buttons, and cards for the dealership's other cars it recommends | Answers only from a record of facts about the car, cites the facts it used, and is rejected if a citation does not hold; otherwise it says the dealer can answer — never guesses |
 | **Dealer knowledge loop** | Questions the assistant could not answer, and answers buyers rated 👎, land in the dealer's Buyer Questions inbox | The dealer's reply becomes a fact the assistant cites from then on — the assistant gets better from the dealer, not from guessing |
 | **Market price context** | Places a car's price among comparable listings on the platform (same model, widening to the same make and body type) | The numbers are computed in code, not by the model; it states the comparison and never calls a price a good or bad deal |
-| **Bilingual listings** | Writes the other language on save, in natural Egyptian-market Arabic or English | Only the language the dealer changed is re-translated; a failure saves the car untranslated rather than blocking it |
+| **Bilingual listings** | Writes the other language of a listing or a dealership's profile on save, in Modern Standard Arabic that reads naturally in Egypt, or English | Only the language the dealer changed is re-translated; a failure saves the car untranslated rather than blocking it |
 | **Listing-quality coach** | Scores a draft listing with deterministic rules and adds tailored AI advice per issue | The score is rule-based and reproducible; the model only explains |
 | **Photo descriptions** | Describes each photo for accessibility, SEO and the assistant's knowledge of what the car looks like | Platform-paid and low priority, so it never competes with a dealer waiting on the AI |
 | **Photo search** | Buyers search the marketplace with a photo of a car they like | Runs on a fast, separate model chain; metered but never billed to a dealership |
+| **Search by description** | A sentence in the home search — *"automatic SUV under 1.5 million in Cairo"* — becomes the matching filters | If the model fails or finds no filter, it is the plain word search after all; the buyer is never stopped |
+| **Chat translation** | Translates a buyer–dealer message into the reader's language, with the original a tap away | Rate-limited per person; the translation never replaces the stored message |
+| **Chat moderation** | Screens buyer–dealer messages: a scam or spam message shows under a warning, an abusive one is hidden until the reader chooses to see it | Only the reader sees the verdict, the sender's message is never altered, and a flagged message's links stop being clickable |
+| **Weekly summary** | Opens each dealership's weekly email with a short summary of its week, in the dealer's chosen language | The numbers come from the database; a summary quoting a number that is not in the data is dropped |
 
 ## Use AutoMe from an AI assistant (MCP)
 
@@ -52,9 +56,11 @@ AutoMe's cars for sale can be searched from any AI client that speaks the [Model
 
 - **Endpoint:** `https://auto-me.vercel.app/api/mcp` (Streamable HTTP, no sign-in).
 - **In Claude:** Settings → Connectors → *Add custom connector*, name `AutoMe`, the URL above, no OAuth. Then turn it on in a chat with **+ → Connectors** and ask, for example, *"Find an automatic SUV under 1.5 million EGP on AutoMe"* or *"عندكم تويوتا كورولا؟"*.
-- **Tools** (all read-only): `search_cars` (words in English or Arabic, typos tolerated, plus filters), `get_car`, `compare_cars`, `list_dealerships`, `get_search_options`. Resources `autome://car/{id}` and `autome://dealership/{slug}`; prompts `find_a_car` and `compare_cars`.
+- **Tools** (all read-only): `search_cars` (words in English or Arabic, typos tolerated, plus filters — the city filter takes a city or a governorate by name, in either language), `get_car`, `compare_cars`, `list_dealerships`, `get_search_options`. Resources `autome://car/{id}` and `autome://dealership/{slug}`; prompts `find_a_car` and `compare_cars`.
 - **What it shows:** exactly what any visitor sees — cars on sale from active dealerships, never hidden cars, a dealer's email or anything private. Searching uses words only: no AI model runs for it.
 - **Limits:** up to 20 results per page and 20 pages; requests are rate-limited per caller. Each call is measured (tool, duration, result count, error) without the query text, the caller's address or any user.
+
+**A buyer's own account.** A second server, `https://auto-me.vercel.app/api/mcp/account`, acts for one signed-in buyer. The AI client signs in with OAuth (Clerk is the authorization server; the buyer approves it on AutoMe's consent page), and every call carries that buyer's token — the server never sees anyone else's data. Its tools: `list_saved_cars`, `save_car`, `unsave_car`, `list_my_test_drives`, `request_test_drive` and `cancel_test_drive`. It is off unless `MCP_ACCOUNT_ENABLED=true`.
 
 **In the browser (WebMCP).** In Chrome 149+ (origin trial, token in `NEXT_PUBLIC_WEBMCP_TRIAL_TOKEN`), pages also offer tools to an agent working in the visitor's own tab: `search_cars` and `open_car` on `/cars`, `get_car_details` on a car's page, `compare_cars` on `/compare`, and on the test-drive form `check_test_drive_availability` and `prepare_test_drive_booking` — which fills the form; only the person's Submit books. Locally, enable `chrome://flags/#enable-webmcp-testing`; in the console, `await document.modelContext.getTools()` lists a page's tools.
 
@@ -139,7 +145,16 @@ prisma/              Schema, migrations and seed
 
 **Fail closed.** Missing rate-limit keys refuse requests in production; cron routes refuse to run without their secret and compare it in constant time; webhooks reject unsigned payloads and replays.
 
-**Arabic is not a translation.** Arabic copy is written as Arabic for an Egyptian reader, not translated sentence by sentence; layouts use logical CSS properties so they mirror correctly; search folds Arabic spelling variants so "سياره" finds "سيارة".
+**Arabic is not a translation.** Arabic copy is written in Modern Standard Arabic for an Egyptian reader — no dialect — not translated sentence by sentence; layouts use logical CSS properties so they mirror correctly; search folds Arabic spelling variants so "سياره" finds "سيارة".
+
+## Design
+
+The public site and the dealer dashboard share one design system, "Cairo Plate".
+
+- **The logo is a licence plate.** Every car in Egypt is known by its plate, so AutoMe's name sits on the light-blue EGYPT / مصر band of a private-car plate. Like a real plate's band, it changes with who is signed in: OWNER, TEAM or ADMIN.
+- **Prices wear the plate too.** A car's price is drawn as a plate in EGP — and only a price is, so the shape always means one thing.
+- **The colours of a Cairo street.** Limestone for the page, asphalt for the text, plate blue for links and focus, and road-marking yellow for the one main action on a screen.
+- **One typeface.** Alexandria, by Egyptian type designer Mohamed Gaber, sets Arabic and Latin in one family, so a mixed title sits on one line at one weight.
 
 ## Tech stack
 
@@ -173,6 +188,7 @@ pnpm install                 # also generates the Prisma client
 # create .env — see the variables below
 pnpm prisma migrate deploy   # create the schema
 pnpm db:seed                 # plans, sample dealerships and cars
+pnpm demo:reset              # optional: realistic demo dealerships, cars and reviews
 pnpm dev                     # http://localhost:3000
 ```
 
@@ -230,13 +246,14 @@ Dealership storefronts are served on subdomains; locally, open `http://<slug>.lo
 | `pnpm db:migrate` | Create and apply a migration in development |
 | `pnpm db:seed` / `pnpm db:reset` | Seed / reset and re-seed the database |
 | `pnpm db:studio` | Prisma Studio |
+| `pnpm demo:reset` | Replace the demo dealerships with a fresh realistic set, without touching real ones |
 
 </details>
 
 ## Quality
 
 ```bash
-pnpm typecheck && pnpm test                    # 800+ unit and integration tests
+pnpm typecheck && pnpm test                    # 2,100+ unit and integration tests
 AI_EVAL=1 pnpm vitest run lib/ai/evaluation    # live evaluations against real models
 ```
 
