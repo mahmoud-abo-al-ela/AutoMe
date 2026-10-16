@@ -72,7 +72,7 @@ Developers: `pnpm -s mcp:ops` is a separate, internal MCP server over stdio for 
 
 - **Tenancy.** Each dealership is an organization with its own members, roles, subdomain and data. Every repository query is scoped by an organization id resolved on the server from the session and subdomain — never from request input.
 - **Subscriptions.** Starter, Pro and Enterprise plans priced in EGP and paid through Paymob, a payment each period: renewal reminders a week and three days ahead, a seven-day grace, then the free plan. An upgrade is paid now; a downgrade waits for the paid period to end. Paymob's callbacks are HMAC-verified and idempotent, and a daily job looks up any payment whose callback never arrived.
-- **Entitlements.** Plans gate features and set limits on cars, team members, photos per car and **AI listings per month**. Limits are enforced on the server in the same guard stack as authentication.
+- **Entitlements.** Plans gate features and set limits on cars, team members, photos per car and **AI listings per month**. Limits are enforced on the server: car and seat counts inside the same locked transaction as the insert, the AI allowance before every AI call.
 - **Usage metering.** Every AI call writes a ledger row — tenant, feature, provider, model, tokens, latency, outcome — on success *and* failure. That ledger drives plan limits, per-provider capacity caps and cost reporting. A plan's AI allowance counts cars saved with AI's help, so the photo read, translation and advice behind one listing are one use.
 - **Fair use.** Free-plan traffic runs at a lower priority against shared AI capacity, so paying dealerships are never the ones told "AI busy".
 
@@ -84,7 +84,7 @@ flowchart LR
 
     subgraph Web["Next.js 15 · App Router"]
         Routes["Routes<br/>[locale]/(site) · org/[slug] · (super-admin)"]
-        Actions["Server actions<br/>auth → validate → plan gate → rate limit"]
+        Actions["Server actions<br/>auth → validate → service"]
         API["Route handlers<br/>AI stream · webhooks · cron"]
     end
 
@@ -97,9 +97,9 @@ flowchart LR
     Web -.-> Clerk["Clerk auth"] & Paymob["Paymob billing"] & Stream["Stream chat"] & Supabase["Supabase storage"] & Arcjet["Arcjet protection"]
 ```
 
-**Request path.** Route → server action → service → repository → Prisma. Each server action runs the same guards in the same order: authentication and tenant resolution (`withOrgAuth`), Zod validation, plan gate and usage limit, then rate limiting. Route handlers under `app/api/` assemble the same guards themselves.
+**Request path.** Route → server action → service → repository → Prisma. A server action authenticates and resolves the tenant (`withOrgAuth`), validates its input with Zod and hands off to a service; actions that can be abused also rate-limit. Plan limits are checked where the decision is made: AI features in `authorizeDealerAiFeature` (plan, allowance and rate limit together), car and seat counts inside the repository's locked insert, photos per car in the car service. Route handlers under `app/api/` authenticate, rate-limit and validate themselves.
 
-**AI path.** Every model call goes through `generateStructured` in `lib/ai/client.ts` — the only code that talks to a provider, so no call can skip metering:
+**AI path.** Every model call goes through `lib/ai/client.ts` (`generateStructured`), or `lib/ai/embeddings.ts` for embeddings. They are the only code that talks to a provider, so no call can skip metering:
 
 ```mermaid
 flowchart LR
@@ -118,13 +118,15 @@ flowchart LR
 ```
 app/                 Routes: [locale]/(site) public site, [locale]/org/[slug] dealer
                      dashboard, [locale]/(super-admin), api/ (AI stream, uploads,
-                     webhooks, cron)
-actions/             Server actions — the guard stack lives here
+                     search, MCP, background jobs, webhooks, cron)
+actions/             Server actions: authenticate, validate, call a service
 lib/services/        Business logic, one folder per domain
 lib/repositories/    Data access; every query takes a server-sourced tenant id
 lib/ai/              AI client, providers, model chains, prompts, schemas, grounding,
                      evaluations
-lib/middleware/      Auth, plan gates, usage limits, rate limits, validation
+lib/jobs/            Background jobs, queued and retried through QStash
+lib/mcp/             MCP servers: public, account and ops
+lib/middleware/      Auth, usage limits, rate limits, validation
 messages/{en,ar}/    Translations, one file per area
 prisma/              Schema, migrations and seed
 ```
