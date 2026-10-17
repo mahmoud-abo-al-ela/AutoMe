@@ -12,15 +12,6 @@ import { mcpReferralMedium } from "@/lib/services/mcp/referrals";
 import { carPageText, loadCar } from "./_lib/car-seo";
 import { defaultShareImage } from "@/lib/utils/page-seo";
 
-/**
- * Title, description, canonical, hreflang and share card for a listing.
- *
- * The title and description are derived rather than stored: a meta title is a
- * template over facts the row already has, and a meta description is the first
- * 155 characters of the listing text. Asking the model for four more fields
- * would have cost tokens and added two more things that can be wrong, to
- * produce something a template computes exactly.
- */
 export async function generateMetadata({
   params,
 }: {

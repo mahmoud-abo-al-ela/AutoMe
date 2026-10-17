@@ -31,12 +31,6 @@ function isCurrent(pathname: string, path: string) {
 const barIcon =
   "relative flex size-11 shrink-0 items-center justify-center rounded-control text-inverse-foreground transition-colors hover:bg-inverse-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker";
 
-/**
- * The super-admin frame (canvas: Super admin round 1, "1 · Platform pulse"):
- * the dealer dashboard's asphalt bar, with a plate that reads ADMIN so
- * an admin always sees they are in the platform admin — most of all during a
- * support session, when the dealer's dashboard is one click away.
- */
 export function AdminTopBar() {
   const t = useTranslations("superAdmin.nav");
   useRememberPlateBand("admin");

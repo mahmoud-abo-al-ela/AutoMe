@@ -30,12 +30,6 @@ function weeksOf(month: string) {
   return weeks;
 }
 
-/**
- * The month on the side (canvas: C · Month and day): Saturday first, a dot per
- * drive (amber when one still needs an outcome), today ringed, the chosen day
- * filled, closed weekdays muted. On a phone it folds to the chosen day's week
- * until the dealer asks for the whole month.
- */
 export function MonthCalendar({
   month,
   selected,

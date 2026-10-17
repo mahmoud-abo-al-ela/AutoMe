@@ -1,8 +1,3 @@
-/**
- * The plans page on its way, in its own shape: the header, the four billing
- * numbers, then the comparison — three plan columns over their rows on a
- * laptop, a card per plan below that. Shimmer, like every admin skeleton.
- */
 export default function PlansLoading() {
   return (
     <div aria-busy className="flex flex-col gap-6">

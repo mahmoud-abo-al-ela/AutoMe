@@ -14,13 +14,6 @@ import { PlanStep } from "./PlanStep";
 import { StepIndicator } from "./StepIndicator";
 import { STEPS, useCreateDealership, type Plan, type Values } from "./use-create-dealership";
 
-/**
- * Adding a dealership (canvas: Super admin add a dealership round 1, "B ·
- * Three steps"): the dealership and where it is, then the owner and how to
- * reach it, then the plan with every answer to check. The web address and the
- * owner's email are checked as they are typed — whether the address is free,
- * and whether the owner already has an account and so becomes the owner now.
- */
 export function CreateDealershipForm({ plans }: { plans: Plan[] }) {
   const t = useTranslations("superAdmin.organizations.form");
   const fmt = useFormatters();

@@ -11,11 +11,6 @@ import type { ActionResponse } from "@/lib/utils/response";
 
 type Busy = "pay" | "cancel" | "keep" | null;
 
-/**
- * The owner's buttons on the billing page: pay the renewal (to Paymob), cancel
- * at period end, keep the current plan. One place for the loading state, the
- * toasts and the refresh, which the banner and the plan card both use.
- */
 export function useBillingActions(organizationId: string) {
   const router = useRouter();
   const t = useTranslations("org.billing.current");

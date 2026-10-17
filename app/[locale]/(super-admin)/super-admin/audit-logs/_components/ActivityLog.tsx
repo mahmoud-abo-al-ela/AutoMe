@@ -33,14 +33,6 @@ const SOURCE_TONES: Record<PlatformActivitySource, string> = {
 };
 const NO_LOOKUPS: PlatformActivity["lookups"] = { cars: {}, users: {}, memberships: {}, plans: {} };
 
-/**
- * The super-admin Activity page (canvas: Super admin activity round 1, "2 ·
- * Data table"): every change across AutoMe as a row — when, who, what
- * happened, to what, where, and whether a dealer, a buyer, AutoMe staff or a
- * support session made it. A row opens in place to show the change in full:
- * each field before and after, the session it was made in, and the device.
- * Ten to a page; cards below laptop width; the CSV holds what the filters match.
- */
 export function ActivityLog({ data }: { data: PlatformActivity }) {
   const t = useTranslations("superAdmin.auditLogs");
   const fmt = useFormatters();

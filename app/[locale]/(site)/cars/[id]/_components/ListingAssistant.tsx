@@ -21,14 +21,6 @@ const SUGGESTIONS = ["features", "hours", "mileage"] as const;
 /** How many earlier exchanges travel with a question, as context. */
 const HISTORY_SENT = 4;
 
-/**
- * Buyer questions answered from what AutoMe knows about this car.
- *
- * A decline shows the model's own wording when the server passed it (see
- * declineText), otherwise fixed copy — and always the way out, the dealer
- * chat, because the point of declining is to send the buyer to someone who
- * knows.
- */
 const ListingAssistant = ({ carId }: { carId: string }) => {
   const t = useTranslations("carDetail.assistant");
   const locale = useLocale() as Locale;
@@ -46,12 +38,6 @@ const ListingAssistant = ({ carId }: { carId: string }) => {
   const settle = (id: number, patch: Partial<Exchange>) =>
     setExchanges((all) => all.map((e) => (e.id === id ? { ...e, ...patch } : e)));
 
-  /**
-   * What was said so far, for the model to read a follow-up by — named by the
-   * server's id for each reply; the server reads back what it said. Only real
-   * replies carry one: small talk, errors and "unavailable" say nothing about
-   * the car.
-   */
   const historyFor = (all: Exchange[]) =>
     all
       .flatMap((e) => {

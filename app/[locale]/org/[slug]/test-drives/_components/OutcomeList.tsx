@@ -9,12 +9,6 @@ import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 import { useDriveText } from "./schedule-shared";
 
-/**
- * Confirmed drives whose time has passed with nothing recorded — the one
- * thing on this page waiting on the dealer, so it sits in amber under the
- * calendar. "Happened" counts the drive in Insights; "Didn't come" records the
- * no-show without telling the buyer anything.
- */
 export function OutcomeList({
   drives,
   pendingId,

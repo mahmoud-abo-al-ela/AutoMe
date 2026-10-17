@@ -10,12 +10,6 @@ import { findCity, findGovernorate } from "@/lib/locations/data";
 import type { Locale } from "@/i18n/routing";
 import { groupHours, hoursToEntries, termsToInput, unstatedTerms, type StorefrontState } from "./storefront-state";
 
-/**
- * The dealership as buyers meet it, drawn from the unsaved form so every
- * keystroke shows. Built from the public page's own pieces — the open/closed
- * badge and the terms list buyers read on every listing — so it cannot drift
- * into describing a page that does not exist.
- */
 export function StorefrontPreview({ state, logo }: { state: StorefrontState; logo: string | null }) {
   const t = useTranslations("org.settings.storefront.preview");
   const tTerms = useTranslations("org.settings.storefront.terms");

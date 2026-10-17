@@ -10,11 +10,6 @@ import { cn } from "@/lib/utils";
 import { useBillingActions } from "./use-billing-actions";
 import type { BillingPaidAhead, BillingRenewal, BillingSubscription } from "./_lib/billing-types";
 
-/**
- * The one banner that asks for money: a trial coming to an end, a renewal
- * that is due, or a payment that is overdue. Nothing shows once the next
- * period is paid, or when the plan is set to end.
- */
 export default function RenewalBanner({
   subscription,
   renewal,

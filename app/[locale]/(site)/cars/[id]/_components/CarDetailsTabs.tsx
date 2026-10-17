@@ -15,11 +15,6 @@ const TRIGGER =
   "after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full after:bg-transparent " +
   "hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:bg-border-strong";
 
-/**
- * Description / Features / All specs (Figma: Tabs). Underline tabs on a
- * hairline; the six key specs already sit above, under the gallery, so the
- * tabs hold the long-form detail.
- */
 const CarDetailsTabs = ({ car }: { car: CarDetail }) => {
   const t = useTranslations("carDetail.tabs");
   const fmt = useFormatters();

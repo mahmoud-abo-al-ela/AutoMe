@@ -23,13 +23,6 @@ const VERDICT_TONE = {
   unknown: "text-muted-foreground",
 } as const;
 
-/**
- * Step 4: the price — placed among similar cars as it is typed, by the same
- * comparison the public listing's gauge uses — then the words buyers read,
- * who sees the car, and the listing check. When adding, the buttons below
- * choose between publishing and keeping it hidden; when editing, the status
- * is chosen here.
- */
 export function PublishStep({
   form,
   isAi,

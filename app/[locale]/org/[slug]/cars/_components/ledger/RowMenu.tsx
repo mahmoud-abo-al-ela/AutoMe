@@ -14,11 +14,6 @@ import type { InventoryRow } from "@/lib/services/dashboard";
 import type { CarChange } from "@/hooks/use-inventory";
 import { cn } from "@/lib/utils";
 
-/**
- * One car's actions: open it, edit it, feature it, move it between on sale,
- * hidden and sold, delete it. Deleting asks first (the caller's dialog); the
- * rest are undone from this same menu, so they act at once.
- */
 export function RowMenu({
   car,
   name,

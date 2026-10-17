@@ -30,14 +30,6 @@ import type {
   CompareWinners,
 } from "../_lib/compare-types";
 
-/**
- * Mobile comparison view with:
- *  - Swipeable car cards carousel at the top (Embla)
- *  - Specs displayed below for the active car
- *  - "Compare Side by Side" toggle for compact 2-car view
- *  - Sticky spec category headers
- *  - Swipe indicator dots synced with carousel
- */
 const MobileCompareTable = ({
   cars,
   highlightDifferences,

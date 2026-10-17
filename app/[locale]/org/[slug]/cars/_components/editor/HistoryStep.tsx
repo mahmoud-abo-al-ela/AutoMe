@@ -12,15 +12,6 @@ import { ChoiceCards, Question } from "./editor-ui";
 /** "6" stands for six or more, as the stored owner count does. */
 const MAX_OWNERS = 6;
 
-/**
- * Step 3: what buyers ask first — repaint, accidents, owners, service, the
- * licence. One question at a time, answered with a tap. Every one is optional
- * and "Not stated" is a real answer: the listing shows nothing for it, and the
- * buyer assistant declines rather than guessing.
- *
- * The questions are asked the way buyers ask them ("has any panel been
- * repainted?"), so "No" there is original paint — the stored field.
- */
 export function HistoryStep({ form }: { form: UseFormReturn<CarFormValues> }) {
   const t = useTranslations("org.carForm");
   const fmt = useFormatters();

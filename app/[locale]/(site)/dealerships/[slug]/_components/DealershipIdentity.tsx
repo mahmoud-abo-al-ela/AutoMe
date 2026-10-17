@@ -18,12 +18,6 @@ const initialsOf = (name: string) =>
         .toUpperCase()
         .slice(0, 2);
 
-/**
- * Who the dealership is: the breadcrumb (desktop, as on a car's page), the
- * logo — or its initials on the marker yellow — the name, one line of facts
- * (the full address among them) and the dealer's own description. `actions`
- * sit at the header's end: the About tab puts Message and Directions there.
- */
 export function DealershipIdentity({ dealership, actions }: { dealership: DealershipDetail; actions?: ReactNode }) {
     const t = useTranslations("dealerships");
     const fmt = useFormatters();

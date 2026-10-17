@@ -1,8 +1,3 @@
-/**
- * The users list on its way, in its own shape: the header with its
- * action, the toolbar with its account dropdown, then the table's rows. Shimmer, like
- * every admin skeleton.
- */
 export default function UsersLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

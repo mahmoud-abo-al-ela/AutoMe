@@ -18,19 +18,7 @@ const eventSchema = z.object({
   message: z.record(z.string(), z.unknown()).optional(),
 });
 
-/**
- * Stream Chat's webhook — every new or edited chat message, for moderation.
- *
- * Public (under /api/webhooks), so it authenticates itself: Stream signs the
- * raw body with the app's secret (HMAC-SHA256, X-Signature), checked in
- * constant time by the SDK. Without the secret it refuses everything rather
- * than trusting anyone.
- *
- * It answers at once and moderates after the response (`after`): Stream
- * retries a webhook that is slow, and a message is already delivered by the
- * time this runs — a check can never hold one up. A retried event is
- * harmless: moderation is idempotent and its model call is cached.
- */
+// Public route: trusts only Stream's HMAC signature and refuses everything when the secret is unset.
 export async function POST(req: Request) {
   if (!process.env.STREAM_API_SECRET || !process.env.NEXT_PUBLIC_STREAM_API_KEY) {
     logError("Stream credentials are not configured; rejecting webhook.");

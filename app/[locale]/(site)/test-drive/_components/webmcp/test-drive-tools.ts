@@ -2,15 +2,6 @@ import { z } from "zod";
 import { BOOKING_HORIZON_DAYS, type BookingProblem } from "@/lib/utils/booking-slots";
 import { defineWebMcpTool, type WebMcpToolDefinition } from "@/lib/webmcp/define-tool";
 
-/**
- * The test-drive form's WebMCP tools: see when the car can be driven, and
- * fill the form with a booking. Neither books anything. Requesting the test
- * drive stays the person's own act — pressing Submit on the form these tools
- * filled in, which runs the same request, checks and race-safe booking
- * (PR 12) as any other — so an agent can prepare a booking but never make
- * one (plans/mcp D-9, D-25).
- */
-
 export interface TestDriveToolDeps {
   checkDay: (date: string) => Promise<unknown>;
   /** Fill the form; the reason it cannot be filled, or null. */

@@ -5,11 +5,6 @@ import { FairPriceGauge, PriceVerdictLine } from "@/components/brand";
 import { useFormatters } from "@/hooks/use-formatters";
 import type { MarketPosition } from "@/lib/services/car/market-price";
 
-/**
- * Where this price sits in the market (Figma: FairPriceGauge / Full) — the
- * gauge, the verdict in words, and what the verdict rests on. The same
- * comparison the listing assistant quotes (lib/services/car/market-price).
- */
 export function MarketPriceBlock({ market, currency }: { market: MarketPosition | null; currency: string }) {
   const t = useTranslations("common.market");
   const fmt = useFormatters();

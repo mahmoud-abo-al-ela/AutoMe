@@ -4,13 +4,6 @@ import { NotFoundError } from "@/lib/utils/errors";
 import { carLine, type ListedCar } from "@/lib/webmcp/car-line";
 import { defineWebMcpTool, type WebMcpToolDefinition } from "@/lib/webmcp/define-tool";
 
-/**
- * The compare page's WebMCP tool: put cars side by side on the page. The
- * page holds its selection in the browser (compareUtils, the list the
- * compare tray adds to), so the tool sets that list — the person sees the
- * comparison it describes, and can change it.
- */
-
 export interface ComparedCar extends ListedCar {
   bodyType?: string | null;
   fuelType?: string | null;

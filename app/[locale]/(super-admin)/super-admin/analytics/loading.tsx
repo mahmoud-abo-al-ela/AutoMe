@@ -1,10 +1,5 @@
 import { ReportSkeletonFromUrl } from "./_components/ReportSkeletons";
 
-/**
- * Analytics on its way, in its own shape: the header with the period switch,
- * the report tabs, then the open report in its own shape, read from the URL.
- * Shimmer, like every admin skeleton.
- */
 export default function AnalyticsLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

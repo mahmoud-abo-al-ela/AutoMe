@@ -2,23 +2,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn, MAX_COMPARE_CARS } from "@/lib/utils";
 import { specCategories } from "./utils";
 
-/**
- * A bar on a muted cell. The skeleton's own colour (--accent) is the muted
- * colour itself, so on the label column and the section headers a plain
- * Skeleton drew nothing and those cells loaded as blank blocks.
- */
 const OnMuted = ({ className }: { className?: string }) => <Skeleton className={cn("bg-foreground/10", className)} />;
 
 /** The rows of the first tab, which is the one the comparison opens on. */
 const FIRST_TAB = specCategories[0];
 
-/**
- * The compare page as it will load, shape for shape (ComparePageHeader and
- * CompareTable): the title with its count and controls, the three car columns
- * across the full width, the tab strip, and the first tab's rows. It drew a
- * 250px label column beside the cards and every category at once — a page
- * two screens taller than the one that replaced it.
- */
 const ComparePageSkeleton = () => {
     return (
         <div>

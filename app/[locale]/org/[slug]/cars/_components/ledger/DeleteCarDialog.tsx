@@ -15,11 +15,6 @@ import { buttonVariants } from "@/components/ui/button";
 import type { InventoryRow } from "@/lib/services/dashboard";
 import { useCarName } from "./ledger-shared";
 
-/**
- * Deleting a car is the one change on this page that cannot be undone, so it
- * asks first, naming the car, with the destructive verb on the button. Radix
- * puts focus on "Keep it" when it opens; Escape closes it without deleting.
- */
 export function DeleteCarDialog({
   car,
   onClose,

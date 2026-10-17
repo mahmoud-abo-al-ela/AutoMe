@@ -11,14 +11,6 @@ import CompareCarCard from "./CompareCarCard";
 import { handleRemoveCar } from "./utils";
 import type { CompareCar } from "../_lib/compare-types";
 
-/**
- * Empty state for the compare page (Figma: EmptyState).
- *
- *  1. **No cars** – the site empty state: what happened, and the way to Browse.
- *  2. **One car** – that car beside the next step, since a comparison needs two.
- *
- * Uses shared `handleRemoveCar` from utils instead of duplicated logic.
- */
 const EmptyCompare = ({ singleCar }: { singleCar: CompareCar | null }) => {
   const t = useTranslations("compare.empty");
   const fmt = useFormatters();

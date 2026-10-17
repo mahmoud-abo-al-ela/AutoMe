@@ -44,11 +44,6 @@ const CarImageGallery = ({
     modalThumbnailRef,
   } = useCarImageGallery(images);
 
-  /**
-   * What the current photo shows, in the reader's language, when the model has
-   * described it — otherwise the make and model. The position stays either
-   * way: a screen reader moving through a carousel needs "2 of 5".
-   */
   const currentAlt = (short: boolean) => {
     const image = images?.[currentImageIndex];
     const description = image?.description?.[locale === "ar" ? "ar" : "en"];

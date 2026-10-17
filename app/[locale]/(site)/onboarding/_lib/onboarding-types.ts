@@ -9,11 +9,6 @@ export interface OnboardingDayHours {
   closed: boolean;
 }
 
-/**
- * The wizard's own lowercase day keys. Deliberately not the Prisma `DayOfWeek`
- * enum: this is the client-side form shape, and the mapping to the stored
- * uppercase enum happens in the submit action.
- */
 export type OnboardingDay =
   | "monday"
   | "tuesday"
@@ -25,11 +20,6 @@ export type OnboardingDay =
 
 export type OnboardingWorkingHours = Record<OnboardingDay, OnboardingDayHours>;
 
-/**
- * Everything the three steps collect. Declared rather than inferred from
- * `DEFAULT_FORM_DATA`, whose `planId: null` would otherwise infer as the type
- * `null` and make every assignment to it fail.
- */
 export interface OnboardingFormData {
   name: string;
   slug: string;
@@ -70,11 +60,6 @@ export type OnboardingLocationPatch = Partial<OnboardingLocation>;
  */
 export type SlugStatus = "invalid" | "checking" | "available" | "taken" | null;
 
-/**
- * One row of the working-hours editor. The day name is looked up from
- * `onboarding.workingHours.days` by `key`, so it is not carried here — a
- * label baked into a constant is English for every reader.
- */
 export interface WorkingHoursDay {
   key: OnboardingDay;
 }

@@ -19,11 +19,6 @@ export interface SpecCategory {
     specs: SpecDefinition[];
 }
 
-/**
- * Shared specification categories used by both desktop and mobile compare views.
- * Each category contains an array of spec definitions keyed by the car field. The visible label comes from carAttributes.fields,
- * keyed by that same data key, so the label and the column cannot drift apart.
- */
 export const specCategories: SpecCategory[] = [
     {
         id: "basic",
@@ -56,11 +51,6 @@ export const allSpecKeys: SpecKey[] = specCategories.flatMap((cat) =>
 
 // ─── Car Removal Handler ─────────────────────────────────────────────────────
 
-/**
- * Remove a car from the compare list and broadcast the change.
- * Centralises the logic previously duplicated in CompareTable,
- * MobileCompareTable, and EmptyCompare.
- */
 export const handleRemoveCar = (carId: string): void => {
     compareUtils.removeFromCompare(carId);
     window.dispatchEvent(new Event("compareListUpdated"));
@@ -68,14 +58,6 @@ export const handleRemoveCar = (carId: string): void => {
 
 // ─── Difference Computation ──────────────────────────────────────────────────
 
-/**
- * Compare the spec values across all provided cars and return a map indicating
- * which specs have differing values. Keyed by spec key plus "features".
- *
- * @example
- *   computeDifferences([carA, carB])
- *   // => { make: false, model: true, year: true, price: true, ... }
- */
 export const computeDifferences = (
     cars: CompareCar[]
 ): CompareDifferences => {
@@ -103,23 +85,6 @@ export const computeDifferences = (
 /** The specs that have a "best" value; everything else is descriptive. */
 type NumericSpecKey = "price" | "mileage" | "year" | "seats";
 
-/**
- * Determines the "winner" car for specific numeric/comparable specs.
- *
- * Winner rules:
- *  - price    → lowest is best
- *  - mileage  → lowest is best
- *  - year     → highest (newest) is best
- *  - seats    → highest is best
- *  - features → most features is best
- *
- * Returns a map of spec key → winning car's ID, or null on a tie or when there
- * is not enough data.
- *
- * @example
- *   computeWinners([carA, carB])
- *   // => { price: "car-1", mileage: "car-2", year: "car-1", ... }
- */
 export const computeWinners = (
     cars: CompareCar[]
 ): CompareWinners => {

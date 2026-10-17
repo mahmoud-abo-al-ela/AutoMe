@@ -72,11 +72,6 @@ function StandingAlert({ data, base }: { data: DealershipDetail; base: string })
   );
 }
 
-/**
- * One dealership (canvas: Super admin dealership detail round 1, "1 · Record
- * with tabs"): who it is and its actions, its standing when that needs saying,
- * then tabs — Summary, Cars, Team, Billing, Activity — each in the URL.
- */
 export function DealershipRecord({ data }: { data: DealershipDetail }) {
   const t = useTranslations("superAdmin.organizations.details");
   const fmt = useFormatters();

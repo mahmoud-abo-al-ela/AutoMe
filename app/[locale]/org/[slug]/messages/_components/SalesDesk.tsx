@@ -7,12 +7,6 @@ import { DeskList } from "./DeskList";
 import { DeskConversation } from "./DeskConversation";
 import { DealPanel } from "./DealPanel";
 
-/**
- * Messages as a sales desk (canvas: Messages round 1, 2 · Sales desk): the
- * conversations, the open one, and the deal beside it — three columns on a
- * wide screen, the deal moving into a sheet below that, and on a phone one
- * screen at a time: the list, then the conversation with a back arrow.
- */
 export function SalesDesk({ organizationSlug, base }: { organizationSlug: string; base: string }) {
   const t = useTranslations("org.messages");
   const { channel } = useChatContext();

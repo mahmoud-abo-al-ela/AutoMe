@@ -9,12 +9,6 @@ import { parseFiltersFromSearch } from "@/hooks/cars-page-filters";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-/**
- * The query string again, for the one parser the page's own URL state uses —
- * so the server's first render and the client cannot read a URL differently
- * (a copy of the parser here once missed `exact`). Repeated keys arrive as
- * arrays; the filter UI only ever sets one value, so the first is kept.
- */
 function queryString(params: SearchParams): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -24,13 +18,6 @@ function queryString(params: SearchParams): string {
   return query.toString();
 }
 
-/**
- * The canonical is the bare listing, whatever the filters. Every filter
- * combination is a distinct URL over the same stock; indexing each one would
- * split the page's ranking across thousands of near-duplicates. On a
- * dealership subdomain the list is that dealership's stock, so it is
- * canonical there rather than on the marketplace.
- */
 export async function generateMetadata({
   params,
 }: {

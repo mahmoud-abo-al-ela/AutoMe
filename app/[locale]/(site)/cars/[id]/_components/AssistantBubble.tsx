@@ -147,17 +147,6 @@ export function AssistantBubble({ exchange, carId }: { exchange: Exchange; carId
   );
 }
 
-/**
- * 👍 / 👎 under an answer, once. A 👎 sends the question to the dealer, who
- * can answer it properly — so the buyer is told that, not just thanked.
- * Shown as rated at once; a failed request only loses the rating.
- */
-/**
- * "Ask the dealer" when the assistant cannot answer: the car's chat, opened in
- * place for a signed-in buyer; for a signed-out one, sign-in first and then
- * back to this car with the chat open (OpenChatFromLink). It used to link to
- * /messages, whose sign-in had no way back — the buyer ended on the home page.
- */
 function AskDealerLink({ carId, label }: { carId: string; label: string }) {
   const { isSignedIn } = useUser();
   const { openCarChat } = useChatDock();

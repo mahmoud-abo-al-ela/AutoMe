@@ -11,11 +11,6 @@ type Assistant = Extract<AnalyticsData, { report: "ai" }>["assistant"];
 
 const empty = "px-5 py-8 text-center text-caption text-muted-foreground";
 
-/**
- * The listing assistant on the AI report: what it did with buyers' questions,
- * how buyers rated its answers, and which model and prompt wrote the answers
- * they did not find helpful — so a 👎 traces to the call behind it.
- */
 export function AssistantQuality({ data }: { data: Assistant }) {
   const t = useTranslations("superAdmin.analytics.ai.assistant");
   const fmt = useFormatters();

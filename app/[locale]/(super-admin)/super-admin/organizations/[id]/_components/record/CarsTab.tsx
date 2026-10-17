@@ -26,11 +26,6 @@ import { CarsTable } from "./CarsTable";
 import { chip, chipOff, chipOn, panel, trigger } from "./record-styles";
 import { useGo } from "./use-go";
 
-/**
- * The Cars tab (canvas: dealership tabs round 1, "Cars A · Inventory table"):
- * status chips with their counts, search and sort above the table, ten cars to
- * a page. Everything is in the URL.
- */
 export function CarsTab({
   data,
   base,

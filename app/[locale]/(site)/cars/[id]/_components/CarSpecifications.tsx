@@ -7,12 +7,6 @@ import { usePlaceNames } from "@/hooks/use-place-names";
 import { SpecGrid } from "@/components/brand";
 import type { CarDetail } from "../_lib/car-detail-types";
 
-/**
- * The spec readout (Figma: SpecCell) — Direction B's spec sheet, hairline
- * cells, no icon tiles. `compact` is the six facts a buyer checks first and
- * sits directly under the gallery; `full` adds colour, seats and status for
- * the Specifications tab.
- */
 const CarSpecifications = ({
   car,
   variant = "compact",

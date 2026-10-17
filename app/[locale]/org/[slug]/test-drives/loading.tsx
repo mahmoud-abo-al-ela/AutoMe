@@ -1,8 +1,3 @@
-/**
- * The Test drives page while it loads, in its own shape: the heading, the
- * month on the side, the day beside it — so the page fills in rather than
- * swapping one placeholder for another.
- */
 export default function TestDrivesLoading() {
   return (
     <div aria-busy className="flex flex-col gap-6">

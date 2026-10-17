@@ -55,11 +55,6 @@ export default async function ContactPage({
             </span>
             <div className="flex min-w-0 flex-col gap-0.5">
               <p className="text-micro text-inverse-foreground/70">{t(`methods.${method.key}.title`)}</p>
-              {/* A phone number and an email address are Latin runs: dir="ltr"
-                  keeps "+20 2 …" from being reordered, and self-start sizes
-                  the link to its text so it still sits at the line's start —
-                  the right, on the Arabic page — instead of filling the line
-                  as an LTR block and aligning left. */}
               {href ? (
                 <a href={href} dir="ltr" className="self-start text-caption font-semibold text-marker [overflow-wrap:anywhere] hover:underline">
                   {detail}

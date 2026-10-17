@@ -21,13 +21,6 @@ import { useFormatters } from "@/hooks/use-formatters";
 
 const VIEW_KEY = "autome.cars.view";
 
-/**
- * Browse page (Figma: Browse — desktop / mobile). Desktop: a sticky filter
- * rail with live counts beside the results. Phones: a sticky toolbar with the
- * Filters sheet and sort — the old fixed bottom filter bar sat under the tab
- * bar. The list view is a desktop layout; it applies only once a ≥1024px
- * viewport is confirmed after hydration, so the server render is always grid.
- */
 export const CarsPagePresenter = ({
   cars,
   pagination,

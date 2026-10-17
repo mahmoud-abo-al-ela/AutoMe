@@ -17,11 +17,6 @@ export async function generateMetadata({
   return { title: t("title"), description: t("description") };
 }
 
-/**
- * Messages, as a sales desk (canvas: Messages round 1, 2 · Sales desk). The
- * page title lives at the top of the conversation list, so the desk can have
- * the screen's full height.
- */
 export default async function OrganizationMessagesPage({
   params,
 }: {

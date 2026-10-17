@@ -9,11 +9,6 @@ import { SectionPanel } from "../../_components/SectionPanel";
 /** One audit-log-derived row of the plan history, as the action returns it. */
 type BillingHistoryEntry = Extract<Awaited<ReturnType<typeof getBillingHistory>>, { success: true }>["data"]["history"][number];
 
-/**
- * When the plan changed — created, upgraded, moved down, ended, renewed — and
- * who did it. The server's own description is left out: it is English-only,
- * and the event's translated name already says what happened.
- */
 export default function BillingHistory({ organizationId }: { organizationId: string }) {
   const t = useTranslations("org.billing.history");
   const { dateTime } = useFormatters();

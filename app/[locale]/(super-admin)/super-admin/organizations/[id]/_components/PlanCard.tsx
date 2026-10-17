@@ -37,11 +37,6 @@ function Usage({ label, used, limit }: { label: string; used: number; limit: num
   );
 }
 
-/**
- * The dealership's plan: what it is on, what it costs, when it is paid until,
- * and how much of the plan's cars and team it uses. "Change plan" opens a
- * choice of plans in place; the change applies straight away.
- */
 export function PlanCard({ data, plans }: { data: DealershipDetail; plans: Plan[] }) {
   const t = useTranslations("superAdmin.organizations.details.plan");
   const tSub = useTranslations("superAdmin.organizations.details.subscription");

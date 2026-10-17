@@ -8,13 +8,6 @@ import { Button } from "@/components/ui/button";
 import { compareUtils } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * Fixed tray that surfaces the compare selection (max 3, stored in
- * localStorage) from anywhere on /cars and links through to /compare. Syncs
- * via the same `compareListUpdated` event CarCard already dispatches.
- *
- * Asphalt, like the toasts, and lifted clear of the phone tab bar.
- */
 export const CompareTray = () => {
   const t = useTranslations("cars.compare");
   const fmt = useFormatters();

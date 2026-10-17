@@ -31,15 +31,6 @@ const CATEGORY_ICONS: Record<string, typeof Info> = {
   features: ListChecks,
 };
 
-/**
- * Desktop comparison table with:
- *  - Sticky top row of car cards
- *  - Tabbed spec categories (Basic / Performance / Features)
- *  - CompareSpecRow for each specification with diff highlighting
- *  - CompareFeatureMatrix for the features tab
- *  - CompareWinnerBadge per category
- *  - Framer-motion layout animations for adding/removing cars
- */
 const CompareTable = ({
   cars,
   highlightDifferences,

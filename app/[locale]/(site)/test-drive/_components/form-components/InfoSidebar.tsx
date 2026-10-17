@@ -6,13 +6,6 @@ import { CalendarDays, Clock, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * Static booking guidance. This used to take `car`/`carId` props and fetch
- * `/api/cars/${carId}` — a route that does not exist, so the request 404'd and
- * react-query retried it on every render of the create form. The result was
- * never rendered either: the panel below is entirely static.
- */
-/** Kept in step with the same figure in TestDriveStatusMessage. */
 const ARRIVE_EARLY_MINUTES = 10;
 const CONFIRMATION_WINDOW_HOURS = 24;
 

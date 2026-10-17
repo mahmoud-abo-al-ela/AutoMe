@@ -17,11 +17,6 @@ export function waitingOnDealer(channel: StreamChannel) {
   return !!last && !!buyerId && last.user?.id === buyerId;
 }
 
-/**
- * A conversation in the desk's list: the buyer, the car they are asking
- * about, the last message — bold while it is theirs and unanswered — and how
- * long they have been waiting, in amber, since that is what costs the sale.
- */
 export function DeskPreview({
   channel,
   setActiveChannel,

@@ -14,11 +14,6 @@ const BASE = "/super-admin/users";
 const ANY = "any";
 const trigger = "h-11 data-[size=default]:h-11 rounded-control border-[#8c8170] bg-field";
 
-/**
- * Search, the kind of account (with how many of each), the dealership a team
- * belongs to, and the sort, for the users list. Each change goes to the URL
- * and back to page one. The dealership list is searchable — there can be many.
- */
 export function UsersToolbar({
   query,
   counts,

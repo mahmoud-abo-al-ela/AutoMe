@@ -11,12 +11,6 @@ import { panel, td, th } from "./record-styles";
 import { TeamSidebar } from "./TeamSidebar";
 import { usePlanName } from "../../../../_components/use-plan-name";
 
-/**
- * The Team tab (canvas: dealership tabs round 1, "Team A · People table"):
- * each person with their role, when they joined and what they have done, and
- * a support session as them; beside it the seats the plan allows and anyone
- * invited who has not signed in yet.
- */
 export function TeamTab({
   data,
 }: {

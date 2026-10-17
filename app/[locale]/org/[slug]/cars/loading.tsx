@@ -1,10 +1,5 @@
 import { LedgerSkeleton } from "./_components/ledger/CarsLedger";
 
-/**
- * The Cars page while it loads, in the page's own shape: title, views,
- * toolbar, and the table's frame with the same skeleton rows the table uses,
- * so the page fills in rather than swapping one placeholder for another.
- */
 export default function CarsLoading() {
   return (
     <div aria-busy className="flex flex-col gap-6">

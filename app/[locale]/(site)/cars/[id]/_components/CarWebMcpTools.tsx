@@ -5,11 +5,6 @@ import { useWebMcpTools } from "@/hooks/use-webmcp-tools";
 import { defineWebMcpTool } from "@/lib/webmcp/define-tool";
 import type { CarToolSummary } from "../_lib/webmcp-summary";
 
-/**
- * The car page's WebMCP tool: the car on the screen, as the page shows it
- * (carToolSummary, built on the server). Renders nothing; where the browser
- * has no WebMCP it does nothing at all.
- */
 export function carPageTools(summary: CarToolSummary) {
   return [
     defineWebMcpTool({

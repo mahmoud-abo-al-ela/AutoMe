@@ -6,17 +6,6 @@ import { useTranslations } from "next-intl";
 import type { SlugStatus } from "../../_lib/onboarding-types";
 import { ROOT_DOMAIN } from "@/lib/utils/tenant-host";
 
-/**
- * Shows the dealership URL being reserved as the user types, with its
- * availability inline.
- *
- * The slug was already generated and checked, but never surfaced — so users
- * learned their address only at the end of onboarding. Naming the URL here is
- * what turns "Dealership Name" from a form field into "this is my site".
- *
- * The slug part is editable: it is suggested from the name's Latin letters,
- * and an all-Arabic name suggests nothing, so the dealer types it here.
- */
 export default function SlugPreview({
     slug,
     status,

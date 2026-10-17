@@ -8,12 +8,6 @@ import type {
     WizardStep,
 } from "../../_lib/onboarding-types";
 
-// Icons and order only. The name and description of each step live in
-// messages/{en,ar}/onboarding.json under `wizard.steps`, keyed by `key`.
-//
-// Names stay short enough to hold one line at the indicator's width.
-// "Organization Details" wrapped, which pushed its description a line below
-// the other two and made the row look broken.
 export const STEPS: WizardStep[] = [
     { id: 1, key: "organization", icon: Building2 },
     { id: 2, key: "workingHours", icon: Clock },

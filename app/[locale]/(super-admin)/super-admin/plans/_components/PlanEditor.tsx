@@ -55,12 +55,6 @@ const formFor = (plan: PlanRow): Form => {
   };
 };
 
-/**
- * Editing one plan (canvas: Super admin plans round 1, "1 · Comparison
- * table"), in a panel beside the table: price, limits, and what is included.
- * "No limit" and "Always" are switches rather than a magic -1 to type. The
- * change applies to every dealership on the plan, which the panel says.
- */
 export function PlanEditor({ plan, onClose }: { plan: PlanRow | null; onClose: () => void }) {
   const t = useTranslations("superAdmin.plans.editor");
   const tCommon = useTranslations("superAdmin.common");

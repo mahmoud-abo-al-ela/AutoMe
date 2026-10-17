@@ -23,13 +23,6 @@ type Props = {
   searchParams: Promise<{ days?: string }>;
 };
 
-/**
- * Insights (canvas: Round 3 — Insights; page pattern 9, analytical): the
- * period comes first and everything below follows it — four figures against
- * the period before, test drives per day, the buyer funnel, the stock, and
- * interest per car with its CSV export in the header. The period lives in
- * the URL (?days=7|30|90), so the server renders the page for it.
- */
 export default async function InsightsPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const requested = Number((await searchParams).days);

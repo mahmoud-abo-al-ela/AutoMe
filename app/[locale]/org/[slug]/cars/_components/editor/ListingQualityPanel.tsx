@@ -29,11 +29,6 @@ function featureList(value: unknown): string[] {
   return [];
 }
 
-/**
- * The listing-quality coach, on demand from the form's last step. Reviews the
- * listing as the form holds it right now — in the dashboard's language, the
- * one the dealer is writing in — not as last saved.
- */
 export default function ListingQualityPanel({ watch }: { watch: UseFormWatch<CarFormValues> }) {
   const t = useTranslations("org.carForm.coach");
   const { number } = useFormatters();

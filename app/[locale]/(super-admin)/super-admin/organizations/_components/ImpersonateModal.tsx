@@ -26,12 +26,6 @@ import { toast } from "sonner";
 import { useActionError } from "@/hooks/use-action-error";
 import type { Prisma } from "@/lib/generated/prisma";
 
-/**
- * A member as /api/super-admin/organizations/[id]/members returns it. That
- * route is still JavaScript, so this is a hand-written mirror of its query
- * rather than an inferred type; it will not track changes there
- * automatically.
- */
 type OrgMemberOption = Prisma.MembershipGetPayload<{
   include: {
     user: { select: { id: true; name: true; email: true; imageUrl: true } };

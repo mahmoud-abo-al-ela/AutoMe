@@ -2,12 +2,6 @@ import { Building2, Mail, Phone, MapPin, type LucideIcon } from "lucide-react";
 import { toLocalEgyptPhone, toPhoneField } from "@/lib/utils/phone";
 import type { OrgDetailsFormValues } from "./useOrgDetails";
 
-/**
- * One text field of the org-details form.
- *
- * Icons, order and input semantics only. The label and placeholder live in
- * messages/{en,ar}/onboarding.json under `orgDetails.fields`, keyed by `id`.
- */
 export interface OrgInputField {
     id: keyof OrgDetailsFormValues;
     icon: LucideIcon;
@@ -16,11 +10,6 @@ export interface OrgInputField {
     value: string | undefined;
     /** Rewrites what the user typed before it reaches the form state. */
     normalize?: (value: string) => string;
-    /**
-     * Rewrites what is *shown* as it is typed — rejecting characters the field
-     * does not take, or changing the ones it does. The caret is carried across
-     * the rewrite, so it may shorten the value.
-     */
     display?: (value: string) => string;
 }
 

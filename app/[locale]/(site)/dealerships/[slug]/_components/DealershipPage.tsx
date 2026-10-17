@@ -18,15 +18,6 @@ import {
     type DealershipTab,
 } from "../_lib/detail-types";
 
-/**
- * A dealership's storefront (round 1, direction A: storefront and visit card).
- * Who they are across the top; the cars, reviews and about tabs in the main
- * column; beside them a visit card that stays in view — open now, message,
- * call, directions, the terms. On phones the card comes first, so the
- * actions sit above the tabs.
- *
- * The server renders the first page of cars; filtering and paging fetch here.
- */
 export function DealershipPage({
     dealership,
     initialCars,

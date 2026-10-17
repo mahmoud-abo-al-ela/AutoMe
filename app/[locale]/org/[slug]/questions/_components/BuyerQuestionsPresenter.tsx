@@ -15,12 +15,6 @@ import type { AnswerDraft } from "./AnswerEditor";
 export type BuyerQuestionsPresenterProps = ReturnType<typeof useBuyerQuestions>;
 export type InboxQuestion = BuyerQuestionsPresenterProps["questions"][number];
 
-/**
- * Buyer questions as a teaching queue (canvas: Buyer questions round 1,
- * "1 · Teach queue"): the most-asked gap first, answered in place. In the
- * Unanswered view the top question opens ready to answer, and publishing one
- * opens the next, so a dealer can clear the queue without hunting for it.
- */
 export const BuyerQuestionsPresenter = ({
   view,
   questions,

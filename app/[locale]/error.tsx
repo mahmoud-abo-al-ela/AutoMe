@@ -7,13 +7,6 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ErrorScreen, RoadBarrier } from "@/components/brand/ErrorScreen";
 
-// Named for what it is: the root route's error boundary. `global-error.tsx`
-// beside it is the one that replaces the whole document, and both were called
-// GlobalError.
-//
-// It also catches what a layout below it throws — the dealer dashboard's
-// layout included, whose own error page cannot. So inside the dashboard the
-// way out is the dashboard, not the public home page.
 export default function RootRouteError({
   error,
   reset,

@@ -31,11 +31,6 @@ type Props = {
   onReopen: () => void;
 };
 
-/**
- * One question in the queue. The count leads — it is why this question is
- * here before the next one — then the question in the buyer's own words, then
- * where and when it was asked. Answering opens in place, under the question.
- */
 export function QuestionRow({ question, isOpen, isPending, autoFocus, draft, onDraft, onOpen, onClose, onDiscard, onAnswer, onDismiss, onReopen }: Props) {
   const t = useTranslations("org.buyerQuestions");
   const fmt = useFormatters();

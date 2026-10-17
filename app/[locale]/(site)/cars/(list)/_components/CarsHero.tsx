@@ -6,12 +6,6 @@ import type { SearchSuggestion } from "@/lib/search/suggest";
 import { SuggestionList } from "@/components/search/SuggestionList";
 import { useSearchBox } from "@/components/search/use-search-box";
 
-/**
- * Browse page header (Figma: Browse — desktop). Replaces the animated gradient
- * hero, which pushed the first result ~180px further down: a title and the
- * search field — then straight into results. Suggestions open under the
- * field as the buyer types; choosing one applies it (onPickSuggestion).
- */
 export const CarsHero = ({
   searchQuery,
   onSearchChange,

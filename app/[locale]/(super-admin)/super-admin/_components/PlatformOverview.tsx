@@ -28,12 +28,6 @@ function BarRow({ label, value, max, display, tone = "bg-chart-1" }: { label: st
   );
 }
 
-/**
- * The super-admin overview (canvas: Super admin overview round 2, "3 · Metric
- * explorer"; page pattern: analytical, the period first): the period and its
- * comparison, five numbers as tabs over one chart, then the plans, the
- * test-drive funnel and the cars as they stand, then what needs attention.
- */
 export function PlatformOverview({ data, compare, currentAdminId }: { data: Data; compare: boolean; currentAdminId: string }) {
   const t = useTranslations("superAdmin.overview");
   const tPlans = useTranslations("plans");

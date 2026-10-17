@@ -1,12 +1,5 @@
 import type { CarStatus, TestDriveStatus } from "@/lib/generated/prisma";
 
-/**
- * One colour per status across the dashboard — the badges, the charts and the
- * stat strips — so a status reads the same wherever it appears. Site tokens
- * only (globals.css), never raw Tailwind colours.
- *
- * `badge` is the soft pill; `color` is the solid fill for charts and dots.
- */
 export const CAR_STATUS_TONE = {
   AVAILABLE: { badge: "bg-positive-soft text-positive", color: "var(--positive)" },
   SOLD: { badge: "bg-primary-soft text-primary", color: "var(--primary)" },

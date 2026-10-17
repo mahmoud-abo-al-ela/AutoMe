@@ -4,12 +4,6 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { USER_TABS, type UserTab } from "@/lib/services/super-admin/users-options";
 
-/**
- * Each tab of a person's page on its way, in its own shape — shown while a
- * tab switches, and on a reload by the page's loading state. Shimmer, like
- * every admin skeleton.
- */
-
 const sk = "skeleton-shimmer";
 const card = "overflow-hidden rounded-[20px] border border-border bg-card";
 type Row = "car" | "dealership" | "review" | "session" | "feed";

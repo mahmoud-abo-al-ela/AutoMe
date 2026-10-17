@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/brand";
 
-/**
- * The shared frame of the legal pages (privacy, terms, cookies): a plain page
- * header with the revision date, then a single reading column. The body is
- * styled from here so each page only lists its sections — the `prose` class
- * these used was a no-op, as the typography plugin is not installed.
- */
 export function LegalDocument({
   title,
   updated,

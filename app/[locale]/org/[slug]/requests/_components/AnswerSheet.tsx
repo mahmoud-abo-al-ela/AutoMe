@@ -11,15 +11,6 @@ import { useCarName, type QuestionRequest } from "./RequestRows";
 
 const MAX_ANSWER = 500;
 
-/**
- * Answering keeps the list in view (canvas: Round 3 — Requests): a side panel
- * from the inline end, not a page or a centred modal — the task takes
- * seconds and the dealer goes straight on to the next request.
- *
- * Publish is never disabled (a second click while saving is ignored); an
- * empty answer says what is missing instead, after the first attempt (forms:
- * never mark a pristine field invalid).
- */
 export function AnswerSheet({
   question,
   busy,

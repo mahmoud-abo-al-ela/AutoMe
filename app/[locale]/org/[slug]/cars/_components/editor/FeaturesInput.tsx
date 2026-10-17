@@ -11,12 +11,6 @@ const SEPARATOR = /[,،]/;
 
 const same = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: "accent" }) === 0;
 
-/**
- * The car's features as tags: typed and added with Enter or a comma, removed
- * with their ✕ (or Backspace in an empty box), and the common ones a tap away
- * underneath. Replaces the comma-separated text box, where one wrong comma —
- * an Arabic "،" for a "," — ran two features together.
- */
 export function FeaturesInput({
   id,
   label,

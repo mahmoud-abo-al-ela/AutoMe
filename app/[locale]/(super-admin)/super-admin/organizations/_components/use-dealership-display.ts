@@ -21,11 +21,6 @@ export const STATUS_TONES: Record<StatusTone, string> = {
   off: "bg-muted text-muted-foreground",
 };
 
-/**
- * How a dealership row reads, shared by the table, the phone list and the
- * CSV: its place, its plan, where it stands and what it has paid — each as
- * words in the reader's language.
- */
 export function useDealershipDisplay() {
   const t = useTranslations("superAdmin.organizations");
   const tPlans = useTranslations("plans");

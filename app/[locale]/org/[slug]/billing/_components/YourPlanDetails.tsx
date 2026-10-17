@@ -29,11 +29,6 @@ const TONE = {
   info: "text-[#1d4e9e]",
 } as const;
 
-/**
- * What sits inside the dealer's own plan column: where the plan stands, how
- * much of it they use, and — for owners — undoing a scheduled change or
- * ending the plan.
- */
 export function YourPlanDetails({
   status,
   plan,

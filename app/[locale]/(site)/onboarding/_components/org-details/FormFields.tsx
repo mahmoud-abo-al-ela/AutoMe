@@ -10,26 +10,8 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import type { OrgDetailsFormValues } from "./useOrgDetails";
 import type { OrgInputField } from "./constants";
 
-/**
- * Input types whose direction the browser decides for itself.
- *
- * Chromium and WebKit set `direction: ltr` on these from their own stylesheet,
- * so on an Arabic page the phone and email fields end up with their text,
- * placeholder and caret at the left while every other field sits at the right.
- * The `dir` attribute does not fix it — a UA rule outranks it — but an author
- * rule does, which is why this is a class.
- */
 const UA_FORCED_LTR_TYPES = new Set(["tel", "email", "url"]);
 
-/**
- * Apply a field's `display` rewrite to what is in the input, keeping the caret
- * where the typist left it.
- *
- * Rewriting `value` alone would send the caret to the end on every keystroke,
- * which makes correcting a digit in the middle of a phone number impossible.
- * Counting how much of the text *before* the caret survives the rewrite gives
- * the position it belongs at afterwards.
- */
 function rewriteInput(
     input: HTMLInputElement,
     display?: (value: string) => string

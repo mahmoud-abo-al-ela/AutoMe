@@ -17,12 +17,6 @@ import { DeleteCarDialog } from "./DeleteCarDialog";
 
 const VIEW_STATUS = { available: "AVAILABLE", unavailable: "UNAVAILABLE", sold: "SOLD" } as const;
 
-/**
- * The Cars table (canvas: Cars — round 1, "1 · Ledger"; page pattern 1, list):
- * toolbar, one framed table — rows on a phone — and pages that are always
- * there, even when there is one. The status views above it are links the
- * server renders (they carry the counts); everything below is this.
- */
 export function CarsLedger({ view, base, initial }: { view: InventoryView; base: string; initial: Inventory | null }) {
   const state = useInventory(view, initial);
   const [deleting, setDeleting] = useState<InventoryRow | null>(null);
@@ -125,11 +119,6 @@ function LoadFailed({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-/**
- * No rows, for one of three reasons, each with its own way on: the search or
- * a filter matched nothing (clear them), a status view is empty (say what
- * lands there, show all cars), or the dealership has no cars yet (add one).
- */
 function Empty({ state, base }: { state: InventoryData; base: string }) {
   const t = useTranslations("org.cars.ledger.empty");
   const tCars = useTranslations("org.cars");

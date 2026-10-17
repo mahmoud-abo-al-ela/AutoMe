@@ -5,11 +5,6 @@ import { OrgUnreadCount } from "@/components/StreamChat";
 import { useFormatters } from "@/hooks/use-formatters";
 import { CountBadge, OverviewRow } from "./OverviewRow";
 
-/**
- * The unread-messages row. Unread counts live in the chat connection, not the
- * database, so this row fills in in the browser; until chat connects it says
- * it is checking rather than claiming zero.
- */
 export function MessagesRow({ organizationId, href }: { organizationId: string; href: string }) {
   const t = useTranslations("org.dashboard.today.waitingList");
   const { number } = useFormatters();

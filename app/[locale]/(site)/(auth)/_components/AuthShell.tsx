@@ -18,14 +18,6 @@ const POINTS = {
   ],
 } as const satisfies Record<string, readonly (readonly [string, LucideIcon])[]>;
 
-/**
- * Sign-in and sign-up: the Clerk card beside a photo panel in the home hero's
- * overlay (globals.css: .hero-*), saying what the account is for. The panel
- * is a wide-screen extra — on phones the card stands alone, carrying its own
- * title.
- *
- * The panel's headline is not a heading: Clerk's card title is the page's h1.
- */
 export async function AuthShell({ mode, children }: { mode: keyof typeof POINTS; children: ReactNode }) {
   const t = await getTranslations(`auth.${mode}`);
 

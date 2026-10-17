@@ -8,12 +8,6 @@ import { DEFAULT_OVERVIEW_PERIOD, OVERVIEW_PERIODS } from "@/lib/services/super-
 
 const trigger = "h-11 data-[size=default]:h-11 min-w-[176px] rounded-control border-[#8c8170] bg-field";
 
-/**
- * The overview's period and what it is compared with. Both live in the URL
- * (`?days=90&compare=none`), so a view can be shared and the server renders
- * it; the defaults (30 days, against the period before) stay out of it. The
- * page dims while the new period loads — the transition is the page's.
- */
 export function OverviewControls({
   days,
   compare,

@@ -10,11 +10,6 @@ import {
     type WorkingHours,
 } from "../../_lib/scheduling";
 
-/**
- * Used only when a dealership has no WorkingHours rows at all. Onboarding
- * always writes them, so this covers organizations created before that step
- * existed — without it they would be unbookable rather than merely imprecise.
- */
 const FALLBACK_WORKING_HOURS: WorkingHours = {
     MONDAY: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
     TUESDAY: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
@@ -36,13 +31,6 @@ const CLOSED_ALL_WEEK: WorkingHours = {
     SUNDAY: { isOpen: false, openTime: "", closeTime: "" },
 };
 
-/**
- * The selling dealership's opening hours for the car being booked.
- *
- * These used to be a hardcoded Mon–Sat 09:00–17:00 constant behind a simulated
- * fetch, so every dealership was advertised with the same hours and customers
- * could book slots on days the dealership was closed.
- */
 export const useWorkingHours = (carId: string | null | undefined) => {
     const { data, isLoading } = useQuery({
         queryKey: queryKeys.testDrives.workingHours(carId ?? ""),

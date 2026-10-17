@@ -1,11 +1,5 @@
 import CarCardSkeleton from "@/components/CarCardSkeleton";
 
-/**
- * Browse loading state — the same frame as the page (header, rail, toolbar,
- * grid) so content replaces it without the layout jumping. Shown by the
- * route's loading.tsx and by the page's Suspense while its client part loads,
- * so the two hand over without a blank gap.
- */
 export function CarsPageSkeleton() {
   return (
     <div aria-busy="true" className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:px-0">

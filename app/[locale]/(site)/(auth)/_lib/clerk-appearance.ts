@@ -3,19 +3,6 @@ import type { SignIn } from "@clerk/nextjs";
 
 type ClerkAppearance = NonNullable<ComponentProps<typeof SignIn>["appearance"]>;
 
-/**
- * The Clerk sign-in and sign-up cards in the site's design (Figma: Button,
- * Input): limestone card, asphalt text, plate-blue links, and the marker
- * yellow "Continue" with the hard key shadow — the one primary action, as
- * everywhere else on the site.
- *
- * `variables` are literal colours because Clerk derives its hover and border
- * shades from them and cannot read a CSS variable; they mirror the site
- * tokens in globals.css. The `elements` classes use the tokens themselves,
- * so links follow a dealership's own primary colour on its subdomain. They
- * are `!important` because Clerk's styles are unlayered and would otherwise
- * beat Tailwind's utilities layer.
- */
 export const clerkAppearance = {
   variables: {
     colorPrimary: "#1d4e9e",

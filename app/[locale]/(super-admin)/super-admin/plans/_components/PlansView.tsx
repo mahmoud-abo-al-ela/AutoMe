@@ -12,13 +12,6 @@ import type { PlanRow, PlansPage } from "@/lib/services/super-admin/plans";
 import { PlanEditor } from "./PlanEditor";
 import { PLAN_ROWS, usePlanValues, type PlanRowKey } from "./use-plan-values";
 
-/**
- * The super-admin plans page (canvas: Super admin plans round 1, "1 ·
- * Comparison table"): four billing numbers, then every plan side by side —
- * who is on it and what it brings in at the top of its column, then a row
- * for each thing a plan sets. Edit opens the plan in a side panel. On a phone
- * each plan is its own card with the same rows.
- */
 export function PlansView({ data }: { data: PlansPage }) {
   const t = useTranslations("superAdmin.plans");
   const fmt = useFormatters();

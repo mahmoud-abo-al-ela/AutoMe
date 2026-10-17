@@ -6,14 +6,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-/**
- * Dashed-border placeholder card shown in empty compare slots.
- *
- * Features:
- *  - Dashed border with subtle pulse animation to draw attention
- *  - Plus icon with "Add Car" text
- *  - Links to /cars browse page
- */
 const AddCarSlot = (): React.ReactElement => {
     const t = useTranslations("compare");
     return (

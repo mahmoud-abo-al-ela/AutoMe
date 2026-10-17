@@ -41,12 +41,6 @@ export function useDeal(channel: Channel) {
   });
 }
 
-/**
- * The deal beside the conversation (canvas: 2 · Sales desk): the car with its
- * licence-plate price and where that sits among similar cars, then what this
- * buyer has done with the dealership — saves, other cars, test drives — and
- * the two moves that follow: send the booking link, or open the car.
- */
 export function DealPanel({ channel, base, className }: { channel: Channel; base: string; className?: string }) {
   const t = useTranslations("org.messages");
   const tMessages = useTranslations("org.messages.quick");

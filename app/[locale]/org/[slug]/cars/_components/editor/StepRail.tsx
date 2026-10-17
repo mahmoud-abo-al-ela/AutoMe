@@ -6,12 +6,6 @@ import { useFormatters } from "@/hooks/use-formatters";
 import { CAR_STEPS, type CarStep } from "@/hooks/use-car-form";
 import { cn } from "@/lib/utils";
 
-/**
- * The steps down the side (lg and up): done ones ticked with what they hold
- * and a way back, the current one in marker yellow, the rest ahead. When
- * editing every step is open. On a phone the rail gives way to a single
- * "Step 2 of 4" line with a bar (StepHeading).
- */
 export function StepRail({
   current,
   reached,

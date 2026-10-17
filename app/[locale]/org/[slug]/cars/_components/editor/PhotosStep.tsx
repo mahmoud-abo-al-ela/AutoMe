@@ -32,12 +32,6 @@ export type AiReading = {
   onRead: () => void;
 };
 
-/**
- * Step 1: the photos — the cover first, the rest in the order buyers swipe
- * them. Each can be moved, made the cover or removed with a visible button,
- * so the order never depends on dragging. When adding a car on a plan that
- * reads photos, the offer to read the details sits right under them.
- */
 export function PhotosStep({
   photos,
   onChange,
@@ -186,11 +180,6 @@ function PhotoTile({
   );
 }
 
-/**
- * The offer to read the details from the photos. Its progress is real: bytes
- * sent, then fields written; the model's queue in between holds the bar and
- * says it is waiting rather than inventing a percentage.
- */
 function AiPanel({ ai, reading, hasPhotos }: { ai: AiOffer; reading: AiReading; hasPhotos: boolean }) {
   const t = useTranslations("org.carForm");
   const fmt = useFormatters();

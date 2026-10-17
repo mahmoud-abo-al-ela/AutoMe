@@ -13,61 +13,18 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { requestOrigin } from "@/lib/utils/page-seo";
 
-// NOTE: the font stack in globals.css names these families directly rather
-// than using the --font-* variables below. next/font expands those to
-// `"Inter", "Inter Fallback"`, and Inter Fallback is local(Arial), which
-// covers Arabic and would intercept it before Cairo. See globals.css.
-//
-// `adjustFontFallback: false` does NOT remove that face — it was tried and
-// the fallback is still emitted — so the ordering is what fixes it.
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 });
 
-// Inter has no Arabic coverage. Car makes and models stay Latin ("Toyota
-// Corolla" is not transliterated), so an Arabic listing title mixes both
-// scripts inside one string and the two faces have to sit together.
-//
-// Cairo is the de-facto UI face for Egyptian consumer products, which is the
-// market this ships to — it is what a reader here expects a marketplace to
-// look like. It also has a large x-height, so it holds up at the small sizes
-// this app uses heavily (~760 of its type utilities are text-sm or smaller).
-//
-// Loaded as a variable font: one file covers 200-1000, so there is no weight
-// to forget. The previous face was pinned to 400/500/600/700, which is why
-// font-extrabold rendered as synthesised faux-bold in Arabic.
 const arabic = Cairo({
   subsets: ["arabic", "latin"],
   variable: "--font-arabic",
   display: "swap",
 });
 
-/**
- * The title is resolved here and nowhere else.
- *
- * Every page used to append its own brand — with three different separators
- * ("|", "-") and three different brand strings ("AutoMe", "AutoMe Admin",
- * "AutoMe Platform"). Once the Arabic pages started supplying a translated
- * title that also carried the brand, tabs read
- * "تصفح السيارات | أوتومي | AutoMe". Pages now set only their own name.
- *
- * "Once" has to mean once *in the tree*, not once per layout: `title.default`
- * is itself a title as far as the parent is concerned, so the site layout
- * declaring its own `{ default: "AutoMe", template: "%s | AutoMe" }` got that
- * default fed through this template and the home tab read "AutoMe | AutoMe".
- * Resolving the storefront brand up here is what lets that second declaration
- * go away.
- *
- * On a dealership subdomain the brand *is* the dealership, so the whole thing
- * — default, template and favicon — swaps over to it. That costs nothing on
- * the main domain: `getCurrentOrganization` returns null on a missing header
- * without touching the database, and is request-cached when it does.
- *
- * The brand stays Latin in both locales: it is a proper noun, and per the
- * i18n rule we do not transliterate names.
- */
 export async function generateMetadata({
   params,
 }: {
@@ -167,11 +124,6 @@ export default async function LocaleLayout({
             cannot reach into — without this the auth screens stay English on /ar. */}
         <ClerkProvider
           localization={clerkLocalization[locale]}
-          // NEXT_PUBLIC_CLERK_SIGN_IN_URL/SIGN_UP_URL are "/sign-in" and
-          // "/sign-up" with no locale, and Clerk builds its own footer links from
-          // them — so "إنشاء حساب جديد" on the Arabic sign-in card pointed at the
-          // unprefixed path and bounced the reader into English. Props win over
-          // the env vars, which is the only way to make them locale-aware.
           signInUrl={`/${locale}/sign-in`}
           signUpUrl={`/${locale}/sign-up`}
           // Where any Clerk flow without its own redirect ends up. Clerk's default

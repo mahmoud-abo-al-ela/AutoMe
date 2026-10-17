@@ -7,15 +7,6 @@ import { planFeatureKeys } from "@/components/Pricing/pricing-plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import type { OnboardingPlan } from "../../_lib/onboarding-types";
 
-/**
- * The bullets come from the same mapper the public pricing section uses, so the
- * two surfaces cannot describe the same plan differently.
- *
- * They used to be built here out of the Json column's own keys, split from
- * camelCase into Title Case — English by construction, and so untranslatable.
- * A flag that mapper does not know about is no longer listed rather than being
- * listed in the wrong language.
- */
 export function PlanFeatureList({ plan }: { plan: OnboardingPlan }) {
     const t = useTranslations("plans");
     const fmt = useFormatters();

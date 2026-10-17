@@ -9,12 +9,6 @@ import type { TermFlag, TermsState } from "./storefront-state";
 
 const ANSWERS: TriStateFormValue[] = ["yes", "no", UNSET];
 
-/**
- * The dealership's standing terms, each a Yes / No / Not stated choice. A
- * radio group rather than a dropdown: three answers fit on one line, and the
- * choice is visible without opening anything. "Not stated" is never read as
- * "no" — the assistant tells buyers to ask.
- */
 export function TermsSection({ terms, onChange }: { terms: TermsState; onChange: (next: TermsState) => void }) {
   const t = useTranslations("org.settings.storefront.terms");
 

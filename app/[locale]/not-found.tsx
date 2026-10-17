@@ -6,11 +6,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { ErrorScreen } from "@/components/brand/ErrorScreen";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * A page that does not exist: the road ends here. The number in the page's
- * own digits, then the two likely ways on — home, or back where the reader
- * came from.
- */
 export default function NotFound() {
   const t = useTranslations("common.errorPage.notFound");
   const router = useRouter();

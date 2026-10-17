@@ -1,9 +1,3 @@
-// Structure for the contact page. The prose lives in messages/{en,ar}/contact.json.
-//
-// This file used to hold the copy itself, which no JSX string sweep would ever
-// find — the same trap as lib/WhyConfig.ts and lib/HeaderConfig.ts. What stays
-// here is what is not language: icons, hrefs, form values, and the two details
-// that are literally the same in both locales.
 import {
   Mail,
   MapPin,

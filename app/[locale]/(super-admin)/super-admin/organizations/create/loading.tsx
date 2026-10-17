@@ -1,8 +1,3 @@
-/**
- * Adding a dealership, on its way, in its own shape: back link, the header,
- * the three steps (a slim bar on a phone), then the first step's fields and
- * the buttons. Shimmer, like every admin skeleton.
- */
 export default function CreateDealershipLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

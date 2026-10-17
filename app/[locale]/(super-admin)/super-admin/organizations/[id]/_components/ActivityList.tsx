@@ -14,11 +14,6 @@ function tone(entry: Activity["entries"][number]) {
   return "bg-[#8c8170]";
 }
 
-/**
- * A dealership's activity as sentences — the same wording as the dealer's own
- * Activity page — newest first, each with when it happened. Car names stay
- * plain text: the super-admin has no car editor.
- */
 export function ActivityList({ activity, dealershipName }: { activity: Activity; dealershipName: string }) {
   const t = useTranslations("superAdmin.organizations.details");
   const fmt = useFormatters();

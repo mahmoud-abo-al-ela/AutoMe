@@ -15,11 +15,6 @@ export async function generateMetadata({
   return { title: t("title"), description: t("description") };
 }
 
-/**
- * Adding a car: straight into the steps, photos first. There is no separate
- * "by hand or with AI" choice any more — the photos step offers to read the
- * details when the plan does, and typing them is simply carrying on.
- */
 const CreateCarPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
   const t = await getTranslations("org.carForm.editor");

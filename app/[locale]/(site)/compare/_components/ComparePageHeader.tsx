@@ -15,11 +15,6 @@ import {
 import { Printer, Share2, Trash2, Check } from "lucide-react";
 import type { CompareHandlers } from "../_lib/compare-types";
 
-/**
- * Header bar for the compare page: the title over a hairline (the shape of the
- * Browse and Dealerships headers) with the car count, then the controls —
- * highlight differences, print, share, and a two-step "clear all".
- */
 const ComparePageHeader = ({
     carCount,
     highlightDifferences,

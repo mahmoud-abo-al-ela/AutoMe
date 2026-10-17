@@ -8,13 +8,6 @@ import type { AttentionCar, AttentionReason } from "@/lib/services/dashboard";
 import { formatNumber } from "@/lib/utils/number";
 import { cn } from "@/lib/utils";
 
-/**
- * The Cars page's "Needs attention" view: every available car that may not
- * be selling, its one reason, and the fix as a link to its editor — "Review
- * price", "Add photos", "Edit listing". The same list the overview shows the
- * top three of (lib/services/dashboard: carsNeedingAttention). Rows in one
- * frame; an empty list keeps the frame and says why there is nothing.
- */
 export async function AttentionList({ cars, base }: { cars: AttentionCar[] | null; base: string }) {
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("org.cars.attention");

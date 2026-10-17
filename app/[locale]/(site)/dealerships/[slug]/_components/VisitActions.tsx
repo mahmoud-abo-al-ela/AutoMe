@@ -34,12 +34,6 @@ export function OpenStatusLine({ dealership }: { dealership: DealershipDetail })
     );
 }
 
-/**
- * Message, call and directions — what a buyer does next. Platform staff and
- * the dealership's own team see why they cannot message instead. `inline` is
- * the page header's set (About tab): one button per row, with the phone number
- * and website the visit card leaves to that tab.
- */
 export function VisitActions({
     dealership,
     newestCars,

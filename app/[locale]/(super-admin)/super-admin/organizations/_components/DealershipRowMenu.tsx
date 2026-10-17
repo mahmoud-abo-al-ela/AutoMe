@@ -13,11 +13,6 @@ import {
 import { storefrontUrl } from "@/lib/utils/tenant-host";
 import type { DealershipRow } from "@/lib/services/super-admin/dealerships";
 
-/**
- * A dealership's actions, behind "⋯" at the end of its row: open it, start a
- * support session, see its storefront, suspend or reactivate it, and — kept
- * apart and in red — delete it, which asks first.
- */
 export function DealershipRowMenu({
   row,
   busy,

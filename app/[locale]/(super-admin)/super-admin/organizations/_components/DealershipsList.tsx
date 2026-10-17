@@ -51,13 +51,6 @@ function Initials({ name, muted }: { name: string; muted?: boolean }) {
   );
 }
 
-/**
- * The super-admin dealerships list (canvas: Super admin dealerships round 1,
- * "1 · Data table"; page pattern: a list with saved views): search, the
- * status (with how many are in each) and filters, then a table with selection for bulk
- * suspend and export, a menu per row, and pages of ten. On a phone the
- * table becomes a list. Everything that narrows the list lives in the URL.
- */
 export function DealershipsList({ data }: { data: DealershipsPage }) {
   const t = useTranslations("superAdmin.organizations");
   const fmt = useFormatters();

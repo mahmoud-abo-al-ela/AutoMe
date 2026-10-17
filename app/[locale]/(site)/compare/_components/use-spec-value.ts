@@ -6,15 +6,6 @@ import type { SpecKey, SpecValue } from "../_lib/compare-types";
 
 const EMPTY = "—";
 
-/**
- * Renders one comparison cell in the page's language: the locale's digits, the
- * EGP format, and the translated name of an enum value ("SUV" → "دفع رباعي").
- *
- * The spec definitions used to carry their own `format` — written once, with
- * no locale — so the Arabic table showed "EGP 875,000", Western-digit years
- * and English body types. A key without an entry here (model) is free text
- * and shown as entered.
- */
 export function useSpecValue() {
   const fmt = useFormatters();
   const attr = useCarAttributes();

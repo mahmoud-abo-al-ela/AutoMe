@@ -6,12 +6,6 @@ import {
 } from "./onboarding-draft";
 import { DEFAULT_FORM_DATA } from "../_components/wizard/constants";
 
-/**
- * What these pin: a refresh used to empty three steps of typing, and the fix
- * has to fail quietly in every case where storage does not cooperate — a
- * broken draft must never take the form down with it.
- */
-
 const FILLED = {
   ...DEFAULT_FORM_DATA,
   name: "Cairo Premium Cars",

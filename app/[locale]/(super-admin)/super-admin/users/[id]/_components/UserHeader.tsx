@@ -38,12 +38,6 @@ import type { UserDetail } from "@/lib/services/super-admin/user-detail";
 import ImpersonateModal from "../../../organizations/_components/ImpersonateModal";
 import { KIND_TONES, type UserKind } from "../../_components/use-user-display";
 
-/**
- * The top of a person's page: back to the list, who they are and what kind of
- * account they have, and their actions behind "⋯" — a support session as them
- * when they are on a dealership's team, and giving or taking platform admin
- * access, which asks first. Your own access can't be taken from here.
- */
 export function UserHeader({
   data,
   currentAdminId,

@@ -13,17 +13,6 @@ import { cn } from "@/lib/utils";
 import { CarThumb, FeaturedTag, MARKET_TONE, reasonTone, StatusPill, useCarName, useLedgerText } from "./ledger-shared";
 import { RowMenu } from "./RowMenu";
 
-/**
- * The Cars table from tablet width up: a checkbox to select, the car with the
- * one thing to fix under its name, the price as a plate, where it sits among
- * similar cars, interest, days listed, status, and the row's other actions.
- * Price, saves, test drives and days listed sort; the header says which and
- * which way (aria-sort).
- *
- * It fits its frame at every width rather than scrolling: below 1280px the
- * gauge, saves and test drives step out, below 1024px the market words and
- * days listed too — the phone rows take over below 768px.
- */
 export function LedgerTable({
   state,
   cars,

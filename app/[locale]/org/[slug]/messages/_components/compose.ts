@@ -1,11 +1,5 @@
 import type { Channel } from "stream-chat";
 
-/**
- * Put text in the conversation's writing box, for the dealer to read, edit
- * and send — never sent on their behalf. Works from anywhere on the desk,
- * the deal panel included, through the channel's own composer; then focuses
- * the box so typing carries on from there.
- */
 export function compose(channel: Channel, text: string) {
   channel.messageComposer.textComposer.setText(text);
   requestAnimationFrame(() => {

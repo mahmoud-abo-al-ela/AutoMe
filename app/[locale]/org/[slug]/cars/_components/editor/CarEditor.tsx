@@ -32,16 +32,6 @@ import { usePhotoReading } from "./use-photo-reading";
 
 const NO_DATA: CarFormInitialData = {};
 
-/**
- * Adding or editing a car (canvas: Car editor — round 1, B · Guided steps):
- * four steps down a rail — photos, the car, its history, then price and
- * publish — one on screen at a time. Adding moves forward a step at a time
- * and publishes (or saves hidden) at the end; editing opens on the first step
- * with every step open and "Save changes" on each.
- *
- * When adding on a plan that reads photos, the first step offers to read the
- * details; what the AI fills carries its mark until the dealer changes it.
- */
 export function CarEditor({
   mode,
   carId = null,

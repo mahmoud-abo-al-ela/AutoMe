@@ -32,11 +32,6 @@ import DeleteOrganizationDialog from "../../_components/DeleteOrganizationDialog
 import ImpersonateModal from "../../_components/ImpersonateModal";
 import { STATUS_TONES, useDealershipDisplay } from "../../_components/use-dealership-display";
 
-/**
- * The top of a dealership's page: back to the list, who it is and where it
- * stands, and its actions — suspend or reactivate (suspending asks first),
- * and behind "⋯" a support session, the storefront and delete.
- */
 export function DealershipHeader({ data }: { data: DealershipDetail }) {
   const t = useTranslations("superAdmin.organizations");
   const tCommon = useTranslations("superAdmin.common");

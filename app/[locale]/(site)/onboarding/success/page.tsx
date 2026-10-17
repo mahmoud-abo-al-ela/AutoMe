@@ -35,12 +35,6 @@ export async function generateMetadata({
 /** The four things a new dealer is pointed at, in the order they matter. */
 const NEXT_STEPS = ["listCar", "inviteTeam", "brand", "hours"] as const;
 
-/**
- * Where Paymob returns the buyer after a sign-up payment. `ref` is our Payment
- * id; the other parameters Paymob appends are unsigned and never read. The
- * dealership exists once the payment settles, through Paymob's callback or
- * through confirmSignupPayment asking Paymob here.
- */
 export default async function OnboardingSuccessPage({
     params,
     searchParams,

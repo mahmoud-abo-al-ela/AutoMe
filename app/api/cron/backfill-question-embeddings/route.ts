@@ -5,20 +5,6 @@ import { backfillQuestionEmbeddings } from "@/lib/services/buyer-question/meanin
 import { logError } from "@/lib/utils/errors";
 import { runAllPages } from "@/lib/utils/paged-run";
 
-/**
- * Give buyer questions their meaning (a vector) where they have none from the
- * current embedding model — the questions asked before embeddings existed, or
- * all of them after AI_EMBEDDING_MODEL changes. A batch per call, in one
- * embedding request, oldest id first. Run it until `next` is null:
- *
- *   curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
- *     "https://<host>/api/cron/backfill-question-embeddings?limit=100"
- *
- * then again with `&after=<next>`. It only stores vectors — it never folds
- * questions together, so nothing a dealer has seen disappears in a backfill.
- * Platform-paid and low priority, in the embedding pool.
- */
-
 export const runtime = "nodejs";
 export const maxDuration = 300;
 /** Stop starting new pages with this much of maxDuration left. */
@@ -47,13 +33,6 @@ export async function POST(request: Request) {
   }
 }
 
-/**
- * The daily run, scheduled in vercel.json at 02:15 UTC (Vercel Cron sends
- * GET): every page from the start until none is left or the run's time is up.
- * It selects only what is still missing, so what one run doesn't reach the
- * next starts with. This is the recovery path for a save whose background
- * job ran without the queue (lib/jobs) and failed its one try.
- */
 export async function GET(request: Request) {
   const refused = refuseCronRequest(request, "the scheduled question-embedding backfill");
   if (refused) return refused;

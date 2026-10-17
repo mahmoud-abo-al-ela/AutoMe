@@ -4,13 +4,6 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * Accessible filter chip (Figma: Chip / Filter). A real <button> with
- * role="checkbox" so it is keyboard reachable and announced. Selected is the
- * asphalt pill with full-contrast text — the state reads at a glance and
- * never relies on a tint. The facet count rides along; a zero-count option
- * is disabled rather than hidden, so the list does not reflow.
- */
 export const FilterChip = ({
   label,
   count,

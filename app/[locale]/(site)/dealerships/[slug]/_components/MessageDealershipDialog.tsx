@@ -22,13 +22,6 @@ import { resolveCarTitle } from "@/lib/utils/car-text";
 import type { Locale } from "@/i18n/routing";
 import type { DealershipCar, DealershipDetail } from "../_lib/detail-types";
 
-/**
- * "Message the dealership" asks which car first. Conversations on AutoMe are
- * about a car — the dealer's inbox and sales desk are built around one — so
- * rather than a car-less chat the dealer would have to untangle, the buyer
- * picks the car and that car's chat opens (signed out: sign in, then back to
- * the car with its chat open, as from the car page).
- */
 export function MessageDealershipDialog({
     dealership,
     newestCars,
