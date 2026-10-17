@@ -11,11 +11,6 @@ import { downloadCsv, useDealershipDisplay } from "./use-dealership-display";
 
 const BASE = "/super-admin/organizations";
 
-/**
- * The dealerships list's state and what it does: the selection, suspending
- * (which asks first) and reactivating one or many, deleting, the CSV export,
- * and where each page lives.
- */
 export function useDealershipsList(data: DealershipsPage) {
   const t = useTranslations("superAdmin.organizations");
   const tCommon = useTranslations("superAdmin.common");

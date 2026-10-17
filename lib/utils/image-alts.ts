@@ -1,11 +1,3 @@
-/**
- * The `Car.imageAlts` Json column: alt text per image URL, both languages.
- *
- * Pure and dependency-free so both the serializer (which renders it) and the
- * service that writes it can read it — the serializer must not pull in the AI
- * client or the database to do so.
- */
-
 export interface ImageAlt {
   en: string;
   ar: string;

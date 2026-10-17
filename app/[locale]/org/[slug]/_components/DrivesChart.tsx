@@ -9,13 +9,6 @@ import { Panel, PanelEmpty } from "./Panel";
 
 export type DrivesPoint = { date: string; requested: number; completed: number };
 
-/**
- * Test drives per day for the last 30 days: how many were requested and how
- * many of those were completed — one unit, one axis, so the two lines can be
- * read against each other (the stacked area this replaces summed unlike
- * things). Colours are the validated chart tokens (globals.css, work mode),
- * named in a legend beside the title; hovering a day shows both values.
- */
 export function DrivesChart({ data, emptyLabel }: { data: DrivesPoint[]; /** What an empty period says; the overview's 30 days by default. */ emptyLabel?: string }) {
   const t = useTranslations("org.dashboard.today.chart");
   const { date, number } = useFormatters();

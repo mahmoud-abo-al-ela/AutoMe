@@ -19,13 +19,6 @@ import { getFilterOptions, type CarFilters } from "@/lib/services/car/listing";
 import { db } from "@/lib/prisma";
 import { CARS, HIDDEN_TENANT_CARS, OTHER_TENANT_CARS, type RelevanceCar } from "@/test/fixtures/search-relevance";
 
-/**
- * The filter panel's counts for a search with text agree with its results:
- * for every filter not chosen, its options' counts are the results grouped by
- * that field — whatever the words did (set aside, corrected, a car's name) —
- * and a chosen one counts what choosing each value gives. Real Postgres.
- */
-
 const ORG = "org_test_facets";
 const OTHER_ORG = "org_test_facets_other";
 const HIDDEN_ORG = "org_test_facets_hidden";

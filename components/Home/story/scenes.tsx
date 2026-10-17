@@ -7,16 +7,6 @@ import { Car, Check, Languages, Sparkles } from "lucide-react";
 import { PricePlate } from "@/components/brand";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * The four scenes of the home scroll story (ScrollStory), one per feature:
- * a fair-price check, asking the listing, bilingual chat, a test drive.
- * Each is plain markup with data-* hooks, plus a GSAP timeline that plays it
- * — added to the pinned, scrubbed master timeline on desktop, or played once
- * on its own as the scene scrolls in on phones.
- *
- * The sample car and prices are illustration, not a live listing.
- */
-
 export type SceneKind = "price" | "ask" | "chat" | "drive";
 
 const SAMPLE_PRICE = 875_000;
@@ -131,12 +121,6 @@ export function DriveScene() {
   );
 }
 
-/**
- * The timeline that plays one scene. `dir` is 1 for left-to-right pages and
- * -1 for Arabic, so motion along the line runs toward the reading end.
- * Starting states are set here too, so a scene is always built and played
- * from the same place.
- */
 export function sceneTimeline(scene: Element, kind: SceneKind, dir: 1 | -1) {
   const q = gsap.utils.selector(scene);
   const tl = gsap.timeline({ defaults: { ease: "power2.out", duration: 0.5 } });

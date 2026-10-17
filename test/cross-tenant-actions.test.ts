@@ -54,25 +54,6 @@ import * as teamActions from "@/actions/team";
 import * as testDriveActions from "@/actions/test-drive";
 import { db } from "@/lib/prisma";
 
-/**
- * Every dealer Server Action, called against dealership B by people with no
- * right to it, through the real actions and real Postgres (roadmap 5.1).
- *
- *   outsider  — signed in, a member of nothing, posting from B's dashboard;
- *   forger    — A's owner, sending every impersonation cookie and header the
- *               old middleware trusted, naming B;
- *   A's owner — and an admin in a verified support session for A — acting
- *               in A as they may, but handing over B's record ids.
- *
- * The first two must be refused outright. The third must get nothing of B's
- * back and change nothing of B's. Whatever each call answers, B's rows are
- * compared before and after: a write that "failed" after writing is caught
- * there.
- *
- * A new dealer action fails the completeness check below until it has a row
- * here — the matrix is only worth having while it is the whole list.
- */
-
 const ORGS = { a: "org_test_matrix_a", b: "org_test_matrix_b" };
 const SLUG = { a: "matrix-test-a", b: "matrix-test-b" };
 const CLERK = {
@@ -87,11 +68,6 @@ type Person = keyof typeof CLERK;
 const user: Record<Person, string> = { outsider: "", ownerA: "", ownerB: "", staffB: "", buyer: "", admin: "" };
 const ids = { carA: "", carB: "", questionB: "", driveB: "", staffBMembership: "", sessionA: "" };
 
-/**
- * Text only B's rows hold. Any of it in a response to someone outside B is a
- * leak, whatever field it came back in. (The buyer's name is not here: the
- * deal panel names whoever the dealer is chatting with, by design.)
- */
 const B_ONLY = [
   "Matrix B Motors",
   "matrix-b-car-secret",

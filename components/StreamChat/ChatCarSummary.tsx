@@ -9,11 +9,6 @@ import { cn } from "@/lib/utils";
 import type { CarDetail } from "@/app/[locale]/(site)/cars/[id]/_lib/car-detail-types";
 import { useChatCarTitle } from "./CarContactActions";
 
-/**
- * The car at the top of a conversation: photo, title, live price, a Sold or
- * Unavailable tag, and one line under it — the dealership for a buyer, the
- * buyer for a dealer. Shared by the floating chat and the inbox.
- */
 export function ChatCarSummary({
   car,
   subtitle,
@@ -59,12 +54,6 @@ export function ChatCarSummary({
   );
 }
 
-/**
- * ChatCarSummary's shape while the live car loads: the saved photo (it is
- * the same car) and grey lines for the words. Showing anything else first —
- * a person's avatar, the English title — made the header change under the
- * reader's eyes.
- */
 export function ChatCarSummarySkeleton({ image, className }: { image?: string; className?: string }) {
   return (
     <div className={cn("flex min-w-0 flex-1 items-start gap-3", className)} aria-busy="true">

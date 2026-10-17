@@ -12,12 +12,6 @@ import type { BillingPlan } from "./_lib/billing-types";
 
 export type BillingCycle = "monthly" | "yearly";
 
-/**
- * One plan, as a column (canvas: Billing round 1, "2 · Plans first"): its
- * name, price for the chosen period and what it includes. The dealer's own
- * plan is outlined and carries their usage and plan actions (`children`); the
- * others end in a button that says what choosing them does.
- */
 export function PlanColumn({
   plan,
   cycle,

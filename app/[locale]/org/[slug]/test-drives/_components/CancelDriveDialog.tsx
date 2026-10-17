@@ -15,11 +15,6 @@ import { buttonVariants } from "@/components/ui/button";
 import type { ScheduleDrive } from "@/lib/services/dashboard/schedule";
 import { useDriveText } from "./schedule-shared";
 
-/**
- * Declining a request or cancelling a confirmed drive emails the buyer and
- * frees the slot, so it asks first: the buyer by name, the car and the time,
- * and the destructive verb on the button. Focus starts on "Keep it".
- */
 export function CancelDriveDialog({
   target,
   onClose,

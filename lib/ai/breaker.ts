@@ -16,29 +16,6 @@ import {
 import { getRedis } from "@/lib/redis";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * Our own limits in front of each provider's.
- *
- * Per key, because each key has its own allowance: one running out says
- * nothing about the next. The caps are the provider's (every key of a
- * provider is on the same kind of plan); the counts are the key's own. A key
- * at its cap is skipped; only when every key of every provider in a chain is
- * capped is the request refused as "AI busy".
- *
- * Counted in Redis when it is configured: every attempt *reserves* its
- * request before it is sent (INCR, backed out with DECR if that went over the
- * cap), so two requests in flight cannot both take the last slot — reading
- * the ledger and then calling let a burst of parallel requests overshoot
- * together. Without Redis, or when it fails, the caps are read from the usage
- * ledger (AiUsage.provider = ledgerId(provider, keyIndex)) as before: the
- * ledger stays the record either way.
- */
-
-/**
- * The caps are one pool shared by every tenant. Without a reserve, a burst of
- * free-plan usage would leave paying dealers facing "AI busy", so low-priority
- * calls stop at this percentage of each cap and standard calls may use all of it.
- */
 const DEFAULT_LOW_PRIORITY_PERCENT = 60;
 
 /** "low" is for callers not paying for the capacity they use: free-plan dealers. */
@@ -91,11 +68,6 @@ export function currentCaps(
   return { rpm: share(caps.rpm)!, rpd: share(caps.rpd), monthlyTokens: share(caps.monthlyTokens) };
 }
 
-/**
- * A separate allowance on the same key. Google meters embedding models apart
- * from the text models, so embedding requests must not spend the text pool's
- * 10 a minute — nor be refused because a buyer is waiting on an answer.
- */
 export type CapacityPool = "embed";
 
 const DEFAULT_EMBED_CAPS: ProviderCaps = { rpm: 60, rpd: 1_000 };
@@ -130,11 +102,6 @@ export function blockFor(ledger: string, caps: ProviderCaps, usage: Usage): stri
   return null;
 }
 
-/**
- * This month's tokens for a key whose counter is not there yet. The first
- * read of a month seeds it from the ledger — a deploy mid-month must not
- * start the allowance at zero.
- */
 async function seedMonthTokens(redis: Redis, ledger: string, now: number): Promise<number> {
   const key = monthKey(ledger, now);
   const fromLedger = await sumProviderTokensSince(ledger, startOfMonthUtc(now));
@@ -160,11 +127,6 @@ export async function ledgerUsage(ledger: string, caps: ProviderCaps, now: numbe
   return { minute, day, tokens };
 }
 
-/**
- * Why one key of a provider cannot take another call right now, or null if it
- * can. Developer-facing; the client turns an all-capped chain into "AI busy".
- * A read, not a reservation: each attempt reserves with reserveRequest.
- */
 export async function capacityBlock(
   provider: ProviderId,
   keyIndex = 0,
@@ -193,15 +155,6 @@ export async function capacityBlock(
   }
 }
 
-/**
- * Take one request's slot on a key, just before it is sent. False when that
- * slot went over the per-minute or daily cap — the slot is given back and the
- * caller moves on to another key. Every attempt reserves, retries included:
- * each one is a request the provider counts.
- *
- * Without Redis there is nothing to reserve against: true, and the ledger
- * check made before the chain started is all the protection there is.
- */
 export async function reserveRequest(
   provider: ProviderId,
   keyIndex = 0,
@@ -245,11 +198,6 @@ export async function reserveRequest(
   }
 }
 
-/**
- * Count what one request spent against its key's monthly token allowance —
- * successes and failures alike, which the provider meters the same. Never
- * throws: the ledger row is the record, and the counter is seeded from it.
- */
 export async function recordTokens(ledger: string, tokens: number): Promise<void> {
   const redis = getRedis();
   if (!redis || tokens <= 0) return;

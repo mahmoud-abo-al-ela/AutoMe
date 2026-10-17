@@ -30,11 +30,6 @@ const isSubdomainRedirectToHomeRoute = localizedPathMatcher(
 // the intl middleware entirely, or every fetch gains a redirect hop.
 const isApiRoute = pathMatcher(["/api(.*)", "/trpc(.*)"]);
 
-// Crawler files are per host, not per language, and live at the root. The
-// intl middleware would redirect /sitemap.xml to /en/sitemap.xml, which does
-// not exist. They still go through Clerk's handler, which is what sets the
-// sanitized x-subdomain header they read to tell a storefront from the
-// marketplace.
 const isCrawlerFile = pathMatcher(["/sitemap.xml", "/robots.txt"]);
 
 // Discovery documents (OAuth for MCP clients, among others) live at the root,
@@ -94,12 +89,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   const requestHeaders = new Headers(req.headers);
 
-  // A client can send any header it likes. Strip our internal ones before we
-  // trust anything downstream — otherwise forwarding them turns
-  // x-organization-slug into a client-controlled tenant selector. The
-  // impersonation ones are no longer set at all: a support session is the
-  // database row its cookie names, verified on the server
-  // (lib/services/impersonation/active.ts), never something a request asserts.
+  // Strip internal headers a client could forge, or x-organization-slug becomes a client-chosen tenant.
   requestHeaders.delete("x-organization-slug");
   requestHeaders.delete("x-dashboard-org");
   requestHeaders.delete("x-subdomain");
@@ -180,11 +170,6 @@ const clerk = clerkMiddleware(async (auth, req) => {
 
   return response;
 },
-// Clerk's Frontend API through this site at /__clerk — required for a
-// production instance on a vercel.app domain, which cannot carry Clerk's DNS
-// records. Only where NEXT_PUBLIC_CLERK_PROXY_URL is set (production); the
-// browser side reads the same variable. Clerk handles the path before the
-// handler above runs, with the keys from the environment.
 { frontendApiProxy: { enabled: Boolean(process.env.NEXT_PUBLIC_CLERK_PROXY_URL), path: CLERK_PROXY_PATH } });
 
 export default async function middleware(

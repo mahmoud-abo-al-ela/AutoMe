@@ -18,15 +18,6 @@ import {
   STATUS_FORM_TO_DB,
 } from "@/lib/constants/car-options";
 
-/**
- * Message-shape checks for the org dashboard shell.
- *
- * The shell sits behind sign-in and behind an organization membership, so a
- * missing key surfaces as a raw `org.nav.…` in a dealer's sidebar long before
- * anyone on this side sees it. `sidebarItems` is imported rather than
- * restated: a nav entry added without its label is the failure worth catching.
- */
-
 type Flat = [string, string][];
 
 const flatten = (obj: Record<string, unknown>, prefix = ""): Flat =>
@@ -76,12 +67,6 @@ describe("org messages", () => {
   });
 
   it("uses {value} rather than ICU # inside plurals", () => {
-    // Inside a plural, `#` formats with the bare routing locale, which gives
-    // Western digits in Arabic while every other number on the page uses
-    // Eastern ones. See lib/utils/intl-locale.
-    //
-    // Only inside a plural: elsewhere ICU treats `#` as a literal character,
-    // and an invoice number is written "#123" in English.
     const withHash = [enOrg, arOrg].flatMap((messages) =>
       flatten(messages)
         .filter(
@@ -142,11 +127,6 @@ describe("dashboard messages cover every series the charts render", () => {
   });
 
   it.each(["en", "ar"] as const)("names every car status in %s", (locale) => {
-    // The inventory pie and the popular-cars badges both read these. They
-    // live in carAttributes because a car status is a car attribute, not a
-    // dashboard one — carDetail still carries its own copy under
-    // "badges.status*", which should fold into this when the cars surface is
-    // translated.
     const messages = locale === "en" ? enCarAttributes : arCarAttributes;
 
     for (const status of ["AVAILABLE", "SOLD", "UNAVAILABLE"]) {

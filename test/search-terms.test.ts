@@ -12,12 +12,6 @@ import { findSimilarNames, findSimilarWords, refreshSearchTerms } from "@/lib/re
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 
-/**
- * The search's vocabulary (car_search_terms): what goes into it, and the
- * spelling neighbours it proposes. Words are invented so no other suite's cars
- * can supply them.
- */
-
 const LIVE = "org_test_terms_live";
 const SUSPENDED = "org_test_terms_suspended";
 const DELETED = "org_test_terms_deleted";

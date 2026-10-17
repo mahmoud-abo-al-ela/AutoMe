@@ -9,14 +9,7 @@ function secretMatches(header: string | null, secret: string): boolean {
   return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
-/**
- * The guard every cron route runs first: `Authorization: Bearer $CRON_SECRET`
- * (what Vercel Cron sends). Returns the refusal to send, or null to go on.
- *
- * Fails closed — with no secret configured nobody may run the job, rather
- * than everybody (an unset secret once let anyone delete audit logs).
- * `job` names it in that log line, e.g. "the weekly summary".
- */
+// Fails closed: with no CRON_SECRET configured nobody may run the job.
 export function refuseCronRequest(request: Request, job: string): NextResponse | null {
   const secret = process.env.CRON_SECRET;
   if (!secret) {

@@ -1,12 +1,3 @@
-/**
- * Prompt for describing a car listing's photos as alt text.
- *
- * The car's make, model and year are given rather than re-identified: the
- * dealer confirmed them, and a description that names a different car than
- * the listing does is worse than none.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const imageAltsPrompt = {
   version: "2026-10-10.1",
   text: (car: { year: number; make: string; model: string }, count: number) =>

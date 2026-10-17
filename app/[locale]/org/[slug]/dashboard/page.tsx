@@ -36,19 +36,6 @@ type Board = Omit<TodayBoardRows, "candidates"> & {
   };
 };
 
-/**
- * The dealer's overview (canvas: Round 3 — Overview; page pattern 4,
- * Dashboard): a read-only glance that links out. A heading and one sentence
- * on what is waiting; today's test drives as a road across the opening hours
- * (the one bold element); four figures for the last 30 days; two lists —
- * what waits on the dealer, and the cars that need a look; then test drives
- * per day. One order at every width (canvas: Overview on a phone), so what is
- * read and tabbed through always matches what is seen. No date range and no editing here: acting happens on the pages the
- * rows open.
- *
- * Every figure is read live; a failed read leaves its part out, not the page.
- * "Today" and its times are Cairo's.
- */
 export default async function DashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const locale = (await getLocale()) as Locale;

@@ -1,10 +1,5 @@
 import type { WebMcpToolDescriptor } from "@/lib/webmcp/types";
 
-/**
- * A stand-in for Chrome's `document.modelContext`, for jsdom tests: it keeps
- * what was registered, drops a tool when its signal aborts — as Chrome does —
- * and lets a test call a tool the way an agent would.
- */
 export function installModelContext() {
   const tools = new Map<string, WebMcpToolDescriptor>();
   const registerTool = async (tool: WebMcpToolDescriptor, options?: { signal?: AbortSignal }) => {

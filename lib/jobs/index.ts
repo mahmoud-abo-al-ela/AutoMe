@@ -5,18 +5,6 @@ import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
 import { reportSignal } from "@/lib/observability/report";
 
-/**
- * Background work that must not be lost: a job is handed to Upstash QStash,
- * which calls /api/jobs/<name> and retries with backoff until it succeeds —
- * where `after()` gets one try inside the function that queued it, and a
- * failure (an "AI busy", a timeout) is simply gone.
- *
- * Without QStash configured — local development, CI, a deploy before the
- * variables are added — on a host QStash cannot reach, or when it does not
- * answer, the job runs after the response exactly as before, so nothing
- * depends on the queue to work.
- */
-
 const RETRIES = 3;
 /** Queueing sits in front of the caller's response; a slow queue is a down one. */
 const PUBLISH_TIMEOUT_MS = 2_000;

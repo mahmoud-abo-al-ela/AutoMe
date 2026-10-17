@@ -15,12 +15,6 @@ vi.mock("@/lib/utils/revalidate", () => ({ revalidateLocalized: vi.fn() }));
 
 import { getCars as getCarsAction, getCarsFilters } from "@/actions/cars-listing";
 
-/**
- * The public listing actions take only what a buyer can choose. The scope of
- * what may be seen — which dealership, which statuses — is the server's: from
- * a request, it would list another dealer's hidden and sold cars.
- */
-
 const SCOPE = {
   organizationId: "org-other-dealer",
   status: "SOLD",

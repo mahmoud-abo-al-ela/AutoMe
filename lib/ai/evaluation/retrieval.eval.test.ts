@@ -12,17 +12,6 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 import { FOLD_SIMILARITY, SUGGEST_SIMILARITY } from "@/lib/services/buyer-question/meaning";
 
-/**
- * Buyer questions by meaning, against the real embedding model.
- *
- *   AI_EVAL=1 pnpm eval lib/ai/evaluation/retrieval
- *
- * What the thresholds in lib/services/buyer-question/meaning.ts promise:
- * folding (which deletes a row) must never join two different questions, and
- * a rephrasing — in other words or the other language — must find its own
- * kind first. One request embeds the whole set.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 /** Questions buyers ask, by what they mean: English, MSA, and Egyptian Arabic. */

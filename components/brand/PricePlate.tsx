@@ -18,19 +18,6 @@ const plateVariants = cva(
   }
 );
 
-/**
- * A listing price, drawn as an Egyptian private-car licence plate: the
- * light-blue band, the heavy border, the number in the body.
- *
- * Price only. The shape is the brand's one strong motif, and it stays
- * meaningful only while it means exactly one thing — never decoration, never
- * a plan's monthly price.
- *
- * The band is laid out physically, like the real plate (EGP on the left,
- * ج.م. on the right) whatever the page direction. The visual is hidden from
- * assistive tech and the formatted price is read instead, so "EGP 875,000"
- * is announced rather than "EGP, ج.م., 875,000".
- */
 export function PricePlate({
   amount,
   currency,

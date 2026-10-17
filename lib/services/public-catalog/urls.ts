@@ -1,12 +1,6 @@
 import type { Locale } from "@/i18n/routing";
 import { ServiceUnavailableError } from "@/lib/utils/errors";
 
-/**
- * Links to AutoMe's own pages, for answers read outside the site (MCP). Always
- * built from NEXT_PUBLIC_APP_URL, never from the request's host: a caller must
- * not be able to make AutoMe hand out links to a host of its choosing.
- */
-
 /** Where an answer's links came from, so a visit can be counted against it. */
 export interface LinkSource {
   /** The surface, e.g. "mcp". */

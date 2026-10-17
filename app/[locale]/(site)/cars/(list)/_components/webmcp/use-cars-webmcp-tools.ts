@@ -12,11 +12,6 @@ import { carsPageTools } from "./cars-tools";
 /** Longer than any search the page runs; past it the agent is told the search failed. */
 const LIST_TIMEOUT_MS = 15_000;
 
-/**
- * The page's own query for a key, once it has settled. The tool does not
- * fetch: it waits for the list the page fetches for the filters it just
- * applied, so what it returns is the cards on the screen, from one request.
- */
 function settledQuery<T>(client: QueryClient, queryKey: QueryKey): Promise<T> {
   const cache = client.getQueryCache();
   return new Promise<T>((resolve, reject) => {

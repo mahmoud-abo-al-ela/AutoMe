@@ -1,14 +1,5 @@
 import { foldSearchText } from "@/lib/utils/search-text";
 
-/**
- * What a buyer typed into the listing assistant, before any model sees it.
- *
- * Every question sent to the model is billed to the dealer's allowance and
- * takes seconds; a greeting, a thank-you or a keyboard mash deserves neither.
- * These are answered instantly with fixed copy, and never reach the dealer's
- * buyer-questions inbox. Deliberately conservative: anything that might be a
- * real question goes to the model — a false "noise" would turn a buyer away.
- */
 export type BuyerMessageKind = "question" | "greeting" | "thanks" | "noise";
 
 const GREETINGS = new Set(

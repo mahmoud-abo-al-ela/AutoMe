@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { z } from "zod";
 
-/**
- * The client across more than one provider: CodeCraft (OpenAI-compatible, over
- * `fetch`) in front of Google (the Gemini SDK, mocked here). The single-provider
- * metering contract is in client.test.ts; this is what changes with two.
- */
-
 const generate = vi.hoisted(() => vi.fn());
 const createAiUsage = vi.hoisted(() => vi.fn());
 const countPlatformCallsSince = vi.hoisted(() => vi.fn());

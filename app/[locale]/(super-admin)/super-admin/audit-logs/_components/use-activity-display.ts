@@ -13,12 +13,6 @@ const read = (value: unknown, key: string): unknown =>
   value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined;
 const str = (value: unknown) => (typeof value === "string" && value ? value : null);
 
-/**
- * How the Activity table names things: the person who made a change, who
- * they were signed in as during a support session, what the change was to —
- * a car, a person, a plan, the dealership — and the device it came from.
- * Also the CSV, in the admin's language.
- */
 export function useActivityDisplay() {
   const t = useTranslations("superAdmin.auditLogs");
   const tPlans = useTranslations("plans");

@@ -33,12 +33,6 @@ export function useChatCarTitle(car: CarDetail) {
   };
 }
 
-/**
- * The ways out of the chat, as marketplace apps offer them above every
- * conversation. A buyer gets Call and WhatsApp (the dealership's phone;
- * WhatsApp only for a mobile), Test drive while the car is available, and
- * View car. A dealer's side has no buyer phone to offer, so only View car.
- */
 export function CarContactActions({
   car,
   audience,

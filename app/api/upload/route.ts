@@ -14,11 +14,6 @@ const ALLOWED_BUCKETS = new Set(["organization-logos", "car-images"]);
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-/**
- * Detect the real image format from magic bytes rather than trusting the
- * client-supplied `file.type` / filename extension. Returns null for anything
- * that isn't one of the formats we accept.
- */
 function detectImageType(
   buffer: Buffer
 ): { ext: string; contentType: string } | null {

@@ -35,12 +35,6 @@ const SAVE: Record<StorefrontPart, (state: StorefrontState) => Promise<ActionRes
   terms: (state) => updateDealershipTerms(termsToInput(state.terms)),
 };
 
-/**
- * Settings' first tab: what buyers see (canvas: Settings round 1,
- * "2 · Storefront"). The profile, opening hours and terms are edited on the
- * left as one form with one Save, and the preview on the right shows the
- * result as it is typed. Members see it all, read-only: only owners can save.
- */
 export function StorefrontEditor({ initial, logo, canEdit }: { initial: StorefrontState; logo: string | null; canEdit: boolean }) {
   const t = useTranslations("org.settings.storefront");
   const locale = useLocale();

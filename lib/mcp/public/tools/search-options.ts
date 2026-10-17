@@ -4,13 +4,6 @@ import { SPECS, type SpecKind } from "@/lib/search/specs";
 import { PUBLIC_SEARCH_LIMITS, PUBLIC_SORTS } from "@/lib/services/public-catalog";
 import type { PublicTool } from "../tool";
 
-/**
- * What search_cars accepts: the makes, body types, fuels, gearboxes and colours
- * the site knows, each as the value to send and its name in the reader's
- * language, plus the sorts and limits. Static — built from the site's own
- * lists, with no database read — so it is the same for every caller.
- */
-
 const AR_MAKES = (arCarAttributes as unknown as { make: Record<string, string> }).make;
 
 const option = z.object({ value: z.string(), label: z.string() });

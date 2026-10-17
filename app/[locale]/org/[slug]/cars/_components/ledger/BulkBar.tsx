@@ -14,12 +14,6 @@ const ACTIONS: { change: Exclude<CarChange, "unfeature">; applies: (car: Invento
   { change: "feature", applies: (car) => !car.featured },
 ];
 
-/**
- * What to do with the selected cars. It floats over the foot of the page
- * rather than pushing the table down, so selecting a row never moves the row
- * under the pointer. Every change here is undone from a row's menu, so none
- * asks first.
- */
 export function BulkBar({ state, cars }: { state: InventoryData; cars: InventoryRow[] }) {
   const t = useTranslations("org.cars.ledger.bulk");
   const fmt = useFormatters();

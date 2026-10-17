@@ -22,11 +22,6 @@ import {
     type DealershipTab,
 } from "./_lib/detail-types";
 
-/**
- * One lookup per request, shared by the metadata and the page. A missing or
- * inactive dealership is null (the page answers 404); anything else throws to
- * the error boundary.
- */
 const loadDealership = cache(async (slug: string) => {
     try {
         return await dealershipService.getDealershipBySlug(slug);
@@ -97,12 +92,6 @@ export async function generateMetadata({ params }: Pick<PageProps, "params">): P
     };
 }
 
-/**
- * A dealership's storefront. Rendered on the server — the dealership, its
- * first page of cars and the filter options — so the page arrives whole
- * (and readable by search engines) instead of as a skeleton that fetched
- * everything after load. Filtering and paging then run in the browser.
- */
 export default async function DealershipDetailPage({ params, searchParams }: PageProps) {
     const { slug, locale } = await params;
     const dealership = await loadDealership(slug);

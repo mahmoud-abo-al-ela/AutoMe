@@ -1,10 +1,5 @@
 import { Building2, Car, Heart, Home, LayoutDashboard, MessageSquare, Scale, type LucideIcon } from "lucide-react";
 
-/**
- * Who the phone navigation is for. A guest browses; a buyer shops; a dealer —
- * any dealership member, or a platform admin — works from the dashboard and
- * shops only on the side.
- */
 export type Viewer = "guest" | "buyer" | "dealer";
 
 export type MobileTab = {
@@ -16,12 +11,6 @@ export type MobileTab = {
   unread?: boolean;
 };
 
-/**
- * The bottom tab bar's tabs, before "More". Every tab is somewhere the viewer
- * can actually go: a guest gets browsing (Saved and Messages would only send
- * them to sign in), a buyer gets their saved cars and conversations, a dealer
- * gets the dashboard. The More sheet (MobileMenu) lists what is not here.
- */
 export function mobileTabs(
   viewer: Viewer,
   { onSubdomain, dashboardHref }: { onSubdomain: boolean; dashboardHref: string }

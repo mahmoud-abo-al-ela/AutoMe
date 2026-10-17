@@ -1,12 +1,3 @@
-/**
- * Navigation config.
- *
- * Items carry a `labelKey` into the `nav` message namespace rather than an
- * English string. `navIcon` is an explicit key too: the mobile menu used to
- * look its icon up by the English label, which meant every translated item
- * silently fell back to the generic Home icon.
- */
-
 /** A key in messages/{locale}/nav.json. */
 export type NavLabelKey =
   | "browseCars"

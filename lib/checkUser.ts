@@ -7,11 +7,6 @@ import { resolveActiveImpersonation, type ActiveImpersonation } from "@/lib/serv
 
 export type { UserWithOrganizations };
 
-/**
- * What checkUser resolves to: the user row, plus the impersonation marker when
- * an admin is viewing as someone else. The extras are optional because the
- * non-impersonating path returns the row unchanged.
- */
 export type CurrentUser = UserWithOrganizations & {
   isImpersonated?: boolean;
   impersonation?: ActiveImpersonation;
@@ -30,11 +25,6 @@ export async function checkUser(): Promise<CurrentUser | null> {
 
   let userData = await findOrCreateUser(userId);
 
-  // The email check is load-bearing, not defensive. `assignPendingOrganizations`
-  // matches on `pendingOwnerEmail: userData.email`, and Prisma turns a null into
-  // `IS NULL` — which matches every organization still awaiting an owner and
-  // would grant this user OWNER membership on all of them. Now that
-  // `User.email` is nullable, that is reachable rather than theoretical.
   if (userData.email) {
     userData = await assignPendingOrganizations(userData, userData.email);
   }
@@ -97,13 +87,6 @@ async function findOrCreateUser(clerkId: string): Promise<UserWithOrganizations>
         email,
       });
     } catch (error) {
-      // find-then-create is not atomic. A first page load renders several
-      // server components concurrently, each calling checkUser; they all miss
-      // on the lookup above and race to insert. Whoever loses gets P2002 on the
-      // unique clerkId — the row now exists, so re-read it instead of throwing.
-      // Read `code` structurally: the generated client re-exports
-      // PrismaClientKnownRequestError via `export import`, which is a type
-      // alias, so `instanceof` does not narrow against it.
       const isDuplicateClerkId =
         typeof error === "object" &&
         error !== null &&
@@ -147,13 +130,7 @@ async function assignPendingOrganizations(
   return (await tenantRepository.findUserWithOrganizationsById(userData.id)) as UserWithOrganizations;
 }
 
-/**
- * Swap to the impersonated member only inside a support session the database
- * verifies (lib/services/impersonation/active.ts) — never on a cookie or header
- * alone. The target comes from the session row, and the verified session rides
- * along as `impersonation`, so tenant resolution decides on the same session
- * this swap used rather than reading it a second time.
- */
+// Impersonate only inside a support session the database verifies, never on a cookie or header alone.
 async function resolveImpersonation(
   userData: UserWithOrganizations
 ): Promise<CurrentUser> {

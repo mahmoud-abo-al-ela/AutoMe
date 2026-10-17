@@ -1,12 +1,6 @@
 import { alexandria } from "@/components/brand/site-font";
 import { AdminTopBar } from "./AdminTopBar";
 
-/**
- * The super-admin frame: the dealer dashboard's theme, width and type, under
- * the admin top bar. The layout wraps every admin page in it, and the locale
- * root's loader draws the same frame on a reload, so the bar is already in
- * place while the admin check runs and nothing jumps when the page arrives.
- */
 export function AdminFrame({ children, after }: { children: React.ReactNode; after?: React.ReactNode }) {
   return (
     <div

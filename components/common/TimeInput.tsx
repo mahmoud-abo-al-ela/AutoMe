@@ -10,20 +10,6 @@ import {
 } from "@/lib/utils/datetime";
 import type { Locale } from "@/i18n/routing";
 
-/**
- * A native time input whose AM/PM reads in the page's language.
- *
- * The input formats its own value, and it does so from the *browser's* UI
- * language — not the page's. `lang="ar"`, `lang="ar-EG"` and
- * `lang="ar-EG-u-nu-latn"` on the element were all tried; Chromium renders
- * "04:00 PM" for every one of them. So in Arabic the native marker is hidden
- * (see app/globals.css) and replaced by the chip below, which carries the same
- * ص/م that Intl gives every other time in the product.
- *
- * Everything else stays the browser's: the digits, the field's own keyboard
- * handling, and the picker behind the clock icon. Only the marker is ours, and
- * only in Arabic — the English input is untouched.
- */
 export default function TimeInput({
     id,
     value,
@@ -48,12 +34,6 @@ export default function TimeInput({
     const period = dayPeriodOf(value);
     const labels = dayPeriodLabels(locale);
 
-    // Physical `left`, not `start`: a time input lays its own contents out
-    // left-to-right whatever the page direction — digits at the left edge,
-    // picker icon at the right — so the marker goes at the physical left and
-    // the digits are padded off it. Hiding the native marker frees space
-    // inside the field but nothing reflows to fill it, which is why the
-    // padding is added rather than inherited.
     return (
         <span className="relative inline-flex items-center">
             <Input

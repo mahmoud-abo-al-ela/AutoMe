@@ -142,11 +142,6 @@ export const useCarForm = (
         }
     }, [watchMake, watchModel, watchYear, form]);
 
-    // A corrected year follows into the text that states it — the AI writes
-    // "كيا سيراتو ٢٠٢٠" into the title and description. Keyed on the last
-    // complete year, so typing through "202" rewrites nothing, and the first
-    // one seen (a pre-fill) is only recorded. Not marked dirty: both languages
-    // change together, so there is nothing for the server to re-translate.
     const lastYear = useRef<number | null>(null);
     useEffect(() => {
         const year = asModelYear(watchYear);

@@ -2,30 +2,6 @@ import { expandSearchTerm, hasAlias, knownNames } from "@/lib/locations";
 import { searchWords } from "@/lib/utils/search-text";
 import { isCorrectable } from "@/lib/search/lexical";
 
-/**
- * Builds the Postgres prefix tsqueries for the car search box — one per term,
- * which search.js judges and combines.
- *
- * Lifted out of search.js so it can be tested directly: it produces strings
- * that are injected into `to_tsquery`, where a malformed grouping is a runtime
- * SQL error rather than a wrong result.
- *
- * Three jobs:
- *
- * - **Prefix matching**, so as-you-type queries hit partial words:
- *   "toyota cor" → `toyota:*`, `cor:*`.
- * - **Alias expansion**, so an Arabic query reaches the English columns a
- *   reader sees translated. "نيسان" has to find the Nissans, because that is
- *   what the filter chip beside the search box says.
- * - **Arabic normalization**, so a query reaches Arabic text a dealer wrote.
- *   Words are folded by `searchWords`, the same fold the stored vector is
- *   built through — see lib/utils/search-text.ts, and the warning there about
- *   folding one side only.
- *
- * Reducing to letters and digits is also what keeps the string safe to inject:
- * no quote, backslash or tsquery operator can survive it.
- */
-
 /** `a:* & b:*` for one variant — all of its words must be present. */
 function variantClause(variant: string): string | null {
   const parts = [...new Set(searchWords(variant))];
@@ -33,11 +9,6 @@ function variantClause(variant: string): string | null {
   return parts.map((word) => `${word}:*`).join(" & ");
 }
 
-/**
- * One OR group for a term and everything it is the display form of:
- * `(nissan:* | نيسان:* | ...)`. Returns null only when nothing survives
- * reduction — punctuation on its own, now that Arabic is kept.
- */
 function orGroup(variants: string[]): string | null {
   const clauses = [...new Set(variants.map(variantClause).filter(Boolean))] as string[];
 
@@ -47,35 +18,13 @@ function orGroup(variants: string[]): string | null {
   return `(${clauses.join(" | ")})`;
 }
 
-/**
- * One thing the buyer typed — a word, or a multi-word place that is one alias —
- * with every way it can match a car. Judged on its own by the search (does any
- * car have it? only in prose? in most cars?), so a word no listing uses cannot
- * empty a search the other words would answer.
- */
 export interface SearchTerm {
   /** As the buyer typed it, for telling them which words were set aside. */
   text: string;
   /** Prefix tsquery over every field: `(nissan:* | نيسان:*)`. */
   query: string;
-  /**
-   * The same, restricted to the structured fields — make and model (weight A),
-   * body, fuel, gearbox, colour, location and feature tags (D) — and never the
-   * free text of titles and descriptions (B, C).
-   */
   structuredQuery: string;
-  /**
-   * Exactly the word (no prefix) as a make or model (A): whether the term names
-   * what a car is — "corolla", "x5" — rather than something about it. Exact, so
-   * "sport" does not name the Sportage.
-   */
   nameQuery: string;
-  /**
-   * Prefix tsquery over the car's own name only — make and model (A) and its
-   * titles (B). A term that names cars is matched by it, so a description
-   * comparing itself to one ("better than a Corolla", "X5-like comfort") does
-   * not make a car one.
-   */
   ownQuery: string;
   /** Canonical dealership city/region values the term names, compared by equality. */
   places: string[];
@@ -136,13 +85,6 @@ export function searchTerms(term: string): SearchTerm[] {
   return terms;
 }
 
-/**
- * The folded word a typo correction may replace this term with, or null. Only
- * a single free word qualifies: never a place, a year, or an alias or known
- * value (a make in Arabic, a body type) — those are known words already, and
- * one no car in scope has is genuinely absent, not misspelt. isCorrectable
- * rules out short words and model codes.
- */
 export function correctableWord(term: SearchTerm): string | null {
   if (term.places.length > 0 || term.year !== null || hasAlias(term.text)) return null;
   const words = searchWords(term.text);
@@ -151,11 +93,6 @@ export function correctableWord(term: SearchTerm): string | null {
 
 let names: Map<string, string> | undefined;
 
-/**
- * The alias index's one-word names a typo may be corrected to, keyed by the
- * word as a search folds it, to the name as displayed: "تويوتا" → تويوتا,
- * "هيونداي" → هيونداي. Built once.
- */
 export function correctionNames(): Map<string, string> {
   if (!names) {
     names = new Map();
@@ -167,12 +104,6 @@ export function correctionNames(): Map<string, string> {
   return names;
 }
 
-/**
- * The term that stands in for a typo: any of the known words that may have
- * been meant, each with everything it is the display form of ("تويوتا"
- * reaches the Toyotas), matched like every term, by prefix. Keeps the typed
- * text, so the search can say what it corrected.
- */
 export function correctedTerm(typed: string, words: string[]): SearchTerm | null {
   const expanded = words.map((word) => expandSearchTerm(word));
   const unique = (values: string[]) => [...new Set(values)];

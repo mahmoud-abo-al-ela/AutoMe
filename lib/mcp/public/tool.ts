@@ -4,11 +4,6 @@ import { enforceMcpCostlyLimit } from "@/lib/middleware/with-rate-limit";
 import { recordToolCall } from "@/lib/services/mcp/telemetry";
 import { ToolTimeoutError, logToolError, toolErrorCode } from "./errors";
 
-/**
- * One public MCP tool: its contract and its work. The work is a plain function
- * over the public catalog, testable without HTTP; runTool wraps every call the
- * same way — time budget, the costly-call limit, error codes, measures.
- */
 export interface PublicTool<
   Input extends z.ZodRawShape,
   Output extends z.ZodRawShape,

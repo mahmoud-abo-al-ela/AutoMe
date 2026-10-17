@@ -4,12 +4,6 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseAnalyticsQuery, type AnalyticsReport } from "@/lib/services/super-admin/analytics-options";
 
-/**
- * Each Analytics report on its way, in its own shape — shown while switching
- * report or period, and on a reload by the page's loading state. Shimmer,
- * like every admin skeleton.
- */
-
 const sk = "skeleton-shimmer";
 const card = "overflow-hidden rounded-[20px] border border-border bg-card";
 

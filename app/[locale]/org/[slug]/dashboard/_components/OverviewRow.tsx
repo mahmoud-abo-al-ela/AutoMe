@@ -3,12 +3,6 @@ import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-/**
- * One row of the overview's supporting lists: a leading badge or picture, a
- * line and its detail, and a chevron as the resting sign that the row opens
- * something. The whole row is the link. No hooks, so the server renders it
- * and the client messages row reuses it.
- */
 export function OverviewRow({
   href,
   lead,

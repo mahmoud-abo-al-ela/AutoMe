@@ -11,12 +11,6 @@ import { OutcomeList } from "./OutcomeList";
 import { DaySchedule } from "./DaySchedule";
 import { CancelDriveDialog } from "./CancelDriveDialog";
 
-/**
- * Test drives (canvas: Test drives — calendar round 2, C · Month and day):
- * the month on the side with the drives that need an outcome beneath it, and
- * the chosen day — its drives and the free time between them — beside it.
- * On a phone: the week (or the month, on request), the outcomes, then the day.
- */
 export function TestDrivesView({ initialDate, base }: { initialDate: string; base: string }) {
   const t = useTranslations("org.testDrives");
   const state = useSchedule(initialDate);

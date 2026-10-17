@@ -2,12 +2,6 @@ import { describe, it, expect } from "vitest";
 import { normalizeCarStatus } from "@/lib/constants/car-options";
 import { carSchema, updateCarFullSchema, updateCarSchema } from "@/lib/validations/schemas";
 
-/**
- * The dealer form sends "Available"; other callers send "AVAILABLE". Adding a
- * car used to accept only the second — so every car added from the form was
- * refused with "Invalid enum value ... received 'Available'".
- */
-
 const validCar = {
   title: "Toyota Corolla 2020",
   make: "Toyota",

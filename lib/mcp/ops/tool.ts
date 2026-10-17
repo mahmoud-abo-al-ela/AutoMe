@@ -3,12 +3,6 @@ import type { Redis } from "@upstash/redis";
 import type { CallToolResult } from "@modelcontextprotocol/server";
 import { AppError, NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 
-/**
- * One ops MCP tool: its contract and its work, the work a plain function over
- * lib/services/ai-ops, testable without a transport. runOpsTool wraps every
- * call the same way — a time budget, a fixed error code, one audit line.
- */
-
 /** What the server was started with; nothing a caller can change. */
 export interface OpsConfig {
   /** A read-only Redis client for the breaker's counters, or none (ledger only). */

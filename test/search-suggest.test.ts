@@ -14,12 +14,6 @@ import { resetSuggestionsForTests, suggestSearches } from "@/lib/services/car/se
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 
-/**
- * Suggestions read public listings only — available cars of active,
- * undeleted dealerships — and count them live. Invented names, so no other
- * suite's cars can supply them.
- */
-
 const LIVE = "org_test_suggest_live";
 const SUSPENDED = "org_test_suggest_suspended";
 const DELETED = "org_test_suggest_deleted";

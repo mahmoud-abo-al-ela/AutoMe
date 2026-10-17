@@ -6,11 +6,6 @@ import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ErrorScreen, RoadBarrier } from "@/components/brand/ErrorScreen";
 
-/**
- * A super-admin page that failed to render: the same screen and copy as the
- * rest of the product. The brand's buttons live in the site theme, so this
- * page turns it on for as long as it shows.
- */
 export default function SuperAdminError({
   error,
   reset,

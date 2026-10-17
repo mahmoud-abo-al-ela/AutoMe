@@ -16,14 +16,6 @@ const TABS: Tab[] = ["needsReply", "unread", "all"];
 const SORT: ChannelSort = { last_message_at: -1 };
 const OPTIONS = { limit: 30 };
 
-/**
- * The conversations down the side of the desk (canvas: Messages round 1,
- * 2 · Sales desk). Opens on "Needs a reply" — buyers whose last word has no
- * answer yet — because answering fast is what sells the car. The tabs filter
- * what is already loaded, so they switch instantly and follow new messages
- * live; the open conversation stays listed after it is answered, so it does
- * not vanish from under the dealer.
- */
 export function DeskList({ organizationSlug }: { organizationSlug: string }) {
   const t = useTranslations("org.messages");
   const { client, channel: active } = useChatContext();

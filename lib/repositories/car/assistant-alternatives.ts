@@ -18,16 +18,6 @@ const ALTERNATIVE_FIELDS = {
   fuelType: true,
 } as const;
 
-/**
- * The dealership's other cars on sale that a buyer's question names — "عندكم
- * كيا؟" finds its Kias however far they are in price from the car being
- * viewed. Words are judged and corrected exactly as the site's search judges
- * them (dealerSearchCondition), in this dealership's scope, which is in the
- * SQL; nearest to `price` first, since the buyer is looking at that budget.
- *
- * Empty when no word of the question names any of its cars ("is it
- * negotiable?") — the caller then offers the cars closest in price instead.
- */
 export async function findOtherAvailableCarsMatching(input: {
   organizationId: string;
   excludeCarId: string;

@@ -54,13 +54,6 @@ export interface BillingEmailInput {
   email: BillingEmail;
 }
 
-/**
- * A billing email to a dealership's owners, in its chosen language and
- * direction. Every call to action opens the billing page, where paying starts
- * a fresh Paymob checkout: a checkout link put in an email would expire long
- * before some owners read it. Inline styles only — email clients ignore
- * stylesheets.
- */
 export function buildBillingEmail({ locale, dealership, slug, email }: BillingEmailInput): {
   subject: string;
   html: string;

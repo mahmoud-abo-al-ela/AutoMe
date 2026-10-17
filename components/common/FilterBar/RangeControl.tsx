@@ -4,11 +4,6 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Slider } from "@/components/ui/slider";
 
-/**
- * Generic min/max range control. The slider domain is pinned to `bounds`
- * (global, unfiltered) so it doesn't shift as other filters are applied. Drag
- * updates local state; release commits via onCommit([min, max], bounds).
- */
 export type RangeBounds = {
   min?: number;
   max?: number;

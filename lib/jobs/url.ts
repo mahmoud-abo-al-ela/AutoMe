@@ -1,9 +1,3 @@
-/**
- * Where a job is delivered, for both sides of the queue: lib/jobs publishes
- * to it and app/api/jobs verifies QStash's signature against it, so the two
- * can never disagree. Null when there is no public URL to deliver to — unset,
- * or local, which QStash cannot reach.
- */
 export function jobUrl(name: string): string | null {
   const raw = process.env.NEXT_PUBLIC_APP_URL;
   if (!raw) return null;

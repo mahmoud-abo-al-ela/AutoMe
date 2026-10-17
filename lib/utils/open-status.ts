@@ -2,23 +2,6 @@ import type { DayOfWeek } from "@/lib/generated/prisma";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 import { cairoNow } from "@/lib/utils/datetime";
 
-/**
- * "Is this dealership open right now?"
- *
- * Split out of the badge component it used to live in, for two reasons.
- *
- * It returned a finished English sentence (`message: "Opens tomorrow at
- * 09:00"`), so there was nowhere to put a translation — the same problem the
- * server actions had before they started returning message keys. It now returns
- * a key plus its parameters and leaves the wording to the caller.
- *
- * And it read the clock with `new Date().getDay()` / `.getHours()`, which is
- * the *visitor's* timezone rather than the dealership's. A reader in London saw
- * a Cairo dealership shut two hours early; one in Dubai saw it open late. Egypt
- * observes DST, so a fixed offset would not have fixed it either — hence
- * `cairoNow`, which resolves the zone by name.
- */
-
 /** Indexed by `Date.getDay()`, so Sunday first. */
 const DAY_KEYS: readonly DayOfWeek[] = [
   "SUNDAY",
@@ -47,12 +30,6 @@ export interface OpenStatus {
   params?: { time?: string; day?: DayOfWeek };
 }
 
-/**
- * Minutes since midnight for "09:00" or "9:00 AM".
- *
- * Both shapes occur: the column is free text, and older rows were written by a
- * form that used a 12-hour picker.
- */
 export function parseTimeToMinutes(
   timeStr: string | null | undefined
 ): number | null {

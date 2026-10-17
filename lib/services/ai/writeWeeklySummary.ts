@@ -5,12 +5,6 @@ import { weeklySummaryPrompt } from "@/lib/ai/prompts/weekly-summary";
 import { weeklySummarySchema, type WeeklySummary } from "@/lib/ai/schemas/weekly-summary";
 import { textPart } from "@/lib/ai/provider/types";
 
-/**
- * The words at the top of a dealership's weekly summary, written around its
- * figures (`numbers`, as JSON). Nobody waits on it — a cron sends the email —
- * but it runs once per dealership in one invocation, so it takes the fast
- * chain to keep the whole run inside its time limit.
- */
 export async function writeWeeklySummary(
   numbers: Record<string, number | null>,
   locale: Locale,

@@ -2,16 +2,6 @@ import { createHash } from "node:crypto";
 import { getRedis } from "@/lib/redis";
 import { RateLimitError, logError } from "@/lib/utils/errors";
 
-/**
- * Stops a caller sweeping get_car with guessed ids. Car ids are random UUIDs,
- * so a real client almost never asks for one that is not found; a run of
- * misses from one address is a scan. Past MISSES_ALLOWED misses in a window,
- * that address gets "rate_limited" for the rest of it.
- *
- * A second layer under the Arcjet limits, which still hold on their own: with
- * Redis unconfigured or down this guard steps aside and says so in the log.
- */
-
 const WINDOW_SECONDS = 10 * 60;
 /** Provisional, like every MCP limit; MCP_RL_CAR_MISSES overrides it. */
 const MISSES_ALLOWED = (() => {

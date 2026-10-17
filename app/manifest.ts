@@ -1,10 +1,5 @@
 import type { MetadataRoute } from "next";
 
-/**
- * The web app manifest: the name and icon a phone uses when the site is added
- * to its home screen, and the colours of its splash. Not localized — one file
- * serves both languages, and the name is the brand in either.
- */
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "AutoMe",

@@ -19,12 +19,6 @@ import type { DealershipReview, ReviewsPagination, ReviewRatingCount } from "../
 
 const PER_PAGE = 10;
 
-/**
- * The Reviews tab: the average and how the ratings break down (counted over
- * every review, not just this page), the invitation to write one, then the
- * reviews. The average and total come from the page's server render; after
- * a review is posted the page refreshes, so the header's rating follows.
- */
 const DealershipReviews = ({
     organizationId,
     organizationSlug,

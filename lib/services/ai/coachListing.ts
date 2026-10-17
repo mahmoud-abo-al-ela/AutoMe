@@ -17,11 +17,6 @@ export interface ListingToCoach {
   imageCount: number;
 }
 
-/**
- * One concrete suggestion per flagged issue, in the dashboard's language.
- * Advice for a code the rules did not flag is dropped: the rules decide what
- * is wrong, the model only says how to fix it.
- */
 export async function coachListing(
   listing: ListingToCoach,
   issues: ListingIssueCode[],

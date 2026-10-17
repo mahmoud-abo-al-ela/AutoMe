@@ -24,11 +24,6 @@ import type { DealershipDetail } from "@/lib/services/super-admin/dealership-det
 import { BillingPayments } from "./BillingPayments";
 import { usePlanName } from "../../../../_components/use-plan-name";
 
-/**
- * The Billing tab (canvas: dealership tabs round 1, "Billing C · Plans
- * first"): the plans side by side with the current one marked and where it
- * stands, a move to any other — which asks first — then every payment.
- */
 export function BillingTab({
   data,
 }: {

@@ -7,13 +7,6 @@ vi.mock("next/cache", () => ({ revalidatePath }));
 
 const { revalidateLocalized, revalidateRouteTree } = await import("./revalidate");
 
-/**
- * A revalidation that names no real page fails silently: Next just finds
- * nothing to refresh. That is how every call in actions/ went dead when the
- * locale prefix arrived, and how /admin/... paths outlived the routes they
- * named. So these check the paths against the route tree on disk.
- */
-
 const ROOT = process.cwd();
 const LOCALE_DIR = path.join(ROOT, "app", "[locale]");
 

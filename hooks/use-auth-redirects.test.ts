@@ -2,27 +2,6 @@ import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 
-/**
- * Clerk's redirect props are the one place a URL escapes next-intl.
- *
- * Everything else navigates through `@/i18n/navigation`, which keeps the locale
- * prefix. These props are plain strings Clerk navigates to itself, so a literal
- * like "/auth-redirect" is a 308 to the default locale — which is how signing in
- * on an Arabic page dropped the reader into English for the rest of the session.
- *
- * The failure is silent: nothing errors, the destination is simply the wrong
- * language. So the rule is enforced by shape rather than by review — these props
- * must always be an expression carrying the locale, never a string literal.
- */
-
-/**
- * A literal is written prop="…"; a locale-carrying expression is prop={…}.
- *
- * Deliberately a regex literal rather than one built from a list of prop names:
- * inside a template string `\b` is a backspace character rather than a word
- * boundary, so the assembled pattern matches nothing and the test passes on
- * every input. It did, until a deliberately reintroduced bug failed to trip it.
- */
 const REDIRECT_PROP_LITERAL =
   /\b(forceRedirectUrl|fallbackRedirectUrl|afterSignInUrl|afterSignUpUrl|afterSignOutUrl|signInUrl|signUpUrl)\s*=\s*"/g;
 
@@ -89,12 +68,6 @@ describe("Clerk redirect targets", () => {
   });
 });
 
-/**
- * A chat button that sent a signed-out buyer to /messages?carId=… lost them:
- * /messages redirected to sign-in with no return address, and they landed on
- * the home page with neither the car nor the chat. Chat entry points go
- * through `signInTo(carChatReturnPath(id))` instead (see OpenChatFromLink).
- */
 const MESSAGES_BY_CAR = /\/messages\?carId=/g;
 
 describe("chat entry points", () => {

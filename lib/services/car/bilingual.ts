@@ -1,16 +1,6 @@
 import type { Locale } from "@/i18n/routing";
 import type { ListingText } from "@/lib/services/ai/translateListing";
 
-/**
- * Keeping a listing's two languages in step when the dealer only writes one.
- *
- * The dealer form shows the fields of the dashboard's language and hides the
- * other; on save the missing or stale language is written by translation. This
- * module is the pure half of that — which way to translate, what to send, and
- * how the reply lands — so it can be tested without a model. The AI call and
- * its plan gate live in the car actions.
- */
-
 /** The listing fields that exist per language. `title` is the English one. */
 export interface BilingualListing {
   title: string;
@@ -31,14 +21,6 @@ function hasLanguage(car: BilingualListing, locale: Locale): boolean {
     : hasText(car.descriptionAr) || hasList(car.featuresAr);
 }
 
-/**
- * The language to translate from, or null when nothing needs translating.
- *
- * `editedLocale` is the language whose fields the dealer changed in this save.
- * Those win: the other language is now stale and gets rewritten from them.
- * Otherwise only a missing language is filled — an untouched AI draft already
- * carries both, and re-translating it would spend a request to change nothing.
- */
 export function translationSource(
   car: BilingualListing,
   editedLocale: Locale | null
@@ -66,16 +48,6 @@ export function sourceText(car: BilingualListing, from: Locale): ListingText {
       };
 }
 
-/**
- * Write the translation into the other language's fields.
- *
- * With `overwrite` (the dealer edited the source) every target field is
- * replaced, because all of it is now stale. Without it only empty fields are
- * filled, so anything the dealer or the photo extraction wrote survives.
- *
- * The English title is never written: the form generates it from make, model
- * and year, and a translated headline would contradict that.
- */
 export function applyTranslation<T extends BilingualListing>(
   car: T,
   to: Locale,

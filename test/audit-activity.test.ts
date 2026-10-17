@@ -20,12 +20,6 @@ import { createAuditLog, recordAdminAuditEntry } from "@/lib/services/audit/audi
 import { getActivity, getUserActivity } from "@/lib/services/audit/activity";
 import { db } from "@/lib/prisma";
 
-/**
- * The Activity pages' reads, against real Postgres: a dealership's page names
- * only its own cars and members, while the super-admin's view of a person
- * spans every dealership they acted in.
- */
-
 const ORG = "org_test_audit_a";
 const OTHER_ORG = "org_test_audit_b";
 const ORGS = [ORG, OTHER_ORG];

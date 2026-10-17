@@ -17,12 +17,6 @@ import { getBillingContact } from "@/lib/services/billing";
 import { auditHelpers } from "@/lib/services/audit/audit";
 import { db } from "@/lib/prisma";
 
-/**
- * Team management against real Postgres: only the owner manages the team, a
- * member id from another dealership is not found, and the owner can be
- * neither demoted nor removed.
- */
-
 const ORG = "org_test_team_a";
 const OTHER_ORG = "org_test_team_b";
 const ORGS = [ORG, OTHER_ORG];

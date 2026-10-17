@@ -27,12 +27,6 @@ import { cairoNow } from "@/lib/utils/datetime";
 import { AuthorizationError, NotFoundError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
 
-/**
- * Test drives through the signed-in MCP endpoint, on Postgres: the site's own
- * booking path (buyer policy, race-safe slots), plus what no person clicked
- * — the app named in the buyer's email, and an entry in the dealer's log.
- */
-
 const ORG = "org_test_mcp_drives";
 const BUYER = "user_test_mcp_drives_buyer";
 const OTHER = "user_test_mcp_drives_other";

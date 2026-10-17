@@ -40,13 +40,6 @@ type Props = {
   organizationId: string;
 };
 
-/**
- * Billing with the plans first (canvas: Billing round 1, "2 · Plans first").
- * The three plans side by side for the chosen period; the dealer's own is
- * outlined and carries their usage. Every other plan's button says what
- * choosing it does — pay now, or switch when the paid period ends — by the
- * same rule the server applies. Payments sit below.
- */
 export function BillingView({ plans, subscription, paidAhead, renewal, usage, payments, lastPayment, isOwner, owner, organizationId }: Props) {
   const t = useTranslations("org.billing");
   const tPlans = useTranslations("plans");

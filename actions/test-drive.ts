@@ -16,11 +16,6 @@ import { isDateString } from "@/lib/utils/date-only";
 import { getCurrentOrganization } from "@/lib/getOrganization";
 import { assertNotImpersonating } from "@/lib/auth/assert-buyer";
 
-/**
- * Every page that shows a test drive: the car's page, the buyer's booking
- * page, and the dealer's list and dashboard. Dealer pages go by route tree
- * because the user-side actions have the organization's id, not its slug.
- */
 function revalidateTestDrivePages(carId: string | null | undefined) {
   if (carId) revalidateLocalized(`/cars/${carId}`);
   revalidateLocalized("/test-drive");

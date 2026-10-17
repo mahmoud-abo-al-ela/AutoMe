@@ -33,13 +33,6 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 
 
-/*
- * Photo extraction moved to the streaming route app/api/ai/car-listing, which
- * reports real progress. The server action it replaces is gone rather than kept
- * beside it: every export of a "use server" module is a callable endpoint, and a
- * second, unstreamed path to the same gated call is one more to keep guarded.
- */
-
 export const getCarPlanLimits = withOrgAuth(async (ctx) => {
   // The plan in effect and the one feature reader — what the server will allow.
   const plan = await planInEffect(ctx.organization);
@@ -57,11 +50,7 @@ export async function getMaxImagesPerCar() {
   return getCarPlanLimits();
 }
 
-/**
- * The same authorization as the photo extraction (authorizeDealerAiFeature).
- * Deliberately NOT exported — every export of a "use server" module is a
- * callable endpoint, and this one must only run inside a save.
- */
+// Not exported: every export of a "use server" module is a callable endpoint.
 async function translateGated(ctx: TenantContext, source: ListingText, from: Locale) {
   const caller = await authorizeDealerAiFeature(ctx, AI_FEATURES.listingTranslation);
   return translateListing(source, from, caller);
@@ -70,14 +59,6 @@ async function translateGated(ctx: TenantContext, source: ListingText, from: Loc
 /** Whether the save wrote the other language, for the client to say so. */
 type TranslationOutcome = "none" | "done" | "skipped";
 
-/**
- * Write the language the dealer did not, before the car is saved.
- *
- * Best effort by design: a plan without AI, a used-up allowance, a rate limit
- * or a failed call all save the car as the dealer wrote it. The listing then
- * shows its one language to both audiences, with the "not translated" note —
- * which beats refusing to save a car over a translation.
- */
 async function fillOtherLanguage<T extends BilingualListing>(
   ctx: TenantContext,
   car: T,
@@ -99,14 +80,6 @@ async function fillOtherLanguage<T extends BilingualListing>(
   }
 }
 
-/**
- * The AI work a save leaves behind: describe the car's photos, and give it its
- * meaning for search. Platform-initiated, so both are metered but never billed
- * to the dealer (neither feature is in DEALER_METERED_FEATURES), and run at low
- * priority so they cannot take shared capacity from a dealer waiting on the AI.
- * Queued as background jobs, so a busy AI is retried rather than lost; never
- * fails the save.
- */
 async function enrichAfterSave(ctx: TenantContext, carId: string) {
   const organizationId = ctx.organization.id;
   const caller = { ...aiCallerFor(ctx), priority: "low" as const };
@@ -234,12 +207,6 @@ async function coachGated(ctx: TenantContext, listing: ListingToCoach, codes: Li
   return coachListing(listing, codes, language, caller);
 }
 
-/**
- * Review a listing before it is published: the rule-based score and issues
- * always, plus AI advice for each issue when the plan, allowance and rate
- * limit allow. Advice is best effort — without it the dealer still gets the
- * review, and `advice` says why there is none.
- */
 export const reviewListingQuality = withOrgAuth(async (ctx, input: unknown) => {
   const { language, ...listing } = validateAction(listingReviewSchema, input);
   const review = reviewListing(listing);
@@ -271,11 +238,6 @@ export const reviewListingQuality = withOrgAuth(async (ctx, input: unknown) => {
   });
 });
 
-/**
- * Where a price being typed into the editor sits among similar cars on
- * AutoMe — the public fair-price gauge's own comparison, so the editor and
- * the listing never disagree. null when too few similar cars are on sale.
- */
 export const comparePrice = withOrgAuth(async (_ctx, input: unknown) => {
   const { carId, ...car } = validateAction(priceComparisonSchema, input);
   const prices = await marketPricesFor({ id: carId ?? "", priceCurrency: "EGP", ...car });

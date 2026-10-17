@@ -3,15 +3,6 @@ import type { Reporter, TestCase, TestModule } from "vitest/node";
 import type { AiCallRecord } from "@/lib/ai/client";
 import { allCases, type EvalReport, type ReportedCall, type ReportedCase } from "@/lib/ai/evaluation/report";
 
-/**
- * Writes the evaluation run to AI_EVAL_REPORT (default eval-report.json) for
- * scripts/ai-eval-compare.ts. Used only by vitest.eval.config.mjs.
- *
- * A skipped case with a note is inconclusive — the suites skip with a note
- * when every model in the chain was unavailable. A skip without one is a
- * suite that did not run (AI_EVAL unset) and is left out.
- */
-
 const toCall = (call: AiCallRecord): ReportedCall => ({
   feature: call.feature,
   model: `${call.provider}/${call.model}`,
@@ -19,12 +10,6 @@ const toCall = (call: AiCallRecord): ReportedCall => ({
   cached: call.cached,
 });
 
-/**
- * The error that stopped the suite a case belongs to, if any. A `beforeAll`
- * that throws — where most suites call the model — marks every case under it
- * skipped, without a note; read as "did not run", a broken suite would vanish
- * from the report and the run would pass.
- */
 function suiteFailure(test: TestCase): string | null {
   for (let node: TestCase["parent"] | undefined = test.parent; node; ) {
     // The suite's own errors — a hook that threw. Not its state: a suite is

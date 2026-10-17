@@ -21,13 +21,6 @@ type Row = { key: string; tag: keyof typeof TAGS; dealership: string; details: s
 
 const actionLink = cn(buttonVariants({ variant: "outline-strong", size: "control" }), "h-10 shrink-0 border bg-field");
 
-/**
- * What needs an admin, as a queue (canvas: Super admin overview round 2,
- * "3 · Metric explorer"): payments overdue, trials ending within a week,
- * support sessions left open, and new dealerships with no cars — each with
- * its dealership and the one action that deals with it. A table from md up,
- * a list of cards on a phone.
- */
 export function NeedsAttention({ needsYou, currentAdminId }: { needsYou: PlatformOverview["needsYou"]; currentAdminId: string }) {
   const t = useTranslations("superAdmin.overview.needs");
   const tPlans = useTranslations("plans");

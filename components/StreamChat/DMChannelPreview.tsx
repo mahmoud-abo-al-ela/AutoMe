@@ -14,13 +14,6 @@ import { useConversationSide } from "./ConversationHeader";
 /** Above this the dot shows "9+" — it is 20px across. */
 const CAP = 9;
 
-/**
- * A conversation in the dealer's inbox: which car, which buyer, the last
- * message. The car comes first — a dealership with forty cars reads its inbox
- * by car — so its photo is the avatar and its title sits under the buyer's
- * name. The buyer is the conversation's creator, not "the first other
- * member", which with several staff on a channel could be a colleague.
- */
 export function DMChannelPreview({
     channel,
     setActiveChannel,

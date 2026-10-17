@@ -15,12 +15,6 @@ import { useCarsPage } from "@/hooks/use-cars-page";
 import { installModelContext } from "@/test/fixtures/webmcp";
 import { useCarsWebMcpTools } from "./use-cars-webmcp-tools";
 
-/**
- * The cars page's WebMCP tools on the real page hook: an agent's search must
- * leave the page exactly as the person's own clicks in the filter panel would
- * — the same URL, the same chips — and answer with the cards on the screen.
- */
-
 const TOYOTA = { id: "11111111-1111-4111-8111-111111111111", make: "Toyota", model: "Corolla", year: 2020, price: 850_000, mileage: 40_000 };
 const KIA = { id: "22222222-2222-4222-8222-222222222222", make: "Kia", model: "Cerato", year: 2019, price: 700_000, mileage: 60_000 };
 const HIDDEN = "33333333-3333-4333-8333-333333333333";
@@ -52,11 +46,6 @@ async function mount(withTools: boolean) {
 /** Let fetches settle and React render them. */
 const settle = () => act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
-/**
- * Call a tool as an agent would. Started inside act but not awaited there:
- * act holds React's renders until its callback ends, and a search waits for
- * the list the page renders — awaiting inside act would wait for itself.
- */
 async function agent(context: ReturnType<typeof installModelContext>, name: string, args: unknown) {
   let pending!: Promise<unknown>;
   await act(async () => {

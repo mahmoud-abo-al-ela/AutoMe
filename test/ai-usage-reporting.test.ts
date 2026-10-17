@@ -15,11 +15,6 @@ import {
 } from "@/lib/repositories/ai-usage";
 import { db } from "@/lib/prisma";
 
-/**
- * The reporting reads run raw SQL for the latency percentiles, which no mock
- * can check — `percentile_cont` either exists and aggregates correctly or it
- * does not. Needs real Postgres.
- */
 const ORG_ID = "org_test_ai_usage";
 
 /** Well before the window every assertion uses, so it must be excluded. */

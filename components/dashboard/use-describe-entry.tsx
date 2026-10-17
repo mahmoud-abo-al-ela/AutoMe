@@ -18,15 +18,6 @@ const TERM_FLAGS = ["offersFinancing", "acceptsTradeIn", "allowsInspection", "of
 const read = (value: unknown, key: string): unknown =>
   value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined;
 
-/**
- * Turns an audit entry into a sentence — "Sara Hassan marked BMW X4 2023 as
- * sold" — and the values it changed, each formatted as the dashboard shows it
- * elsewhere: prices as prices, days by name, terms as Yes / No / Not stated.
- * Anything it does not recognise still reads, as "{who}: {action}".
- *
- * Shared by the dealer's Activity and the super-admin dealership page;
- * `carHref` says where a car's name links, or leaves it plain text.
- */
 export function useDescribeEntry(
   lookups: ActivityLookups,
   dealershipName: string,

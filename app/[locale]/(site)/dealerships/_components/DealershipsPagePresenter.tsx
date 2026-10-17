@@ -12,13 +12,6 @@ import {
 import { SiteEmptyState } from "@/components/brand";
 import type { useDealershipsPage } from "@/hooks/use-dealerships-page";
 
-/**
- * Presentational shell for the dealerships listing. All state lives in
- * useDealershipsPage (via ClientPage); this component only renders.
- *
- * ClientPage spreads the whole hook result in, so the props are derived from it
- * rather than restated.
- */
 export type DealershipsPageData = ReturnType<typeof useDealershipsPage>;
 
 export const DealershipsPagePresenter = ({

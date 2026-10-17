@@ -16,12 +16,6 @@ const AI_FIELDS = [
   "features", "featuresAr", "description", "descriptionAr", "titleAr",
 ] as const satisfies readonly (keyof CarFormValues)[];
 
-/**
- * Reading a new car's details from its photos: whether the plan offers it,
- * the reading itself, and which fields carry the AI's mark. Adding only —
- * when editing, the offer is always none. `onRead` runs after a reading
- * fills the form (the editor moves on to the next step).
- */
 export function usePhotoReading({
   form,
   isEdit,

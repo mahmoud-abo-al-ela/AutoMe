@@ -1,13 +1,5 @@
 import { db } from "@/lib/prisma";
 
-/**
- * What the Messages sales desk shows beside a conversation (canvas: Messages
- * round 1, 2 · Sales desk): the car it is about — only if it is this
- * dealership's — and this buyer's history with the dealership: when they saved
- * this car, how many of its other cars they saved, their test drives here.
- * One round of parallel queries. `buyerId` is the app's user id, which is also
- * the buyer's Stream id.
- */
 export async function findDealContext(organizationId: string, buyerId: string, carId: string | null) {
   const [car, savedThis, savedOthers, drives, buyer] = await Promise.all([
     carId

@@ -15,12 +15,6 @@ export function SearchNotice({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * What the search did with words it could not use as typed: a typo read as
- * the word it was probably meant to be, words no car mentions set aside, no
- * car having them all, or none matching and the cars shown being the closest
- * in meaning. Nothing when every word matched.
- */
 export function SearchMatchNotice({
   searchMatch,
   locale,

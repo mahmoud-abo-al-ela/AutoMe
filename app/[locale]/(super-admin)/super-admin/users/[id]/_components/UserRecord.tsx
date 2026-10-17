@@ -19,12 +19,6 @@ import {
   SessionsList,
 } from "./UserTabs";
 
-/**
- * One person (canvas: Super admin one user round 1, "A · Record with tabs"):
- * who they are and their actions, then tabs that follow the kind of account —
- * the summary's four numbers and lists change with it too. Tab and page are
- * in the URL.
- */
 export function UserRecord({
   data,
   currentAdminId,

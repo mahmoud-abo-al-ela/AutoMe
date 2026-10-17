@@ -32,13 +32,6 @@ type Props = {
 
 type View = (typeof INVENTORY_VIEWS)[number] | "attention";
 
-/**
- * The dealer's cars (canvas: Cars — round 1, "1 · Ledger"; page pattern 1,
- * list). One page, five views of the same stock, in the URL (?view=) so the
- * overview can link straight to one: every car, those on sale, those that
- * need attention, hidden, sold. Four are the table, filtered by status; "Needs
- * attention" is its own list, each car with the fix that comes first.
- */
 const CarsPage = async ({ params, searchParams }: Props) => {
   const { slug } = await params;
   const requested = (await searchParams).view;

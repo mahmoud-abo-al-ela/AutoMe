@@ -1,13 +1,6 @@
 import type { useComparePage } from "@/hooks/use-compare-page";
 import type { SerializedCarWithImages } from "@/lib/utils/serializers";
 
-/**
- * One car in the comparison — anchored on the serializer rather than on
- * `useComparePage`. The hook calls `computeDifferences`/`computeWinners` from
- * `_components/utils`, so deriving the car from the hook would make the two
- * modules circularly reference each other's inferred types. This is the exact
- * type the hook's `select` produces.
- */
 export type CompareCar = SerializedCarWithImages;
 
 /** Everything `useComparePage` returns; the page spreads it into the presenter. */

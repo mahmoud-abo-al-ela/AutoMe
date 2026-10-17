@@ -17,11 +17,6 @@ export function currentFlag(moderation: StoredModeration | undefined, text: stri
   return moderation && moderation.source === text ? moderation.category : null;
 }
 
-/**
- * What the other person sees (owner's choice): a scam or spam message stays
- * readable under a warning; abuse is hidden until they choose to read it.
- * The sender always sees their own message as sent.
- */
 export function flagDisplay(category: FlagCategory): "warn" | "hide" {
   return category === "abuse" ? "hide" : "warn";
 }

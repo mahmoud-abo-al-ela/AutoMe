@@ -5,12 +5,6 @@ import { getTranslations } from "next-intl/server";
 import { routing, type Locale } from "@/i18n/routing";
 import { mainOrigin } from "@/lib/utils/seo-meta";
 
-/**
- * The share card for every page that has no image of its own — home, the
- * lists, FAQ, about. Car and dealership pages set theirs (the car's photo,
- * the dealership's logo), which take precedence. Built once per locale at
- * build time.
- */
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "AutoMe";
@@ -30,13 +24,6 @@ const projectFile = (path: string) => readFile(join(process.cwd(), path));
 const dataUri = async (path: string, type: string) =>
   `data:${type};base64,${(await projectFile(join("public", path))).toString("base64")}`;
 
-/**
- * One line of the headline, word by word. ImageResponse shapes Arabic letters
- * but lays words out left to right with no bidi, so an Arabic line comes out
- * with its words — and its trailing comma or full stop — in mirror order. The
- * words are placed in reading order here instead, each with its punctuation
- * on the side it trails on.
- */
 function Line({ text, rtl, accent = false }: { text: string; rtl: boolean; accent?: boolean }) {
   const words = text.split(/\s+/).filter(Boolean).map((word) => {
     const [, core, mark] = word.match(/^(.*?)([.,،؛!؟]*)$/) ?? [word, word, ""];
@@ -66,11 +53,6 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ loc
   const typedLocale = (routing.locales.includes(locale as Locale) ? locale : routing.defaultLocale) as Locale;
   const t = await getTranslations({ locale: typedLocale, namespace: "home.hero" });
   const [font, logo, photo] = await Promise.all([
-    // Cairo ExtraBold, the site's Arabic face (it covers Latin too), as
-    // TrueType — the format ImageResponse reads; next/font's woff2 is not.
-    // Kept in the repo with its OFL licence rather than downloaded while
-    // building: the download failed on Vercel's build machine, and the card
-    // has no business depending on a network call to build.
     projectFile("assets/fonts/Cairo-ExtraBold.ttf"),
     dataUri("brand/autome-logo.png", "image/png"),
     dataUri("hero-car.jpg", "image/jpeg"),

@@ -1,19 +1,6 @@
 import { cairoNow } from "@/lib/utils/datetime";
 import { APP_TIME_ZONE } from "@/lib/utils/intl-locale";
 
-/**
- * Calendar dates ("YYYY-MM-DD") without a zone, and the Cairo instants they
- * map to.
- *
- * A calendar date is kept as a string, and arithmetic on one runs on a UTC
- * midnight, where no zone can move it to a neighbouring day. Reading a date
- * through the runtime's zone is the trap: `new Date("2026-10-05")` is UTC
- * midnight, which `getDay()` places on the 4th anywhere west of UTC.
- *
- * Shared by test-drive booking (dates a buyer picks) and billing (the day a
- * paid period ends).
- */
-
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A real calendar date in "YYYY-MM-DD" form (rejects 2026-02-30). */
@@ -70,11 +57,6 @@ function cairoOffsetMinutes(instant: number): number {
   return Math.round((asUtc - Math.floor(instant / 60_000) * 60_000) / 60_000);
 }
 
-/**
- * The instant Cairo's clocks read 00:00 on a calendar date. Taken from the
- * IANA zone, not a fixed +02:00: Egypt has daylight saving time again (since
- * 2023), so midnight is 22:00 UTC in winter and 21:00 UTC in summer.
- */
 export function cairoMidnight(date: string): Date {
   const wallAsUtc = dateOnlyToUtc(date).getTime();
   // The offset at the guess can differ from the offset at the answer on a

@@ -1,11 +1,3 @@
-/**
- * Which upgrade banner, if any, a plan-gated resource should show.
- *
- * Pulled out of the component because the interesting part is a set of
- * numeric edge cases, and one of them shipped wrong: `current >= limit` is
- * true at `0 >= 0`, so a brand-new org on a plan that does not carry a
- * feature at all was told it had exhausted an allowance it never had.
- */
 export type UpgradeBannerState =
   | "hidden"
   | "noPlan"

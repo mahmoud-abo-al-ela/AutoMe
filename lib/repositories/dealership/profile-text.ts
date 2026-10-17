@@ -19,12 +19,7 @@ export async function findDealershipProfileText(organizationId: string) {
   return db.organization.findUnique({ where: { id: organizationId }, select: PROFILE_TEXT_SELECT });
 }
 
-/**
- * Store translated pairs, but only if each translated field still holds the
- * text that was translated (`translatedFrom`, as stored): a dealer who saved
- * again while the translation ran must not have their new text paired with
- * the old one's translation. Returns whether the row was written.
- */
+// Writes only if each field still holds the translated text, so a newer save is never paired with a stale translation.
 export async function saveDealershipProfileLanguages(
   organizationId: string,
   translatedFrom: Partial<Record<DealershipTextField, string>>,

@@ -1,8 +1,3 @@
-/**
- * The dealerships list on its way, in its own shape: the header with its two
- * actions, the toolbar with its status dropdown, then the table's rows. Shimmer, like
- * every admin skeleton.
- */
 export default function DealershipsLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

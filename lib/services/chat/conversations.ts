@@ -12,12 +12,6 @@ import { assertBuyerAllowed } from "@/lib/auth/assert-buyer";
 import type { BuyerViewerSource } from "@/lib/auth/buyer-policy";
 import { AuthenticationError, NotFoundError } from "@/lib/utils/errors";
 
-/**
- * Buyer ↔ dealership conversations on Stream Chat: the signed-in person's chat
- * session, and the channels a buyer opens about a car or with a dealership.
- * Every dealership member joins the channel, so whoever is on shift answers.
- */
-
 type ChannelOrganization = { id: string; name: string; slug: string; logo: string | null };
 type OrgMember = Parameters<typeof ensureOrgMembersInStream>[0][number];
 

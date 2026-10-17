@@ -8,16 +8,6 @@ import { startCheckout } from "./checkout";
 import { renewalStage } from "./periods";
 import { freePlanState } from "./transitions";
 
-/**
- * What a dealership owner can do to its subscription from the billing page.
- * Callers own auth, the owner check and rate limiting (actions/billing.ts).
- *
- * Nothing here charges anyone directly: a payment is a checkout (checkout.ts)
- * that takes effect when Paymob confirms it (settle.ts). What changes here at
- * once is only what costs nothing: a scheduled downgrade or cancellation, and
- * changes during a trial or after a lapse.
- */
-
 export interface BillingOrganization {
   id: string;
   slug: string;
@@ -40,11 +30,6 @@ async function subscriptionOf(organizationId: string) {
 
 type Subscription = Awaited<ReturnType<typeof subscriptionOf>>;
 
-/**
- * Once the next period is paid for, the plan is settled until it starts: an
- * upgrade, a downgrade or a cancellation would leave that payment for a period
- * that no longer exists. Support refunds it if the owner really wants out.
- */
 async function assertNothingPaidAhead(subscription: Subscription): Promise<void> {
   if (!subscription.currentPeriodEnd) return;
   const ahead = await billingRepo.findPaidRenewalAhead(subscription.organizationId, subscription.currentPeriodEnd);
@@ -128,11 +113,6 @@ export async function changePlan({
   return { type: "updated" };
 }
 
-/**
- * Pay for the next period now: during a trial, from a week before the period
- * ends, or in the grace after it. It is for the plan and period the
- * subscription will have next (a scheduled change included).
- */
 export async function payRenewal({
   organization,
   actor,
@@ -169,11 +149,6 @@ export async function payRenewal({
   return { url: checkout.url };
 }
 
-/**
- * Stop renewing. The plan runs to the end of what is paid (or the trial),
- * then the dealership moves to the free plan. Past due, nothing is paid, so
- * it moves now.
- */
 export async function cancelPlan({
   organization,
   actor,

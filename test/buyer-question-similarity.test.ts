@@ -19,12 +19,6 @@ import {
 } from "@/lib/repositories/buyer-question";
 import { db } from "@/lib/prisma";
 
-/**
- * pgvector queries — cosine distance, model filters, tenant scoping — which
- * only a real Postgres with the extension can answer. CI runs these on the
- * pgvector image.
- */
-
 const ORG = "org_test_similarity";
 const OTHER_ORG = "org_test_similarity_other";
 const CAR_A = "5d1c2a3b-0000-4000-8000-00000000000a";

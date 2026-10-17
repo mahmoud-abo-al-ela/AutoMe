@@ -36,11 +36,6 @@ async function aiListings(organizationId: string) {
   return { aiListingsUsed: used, aiListingsLimit: limit };
 }
 
-/**
- * The model's words for the week, or null. Null when the model fails or when
- * its words quote a number the week does not have — the email is worth
- * sending with the figures alone, and never worth sending with a wrong one.
- */
 async function summarise(
   organizationId: string,
   numbers: Record<string, number | null>,
@@ -96,17 +91,6 @@ async function sendOne(
   return { delivered, withSummary: summary !== null };
 }
 
-/**
- * Send last week's summary to every dealership that should get one.
- *
- * Each dealership's week is claimed in the ledger before anything is sent,
- * so repeated runs — the cron fires hourly 06:00–09:00 UTC on Saturday, to hit
- * 09:00 Cairo in summer and winter and to finish what a run ran out of time
- * for, and Vercel may retry — send one email, not two. A
- * dealership none of whose owners could be reached gives its claim back, and
- * the next run tries again. The run stops at `deadline` and the next one
- * continues: claimed weeks are skipped, unclaimed ones are sent.
- */
 export async function runWeeklyDigest(now: Date, options: { deadline: number }): Promise<DigestRunReport> {
   const week = digestWeek(now);
   const report: DigestRunReport = {
@@ -131,12 +115,6 @@ export async function runWeeklyDigest(now: Date, options: { deadline: number }):
   return report;
 }
 
-/**
- * Dealerships summarised at once. The paragraph comes from the dealer text
- * chain (~25 s each, measured 2026-09-29) because its Arabic is the one that
- * reads right; four at a time keeps a run to minutes and well inside the
- * gateway's 60 requests a minute.
- */
 const CONCURRENCY = 4;
 
 async function digestOne(

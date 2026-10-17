@@ -3,11 +3,6 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { SearchSuggestion } from "@/lib/search/suggest";
 
-/**
- * Where the highlighted option moves for a key, in a list of `count`: down
- * from the field to the first option and around, up to the last and around.
- * -1 is the field itself, nothing highlighted. Null for any other key.
- */
 export function nextActive(active: number, key: string, count: number): number | null {
   if (count === 0) return null;
   if (key === "ArrowDown") return active >= count - 1 ? 0 : active + 1;
@@ -15,14 +10,6 @@ export function nextActive(active: number, key: string, count: number): number |
   return null;
 }
 
-/**
- * A search field as a WAI-ARIA combobox over its suggestions: arrows move
- * through them while focus stays in the field, Enter takes the highlighted
- * one (or, with none highlighted, does what the field always did), Escape
- * closes the list and keeps the text, Tab and leaving the field close it.
- * Delete on a highlighted recent search removes it (`onRemove`) — the field
- * is empty while recents show, so no text is being edited.
- */
 export function useSuggestionCombobox(
   suggestions: SearchSuggestion[],
   onPick: (suggestion: SearchSuggestion) => void,

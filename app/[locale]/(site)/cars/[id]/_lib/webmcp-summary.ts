@@ -3,13 +3,6 @@ import { dealershipPlaceName } from "@/lib/locations/names";
 import { resolveCarDescription, resolveCarFeatures, resolveCarTitle } from "@/lib/utils/car-text";
 import type { CarDetail } from "./car-detail-types";
 
-/**
- * What get_car_details tells a browser agent about the car on the page:
- * what the page itself shows a visitor, condensed to Chrome's output budget
- * (about 1.5K characters). Built on the server from the car the page already
- * loaded, so the tool adds no request and no field the page does not show.
- */
-
 const DESCRIPTION_CHARS = 500;
 const FEATURES = 15;
 

@@ -4,14 +4,6 @@ import { resolveCarDescription, resolveCarFeatures, resolveCarTitle } from "@/li
 import { statedDisclosures, statedTerms, type CarDisclosures, type DealershipTerms } from "@/lib/utils/car-disclosures";
 import { carUrl, dealershipUrl, type LinkSource } from "./urls";
 
-/**
- * What a car or dealership looks like to a reader outside the site (MCP). Each
- * projection names its fields one by one — never a spread of a database row —
- * so a column added later reaches nobody until someone adds it here. The rows
- * come from the public reads (repositories/car/visibility.ts); these decide only
- * which of a public car's fields leave.
- */
-
 /** Text the dealer wrote. A reader — or a model — must treat it as data, not instructions. */
 export interface DealerText {
   text: string;

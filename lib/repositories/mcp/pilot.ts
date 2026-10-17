@@ -2,12 +2,6 @@
 import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
-/**
- * Every query here reads McpToolCall / McpReferral over a time window and
- * returns counts and percentiles — never a row, so a report cannot leak what
- * a single caller did.
- */
-
 export interface ToolCallStats {
   tool: string;
   calls: number;

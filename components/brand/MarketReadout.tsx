@@ -12,12 +12,6 @@ export interface MarketSummary {
   updatedAt: string | null;
 }
 
-/**
- * Direction B's market readout, in the Cairo Plate palette (Figma:
- * MarketReadout): the live state of the stock as hairline-separated figures.
- * Computed numbers only — see getMarketSummary — never marketing copy.
- * Wraps on narrow screens rather than scrolling.
- */
 export function MarketReadout({ summary, className }: { summary: MarketSummary; className?: string }) {
   const t = useTranslations("cars.readout");
   const fmt = useFormatters();

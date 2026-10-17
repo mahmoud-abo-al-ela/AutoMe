@@ -1,10 +1,5 @@
 import { DealershipTabSkeletonFromUrl } from "./_components/TabSkeletons";
 
-/**
- * A dealership's page on its way, in its own shape: back link, the name and
- * actions, the tabs, then the open tab in its own shape, read from the URL.
- * Shimmer, like every admin skeleton.
- */
 export default function DealershipLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

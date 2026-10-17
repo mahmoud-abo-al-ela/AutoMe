@@ -2,11 +2,6 @@ import * as dealRepository from "@/lib/repositories/dashboard/deal";
 import { marketPositionsFor } from "@/lib/services/car/market-price";
 import { verifyAccess } from "./access";
 
-/**
- * The deal beside a conversation: the car with where its price sits among
- * similar cars, and what this buyer has done with the dealership so far.
- * A car that is not the dealership's is left out rather than shown.
- */
 export async function getDealContext(
   userId: string,
   organizationId: string,

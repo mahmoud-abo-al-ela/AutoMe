@@ -11,11 +11,6 @@ import type {
   DealershipInventoryFilterState,
 } from "../../_lib/detail-types";
 
-/**
- * Everything `buildActiveChips` needs to render a label in the active locale.
- * Injected rather than imported so this module stays React-free and directly
- * testable — the same arrangement the car listing chips use.
- */
 export interface InventoryChipFormatters {
   formatPrice: (value: number) => string;
   search: (query: string) => string;

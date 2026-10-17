@@ -6,11 +6,6 @@ import type { BuyerQuestionView } from "@/lib/validations/schemas";
 /** At most this many dealer answers reach the model per question. */
 export const MAX_DEALER_ANSWERS = 20;
 
-/**
- * The dealer's answers that apply to one car: those given on it, and those
- * the dealer marked as true of every car they sell. Most-asked first, so the
- * cap drops the long tail rather than the questions buyers actually ask.
- */
 export async function findAnswersForCar(carId: string, organizationId: string, take = MAX_DEALER_ANSWERS) {
   return db.buyerQuestion.findMany({
     where: {

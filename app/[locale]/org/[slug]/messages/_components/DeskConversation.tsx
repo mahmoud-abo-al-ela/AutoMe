@@ -23,12 +23,6 @@ import { compose, testDriveLink } from "./compose";
 
 const VERDICT_TONE = { below: "text-price-below", above: "text-price-above", fair: "text-muted-foreground", unknown: "text-muted-foreground" } as const;
 
-/**
- * The open conversation in the desk's middle column: who it is with, the car
- * (as a strip with "The deal" where the side column is not shown), Stream's
- * message list — the buyer on the reading start side, the dealership on the
- * end side, mirrored with the page direction — quick replies, and the box.
- */
 export function DeskConversation({ base }: { base: string }) {
   const t = useTranslations("org.messages");
   const { channel } = useChatContext();

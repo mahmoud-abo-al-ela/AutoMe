@@ -16,14 +16,6 @@ import { formatCarPrice } from "@/lib/utils/currency";
 import { formatMileage } from "@/lib/utils/units";
 import { formatNumber } from "@/lib/utils/number";
 
-/**
- * Locale-bound formatters for client components.
- *
- * The underlying helpers all take the locale explicitly so they work on the
- * server too. This binds the active one once, so a component never has to
- * thread `locale` down through props — which is how the previous "en-US"
- * hardcodes accumulated: passing it was inconvenient, so nobody did.
- */
 export function useFormatters() {
   const locale = useLocale() as Locale;
 

@@ -14,13 +14,6 @@ export interface UserWithMemberships {
   memberships?: MembershipWithOrgSlug[] | null;
 }
 
-/**
- * A human-readable name for a user, for emails and dealer-facing lists.
- *
- * `name` is optional and `email` is nullable — Clerk supports phone-only
- * signups — so the long-standing `user.name || user.email.split("@")[0]`
- * would throw for exactly the users this fallback was meant to cover.
- */
 export function displayNameFor(user: {
   name?: string | null;
   email?: string | null;
@@ -32,12 +25,6 @@ export function displayNameFor(user: {
 }
 
 
-/**
- * Check if user has an organization membership (any role)
- * @param {Object} user - User object with memberships
- * @param {string} organizationSlug - Optional organization slug to check specific org
- * @returns {boolean}
- */
 export function isOrgMember(
   user: UserWithMemberships | null | undefined,
   organizationSlug: string | null = null
@@ -55,12 +42,6 @@ export function isOrgMember(
   return true;
 }
 
-/**
- * Get user's role in a specific organization
- * @param {Object} user - User object with memberships
- * @param {string} organizationSlug - Organization slug
- * @returns {string|null} - Returns 'OWNER', 'ADMIN', 'MEMBER', or null
- */
 export function getOrgRole(
   user: UserWithMemberships | null | undefined,
   organizationSlug: string | null | undefined
@@ -76,12 +57,6 @@ export function getOrgRole(
   return membership?.role || null;
 }
 
-/**
- * Check if user is owner of an organization
- * @param {Object} user - User object with memberships
- * @param {string} organizationSlug - Organization slug
- * @returns {boolean}
- */
 export function isOrgOwner(
   user: UserWithMemberships | null | undefined,
   organizationSlug: string | null | undefined
@@ -90,12 +65,6 @@ export function isOrgOwner(
   return role === 'OWNER';
 }
 
-/**
- * Get user's membership in a specific organization
- * @param {Object} user - User object with memberships
- * @param {string} organizationSlug - Organization slug
- * @returns {Object|null} - Membership object or null
- */
 export function getOrgMembership(
   user: UserWithMemberships | null | undefined,
   organizationSlug: string | null | undefined

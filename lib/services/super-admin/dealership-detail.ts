@@ -5,13 +5,6 @@ import { graceEndsOn } from "@/lib/services/billing/periods";
 import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { DETAIL_CARS_PER_PAGE, type DealershipDetailQuery, type DetailCarSort } from "./dealerships-options";
 
-/**
- * One dealership for the super-admin (canvas: Super admin dealership detail
- * round 1, "1 · Record with tabs", and dealership tabs round 1 — Cars A, Team
- * A, Billing C, Activity A): the record and its standing on every tab, then
- * only the open tab's rows.
- */
-
 const RECENT_DAYS = 30;
 const SUMMARY_CARS = 5;
 const SUMMARY_ACTIVITY = 6;

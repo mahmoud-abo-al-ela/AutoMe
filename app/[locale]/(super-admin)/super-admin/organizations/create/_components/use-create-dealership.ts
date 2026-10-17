@@ -59,11 +59,6 @@ const lookupOwner = async (email: string) => {
   return result.success ? result.data : null;
 };
 
-/**
- * The add-a-dealership form's state: its three steps, every answer, the web
- * address and owner email checked as they are typed, validation per step, and
- * the submit.
- */
 export function useCreateDealership(plans: Plan[]) {
   const t = useTranslations("superAdmin.organizations.form");
   const actionError = useActionError();

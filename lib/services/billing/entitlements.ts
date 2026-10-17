@@ -4,12 +4,6 @@ import { isFreePlan } from "@/lib/utils/plan-change";
 import { renewalStage } from "./periods";
 
 /**
- * What a dealership's plan gives it — the one reader of plan features and
- * limits. Authentication says who is asking, membership whether they may act
- * for the dealership; this says only what the dealership is entitled to.
- */
-
-/**
  * A plan feature as the gates read it. `limit` is a monthly or total count,
  * -1 for no limit, or null when the feature has none.
  */
@@ -20,13 +14,6 @@ export interface PlanFeature {
 
 const OFF: PlanFeature = { enabled: false, limit: null };
 
-/**
- * Read one feature out of a plan's free-form `features` JSON, whatever shape
- * it was stored in: `{ enabled, limit }` (aiProcessing, aiAssistant), a
- * boolean (prioritySupport), a count, or a string tier ("basic" analytics).
- * Missing or unreadable is off — a gate never opens on a value it doesn't
- * understand. (The old checkPlanFeature read `{ enabled: false }` as on.)
- */
 export function planFeature(plan: Pick<Plan, "features"> | null | undefined, key: string): PlanFeature {
   const features = plan?.features;
   if (!features || typeof features !== "object" || Array.isArray(features)) return OFF;
@@ -47,19 +34,6 @@ export function planFeature(plan: Pick<Plan, "features"> | null | undefined, key
 
 type SubscriptionWithPlan = Subscription & { plan: Plan };
 
-/**
- * The plan a dealership is entitled to right now.
- *
- * Usually its subscription's plan. But a paid plan whose period ended and
- * whose grace is over is the free plan, now — not when the daily renewal job
- * next runs and moves it there. Before this, a job that failed or stopped
- * early left the paid plan working indefinitely (fail-open). A renewal paid
- * for the period that has started counts, even before the job applies it.
- * Inside the grace the paid plan still works, as billing promises.
- *
- * Null when there is no subscription, or no free plan to fall back to: the
- * gates then refuse.
- */
 export async function planInEffect(
   organization: { id: string; subscription?: SubscriptionWithPlan | null },
   now: Date = new Date()

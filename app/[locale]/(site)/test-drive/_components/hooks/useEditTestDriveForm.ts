@@ -80,11 +80,6 @@ export const useEditTestDriveForm = ({
     const watchDate = watch("date");
     const watchStartTime = watch("startTime");
 
-    /**
-     * Slots for a date, minus existing bookings other than this one. The
-     * server leaves this booking out by id; matching it by start and end time,
-     * as before, also freed anyone else's booking at the same time.
-     */
     const loadTimeSlots = useCallback(
         async (dateString: string, hours: { openTime: string; closeTime: string }) => {
             // Same rule as the create form: today's slots stop being offered

@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 export type DrawerNavItem = { href: string; label: string; current: boolean; badge?: React.ReactNode };
 export type DrawerNavGroup = { key: string; title: string; items: DrawerNavItem[] };
 
-/**
- * The dashboards' phone menu (the dealer's, the super admin's): their sections
- * in titled groups on the asphalt drawer — the same shape as the site's More
- * sheet (components/Header/MobileMenu.tsx), so every role's phone menu reads
- * the same way. The account and the language are in the top bar, not here.
- * A group with nothing in it (an owner-only one, for a member) is left out.
- */
 export function DrawerNavGroups({
   label,
   groups,

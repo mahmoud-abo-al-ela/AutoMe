@@ -15,12 +15,6 @@ import type { Locale } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Where Paymob returns the owner after paying for an upgrade or a renewal.
- * `ref` is our Payment id; the rest of Paymob's query string is unsigned and
- * never read. confirmBillingPayment answers only for this dealership's own
- * payment, to its owner, and settles it from Paymob if the callback is late.
- */
 export default async function BillingSuccessPage({
     params,
     searchParams,

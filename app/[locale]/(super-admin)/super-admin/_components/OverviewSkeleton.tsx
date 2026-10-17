@@ -1,9 +1,3 @@
-/**
- * The overview on its way, in its own shape: the header with the period and
- * comparison, the five number tabs over the chart, the three cards, then the
- * needs-attention table. Shimmer, like the dealer pages' skeletons. Shown by
- * the overview's own loading boundary and, on a reload, by the locale root's.
- */
 export function OverviewSkeleton() {
   return (
     <div aria-busy className="flex flex-col gap-6">

@@ -1,18 +1,3 @@
-/**
- * Prompt for answering a buyer's question about one listing.
- *
- * The listing and the question arrive as separate parts, both as JSON, and
- * both are untrusted: the question is typed by anyone on the internet, and the
- * description is dealer-written (or model-written, since Phase B). Neither may
- * change these rules.
- *
- * Declining is the contract, not a failure mode: a buyer told "the listing
- * doesn't say" asks the dealer; a buyer told an invented answer buys a car on
- * it. A decline's `answer` is shown too, but only after declineText has checked
- * it for links and contact details — the service falls back to fixed wording.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const listingQaPrompt = {
   version: "2026-10-12.1",
   text: (language: "en" | "ar") =>

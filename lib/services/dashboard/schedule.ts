@@ -26,12 +26,6 @@ function hoursOn(rows: HoursRow[], weekday: DayOfWeek) {
   return row?.isOpen ? { openTime: row.openTime, closeTime: row.closeTime } : null;
 }
 
-/**
- * The open time a day has left between its bookings, within opening hours.
- * Bookings may overlap or run past closing; each is clipped to the day and the
- * gaps between them returned in order. Pure, so the calendar's "Free, 2½
- * hours" can be tested without a database.
- */
 export function freeGaps(
   hours: { openTime: string; closeTime: string } | null,
   bookings: { startTime: string; endTime: string }[],
@@ -88,11 +82,6 @@ function toDrive(drive: DriveRow, now: { date: string; time: string }) {
 
 export type ScheduleDrive = ReturnType<typeof toDrive>;
 
-/**
- * A month for the calendar: per day, how many drives and whether one still
- * needs an outcome; and the weekdays the dealership is closed, which the
- * calendar mutes.
- */
 export async function getScheduleMonth(userId: string, organizationId: string, month: string) {
   await verifyAccess(userId, organizationId);
   const [year, monthIndex] = month.split("-").map(Number);

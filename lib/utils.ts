@@ -19,11 +19,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/**
- * Maximum number of cars in a comparison. The one source for the limit the
- * compare tray enforces, the compare page's column count, and the FAQ's
- * answer about it.
- */
 export const MAX_COMPARE_CARS = 3;
 
 // Car comparison utilities

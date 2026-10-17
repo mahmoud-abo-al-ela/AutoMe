@@ -30,13 +30,6 @@ const BASE = "/super-admin/users";
 const th = "px-3 py-3 text-center font-semibold first:ps-5 first:text-start";
 const td = "px-3 py-3 text-center first:ps-5 first:text-start";
 
-/**
- * The super-admin users list (canvas: Super admin users round 1, "1 · Data
- * table"): search, the kind of account (with how many of each), a dealership
- * filter and a sort, then a table — ten to a page, a list of cards below
- * laptop width — with a menu per person: open them, start a support session
- * as them, or give or take platform admin access, which asks first.
- */
 export function UsersList({ data, currentAdminId }: { data: UsersPage; currentAdminId: string }) {
   const t = useTranslations("superAdmin.users");
   const fmt = useFormatters();

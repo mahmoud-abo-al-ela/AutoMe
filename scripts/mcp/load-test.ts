@@ -1,20 +1,3 @@
-/**
- * Load test for the public MCP endpoint (plans/mcp, ROADMAP PR 7): checks that
- * a normal client is never limited and a burst from one address is cut off.
- * Every request comes from this machine, so it is one caller to the limits.
- *
- *   pnpm mcp:load-test --url http://localhost:3000/api/mcp --profile normal
- *   pnpm mcp:load-test --url https://<preview>.vercel.app/api/mcp --profile burst
- *
- * Profiles:
- *   normal  40 mixed calls over ~60 s (search, details, options) — expect no 429.
- *   burst   200 calls, 20 at a time — expect 429s once the per-IP bucket empties.
- *
- * Refuses the production host unless --production is passed: a burst there
- * spends the real limits for this address and adds rows to the pilot's measures.
- * A preview behind Vercel protection needs VERCEL_AUTOMATION_BYPASS_SECRET set.
- */
-
 const PRODUCTION_HOST = "auto-me.vercel.app";
 
 function arg(name: string): string | undefined {

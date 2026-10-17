@@ -16,12 +16,6 @@ import { useDescribeEntry } from "@/components/dashboard/use-describe-entry";
 
 export type ActivityFilters = { kind: ActivityKind; who: string; days: string; page: number };
 
-/**
- * Activity as a feed (canvas: Audit log round 1, "1 · Feed"): one sentence per
- * change, grouped by day in Cairo, newest first, with what changed shown
- * before → after. The filters live in the address, so a filtered view can be
- * shared or bookmarked.
- */
 export function ActivityFeed({
   activity,
   filters,

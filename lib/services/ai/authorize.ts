@@ -8,23 +8,6 @@ import { planFeature, planInEffect } from "@/lib/services/billing/entitlements";
 import { isFreePlan } from "@/lib/utils/plan-change";
 import { PlanLimitError } from "@/lib/utils/errors";
 
-/**
- * The one authorization step before a dealer's AI call: what AI_FEATURE_POLICY
- * says the feature needs, checked against the plan in effect now. Replaces the
- * withPlanGate(withUsageLimit(enforceDealerAiLimit(aiCallerFor))) stacks each
- * entry point assembled for itself.
- *
- *   1. the plan in effect (a lapsed paid plan is the free one) has the
- *      feature's gate switched on;
- *   2. if the feature is billed to the dealer, this month's allowance has room
- *      (cars saved with AI help — see lib/services/car/ai-allowance.ts);
- *   3. the dealer-AI rate limit;
- *
- * and returns who the call is billed to, at the priority the policy and plan
- * give. Throws PlanLimitError or RateLimitError; the caller decides whether a
- * refusal is the answer (a photo read) or a degraded result (a save without
- * its translation).
- */
 export async function authorizeDealerAiFeature(ctx: TenantContext, feature: AiFeature): Promise<AiCallerContext> {
   const policy = AI_FEATURE_POLICY[feature];
   if (policy.audience !== "dealer") {
@@ -70,11 +53,6 @@ export async function authorizeDealerAiFeature(ctx: TenantContext, feature: AiFe
   return { organizationId: ctx.organization.id, userId: ctx.user.id, priority: priorityFor(feature, plan) };
 }
 
-/**
- * Who a call nobody signed in for is billed to — nobody — and how urgently it
- * runs, from the policy. `organizationId` is the storefront it was made on,
- * for reporting; never a dealer's allowance.
- */
 export function publicAiCaller(feature: AiFeature, organizationId: string | null = null): AiCallerContext {
   const policy = AI_FEATURE_POLICY[feature];
   if (policy.audience === "dealer") {

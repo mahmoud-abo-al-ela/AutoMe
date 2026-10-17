@@ -7,15 +7,6 @@ import { textPart } from "@/lib/ai/provider/types";
 
 export type { ChatSender };
 
-/**
- * Translate one chat message into `to`. `sender` says who wrote it — it
- * decides who is paying whom in "we can do 600k" — or null when unknown.
- *
- * On the fast chain, like the buyer assistant: someone tapped "Translate" and
- * is watching the message. Cached on the text, sender and direction, so the
- * same words are not sent twice while the cache holds them; the durable copy
- * lives on the Stream message (see lib/services/chat).
- */
 export async function translateChatMessage(
   text: string,
   to: Locale,

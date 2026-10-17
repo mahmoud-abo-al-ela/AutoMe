@@ -13,11 +13,6 @@ interface ChatDockState {
 
 const ChatDockContext = createContext<ChatDockState | null>(null);
 
-/**
- * The floating chat's state, above every page so it survives navigation: a
- * buyer can keep a conversation open while browsing other cars, as in
- * Messenger. One car at a time — opening another replaces it.
- */
 export function ChatDockProvider({ children }: { children: ReactNode }) {
   const [carId, setCarId] = useState<string | null>(null);
   const [minimized, setMinimized] = useState(false);

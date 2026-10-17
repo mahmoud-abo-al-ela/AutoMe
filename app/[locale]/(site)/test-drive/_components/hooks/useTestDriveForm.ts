@@ -128,12 +128,6 @@ export const useTestDriveForm = ({
         }
     };
 
-    /**
-     * Fill the form with a booking, as if the person had picked it — after
-     * checking it against the rules the server applies (checkBooking), so the
-     * form never shows a slot it would refuse. Books nothing: requesting is
-     * still the person pressing Submit. The reason when it cannot be filled.
-     */
     const prepareBooking = async (booking: {
         date: string;
         startTime: string;
@@ -177,11 +171,6 @@ export const useTestDriveForm = ({
         };
     };
 
-    // Time selection handlers
-    // A person's pick is never empty (no item has value ""). An empty one is
-    // Radix's hidden native select catching up when the times are set before
-    // their options exist — as when a booking is filled in for them — and must
-    // not wipe the times it was given.
     const handleStartTimeSelect = (time: string) => {
         if (!time) return;
         setValue("startTime", time);

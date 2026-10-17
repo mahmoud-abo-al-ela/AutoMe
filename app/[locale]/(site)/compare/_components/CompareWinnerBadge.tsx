@@ -30,17 +30,6 @@ const CATEGORY_WINNER_RULES: Record<
     },
 };
 
-/**
- * Small badge shown at the top of each category section indicating which car
- * "wins" that category based on aggregated spec winners.
- *
- * Auto-detects winner based on:
- *  - basic: Lowest price + newest year
- *  - performance: Lowest mileage + most seats
- *  - features: Most features
- *
- * Shows trophy icon with car name. Returns null if there's no clear winner.
- */
 const CompareWinnerBadge = ({
     categoryId,
     cars,

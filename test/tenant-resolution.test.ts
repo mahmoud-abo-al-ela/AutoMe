@@ -38,12 +38,6 @@ import { resolveTenantContext } from "@/lib/auth/context";
 import { AuthorizationError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
 
-/**
- * Who is asking, and in which dealership — checkUser and lib/org — against
- * real Postgres. These run on every authenticated request; this pins what
- * they do so the code behind them can move.
- */
-
 const ORGS = { a: "org_test_tenant_a", b: "org_test_tenant_b", off: "org_test_tenant_off", pending: "org_test_tenant_pending" };
 const CLERK = {
   owner: "clerk_test_tenant_owner",

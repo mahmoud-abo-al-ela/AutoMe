@@ -8,11 +8,6 @@ import type { DealershipDetail } from "../_lib/detail-types";
 
 const card = "rounded-[20px] border border-border bg-card p-5 sm:p-6";
 
-/**
- * How the dealership sells and when it is open, side by side. Message and
- * Directions are in the header on this tab, and the address in its facts
- * line, so the page leaves the visit card out here.
- */
 export function DealershipAbout({ dealership }: { dealership: DealershipDetail }) {
     const t = useTranslations("dealerships.detail");
     const showTerms = hasStatedTerms(dealership);

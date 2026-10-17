@@ -22,11 +22,6 @@ import {
 import { ValidationError } from "@/lib/utils/errors";
 import { assertBuyerAllowed } from "@/lib/auth/assert-buyer";
 
-/**
- * The public dealerships list. Filters and page size are reduced to what the
- * list page can set (dealershipListFiltersSchema) — no plan filter, at most 48
- * per page.
- */
 export const getDealerships = withErrorHandling(
     async (filters: DealershipListFiltersInput = {}, pagination: DealershipListPageInput = {}) => {
     const result = await dealershipService.getDealerships(
@@ -70,12 +65,6 @@ export const getDealershipFilters = withErrorHandling(
     return createSuccessResponse(options);
 });
 
-/**
- * A public dealership's cars on sale, one page at a time. The dealership is
- * named by slug and resolved here to one the public may see; filters and the
- * page size are validated, so a request cannot ask for another scope or for
- * every car at once.
- */
 export const getDealershipCars = withErrorHandling(
     async (slug: string, filters: DealershipCarFiltersInput = {}, pagination: PublicPageInput = {}) => {
     const organizationId = await dealershipService.resolvePublicDealershipId(validateAction(dealershipSlugSchema, slug));

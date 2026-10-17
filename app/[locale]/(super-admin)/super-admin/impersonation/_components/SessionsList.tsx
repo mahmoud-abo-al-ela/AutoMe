@@ -32,14 +32,6 @@ const BASE = "/super-admin/impersonation";
 const th = "px-3 py-3 text-center font-semibold first:ps-5 first:text-start";
 const td = "px-3 py-3 text-center first:ps-5 first:text-start";
 
-/**
- * The super-admin support sessions list (canvas: Super admin support sessions
- * round 1, "1 · Data table"): views with their counts — open now among them —
- * search, an admin filter and a period, then one row per session: who signed
- * in as whom, where, why, for how long, and how many changes they made. An
- * open session can be ended (it asks first); a finished one links to what
- * changed. Ten to a page; cards below laptop width.
- */
 export function SessionsList({ data, currentAdminId }: { data: SessionsPage; currentAdminId: string }) {
   const t = useTranslations("superAdmin.impersonation");
   const tCommon = useTranslations("superAdmin.common");

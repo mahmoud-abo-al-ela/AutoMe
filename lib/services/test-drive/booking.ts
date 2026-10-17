@@ -28,13 +28,6 @@ interface TestDriveFormData {
   notes?: string;
 }
 
-/**
- * Refuse a booking the form would never have offered. The form applies the
- * same rules (lib/utils/booking-slots), but a server action accepts whatever
- * a caller sends. The rules run inside bookSlot's lock on the car's day
- * (repositories/test-drive/booking.ts), against the bookings as they are at
- * that moment — so two requests for overlapping slots cannot both pass.
- */
 async function slotCheck(
   booking: { organizationId: string; date: string; startTime: string; endTime: string }
 ): Promise<testDriveRepository.SlotCheck> {
@@ -243,16 +236,6 @@ export async function getBookedTimeSlots(carId: string, date: string, excludeTes
   return await testDriveRepository.getBookedTimeSlots(carId, date, excludeTestDriveId);
 }
 
-/**
- * The selling dealership's opening hours for a car, one entry per day.
- *
- * The booking calendar needs these to decide which days and half-hour slots it
- * may offer. They are the same hours already published on the dealership's
- * public detail page, so no authorization beyond the car existing is required.
- *
- * Returns `[]` when the dealership has never configured any — the caller
- * decides what to do with that.
- */
 export async function getCarWorkingHours(carId: string) {
   const car = await carRepository.findPublicCarById(carId);
   if (!car) {

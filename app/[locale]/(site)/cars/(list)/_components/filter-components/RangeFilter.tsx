@@ -6,11 +6,6 @@ import { FilterSection } from "./FilterSection";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-/**
- * Generic min/max range section used for price, year and mileage. The slider
- * domain is pinned to `bounds` (global, unfiltered) so it doesn't shift as
- * other filters are applied. Drag updates local state; release commits.
- */
 export interface RangeBounds {
   min: number;
   max: number;
@@ -34,11 +29,6 @@ export const RangeFilter = ({
   icon?: LucideIcon;
   label: string;
   step?: number;
-  /**
-   * Required on purpose. This used to default to `String(v)`, which renders
-   * Latin digits regardless of locale — the Year range silently used it and
-   * stayed English while every other number on the page was translated.
-   */
   formatValue: (value: number) => string;
   onCommit: (value: [number, number], bounds: RangeBounds) => void;
   isLoading?: boolean;

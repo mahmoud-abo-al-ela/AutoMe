@@ -17,11 +17,6 @@ export type AiCallRecord = AiCallMeta & { feature: AiFeature };
 
 const callListeners = new Set<(call: AiCallRecord) => void>();
 
-/**
- * Hear about every answered call. The evaluation suites use it to report which
- * model answered each case — a fallback answer is a different experiment.
- * Returns the unsubscribe. A listener that throws never costs the call.
- */
 export function subscribeAiCalls(listener: (call: AiCallRecord) => void): () => void {
   callListeners.add(listener);
   return () => callListeners.delete(listener);

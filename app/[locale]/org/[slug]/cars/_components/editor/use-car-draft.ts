@@ -22,16 +22,6 @@ export type CarDraft = {
 const MAX_AGE_MS = 7 * 86_400_000;
 const SAVE_AFTER_MS = 300;
 
-/**
- * Keeps a new car's form in the browser while it is being filled in, so a
- * refresh — or a closed tab — picks up where the dealer left off: the
- * photos, every field, the step, the AI's marks. Read once on arrival, then
- * written a moment after every change; cleared when the car is saved or the
- * dealer starts over. See lib/utils/draft-store for where it lives.
- *
- * Saving waits until the read has finished: otherwise the empty form on
- * arrival would be written over the draft before it could be restored.
- */
 export function useCarDraft({
   enabled,
   storageKey,

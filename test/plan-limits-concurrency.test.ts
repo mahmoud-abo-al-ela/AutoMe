@@ -13,12 +13,6 @@ import { createCarWithinLimit } from "@/lib/repositories/car";
 import { createMembershipWithinLimit } from "@/lib/repositories/team";
 import { db } from "@/lib/prisma";
 
-/**
- * Plan limits under real concurrency, on Postgres: several saves race for a
- * dealership's last free place. Before the per-dealership lock, each counted
- * before any had inserted and all of them got in.
- */
-
 const ORG = "org_test_plan_limits";
 const USERS = Array.from({ length: 6 }, (_, i) => `user_test_plan_limits_${i}`);
 

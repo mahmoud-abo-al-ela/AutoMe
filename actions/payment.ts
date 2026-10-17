@@ -9,11 +9,6 @@ import { signupCheckoutSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { returnLocale } from "@/lib/utils/return-locale";
 
-/**
- * Open a Paymob checkout for a paid plan chosen in onboarding. The dealership
- * is created when the payment settles, not here. `locale` is the page's, for
- * the page Paymob returns the buyer to.
- */
 export const createSignupCheckout = withAuth(
   async (ctx, planId: string, billingPeriod: string, onboardingSessionId: string, locale: string) => {
     refuseDuringSupportSession(ctx);

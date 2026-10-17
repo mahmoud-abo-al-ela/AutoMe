@@ -10,19 +10,6 @@ import type {
     OnboardingLocationPatch,
 } from "../../_lib/onboarding-types";
 
-/**
- * Country / State / City, mirroring the org profile settings page so a
- * dealership's location is captured up front rather than left null until
- * someone edits their profile.
- *
- * The option labels come from `useEgyptLocations` and follow the active locale;
- * only the field's own copy is translated here.
- *
- * Country is shown but not editable. AutoMe serves Egypt and nothing else —
- * the list has one entry, so a select that opens onto a single option is a
- * question with no answer to give. It stays on the form because the value is
- * part of the address a dealer is confirming, not because it is a choice.
- */
 export default function LocationFields({
     value,
     onChange,

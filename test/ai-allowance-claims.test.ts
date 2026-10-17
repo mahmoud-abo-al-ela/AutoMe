@@ -15,13 +15,6 @@ import { DEALER_METERED_FEATURES } from "@/lib/middleware/plan-limits";
 import { db } from "@/lib/prisma";
 import type { TenantContext } from "@/lib/auth/context";
 
-/**
- * The AI-listing loophole, against real Postgres: read photos for a new car,
- * re-save a car already counted this month (which used to claim that read),
- * then add the new car — which then counted nothing. An edit now claims only
- * its own calls, so the read stays for the new car.
- */
-
 const ORG = "org_test_ai_claims";
 const USER = "user_test_ai_claims";
 const ctx = { user: { id: USER }, organization: { id: ORG, slug: "ai-claims" } } as unknown as TenantContext;

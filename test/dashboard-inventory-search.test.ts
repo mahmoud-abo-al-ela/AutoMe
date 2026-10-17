@@ -13,12 +13,6 @@ import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 
-/**
- * The dealer's Cars table searches with the buyers' engine — Arabic, synonyms,
- * typos — over the dealership's own cars only, every status, keeping the
- * table's own sorting and paging. Real Postgres.
- */
-
 const OWN = "org_test_inventory_own";
 const OTHER = "org_test_inventory_other";
 const USERS = ["user_test_inventory_1", "user_test_inventory_2"];

@@ -21,11 +21,6 @@ export function planFeatures(plan: PlanRow) {
 export const PLAN_ROWS = ["price", "yearly", "trial", "cars", "team", "photos", "activity", "aiListing", "aiAssistant", "priority"] as const;
 export type PlanRowKey = (typeof PLAN_ROWS)[number];
 
-/**
- * A plan's settings as words, the same in the comparison table and on the
- * phone cards: prices in EGP, -1 as "No limit", features as included or not
- * (a boolean, for the table to draw as a tick).
- */
 export function usePlanValues() {
   const t = useTranslations("superAdmin.plans");
   const tPlans = useTranslations("plans");

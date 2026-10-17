@@ -1,11 +1,5 @@
 import type { serializeTestDrive } from "@/lib/utils/serializers";
 
-/**
- * A test drive as it leaves the repository, minus the car. `serializePartialCar`
- * erases the joined car to `Record<string, unknown>` because the test-drive
- * repository is JS by design (dynamic where builders), so the two car shapes are
- * declared below and re-attached rather than inferred.
- */
 type SerializedTestDrive = NonNullable<ReturnType<typeof serializeTestDrive>>;
 
 /**

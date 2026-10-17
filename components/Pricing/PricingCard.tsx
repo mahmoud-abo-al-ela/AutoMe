@@ -8,12 +8,6 @@ import { formatPlanPrice, planPeriodKey, type UiPlan } from "./pricing-plans";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 
-/**
- * A single pricing plan card. The popular plan is the asphalt card with the
- * marker CTA — the one primary action in the row; the others are outlined.
- * Plan prices are plain figures, never the price plate: that shape means a
- * car's price and nothing else.
- */
 export default function PricingCard({
   plan,
   billingPeriod,

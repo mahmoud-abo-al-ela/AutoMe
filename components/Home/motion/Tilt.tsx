@@ -6,11 +6,6 @@ import type { PointerEvent, ReactNode } from "react";
 const SPRING = { stiffness: 220, damping: 18 };
 const MAX_TILT = 7; // degrees
 
-/**
- * A card that leans toward the pointer and lifts a little, like a plate
- * catching the light. Mouse and pen only — touch gets the plain card, since a
- * finger has no hover and tilting under it would fight the scroll.
- */
 export function Tilt({ children, className }: { children: ReactNode; className?: string }) {
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);

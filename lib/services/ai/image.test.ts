@@ -2,13 +2,6 @@ import { describe, it, expect } from "vitest";
 import { prepareImage } from "@/lib/services/ai/image";
 import { ValidationError } from "@/lib/utils/errors";
 
-/**
- * A server action is a public RPC endpoint: the dropzone's `accept` list and
- * the form's size check are usability, not control. Everything past this
- * function costs provider quota proportional to the bytes, so the limits are
- * enforced again here against a caller that never touched the UI.
- */
-
 const JPEG = [0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0];
 
 /** A File-like with the fields the guard reads, so a size case costs no memory. */

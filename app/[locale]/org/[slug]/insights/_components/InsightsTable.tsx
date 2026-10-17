@@ -30,11 +30,6 @@ function usePriceText() {
 
 const carName = (car: InsightCar) => `${car.make} ${car.model} ${car.year}`;
 
-/**
- * Interest per car for the period: one framed table (page pattern 9's detail
- * table), most saved first, paged. The car opens its listing editor. Cells
- * are body/secondary size, never meta; numbers are tabular and end-aligned.
- */
 export function InsightsTable({ cars, carsHref }: { cars: InsightCar[]; carsHref: string }) {
   const t = useTranslations("org.insights.table");
   const { number } = useFormatters();
@@ -117,11 +112,6 @@ export function InsightsTable({ cars, carsHref }: { cars: InsightCar[]; carsHref
   );
 }
 
-/**
- * The table as a CSV — every car, not just the page shown — with headers in
- * the reader's language and plain digits so a spreadsheet can sum them. A BOM
- * keeps Arabic readable when Excel opens it.
- */
 export function ExportCsvButton({ cars, days }: { cars: InsightCar[]; days: number }) {
   const t = useTranslations("org.insights");
   const locale = useLocale();

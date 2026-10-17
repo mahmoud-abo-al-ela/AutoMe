@@ -59,12 +59,6 @@ export default async function SiteLayout({
           )}
           <MainHeader user={user} organizationSlug={organization?.slug} organization={organization} />
           <main
-            // No font class here. This used to carry a SECOND Inter instance,
-            // which set font-family: Inter, Inter Fallback on every page body —
-            // and Inter Fallback is local(Arial), which covers Arabic. So all
-            // page content rendered Arabic in Arial while the header and footer,
-            // which sit outside <main>, correctly inherited the Cairo stack from
-            // <body>. Inheriting is the whole point; see globals.css.
             className="flex-1 animate-in fade-in duration-500"
           >
             {/* The content area waits; the header and tab bar stay usable. */}

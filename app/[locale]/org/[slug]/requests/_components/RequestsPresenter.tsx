@@ -16,15 +16,6 @@ import { DeclineDialog } from "./DeclineDialog";
 
 const VIEWS: View[] = ["all", "drives", "questions"];
 
-/**
- * Requests (canvas: Round 3 — Requests; page pattern 10A, standalone inbox):
- * the things a buyer is waiting on the dealer for, acted on where they are.
- * A test drive is confirmed in its row, or declined after a named
- * confirmation; a question is answered in a side panel, so the list stays in
- * view. Rows, not a table; pages, not endless scroll, so the order holds
- * while the dealer works down it. Unread chats get one row that leads to
- * Messages, where conversations are answered.
- */
 export function RequestsPresenter({
   organizationId,
   view,

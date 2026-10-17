@@ -1,8 +1,3 @@
-/**
- * The support sessions on their way, in their own shape: the header with its
- * action, the view tabs, the toolbar, then the table's rows (cards below
- * laptop width). Shimmer, like every admin skeleton.
- */
 export default function SessionsLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

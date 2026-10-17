@@ -1,13 +1,3 @@
-/**
- * Replace a model year in listing text, in Western or Arabic-Indic digits.
- *
- * The AI writes the year into the title and description of both languages —
- * "Kia Cerato 2020", "كيا سيراتو ٢٠٢٠" — so when the dealer corrects the Year
- * field, the text has to follow or the listing contradicts itself. Only the
- * whole number is replaced: 2020 inside 12020 or 20201 is left alone. Each
- * occurrence keeps the digits it was written in.
- */
-
 const ARABIC_INDIC = "٠١٢٣٤٥٦٧٨٩";
 
 function toArabicIndic(value: string): string {

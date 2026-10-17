@@ -5,20 +5,6 @@ import { PrismaClient } from "../../lib/generated/prisma";
 import { findDemo, removeDemo } from "./find-demo";
 import { createDemo } from "./create-demo";
 
-/**
- * Replace AutoMe's demo data — and only the demo data — with the realistic set
- * in this folder.
- *
- *   pnpm demo:reset                         # dry run: what would go, what would come
- *   pnpm demo:reset --apply                 # do it (a database on this machine)
- *   DATABASE_URL=<production> pnpm demo:reset --apply --production
- *
- * Never prisma/seed.ts against a real database: it empties every table first.
- * This touches the dealerships and people find-demo.ts names, refuses if any of
- * them is in real use, and leaves every other dealership, person and payment
- * as it was. The new cars get their search meaning, photo descriptions and
- * search terms from the nightly crons (backfill-*, refresh-search-terms).
- */
 async function main() {
   const apply = process.argv.includes("--apply");
   const url = process.env.DATABASE_URL;

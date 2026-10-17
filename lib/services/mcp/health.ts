@@ -1,16 +1,5 @@
 import { pilotReport } from "./pilot-report";
 
-/**
- * The public MCP endpoint's last day against the pilot's targets
- * (plans/mcp, ROADMAP §Pilot): AutoMe's own errors under 1 % of calls,
- * timeouts and dependencies down under 0.5 %, p95 latency under 800 ms for
- * every tool. Read from McpToolCall, which records every call — the
- * denominator a per-error alert does not have.
- *
- * A quiet day proves nothing: below MIN_CALLS the rates are not judged, since
- * one failure in a handful of calls is noise, not a breach.
- */
-
 export const MCP_TARGETS = {
   internalErrorRate: 0.01,
   unavailableRate: 0.005,

@@ -1,22 +1,3 @@
-/**
- * Find — and, only when asked, delete — car photos left in storage by the
- * old photo delete, which never removed anything (it looked under
- * <carId>/… while uploads live under cars/<carId>/…; fixed in
- * lib/services/storage/delete.ts). Two kinds are left behind:
- *
- *   - every photo of a car that no longer exists (a deleted car);
- *   - photos a dealer removed from a car that still exists.
- *
- * A photo is kept if any car's stored images name it — whatever car's folder
- * it is in — so nothing a listing still shows is ever touched.
- *
- *   pnpm tsx --env-file=.env scripts/storage/orphaned-car-photos.ts            # dry run: lists, deletes nothing
- *   pnpm tsx --env-file=.env scripts/storage/orphaned-car-photos.ts --delete   # deletes what the dry run listed
- *
- * Reads the database DATABASE_URL points at and the Supabase project
- * NEXT_PUBLIC_SUPABASE_URL names — check both before running, and run the dry
- * run first. Deleting is permanent.
- */
 import { createAdminClient } from "@/lib/supabase";
 import { getPublicUrl } from "@/lib/services/storage";
 import { db } from "@/lib/prisma";

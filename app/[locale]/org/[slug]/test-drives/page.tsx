@@ -11,11 +11,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: L
   return { title: t("title") };
 }
 
-/**
- * The Test drives calendar. The chosen day is in the address (?date=2026-10-07)
- * so a refresh, a bookmark or a link from the overview opens that day; without
- * one — or with one that is not a date — it opens on today, in Cairo.
- */
 export default async function TestDrivesPage({
   params,
   searchParams,

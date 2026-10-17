@@ -49,12 +49,6 @@ describe("buildSearchClause", () => {
     expect(values).toContain("gallery");
   });
 
-  // The regression this file exists for. Letting a canonical value reach a
-  // `contains` matched every dealership with a "c" anywhere in its name,
-  // description or address — searching "القاهرة" returned eleven of them
-  // instead of three. The clause now takes its text variants from a bucket
-  // that cannot contain a code or a slug, so the invariant is checked
-  // directly rather than through a length proxy.
   it("never substring-matches a canonical value", () => {
     const canonical = new Set([
       ...EGYPT_GOVERNORATES.map((governorate) => governorate.code),

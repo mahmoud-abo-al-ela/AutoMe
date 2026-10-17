@@ -9,12 +9,6 @@ import { ChatCarSummary } from "../ChatCarSummary";
 const ICON_BUTTON =
   "cursor-pointer rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground";
 
-/**
- * The top of the floating chat: the car as it is now (live price and status,
- * not the snapshot taken when the conversation started), who is selling it,
- * and the ways to reach them outside the chat — as marketplace apps pin the
- * listing above every conversation.
- */
 export function DockHeader({
   car,
   onCarPage,

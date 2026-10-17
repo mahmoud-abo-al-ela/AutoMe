@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { isDateString } from "@/lib/utils/date-only";
 
-/**
- * A test drive's date is a Cairo calendar day, kept as "YYYY-MM-DD" end to
- * end. Coercing it to a Date turned the form's local midnight into an
- * instant, which a browser west of UTC sends as the previous day.
- */
 const testDriveDate = z.string().refine(isDateString, "Date must be YYYY-MM-DD");
 
 export const requestTestDriveSchema = z.object({

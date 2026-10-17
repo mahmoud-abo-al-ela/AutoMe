@@ -11,15 +11,6 @@ const initials = (name: string) =>
     .join("")
     .slice(0, 2);
 
-/**
- * Buyer reviews (Figma: Testimonial).
- *
- * ⚠️ PLACEHOLDER CONTENT — owner decision 2026-10-02. These are invented
- * reviews kept from the previous site until real ones exist. The stock-photo
- * faces are gone: an initials disc stands in, so nothing pretends to be a
- * photograph of a real buyer. No autoplay carousel — four cards, a sideways
- * scroll on phones.
- */
 export default async function Testimonials({ brand }: { brand: string }) {
   const t = await getTranslations("home.testimonials");
   const reviews = ([1, 2, 3, 4] as const).map((n, i) => ({

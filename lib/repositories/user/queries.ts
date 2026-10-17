@@ -58,11 +58,6 @@ export async function findUserByEmail(email: string) {
   return serializeUser(user);
 }
 
-/**
- * Find organization owned by user (where user has OWNER role)
- * @param {string} userId - The user ID
- * @returns {Promise<Object|null>} The membership with organization or null
- */
 export async function findUserOwnedOrganization(userId: string) {
   const membership = await db.membership.findFirst({
     where: {

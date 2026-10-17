@@ -13,24 +13,11 @@ import { cn } from "@/lib/utils";
 import { SectionPanel } from "../../../_components/SectionPanel";
 import { WEEK, type HoursState } from "./storefront-state";
 
-/**
- * A time field reads left to right in both languages, like the clock it is.
- * Without this, an Arabic page right-aligns the digits while the ص/م chip sits
- * at the field’s left, so the two drift apart by however wide the time is.
- */
-// No clock icon: the times are typed or stepped with the arrow keys, and the
-// icon only crowded the ص/م mark in a narrow field.
 const TIME_FIELD =
   "h-11 w-full rounded-control border-[#8c8170] bg-field text-left [direction:ltr] sm:w-32 [&::-webkit-calendar-picker-indicator]:hidden";
 /** On a phone the two times share the row; from sm up each keeps its own width. */
 const TIME_SLOT = "min-w-0 flex-1 sm:flex-none [&>span]:w-full";
 
-/**
- * Opening hours as a week strip, Saturday to Friday: pick a day to edit it
- * below. One day at a time keeps the seven pairs of times from becoming a
- * wall of inputs, and "same hours for every open day" does the usual job of
- * setting the whole week in one go.
- */
 export function HoursSection({
   hours,
   onChange,

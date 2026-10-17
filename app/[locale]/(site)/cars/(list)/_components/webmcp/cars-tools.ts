@@ -6,14 +6,6 @@ import { NotFoundError } from "@/lib/utils/errors";
 import { carLine, type ListedCar } from "@/lib/webmcp/car-line";
 import { defineWebMcpTool, type WebMcpToolDefinition } from "@/lib/webmcp/define-tool";
 
-/**
- * The cars page's WebMCP tools: search the cars the way the filter panel
- * does, and open one. A search goes through the page's own applyFilters, so
- * the URL, the filter chips and the cards an agent's search produces are the
- * ones the person's own clicks would — and the cars it returns are the cards
- * on the screen, from the same query.
- */
-
 export interface CarsToolDeps {
   /** Apply a whole set of filters as the panel does: state, URL, chips (useCarsPage). */
   applyFilters: (filters: CarPageFilters) => void;

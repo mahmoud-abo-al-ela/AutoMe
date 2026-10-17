@@ -4,15 +4,6 @@ import { redactParts, redactText } from "@/lib/ai/redact";
 import { createAiTrace, pruneAiTraces } from "@/lib/repositories/ai-trace";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * Which AI calls keep a trace (AiTrace) — what they were given and what came
- * back, redacted — and the writing of it.
- *
- * Every listing-assistant answer is traced, because those are what buyers
- * rate: a 👎 opens what the model saw. Other features are sampled. Private
- * content — a chat message between buyer and dealer — is never traced.
- */
-
 const ALWAYS: ReadonlySet<AiFeature> = new Set([AI_FEATURES.listingQA]);
 const DEFAULT_SAMPLE_RATE = 0.1;
 /** Prune on roughly one write in this many: retention without a cron. */

@@ -30,11 +30,6 @@ type Props = {
   suggestion?: AnswerSuggestion | null;
 };
 
-/**
- * The answer, written in place under the question (canvas: Buyer questions
- * round 1, "1 · Teach queue"). Ctrl/⌘+Enter publishes, for dealers clearing a
- * run of questions from the keyboard.
- */
 export function AnswerEditor({
   initial,
   onDraft,

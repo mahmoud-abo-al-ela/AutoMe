@@ -11,11 +11,6 @@ import { useActionError } from "@/hooks/use-action-error";
 import type { getCurrentImpersonationSession } from "@/lib/services/impersonation/impersonation";
 import type { Organization } from "@/lib/generated/prisma";
 
-/**
- * Derived from the service rather than restated, so a change to what
- * getCurrentImpersonationSession selects shows up here. `import type` is erased,
- * so this does not pull the server module into the client bundle.
- */
 type ImpersonationSession = NonNullable<
   Awaited<ReturnType<typeof getCurrentImpersonationSession>>
 >;

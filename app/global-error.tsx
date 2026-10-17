@@ -3,12 +3,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
-/**
- * The last resort: the root layout itself failed, so this replaces the whole
- * document — no stylesheet, no fonts, no message files. Everything it needs
- * is here: the brand's colours inline, the barrier drawn in plain CSS, and the
- * copy in both languages, chosen from the address (/ar/… reads Arabic).
- */
 const COPY = {
   en: {
     title: "Something went wrong",

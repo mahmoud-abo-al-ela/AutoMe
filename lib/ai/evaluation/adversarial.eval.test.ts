@@ -30,19 +30,6 @@ import {
   isCapacityFailure,
 } from "@/lib/ai/evaluation/harness";
 
-/**
- * Hostile and degraded photos, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation
- *
- * The photo is the attack surface of this feature: it is the one input a
- * dealer — or anyone who can put a sign in front of a car — fully controls, and
- * whatever the model reads from it is published under the dealer's name. So
- * these check the three ways a photo goes wrong in practice: text in the frame
- * that tries to steer the model, a plate that must not be published, and a
- * photo too poor to identify anything from.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 type Outcome = CarListingDraft | "unavailable";

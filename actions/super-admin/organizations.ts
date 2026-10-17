@@ -103,11 +103,6 @@ export const checkOwnerEmail = withSuperAdmin(async (_admin, email: string) => {
   return createSuccessResponse(await orgService.findAccountByEmail(value));
 });
 
-/**
- * Every dealership the list's current view and filters match, for its CSV.
- * Takes the list's URL params and reads them through the same parser as the
- * page, so anything unknown falls back to its default.
- */
 export const exportDealerships = withSuperAdmin(async (_admin, params: Record<string, string>) => {
   const rows = await dealershipsService.getDealershipsForExport(
     parseDealershipQuery(typeof params === "object" && params ? params : {}),

@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * The top of every dashboard page (Figma: Dashboard — page header): the
- * page's title, one line on what it is for, and its actions at the far end —
- * at most one of them marker yellow, the page's main action. The same shape
- * as the public site's plain PageHeader, at the work-mode scale.
- */
 export function OrgPageHeader({
   title,
   description,

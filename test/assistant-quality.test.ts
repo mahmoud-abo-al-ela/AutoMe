@@ -16,11 +16,6 @@ import {
 } from "@/lib/repositories/super-admin/analytics";
 import { db } from "@/lib/prisma";
 
-/**
- * The super-admin quality report reads groupBy over nullable columns — a row
- * from before provenance was kept has no model — which only real Postgres can
- * show grouping correctly.
- */
 const ORG_ID = "org_test_assistant_quality";
 const CAR_ID = "6b0f9d3e-7d0a-4c6e-9e44-2a1f6f3c9a01";
 

@@ -9,16 +9,6 @@ import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 import en from "@/messages/en/dealerships.json";
 import ar from "@/messages/ar/dealerships.json";
 
-/**
- * The open/closed sentence is assembled from three separate pieces — a status
- * key from lib/utils/open-status, a day name from the message bundle, and a
- * clock face from formatClockTime. Nothing type-checks that they fit together,
- * and the page that renders them fetches client-side, so it is invisible to an
- * HTTP-level check.
- *
- * This asserts the composition end to end, in both locales, without React.
- */
-
 const messages = { en, ar };
 
 /** The wording half of useOpenStatusMessage, without the hook. */

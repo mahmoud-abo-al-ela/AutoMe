@@ -14,18 +14,6 @@ import { startCheckout, type Checkout } from "./checkout";
 import { trialPeriod } from "./periods";
 import { planSignupKind } from "@/lib/utils/plan-signup";
 
-/**
- * A new dealership's first plan, three ways:
- *
- *   free plan  — created at once, nothing to pay, ever;
- *   trial      — a paid plan with trial days: created at once as TRIALING,
- *                with no payment upfront (Paymob links cannot keep a card for
- *                later). The first payment link goes out before the trial ends
- *                like any renewal (owner's choice, 2026-10-01);
- *   paid       — a Paymob checkout first; the dealership is created when the
- *                payment settles (settle.ts).
- */
-
 export interface SignupUser {
   id: string;
   name?: string | null;
@@ -90,11 +78,6 @@ export async function startSignupCheckout({
   });
 }
 
-/**
- * The free and trial paths: the dealership is created now. A paid plan
- * without a trial is refused: it is only ever created by a settled payment,
- * whatever the client sends.
- */
 export async function createUnpaidOrganization({
   user,
   details,

@@ -6,22 +6,8 @@ import type {
   ProviderResult,
 } from "@/lib/ai/provider/types";
 
-/**
- * Any API speaking OpenAI's Chat Completions format — which most gateways and
- * vendors do. One implementation, configured per provider in lib/ai/providers:
- * a base URL and how it spells "think less". The key arrives per call.
- *
- * Plain `fetch`, no SDK: the surface used is one endpoint, and an SDK per
- * vendor is exactly the coupling this layer exists to avoid.
- */
-
 export interface OpenAiCompatibleConfig {
   baseUrl: string;
-  /**
-   * The `reasoning_effort` sent for `thinking: "low"`, or undefined to send
-   * nothing. Measured on CodeCraft: "low" changed nothing on Gemini 3.7 Flash,
-   * "minimal" cut its completion tokens by a third.
-   */
   lowReasoningEffort?: string;
 }
 
@@ -63,11 +49,6 @@ function usageOf(usage: ChatUsage | null | undefined): TokenUsage {
   };
 }
 
-/**
- * An HTTP failure as the shared classification expects it: a numeric status,
- * and a message short enough to log. The body is truncated because a gateway
- * may echo the request, and the request carries a buyer's words or a photo.
- */
 async function httpError(response: Response): Promise<Error> {
   let detail = "";
   try {

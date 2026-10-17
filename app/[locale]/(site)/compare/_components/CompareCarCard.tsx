@@ -12,13 +12,6 @@ import { resolveCarTitle } from "@/lib/utils/car-text";
 import type { Locale } from "@/i18n/routing";
 import type { CompareCar } from "../_lib/compare-types";
 
-/**
- * A car at the head of a comparison column: photo, title, the price plate and
- * the year · km · fuel line, with remove and "view details".
- *
- * Text goes through the same helpers as the listing cards, so the Arabic page
- * gets the Arabic title, its own digits and translated fuel types.
- */
 const CompareCarCard = ({
     car,
     onRemove,

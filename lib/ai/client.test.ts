@@ -1,15 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z } from "zod";
 
-/**
- * The metering contract, tested at the only place that can enforce it.
- *
- * These cases exist because the defect they guard against already shipped once:
- * `createAiUsage` was written, indexed and wired into the plan gate, and simply
- * never called. "One row per provider attempt, on success and on failure" is
- * the invariant; everything below is a way for it to be broken.
- */
-
 const generate = vi.hoisted(() => vi.fn());
 const createAiUsage = vi.hoisted(() => vi.fn());
 const countPlatformCallsSince = vi.hoisted(() => vi.fn());

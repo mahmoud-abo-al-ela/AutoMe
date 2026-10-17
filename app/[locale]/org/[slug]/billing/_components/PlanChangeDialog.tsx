@@ -16,11 +16,6 @@ import { isFreePlan, planChange } from "@/lib/utils/plan-change";
 import type { BillingCycle } from "./PlanColumn";
 import type { BillingPaidAhead, BillingPlan, BillingSubscription } from "./_lib/billing-types";
 
-/**
- * Confirms a plan change and says exactly what it does — pay now, wait for
- * the paid period to end, or switch at once — by the same rule the server
- * applies (lib/utils/plan-change). Paying goes on to Paymob's checkout.
- */
 export function PlanChangeDialog({
   plan,
   cycle,

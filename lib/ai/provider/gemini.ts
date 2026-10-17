@@ -2,26 +2,9 @@ import { GoogleGenAI, ThinkingLevel, type GenerateContentResponse } from "@googl
 import type { TokenUsage } from "@/lib/ai/models";
 import type { EmbedRequest, EmbedResult, EmbeddingTask, ProviderRequest, ProviderResult } from "@/lib/ai/provider/types";
 
-/**
- * Google's Gemini API, through its SDK. The only module in the repo that
- * imports `@google/genai`.
- *
- * Nothing here knows about metering, caching, plan gates or Zod — this layer
- * makes one call and reports what came back. The SDK's ApiError carries a
- * numeric `status`, which is what the shared classification in ./errors reads.
- */
-
 /** One SDK client per key: a provider may have several. */
 const clients = new Map<string, GoogleGenAI>();
 
-/**
- * Whether a key is present at all.
- *
- * Checked by callers *before* constructing the client, because the module is
- * imported during `next build` and in CI, where `GEMINI_API_KEY` is the literal
- * string "placeholder". Constructing lazily keeps import-time side effects out
- * of the build.
- */
 export function isConfigured(): boolean {
   return Boolean(process.env.GEMINI_API_KEY);
 }

@@ -1,18 +1,3 @@
-/**
- * Who may act as a buyer: save a car, message a dealership, book a test drive,
- * or review a dealership.
- *
- * A signed-in account is not the same as a buyer. Platform staff and the
- * dealership's own people browse the storefront too, and if they could act on
- * it their activity would land in the dealer's leads, inbox and rating as if a
- * customer had done it. So the identity is checked against the dealership being
- * acted on, not only for being signed in.
- *
- * Pure and free of server imports: the server actions enforce it
- * (assert-buyer.ts) and the storefront uses the same answer to decide which
- * buttons to show, so the two cannot drift.
- */
-
 export type BuyerAction = "save" | "message" | "testDrive" | "review";
 
 export type BuyerBlockReason =
@@ -50,13 +35,6 @@ export function toBuyerViewer(user: BuyerViewerSource | null | undefined): Buyer
   };
 }
 
-/**
- * Why `viewer` may not take `action` on the dealership `targetOrgId`, or null
- * when they may. A signed-out viewer is never blocked here: the sign-in flows
- * already handle them, and the actions require a session anyway.
- *
- * Order matters: the first reason that applies is the one shown.
- */
 export function buyerBlockReason(
   viewer: BuyerViewer | null,
   targetOrgId: string,

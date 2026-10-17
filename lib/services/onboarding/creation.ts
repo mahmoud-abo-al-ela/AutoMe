@@ -17,14 +17,6 @@ export interface OrganizationDetails {
   workingHours?: WorkingHoursInput | null;
 }
 
-/**
- * Create an organization, its working hours, the owner's membership and its
- * subscription, inside a transaction the caller owns, so a paid sign-up can
- * mark its payment and create the dealership as one unit.
- *
- * Writes no audit log: the audit helpers use their own connection, so the
- * caller logs once the transaction has committed.
- */
 export async function createOrganizationRecords(
   tx: Prisma.TransactionClient,
   details: OrganizationDetails,

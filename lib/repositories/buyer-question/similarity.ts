@@ -3,15 +3,6 @@ import { db } from "@/lib/prisma";
 import { Prisma } from "@/lib/generated/prisma";
 import { toVectorLiteral } from "@/lib/ai/embeddings";
 
-/**
- * Everything here is raw SQL: Prisma cannot read or write a vector column.
- * Every query is scoped by organizationId in its WHERE (tenant isolation),
- * and only ever compares vectors made by the same model.
- *
- * Similarity is cosine similarity, 1 − (a <=> b): 1 is the same meaning, and
- * unrelated questions about a car sit around 0.6.
- */
-
 const vector = (values: number[]) => Prisma.sql`${toVectorLiteral(values)}::vector`;
 
 /** The question a job embeds, or null when it no longer exists. */
@@ -29,11 +20,6 @@ export async function setQuestionEmbedding(input: { id: string; organizationId: 
     WHERE "id" = ${input.id} AND "organizationId" = ${input.organizationId}`;
 }
 
-/**
- * The closest earlier question on the same car in one of these statuses, by
- * the same model, with how close it is. Earlier only, so two rephrasings
- * embedded at once fold one way, into the older.
- */
 export async function findNearestEarlierQuestion(input: {
   organizationId: string;
   carId: string;
@@ -58,11 +44,6 @@ export async function findNearestEarlierQuestion(input: {
   return row ? { id: row.id, similarity: Number(row.similarity) } : null;
 }
 
-/**
- * Link an open question to the answered one it rephrases on the same car. The
- * two keep their own statuses and answers; the link only tells the dealer the
- * assistant had an answer and did not use it. Both scoped to the dealership.
- */
 export async function linkRelatedQuestion(input: { id: string; relatedId: string; organizationId: string }) {
   await db.buyerQuestion.updateMany({
     where: { id: input.id, organizationId: input.organizationId, NOT: { id: input.relatedId } },
@@ -70,12 +51,6 @@ export async function linkRelatedQuestion(input: { id: string; relatedId: string
   });
 }
 
-/**
- * Fold a rephrased repeat into the question it repeats: its asks are added to
- * that one's count, the later of the two "last asked" kept, and the repeat
- * removed — only while it is still open, so an answer is never thrown away.
- * Returns whether it folded.
- */
 export async function foldQuestionInto(input: { fromId: string; intoId: string; organizationId: string }): Promise<boolean> {
   return db.$transaction(async (tx) => {
     const [from, into] = await Promise.all([
@@ -106,11 +81,6 @@ export async function foldQuestionInto(input: { fromId: string; intoId: string; 
   });
 }
 
-/**
- * The dealer's answers for one car, closest in meaning to a buyer's question
- * first — for a car with more answers than fit in the record. Answers with no
- * vector yet (not backfilled) come after, most-asked first.
- */
 export function findAnswersForCarByMeaning(input: {
   carId: string;
   organizationId: string;
@@ -130,11 +100,6 @@ export function findAnswersForCarByMeaning(input: {
     LIMIT ${input.take}`;
 }
 
-/**
- * For each open question, the closest answered question on another of the
- * dealership's cars — to offer that answer again. Callers apply the
- * threshold; this returns the nearest whatever its distance.
- */
 export async function findAnswerSuggestions(organizationId: string, questionIds: string[]) {
   if (questionIds.length === 0) return [];
   const rows = await db.$queryRaw<

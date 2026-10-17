@@ -9,13 +9,6 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * `compact` renders the control as a 48px row, the same height as an Input, so
- * the logo occupies one cell of the form grid like every other field. The
- * square tile it replaced was 112px tall and sat beside a 48px name field,
- * leaving a block of dead space that no other row had.
- */
-/** Matches the size the messages quote, so copy and check cannot disagree. */
 const MAX_LOGO_MB = 5;
 
 export default function LogoUpload({

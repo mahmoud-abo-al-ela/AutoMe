@@ -6,13 +6,6 @@ export interface SocialShareTarget {
   action: () => void;
 }
 
-/**
- * Build the share targets for a given page.
- *
- * Takes the url and title as arguments rather than closing over module scope:
- * the values are per-render (the url comes from window.location) and there is
- * no sensible module-level value for either.
- */
 export function socialShares(
   shareUrl: string,
   shareTitle: string

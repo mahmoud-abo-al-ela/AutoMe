@@ -5,11 +5,6 @@ import { imageSearchSchema } from "@/lib/ai/schemas/image-search";
 import { textPart } from "@/lib/ai/provider/types";
 import { prepareImage } from "@/lib/services/ai/image";
 
-/**
- * Filters the hero photo search produces. Every field is optional by omission:
- * a field the model could not determine is dropped rather than sent empty, so
- * the caller can build a URL without having to re-check for "".
- */
 export interface ImageSearchFilters {
   make?: string;
   bodyType?: string;

@@ -6,17 +6,6 @@ import { PaymobApiError, checkoutUrl, createIntention, paymobConfig } from "@/li
 import { EGYPT_DIALING_CODE, isEgyptNationalPhone, toNationalEgyptPhone } from "@/lib/utils/phone";
 import { NotFoundError, ServiceUnavailableError, ValidationError, logError } from "@/lib/utils/errors";
 
-/**
- * Start paying for a plan: a PENDING Payment row, a Paymob intention that
- * carries its id, and the URL of Paymob's checkout page.
- *
- * Nothing changes on the subscription here. The payment takes effect when
- * Paymob confirms it (settle.ts), through the callback or, if that is late,
- * through the success page asking Paymob directly.
- *
- * Callers own auth, ownership and rate limiting (server-action-guard).
- */
-
 /** How long the checkout page can be paid. A later attempt starts a new checkout. */
 const CHECKOUT_TTL_SECONDS = 60 * 60;
 
@@ -58,12 +47,6 @@ export interface Checkout {
   url: string;
 }
 
-/**
- * The public origin Paymob calls back and returns buyers to. Required in
- * production; in development it falls back to the local server, as the rest of
- * the app does. Paymob cannot call localhost back, so there the success page
- * confirms the payment by asking Paymob (confirm.ts).
- */
 function appUrl(): string {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
   const url = configured || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000");

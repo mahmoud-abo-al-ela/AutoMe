@@ -17,11 +17,6 @@ type Props = {
   terms: Partial<DealershipTerms> | undefined;
 };
 
-/**
- * The car's history and the dealership's terms — only what the dealer stated.
- * A field left "not stated" is absent here rather than shown as "no": silence
- * about accidents is not a claim that there were none.
- */
 const CarHistoryCard = ({ car, terms = {} }: Props) => {
   const t = useTranslations("carDetail.history");
   const fmt = useFormatters();

@@ -3,23 +3,6 @@ import { ar as arLocale, enUS } from "date-fns/locale";
 import type { Locale } from "@/i18n/routing";
 import { APP_TIME_ZONE, intlLocale } from "./intl-locale";
 
-/**
- * Date and time formatting for AutoMe.
- *
- * Exists for the same reason as `currency.ts` and `units.ts`: before it, 23
- * call sites hardcoded "en-US", so every date in the product rendered in US
- * order (month/day) regardless of the reader's language — on an Egypt-only
- * product where both locales use day/month.
- *
- * Two rules are enforced here rather than at the call sites:
- *
- * - **Times are formatted in Africa/Cairo, by name.** Egypt reinstated DST in
- *   2023, so the offset changes twice a year and a hardcoded +02:00 is wrong
- *   for part of the year. Leaving the zone unset is also wrong: it would render
- *   in the *server's* zone, which is typically UTC.
- * - **Eastern Arabic numerals in Arabic**, via `intlLocale`. See that file.
- */
-
 type DateInput = Date | string | number;
 
 function toDate(value: DateInput): Date {
@@ -31,11 +14,6 @@ function isValid(date: Date): boolean {
   return !Number.isNaN(date.getTime());
 }
 
-/**
- * Format a date. Defaults to a medium, unambiguous form ("15 Aug 2026") rather
- * than a numeric one, because 03/08 reads as two different days either side of
- * the Atlantic and this product serves both audiences.
- */
 export function formatDate(
   value: DateInput,
   locale: Locale = "en",
@@ -73,30 +51,6 @@ export function formatTime(
 /** A bare clock string, as WorkingHours stores one: "9:00", "09:00", "17:30". */
 const CLOCK_PATTERN = /^\s*(\d{1,2}):(\d{2})\s*$/;
 
-/**
- * Format a bare "HH:mm" wall-clock string.
- *
- * `WorkingHours.openTime`/`closeTime` and `TestDrive.startTime`/`endTime` hold
- * a clock face, not an instant: no date, no zone. They were rendered raw, so
- * an Arabic reader saw "09:00" in Latin digits with no meridiem while every
- * date beside it was in Arabic.
- *
- * Anchored to an arbitrary UTC day and formatted in UTC, deliberately: running
- * these through `Africa/Cairo` would apply the offset to a time that never had
- * one and display an hour the dealership never chose.
- *
- * Returns the input unchanged when it is not "HH:mm", so a malformed column
- * degrades to the raw value rather than to "Invalid Date".
- */
-/**
- * The current date and wall-clock time in Africa/Cairo, as "YYYY-MM-DD" and
- * "HH:mm".
- *
- * Anything asking "is it open right now?" or "has this slot passed?" has to ask
- * in the dealership's zone. `new Date().getHours()` answers in the *visitor's*
- * zone, so a reader in London would see a Cairo dealership close two hours
- * early — and the server, usually on UTC, would disagree with both.
- */
 export function cairoNow(now: Date = new Date()): {
   date: string;
   time: string;
@@ -137,12 +91,6 @@ export function formatClockTime(value: string, locale: Locale = "en"): string {
   }).format(new Date(Date.UTC(2000, 0, 1, hours, minutes)));
 }
 
-/**
- * The locale's own AM/PM markers — "ص" and "م" in Arabic.
- *
- * Read out of Intl rather than written into a message file, so the marker
- * beside a time input and the one inside a formatted time cannot disagree.
- */
 export function dayPeriodLabels(locale: Locale = "en"): {
   am: string;
   pm: string;
@@ -168,14 +116,6 @@ export function dayPeriodOf(value: string): "am" | "pm" | null {
   return parts ? (parts.hours < 12 ? "am" : "pm") : null;
 }
 
-/**
- * The same clock time in the other half of the day: 09:00 becomes 21:00 and
- * back again.
- *
- * Twelve hours forward modulo the day, not a branch on am/pm, because that is
- * the same arithmetic in both directions and has no midnight/noon special case
- * to get wrong. Malformed input is returned untouched.
- */
 export function flipDayPeriod(value: string): string {
   const parts = clockParts(value);
   if (!parts) return value;
@@ -224,14 +164,6 @@ export function dateFnsLocale(locale: Locale) {
   return locale === "ar" ? arLocale : enUS;
 }
 
-/**
- * `date-fns` `format` with the locale injected.
- *
- * Prefer `formatDate` above; this exists for the call sites that need a
- * specific pattern (a weekday header, an ISO-ish key) rather than a
- * locale-chosen one. Note that date-fns formats in the *runtime's* zone, so
- * this is for wall-clock patterns, not for instants.
- */
 export function formatPattern(
   value: DateInput,
   pattern: string,
@@ -243,13 +175,6 @@ export function formatPattern(
   return dateFnsFormat(date, pattern, { locale: dateFnsLocale(locale) });
 }
 
-/**
- * Chat-list timestamp: clock time today, weekday within the week, date beyond.
- *
- * Extracted from the two Stream channel previews, which each carried an
- * identical copy hardcoded to "en-US" — so localizing one and not the other
- * would have left two visibly different date formats in the same sidebar.
- */
 export function formatMessageTimestamp(
   value: DateInput | null | undefined,
   locale: Locale = "en"
@@ -274,14 +199,6 @@ export function formatMessageTimestamp(
   return formatDate(date, locale, { day: "numeric", month: "short", year: undefined });
 }
 
-/**
- * Rewrite ASCII digits in the locale's numbering system.
- *
- * date-fns writes its numbers itself, in ASCII, whatever locale object it is
- * given — its Arabic locale says "منذ 3 أيام". The digits are mapped through
- * Intl here rather than hardcoded, so `intlLocale` stays the one place the
- * numbering system is decided.
- */
 function localizeDigits(text: string, locale: Locale): string {
   const digits = new Intl.NumberFormat(intlLocale(locale), {
     useGrouping: false,

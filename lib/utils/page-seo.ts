@@ -9,15 +9,6 @@ import {
   openGraphLocale,
 } from "@/lib/utils/seo-meta";
 
-/**
- * The dealership subdomain's origin when the request is on one, else null.
- *
- * `x-subdomain` is set by the middleware from the Host header, and only for a
- * host under NEXT_PUBLIC_ROOT_DOMAIN (the middleware strips a client-sent
- * copy first), so the host it came from is safe to echo back. Impersonation
- * sets the organization header on the main domain but not this one, which is
- * the point: a super-admin viewing a dealership is still on the main domain.
- */
 async function subdomainOrigin(): Promise<string | null> {
   const h = await headers();
   const host = h.get("host");
@@ -29,12 +20,6 @@ async function subdomainOrigin(): Promise<string | null> {
   return `${proto}://${host}`;
 }
 
-/**
- * The site's share card (app/[locale]/opengraph-image.tsx) for a page with no
- * image of its own. Named outright because Next replaces a page's whole
- * `openGraph`, it does not merge it: a page that sets its title there loses
- * the image the file convention attached higher up.
- */
 export function defaultShareImage(locale: Locale) {
   return { url: `${mainOrigin()}/${locale}/opengraph-image`, width: 1200, height: 630, alt: "AutoMe" };
 }
@@ -44,31 +29,6 @@ export async function requestOrigin(): Promise<string> {
   return (await subdomainOrigin()) ?? mainOrigin();
 }
 
-/**
- * Title, description, canonical, hreflang and Open Graph for a page that
- * exists in every locale.
- *
- * A dealership subdomain serves every route the main domain does, but only
- * two of them with different content: the home page is the dealership's
- * storefront, and the car list is its stock. Those pass `tenantScoped` and
- * canonicalise onto the subdomain — pointing them at the main domain would
- * declare the storefront a duplicate of the marketplace home. Everything else
- * (about, legal, a dealership's own page) is the same document on any host,
- * and canonicalises onto the main domain so the copies do not compete.
- *
- * Open Graph does not inherit the page title — without its own `title` and
- * `description` a shared link previews as a bare URL — and it is replaced, not
- * merged, by any segment that sets it. So the page's copy is passed in and
- * repeated here, and a page with more to say (images, type) spreads
- * `openGraph` into its own. On a subdomain storefront the site's name is the
- * dealership's, as it is in the tab title.
- *
- * Omit `title` to keep the root layout's `title.default` (the home page).
- *
- * Twitter (X) reads its own tags; the card type is the one thing it cannot
- * take from Open Graph, and without it a link shows as a bare URL there. The
- * image comes from Open Graph — the page's own, or app/[locale]/opengraph-image.
- */
 export async function localizedPageMetadata(
   path: string,
   locale: Locale,

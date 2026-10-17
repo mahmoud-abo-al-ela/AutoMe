@@ -4,12 +4,6 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseDealershipTab, type DealershipTab } from "@/lib/services/super-admin/dealerships-options";
 
-/**
- * Each dealership tab on its way, in its own shape — shown while a tab
- * switches, and on a reload by the page's loading state. Shimmer, like every
- * admin skeleton.
- */
-
 const sk = "skeleton-shimmer";
 const card = "overflow-hidden rounded-[20px] border border-border bg-card";
 

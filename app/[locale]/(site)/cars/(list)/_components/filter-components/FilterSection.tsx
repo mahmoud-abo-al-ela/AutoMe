@@ -9,13 +9,6 @@ import {
 } from "@/components/ui/accordion";
 import { useFormatters } from "@/hooks/use-formatters";
 
-/**
- * Unified shell for every sidebar filter section. Owns the accordion item,
- * the icon + label header, the active-count badge, and the empty state — so
- * all seven sections share one padding scale, one badge treatment, and one
- * empty behaviour (the section always stays mounted; it never disappears and
- * shifts the sections below it).
- */
 export const FilterSection = ({
   value,
   icon: Icon,

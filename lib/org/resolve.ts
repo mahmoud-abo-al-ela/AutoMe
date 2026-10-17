@@ -48,11 +48,6 @@ export async function getCurrentOrganization() {
   return getOrganizationBySlug(slug);
 }
 
-/**
- * The dealership the dashboard URL names (x-dashboard-org, set by middleware
- * from /[locale]/org/[slug]). Selection only: callers still require a
- * membership. Null off the dashboard.
- */
 export async function getDashboardOrganizationSlug() {
   const headersList = await headers();
   return headersList.get("x-dashboard-org");

@@ -5,11 +5,6 @@ import { Link } from "@/i18n/navigation";
 import { OrgPageHeader } from "../_components/OrgPageHeader";
 import { SettingsTabs } from "./_components/SettingsTabs";
 
-/**
- * Settings, as three tabs (canvas: Settings round 1, "2 · Storefront"): what
- * buyers see, who works here, and the emails the dealership gets. Each tab is
- * its own address, so a link — the weekly email's, say — opens the right one.
- */
 export default async function SettingsLayout({ children, params }: { children: ReactNode; params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const t = await getTranslations("org.settings");

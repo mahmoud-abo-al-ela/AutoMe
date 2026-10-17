@@ -5,14 +5,6 @@ import { useFormatters } from "@/hooks/use-formatters";
 import StepIndicator from "./StepIndicator";
 import type { WizardStep } from "../../_lib/onboarding-types";
 
-/**
- * The single source of progress in the wizard.
- *
- * This used to sit under a separate card showing "Step 1 of 3", "33% Complete"
- * and a filled bar — four indicators of the same fact, costing ~180px above the
- * fold. The stepper is the one worth keeping: it also says what is coming next.
- * The step count is folded in here; the progress bar card is gone.
- */
 export default function StepIndicators({
     steps,
     currentStep,

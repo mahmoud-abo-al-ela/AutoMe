@@ -13,11 +13,6 @@ const item: Variants = {
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 140, damping: 20 } },
 };
 
-/**
- * Rises into view once, as it scrolls in. Children marked RevealItem follow
- * one after another (staggered); anything else rises with the container.
- * Transform and opacity only, so it stays on the GPU.
- */
 export function Reveal({
   children,
   as = "div",

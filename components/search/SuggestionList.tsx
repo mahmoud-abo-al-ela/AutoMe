@@ -8,20 +8,6 @@ import { cn } from "@/lib/utils";
 import type { SearchSuggestion } from "@/lib/search/suggest";
 import { SuggestionLabel } from "./SuggestionLabel";
 
-/**
- * The listbox under a search field (useSuggestionCombobox drives it): each
- * suggestion with what it is and how many cars it leads to — or, with the
- * field empty, the buyer's recent searches. Options are never focused — the
- * field keeps focus, and the highlighted option is announced through
- * aria-activedescendant — and a click must not blur the field first, so
- * everything in the list cancels its mousedown.
- *
- * A recent search's remove button sits beside its option, not inside it: an
- * option holds no control of its own. Keyboard users remove with Delete.
- *
- * Positioned by its parent: render it inside a relatively positioned box
- * around the field.
- */
 export function SuggestionList({
   id,
   query,

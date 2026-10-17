@@ -47,22 +47,12 @@ const PRIMARY = new Set<string>([
   "insights",
 ]);
 
-/**
- * The phone menu's groups (DrawerNavGroups), in the order a dealer reaches
- * for them: the day's work, what it tells them, and the dealership itself —
- * that last one the owner's alone (OWNER_ONLY), so a member never sees it.
- */
 const MENU_GROUPS = [
   { key: "work", names: ["dashboard", "requests", "cars", "test-drives", "messages"] },
   { key: "insight", names: ["insights", "questions"] },
   { key: "dealership", names: ["billing", "audit-logs", "settings"] },
 ] as const;
 
-/**
- * A square control on the asphalt bar: 44px, and 40px on a phone, where the
- * menu, messages, language and account share the row with the dealership's
- * name — at 44px a 375px screen cut "Red Sea Motors" short.
- */
 const barIcon =
   "relative flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-control text-inverse-foreground transition-colors hover:bg-inverse-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker";
 

@@ -16,11 +16,6 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { intlLocale } from "@/lib/utils/intl-locale"
 import type { Locale } from "@/i18n/routing"
 
-/**
- * Egypt's week starts on Saturday — the weekend is Friday–Saturday, not
- * Saturday–Sunday. react-day-picker defaults to Sunday, which puts the weekend
- * either side of the grid instead of together at the end.
- */
 const WEEK_STARTS_ON = 6 as const;
 
 function Calendar({
@@ -43,11 +38,6 @@ function Calendar({
   // stock shadcn and only fixes the arrows, not the day order.
   const direction = useDirection();
 
-  // The month name, the weekday headers and the day numbers all came from the
-  // *system* locale before this — `toLocaleString("default", …)` below, and
-  // react-day-picker's own English default. So an Arabic booking page opened a
-  // picker captioned "September 2026" with Su–Sa headers and Western digits,
-  // directly under a trigger reading "الثلاثاء، ١ سبتمبر ٢٠٢٦".
   const locale = useLocale() as Locale;
   const tag = intlLocale(locale);
 

@@ -6,11 +6,6 @@ import { formatNumber } from "@/lib/utils/number";
 import { resolveCarTitle } from "@/lib/utils/car-text";
 import type { Locale } from "@/i18n/routing";
 
-/**
- * Desktop breadcrumbs (Figma: Breadcrumbs). Phones go back with the browser
- * or the tab bar instead, so this is hidden below md. The separators point
- * along the reading direction.
- */
 const Breadcrumbs = ({ car }: { car: CarDetail }) => {
   const t = useTranslations("carDetail.breadcrumb");
   // Server component: useFormatters is a "use client" hook, so the plain

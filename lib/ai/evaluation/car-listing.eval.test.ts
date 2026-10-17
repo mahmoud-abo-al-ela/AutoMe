@@ -22,29 +22,6 @@ import {
   isPlausibleKilometres,
 } from "@/lib/ai/evaluation/assertions";
 
-/**
- * Evaluation of the real extraction, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation
- *
- * Opt-in because every run spends provider quota and the answers are not
- * deterministic — this is a periodic check on behaviour, not a gate on every
- * commit. The unit suite covers the contract; this covers whether the model
- * still does what the prompt asks.
- *
- * No database needed: the metering write and the breaker's count both fail
- * closed into a log line, so ledger errors in an eval run are expected.
- *
- * **A busy provider is not a failed evaluation.** The free-tier Flash models
- * return 503 often enough that a whole chain can be exhausted, and reporting
- * that as a quality regression is how a suite stops being believed. Capacity
- * failures skip; only a real answer is judged.
- *
- * Deliberately few calls — the cost of an evaluation suite is counted in
- * requests, not in `it` blocks, so each `beforeAll` makes one and every
- * assertion reads its result.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 /** Real vision calls measured at 7-17s, and the client may walk its chain. */

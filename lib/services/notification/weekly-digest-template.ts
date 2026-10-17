@@ -21,12 +21,6 @@ export interface WeeklyDigestEmailInput {
   summary: WeeklySummary | null;
 }
 
-/**
- * A dealership's weekly summary email, in its chosen language and direction.
- * The figures are always there; the paragraph above them only when the model
- * wrote one that holds (see numbersHold). Inline styles only — email clients
- * ignore stylesheets.
- */
 export function buildWeeklyDigestEmail(input: WeeklyDigestEmailInput): { subject: string; html: string } {
   const { locale, numbers: n } = input;
   const t = createTranslator({ locale, messages: MESSAGES[locale], namespace: "weeklyDigest" });

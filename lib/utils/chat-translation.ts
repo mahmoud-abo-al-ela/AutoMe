@@ -1,12 +1,6 @@
 import type { Locale } from "@/i18n/routing";
 import { detectTextLanguage } from "@/lib/utils/text-language";
 
-/**
- * Chat-translation rules shared by the server (lib/services/chat/translation)
- * and the chat UI, so the "Translate" link is offered on exactly the messages
- * the server will translate.
- */
-
 /** Longer messages are not offered a translation. */
 export const MAX_TRANSLATABLE_CHARS = 2000;
 

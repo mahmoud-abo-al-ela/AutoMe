@@ -40,18 +40,6 @@ import { deleteCar, updateCar } from "@/actions/cars";
 import { endImpersonation } from "@/lib/services/impersonation";
 import { db } from "@/lib/prisma";
 
-/**
- * The forged-impersonation hole, end to end through the real Server Actions
- * and real Postgres. Before the fix, three cookies any signed-in user can set
- * (x-impersonated-org / -user / -session) made middleware forward
- * x-impersonation-active, and resolveTenantContext skipped the membership
- * check: a stranger could answer another dealership's buyer questions — which
- * its public assistant then cites — and edit or delete its cars.
- *
- * Tenant access is a membership, or a support session the database verifies
- * for exactly that dealership. The platform ADMIN role alone is not access.
- */
-
 const ORGS = { a: "org_test_forgery_a", b: "org_test_forgery_b", c: "org_test_forgery_c" };
 const SLUG = { b: "forgery-test-b" };
 const CLERK = { stranger: "clerk_test_forgery_stranger", owner: "clerk_test_forgery_owner", admin: "clerk_test_forgery_admin" };

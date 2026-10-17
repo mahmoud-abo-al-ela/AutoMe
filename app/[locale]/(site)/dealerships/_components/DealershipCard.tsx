@@ -21,11 +21,6 @@ const initialsOf = (name: string) =>
     .toUpperCase()
     .slice(0, 2);
 
-/**
- * Dealership card (Figma: DealerCard). A dealership without a logo gets its
- * initials on a marker-yellow tile — distinct per dealer — instead of the
- * identical blue building icon every logo-less dealer used to share.
- */
 const DealershipCard = ({ dealership, index = 0 }: { dealership: DealershipListItem; index?: number }) => {
   const { name, slug, logo, city, averageRating, totalReviews, carCount, brands = [], priceFrom, workingHours } =
     dealership;

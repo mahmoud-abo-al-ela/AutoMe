@@ -1,25 +1,8 @@
 import { DEFAULT_FORM_DATA } from "../_components/wizard/constants";
 import type { OnboardingFormData } from "./onboarding-types";
 
-/**
- * The wizard's answers, kept across a page reload.
- *
- * Three steps of typing lived in React state alone, so a refresh — or a
- * misplaced browser Back — emptied the whole form and sent the dealer back to
- * step one. This is the smallest thing that fixes that.
- *
- * `sessionStorage`, not `localStorage`: the draft holds a name, an email, a
- * phone number and an address. Surviving a reload is the whole requirement;
- * outliving the tab on a shared machine is not, and would leave that on disk
- * indefinitely.
- */
 const STORAGE_KEY = "autome:onboarding-draft";
 
-/**
- * Bumped when the shape changes. An older draft is dropped rather than merged,
- * which is what the day-key reorder would otherwise have demanded: a draft
- * written before it holds working hours the form no longer has fields for.
- */
 const VERSION = 1;
 
 export interface OnboardingDraft {
@@ -28,11 +11,6 @@ export interface OnboardingDraft {
   formData: OnboardingFormData;
 }
 
-/**
- * Storage access itself can throw — Safari's private mode denies it outright —
- * so every entry point here is guarded. A draft is a convenience; failing to
- * read or write one must never take the form down with it.
- */
 function session(): Storage | null {
   try {
     return typeof window === "undefined" ? null : window.sessionStorage;

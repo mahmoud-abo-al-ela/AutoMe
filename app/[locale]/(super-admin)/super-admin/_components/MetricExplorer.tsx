@@ -12,13 +12,6 @@ import type { PlatformOverview } from "@/lib/services/super-admin/overview";
 
 type Point = { date: string; previousDate: string; current: number; previous: number };
 
-/**
- * The overview's five numbers as tabs (canvas: Super admin overview round 2,
- * "3 · Metric explorer"): each shows the period's total and how it moved
- * against the period before, in words; the chosen one draws its running
- * total day by day below, with the period before as a dashed line. One unit
- * on one axis — money in EGP, everything else a count.
- */
 export function MetricExplorer({
   metrics,
   windows,
@@ -75,11 +68,6 @@ export function MetricExplorer({
 
   return (
     <section aria-label={t("metrics.label")} className="overflow-hidden rounded-[20px] border border-border bg-card">
-      {/* A grid at every width — two columns on a phone, three on a small
-          tablet, all five in a row from lg — so every figure is on screen at
-          once; it was a sideways strip under lg that showed one and a half.
-          The 1px gap over the border colour draws the dividers, and the last
-          tile spans what its row has left, so no gap shows as an empty cell. */}
       <div role="tablist" aria-label={t("metrics.label")} className="grid grid-cols-2 gap-px border-b border-border bg-border sm:grid-cols-3 lg:grid-cols-5">
         {OVERVIEW_METRICS.map((metric, i) => {
           const on = metric === selected;

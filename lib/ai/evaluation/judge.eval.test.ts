@@ -11,17 +11,6 @@ import * as cache from "@/lib/ai/cache";
 import { CALL_TIMEOUT } from "@/lib/ai/evaluation/harness";
 import { judge, type JudgeCriterion, type JudgeInput, type JudgeVerdicts } from "@/lib/ai/evaluation/judge";
 
-/**
- * The judge, held to hand-labelled examples.
- *
- *   AI_EVAL=1 pnpm eval lib/ai/evaluation/judge
- *
- * The other suites' `[judge]` cases are advisory because a judge is noisier
- * than an assertion. This suite is what keeps it honest: if it stops telling
- * dialect from MSA, or a vague decline from a specific one, its verdicts
- * elsewhere mean nothing — and that is a failure, not advice.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 type Expected = Partial<Record<JudgeCriterion, "pass" | "fail" | "na">>;

@@ -9,11 +9,6 @@ import { IMAGE_EXTENSION, sniffImageType } from "@/lib/utils/image-type";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const TOO_LARGE = { key: "errors.upload.tooLarge", params: { max: 5 } };
 
-/**
- * Upload bytes only as the image format they actually are. The declared type
- * and name are the sender's claim — a server action receives whatever a caller
- * sends — so the stored content type and extension come from the bytes.
- */
 function checkedImage(buffer: Buffer) {
   if (buffer.length > MAX_IMAGE_BYTES) {
     throw new ValidationError("Each image must be 5 MB or smaller", "images", TOO_LARGE);

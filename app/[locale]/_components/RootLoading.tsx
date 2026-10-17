@@ -16,11 +16,6 @@ import SessionsLoading from "../(super-admin)/super-admin/impersonation/loading"
 import ActivityLoading from "../(super-admin)/super-admin/audit-logs/loading";
 import AnalyticsLoading from "../(super-admin)/super-admin/analytics/loading";
 
-/**
- * The skeleton for the admin page at a path — the same one the page's own
- * loading.tsx shows when moving between admin pages. A page without one shows
- * the top bar alone until it arrives.
- */
 function adminSkeleton(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   const start = (routing.locales as readonly string[]).includes(segments[0]) ? 1 : 0;
@@ -38,24 +33,6 @@ function adminSkeleton(pathname: string) {
   return null;
 }
 
-/**
- * The boundary above every locale route, shown on a cold load or reload while
- * the route's layout resolves (the public layout awaits the user and the
- * dealership; the super-admin layout checks the user is an admin). On a reload
- * the layout and the page load together, so this is usually the only loader
- * shown; moving between pages shows the route's own loader instead.
- *
- * The super-admin gets its own frame here — the top bar, then the page's own
- * skeleton, never the road loader — so a reload looks the same as moving
- * between admin pages. Everywhere else gets the road
- * loader on its own.
- *
- * The site palette applies only under data-theme="site", which the layouts
- * set once they mount — before that, this wrapper sets it (in work mode for
- * the dashboard), so the loader appears in the right colours. The site font
- * is not loaded here for the public site and the dashboard; on a cold load
- * the plate shows the fallback face for that moment.
- */
 export function RootLoading({ band }: { band: PlateBand }) {
   const pathname = usePathname();
 

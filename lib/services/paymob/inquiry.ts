@@ -2,18 +2,6 @@ import { paymobConfig } from "./config";
 import { PaymobApiError, paymobRequest } from "./http";
 import type { PaymobTransaction } from "./transaction";
 
-/**
- * Asking Paymob for a payment's result, for when the callback has not arrived:
- * the success page (the buyer is often back before the callback) and the daily
- * job (a callback lost to a deploy or an outage).
- *
- * The answer comes over Paymob's authenticated API, so it is as trustworthy
- * as a verified callback and settles a payment the same way.
- *
- * This API predates intentions and authenticates with a short-lived token
- * exchanged for the API key, not with the secret key.
- */
-
 async function authToken(): Promise<string> {
   const { apiKey } = paymobConfig();
   const { token } = await paymobRequest<{ token: string }>("/api/auth/tokens", {

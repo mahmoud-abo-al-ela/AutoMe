@@ -1,17 +1,5 @@
 import { createHash } from "node:crypto";
 
-/**
- * The text a car's meaning is made from, for meaning-based search.
- *
- * Lean on purpose: what the car is (year, make, model, body, fuel) and what
- * the dealer wrote about it, in both languages — measured against the fuller
- * listing on 2026-10-12 (lib/ai/evaluation/search.eval.test.ts): the right car
- * came first for 11 of 12 queries instead of 9, and within 0.03 of each
- * query's best match sat 3% of the wrong cars instead of 12%. Colour, gearbox,
- * seats and repeated labels made every car look like every other; a buyer's
- * "automatic" or "white" is a filter, as are price, mileage and year ranges.
- */
-
 export interface CarForEmbedding {
   make: string;
   model: string;

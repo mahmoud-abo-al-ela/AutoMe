@@ -1,19 +1,5 @@
 import type { Locale } from "@/i18n/routing";
 
-/**
- * Pick the listing text a reader should see, in the language they asked for.
- *
- * The rule is **fall back, never blank**. A listing with no Arabic description
- * should show the English one, because an empty listing is worse than an
- * untranslated one — a buyer who cannot read a word of it at least learns the
- * car exists. The caller is told when that happened so it can say so, rather
- * than passing an English paragraph off as Arabic.
- *
- * `title`/`description` are the source-of-record columns and predate the
- * bilingual ones, so for English they count as the English text rather than as
- * a fallback from it.
- */
-
 /** Only the text columns; deliberately loose so serialized and raw rows both fit. */
 export interface BilingualCarText {
   title?: string | null;
@@ -26,14 +12,6 @@ export interface BilingualCarText {
 
 export interface ResolvedCarText {
   text: string;
-  /**
-   * The language the text is actually in — not the one that was asked for.
-   *
-   * Callers need this for `dir`. English prose dropped into an RTL page without
-   * `dir="ltr"` renders with its trailing punctuation displaced and any bare
-   * numbers or Latin runs reordered, which looks like a rendering bug rather
-   * than a missing translation.
-   */
   locale: Locale;
   /** The reader asked for one language and is being shown the other. */
   fellBack: boolean;
@@ -65,12 +43,6 @@ function resolve(
   return null;
 }
 
-/**
- * Returns null when the car carries no stored title at all, which is the
- * common case for listings created before this existed. Callers keep their own
- * generated "2020 Toyota Corolla" fallback for that, because building it needs
- * locale-aware number formatting that belongs in the component.
- */
 export function resolveCarTitle(
   car: BilingualCarText,
   locale: Locale
@@ -93,11 +65,6 @@ export interface ResolvedCarFeatures {
   fellBack: boolean;
 }
 
-/**
- * Same rule as the text: the reader's language when there is a list in it,
- * otherwise the other one — an English list beats no list. `features` is the
- * English source of record. Never null: an empty list is a normal state.
- */
 export function resolveCarFeatures(
   car: BilingualCarFeatures,
   locale: Locale

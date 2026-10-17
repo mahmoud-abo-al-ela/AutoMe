@@ -5,12 +5,6 @@ import type { Locale } from "@/i18n/routing";
 import { formatPlanAmount } from "@/lib/utils/currency";
 import { planKeyFor, type PlanKey } from "@/lib/constants/plans";
 
-/**
- * A feature bullet, as a message key plus its ICU params rather than a
- * sentence. This module is a plain data module with no React in it, so it
- * cannot call a translation hook — and the copy has to survive a language
- * switch without the plan data being refetched.
- */
 export type PlanFeature = {
   /** Key under `home.pricing.features`. */
   key: string;
@@ -21,11 +15,6 @@ export type PlanFeature = {
 
 /** The shape the pricing cards render, whether it came from the DB or the defaults. */
 export type UiPlan = {
-  /**
-   * Supplies the translated name and description. Null for a DB plan whose
-   * `type` is unrecognised, in which case the card falls back to `name` —
-   * "fall back, never blank".
-   */
   planKey: PlanKey | null;
   /** Untranslated DB name, used only when `planKey` is null. */
   name: string;
@@ -60,11 +49,6 @@ type PlanFeatureFlags = {
   prioritySupport?: boolean;
 };
 
-/**
- * The AI bullet states the monthly allowance rather than a bare yes/no, since
- * the plans that have AI differ only in how much. Enabled with no limit reads
- * as not included, because withUsageLimit enforces a missing limit as 0.
- */
 function aiProcessingFeature(ai: PlanFeatureFlags["aiProcessing"]): PlanFeature {
   const limit = ai?.limit ?? 0;
   if (!ai?.enabled || limit === 0) return { key: "aiProcessing", included: false };
@@ -153,14 +137,6 @@ export const defaultPlans: UiPlan[] = [
   },
 ];
 
-/**
- * The bullets a plan's limits and flags produce, as message keys.
- *
- * Exported because the onboarding wizard lists the same plans and used to
- * derive the same bullets itself — from a camelCase-to-Title-Case split of
- * whatever keys the Json column happened to hold, which produces English by
- * construction and so could not be translated at all.
- */
 export function planFeatureKeys(plan: DbPlan): PlanFeature[] {
   const f = featureFlags(plan.features);
 
@@ -211,11 +187,6 @@ export function resolvePlans(dbPlans?: DbPlan[] | null): UiPlan[] {
   return dbPlans && dbPlans.length > 0 ? dbPlans.map(mapDbPlanToUi) : defaultPlans;
 }
 
-/**
- * The two price columns every pricing surface reads. Narrower than `UiPlan` so
- * the onboarding wizard, whose plans come straight from Prisma, can share the
- * helpers below without first being reshaped into a card model.
- */
 export type PlanPricing = {
   monthlyPrice: number | null;
   yearlyPrice?: number | null;
@@ -239,14 +210,6 @@ export function calculateSavingsPercentage(plans: PlanPricing[]): number {
   return Math.round(totalSavings / paidPlans.length);
 }
 
-/**
- * The rendered price, or null for "contact us" pricing — the caller renders
- * `plans.custom` in that case rather than this module returning the English
- * word "Custom".
- *
- * Plans are priced and charged in EGP through Paymob, so this is the amount
- * the dealership pays, in the reader's digits (formatPlanAmount).
- */
 export function formatPlanPrice(
   plan: PlanPricing,
   billingPeriod: string,

@@ -856,13 +856,6 @@ const COLORS = [
   "Midnight Blue", "Crystal Black", "Storm Silver",
 ];
 
-/**
- * `Car.location` is free text a dealer types, so the seed writes what one
- * would: the English name of the dealership's own city. Picking it at random
- * from a list, as this did, produced cars in Aswan belonging to a showroom in
- * Alexandria — and made every location-related query look like it worked when
- * it had simply matched noise.
- */
 function carLocation(org: { city: string | null }) {
   const city = findCity(org.city);
   return city ? `${city.en}, Egypt` : "Egypt";

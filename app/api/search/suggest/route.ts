@@ -5,17 +5,6 @@ import { suggestSearches } from "@/lib/services/car/search-suggestions";
 import { RateLimitError, ServiceUnavailableError, logError } from "@/lib/utils/errors";
 import { MAX_SUGGEST_QUERY } from "@/lib/search/suggest";
 
-/**
- * Search suggestions as a buyer types: GET /api/search/suggest?q=…&locale=…
- *
- * Public, and the same for everyone: public listings only, no session, no
- * cookie, no tenant — it takes no parameter but the text and the language.
- * That is what makes it safe for a CDN to share an answer between buyers,
- * for a minute. A refusal or a failure is never shared.
- *
- * Rate-limited on its own bucket (enforceSuggestLimit), before anything else.
- */
-
 export const runtime = "nodejs";
 
 const querySchema = z.object({
@@ -26,6 +15,7 @@ const querySchema = z.object({
 const SHARED = { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" };
 const NEVER = { "Cache-Control": "no-store" };
 
+// CDN-cached across buyers, so it must stay public-only: no session, cookie or tenant input.
 export async function GET(request: Request) {
   try {
     await enforceSuggestLimit();

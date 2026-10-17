@@ -37,11 +37,6 @@ const DAY_NAMES: readonly DayOfWeek[] = [
   "SATURDAY",
 ];
 
-/**
- * The working-hours key for a day the picker handed us. The picker's Date is
- * local midnight on the day clicked, so its local calendar date is that day;
- * the weekday is then taken from the date string, never from a zone.
- */
 export const dayOfWeekFor = (date: Date): DayOfWeek =>
   dayOfWeekForDate(format(date, "yyyy-MM-dd"));
 
@@ -103,13 +98,6 @@ export const filterPastTimeSlots = (
   return slots.filter((slot) => slot > time);
 };
 
-/**
- * Days outside the booking window (Cairo's today plus the horizon) and days
- * the dealership is closed cannot be picked — the same window the server
- * enforces. "Today" used to be the visitor's own, so someone abroad could be
- * offered a day Cairo had already finished, and the horizon was not applied
- * at all.
- */
 export const makeIsDateDisabled =
   (workingHours: WorkingHours, now: Date = new Date()) =>
     (date: Date): boolean => {

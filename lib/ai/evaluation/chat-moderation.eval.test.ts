@@ -13,19 +13,6 @@ import * as cache from "@/lib/ai/cache";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 import { screenChatMessage } from "@/lib/utils/chat-screen";
 
-/**
- * Chat moderation, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation/chat-moderation
- *
- * Two failures matter. A con that slips through leaves a buyer paying a
- * "deposit" to a stranger's wallet. And a false flag on ordinary trade — a
- * reservation deposit taken at the showroom, a dealer's WhatsApp number, a
- * down payment — puts a scam warning on an honest dealer. The hard negatives
- * below all trip the free screen on purpose, so it is the model that has to
- * tell them apart.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 type Case = { text: string; sender: ChatSender; expect: ModerationCategory[] };

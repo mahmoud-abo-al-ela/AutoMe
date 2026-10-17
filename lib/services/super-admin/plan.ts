@@ -124,11 +124,6 @@ export type PlanSettings = {
   prioritySupport: boolean;
 };
 
-/**
- * Saves one plan's prices, limits and features. The features are merged into
- * what the plan already stores, so keys this form doesn't show are kept.
- * Returns the plan before and after, for the audit log.
- */
 export async function updatePlanSettings(planId: string, settings: PlanSettings) {
   const existing = await planRepo.findPlanById(planId);
   if (!existing) throw new NotFoundError("Plan");

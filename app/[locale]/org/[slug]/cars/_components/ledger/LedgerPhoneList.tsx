@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 import { CarThumb, FeaturedTag, reasonTone, StatusPill, useCarName, useLedgerText } from "./ledger-shared";
 import { RowMenu } from "./RowMenu";
 
-/**
- * The same cars on a phone (canvas: "Any of the three on a phone"): framed
- * rows of the car, its price and status, and the one note that matters most —
- * what to fix if anything, else how many buyers saved it. The row opens the
- * car's editor; its other actions sit beside it. No selection on a phone:
- * changing several cars at once is a desk job.
- */
 export function LedgerPhoneList({
   state,
   cars,

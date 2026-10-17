@@ -44,12 +44,6 @@ class OrgUnreadBadgeErrorBoundary extends Component<
     }
 }
 
-/**
- * Unread messages across this organization's chats, kept live from Stream's
- * events. null until the chat client is connected. Must run inside the chat
- * context — use it through OrgUnreadBadge or OrgUnreadCount, whose boundary
- * catches its absence.
- */
 function useOrgUnreadCount(organizationId?: string | null): number | null {
     const { client, channel: activeChannel } = useChatContext();
     const [unreadCount, setUnreadCount] = useState(0);
@@ -144,11 +138,6 @@ function OrgUnreadCountInner({
     return <>{children(useOrgUnreadCount(organizationId))}</>;
 }
 
-/**
- * The unread count as a render prop, for places that show it as part of
- * something larger (the dashboard's messages card). `children` gets null
- * while chat is still connecting, or when there is no chat context at all.
- */
 export function OrgUnreadCount({
     organizationId,
     children,

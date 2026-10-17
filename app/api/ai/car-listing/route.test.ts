@@ -2,12 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthenticationError, AuthorizationError, RateLimitError } from "@/lib/utils/errors";
 import type { AiProgressEvent } from "@/lib/ai/client";
 
-/**
- * The streaming extraction route. What is proven here: every gate refuses with
- * a real HTTP status BEFORE a stream opens or a model is called, and a
- * successful call streams real progress in order, ending in the result.
- */
-
 const resolveTenantContext = vi.hoisted(() => vi.fn());
 const enforceDealerAiLimit = vi.hoisted(() => vi.fn());
 const extractCarListing = vi.hoisted(() => vi.fn());

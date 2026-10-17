@@ -5,23 +5,6 @@ import { jobUrl } from "@/lib/jobs/url";
 import { logError } from "@/lib/utils/errors";
 import { reportSignal } from "@/lib/observability/report";
 
-/**
- * A background job, delivered by Upstash QStash (see lib/jobs).
- *
- * Public to the middleware — no session — so it authenticates itself: the
- * request must carry QStash's signature over this exact URL and body, made
- * with one of our signing keys. Without the keys it refuses (fail closed),
- * never runs unsigned work.
- *
- * Status codes drive the queue: 2xx is done; anything else is retried with
- * backoff. So a failed run answers 500 — that is how an "AI busy" becomes a
- * retry — and a request the queue did not sign answers 401. A signed job that
- * can never succeed — an unknown name, an unreadable body, a payload its
- * schema refuses — answers 489 with Upstash-NonRetryable-Error, QStash's
- * signal to stop retrying and move it to the dead-letter queue, where it can
- * be inspected rather than delivered three more times.
- */
-
 /** QStash's "do not retry this one" answer. */
 function nonRetryable(error: string) {
   return NextResponse.json({ error }, { status: 489, headers: { "Upstash-NonRetryable-Error": "true" } });
@@ -31,6 +14,7 @@ export const runtime = "nodejs";
 /** Long enough for a vision call; needs Fluid compute, like the AI routes. */
 export const maxDuration = 300;
 
+// Public route: runs only work signed by QStash and fails closed without the signing keys; non-2xx means retry.
 export async function POST(request: Request, { params }: { params: Promise<{ name: string }> }) {
   const currentSigningKey = process.env.QSTASH_CURRENT_SIGNING_KEY;
   const nextSigningKey = process.env.QSTASH_NEXT_SIGNING_KEY;

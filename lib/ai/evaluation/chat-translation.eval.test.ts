@@ -13,19 +13,6 @@ import * as cache from "@/lib/ai/cache";
 import { containsArabic, isPredominantlyArabic } from "@/lib/ai/evaluation/assertions";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * Chat translation, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation/chat-translation
- *
- * The cases are the ones Stream's built-in translation failed on 2026-09-29,
- * which is why this feature exists at all: "العربية" (the car) read as
- * "Arabic", a jerking gearbox read as "in neutral", a seller's price read as
- * the seller paying. And the one our own model failed while being asked for
- * natural Egyptian Arabic: it added "original paint" to a sentence that never
- * said it. A translation that invents a claim about a car is worse than none.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 const CASES = {

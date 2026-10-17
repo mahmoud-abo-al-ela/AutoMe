@@ -36,29 +36,6 @@ interface FacetRow {
   logo: string | null;
 }
 
-/**
- * The filter panel's options for a search with text, counted over the cars
- * the search's results are made of — the same words judged the same way
- * (analyzeTerms: missing, corrected, names), the same cars found by meaning,
- * the same tenant and visibility. Before this, the counts matched each word
- * with `contains`, so an Arabic search, a set-aside word or a typo showed
- * counts that disagreed with the results beside them.
- *
- * Each filter's options are counted with every other filter applied but not
- * its own, as the panel has always counted: a selected make's count is the
- * results' total, and an unselected one's is what choosing it would add.
- *
- * Meaning counts a car in when it is as close as the results require: the
- * same floor and the same distance from the best match, the best taken among
- * the results' own cars, so a selected value's count stays the total. Not
- * mirrored: the results also stop at the HYBRID_CANDIDATES closest cars,
- * which no search reaches at today's size. And for an option not yet chosen,
- * the count predicts at the present threshold; choosing it can move the best
- * match, and with it the threshold.
- *
- * Without the meaning (no pgvector, a failed query), counted by the words
- * alone — as the results then are.
- */
 export async function searchFacets(filters: CarFilters): Promise<SearchFacets> {
   if (filters.meaning) {
     try {

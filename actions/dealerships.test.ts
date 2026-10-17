@@ -22,12 +22,6 @@ import {
   searchDealerships,
 } from "@/actions/dealerships";
 
-/**
- * A public dealership page's reads name the dealership by slug; the id is
- * resolved on the server to one the public may see. A request's own
- * organizationId, status or page size is never passed on.
- */
-
 beforeEach(() => {
   vi.clearAllMocks();
   service.resolvePublicDealershipId.mockResolvedValue("org-resolved");

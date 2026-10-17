@@ -14,11 +14,6 @@ import { resolveCarTitle } from "@/lib/utils/car-text";
 import type { Locale } from "@/i18n/routing";
 import type { CarDetail } from "../_lib/car-detail-types";
 
-/**
- * Phones and tablets: the price and the one primary action, pinned to the
- * bottom (Figma: Car detail — mobile, sticky action bar). The site's tab bar
- * steps aside on this page so the two never stack.
- */
 const MobileStickyBar = ({ car }: { car: CarDetail }) => {
   const t = useTranslations("carDetail.actions");
   const locale = useLocale() as Locale;

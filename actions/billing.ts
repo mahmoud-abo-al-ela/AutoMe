@@ -71,13 +71,6 @@ const planChangeSchema = z.object({
   billingPeriod: z.enum(["monthly", "yearly"]),
 });
 
-/**
- * Switch plan or billing period. An upgrade returns a Paymob checkout; a
- * downgrade is scheduled for the end of the paid period; changes that cost
- * nothing (during a trial, after a lapse) apply now. See lib/utils/plan-change.
- *
- * `locale` is the page's, for the page Paymob returns the owner to.
- */
 export const changePlan = withAuth(
   async (ctx, organizationId: string, planId: string, billingPeriod: string, locale: string) => {
     refuseDuringSupportSession(ctx);
@@ -129,11 +122,6 @@ export const keepCurrentPlan = withAuth(async (ctx, organizationId: string) => {
   return createSuccessResponse({ kept: true });
 });
 
-/**
- * Where an upgrade or renewal payment stands, for the page Paymob returns the
- * owner to; settles it from Paymob's own answer if the callback is late.
- * Not rate limited, like confirmSignupPayment: the page polls it.
- */
 export const confirmBillingPayment = withAuth(async (ctx, organizationId: string, ref: string) => {
   const organization = await ownedOrganization(ctx.user.id, validateAction(uuidSchema, organizationId));
   const { state, payment: current } = await confirmDealershipPayment(

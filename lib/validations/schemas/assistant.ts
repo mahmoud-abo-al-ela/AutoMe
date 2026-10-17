@@ -15,11 +15,6 @@ export const priceComparisonSchema = z.object({
   price: z.coerce.number().positive().max(1_000_000_000),
 });
 
-/**
- * The listing as the dealer's form currently holds it, for the quality coach.
- * Bounded like the car schema so a crafted request cannot send the model an
- * arbitrarily large prompt.
- */
 export const listingReviewSchema = z.object({
   year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1),
   make: z.string().max(50),
@@ -37,21 +32,10 @@ export const describedSearchSchema = z.object({
   query: z.string().trim().min(2).max(200),
 });
 
-/**
- * A buyer's question about one listing. The id is a uuid because it keys the
- * per-car rate limit: free text there would let a caller open a fresh bucket
- * per request. The question is short because it is billed to the dealer and
- * sent to the model verbatim.
- */
 export const listingQuestionSchema = z.object({
   carId: z.string().uuid(),
   question: z.string().trim().min(2).max(300),
   locale: z.enum(["en", "ar"]),
-  /**
-   * The last few replies, by id, so a follow-up ("and the price?") can be
-   * read. Ids, not text: the server reads back what it said, so a page
-   * cannot put words in the assistant's mouth. Bounded at four exchanges.
-   */
   historyIds: z.array(z.string().uuid()).max(4).default([]),
 });
 

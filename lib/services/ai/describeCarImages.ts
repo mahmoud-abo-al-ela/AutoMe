@@ -12,12 +12,6 @@ export interface PhotoToDescribe {
   mimeType: string;
 }
 
-/**
- * Write alt text for a car's photos in one call.
- *
- * Returns a map from URL to alt text for every photo the model described;
- * a photo it skipped is simply absent, and keeps its fallback alt text.
- */
 export async function describeCarImages(
   car: { year: number; make: string; model: string },
   photos: PhotoToDescribe[],

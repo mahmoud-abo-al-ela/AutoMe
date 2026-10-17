@@ -21,16 +21,6 @@ export function RoadBarrier({ className }: { className?: string }) {
   );
 }
 
-/**
- * Every error and not-found page in the brand (canvas language: Cairo
- * Plate): a picture, a plain headline, what happened and what to do, then
- * the way out — the marker-yellow action first.
- *
- * `fullPage` is for a page that renders outside the public site and the
- * dashboard (the locale-level error and 404 pages): it turns the site theme
- * and its face on itself and fills the screen. Inside a themed shell it sits
- * in the content area instead.
- */
 export function ErrorScreen({
   art,
   title,

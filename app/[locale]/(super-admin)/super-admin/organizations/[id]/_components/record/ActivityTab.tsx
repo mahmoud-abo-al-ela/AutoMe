@@ -24,11 +24,6 @@ import { Pager } from "../../../../_components/Pager";
 import { chip, chipOff, chipOn, panel, trigger } from "./record-styles";
 import { useGo } from "./use-go";
 
-/**
- * The Activity tab (canvas: dealership tabs round 1, "Activity A · Feed with
- * filters"): kind chips, who and when, then the changes grouped by day in
- * Cairo, each as a sentence with what it changed shown before → after.
- */
 export function ActivityTab({
   data,
   base,

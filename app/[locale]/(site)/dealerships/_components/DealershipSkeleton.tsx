@@ -35,11 +35,6 @@ export function DealershipGridSkeleton({ count = 8 }) {
     );
 }
 
-/**
- * The dealership page while the server renders it: the identity row, the
- * visit card beside the tabs (above them on phones), and a grid of cars —
- * the same shapes the page lands in.
- */
 export function DealershipDetailSkeleton() {
     return (
         <div aria-hidden className="mx-auto w-full max-w-[1360px] px-4 pb-16 pt-4 sm:px-6 md:pt-6 xl:px-0">

@@ -71,7 +71,10 @@ lib/repositories/**               data access — the only layer that touches Pr
   them) and `_lib/`; promote to `components/`, `hooks/` or `lib/` when a second route needs it.
 - ESLint warns past 300 lines of code in a file. Split by responsibility, not by count — the
   `code-craft` skill lists the current candidates and how to split them.
-- Comments say why, not what. No step-number comments or banner separators.
+- Comments say why, not what, in one line. Only a non-obvious reason earns one (a security or
+  tenant guard, a must-not-change ordering, a workaround); no multi-paragraph JSDoc or file-header
+  essays. In `.js` files keep JSDoc type tags (`@param {…}`), which TypeScript reads. No
+  step-number comments or banner separators.
 
 ## Before you finish
 

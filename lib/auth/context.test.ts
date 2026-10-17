@@ -1,11 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthorizationError } from "@/lib/utils/errors";
 
-// context.ts reads all of its inputs through these modules. Mocking them lets
-// us drive resolveTenantContext without a database or a live Clerk session —
-// the whole tenant-selection bug class lives in what they return. next/headers
-// is mocked too: context.ts must not read impersonation from request headers,
-// and the forged-header tests below prove that it doesn't.
 vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("@/lib/checkUser", () => ({ checkUser: vi.fn() }));

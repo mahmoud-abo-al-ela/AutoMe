@@ -4,11 +4,6 @@ import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import type { CarsActiveFilter, CarsHandlers } from "../_lib/cars-types";
 
-/**
- * What is narrowing the results, each removable (Figma: Chip / Token). The
- * label names the filter type as well as the value, so "Automatic" reads as
- * "Gearbox: Automatic" and two numeric ranges can't be confused.
- */
 export const ActiveFilters = ({
   filters,
   onClearFilter,

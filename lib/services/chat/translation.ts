@@ -8,23 +8,6 @@ import {
 } from "@/lib/utils/chat-translation";
 import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 
-/**
- * Translate a chat message for a member of its conversation.
- *
- * Nothing the caller sends is trusted beyond the message id and the target
- * language: the text, the conversation and who may read it all come from
- * Stream. A caller who is not a member of the message's channel gets
- * "not found" — the same as a message that does not exist, so ids cannot be
- * probed.
- *
- * The translation is written back onto the message, as its author, by the
- * server: the other member gets it live, a second tap costs nothing, and it
- * is deleted with the message. Stream does not mark the message edited — a
- * custom field is not its text. A sender could put their own words in that
- * field from their own client; the reader then sees a "translation" of the
- * sender's message written by the sender, which says nothing the sender could
- * not have typed as the message itself.
- */
 export async function translateMessageFor(
   userId: string,
   messageId: string,

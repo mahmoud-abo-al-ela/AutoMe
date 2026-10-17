@@ -3,16 +3,6 @@ import { createTranslator } from "next-intl";
 import enPlans from "@/messages/en/plans.json";
 import arPlans from "@/messages/ar/plans.json";
 
-/**
- * The plan limits are rendered on the pricing page, in onboarding, in billing
- * and in super-admin, always with `{ count, value }`: the raw count picks the
- * plural form and `value` is the count already in the reader's numerals.
- *
- * They were `{value} صور لكل سيارة` with no plural, which reads "١٢ صور" — 3–10
- * takes صور, 11–99 takes صورة. Arabic has six plural categories; these pin
- * that each one is reached and that no form is missing its count.
- */
-
 const LIMIT_KEYS = [
   "carListings",
   "teamMembers",

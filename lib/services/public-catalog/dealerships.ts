@@ -7,12 +7,6 @@ import { publicDealership, type DealerText, type PublicDealership, type PublicDe
 import { resolvePlace } from "./place";
 import type { LinkSource } from "./urls";
 
-/**
- * Dealerships for readers outside the site (MCP): the public list and one
- * dealership's page, through the same services the site uses — which already
- * show only active, non-deleted dealerships and no email or plan.
- */
-
 export const DEALERSHIP_LIST_LIMITS = { defaultLimit: 10, maxLimit: 20, maxPage: 20, window: 400 } as const;
 
 export interface PublicDealershipSearch {

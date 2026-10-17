@@ -14,13 +14,6 @@ function SeenTicks() {
   );
 }
 
-/**
- * Stream's delivery status with the read state drawn as ticks. Stream's own
- * read state is the reader's avatar — for a buyer that was the photo of the
- * staff member who read it, which the dealership-as-sender rule
- * (useDealershipSender) otherwise hides — and ticks are what people read at
- * a glance anyway. Pass as `MessageStatus` to every `<Channel>`.
- */
 export function ChatMessageStatus(props: MessageStatusProps) {
   return <MessageStatus {...props} MessageReadStatus={SeenTicks} />;
 }

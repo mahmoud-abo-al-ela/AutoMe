@@ -28,14 +28,6 @@ import { NotFoundError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
 import type { CarStatus } from "@/lib/generated/prisma";
 
-/**
- * The public visibility policy (lib/repositories/car/visibility.ts) on every
- * read path it covers, against real Postgres. Three dealerships — Active,
- * Suspended, Deleted — each with an available, a sold and an unavailable car:
- * lists show only A's available car, a car opened by id only A's available or
- * sold one, and the dealer's own dashboard still sees everything it owns.
- */
-
 const MAKE = "Visipolmake";
 const ORGS = { A: "org_test_visibility_a", S: "org_test_visibility_s", D: "org_test_visibility_d" } as const;
 const USER = "user_test_visibility";

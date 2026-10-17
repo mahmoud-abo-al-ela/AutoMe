@@ -21,11 +21,6 @@ export async function createAiTrace(data: TraceToKeep) {
 /** At most this many rows per prune: it runs inside someone's request. */
 const PRUNE_BATCH = 500;
 
-/**
- * Delete the oldest traces past retention, a bounded batch at a time — a
- * backlog drains over several prunes instead of stalling one request.
- * Returns how many went.
- */
 export async function pruneAiTraces(now: Date = new Date()): Promise<number> {
   const cutoff = new Date(now.getTime() - AI_TRACE_RETENTION_DAYS * 86_400_000);
   const stale = await db.aiTrace.findMany({

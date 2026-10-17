@@ -6,13 +6,6 @@ import { Reveal, RevealItem } from "@/components/Home/motion/Reveal";
 /** The sample listing's price — illustration, like the home story's. */
 const SAMPLE_PRICE = 875_000;
 
-/**
- * The dealer hero's second column: a glance at a showroom on AutoMe, built
- * from the home story's sample — a listing the AI wrote, a buyer's message
- * with its translation, a test drive booked. Illustration, not live data, so
- * it is hidden from assistive tech; the features below say the same in words.
- * The three cards rise in one after another and sit slightly staggered.
- */
 export async function DealerPreview() {
   const t = await getTranslations("forDealers.preview");
   const tStory = await getTranslations("home.story");

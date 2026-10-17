@@ -6,15 +6,6 @@ import { compareEvalRunsTool, latestEvalReportTool } from "./tools/eval-reports"
 import { getTraceTool, listTracesTool } from "./tools/traces";
 import { recentErrorsTool, usageSummaryTool } from "./tools/usage";
 
-/**
- * AutoMe's internal AI-ops MCP server: platform-wide AI telemetry for a
- * developer, over stdio, run only by scripts/mcp/ai-ops/server.ts after its
- * guard (./guard.ts) passes. Read-only by construction — the process holds
- * nothing but a read-only database role and, at most, a read-only Redis
- * token — and every tool reports aggregates or redacted traces: there is no
- * SQL, filesystem, environment or write tool, and none takes a path.
- */
-
 /** Read-only, closed-world tools: they never change anything, and only read AutoMe's telemetry. */
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 

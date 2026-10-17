@@ -8,11 +8,6 @@ import { textPart } from "@/lib/ai/provider/types";
 import { questionKey } from "@/lib/utils/question-key";
 import type { Trace } from "@/lib/utils/dev-trace";
 
-/**
- * What a buyer is shown: an answer the record backs, or a decline — with the
- * model's own wording for it when that wording passes declineText, and the
- * caller's fixed wording when it does not. `meta` says which call wrote it.
- */
 export type ListingAnswer = { meta: AiCallMeta } & (
   | {
       grounded: true;
@@ -41,12 +36,6 @@ const MAX_DECLINE_CHARS = 240;
 /** Cards under one answer; more is a list, and the answer already named them. */
 const MAX_CAR_CARDS = 3;
 
-/**
- * The buttons the model asked for that this listing can back: directions
- * need the dealership's address, a call its phone, a test drive a car still
- * for sale. The model only chooses whether a button fits the answer; what it
- * opens comes from the dealer's row.
- */
 function backedActions(facts: ListingFacts, requested: readonly ListingAction[]): ListingAction[] {
   const dealership = (facts.dealership ?? {}) as { address?: string; phone?: string };
   const backed: Record<ListingAction, boolean> = {
@@ -57,22 +46,12 @@ function backedActions(facts: ListingFacts, requested: readonly ListingAction[])
   return [...new Set(requested)].filter((action) => backed[action]);
 }
 
-/**
- * The other cars the answer names, as refs this record has — and only when
- * the answer cites otherCars, so a card never appears beside an answer that
- * is not about alternatives.
- */
 function backedCarRefs(facts: ListingFacts, cited: readonly ListingFactKey[], named: readonly number[]): number[] {
   if (!cited.includes("otherCars") || !Array.isArray(facts.otherCars)) return [];
   const known = new Set((facts.otherCars as { ref: number }[]).map((car) => car.ref));
   return [...new Set(named)].filter((ref) => known.has(ref)).slice(0, MAX_CAR_CARDS);
 }
 
-/**
- * Things a decline has no business containing, because they are what an
- * instruction planted in a listing would try to get in front of a buyer: a
- * link, a domain, an email, or a phone number (Western or Arabic-Indic).
- */
 const UNSAFE_IN_DECLINE = [
   /https?:|www\./i,
   // Any word.word with a letters-only ending, not a list of known endings: a
@@ -82,33 +61,12 @@ const UNSAFE_IN_DECLINE = [
   /[0-9٠-٩][0-9٠-٩\s-]{6,}/,
 ];
 
-/**
- * The model's wording for a decline, if it is safe to show; otherwise
- * nothing, and the caller falls back to fixed copy. A decline carries no
- * facts, so it only has to be short and free of anything that points a buyer
- * somewhere else.
- */
 export function declineText(text: string): string | undefined {
   const trimmed = text.trim();
   if (!trimmed || trimmed.length > MAX_DECLINE_CHARS) return undefined;
   return UNSAFE_IN_DECLINE.some((pattern) => pattern.test(trimmed)) ? undefined : trimmed;
 }
 
-/**
- * Answer a buyer's question from one listing's facts, or decline.
- *
- * The model's own `grounded` flag is necessary but not sufficient: an answer
- * is shown only when it also cites at least one fact, every cited fact is one
- * this listing actually has, and every number it states is the record's (see
- * unbackedNumbers). Anything else is a decline.
- *
- * A decline may carry the model's own wording — "the listing doesn't say
- * whether it's been in an accident" reads as a reply, a fixed sentence reads
- * as a wall — but only when the model itself declined, and only through
- * declineText, so a manipulated "I don't know, but visit…" is dropped. An
- * answer the model called grounded but whose citations fail is never shown in
- * any form: it may state a fact the record does not have.
- */
 export async function answerListingQuestion(
   question: string,
   facts: ListingFacts,
@@ -131,11 +89,6 @@ export async function answerListingQuestion(
     schema: listingQaSchema,
     promptVersion: `${listingQaPrompt.version}.${language}`,
     ctx,
-    // The record is in the key, so an edited listing is never answered from
-    // its old self, and two listings never share an answer. A re-asked
-    // question costs the dealer nothing; the model still sees what was typed.
-    // The conversation is in the key too: "and the price?" means something
-    // different after each question it can follow.
     cacheBytes: `${record}\0${JSON.stringify(history)}\0${questionKey(question)}`,
     thinking: "low",
     temperature: 0,

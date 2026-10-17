@@ -1,8 +1,3 @@
-/**
- * The activity on its way, in its own shape: the header with its export, the
- * toolbar, then the table's rows (cards below laptop width). Shimmer, like
- * every admin skeleton.
- */
 export default function ActivityLoading() {
   return (
     <div aria-busy className="flex flex-col gap-5">

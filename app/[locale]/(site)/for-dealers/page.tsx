@@ -40,16 +40,6 @@ export async function generateMetadata({ params }: Props) {
   });
 }
 
-/**
- * The page for dealerships: what AutoMe does for a showroom, the plans, and
- * the billing questions — everything the home page used to carry for dealers
- * below the buyer's content. The header's "For dealers", the footer and the
- * home page's dealer band all lead here; "See plans" lands on `#plans`.
- *
- * Marketplace only: a dealership's subdomain is its storefront, with no
- * sign-up pitch on it, so the middleware sends a visit there on to the main
- * domain (lib/route-policy: MAIN_DOMAIN_ONLY_ROUTES).
- */
 export default async function ForDealersPage() {
   const t = await getTranslations("forDealers");
   const tBand = await getTranslations("home.dealerBand");

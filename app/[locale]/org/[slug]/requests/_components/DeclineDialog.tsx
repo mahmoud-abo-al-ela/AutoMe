@@ -15,12 +15,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { useFormatters } from "@/hooks/use-formatters";
 import { useCarName, type DriveRequest } from "./RequestRows";
 
-/**
- * Declining cancels a buyer's booking and tells them so — it is not undone
- * from here, so it asks first, naming the buyer, the car and the slot, with a
- * destructive verb on the button. Radix puts focus on Cancel ("Keep it")
- * when it opens, and Escape closes it without declining.
- */
 export function DeclineDialog({
   drive,
   onClose,

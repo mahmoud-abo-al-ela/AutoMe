@@ -22,12 +22,6 @@ const ALL = "all";
 const half = "w-[calc(50%-0.3125rem)]";
 const trigger = "h-11 data-[size=default]:h-11 rounded-control border-[#8c8170] bg-field";
 
-/**
- * Search, status (with how many dealerships are in each), plan, governorate
- * and sort for the dealerships list. Each change goes to the URL — so a
- * filtered list can be shared — and back to page one. The list dims while it
- * loads.
- */
 export function DealershipsToolbar({
   query,
   counts,

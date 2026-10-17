@@ -1,11 +1,5 @@
 import { db } from "@/lib/prisma";
 
-/**
- * The reads behind the Activity pages (lib/services/audit/activity.ts): the
- * people a dealership's entries are by, the names a page of entries refers to
- * by id, and one person's entries across every dealership.
- */
-
 /** A dealership's members, oldest first, for the Activity page's "who" filter. */
 export async function findMembershipPeople(organizationId: string) {
   return db.membership.findMany({
@@ -15,11 +9,6 @@ export async function findMembershipPeople(organizationId: string) {
   });
 }
 
-/**
- * The cars, people, memberships and plans a page of entries names by id.
- * Cars and memberships are scoped to the dealership when one is given — every
- * caller but the super-admin's cross-dealership views passes it.
- */
 export async function findActivityLookupRows({
   carIds,
   userIds,

@@ -8,12 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const PERIODS = [7, 30, 90] as const;
 
-/**
- * The period for the whole page (page pattern 9: the range comes first and
- * every chart follows it). Kept in the URL — `?days=30` — so a period can be
- * shared or bookmarked, and the server renders the page for it. While the
- * new period loads, a spinner sits by the control that changed.
- */
 export function PeriodSelect({ days }: { days: number }) {
   const t = useTranslations("org.insights.period");
   const router = useRouter();

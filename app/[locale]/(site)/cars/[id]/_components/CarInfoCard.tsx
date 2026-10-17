@@ -22,12 +22,6 @@ const initialsOf = (name: string) =>
     .toUpperCase()
     .slice(0, 2);
 
-/**
- * The decision panel (Figma: Car detail — price panel): what it is, what it
- * costs, whether that is a fair price, who sells it, and how to reach them.
- * Sticky beside the gallery on desktop; inline under it on phones, where the
- * contact bar (MobileStickyBar) carries the primary action.
- */
 const CarInfoCard = ({ car, market }: { car: CarDetail; market: MarketPosition | null }) => {
   const t = useTranslations("carDetail.dealership");
   const {

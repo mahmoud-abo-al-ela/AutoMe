@@ -1,21 +1,6 @@
 import { sentryEnabled } from "@/lib/sentry-enabled";
 import type { McpHealth } from "./health";
 
-/**
- * What reaches Sentry from the public MCP endpoint, tagged `surface: mcp` so
- * one alert rule can watch all of it (docs/mcp-runbook.md).
- *
- * The record of every call is McpToolCall — rates and latency come from
- * there (./health.ts). Sentry gets only what someone must look at: a failure
- * that is AutoMe's fault ("internal"), a dependency down ("unavailable"), and
- * a day whose rates crossed the pilot's targets. Never the caller's input:
- * the tool, the code and the error are enough, and arguments are what the
- * telemetry promised not to keep.
- *
- * The SDK is imported lazily and only on these paths, as in lib/ai/telemetry.ts;
- * nothing here may throw into the request it reports on.
- */
-
 export type McpFailureCode = "internal" | "unavailable";
 
 export async function reportMcpFailure(failure: { tool: string; code: McpFailureCode; error: unknown }): Promise<void> {

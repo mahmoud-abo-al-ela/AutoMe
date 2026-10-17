@@ -9,11 +9,6 @@ import { planSettingsSchema } from "@/lib/validations/schemas";
 import { createSuccessResponse } from "@/lib/utils/response";
 import { z } from "zod";
 
-/**
- * Save one plan's prices, limits and features (plans page, "Edit"). Applies
- * to every dealership on the plan; a new price from their next payment. The
- * audit log keeps what each setting was before and after.
- */
 export const updatePlanSettings = withSuperAdmin(async (admin, planId: string, input: unknown) => {
   const id = validateAction(z.string().trim().min(1).max(64), planId);
   const settings = validateAction(planSettingsSchema, input);

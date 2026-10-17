@@ -37,11 +37,6 @@ export function isCurrentSection(pathname: string | null | undefined, href: stri
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/**
- * Desktop nav item (Figma: Header). The current page is marked twice — full
- * ink and a marker bar on the header's bottom edge — so it never relies on
- * colour alone.
- */
 function NavItem({ href, label, active }: { href: string; label: string; active: boolean }) {
   return (
     <Link
@@ -92,14 +87,6 @@ function IconLink({
   );
 }
 
-/**
- * Site header (Figma: Header, MobileTopBar) — sticky and in normal flow, so
- * pages no longer guess its height with their own top margins.
- *
- * Phones get the brand, the language toggle and the account here (the avatar,
- * or Sign in) — once each; navigation lives in the bottom tab bar
- * (BottomTabBar), so nothing crowds — or clips at — the screen edge.
- */
 export default function MainHeader({
   user,
   organizationSlug,

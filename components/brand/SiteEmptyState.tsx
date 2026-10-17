@@ -5,11 +5,6 @@ import { cn } from "@/lib/utils";
 
 type EmptyAction = { label: string } & ({ href: string; onClick?: never } | { onClick: () => void; href?: never });
 
-/**
- * Public-site empty state (Figma: EmptyState). Says what happened and offers
- * the most useful next step; no illustration. The dashboards keep
- * components/common/EmptyState — this one uses site-only tokens.
- */
 export function SiteEmptyState({
   icon: Icon,
   title,

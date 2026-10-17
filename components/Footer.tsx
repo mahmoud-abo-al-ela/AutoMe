@@ -4,14 +4,6 @@ import { Logo } from "@/components/brand";
 import type { HeaderUser } from "@/components/Header/MainHeader";
 import { showsDealerPitch } from "@/lib/org/client";
 
-/**
- * Site footer (Figma: Footer) — asphalt, with the column headings in marker
- * yellow.
- *
- * The social icons are gone: they linked to facebook.com, x.com and
- * instagram.com themselves, not to any AutoMe account. They come back when
- * there are accounts to link to.
- */
 const Footer = async ({
   user,
   organization,

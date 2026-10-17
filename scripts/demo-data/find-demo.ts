@@ -1,18 +1,6 @@
 import type { PrismaClient } from "../../lib/generated/prisma";
 import { DEALERSHIPS } from "./dealerships";
 
-/**
- * What counts as demo data, and nothing else may be touched.
- *
- * - Dealerships: the ten the old seed made (prisma/seed.ts) and the six this
- *   script makes — by slug.
- * - People: a Clerk id no real sign-in can have. The old seed's end in
- *   "_clerk_id" (admin_clerk_id, <slug>_admin_clerk_id, customer_3_clerk_id…);
- *   this script's start with "demo_". Real ones are Clerk's ("user_2Nx…").
- *
- * A listed dealership with a real member, or with a paid payment, stops the
- * whole run: that is a dealership someone is using, whatever its slug.
- */
 const OLD_SEED_SLUGS = [
   "cairo-auto-gallery", "alexandria-motors", "giza-premium-cars", "delta-wheels", "tanta-auto-center",
   "upper-egypt-auto", "aswan-car-mart", "portsaid-automotive", "ismailia-car-gallery", "red-sea-motors",

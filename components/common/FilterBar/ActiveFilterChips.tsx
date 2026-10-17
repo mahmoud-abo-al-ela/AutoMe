@@ -5,12 +5,6 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-/**
- * Removable active-filter chips + a "Clear all" affordance. Each chip is a real
- * <button> with an aria-label, so removals are keyboard reachable and announced.
- *
- * onClear(type) removes one; onClear("all") resets.
- */
 export type ActiveFilter = {
   type: string;
   label: string;

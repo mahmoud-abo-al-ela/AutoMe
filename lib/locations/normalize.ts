@@ -1,29 +1,6 @@
-/**
- * The one way a place name is folded before it is looked up.
- *
- * Both the display index and the search index key on this, so a spelling that
- * resolves for display resolves for search too. Keeping two normalizers is how
- * the previous version came to have an Arabic-aware one on the search side and
- * an ASCII-only one on the display side — the latter reduced every Arabic name
- * to the empty string, silently dropping half of each index.
- *
- * The Arabic half of the fold is not written here for the same reason: it is
- * `foldSearchText`, shared with the car search index, which is mirrored in SQL.
- * A place name and a car description have to fold the same way or a dealership
- * in "القاهره" stops being findable from a car listing that says "القاهرة".
- *
- * What remains here is what is specific to a *place*: Latin transliteration
- * marks, the administrative suffixes, and the article.
- */
-
 import { ARABIC_LETTERS, foldSearchText } from "@/lib/utils/search-text";
 
 const LATIN_MARKS = /[̀-ͯ]/g;
-/**
- * Anything that is neither a latin alphanumeric nor an Arabic letter —
- * Arabic punctuation included: the whole Arabic block once counted as
- * letters, so "أسود؟" missed the colour and "هيونداي؟" the make.
- */
 const SEPARATORS = new RegExp(`[^a-z0-9${ARABIC_LETTERS}]+`, "g");
 
 export function normalizePlaceName(value: string): string {

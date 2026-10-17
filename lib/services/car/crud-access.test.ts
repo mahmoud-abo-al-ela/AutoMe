@@ -18,12 +18,6 @@ vi.mock("@/lib/jobs/search-terms", () => ({ searchTermsChanged: vi.fn() }));
 
 import { deleteCar, updateCar as updateCarService } from "@/lib/services/car/crud";
 
-/**
- * Who may change a dealership's car: its members, and a platform admin in a
- * verified support session for exactly that dealership. The ADMIN role alone
- * opens nothing, and a session for one dealership opens nothing in another.
- */
-
 const ORG_X = "org-x";
 const ORG_Y = "org-y";
 const admin = { id: "admin-db", email: "a@x.eg", role: "ADMIN", memberships: [] };

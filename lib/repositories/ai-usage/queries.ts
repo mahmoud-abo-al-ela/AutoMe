@@ -2,28 +2,10 @@
 import { db } from "@/lib/prisma";
 import { cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 
-/**
- * Midnight in Cairo on the first of the current month. A dealer's AI
- * allowance resets with their month — the same calendar billing keeps — not
- * at UTC midnight, which is 2–3 hours into the 1st in Cairo and 10 pm on the
- * last day of the month before. (The provider caps keep UTC months:
- * lib/ai/breaker-windows.ts, the provider's own billing month.)
- */
 export function startOfCurrentMonthCairo(now: Date = new Date()): Date {
     return cairoMidnight(`${cairoDate(now).slice(0, 7)}-01`);
 }
 
-/**
- * Count the distinct cars an organization saved with AI's help this calendar
- * month: cars that successful calls of the given billable features were
- * stamped with on save (attributeAiUsageToCar). Drives
- * RESOURCE_CONFIG.aiProcessing — plans sell "AI listings", so the photo read,
- * translation and coach advice behind one car are one use, however many calls.
- *
- * `organizationId` is required and must be server-sourced from ctx /
- * getCurrentOrganization() — never a client argument (see tenant-isolation skill).
- * Failed calls are excluded so a provider error never burns a customer's quota.
- */
 export async function countOrgAiCarsThisMonth(organizationId: string, features: string[]) {
     const cars = await db.aiUsage.findMany({
         where: {
@@ -39,11 +21,6 @@ export async function countOrgAiCarsThisMonth(organizationId: string, features: 
     return cars.length;
 }
 
-/**
- * Successful calls of one feature this month that no saved car claimed — photo
- * reads the dealer walked away from. Free under the per-car allowance, so they
- * get their own cap (see UNSAVED_READS_PER_LISTING).
- */
 export async function countOrgUnsavedAiCallsThisMonth(organizationId: string, feature: string) {
     return db.aiUsage.count({
         where: {
@@ -57,11 +34,6 @@ export async function countOrgUnsavedAiCallsThisMonth(organizationId: string, fe
 }
 
 
-/**
- * Every ledger (AiUsage.provider: "google", "google#2", "google:embed") with
- * calls since a timestamp — the keys and pools that have been used, for a
- * report of the breaker's state across all of them.
- */
 export async function findProviderLedgersSince(since: Date): Promise<string[]> {
     const rows = await db.aiUsage.findMany({
         where: { createdAt: { gte: since } },
@@ -71,12 +43,6 @@ export async function findProviderLedgersSince(since: Date): Promise<string[]> {
     return rows.map((row) => row.provider);
 }
 
-/**
- * Count AI calls to one provider since a timestamp, across every feature and
- * tenant. Backs the per-provider request-count breaker (RPM / RPD): a provider's
- * cap is per key regardless of feature, so this counts every recorded attempt
- * (success or failure), since each one was a request the provider received.
- */
 export async function countPlatformCallsSince(since: Date, provider: string) {
     return db.aiUsage.count({
         where: {
@@ -86,11 +52,6 @@ export async function countPlatformCallsSince(since: Date, provider: string) {
     });
 }
 
-/**
- * Tokens one provider has been sent and has returned since a timestamp —
- * input, output and thinking — for a plan sold as a monthly token allowance.
- * Failed calls count too: the provider metered them all the same.
- */
 export async function sumProviderTokensSince(provider: string, since: Date) {
     const totals = await db.aiUsage.aggregate({
         where: { provider, createdAt: { gte: since } },
@@ -102,18 +63,6 @@ export async function sumProviderTokensSince(provider: string, since: Date) {
         (totals._sum.thinkingTokens ?? 0)
     );
 }
-
-/**
- * Reporting reads for the AI usage surface.
- *
- * `AiUsage` has carried a `[feature, createdAt]` index commented "per-feature
- * reporting" since it was created, and nothing has ever queried it — the table
- * was write-only in practice, read solely by the quota gate. These are the
- * readers it was indexed for.
- *
- * All of them are platform-wide and therefore super-admin only. A per-tenant
- * view has to filter on `organizationId`, which the composite index leads with.
- */
 
 /** One row per feature: how much it is used and how often it fails. */
 export interface FeatureUsage {
@@ -226,14 +175,6 @@ export async function getUsageByModel(since: Date): Promise<ModelUsage[]> {
     }));
 }
 
-/**
- * Failure counts by error code.
- *
- * The codes are deliberately coarse and stable (`HTTP_503`, `TIMEOUT`,
- * `SCHEMA_REJECTED`) so that grouping by them means something. This is the view
- * that distinguishes "the provider is saturated" from "our schema stopped
- * matching what the model returns", which look identical from a failure rate.
- */
 export async function getFailuresByCode(
     since: Date
 ): Promise<{ errorCode: string; count: number }[]> {
@@ -272,11 +213,6 @@ export async function findRecentFailures(since: Date, limit: number): Promise<Re
     });
 }
 
-/**
- * Dealerships with more than `limit` AI calls since `since`, busiest first:
- * the daily usage watch (lib/services/ai/usage-watch.ts). Calls, not cost —
- * costMicroUsd is 0 on the free tier, so a runaway shows in the count.
- */
 export async function findOrganizationsOverCallCount(
     since: Date,
     limit: number

@@ -11,13 +11,6 @@ import {
 } from "@/lib/utils/car-disclosures";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
-/**
- * The storefront form's three parts — profile, opening hours, terms — as the
- * editor holds them, and the pure conversions to and from what the server
- * stores. Each part saves through its own action, so each is compared with its
- * own saved copy to know what changed.
- */
-
 /** Saturday first: Egypt's week, as the date picker and the public page show it. */
 export const WEEK: readonly DayOfWeek[] = ["SATURDAY", "SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
 
@@ -72,11 +65,6 @@ export function hoursToEntries(hours: HoursState): WorkingHoursEntry[] {
   return WEEK.map((day) => ({ dayKey: day, ...hours[day] }));
 }
 
-/**
- * Open days whose closing time is not after the opening time. The open/closed
- * badge has no notion of hours past midnight, so such a day would read as
- * closed all day.
- */
 export function invalidDays(hours: HoursState): DayOfWeek[] {
   return WEEK.filter((day) => hours[day].isOpen && hours[day].closeTime <= hours[day].openTime);
 }

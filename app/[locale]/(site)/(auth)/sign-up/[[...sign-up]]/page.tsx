@@ -22,12 +22,6 @@ export default async function SignUpPage({
   const { locale } = await params;
 
   const query = await searchParams;
-  // See the sign-in page: this value decides where an authenticated user is
-  // sent, so it must be proven internal before Clerk ever sees it.
-  // The fallback has to carry the locale. DEFAULT_REDIRECT is "/", which has
-  // no prefix, and `localePrefix: "always"` with detection off resolves that
-  // to the default locale — so signing in on /ar with no return path landed
-  // the reader on /en.
   const redirectUrl = safeRedirectPath(query?.redirect_url, `/${locale}`);
   const returnQuery = `?redirect_url=${encodeURIComponent(redirectUrl)}`;
 

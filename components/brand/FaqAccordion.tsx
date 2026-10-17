@@ -5,17 +5,6 @@ import { cn } from "@/lib/utils";
 
 export type FaqItem = { id: string; question: ReactNode; answer: ReactNode };
 
-/**
- * Questions that open their answers (Figma: Accordion) — the FAQ page's
- * sections and the dealer page's billing questions. Radix Accordion, so each
- * question is a real button with aria-expanded/aria-controls. Hairline rows
- * and +/−, not floating cards.
- *
- * forceMount: Radix otherwise leaves a closed panel out of the DOM, so the
- * server HTML held every question and no answer — nothing for a search engine
- * to index, and nothing to read before hydration. Force-mounted, Radix no
- * longer hides a closed panel itself, so it is hidden by its own data-state.
- */
 export function FaqAccordion({ items, className }: { items: FaqItem[]; className?: string }) {
   return (
     <AccordionPrimitive.Root type="single" collapsible className={cn("border-t border-border", className)}>

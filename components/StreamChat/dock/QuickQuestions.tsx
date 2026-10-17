@@ -5,11 +5,6 @@ import type { CarDetail } from "@/app/[locale]/(site)/cars/[id]/_lib/car-detail-
 
 type Question = "available" | "price" | "visit" | "installments" | "tradeIn";
 
-/**
- * One-tap first messages, as Facebook Marketplace offers "Is this still
- * available?". A blank box is where most first messages die. Questions the
- * dealership has already answered "no" to on its profile are not offered.
- */
 export function QuickQuestions({
   car,
   disabled,

@@ -7,11 +7,6 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useBuyerAccess } from "@/components/BuyerAccess";
 
-/**
- * Save / Compare / Share (Figma: IconButton / Outline) — 44px squares with a
- * tooltip and an accessible name; pressed state is a filled asphalt square,
- * not a tint.
- */
 const CarActionButtons = ({
   isFavorite,
   isInCompare,

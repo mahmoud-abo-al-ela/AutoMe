@@ -31,11 +31,6 @@ function useCountdown(retryAfter: number | undefined, error: ActionError | undef
   return left;
 }
 
-/**
- * An action's error as the user reads it. A rate limit that says how long to
- * wait is shown as a live countdown — "try again in 0:42" — and then as
- * "you can try again now", instead of an open-ended "wait a moment".
- */
 export function ActionErrorText({ error, fallback }: { error?: ActionError; fallback?: string }) {
   const t = useTranslations("errors");
   const actionError = useActionError();

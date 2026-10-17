@@ -1,18 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { PaymobTransaction } from "./transaction";
 
-/**
- * Verification of Paymob's transaction callback.
- *
- * Anyone can POST to the callback URL, so the callback is trusted only when
- * the `hmac` query parameter is HMAC-SHA512, keyed with the account's HMAC
- * secret, over these twenty fields of `obj` concatenated with no separator,
- * in Paymob's fixed order (not alphabetical). Booleans are "true"/"false",
- * numbers their plain form, strings exactly as received.
- *
- * The buyer's redirect back to AutoMe carries the same fields in its query
- * string; it is never used to change state.
- */
+// The callback is trusted only via HMAC-SHA512 over these fields in Paymob's fixed (not alphabetical) order.
 const FIELDS = [
   "amount_cents",
   "created_at",

@@ -27,12 +27,6 @@ import { refreshSearchTerms } from "@/lib/repositories/car/search-terms";
 import { db } from "@/lib/prisma";
 import type { CarStatus } from "@/lib/generated/prisma";
 
-/**
- * The public MCP tools end to end — a real MCP client, the real catalog and
- * real Postgres: what an AI client sees is exactly the public site, never a
- * hidden car or a private field, and searching costs no model call.
- */
-
 const MAKE = "Mcptoolmake";
 const ORGS = { A: "org_test_mcp_tools_a", S: "org_test_mcp_tools_s", D: "org_test_mcp_tools_d" } as const;
 const SECRET_EMAIL = "private-owner@mcp-test.example";

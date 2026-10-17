@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * A titled panel with a ruled header: the section blocks of Settings and
- * Billing (canvas: Settings round 1, "2 · Storefront"). The overview and
- * Insights use Panel, a lighter card for charts and stats.
- */
 export function SectionPanel({
   title,
   hint,

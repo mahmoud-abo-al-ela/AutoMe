@@ -5,15 +5,6 @@ import { searchWords } from "@/lib/utils/search-text";
 import { SPECS } from "@/lib/search/specs";
 import type { SearchSuggestion, SuggestionLocale } from "@/lib/search/suggest";
 
-/**
- * What the search box suggests as a buyer types: makes, by their name in
- * either language ("تو" → تويوتا), make-and-model pairs ("toyota cor" →
- * Toyota Corolla), and specs — body type, fuel, gearbox, colour, features
- * ("sed" → Sedan, "فتح" → فتحة سقف). Each with how many public cars it leads
- * to. Nothing depends on who is asking — public listings only — so the route
- * may let a CDN share the answer between buyers.
- */
-
 export const MAX_SUGGESTIONS = 8;
 /** How many of a category are taken before the others have had their turn. */
 const CAPS = { make: 3, model: 4, spec: 3 } as const;
@@ -27,12 +18,6 @@ const AR_MAKES: Record<string, string> = arCarAttributes.make;
 
 const fold = (value: string) => searchWords(value).join(" ");
 
-/**
- * How well any of a suggestion's names matches what was typed, both folded:
- * 0 — a name is exactly it; 1 — a name starts with it; 2 — a later word of a
- * name does ("cruiser" → Land Cruiser). Null: no match. Never inside a word,
- * as the search itself never matches there.
- */
 export function matchQuality(names: string[], typed: string): 0 | 1 | 2 | null {
   if (names.some((name) => name === typed)) return 0;
   if (names.some((name) => name.startsWith(typed))) return 1;
@@ -48,17 +33,6 @@ interface Candidate {
   key: string;
 }
 
-/**
- * The suggestions for a query, from the public counts. Pure: the service
- * fetches, this decides.
- *
- * Order: how well a name matches, then makes before models before specs, then
- * the most cars, then the label. Up to eight: every exact match first, then
- * at most CAPS of each category in that order, then whatever is left — so a
- * good make or model is never pushed out by a weaker spec, and specs still get
- * a place beside many models. A category with no match simply yields its
- * places.
- */
 export function matchSuggestions(
   query: string,
   locale: SuggestionLocale,
@@ -134,11 +108,6 @@ export function matchSuggestions(
   return ranked.filter((c) => chosen.has(c)).map((c) => c.suggestion);
 }
 
-/**
- * A count read, reused for a minute by this instance: a buyer typing asks
- * once per pause, and the counts barely move in a minute. A failed read is
- * forgotten at once, never served to the next minute's buyers.
- */
 function cachedFor<T>(load: () => Promise<T>) {
   let entry: { at: number; value: Promise<T> } | null = null;
   return {

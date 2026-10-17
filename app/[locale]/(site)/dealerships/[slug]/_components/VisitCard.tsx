@@ -7,13 +7,6 @@ import { OpenStatusLine, VisitActions } from "./VisitActions";
 import { ShareDealershipButton } from "./ShareDealershipButton";
 import type { DealershipCar, DealershipDetail } from "../_lib/detail-types";
 
-/**
- * Everything a buyer needs to act, kept in view beside the Cars and Reviews
- * tabs: whether the dealership is open, message / call / directions, and the
- * terms they sell on. On phones it sits above the tabs with the actions only —
- * the terms are in the About tab there, the address in the header. On the
- * About tab itself the actions move into the header and this card is not shown.
- */
 export function VisitCard({
     dealership,
     newestCars,

@@ -55,16 +55,6 @@ function SheetContent({
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left";
 }) {
-  // `side` is interpreted relative to the reading direction: "left" means the
-  // side the reader starts from, which is the right-hand edge in Arabic. Every
-  // caller passing "left" is a nav drawer that should follow the text.
-  //
-  // Resolved to a physical side here rather than by switching the classes to
-  // logical properties, because Tailwind's slide-in/out animations only exist
-  // in physical form. Mixing `end-0` with `slide-in-from-right` positions the
-  // panel on one edge and animates it in from the other — it flies across the
-  // screen. Doing the flip once, here, keeps position, border and animation
-  // in agreement by construction.
   const direction = useDirection();
   const tActions = useTranslations("common.actions")
   const flip = { left: "right", right: "left" } as const;

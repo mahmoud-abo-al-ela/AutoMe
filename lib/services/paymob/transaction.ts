@@ -1,8 +1,3 @@
-/**
- * The transaction object Paymob sends as `obj` on the transaction callback,
- * and returns from the inquiry API. Only the fields AutoMe reads, plus the
- * ones the HMAC covers; Paymob sends many more.
- */
 export interface PaymobTransaction {
   id: number;
   amount_cents: number;

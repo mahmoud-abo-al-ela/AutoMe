@@ -1,13 +1,6 @@
 import { createMcpReferral, pruneMcpReferrals } from "@/lib/repositories/mcp/referrals";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * A visit that came from an MCP answer — a page opened from a link a public
- * MCP tool returned (lib/services/public-catalog/urls.ts tags each with
- * utm_source=mcp and the tool as utm_medium). The pilot's "did the answer
- * lead somewhere" measure.
- */
-
 /** The links' mediums: the public tools and resources that hand out links. Anything else is ignored. */
 const MEDIUMS = new Set([
   "search_cars",
@@ -32,11 +25,6 @@ export function mcpReferralMedium(params: SearchParams): string | null {
   return MEDIUMS.has(medium) ? medium : null;
 }
 
-/**
- * Count the visit. Called after the page found a public car or dealership, so
- * a made-up id adds nothing. Best effort, on purpose: losing a count must
- * never cost a buyer the page, so a failure is logged and swallowed.
- */
 export async function recordMcpReferral(kind: "car" | "dealership", target: string, medium: string): Promise<void> {
   try {
     await createMcpReferral({ kind, target, medium });

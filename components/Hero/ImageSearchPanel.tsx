@@ -5,11 +5,6 @@ import { Camera, Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
-/**
- * The expanded "search by photo" panel: preview, an analyzing overlay while the
- * AI runs, and the cancel / change / search controls. Pure presenter — all state
- * and handlers come from useImageSearch.
- */
 const ImageSearchPanel = ({
   imagePreview,
   fileName,

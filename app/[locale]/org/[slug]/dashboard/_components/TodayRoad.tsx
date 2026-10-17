@@ -42,17 +42,6 @@ const at = (value: number, from: number, to: number) =>
 /** On an inline-start offset, centred whichever way the page reads. */
 const centred = "ltr:-translate-x-1/2 rtl:translate-x-1/2";
 
-/**
- * Today's test drives drawn as a road across the dealership's opening hours
- * (canvas: Round 3 — Overview), the page's one bold element and the site's
- * road motif (RoadLoader, the home page's story). A stop on the road for each
- * drive — marker yellow while it waits for the dealer to confirm — and a
- * white "now" line while the day is under way. The road follows the reading
- * direction like a progress bar does; chart value axes stay physical.
- *
- * The drives are also a plain list under the road, which is what screen
- * readers get: the road itself is decoration.
- */
 export async function TodayRoad({
   drives,
   hours,

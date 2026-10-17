@@ -14,13 +14,6 @@ import { lockSubscriptionInTx } from "@/lib/repositories/payment";
 import { runInTransaction } from "@/lib/repositories/transaction";
 import { db } from "@/lib/prisma";
 
-/**
- * The two halves of the renewal-vs-settlement race, against real Postgres:
- * the daily job's compare-and-set write, and settlement's locked re-read.
- * The services' decisions are unit-tested; this pins that the SQL under them
- * does what they assume.
- */
-
 const ORG = "org_test_subscription_cas";
 
 describe.skipIf(!hasTestDb)("subscription compare-and-set (real Postgres)", () => {

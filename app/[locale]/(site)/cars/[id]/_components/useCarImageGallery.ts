@@ -4,11 +4,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useDirection } from "@radix-ui/react-direction";
 import type { CarDetailImage } from "../_lib/car-detail-types";
 
-/**
- * All interaction logic for the car image gallery: index state, next/prev,
- * keyboard + touch navigation, adjacent-image preloading, and keeping the
- * active thumbnail scrolled into view. Keeps CarImageGallery presentational.
- */
 export function useCarImageGallery(images: CarDetailImage[] | undefined) {
   const direction = useDirection();
   const isRtl = direction === "rtl";

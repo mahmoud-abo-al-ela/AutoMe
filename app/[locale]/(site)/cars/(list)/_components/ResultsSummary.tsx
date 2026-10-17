@@ -10,14 +10,6 @@ const SORT_ORDER = ["newest", "priceAsc", "priceDesc", "yearDesc", "yearAsc", "m
 
 export type ResultsView = "grid" | "list";
 
-/**
- * Results toolbar (Figma: Browse — toolbar): how many cars, how they are
- * sorted, and — from lg — grid or list. The count is a live region, so a
- * screen reader hears the new total after each filter change.
- *
- * The per-page selector is gone from the page (it was noise next to sort);
- * `perPage` still works as a URL parameter.
- */
 export const ResultsSummary = ({
   total,
   sortBy,

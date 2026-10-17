@@ -21,11 +21,6 @@ export const checkSlugAvailability = withErrorHandling(async (slug: string) => {
   return createSuccessResponse({ available: await isSlugAvailable(slug) });
 });
 
-/**
- * Create a dealership on the free plan, or on a paid plan's free trial. A paid
- * plan without a trial is refused: those are created only by a settled
- * Paymob payment (lib/services/billing/settle.ts), whatever the client sends.
- */
 export const createOrganization = withAuth(async (ctx, input: OrganizationInput) => {
   refuseDuringSupportSession(ctx);
   await enforceRateLimit();
@@ -79,14 +74,6 @@ export const resumeOnboardingFormData = withAuth(async (ctx) => {
 
 const paymentRefSchema = z.string().uuid();
 
-/**
- * Where a sign-up payment stands, for the page Paymob returns the buyer to.
- * Settles it from Paymob's own answer when the callback has not arrived yet.
- *
- * Not rate limited: the page polls this every few seconds while a payment is
- * confirming, which the shared bucket (10 an hour) would cut off. It only
- * answers for the caller's own payment, and asks Paymob only while unpaid.
- */
 export const confirmSignupPayment = withAuth(async (ctx, ref: string) => {
   const paymentId = validateAction(paymentRefSchema, ref);
   const { state, payment: current } = await confirmSignupPaymentFor(ctx.user.id, paymentId);

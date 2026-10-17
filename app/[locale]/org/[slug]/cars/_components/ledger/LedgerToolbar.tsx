@@ -20,11 +20,6 @@ const ANY = "any";
 const thisYear = new Date().getFullYear();
 const YEARS = Array.from({ length: thisYear - 2004 }, (_, i) => thisYear - i);
 
-/**
- * Above the table (page pattern 1, list): search with a visible label and a
- * "/" shortcut, one Filters control, and Export. Filters in use show as chips
- * underneath, each removable, with Clear all.
- */
 export function LedgerToolbar({ state }: { state: InventoryData }) {
   const t = useTranslations("org.cars.ledger");
   const input = useRef<HTMLInputElement>(null);
@@ -204,11 +199,6 @@ function FilterChips({ filters, onChange }: { filters: InventoryFilters; onChang
   );
 }
 
-/**
- * Every car the table is showing — this view, search and filters, all pages —
- * as a CSV in the reader's language, with plain digits so a spreadsheet can
- * sum them. A BOM so Excel reads the Arabic as UTF-8.
- */
 function ExportButton({ state }: { state: InventoryData }) {
   const t = useTranslations("org.cars.ledger");
   const locale = useLocale();

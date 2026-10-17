@@ -24,11 +24,6 @@ type Entry =
   | { kind: "free"; at: string; endTime: string; minutes: number }
   | { kind: "now"; at: string };
 
-/**
- * The chosen day (canvas: C · Month and day): its drives and, between them,
- * the free time within opening hours — what a dealer reads off when a buyer
- * calls asking "when can I come?". Today carries the yellow "now" line.
- */
 export function DaySchedule({
   day,
   now,

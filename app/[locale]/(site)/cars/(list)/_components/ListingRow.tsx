@@ -17,12 +17,6 @@ import type { MarketPosition } from "@/lib/services/car/market-price";
 
 type ListingRowCar = SerializedCar & { isWishlisted?: boolean; marketPosition?: MarketPosition | null };
 
-/**
- * Desktop list view (Figma: ListingRow) — Direction B's density: the spec
- * readout beside the photo and a price block that always pairs the price
- * with its market verdict. Like the card, the whole row is one link (the
- * title's stretched ::after); Save/Compare sit above it.
- */
 export function ListingRow({ car, index = 0 }: { car: ListingRowCar; index?: number }) {
   const t = useTranslations("cars.row");
   const locale = useLocale() as Locale;

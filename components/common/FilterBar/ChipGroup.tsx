@@ -9,13 +9,6 @@ import { FilterChip } from "./FilterChip";
 
 const COLLAPSED_COUNT = 12;
 
-/**
- * A wrap of accessible FilterChips with an optional search box (auto-shown when
- * there are more than `collapseAt` options) and "+N more" / "Show less"
- * expansion. Works for both single-select (pass a one-element selectedValues)
- * and multi-select — selection semantics are decided by the caller's onToggle.
- *
- */
 export type FilterOption = {
   value: string;
   label?: string;

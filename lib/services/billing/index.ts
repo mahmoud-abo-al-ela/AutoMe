@@ -14,56 +14,26 @@ export async function getActivePlans() {
   return billingRepo.findActivePlans();
 }
 
-/**
- * Get a specific plan by ID
- * @param {string} planId - The plan ID
- * @returns {Promise<Object|null>} The plan or null if not found
- */
 export async function getPlanById(planId: string) {
   return billingRepo.findPlanById(planId);
 }
 
-/**
- * Get a specific plan by type
- * @param {string} type - The plan type (e.g., 'STARTER', 'PRO', 'ENTERPRISE')
- * @returns {Promise<Object|null>} The plan or null if not found
- */
 export async function getPlanByType(type: PlanType) {
   return billingRepo.findPlanByType(type);
 }
 
-/**
- * Get active subscription for an organization
- * @param {string} organizationId - The organization ID
- * @returns {Promise<Object|null>} The active subscription with plan details
- */
 export async function getActiveSubscription(organizationId: string) {
   return billingRepo.findActiveSubscription(organizationId);
 }
 
-/**
- * Get subscription by organization ID
- * @param {string} organizationId - The organization ID
- * @returns {Promise<Object|null>} The subscription with plan details
- */
 export async function getSubscription(organizationId: string) {
   return billingRepo.findSubscriptionByOrgId(organizationId);
 }
 
-/**
- * Get usage statistics for an organization
- * @param {string} organizationId - The organization ID
- * @returns {Promise<Object>} Usage stats including car count, member count, etc.
- */
 export async function getUsageStats(organizationId: string) {
   return billingRepo.getUsageCounts(organizationId);
 }
 
-/**
- * Get all billing page data for an organization
- * @param {string} organizationId - The organization ID
- * @returns {Promise<Object>} Complete billing data including subscription, plans, and usage
- */
 export async function getBillingData(organizationId: string, now: Date = new Date()) {
   const [subscription, plans, usage, payments] = await Promise.all([
     getActiveSubscription(organizationId),
@@ -107,12 +77,6 @@ export async function getBillingContact(organizationId: string) {
   return findOwnerContact(organizationId);
 }
 
-/**
- * Get billing history for an organization from audit logs
- * @param {string} organizationId - The organization ID
- * @param {number} limit - Maximum number of records to return
- * @returns {Promise<Array>} List of billing-related audit logs
- */
 export async function getBillingHistory(organizationId: string, limit = 10) {
   const billingEvents = await billingRepo.findBillingEvents(organizationId, limit);
 

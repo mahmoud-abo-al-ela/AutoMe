@@ -2,14 +2,6 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * A titled block of the dashboard (Figma: Dashboard — panel): white on the
- * limestone page, hairline border, the site's sheet radius. Title and an
- * optional line of description on the starting side, its own controls (a
- * range picker, a link) at the far end.
- *
- * No hooks, so it serves server and client components alike.
- */
 export function Panel({
   title,
   description,
@@ -80,12 +72,6 @@ const COLUMNS = {
   4: "grid-cols-2 xl:grid-cols-4",
 } as const;
 
-/**
- * The headline figures of a page, read across as one strip — the public
- * site's spec readout at dashboard size: cells divided by hairlines inside
- * one rounded frame, the figure large and tabular so a column of them lines
- * up. Values arrive formatted (Eastern digits on /ar).
- */
 export function StatGrid({
   items,
   columns = 3,

@@ -12,12 +12,6 @@ import { installModelContext } from "@/test/fixtures/webmcp";
 import TestDriveForm from "../form-components/TestDriveForm";
 import type { WorkingHours } from "../../_lib/scheduling";
 
-/**
- * The test-drive form's WebMCP tools on the real form: an agent can see free
- * times and fill the form, and nothing is requested until the person presses
- * Submit — which then sends exactly what was filled in.
- */
-
 const CAR = "11111111-1111-4111-8111-111111111111";
 // Tuesday 13 October 2026, 10:00 in Cairo.
 const NOW = new Date("2026-10-13T07:00:00Z");

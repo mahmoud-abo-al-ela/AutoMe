@@ -5,18 +5,6 @@ import {
     LOCAL_MIN_LENGTH,
 } from "@/lib/utils/phone";
 
-/**
- * A translator scoped to `onboarding.orgDetails.validation`, plus the number
- * formatter for the limits it interpolates.
- *
- * The schemas are factories rather than module constants because their messages
- * are translated: a module-level schema would freeze whichever locale happened
- * to load the module first. Same arrangement as `useTestDriveForm`.
- *
- * `n` is passed in rather than left to ICU because next-intl formats numeric
- * arguments against the bare `ar` tag, whose numbering system is Western — a
- * limit rendered that way would read "3" beside Arabic digits everywhere else.
- */
 type Translate = (
     key: string,
     values?: Record<string, string | number | Date>

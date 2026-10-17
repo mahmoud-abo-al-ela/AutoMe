@@ -5,11 +5,6 @@ export interface SpecItem {
   value: string;
 }
 
-/**
- * Spec readout (Figma: SpecCell) — Direction B's spec sheet. Cells are
- * separated by hairlines rather than gaps so a column of figures reads as one
- * table. `columns` is the count at the widest breakpoint; phones always get 2.
- */
 export function SpecGrid({
   items,
   columns = 4,

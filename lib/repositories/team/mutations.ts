@@ -11,11 +11,6 @@ export async function createMembership(data: Prisma.MembershipUncheckedCreateInp
   });
 }
 
-/**
- * Add a member only if the dealership is under its plan's member limit (-1:
- * no limit). The count and the insert run under the dealership's "members"
- * lock, so two invites for the last seat cannot both pass: one gets null.
- */
 export async function createMembershipWithinLimit(data: Prisma.MembershipUncheckedCreateInput, maxMembers: number) {
   return db.$transaction(async (tx) => {
     await lockOrganizationResource(tx, data.organizationId, "members");

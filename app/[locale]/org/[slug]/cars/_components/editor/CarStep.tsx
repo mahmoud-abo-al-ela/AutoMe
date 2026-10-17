@@ -12,11 +12,6 @@ import { FeaturesInput } from "./FeaturesInput";
 
 const SEATS = [1, 2, 3, 4, 5, 6];
 
-/**
- * Step 2: what the car is. Make, model and year also write the title buyers
- * see, shown under them as it forms. Fields the AI read from the photos carry
- * its mark until the dealer changes them.
- */
 export function CarStep({ form, isAi }: { form: UseFormReturn<CarFormValues>; isAi: (field: keyof CarFormValues) => boolean }) {
   const t = useTranslations("org.carForm");
   const tField = useTranslations("carAttributes.fields");

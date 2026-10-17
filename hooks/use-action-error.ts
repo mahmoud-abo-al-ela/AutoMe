@@ -9,13 +9,6 @@ import {
   type ErrorTranslator,
 } from "@/lib/utils/error-messages";
 
-/**
- * Client-side binding of `resolveActionError` to the active locale.
- *
- * The resolution itself lives in `lib/utils/error-messages` so that server
- * components — the checkout-return page, for one — can render the same error
- * the same way without a hook.
- */
 export function useActionError() {
   const t = useTranslations("errors");
   const { number } = useFormatters();

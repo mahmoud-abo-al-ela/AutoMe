@@ -11,11 +11,6 @@ const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 import { findOrganizationsOverCallCount } from "@/lib/repositories/ai-usage";
 import { db } from "@/lib/prisma";
 
-/**
- * The daily AI usage watch's query (lib/services/ai/usage-watch.ts): which
- * dealerships went over the call count in the window — grouped and filtered
- * in Postgres, so only real rows can show the HAVING and the window are right.
- */
 const ORGS = { busy: "org_test_usage_watch_busy", quiet: "org_test_usage_watch_quiet" };
 const FEATURE = "usage_watch_test";
 

@@ -6,11 +6,6 @@ import { Link } from "@/i18n/navigation";
 import { useFormatters } from "@/hooks/use-formatters";
 import { cn } from "@/lib/utils";
 
-/**
- * Previous, numbered and next page links, for a list or tab with more than one
- * page. A tab keeps the reader's place (`scroll` off); a full-page list may
- * send them back to the top. `linkClassName` adds to each link's classes.
- */
 export function Pager({
   page,
   pages,

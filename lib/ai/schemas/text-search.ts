@@ -1,15 +1,6 @@
 import { z } from "zod";
 import { BODY_TYPES, FUEL_TYPES, TRANSMISSIONS } from "@/lib/constants/car-options";
 
-/**
- * A buyer's description of the car they want, as search filters.
- *
- * Every filter is answerable as empty ("" or null) so the model can leave out
- * what the buyer did not say — an empty filter drops out of the URL, where a
- * guessed one silently hides the cars they wanted. The enums are the values
- * the filters match by equality; `keywords` carries everything else (a model,
- * a feature, a place, "family") into the text search, which handles words.
- */
 const amount = z.number().int().min(0).max(1_000_000_000).nullable();
 
 export const textSearchSchema = z.object({

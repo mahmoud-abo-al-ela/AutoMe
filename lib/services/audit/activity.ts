@@ -9,13 +9,6 @@ import type { ActivityKind } from "./activity-filters";
 
 export { ACTIVITY_DAYS, ACTIVITY_KINDS, type ActivityKind } from "./activity-filters";
 
-/**
- * The dealer's Activity page: one page of audit entries, plus the names the
- * entries refer to by id — the cars a test drive was for, the people a team
- * change was about, the plans a plan change moved between — so each entry can
- * be written as a sentence. Every lookup is scoped to the organization.
- */
-
 
 const KIND_TYPES: Record<Exclude<ActivityKind, "all">, EntityType[]> = {
   cars: ["CAR"],
@@ -97,11 +90,6 @@ export function toEntry(log: LogRow) {
   };
 }
 
-/**
- * The names a page of entries refers to by id. Scoped to one dealership on
- * its own Activity page; across all of them for the super-admin's view of a
- * person, which only platform admins reach.
- */
 export async function findLookups(logs: LogRow[], organizationId?: string) {
   const values = logs.flatMap((log) => [log.oldValue, log.newValue]);
   const carIds = ids(
@@ -137,11 +125,6 @@ export async function findLookups(logs: LogRow[], organizationId?: string) {
   };
 }
 
-/**
- * One person's activity across every dealership, newest first — for the
- * super-admin's page about them. Each entry carries the dealership it
- * happened at, since there may be several.
- */
 export async function getUserActivity({ userId, page, take = ACTIVITY_PAGE_SIZE }: { userId: string; page: number; take?: number }) {
   const { logs, total } = await findUserAuditLogs({ userId, skip: (page - 1) * take, take });
   const lookups = await findLookups(logs);

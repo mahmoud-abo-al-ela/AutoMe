@@ -5,12 +5,6 @@ vi.mock("stream-chat", () => ({ StreamChat: { getInstance: () => ({ upsertUser }
 
 import { ensureOrgMembersInStream, upsertStreamUser } from "@/lib/stream-chat";
 
-/**
- * Stream hands every channel member's user object — custom fields included —
- * to every other member. So a Stream user is how a person appears in chat and
- * nothing more: no email, Clerk id or platform role, for buyers or staff.
- */
-
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.NEXT_PUBLIC_STREAM_API_KEY = "key";

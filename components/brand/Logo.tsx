@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { PlateBand } from "@/lib/org/client";
 
-/**
- * The band across the top of the plate: who is signed in. Egyptian plates
- * colour that band by licence type, and these borrow it (see the plate
- * tokens in globals.css). Like a real plate the words are bilingual in every
- * locale, not translated.
- */
 const BANDS: Record<PlateBand, { latin: string; arabic: string; className: string }> = {
   buyer: { latin: "EGYPT", arabic: "مصر", className: "bg-plate-band text-plate-band-foreground" },
   owner: { latin: "OWNER", arabic: "مالك", className: "bg-plate-owner text-plate-owner-foreground" },
@@ -14,23 +8,6 @@ const BANDS: Record<PlateBand, { latin: string; arabic: string; className: strin
   admin: { latin: "ADMIN", arabic: "إدارة", className: "bg-plate-admin text-plate-admin-foreground" },
 };
 
-/**
- * The wordmark, set on a plate (Figma: Logo). The band reads EGYPT / مصر like
- * a real private-car plate and, like one, is laid out physically.
- *
- * On a dealership subdomain the word is the dealership's name and the plate
- * still frames it, so a storefront stays recognisably part of AutoMe. A
- * dealership logo, when there is one, sits beside the plate (MainHeader).
- *
- * Decorative text only — the surrounding link carries the accessible name.
- *
- * `lg` is the plate on its own as an object (the road loader), with the key
- * shadow the marker buttons use so it sits on the page like a real plate.
- *
- * `band` says who is looking (lib/org/client: plateBandFor): the plain
- * EGYPT plate for buyers and visitors, OWNER / TEAM for a dealership's own
- * people, ADMIN for platform staff — so nobody mistakes where they stand.
- */
 export function Logo({
   name = "AutoMe",
   size = "md",

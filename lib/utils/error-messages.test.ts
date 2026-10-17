@@ -15,14 +15,6 @@ import { createErrorResponse, UNEXPECTED_ERROR_CODE } from "./response";
 import { resolveActionError, type ErrorTranslator } from "./error-messages";
 import { BOOKING_PROBLEMS } from "./booking-slots";
 
-/**
- * The contract these pin: a thrown AppError names its user-facing text with a
- * key, and that key survives into the response envelope the client reads.
- *
- * Both halves fail silently otherwise. A class that forgets its key still
- * throws, still returns an envelope and still renders — just in English, for
- * every reader, and only on the error path where nobody looks.
- */
 describe("errors carry a message key", () => {
   const cases: Array<[string, { messageKey?: string }]> = [
     ["AuthenticationError", new AuthenticationError()],

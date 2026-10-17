@@ -7,12 +7,6 @@ import { NotFoundError } from "@/lib/utils/errors";
 import { logToolError, toolErrorCode, type ToolErrorCode } from "./errors";
 import type { CallerContext } from "./tool";
 
-/**
- * A car and a dealership as readable resources — the same public views as
- * get_car, under a stable URI a client can keep. Not listed: the catalogue is
- * reached through search_cars, not enumerated.
- */
-
 const RPC_CODES: Record<ToolErrorCode, number> = {
   // A resource that does not exist is invalid params under the 2026-07-28
   // spec; SDK v2 sends -32602 even when -32002 (the 2025 code) is thrown.

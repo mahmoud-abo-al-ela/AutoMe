@@ -12,11 +12,6 @@ const DRIVE_SELECT = {
   car: { select: { id: true, make: true, model: true, year: true, title: true, titleEn: true, titleAr: true, images: true } },
 } as const;
 
-/**
- * Every booking in a span of days, light: enough for the month calendar to
- * draw a dot per drive and mark a day whose drives still need an outcome.
- * Cancelled drives are left out; they take no time and need nothing.
- */
 export async function findDrivesBetween(organizationId: string, from: Date, to: Date) {
   return db.testDrive.findMany({
     where: { organizationId, date: { gte: from, lte: to }, status: { not: "CANCELLED" } },

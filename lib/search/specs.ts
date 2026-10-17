@@ -1,17 +1,6 @@
 import arCarAttributes from "@/messages/ar/carAttributes.json";
 import { BODY_TYPES, CAR_COLORS, FUEL_TYPES, TRANSMISSIONS } from "@/lib/constants/car-options";
 
-/**
- * The specifications a buyer can be offered as they type — body type, fuel,
- * gearbox, colour and the editor's features — each with the value a car
- * stores and its name in both languages. Pure data: the suggestions match
- * against it, the repository counts it.
- *
- * Body, fuel, gearbox and colour are filters: choosing one sets the filter.
- * A feature is a tag in either language, so choosing one searches for it
- * (and the search's synonyms reach both tag lists).
- */
-
 export type SpecKind = "bodyType" | "fuelType" | "transmission" | "color" | "feature";
 
 export interface Spec {

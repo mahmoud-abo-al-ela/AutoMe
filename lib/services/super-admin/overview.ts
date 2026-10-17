@@ -3,14 +3,6 @@ import { graceEndsOn } from "@/lib/services/billing/periods";
 import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { OVERVIEW_METRICS, type OverviewMetric, type OverviewPeriod } from "./overview-options";
 
-/**
- * The super-admin overview (canvas: Super admin overview round 2, "3 · Metric
- * explorer"): five platform numbers for a period against the period before,
- * each with its running total day by day; then the plans, the test-drive
- * funnel and the cars as they stand; then what needs an admin. Days follow
- * Cairo's calendar, like everything else AutoMe counts.
- */
-
 /** What a subscription brings in each month, in piasters: a yearly plan counts as a twelfth of its price. */
 export function monthlyIncome(subscriptions: { billingPeriod: string; plan: { monthlyPrice: number; yearlyPrice: number } }[]) {
   return subscriptions.reduce(
@@ -28,11 +20,6 @@ export function periodWindows(today: string, days: number) {
   return { current: { start, end: today }, previous: { start: addDays(start, -days), end: addDays(start, -1) } };
 }
 
-/**
- * The running total for each of the `days` days from `start`: day i holds
- * everything from the first day up to and including day i. Events outside
- * the days are left out.
- */
 export function runningTotals(events: { date: string; value: number }[], start: string, days: number) {
   const perDay = new Array<number>(days).fill(0);
   const index = new Map(Array.from({ length: days }, (_, i) => [addDays(start, i), i]));

@@ -1,12 +1,6 @@
 import { PAYMOB_BASE_URL, paymobConfig } from "./config";
 import { paymobRequest } from "./http";
 
-/**
- * Paymob's Intention API: one intention per payment attempt, paid on Paymob's
- * hosted Unified Checkout page. Its client secret is single-use, so a retry
- * needs a new intention.
- */
-
 export interface IntentionBilling {
   firstName: string;
   lastName: string;

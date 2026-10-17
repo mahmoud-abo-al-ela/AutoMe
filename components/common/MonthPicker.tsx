@@ -26,15 +26,6 @@ const parse = (value: string) => {
   return match ? { year: Number(match[1]), month: Number(match[2]) - 1 } : null;
 };
 
-/**
- * A month-and-year picker in the shadcn idiom: an outline Button opening a
- * Popover with a year header and a grid of months.
- *
- * Month, not day, on purpose — the shadcn Calendar would ask for a day the
- * value never stores. Month names and the year come from the shared
- * formatters, so Arabic reads "مارس ٢٠٢٧" like every other date on the page,
- * and are formatted in UTC so no reader's timezone can move the month.
- */
 export function MonthPicker({
   id,
   value,

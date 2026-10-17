@@ -2,13 +2,6 @@ import { NextResponse } from "next/server";
 import { accountMcpEnabled, accountResourceMetadata } from "@/lib/services/mcp/account";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * OAuth Protected Resource Metadata (RFC 9728) for the signed-in MCP endpoint
- * (app/api/mcp/account): where an MCP client signs the person in — the Clerk
- * instance — and how to present the token. Public by design, readable from
- * any origin (browser-based clients), and not found while the endpoint is off.
- */
-
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",

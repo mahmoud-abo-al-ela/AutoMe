@@ -16,12 +16,6 @@ import { MarketplaceReport } from "./MarketplaceReport";
 
 const BASE = "/super-admin/analytics";
 
-/**
- * The super-admin Analytics page (canvas: Super admin analytics round 1, "1 ·
- * Report tabs"): a period, four reports as tabs, and the open report. Both
- * live in the URL; while the next report or period loads, that report's own
- * skeleton stands in.
- */
 export function AnalyticsView({ analytics }: { analytics: Analytics }) {
   const t = useTranslations("superAdmin.analytics");
   const router = useRouter();

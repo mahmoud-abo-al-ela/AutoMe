@@ -26,11 +26,6 @@ import { StructuredData } from "@/lib/utils/seo";
 import { breadcrumbStructuredData, carStructuredData } from "@/lib/utils/structured-data";
 import { carPageText, loadCar } from "../_lib/car-seo";
 
-/**
- * Whether this dealer's plan offers buyers the assistant, with answers left
- * this month. A failed check hides it rather than taking the page down: the
- * listing matters more than the assistant on it.
- */
 async function assistantOffered(organizationId: string): Promise<boolean> {
   try {
     return await isListingAssistantOffered(organizationId);
@@ -105,12 +100,6 @@ const CarContent = async ({ id, mcpMedium = null }: { id: string; mcpMedium?: st
       />
       <Breadcrumbs car={car} />
 
-      {/*
-        One render of the info card, placed by the grid: second in the DOM
-        (right after the gallery on phones), spanning the side column on
-        desktop. Rendering it twice — once per breakpoint — duplicated the
-        page's h1 and its id.
-      */}
       <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
         <CarImageGallery images={car.images} make={car.make} model={car.model} title={car.title} />
 

@@ -11,13 +11,6 @@ import {
 } from "@/lib/ai/evaluation/report";
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 
-/**
- * The nightly evaluation's reports (eval-report.json, downloaded from the
- * workflow run) for an operator: one run summarized, or two compared. The
- * files are the ones the server was configured with — a caller names no
- * path, so these reads can never be pointed anywhere else on the machine.
- */
-
 const MAX_REPORT_BYTES = 10 * 1024 * 1024;
 /** Per list, and per failure note: a report of a bad night stays readable. */
 const MAX_LISTED = 100;

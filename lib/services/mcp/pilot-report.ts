@@ -6,12 +6,6 @@ import {
   type ToolCallStats,
 } from "@/lib/repositories/mcp/pilot";
 
-/**
- * The public MCP pilot's numbers for a window, as plans/mcp/MCP_WEBMCP_ROADMAP.md
- * (§Pilot) defines them: latency, errors and timeouts, zero results, rate
- * limiting, reach and clicks through to AutoMe. Aggregates only.
- */
-
 export interface PilotReport {
   window: { since: string; until: string };
   totals: {

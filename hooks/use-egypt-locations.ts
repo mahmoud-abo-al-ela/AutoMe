@@ -14,20 +14,6 @@ export interface LocationOption {
   label: string;
 }
 
-/**
- * Options for the country → governorate → city cascade, read straight from
- * `lib/locations`.
- *
- * Replaces three awaited round-trips to an external API that stood on the
- * critical path of onboarding a dealer. Because the data is local, there is no
- * loading state, no failure path and no toast to write: the options are simply
- * there on first paint, and the two forms that use this lost about eighty lines
- * of effects and error handling between them.
- *
- * Labels follow the active locale, so a dealer onboarding in Arabic picks from
- * an Arabic list. The **values are codes and slugs**, never display names, so
- * what gets stored does not change when the reader's language does.
- */
 export function useEgyptLocations(governorateCode?: string | null) {
   const locale = useLocale();
 

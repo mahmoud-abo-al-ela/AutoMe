@@ -1,27 +1,5 @@
 import { cities, governorates } from "egydata";
 
-/**
- * Egypt's governorates and their districts, read from the `egydata` package.
- *
- * This is the single source of truth for what a dealer can pick, what gets
- * stored, and what can be translated — the dropdown, the display lookup and the
- * search aliases all read it, so a value that can be chosen is always a value
- * that can be rendered in both languages.
- *
- * ## What is stored
- *
- * `Organization.region` holds the governorate `code` and `Organization.city`
- * holds the city `slug`. Neither column holds a display name, so nothing has to
- * be re-spelled to be translated, and a dealer switching the site to Arabic
- * sees their own address change language.
- *
- * The slug is ours rather than egydata's numeric id on purpose: these values
- * end up in database rows and in shareable filter URLs, and a third-party
- * package's private numbering is not something to hand that job to. The
- * governorate code is egydata's, but it is a stable mnemonic ("CAI", "GIZ")
- * rather than an ordinal.
- */
-
 export interface EgyptCity {
   /** Stored in `Organization.city`. See `citySlug`. */
   slug: string;

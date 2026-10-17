@@ -17,18 +17,6 @@ import {
 import { failedCriteria, judge } from "@/lib/ai/evaluation/judge";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * Listing translation on save, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation
- *
- * The failure that matters is quiet: a "translation" that comes back in the
- * source language passes every unit test and shows the other half of the
- * market the wrong language. Second to it, the dealer's own text is untrusted
- * input to the model — a sentence that reads like an instruction must be
- * translated, not obeyed.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 const ENGLISH: ListingText = {

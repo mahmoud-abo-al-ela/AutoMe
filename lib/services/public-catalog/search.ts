@@ -6,22 +6,9 @@ import { publicCarDetail, publicCarSummary, type PublicCarDetail, type PublicCar
 import { resolvePlace } from "./place";
 import type { LinkSource } from "./urls";
 
-/**
- * The public car search for readers outside the site (MCP): the site's own
- * engine and visibility, by words only. No embedding and no model call — a
- * search from anonymous AI traffic costs a database query, nothing more
- * (owner's decision, 2026-10-12). Arabic folding, synonyms and typo correction
- * still apply; they are the engine's, not a model's.
- */
-
 /** How far one search may page. A real search reads the first pages; this bounds a crawl. */
 export const PUBLIC_SEARCH_LIMITS = { defaultLimit: 10, maxLimit: 20, maxPage: 20, window: 400 } as const;
 
-/**
- * Sorts both search paths order the same way. "best" is each path's own
- * default — relevance for words, newest without them; "newest" is left out
- * because the words path would ignore it.
- */
 export const PUBLIC_SORTS = ["best", "priceAsc", "priceDesc", "yearAsc", "yearDesc", "mileageAsc", "mileageDesc", "oldest"] as const;
 export type PublicSort = (typeof PUBLIC_SORTS)[number];
 

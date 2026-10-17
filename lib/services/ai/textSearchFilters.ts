@@ -6,13 +6,6 @@ import { textPart } from "@/lib/ai/provider/types";
 import { CAR_COLORS } from "@/lib/constants/car-options";
 import enCarAttributes from "@/messages/en/carAttributes.json";
 
-/**
- * Search filters from a buyer's description. Every field is optional by
- * omission: what the buyer did not say is absent, never empty, so the caller
- * builds a URL without re-checking. Only values the listing filters can match
- * survive as filters — an unknown make or colour becomes a keyword instead,
- * where the text search can still find it.
- */
 export interface TextSearchFilters {
   make?: string;
   bodyType?: string;

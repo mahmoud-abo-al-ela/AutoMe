@@ -5,11 +5,6 @@ import { useCarAttributes } from "@/hooks/use-car-attributes";
 import { buildActiveChips } from "./filter-utils";
 import type { DealershipInventoryFilterState, DealershipInventoryProps, InventorySort } from "../../_lib/detail-types";
 
-/**
- * The multi-select facets are stored as comma-separated strings, and the chip
- * and checkbox handlers address them by name at runtime. Reading them through
- * this keeps that dynamic access in one narrow place.
- */
 const readCsvFilter = (
     filters: DealershipInventoryFilterState,
     field: string

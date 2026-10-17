@@ -9,11 +9,6 @@ import type { AiCallerContext } from "@/lib/ai/client";
 /** No tenant: evaluation calls are never billed to anyone. */
 export const EVAL_CALLER: AiCallerContext = { organizationId: null, userId: null };
 
-/**
- * The limits production uses on the streaming route, so the suite judges the
- * path dealers actually get — including the Gemma fallback when every Flash
- * model is busy or queued.
- */
 export const PRODUCTION_LIMITS = {
   timeoutMs: 170_000,
   budgetMs: 170_000,

@@ -6,20 +6,6 @@ import { Logo } from "./Logo";
 import { useSiteBrandName, useSitePlateBand } from "./SiteBrand";
 import type { PlateBand } from "@/lib/org/client";
 
-/**
- * The public site's loading state for waits with no known layout (Figma:
- * Loader, concept "On the road"): the logo plate holds still while the hero's
- * road dashes run beneath it, so the page reads as on its way. Pages whose
- * layout is known keep their skeletons instead — those make a wait feel
- * shorter than any animation.
- *
- * It fills the content area — the header and tab bar stay usable — and fades
- * in after 300ms, so a fast load shows nothing; with reduced motion the dashes
- * stand still and the words carry it. The plate carries the dealership's name
- * on its subdomain (SiteBrandProvider), as the header does. `label` and
- * `description` replace the generic caption when the wait has a specific
- * reason worth naming (confirming a payment).
- */
 export function RoadLoader({
   label,
   description,

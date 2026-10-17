@@ -18,12 +18,6 @@ vi.mock("@/lib/services/audit/audit", () => ({ auditHelpers: { logTestDriveStatu
 import { updateTestDriveStatus } from "@/lib/services/test-drive/status";
 import { cancelTestDrive, editTestDrive } from "@/lib/services/test-drive/booking";
 
-/**
- * A booking moves only from the status it was checked in. If someone else
- * moved it meanwhile, the write finds nothing and the caller is told — it
- * never lands on top of the other change.
- */
-
 const ORG = "org-1";
 const drive = (status: string) => ({ id: "td-1", organizationId: ORG, userId: "buyer-1", carId: "car-1", status, date: new Date(), startTime: "10:00" });
 

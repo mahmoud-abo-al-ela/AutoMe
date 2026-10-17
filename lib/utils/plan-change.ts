@@ -1,20 +1,3 @@
-/**
- * What switching plan (or billing period) does for a dealership. Shared by
- * the billing page (what the confirmation says) and the server (what it
- * does), so the two cannot disagree.
- *
- * Owner's rules (2026-10-01): an upgrade is paid in full now and starts a new
- * period today; a downgrade waits for the paid period to end. No proration.
- *
- *   none     — already on that plan and period;
- *   pay      — a checkout now, new period from today (an upgrade, or any paid
- *              plan when nothing is paid: free, a trial, past due);
- *   schedule — at the end of the paid period (a cheaper plan, the free plan,
- *              or a switch between monthly and yearly);
- *   apply    — now, with nothing to pay (to the free plan, or a trial's
- *              billing period, when no paid period would be cut short).
- */
-
 export type PlanChange = "none" | "pay" | "schedule" | "apply";
 export type Period = "MONTHLY" | "YEARLY";
 

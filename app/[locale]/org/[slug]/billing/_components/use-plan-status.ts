@@ -8,12 +8,6 @@ import type { BillingPaidAhead, BillingSubscription } from "./_lib/billing-types
 
 export type PlanStatusTone = "neutral" | "good" | "warning" | "danger" | "info";
 
-/**
- * Where the dealership's plan stands, in one line — the header's summary and
- * the line under the plan's name. Ordered by what an owner most needs to
- * know: an overdue payment first, then a plan that is ending or changing,
- * then whether the next period is already paid.
- */
 export function usePlanStatus(subscription: BillingSubscription, paidAhead: BillingPaidAhead) {
   const t = useTranslations("org.billing.current");
   const tPlans = useTranslations("plans");

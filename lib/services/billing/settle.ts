@@ -19,25 +19,6 @@ import {
 import { paidPeriodState } from "./transitions";
 import { emailOwners } from "./notices";
 
-/**
- * Apply a Paymob transaction to the Payment it pays for. The one place a
- * payment changes what a dealership has.
- *
- * The transaction must come from a verified source: a callback whose HMAC
- * checked out, or Paymob's inquiry API. Both the callback and the success
- * page call this, often at the same moment, so it is idempotent: marking the
- * payment PAID is a compare-and-set inside the same database transaction as
- * the purchase, and only the caller that wins it applies anything.
- *
- * What a paid payment does:
- *   SIGNUP  — creates the dealership from the onboarding session, with a
- *             period starting today.
- *   UPGRADE — switches the plan now, with a new period starting today.
- *   RENEWAL — pays for the period after the current one. It takes effect when
- *             the current period ends (now, if it already has), so a
- *             downgrade paid early still waits for the period to end.
- */
-
 export type SettlementResult =
   | { status: "paid"; paymentId: string; purpose: PaymentPurpose; organizationId: string }
   | { status: "already_paid"; paymentId: string; organizationId: string | null }
@@ -63,12 +44,6 @@ export class SettlementError extends Error {
 
 type RejectReason = Extract<SettlementResult, { status: "rejected" }>["reason"];
 
-/**
- * A signed transaction that does not match the payment it names: never
- * applied, logged, and sent to Sentry as its own signal by reason — a
- * mismatch is either a bug in checkout or someone relabelling a payment, and
- * both need a person.
- */
 function rejected(paymentId: string, reason: RejectReason, detail: string): SettlementResult {
   const error = new Error(detail);
   void reportSignal({ name: "billing.payment-rejected", level: "error", tags: { "payment.id": paymentId, reason }, groupBy: reason, error });
@@ -98,12 +73,6 @@ export async function settlePayment(
     return rejected(paymentId, "reference_mismatch", `Paymob transaction ${transaction.id} names payment ${reference}, delivered for ${paymentId}; not applied`);
   }
 
-  // Which payment a transaction settles is named by merchant_order_id, which
-  // Paymob's HMAC does not sign; order.id is signed. Bind them through the
-  // order this payment's own checkout created (providerOrderId, saved before
-  // the buyer ever gets a payment page), so a validly signed transaction
-  // cannot be relabelled onto another pending payment — to mark it paid, or
-  // failed. Before anything is written.
   if (!payment.providerOrderId || String(transaction.order?.id) !== payment.providerOrderId) {
     return rejected(
       paymentId,
@@ -209,11 +178,6 @@ async function prepareSignup(payment: PaymentForSettlement): Promise<PreparedSig
   return { sessionId: session.id, data, ownerId: payment.userId, logoUrl };
 }
 
-/**
- * The slug the dealership chose, or the first free variant of it: someone
- * else may have taken it between checkout and payment, and a paid sign-up
- * cannot be refused for that.
- */
 async function freeSlug(tx: Prisma.TransactionClient, slug: string): Promise<string> {
   if (!(await paymentRepo.isSlugTaken(tx, slug))) return slug;
   for (let n = 2; n <= 20; n += 1) {
@@ -284,11 +248,6 @@ async function applyUpgrade(tx: Prisma.TransactionClient, payment: PaymentForSet
 
 // ---------------------------------------------------------------- renewal
 
-/**
- * The period a renewal buys. It follows the current one while the
- * subscription is still a paid plan within its grace; after that (dropped to
- * the free plan, or canceled) it is a fresh start from today.
- */
 type SettlementSubscription = NonNullable<NonNullable<PaymentForSettlement["organization"]>["subscription"]>;
 
 export function renewalPeriodFor(

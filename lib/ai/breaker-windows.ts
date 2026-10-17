@@ -1,13 +1,5 @@
 import type { Redis } from "@upstash/redis";
 
-/**
- * The breaker's Redis counters and how they are read: fixed windows, read so
- * they behave like the rolling ones the ledger gives. The minute is this
- * bucket plus the previous one weighted by how much of it is still inside the
- * last 60 s; the day is the last 24 hourly buckets. Shared by the breaker,
- * which also writes them, and breakerSnapshot, which must only read them.
- */
-
 export const MINUTE_MS = 60_000;
 export const HOUR_MS = 60 * MINUTE_MS;
 

@@ -19,11 +19,6 @@ import { cn } from "@/lib/utils";
 import { CarEditor } from "../../_components/editor/CarEditor";
 import { StatusPill } from "../../_components/ledger/ledger-shared";
 
-/**
- * Editing a car: the same four steps as adding, every one open from the
- * rail, with "Save changes" on each. The heading is the car itself — its name
- * as buyers read it, its status, and a link to the live listing.
- */
 export default function EditCarPage() {
   const t = useTranslations("org.carForm.edit");
   const tEditor = useTranslations("org.carForm.editor");

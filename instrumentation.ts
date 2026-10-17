@@ -1,15 +1,6 @@
 import type { Instrumentation } from "next";
 import { sentryEnabled } from "@/lib/sentry-enabled";
 
-/**
- * Sentry is imported dynamically, inside the `sentryEnabled` branch.
- *
- * A top-level `import * as Sentry` is static, so the bundler pulls the whole
- * SDK — plus its OpenTelemetry dependency tree — into /instrumentation even
- * when `register()` returns immediately. That is the ~10s dev-boot cost this
- * flag exists to avoid, so the import has to be lazy for the flag to mean
- * anything.
- */
 export async function register() {
   if (!sentryEnabled) return;
 
