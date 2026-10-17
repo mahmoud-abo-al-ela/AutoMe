@@ -42,6 +42,7 @@ const source: ListingSource = {
   history: {},
   terms: {},
   otherCars: [],
+  otherCarsMatchQuestion: null,
   marketPrices: null,
   dealerAnswers: [],
 };
@@ -110,6 +111,13 @@ describe("what AutoMe already knows", () => {
     expect(facts.photos).toEqual(["Black leather seats"]);
     expect((facts.dealership as { rating: unknown }).rating).toEqual({ average: 4.6, outOf: 5, reviews: 12 });
     expect((facts.otherCars as { price: unknown }[])[0].price).toEqual({ amount: 900000, currency: "EGP" });
+  });
+
+  it("says whether the other cars match the question only when that is known and the cars were read", () => {
+    expect(buildListingFacts({ ...source, otherCarsMatchQuestion: false }).otherCarsMatchQuestion).toBe(false);
+    expect(buildListingFacts({ ...source, otherCarsMatchQuestion: true }).otherCarsMatchQuestion).toBe(true);
+    expect(buildListingFacts(source)).not.toHaveProperty("otherCarsMatchQuestion");
+    expect(buildListingFacts({ ...source, otherCars: null, otherCarsMatchQuestion: false })).not.toHaveProperty("otherCarsMatchQuestion");
   });
 
   it("numbers the other cars for an answer to name, and keeps their ids and photos from the model", () => {

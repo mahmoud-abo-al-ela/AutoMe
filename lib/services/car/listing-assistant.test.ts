@@ -339,6 +339,7 @@ describe("askAboutListing", () => {
       organizationId: "org-dealer", excludeCarId: "car-1", question: "عندكم كيا؟", price: 850000, take: 8,
     });
     expect(answerListingQuestion.mock.calls[0][1].otherCars.map((c: { model: string }) => c.model)).toEqual(["Sportage"]);
+    expect(answerListingQuestion.mock.calls[0][1].otherCarsMatchQuestion).toBe(true);
     // The card is the matched car, by its position in what the model was shown.
     expect(reply).toMatchObject({ cars: [{ id: "car-sp", model: "Sportage", price: 1900000, image: "https://img/sp.jpg" }] });
   });
@@ -350,6 +351,18 @@ describe("askAboutListing", () => {
     ]);
     await askAboutListing("car-1", "Any Kia?", "en", null);
     expect(answerListingQuestion.mock.calls[0][1].otherCars.map((c: { model: string }) => c.model)).toEqual(["Elantra"]);
+    // Unknown, so the model is never told the dealership has no Kia.
+    expect(answerListingQuestion.mock.calls[0][1]).not.toHaveProperty("otherCarsMatchQuestion");
+  });
+
+  it("tells the model nothing in stock matches when the question names no car the dealership has", async () => {
+    findOtherAvailableCars.mockResolvedValue([
+      { id: "car-el", images: [], year: 2019, make: "Hyundai", model: "Elantra", color: "Black", price: "860000", mileage: 1, bodyType: "Sedan", transmission: "Automatic", fuelType: "Petrol" },
+    ]);
+    await askAboutListing("car-1", "Do you have a BMW?", "en", null);
+    const facts = answerListingQuestion.mock.calls[0][1];
+    expect(facts.otherCars.map((c: { model: string }) => c.model)).toEqual(["Elantra"]);
+    expect(facts.otherCarsMatchQuestion).toBe(false);
   });
 
   it("still offers the cars the question names when the closest-in-price read fails", async () => {

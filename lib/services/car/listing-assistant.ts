@@ -121,7 +121,7 @@ export async function askAboutListing(
   }
   trace?.step(
     `plan ✓ assistant enabled (${allowance.priority} priority) · data: ` +
-      `${otherCars === null ? "other cars ✗ (read failed)" : `${otherCars.length} other cars (${alternatives.matched ? "the question names them" : "closest in price"})`} · ` +
+      `${otherCars === null ? "other cars ✗ (read failed)" : `${otherCars.length} other cars (${alternatives.matched ? "the question names them" : alternatives.matched === false ? "closest in price; the question names none" : "closest in price; matching failed"})`} · ` +
       `${marketPrices ? `price range ✓ (${marketPrices.listings} × ${marketPrices.compared.model ?? marketPrices.compared.bodyType})` : "price range ✗ (under 3 comparable)"} · ` +
       `${dealerAnswers.length} dealer answers`
   );
@@ -153,6 +153,7 @@ export async function askAboutListing(
     // The note in the buyer's language, as the rest of the record is.
     terms: statedTerms(organization, locale),
     otherCars,
+    otherCarsMatchQuestion: alternatives.matched,
     marketPrices,
     dealerAnswers,
   });
@@ -274,8 +275,8 @@ function photoDescriptions(images: string[], stored: unknown, locale: Locale): s
 /** The dealership's other cars the model is shown, and why those. */
 interface OtherCars {
   cars: OtherCarRow[] | null;
-  /** The cars the question names, rather than the ones closest in price. */
-  matched: boolean;
+  /** The cars the question names, rather than the ones closest in price; null when matching could not run. */
+  matched: boolean | null;
 }
 
 type AlternativeRow = Omit<OtherCarRow, "price" | "image"> & { price: unknown; images: string[] | null };
@@ -292,15 +293,16 @@ async function otherCarsFor(organizationId: string, carId: string, price: number
       .findOtherAvailableCarsMatching({ organizationId, excludeCarId: carId, question, price, take: MAX_OTHER_CARS })
       .catch((error: unknown) => {
         logError("Matching the dealership's cars to a buyer's question failed; offering the closest in price", error);
-        return [];
+        return null;
       }),
     carRepository.findOtherAvailableCars(organizationId, carId).catch((error: unknown) => {
       logError("Loading the dealership's other cars failed; answering without them", error);
       return null;
     }),
   ]);
-  if (matching.length > 0) return { cars: matching.map(toOtherCar), matched: true };
-  return { cars: recent && closestByPrice(recent.map(toOtherCar), price), matched: false };
+  if (matching && matching.length > 0) return { cars: matching.map(toOtherCar), matched: true };
+  // A failed match is unknown, never "none in stock": the model must not tell a buyer the dealer has none.
+  return { cars: recent && closestByPrice(recent.map(toOtherCar), price), matched: matching ? false : null };
 }
 
 function actionFor(
