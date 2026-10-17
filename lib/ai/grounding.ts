@@ -23,6 +23,7 @@ export const LISTING_FACT_KEYS = [
   "history",
   "dealershipTerms",
   "otherCars",
+  "otherCarsMatchQuestion",
   "marketPrices",
   "dealerAnswers",
 ] as const;
@@ -82,6 +83,8 @@ export interface ListingSource {
    * empty list is a fact ("none for sale"); null means it could not be read.
    */
   otherCars: OtherCar[] | null;
+  /** Whether otherCars are the ones the buyer's words name; false means none in stock match them, null unknown. */
+  otherCarsMatchQuestion: boolean | null;
   /** How this price sits among comparable listings — summarizeMarketPrices. */
   marketPrices: MarketPrices | null;
   /**
@@ -292,6 +295,7 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
             fuelType: car.fuelType,
           }))
         : undefined,
+    otherCarsMatchQuestion: source.otherCars !== null ? (source.otherCarsMatchQuestion ?? undefined) : undefined,
     marketPrices: source.marketPrices ?? undefined,
     dealerAnswers: dealerAnswers(source.dealerAnswers),
   };

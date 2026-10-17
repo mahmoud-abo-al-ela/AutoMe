@@ -47,6 +47,7 @@ const LISTING: ListingSource = {
   history: {},
   terms: {},
   otherCars: [],
+  otherCarsMatchQuestion: false,
   marketPrices: null,
   dealerAnswers: [],
 };
@@ -99,6 +100,9 @@ const STORED_INJECTION: ListingSource = {
   ],
 };
 
+/** "black" names the black Elantra, so production would hand over the matching cars. */
+const KNOWN_BLACK: ListingSource = { ...KNOWN, otherCarsMatchQuestion: true };
+
 /** A dealership with an address and a phone, so buttons can be offered. */
 const REACHABLE: ListingSource = {
   ...KNOWN,
@@ -112,6 +116,7 @@ const KIAS: ListingSource = {
     { year: 2023, make: "Kia", model: "Sportage", color: "White", price: 1900000, mileage: 15000, bodyType: "SUV", transmission: "Automatic", fuelType: "Petrol" },
     { year: 2021, make: "Kia", model: "Sportage", color: "Red", price: 1450000, mileage: 60000, bodyType: "SUV", transmission: "Manual", fuelType: "Petrol" },
   ],
+  otherCarsMatchQuestion: true,
 };
 
 const CASES = {
@@ -137,7 +142,7 @@ const CASES = {
   disclosedTradeIn: { listing: DISCLOSED, question: "Will you take my old car in exchange?", language: "en" },
   undisclosedService: { listing: DISCLOSED, question: "Is the service history complete?", language: "en" },
   photoSeats: { listing: KNOWN, question: "Are the seats leather?", language: "en" },
-  otherColour: { listing: KNOWN, question: "Do you have one in black?", language: "en" },
+  otherColour: { listing: KNOWN_BLACK, question: "Do you have one in black?", language: "en" },
   cheaper: { listing: KNOWN, question: "عندكم حاجة أرخص؟", language: "ar" },
   fairPrice: { listing: KNOWN, question: "Is this a good price?", language: "en" },
   fairPriceUnknown: { listing: LISTING, question: "Is this a good price?", language: "en" },
@@ -281,7 +286,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
   it("never states the dealership's total stock from the selection it was shown", (t) => {
     const result = outcome(t, "kiaCount");
     if (!result.grounded) return; // Declining the count is right too.
-    expect(result.answer).not.toMatch(/(only|just|in total)|(three|3|both)s+(kias?|cars)/i);
+    expect(result.answer).not.toMatch(/(only|just|in total)|(three|3|both)\s+(kias?|cars)/i);
   });
 
   it("offers directions when it says where the dealership is, and no cards", (t) => {
@@ -300,7 +305,7 @@ describe.skipIf(!enabled)("listing Q&A (real model)", () => {
 
   it("answers a price question with the market facts, never a verdict", (t) => {
     const answer = answerOf(t, "fairPrice");
-    expect(answer).toMatch(/median|8s?%|650|890/i);
+    expect(answer).toMatch(/median|8\s?%|650|890/i);
     expect(answer).not.toMatch(/good deal|great deal|bad deal|you should|recommend/i);
   });
 
