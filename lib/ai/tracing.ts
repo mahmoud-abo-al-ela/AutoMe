@@ -1,18 +1,5 @@
 import { sentryEnabled } from "@/lib/sentry-enabled";
 
-/**
- * Spans around AI work, so a slow request in Sentry shows where its time went:
- * which feature, which models were tried, how long each took, what it spent.
- *
- * Attribute names follow OpenTelemetry's generative-AI conventions
- * (`gen_ai.*`), which Sentry reads for its AI views. Metadata only — model,
- * tokens, outcome. **Never prompts, replies or image bytes**: spans leave the
- * building, and the content lives in AiTrace, redacted, under our control.
- *
- * Sentry is imported lazily and only when enabled, like telemetry.ts: in
- * development the SDK is not loaded at all and a span is a plain call.
- */
-
 export type SpanAttributes = Record<string, string | number | boolean | undefined>;
 
 export interface AiSpan {

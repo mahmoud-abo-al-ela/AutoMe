@@ -13,12 +13,6 @@ import {
   syncDealershipProfileTextFromStorefront,
 } from "@/lib/services/dealership/profile-translation";
 
-/**
- * A storefront visit that finds untranslated text translates it — one visit
- * per dealership per claim window, not every visit. A started translation
- * shows here as the profile being read (a null read ends it early).
- */
-
 const caller = { organizationId: "org-1", userId: null, priority: "low" as const };
 const translationsStarted = () => findDealershipProfileText.mock.calls.length;
 

@@ -21,16 +21,6 @@ export async function getActiveImpersonationCount() {
   return impersonationRepo.countOpenSessionsStartedSince(lifetimeStart());
 }
 
-/**
- * Start an impersonation session
- * @param {Object} params
- * @param {string} params.superAdminId - The Super Admin's user ID
- * @param {string} params.superAdminEmail - The Super Admin's email
- * @param {string} params.targetUserId - The user ID to impersonate
- * @param {string} params.targetOrganizationId - The organization to access
- * @param {string} params.reason - Required reason for impersonation
- * @returns {Promise<Object>} The impersonation session
- */
 export async function startImpersonation({
   superAdminId,
   superAdminEmail,
@@ -90,11 +80,6 @@ export async function startImpersonation({
   };
 }
 
-/**
- * End an impersonation session
- * @param {string} sessionId - The impersonation session ID
- * @param {string} superAdminEmail - The Super Admin's email for logging
- */
 export async function endImpersonation(
   sessionId: string,
   superAdminEmail?: string | null

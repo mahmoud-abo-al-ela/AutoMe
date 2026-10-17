@@ -2,13 +2,6 @@ import * as buyerQuestionRepository from "@/lib/repositories/buyer-question";
 import { NotFoundError } from "@/lib/utils/errors";
 import { answerSuggestions } from "./meaning";
 
-/**
- * The dealer's inbox of questions the listing assistant could not answer.
- *
- * Every read and write is scoped to the dealership inside the query, so an id
- * from another dealership matches nothing — and reads as not found.
- */
-
 type InboxView = Parameters<typeof buyerQuestionRepository.findBuyerQuestions>[1];
 
 /** One page of a view, every view's count, and — for open questions — answers worth reusing. */

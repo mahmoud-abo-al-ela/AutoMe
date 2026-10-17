@@ -21,13 +21,6 @@ export async function findPayingSubscriptions() {
   });
 }
 
-/*
- * The events each overview metric counts, from `since` on: one row per paid
- * invoice, new dealership, car, buyer or test-drive request. The service
- * buckets them by Cairo day. Two periods' worth of rows is small at the
- * platform's size; past a few hundred thousand, count per day in SQL instead.
- */
-
 export async function findPaidPayments(since: Date) {
   return db.payment.findMany({
     where: { status: "PAID", paidAt: { gte: since } },

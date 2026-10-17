@@ -1,22 +1,5 @@
 import { sentryEnabled } from "@/lib/sentry-enabled";
 
-/**
- * What AutoMe tells Sentry beyond crashes, and how it is grouped so that one
- * alert rule can watch each kind (docs/observability-runbook.md).
- *
- * Two entry points:
- * - reportUnexpected: an error someone caught and logged (logError) that was
- *   not an expected, typed one. Before this, those stopped at the console —
- *   a Server Action wrapped in withErrorHandling, a route handler's catch, a
- *   failed background job never reached Sentry at all.
- * - reportSignal: a named event worth an alert even though nothing crashed —
- *   access refused, a support session, a subscription falling behind.
- *
- * Tags carry ids and codes only, never what a person wrote. The SDK is
- * imported lazily and only on these paths (as in lib/ai/telemetry.ts), and
- * nothing here may throw into the request it reports on.
- */
-
 export type SignalName =
   | "authz.refused"
   | "support-session.started"

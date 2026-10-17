@@ -1,14 +1,3 @@
-/**
- * Drafts kept in the browser, in IndexedDB rather than localStorage: a draft
- * holds photos, and IndexedDB stores File objects as they are (structured
- * clone) with room for them, where localStorage holds only strings in a few
- * megabytes.
- *
- * Best effort throughout. A browser that refuses storage (a private window,
- * blocked site data, an old engine) gets nothing saved and an empty read —
- * the form works exactly as it would without drafts.
- */
-
 const DATABASE = "autome";
 const STORE = "drafts";
 

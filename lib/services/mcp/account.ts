@@ -5,16 +5,6 @@ import { getTestDrives } from "@/lib/services/test-drive/status";
 import { getUserWishlist, setCarSaved } from "@/lib/services/wishlist";
 import { ServiceUnavailableError } from "@/lib/utils/errors";
 
-/**
- * The signed-in buyer's MCP endpoint (app/api/mcp/account): who is calling,
- * how a client finds out how to sign in, and the buyer's own data as tools
- * return it (plans/mcp AUTH_MCP_REVIEW.md, D-27).
- *
- * Identity comes only from the verified access token's Clerk user — no tool
- * names a user — and every read goes through the service the site's own
- * pages use, with its scoping and the public visibility rule.
- */
-
 /** Off unless MCP_ACCOUNT_ENABLED is "true" — and off in production until Clerk's OAuth-token pricing is confirmed (D-27). */
 export const accountMcpEnabled = () => process.env.MCP_ACCOUNT_ENABLED === "true";
 
@@ -24,11 +14,6 @@ export const ACCOUNT_METADATA_PATH = `/.well-known/oauth-protected-resource${ACC
 /** Lists are short: an assistant reads them, a person does not page through them. */
 const PAGE_SIZE = 10;
 
-/**
- * The OAuth authorization server: the Clerk instance's Frontend API, which
- * the publishable key encodes ("pk_test_" + base64("<host>$")) — so it is
- * always the instance the app itself signs people in with.
- */
 export function oauthIssuer(): string {
   const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
   const encoded = key.replace(/^pk_(test|live)_/, "");
@@ -58,12 +43,6 @@ export function accountResourceMetadata() {
   };
 }
 
-/**
- * The AutoMe user an access token belongs to, or null — an unknown or deleted
- * account. With the dealerships they work at, for the buyer policy: staff may
- * not save or book their own dealership's cars, here as on the site. An
- * OAuth token is never a support session, so never impersonated.
- */
 export async function resolveAccountCaller(clerkUserId: string) {
   const user = await userRepository.findUserByClerkIdWithMemberships(clerkUserId);
   if (!user?.id) return null;

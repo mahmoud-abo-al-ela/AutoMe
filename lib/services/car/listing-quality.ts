@@ -1,15 +1,3 @@
-/**
- * The deterministic half of the listing-quality coach.
- *
- * These rules decide WHAT is weak; the model only writes advice for what they
- * flagged (see coachListing). So the score is reproducible, costs nothing, and
- * still works on a plan without AI or when the provider is down — the coach
- * degrades to its rule-based half rather than disappearing.
- *
- * Deliberately few rules, each one something a buyer demonstrably notices. A
- * coach that nags about everything is ignored about everything.
- */
-
 export type IssueSeverity = "high" | "medium" | "low";
 
 export const LISTING_ISSUE_CODES = [

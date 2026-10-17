@@ -1,9 +1,3 @@
-/**
- * The Zod schemas every action and route validates its input with, one file
- * per domain. The Zod schema is the runtime contract; z.infer makes it the
- * compile-time one too, so action inputs never get hand-written a second time
- * (they'd drift).
- */
 export * from "./car";
 export * from "./dealership";
 export * from "./team";

@@ -1,11 +1,5 @@
 import type { CarForEmbedding } from "@/lib/services/car/embedding-text";
 
-/**
- * The search evaluation's catalogue: listings as Egyptian dealers write them,
- * and what buyers type looking for them — in English, Modern Standard Arabic
- * and Egyptian Arabic, often in words the listing never uses.
- */
-
 const base: Omit<CarForEmbedding, "make" | "model" | "year" | "bodyType"> = {
   fuelType: "Gasoline",
   title: null,

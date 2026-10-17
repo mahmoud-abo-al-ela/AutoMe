@@ -2,15 +2,6 @@ import type { MetadataRoute } from "next";
 import { routing, type Locale } from "@/i18n/routing";
 import { PROTECTED_ROUTES, SUPER_ADMIN_ROUTES } from "@/lib/route-policy";
 
-/**
- * Metadata helpers with no JSX, deliberately separate from `seo.tsx`.
- *
- * That file exports a `StructuredData` component, which makes it a `.tsx` —
- * and importing a JSX module into `generateMetadata`, which renders nothing,
- * drags a React component into every metadata request for no reason. Keeping
- * the pure helpers here also lets the node test project load them directly.
- */
-
 /** hreflang tags. Region-qualified: the market is Egypt, not the anglophone world. */
 const HREFLANG: Record<Locale, string> = { en: "en-EG", ar: "ar-EG" };
 
@@ -25,11 +16,6 @@ export function mainOrigin(): string {
   );
 }
 
-/**
- * The locale-less path as it follows the locale segment. The home page is
- * `/en`, not `/en/` — the app does not use trailing slashes, and a canonical
- * that disagrees with the URL actually served is a redirect Google must follow.
- */
 function pathSuffix(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
   return clean === "/" ? "" : clean;
@@ -51,20 +37,6 @@ function languageUrls(path: string, origin: string): Record<string, string> {
   return languages;
 }
 
-/**
- * Canonical URL and hreflang alternates for a page that exists in every locale.
- *
- * Without `alternates.languages`, Google treats `/en/cars/x` and `/ar/cars/x`
- * as duplicates and picks one to index — which, since it crawls predominantly
- * from US IPs, is unlikely to be the Arabic half of an Egypt-first marketplace.
- *
- * `x-default` points at the default locale rather than at an unprefixed URL,
- * because `localePrefix: "always"` means no unprefixed URL exists.
- *
- * Takes the locale-less path (`/cars/abc123`). `origin` defaults to the main
- * domain; a page whose content differs on a dealership subdomain passes that
- * subdomain's origin instead (see `lib/utils/page-seo.ts`).
- */
 export function localeAlternates(
   path: string,
   locale: Locale,
@@ -78,14 +50,6 @@ export function localeAlternates(
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
-/**
- * One sitemap entry per locale for a page, each listing all of its siblings.
- *
- * Google reads hreflang from the sitemap as readily as from the page, and it
- * requires the set to be complete on every member — an entry that omits
- * itself, or lists siblings the others do not, is ignored. So every entry
- * carries the identical `languages` map, and only `url` differs.
- */
 export function sitemapEntries(
   path: string,
   fields: Omit<SitemapEntry, "url" | "alternates"> = {},
@@ -99,12 +63,6 @@ export function sitemapEntries(
   }));
 }
 
-/**
- * Pages a crawler has no business fetching, beyond the signed-in ones: the
- * auth screens, the post-sign-in bounce, the dealer sign-up wizard, and the
- * compare page, whose every URL is a different query-string permutation of
- * cars that already have their own pages.
- */
 const UNINDEXED_PUBLIC_PATHS = [
   "/sign-in",
   "/sign-up",
@@ -113,12 +71,6 @@ const UNINDEXED_PUBLIC_PATHS = [
   "/compare",
 ];
 
-/**
- * The robots.txt `Disallow` list, derived from the route policy rather than
- * restated, so a newly protected surface is kept out of the index by the same
- * edit that puts it behind sign-in. Robots paths are prefixes, so `/en/org`
- * covers everything under it; the route-policy `(.*)` suffix is dropped.
- */
 export function crawlDisallowPaths(): string[] {
   const bases = [
     ...PROTECTED_ROUTES,
@@ -140,11 +92,6 @@ export function openGraphAlternateLocales(locale: Locale): string[] {
   return routing.locales.filter((l) => l !== locale).map((l) => OG_LOCALE[l]);
 }
 
-/**
- * Whether a page title still fits a results line (about 60 characters) once
- * the root layout's " | AutoMe" template is appended. A longer one is cut off
- * mid-word in results, so callers fall back to a shorter form instead.
- */
 export const TITLE_LIMIT = 60;
 const TITLE_SUFFIX = " | AutoMe";
 
@@ -155,12 +102,6 @@ export function fitsTitle(title: string): boolean {
 /** Meta descriptions are truncated around 155-160 characters in results. */
 export const META_DESCRIPTION_LIMIT = 155;
 
-/**
- * Trim text to fit a meta description: collapse whitespace, cut on a word
- * boundary rather than mid-word, and only add an ellipsis when something was
- * actually removed. The 0.6 guard keeps a single very long word from collapsing
- * the result to almost nothing.
- */
 export function truncateForMeta(
   text: string,
   limit = META_DESCRIPTION_LIMIT

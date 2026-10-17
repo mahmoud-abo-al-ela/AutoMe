@@ -1,23 +1,5 @@
 import { expandSearchTerm } from "@/lib/locations";
 
-/**
- * The `where` fragment for a dealership free-text search.
- *
- * Extracted because the same block was written out twice in listing.js, once
- * for the listing query and once for the export query, and the two had to be
- * kept in step by hand.
- *
- * Token-based: every word must appear in at least one field (AND across words,
- * OR across fields), so "cairo gallery" matches "Cairo Auto Gallery", which a
- * single substring `contains` on the whole phrase would miss.
- *
- * Each word is also expanded to the value the column actually holds, so a
- * reader who sees "القاهرة" on the page can type it back and find Cairo. Both
- * the whole phrase and the individual words are expanded: "المحلة الكبرى" is a
- * two-word name for one stored value, while "معرض القاهرة" is a free word next
- * to a place name.
- */
-
 /** Free text, matched by substring. */
 const TEXT_FIELDS = ["name", "description", "address"];
 

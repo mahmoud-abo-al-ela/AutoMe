@@ -1,9 +1,3 @@
-/**
- * The evaluation report: what one run of the real-model suites found, and how
- * it compares with the committed baseline. Pure — the reporter writes it, the
- * compare script reads it, and both are tested without a model.
- */
-
 export type CaseOutcome = "pass" | "fail" | "inconclusive";
 
 export interface ReportedCall {
@@ -57,11 +51,6 @@ export const isAdvisory = (id: string) => id.includes(ADVISORY_MARK);
 export interface Comparison {
   /** Passed in the baseline, failed now — the only thing that fails a run. */
   regressions: string[];
-  /**
-   * In the baseline, in a suite this run executed, but absent from it — a
-   * renamed, deleted or no-longer-collected case. Fails the run, like a
-   * regression, until the baseline is updated to accept it.
-   */
   missing: string[];
   /**
    * Every assertion that failed this run, regression or not — with no

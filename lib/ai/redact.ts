@@ -1,15 +1,6 @@
 import { createHash } from "node:crypto";
 import type { AiPart } from "@/lib/ai/provider/types";
 
-/**
- * What a trace may keep of an AI call's input and output.
- *
- * Text is kept with contact details replaced — an email, a phone number
- * (Western or Arabic-Indic digits), a link — because a buyer's question can
- * carry their own, and a debug record has no use for them. Images are never
- * kept: a digest and a size say which photo it was without holding it.
- */
-
 const REDACTIONS: [RegExp, string][] = [
   [/https?:\/\/\S+|www\.\S+/gi, "[link]"],
   [/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, "[email]"],

@@ -10,13 +10,6 @@ import {
 import { revalidateLocalized } from "@/lib/utils/revalidate";
 import type { CallerContext, PublicTool } from "../public/tool";
 
-/**
- * The signed-in buyer's tools (plans/mcp D-27). Each acts on the account the
- * access token belongs to and on nothing else: no input names a user. Writes
- * set a state rather than toggle one, so a client that repeats a call gets
- * what it asked for, not the opposite. Test drives follow in their own PR.
- */
-
 export interface AccountCallerContext extends CallerContext {
   user: AccountCaller;
   /** The app the person signed in with, to name it where it acted for them; null if unknown. */

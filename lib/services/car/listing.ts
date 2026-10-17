@@ -4,11 +4,6 @@ import * as userRepository from "@/lib/repositories/user";
 import { searchMeaning, type SearchMeaning } from "@/lib/services/car/search-meaning";
 import { writtenForm } from "@/lib/search/highlight";
 
-/**
- * The car listing filter set, as understood by buildCarWhereClause. Declared
- * here rather than in the repository because lib/repositories/car/* is still
- * JavaScript (its where-builder is deferred); move this there on conversion.
- */
 export interface CarFilters {
   organizationId?: string;
   dealership?: string;
@@ -41,12 +36,6 @@ export interface CarFilters {
   meaning?: SearchMeaning | null;
 }
 
-/**
- * How a search's words matched the cars (see searchCarsRanked): all of them,
- * some (no car has them all), or by meaning alone (no word did) — the words no
- * car in scope has, which were set aside, and the typos read as known words
- * (`to` holds several when the search could not tell which was meant).
- */
 export interface SearchMatch {
   match: "all" | "some" | "meaning" | "none";
   missing: string[];
@@ -118,11 +107,6 @@ export async function getCars(
 /** The fields a car is shown and found by. */
 const CAR_TEXT_FIELDS = ["titleAr", "titleEn", "title", "make", "model", "descriptionAr", "descriptionEn", "description"];
 
-/**
- * The corrected words as the cars found spell them. The vocabulary holds words
- * folded for search, so a correction would read "فتحه" where the listings say
- * "فتحة"; the results have the word, written right.
- */
 function spellCorrections(match: SearchMatch, cars: unknown[]): SearchMatch {
   if (match.corrected.length === 0) return match;
   const texts = cars.flatMap((car) => {
@@ -203,12 +187,6 @@ export async function getFilterOptions(
   };
 }
 
-/**
- * The options for a search with text, counted over the cars its results are
- * made of (searchFacets) — or null when there is no text, or when its words
- * empty a search the buyer also filtered: getCars then shows what the filters
- * find, and the options follow it.
- */
 async function searchOptions(queryFilters: CarFilters, baseFilters: CarFilters) {
   const search = queryFilters.search?.trim();
   if (!search) return null;

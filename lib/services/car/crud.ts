@@ -15,11 +15,6 @@ import { licenseMonthToDate } from "@/lib/utils/car-disclosures";
 import { discardUploads, sortEditedPhotos } from "./photos";
 import type { CarInput, UpdateCarInput, UpdateCarFullInput } from "@/lib/validations/schemas";
 
-/**
- * The caller may act in this dealership: a member of it, or a platform admin
- * in a verified support session for exactly this dealership. The ADMIN role
- * alone is not enough — sessions are how admins act, time-boxed and audited.
- */
 async function assertCanActIn(
   user: { memberships?: { organizationId: string }[] | null },
   organizationId: string,
@@ -39,11 +34,6 @@ function toCarStatus(status: string | null | undefined): CarStatus {
   return normalizeCarStatus(status) ?? "AVAILABLE";
 }
 
-/**
- * The disclosure columns from validated input. `undefined` leaves a column
- * untouched (a caller that does not send them, like the AI draft path); `null`
- * clears it, which is how the form says "not stated".
- */
 function disclosureColumns(data: CarInput | UpdateCarFullInput) {
   return {
     originalPaint: data.originalPaint,
@@ -178,12 +168,6 @@ export async function updateCar(
   return updated;
 }
 
-/**
- * Change the status or featured flag of several of the organization's cars at
- * once, from the Cars table's selection. The repository scopes the write by
- * organization, so a foreign id is skipped rather than trusted; returns how
- * many cars changed.
- */
 export async function updateCars(
   carIds: string[],
   updateData: UpdateCarInput,

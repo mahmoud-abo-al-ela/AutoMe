@@ -5,20 +5,6 @@ import * as testDriveService from "@/lib/services/test-drive";
 import { NotFoundError, ValidationError } from "@/lib/utils/errors";
 import type { AccountCaller } from "./account";
 
-/**
- * Test drives through the signed-in MCP endpoint (plans/mcp D-27, PR 15d):
- * the same request and cancellation the site's buttons make — the buyer
- * policy, PR 12's race-safe booking, the dealership's and the buyer's emails
- * — for the account the access token belongs to and no other.
- *
- * What differs from the site is what no person clicked. A request names the
- * app that made it in the buyer's confirmation email, with a link to cancel;
- * each request and cancellation is in the dealer's Activity log with that
- * app; a daily limit applies (the tool, enforceMcpAccountTestDriveLimit).
- * A refusal the agent can act on — a taken slot, an existing booking — is an
- * answer, not an error, so it can tell the person why.
- */
-
 /** Who to name for a request an app made: "Claude" for Anthropic's apps, else a generic name. */
 export function mcpClientLabel(clientId: string | null | undefined): string | null {
   if (!clientId) return null;

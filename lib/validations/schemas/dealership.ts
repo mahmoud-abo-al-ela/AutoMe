@@ -51,11 +51,6 @@ export const emailPreferencesSchema = z.object({
 
 export type EmailPreferencesInput = z.infer<typeof emailPreferencesSchema>;
 
-/**
- * A dealership's standing terms for buyers — see lib/utils/car-disclosures.
- * The financing note is short because the buyer assistant sends it with every
- * question asked on the dealer's listings.
- */
 export const dealershipTermsSchema = z.object({
   offersFinancing: z.boolean().nullable(),
   financingNote: z.string().trim().max(200).nullable(),
@@ -76,12 +71,6 @@ export type OrganizationInput = z.infer<typeof organizationSchema>;
 export type OrganizationProfileInput = z.infer<typeof organizationProfileSchema>;
 export type DealershipReviewInput = z.infer<typeof dealershipReviewSchema>;
 
-/**
- * A public dealership page's own reads (getDealershipCars, its filters, its
- * reviews). The dealership is named by its slug and resolved server side to an
- * active one — a request never names a dealership by id, or a suspended one's
- * stock would be one call away.
- */
 export const dealershipSlugSchema = z.string().trim().min(1).max(100);
 
 const word = z.string().trim().max(60);
@@ -112,12 +101,6 @@ export const publicPageSchema = z.object({
 export type DealershipCarFiltersInput = z.infer<typeof dealershipCarFiltersSchema>;
 export type PublicPageInput = z.infer<typeof publicPageSchema>;
 
-/**
- * The public dealerships list (/dealerships): what its filter panel and URL
- * can set, and nothing else — not the plan a dealer pays for, which is the
- * dealer's business. Values come from a URL a visitor can edit, so a bad one
- * falls back to its default instead of breaking the page.
- */
 export const dealershipListFiltersSchema = z.object({
   search: z.string().trim().max(100).optional().catch(undefined),
   city: z.string().trim().max(60).optional().catch(undefined),

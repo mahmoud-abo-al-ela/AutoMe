@@ -1,17 +1,5 @@
 import { ServiceUnavailableError } from "@/lib/utils/errors";
 
-/**
- * Paymob credentials, read from the environment when a payment needs them.
- *
- * Fails closed: a missing variable throws rather than letting a checkout start
- * without a callback secret, or a callback be "verified" against an empty
- * HMAC key. The throw names the variables for the log, and the user sees the
- * translated "billing isn't available" message.
- *
- * Test and live keys must be used with integration IDs of the same mode;
- * mixing them makes Paymob answer 404 "Integration ID/Name does not exist".
- */
-
 /** Egypt's Paymob host. Test and live share it; the keys pick the mode. */
 export const PAYMOB_BASE_URL = "https://accept.paymob.com";
 
@@ -52,6 +40,7 @@ function integrationId(name: string): number | null {
   return id;
 }
 
+// Fails closed: a missing variable throws rather than verifying callbacks against an empty HMAC key.
 export function paymobConfig(): PaymobConfig {
   const missing = REQUIRED.filter((name) => !process.env[name]?.trim());
   if (missing.length > 0) {

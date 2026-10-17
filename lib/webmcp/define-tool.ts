@@ -3,17 +3,6 @@ import { toJsonSchema } from "@/lib/utils/json-schema";
 import { NotFoundError, ValidationError, logError } from "@/lib/utils/errors";
 import type { JsonSchemaObject, WebMcpAnnotations, WebMcpToolDescriptor } from "./types";
 
-/**
- * One WebMCP tool as AutoMe writes it: a Zod schema for its input and a plain
- * function for its work. toDescriptor turns it into what the browser takes —
- * the schema as JSON Schema, and an `execute` that refuses input outside the
- * schema before the work (and so before any change to the page) begins.
- *
- * A tool is a way for an agent to use the page the person is on, with the
- * same state the person sees: its work calls the page's own hooks and server
- * actions, so every rule stays on the server. Registering a tool grants
- * nothing the page did not already allow.
- */
 export interface WebMcpToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny> {
   /** Lower snake case, ≤ 30 characters. */
   name: string;
@@ -24,11 +13,6 @@ export interface WebMcpToolDefinition<Input extends z.ZodTypeAny = z.ZodTypeAny>
   run: (input: z.output<Input>, options: { signal?: AbortSignal }) => Promise<unknown>;
 }
 
-/**
- * A tool as a page's list of tools holds it, whatever its input. Safe to
- * widen: toDescriptor parses the input with the tool's own schema before
- * `run` ever sees it.
- */
 export function defineWebMcpTool<Input extends z.ZodTypeAny>(definition: WebMcpToolDefinition<Input>): WebMcpToolDefinition {
   return definition as unknown as WebMcpToolDefinition;
 }

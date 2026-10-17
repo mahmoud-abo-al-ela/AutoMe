@@ -12,14 +12,6 @@ export interface DealershipProfileText {
   financingNote: string;
 }
 
-/**
- * Write a dealership's description, address and/or financing note in the
- * other language.
- *
- * Metered and cached through the one AI client like every other call; the
- * text and direction are the cache key, so saving the profile again without
- * touching either field spends nothing.
- */
 export async function translateDealershipProfile(
   text: DealershipProfileText,
   from: Locale,

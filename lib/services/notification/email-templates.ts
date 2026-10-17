@@ -85,11 +85,6 @@ export interface TestDriveConfirmationParams {
   endTime: string;
   dealershipName: string;
   dealershipAddress?: string | null;
-  /**
-   * The app that made the request for the buyer (an MCP client, e.g.
-   * "Claude"), when it was not the buyer on the site — named in the email, so
-   * a request they did not mean to make is one click from being cancelled.
-   */
   requestedVia?: string | null;
 }
 

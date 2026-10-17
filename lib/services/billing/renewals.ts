@@ -11,29 +11,6 @@ import { RENEWAL_NOTICE_DAYS, graceEndsOn, renewalStage } from "./periods";
 import { settlePayment } from "./settle";
 import { freePlanState, paidPeriodState } from "./transitions";
 
-/**
- * The daily billing job (app/api/cron/billing-renewals). AutoMe keeps the
- * subscription calendar itself, so this is what moves it along:
- *
- *   1. A period that has ended moves onto the renewal paid ahead for it.
- *   2. A week, then three days, before a period or trial ends: the owners get
- *      an email asking them to renew.
- *   3. A period that ended unpaid turns PAST_DUE, with GRACE_DAYS to pay; one
- *      the owner canceled (or set to the free plan) moves to the free plan.
- *   4. After the grace: the free plan.
- *   5. Checkouts Paymob never reported on are asked about, and abandoned
- *      ones expire.
- *
- * Every step is safe to run twice: each acts only on the state it finds, and
- * each email is claimed once per period. A run that stops at its deadline is
- * finished by the next one.
- *
- * Every write is a compare-and-set on the subscription the run read
- * (updateSubscriptionIfUnchanged). A payment that settles between the read and
- * the write wins: the write is skipped, nothing is emailed or logged for it,
- * and the next run decides on the subscription as the payment left it.
- */
-
 export interface RenewalRunReport {
   rolledOver: number;
   reminded: number;

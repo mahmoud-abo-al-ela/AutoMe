@@ -21,12 +21,6 @@ export type OrganizationWithPlan = Organization & {
     subscription?: (Subscription & { plan: Plan }) | null;
 };
 
-/**
- * What `checkUser()` returns: the user row with memberships joined, plus the
- * impersonation fields layered on in resolveImpersonation — `impersonation` is
- * the support session the database verified, present only while an admin is
- * signed in as someone else.
- */
 export type SessionUser = User & {
     memberships?: Array<Membership & { organization: OrganizationWithPlan }>;
     isImpersonated?: boolean;
@@ -60,25 +54,7 @@ export async function resolveAuthContext(): Promise<AuthContext> {
     return { user, userId };
 }
 
-/**
- * The dealership this request acts on, and the caller's right to act there.
- *
- * Which dealership, first match wins:
- *   1. a support session the database verified — its target, and nothing else;
- *   2. `organizationSlug`, for route handlers whose page passes its dealership
- *      (their URL is /api/…, so it carries none);
- *   3. the dashboard the request comes from (/[locale]/org/[slug] — Server
- *      Actions post to their page), via middleware's x-dashboard-org;
- *   4. the storefront subdomain;
- *   5. the user's own membership, when nothing above names one.
- *
- * Access is a membership of that dealership, or the verified session whose
- * target is exactly that dealership. Nothing else: not a cookie, not a header,
- * and not the platform ADMIN role — admins reach a tenant through a session,
- * which is time-boxed, has a reason and is audited, and see across tenants
- * only on the super-admin pages. Steps 2–4 only *select*; a slug the caller
- * has no membership in is refused, never silently swapped for another.
- */
+// Access needs a membership or a DB-verified support session for this exact dealership; slug, header and subdomain only select.
 export async function resolveTenantContext(
     options: { organizationSlug?: string | null } = {},
 ): Promise<TenantContext> {

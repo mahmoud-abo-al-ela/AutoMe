@@ -5,13 +5,6 @@ import { revalidateLocalized, revalidateRouteTree } from "@/lib/utils/revalidate
 import type { PublicTool } from "../public/tool";
 import type { AccountCallerContext } from "./tools";
 
-/**
- * Requesting and cancelling a test drive for the signed-in person (PR 15d).
- * Each request reaches a real dealership, so: at most a few a day, the
- * person is e-mailed with the app named and a way to cancel, and the
- * dealer's Activity log records it (lib/services/mcp/account-test-drives.ts).
- */
-
 const locale = z.enum(["en", "ar"]).default("en").describe("Language for the links: en or ar.");
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe("YYYY-MM-DD, in Cairo.");
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).describe("HH:mm, 24-hour, on the half hour.");

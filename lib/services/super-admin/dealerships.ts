@@ -10,13 +10,6 @@ import {
   type DealershipView,
 } from "./dealerships-options";
 
-/**
- * The super-admin dealerships list (canvas: Super admin dealerships round 1,
- * "1 · Data table"): saved views with their counts, search, plan and
- * governorate filters, a sort, and a page of rows with each dealership's
- * plan, standing, size, recent test drives and what it has paid.
- */
-
 const VIEW_WHERE: Record<DealershipView, Prisma.OrganizationWhereInput> = {
   all: {},
   active: { isActive: true },

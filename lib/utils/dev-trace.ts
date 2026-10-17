@@ -1,12 +1,3 @@
-/**
- * A step-by-step trace of one request, printed to the dev server's terminal —
- * so a developer can watch a feature work from input to output.
- *
- * Development only. In production every method is a no-op: the trace carries
- * what buyers type, and the AiUsage ledger already records what matters there.
- * Each trace has a short id, so two requests running at once stay readable,
- * and each line the time since the trace started.
- */
 export interface Trace {
   /** One step along the way. */
   step(message: string): void;

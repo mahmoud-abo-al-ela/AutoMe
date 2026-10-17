@@ -8,14 +8,6 @@ import {
 import { reportMcpFailure } from "@/lib/services/mcp/monitoring";
 import { RateLimitError, ServiceUnavailableError, logError } from "@/lib/utils/errors";
 
-/**
- * What AutoMe's two MCP endpoints share over HTTP — the public one
- * (app/api/mcp) and the signed-in one (app/api/mcp/account): stateless,
- * JSON-only Streamable HTTP, small bodies, fixed error codes, nothing cached.
- * Both protocol eras are served: 2026-07-28 clients, and the 2025 family
- * (2025-11-25 and earlier) that most clients still speak.
- */
-
 /** The largest call is under 2 KB; anything near this is not a real client. */
 export const MAX_BODY_BYTES = 16 * 1024;
 
@@ -30,12 +22,6 @@ export function parseError() {
   return NextResponse.json({ jsonrpc: "2.0", error: { code: -32700, message: "Parse error" }, id: null }, { status: 400, headers: NO_STORE });
 }
 
-/**
- * The request as the 2025-era transport should see it. Streamable HTTP asks clients to
- * accept JSON and an event stream, and the SDK refuses one that accepts only
- * JSON (406) — but these servers only ever answer in JSON, so a client that can
- * read JSON is served. Anything that accepts neither is still refused.
- */
 export function forTransport(request: Request): Request {
   const accept = request.headers.get("accept") ?? "";
   const readsJson = accept === "" || accept.includes("application/json") || accept.includes("*/*");
@@ -69,11 +55,6 @@ export function methodNotAllowed() {
   return refuse(405, "method_not_allowed", { Allow: "POST" });
 }
 
-/**
- * The answer to a request a limiter stopped: 429 when over the limit, 503
- * when the limiter itself could not decide (reported — every call is refused
- * until it can), 403 for the shield or any other denial, without saying why.
- */
 export async function limitRefusal(error: unknown): Promise<Response> {
   if (error instanceof RateLimitError) {
     return refuse(429, "rate_limited", error.retryAfter ? { "Retry-After": String(error.retryAfter) } : {});
@@ -85,14 +66,6 @@ export async function limitRefusal(error: unknown): Promise<Response> {
   return refuse(403, "forbidden");
 }
 
-/**
- * Run one JSON-RPC request through a fresh server. A 2026-07-28 request goes
- * to the SDK's handler; a 2025-era one to the stateless transport as before.
- * The SDK's own fallback for the older era answers in an event stream, and
- * these endpoints answer in JSON only — a client that reads only JSON is
- * served (see forTransport) — so the older era keeps its own path, the split
- * the SDK documents for isLegacyRequest.
- */
 export async function serveMcp(createServer: () => McpServer, request: Request, body: unknown): Promise<Response> {
   try {
     const response = (await isLegacyRequest(request, body))

@@ -1,14 +1,3 @@
-/**
- * Prompt for extracting a car listing from a dealer's photo.
- *
- * Deliberately short. The response shape is enforced by the JSON schema derived
- * from `carListingSchema`, so the old "return ONLY valid JSON, no markdown, all
- * fields must exist" preamble is now the API's job. What is left is the domain
- * knowledge a schema cannot express.
- *
- * Bump `version` on any text change: it is part of the response cache key, so a
- * stale answer from the previous wording can never be served.
- */
 export const carListingPrompt = {
   version: "2026-10-10.1",
   text: `You are cataloguing a car — new or used — for an Egyptian dealership listing.

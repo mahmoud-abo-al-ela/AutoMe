@@ -1,11 +1,5 @@
 import { OVERVIEW_PERIODS, parseOverviewPeriod, type OverviewPeriod } from "./overview-options";
 
-/**
- * The Analytics page's reports and periods, apart from the service so the
- * client controls can import them without pulling the database in. The
- * periods are the Overview's, so both pages offer the same choices.
- */
-
 export const ANALYTICS_REPORTS = ["marketplace", "dealerships", "buyers", "ai"] as const;
 export type AnalyticsReport = (typeof ANALYTICS_REPORTS)[number];
 

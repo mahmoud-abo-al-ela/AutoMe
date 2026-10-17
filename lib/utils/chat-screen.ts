@@ -1,20 +1,5 @@
 import { foldSearchText } from "@/lib/utils/search-text";
 
-/**
- * The first, free pass of chat moderation: which messages are worth asking
- * the model about at all.
- *
- * Deliberately broad and never the judge. A signal here only routes a message
- * to the model (lib/services/chat/moderation); on its own it flags nothing,
- * because most of these words are ordinary car talk — "مقدم" is a down
- * payment, a dealer sends its WhatsApp number, a buyer says "stupid me".
- * A message with no signal is left alone and costs nothing, which is what
- * keeps moderating every message affordable.
- *
- * Arabic terms are folded the same way the text is (أ/إ/آ → ا, ة → ه,
- * ى → ي, Arabic-Indic digits → Western), so either spelling matches; they
- * match inside words too, since Arabic attaches و/ف/ب/ال to them.
- */
 export type ScreenSignal =
   | "link"
   | "payment"

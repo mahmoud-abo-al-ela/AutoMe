@@ -9,12 +9,6 @@ import { carEmbeddingText, embeddingHash } from "@/lib/services/car/embedding-te
  */
 const CALLER = { userId: null, priority: "standard" as const };
 
-/**
- * The car-embedding job: give a car its meaning for search, or refresh it after
- * an edit that changed its text. Idempotent and cheap to repeat — a car whose
- * text and model are unchanged (embeddingHash) is left alone without a request.
- * Throws when the embedding fails, so the queue retries.
- */
 export async function embedCar(carId: string, organizationId: string): Promise<"embedded" | "skipped"> {
   const car = await carRepository.findCarForEmbedding(carId, organizationId);
   if (!car) return "skipped";

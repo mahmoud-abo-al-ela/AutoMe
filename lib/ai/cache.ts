@@ -2,13 +2,6 @@ import { createHash } from "node:crypto";
 import { getRedis } from "@/lib/redis";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * The AI response cache: a repeat of the same request is answered without a
- * provider call. In Redis when it is configured, so a repeat landing on another
- * serverless instance — most of them, under load — still hits; with a small
- * in-process copy in front, and on its own when Redis is absent or fails.
- */
-
 const TTL_MS = 10 * 60_000;
 /** Bounded so a burst of distinct uploads cannot grow the heap without limit. */
 const MAX_ENTRIES = 100;
@@ -23,12 +16,7 @@ interface Entry {
 
 const store = new Map<string, Entry>();
 
-/**
- * Not tenant-scoped, which is safe only because each feature keys on
- * everything its answer depends on. ⚠️ A feature whose output depends on
- * anything else — a car record, org settings, locale — must add it to this
- * key, or one tenant's answer will be served to another.
- */
+// Not tenant-scoped: a feature must key on everything its answer depends on, or one tenant's answer reaches another.
 export function cacheKey(input: {
   feature: string;
   model: string;
@@ -71,20 +59,10 @@ function setLocal(key: string, value: unknown): void {
   store.set(key, { value, expiresAt: Date.now() + TTL_MS });
 }
 
-/**
- * `shared: false` keeps a feature's replies in this process only — for
- * private content, like a chat message between a buyer and a dealer, that has
- * no business in a store outside the app.
- */
 export interface CacheOptions {
   shared?: boolean;
 }
 
-/**
- * The first of these keys that has an answer, in order, and its index — one
- * round trip for the whole chain, not one per model. A Redis failure is a
- * miss: the provider is still there.
- */
 export async function getFirst<T>(
   keys: string[],
   { shared = true }: CacheOptions = {}

@@ -16,18 +16,6 @@ import { formatNumber } from "./number";
 // Far enough back that date-fns prints a number ("3 years"), not "about a".
 const THREE_YEARS_AGO = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
 
-/**
- * These pin the two rules that are invisible until they are wrong: Arabic
- * renders Eastern Arabic numerals across every formatter, and times must be
- * expressed in Africa/Cairo rather than in whatever zone the server happens to
- * run in.
- *
- * The numeral direction was reversed on 2026-08-26 — these previously asserted
- * Western digits. What matters either way is that all five formatters agree;
- * a product where the price is ١٥٠٠٠٠٠ and the mileage is 85,000 is worse than
- * either choice made consistently.
- */
-
 const EASTERN_ARABIC = /[٠-٩]/;
 const WESTERN = /[0-9]/;
 
@@ -130,13 +118,6 @@ describe("formatClockTime", () => {
   });
 });
 
-/**
- * The AM/PM marker beside an Arabic time input. A native `<input type="time">`
- * renders its own from the *browser's* UI language and ignores the page's —
- * `lang="ar"`, `lang="ar-EG"` and `lang="ar-EG-u-nu-latn"` were all tried, and
- * Chromium rendered "04:00 PM" for every one — so the marker is hidden and
- * replaced. These pin the replacement.
- */
 describe("dayPeriodLabels", () => {
   it("gives Arabic its own markers", () => {
     expect(dayPeriodLabels("ar")).toEqual({ am: "ص", pm: "م" });

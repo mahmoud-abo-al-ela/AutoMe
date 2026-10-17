@@ -48,11 +48,6 @@ export async function markPaymentFailed(
   return count === 1;
 }
 
-/**
- * Mark a payment PAID inside the settling transaction. A compare-and-set: of
- * two concurrent settlements (the callback and the success page), exactly one
- * gets `true` and applies the purchase; the other is a no-op.
- */
 export async function claimPaymentAsPaid(
   tx: Prisma.TransactionClient,
   id: string,
@@ -79,12 +74,6 @@ export async function recordPaymentPeriod(
   await tx.payment.update({ where: { id }, data });
 }
 
-/**
- * The subscription, read inside the settling transaction under a row lock
- * (FOR UPDATE): a decision made on it holds until the transaction commits,
- * and the daily renewal job's compare-and-set write waits for it rather than
- * landing in between.
- */
 export async function lockSubscriptionInTx(tx: Prisma.TransactionClient, organizationId: string) {
   await tx.$queryRaw`SELECT "id" FROM "Subscription" WHERE "organizationId" = ${organizationId} FOR UPDATE`;
   return tx.subscription.findUnique({ where: { organizationId }, include: { plan: true } });

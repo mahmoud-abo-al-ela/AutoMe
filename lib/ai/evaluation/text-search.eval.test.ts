@@ -11,17 +11,6 @@ import { extractTextSearchFilters, type TextSearchFilters } from "@/lib/services
 import * as cache from "@/lib/ai/cache";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * A buyer's description of the car they want, turned into listing filters,
- * against the real model.
- *
- *   AI_EVAL=1 pnpm eval lib/ai/evaluation/text-search
- *
- * The contract: every filter the buyer stated, and none they did not — a
- * guessed filter hides the cars they wanted. Each case names the filters it
- * must produce and the ones it must not.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 type Case = { query: string; expect: Partial<TextSearchFilters>; absent?: (keyof TextSearchFilters)[] };

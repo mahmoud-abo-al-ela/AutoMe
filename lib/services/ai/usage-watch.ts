@@ -9,13 +9,6 @@ export function dailyCallsAlert(): number {
   return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_DAILY_CALLS_ALERT;
 }
 
-/**
- * The last 24 hours of AI use per dealership against one threshold. Each
- * dealership over it is one Sentry warning, an issue of its own
- * (docs/observability-runbook.md): a bulk import, a buyer bot hammering the
- * listing assistant, or a loop in our own code all look like this first.
- * Read-only; running it again reports again.
- */
 export async function watchAiUsage(now: Date = new Date()) {
   const limit = dailyCallsAlert();
   const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);

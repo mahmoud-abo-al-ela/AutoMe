@@ -4,17 +4,6 @@ import { AI_FEATURES } from "@/lib/ai/features";
 import { textPart } from "@/lib/ai/provider/types";
 import { EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * A second model grading what the deterministic assertions cannot: whether
- * Arabic is plain Modern Standard Arabic, whether the tone is friendly,
- * whether a decline names what was asked, whether a translation kept every
- * fact. Evaluation only — never on a production path.
- *
- * Its verdicts are advisory: the suites record them as their own `[judge]`
- * cases, which the compare script reports but never fails a run on. The judge
- * itself is held to hand-labelled examples in judge.eval.test.ts.
- */
-
 export const JUDGE_CRITERIA = ["msaRegister", "friendlyTone", "specificDecline", "faithful"] as const;
 export type JudgeCriterion = (typeof JUDGE_CRITERIA)[number];
 

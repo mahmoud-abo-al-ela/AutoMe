@@ -8,13 +8,6 @@ import {
 } from "@/lib/ai/grounding";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * The comparison is the listing assistant's (lib/ai/grounding): the same
- * ladder of comparables, the same median, the same minimum count. The fair-
- * price gauge on the site and the assistant's "how does the price compare?"
- * answer therefore can never disagree about one car.
- */
-
 interface PricedCar {
   id: string;
   make: string;
@@ -78,12 +71,6 @@ export interface PoolCar {
 
 const same = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: "accent" }) === 0;
 
-/**
- * marketPricesFor, answered from a pool already in memory instead of one
- * query per rung. Must stay rung-for-rung identical to the database version:
- * same make, then the same model or body type, within the rung's year span,
- * never the car itself.
- */
 export function marketPricesFromPool(car: PricedCar, pool: PoolCar[]): MarketPrices | null {
   for (const level of COMPARISONS) {
     const compared = comparisonFor(car, level);
@@ -105,12 +92,6 @@ export function marketPricesFromPool(car: PricedCar, pool: PoolCar[]): MarketPri
 
 const WIDEST_YEAR_SPAN = Math.max(...COMPARISONS.map((level) => level.yearSpan));
 
-/**
- * Market positions for a page of cars, keyed by car id: one pool read per
- * currency on the page, then the ladder in memory. A car with too few
- * comparables is simply absent. Best effort — a failed read yields an empty
- * map and the cards render without a verdict rather than not at all.
- */
 export async function marketPositionsFor(cars: PricedCar[]): Promise<Map<string, MarketPosition>> {
   const positions = new Map<string, MarketPosition>();
   if (cars.length === 0) return positions;

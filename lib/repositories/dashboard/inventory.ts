@@ -52,15 +52,6 @@ const SELECT = {
   _count: { select: { savedBy: true, testDrive: true } },
 } as const;
 
-/**
- * One page of a dealership's own cars for the Cars table, every status, with
- * how many buyers saved each and asked to drive it. Ties break on id so a page
- * never repeats or skips a car.
- *
- * With search text, the dealer's search is the buyers' search engine
- * (searchedPage): Arabic folding, synonyms, typo correction. Without it, the
- * plain listing's where clause.
- */
 export async function findInventory(organizationId: string, query: InventoryQuery) {
   const { cars, total } = query.search?.trim() ? await searchedPage(organizationId, query) : await plainPage(organizationId, query);
 
@@ -100,13 +91,6 @@ async function plainPage(organizationId: string, query: InventoryQuery) {
   return { cars, total };
 }
 
-/**
- * A page of the cars the search engine matches (dealerSearchCondition),
- * sorted and paged in SQL — the match can be any size, and a list of its ids
- * would not fit in one query (Postgres takes some 32,000 parameters) — then
- * that page's cars loaded as the plain page loads them, in the same order.
- * The dealership's scope is in the condition and again in the load.
- */
 async function searchedPage(organizationId: string, query: InventoryQuery) {
   const condition: Prisma.Sql | null = await dealerSearchCondition({
     organizationId,

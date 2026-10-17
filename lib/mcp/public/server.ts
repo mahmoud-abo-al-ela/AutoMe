@@ -9,12 +9,6 @@ import { listDealershipsTool } from "./tools/list-dealerships";
 import { searchCarsTool } from "./tools/search-cars";
 import { searchOptionsTool } from "./tools/search-options";
 
-/**
- * AutoMe's public MCP server: read-only tools over the public catalog
- * (lib/services/public-catalog), for any MCP client. A fresh server per
- * request — the endpoint is stateless, so no request can see another's state.
- */
-
 /** Read-only, closed-world tools: they never change anything, and only read AutoMe. */
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 

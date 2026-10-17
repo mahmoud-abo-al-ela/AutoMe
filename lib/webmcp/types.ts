@@ -1,11 +1,3 @@
-/**
- * WebMCP as Chrome exposes it in its origin trial (Chrome 149–162, until 2027-03-30), checked
- * against Chrome's docs on 2026-10-13 (plans/mcp D-25): `document.modelContext`
- * with one `registerTool` call per tool, unregistered by aborting the signal
- * passed with it. Only what AutoMe uses is typed; the API is still a draft,
- * so everything is optional at the edge and feature-detected (./support.ts).
- */
-
 /** A JSON Schema object, as `inputSchema` takes it. */
 export interface JsonSchemaObject {
   type: "object";

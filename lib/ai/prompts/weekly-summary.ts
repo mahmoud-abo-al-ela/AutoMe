@@ -1,13 +1,5 @@
 import type { Locale } from "@/i18n/routing";
 
-/**
- * Prompt for the paragraph at the top of a dealership's weekly summary email.
- * The numbers go in a separate part as JSON; the model writes words around
- * them and nothing else — `numbersHold` drops any summary quoting a number
- * the JSON does not contain.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const weeklySummaryPrompt = {
   version: "2026-10-10.1",
   text: (locale: Locale) => `You write the opening of a weekly summary email to the owner of a car dealership

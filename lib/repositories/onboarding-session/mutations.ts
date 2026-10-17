@@ -4,12 +4,6 @@ import { db } from "@/lib/prisma";
 
 const SESSION_TTL_HOURS = 24;
 
-/**
- * Create a new onboarding session
- * @param {string} userId - The user ID
- * @param {Object} data - The onboarding form data (JSON)
- * @returns {Promise<Object>} The created onboarding session
- */
 export async function createOnboardingSession(userId: string, data: Prisma.InputJsonValue) {
     const expiresAt = new Date(
         Date.now() + SESSION_TTL_HOURS * 60 * 60 * 1000,
@@ -25,12 +19,6 @@ export async function createOnboardingSession(userId: string, data: Prisma.Input
     });
 }
 
-/**
- * Update an existing onboarding session's data
- * @param {string} id - The session ID
- * @param {Object} data - The updated onboarding form data (JSON)
- * @returns {Promise<Object>} The updated onboarding session
- */
 export async function updateOnboardingSessionData(id: string, data: Prisma.InputJsonValue) {
     return db.onboardingSession.update({
         where: { id },
@@ -38,11 +26,6 @@ export async function updateOnboardingSessionData(id: string, data: Prisma.Input
     });
 }
 
-/**
- * Mark an onboarding session as completed
- * @param {string} id - The session ID
- * @returns {Promise<Object>} The updated onboarding session
- */
 export async function markOnboardingSessionCompleted(id: string) {
     return db.onboardingSession.update({
         where: { id },
@@ -50,11 +33,6 @@ export async function markOnboardingSessionCompleted(id: string) {
     });
 }
 
-/**
- * Expire all pending sessions for a user (used when creating a new one)
- * @param {string} userId - The user ID
- * @returns {Promise<Object>} Prisma batch update result
- */
 export async function expirePendingSessionsForUser(userId: string) {
     return db.onboardingSession.updateMany({
         where: {

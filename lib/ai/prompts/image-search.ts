@@ -1,13 +1,3 @@
-/**
- * Prompt for turning a buyer's photo into marketplace search filters.
- *
- * The instruction to answer "" rather than guess is the important line: these
- * values go straight into a query string matched by equality, so a confident
- * wrong answer returns an empty result page, while an empty one simply widens
- * the search.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const imageSearchPrompt = {
   version: "2026-10-10.1",
   text: `Identify the car in this photo so it can be matched against a car

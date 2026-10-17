@@ -4,16 +4,6 @@ import { embedQuestion } from "@/lib/services/buyer-question/meaning";
 import { embedCar } from "@/lib/services/car/embedding";
 import { refreshSearchVocabulary } from "@/lib/services/car/search-vocabulary";
 
-/**
- * Every background job: the shape of its payload and what running it does.
- * A job must be safe to run twice — the queue delivers at least once, and a
- * retry follows any failure — so each one re-reads its state and converges.
- *
- * A job throws to be retried. Payloads are signed by the queue (see
- * app/api/jobs/[name]/route.ts) and validated again here, so a job trusts
- * nothing a request could have shaped.
- */
-
 const callerSchema = z.object({
   organizationId: z.string().nullable(),
   userId: z.string().nullable(),
@@ -47,11 +37,6 @@ export const JOBS = {
       await embedCar(carId, organizationId);
     },
   },
-  /**
-   * Give a declined buyer question its meaning (a vector), folding it into
-   * the earlier question it repeats on the same car. Idempotent: skips a
-   * question already embedded by the current model, or gone.
-   */
   "question-embedding": {
     schema: z.object({
       questionId: z.string().uuid(),
@@ -61,11 +46,6 @@ export const JOBS = {
       await embedQuestion(questionId, organizationId);
     },
   },
-  /**
-   * Rebuild the search's vocabulary after cars or dealerships change, at most
-   * once per window (lib/jobs/search-terms.ts). Idempotent: it recomputes
-   * everything from the cars listed when it runs.
-   */
   "search-terms": {
     schema: z.object({}),
     run: async () => {
@@ -81,11 +61,6 @@ export function isJobName(value: string): value is JobName {
   return Object.prototype.hasOwnProperty.call(JOBS, value);
 }
 
-/**
- * Whether a payload is one this job accepts. A payload that fails will fail
- * the same way on every delivery, so the route tells the queue not to retry
- * it rather than spending three more deliveries on it.
- */
 export function isValidJobPayload(name: JobName, payload: unknown): boolean {
   return JOBS[name].schema.safeParse(payload).success;
 }

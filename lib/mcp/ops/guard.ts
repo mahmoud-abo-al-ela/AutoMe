@@ -1,16 +1,5 @@
 import type { RolePosture } from "@/lib/repositories/ops/role";
 
-/**
- * Where the internal AI-ops MCP server may run, decided before it touches
- * anything: a developer's machine, against a local database, as a role the
- * database itself keeps from writing. Every check fails closed — an unset or
- * unknown value is a refusal — and each refusal names the variable, never
- * its value, since the values are credentials.
- *
- * It is a local stdio process, never routed: nothing here is a substitute
- * for authentication, because nothing outside the machine can reach it.
- */
-
 const ALLOWED_ENVIRONMENTS = ["development", "test"];
 const DEFAULT_ALLOWED_HOSTS = ["localhost", "127.0.0.1"];
 
@@ -96,14 +85,6 @@ export function checkRolePosture(posture: RolePosture): string[] {
   return problems;
 }
 
-/**
- * Leave the process with nothing but the read-only role. Every repository
- * reads `DATABASE_URL` through lib/prisma, so pointing it at the ops role
- * means no code path in this process holds the app's credentials — and the
- * Redis credentials, which may write, are dropped; the breaker snapshot is
- * handed a read-only client explicitly, or none. Run before lib/prisma is
- * first imported: the client is built at import.
- */
 export function confineToReadOnly(env: Env): void {
   env.DATABASE_URL = env.OPS_MCP_DATABASE_URL;
   for (const name of ["DIRECT_URL", "UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"]) {

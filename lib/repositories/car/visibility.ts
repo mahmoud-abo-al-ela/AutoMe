@@ -1,22 +1,6 @@
 import { Prisma, type CarStatus } from "@/lib/generated/prisma";
 
-/**
- * What the public may see — the one place it is written. Every public read
- * (the site, its Server Actions, and later MCP) reaches cars through these, so
- * a path cannot drift from the others by restating the rule.
- *
- * A dealership is public while it is active and not deleted. Its cars are
- * listed (search, counts, facets, suggestions, alternatives, prices) while
- * AVAILABLE; one car opened by id is shown while AVAILABLE or SOLD, so a sold
- * car's page still says it sold. Anything else is not found — the same answer
- * as an id that never existed, so a hidden car cannot be told from a missing
- * one.
- *
- * A dealer's own dashboard is the one place that sees past this, by asking for
- * `scope: "dealer"` explicitly; the builders default to public, so a caller
- * that forgets fails closed.
- */
-
+// The one definition of what the public may see; builders default to public so a forgetful caller fails closed.
 export type VisibilityScope = "public" | "dealer";
 
 /** A dealership that may be shown, as a Prisma organization filter. */

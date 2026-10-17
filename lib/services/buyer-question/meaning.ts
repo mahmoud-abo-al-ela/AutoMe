@@ -5,32 +5,10 @@ import { MAX_DEALER_ANSWERS } from "@/lib/repositories/buyer-question";
 import { logError } from "@/lib/utils/errors";
 
 /**
- * Buyer questions by meaning, not by wording: the same question rephrased —
- * or asked in the other language — is one question.
- *
- * Thresholds are cosine similarity between two questions' vectors, set from
- * the retrieval evaluation (lib/ai/evaluation/retrieval.eval.test.ts — 32
- * questions, 8 meanings, English, MSA and Egyptian Arabic) on
- * gemini-embedding-2, 2026-10-11:
- *
- *   same question      median 0.773 · p25 0.727 · min 0.493
- *   different question median 0.613 · p98 0.775 · max 0.851
- *
- * The two overlap, so no single line separates them; each use picks its own
- * side of the overlap by what a mistake costs. Rerun the evaluation before
- * moving either, and after changing AI_EMBEDDING_MODEL.
- */
-
-/**
  * Folding deletes a row, so it sits well above the closest two different
  * questions ever came (0.851): only near-identical rephrasings fold.
  */
 export const FOLD_SIMILARITY = 0.9;
-/**
- * A suggestion costs a dealer a glance, and is theirs to accept: at the
- * different-question 98th percentile, where it finds about half the same
- * questions and is wrong about 1.6% of the time.
- */
 export const SUGGEST_SIMILARITY = 0.78;
 /**
  * Linking a declined question to the answered one it rephrases flags it for
@@ -47,14 +25,6 @@ const BUYER_WAIT_MS = 2_000;
  */
 const CALLER = { organizationId: null, userId: null, priority: "standard" as const };
 
-/**
- * The question-embedding job: give a declined question its vector — folding
- * it into an earlier open question it repeats on the same car, or linking it to
- * an answered one it rephrases (the dealer's answer existed and the assistant
- * did not use it). Idempotent — a
- * question already embedded by the current model, or gone, is left alone.
- * Throws when the embedding fails, so the queue retries.
- */
 export async function embedQuestion(
   questionId: string,
   organizationId: string
@@ -102,12 +72,6 @@ export async function embedQuestion(
   return related ? "linked" : "embedded";
 }
 
-/**
- * The dealer's answers that reach the model for one car. While they all fit,
- * all of them, most-asked first. Beyond that, the ones closest in meaning to
- * what the buyer asked — the most-asked twenty may not include the one that
- * answers this. If the question cannot be embedded, most-asked it is.
- */
 export async function dealerAnswersForQuestion(input: { carId: string; organizationId: string; question: string }) {
   // One more than fit, to know whether any were left out at all.
   const answers = await buyerQuestionRepository.findAnswersForCar(input.carId, input.organizationId, MAX_DEALER_ANSWERS + 1);
@@ -158,14 +122,6 @@ export async function answerSuggestions(organizationId: string, openQuestionIds:
   }
 }
 
-/**
- * Give a batch of buyer questions their meaning where they have none from the
- * current embedding model — asked before embeddings existed, or every one after
- * AI_EMBEDDING_MODEL changes — in one embedding request, oldest id first after
- * `after`. It only stores vectors: it never folds questions together, so
- * nothing a dealer has seen disappears in a backfill. Platform-paid, low
- * priority, in the embedding pool.
- */
 export async function backfillQuestionEmbeddings(limit: number, after?: string) {
   const questions = await buyerQuestionRepository.findQuestionsMissingEmbedding(embeddingModel(), limit, after);
   if (questions.length === 0) return { embedded: 0, next: null };

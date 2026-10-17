@@ -1,32 +1,6 @@
 import type { ListingFactKey, ListingFacts } from "@/lib/ai/grounding";
 import { toLatinDigits } from "@/lib/utils/phone";
 
-/**
- * Whether the numbers in an answer are the record's numbers.
- *
- * `citationsHold` checks that an answer cites facts the listing has — not
- * that it states them correctly. An answer citing `price` that says 650,000
- * when the record says 720,000 passes it. Numbers are where a wrong answer
- * costs a buyer most (price, year, mileage, hours), and the one kind of claim
- * that can be checked mechanically, so every number in an answer must be one
- * the record holds.
- *
- * Where a number may come from:
- * - the facts the answer cites — the claim it makes;
- * - the car's identity — year, make and model — and the dealership's name,
- *   which an answer names them by without citing them ("this 2019 i10 is
- *   silver", "Auto 2000 opens at 10");
- * - the buyer's own question: "is it under 800k?" may be answered with 800k.
- * Never the conversation so far: the page sends it, so it is not evidence.
- * Never the questions *other* buyers asked, kept beside the dealer's answers:
- * a buyer wrote them, so a number planted in one is not the record's.
- */
-
-/**
- * Prices and mileages are rounded in speech ("1.3 million" for 1,250,000);
- * years, counts and hours are not — and a year is in the thousands, so the
- * line sits above any year.
- */
 const ROUNDING_TOLERANCE = 0.05;
 const ROUNDED_FROM = 10_000;
 
@@ -81,11 +55,6 @@ function matches(claimed: number, allowed: number[]): boolean {
   );
 }
 
-/**
- * The numbers an answer states that nothing it may draw on backs — empty when
- * every number holds. The caller treats a non-empty result like failed
- * citations: no answer at all.
- */
 export function unbackedNumbers(
   answer: string,
   facts: ListingFacts,
@@ -100,11 +69,6 @@ export function unbackedNumbers(
   return numbersIn(answer).filter((claimed) => !matches(claimed, allowed));
 }
 
-/**
- * The cited facts as evidence: what the dealer and the listing say. The
- * question beside each of the dealer's past answers is dropped — another
- * buyer wrote it, so nothing in it is the record's word.
- */
 function citedRecord(facts: ListingFacts, cited: readonly ListingFactKey[]): unknown[] {
   return cited.map((key) => {
     const value = facts[key];
@@ -131,13 +95,6 @@ function normalizeContact(text: string): string {
   return /^[+\d\s-]+$/.test(latin) ? latin.replace(/\D/g, "") : latin;
 }
 
-/**
- * The links, emails and phone numbers an answer states that the dealer's own
- * record does not — empty when there are none. A grounded answer may repeat
- * the dealership's phone or website (a buyer asked for it); it may not carry
- * one that only a buyer-written question, a planted instruction or the model
- * itself supplied. The caller treats any as failed grounding: no answer.
- */
 export function unbackedContacts(answer: string, facts: ListingFacts, cited: readonly ListingFactKey[]): string[] {
   const record = JSON.stringify([citedRecord(facts, cited), facts.dealership]) ?? "";
   const known = normalizeContact(record);

@@ -1,12 +1,6 @@
 import type { AuditAction } from "@/lib/generated/prisma";
 import { createAuditLog } from "./audit";
 
-/**
- * Car audit entries, for the dealer's Activity page. Each records only the
- * fields that changed, before and after, plus the car's make, model and year
- * in `metadata.car` — so the entry still names the car after it is deleted.
- */
-
 /** Who made the change: the database User, not the Clerk id. */
 export interface AuditActor {
   id?: string | null;
@@ -50,11 +44,6 @@ export async function logCarCreated(car: AuditCar, actor: AuditActor) {
   });
 }
 
-/**
- * One car edited. A change to the status alone, or the featured flag alone, is
- * logged as that; anything else as an edit. Nothing is logged when nothing the
- * page describes changed (a new photo, say).
- */
 export async function logCarChanged(before: AuditCar, after: AuditCar, actor: AuditActor) {
   const changed = TRACKED.filter(
     (field) => after[field] !== undefined && plain(field, before[field]) !== plain(field, after[field]),

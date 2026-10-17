@@ -9,11 +9,6 @@ export async function updateSubscription(
   return db.subscription.update({ where: { organizationId }, data });
 }
 
-/**
- * Write a subscription only if it is still the row the caller read: a
- * compare-and-set on `updatedAt`, which every write moves. False when anything
- * changed it since — a payment that settled meanwhile — and nothing is written.
- */
 export async function updateSubscriptionIfUnchanged(
   organizationId: string,
   lastSeenUpdatedAt: Date,

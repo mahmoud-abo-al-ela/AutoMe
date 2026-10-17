@@ -7,24 +7,6 @@ import { currentFlag, type StoredModeration } from "@/lib/utils/chat-moderation"
 
 export type ModerationOutcome = "skipped" | "clean" | "flagged" | "cleared" | "unchanged";
 
-/**
- * Moderate one chat message, after it has been delivered — Stream's webhook
- * calls this for every new or edited message, so a check can never delay or
- * block a message, and a failure here only means no warning.
- *
- * 1. A flag already on the message for its current text stands. (Only the
- *    author can edit a message's fields, and flagging their own message only
- *    hurts them.)
- * 2. The free screen: a message with no signal is clean, and any stale flag
- *    from before an edit is removed. This is almost every message.
- * 3. The model judges the rest, told whether the buyer or the dealership
- *    wrote it. A verdict is written onto the message by the server as its
- *    author, which Stream delivers to both people live.
- *
- * A sender who strips the flag from their own message triggers
- * `message.updated`, which runs this again and puts it back — the model's
- * answer is cached, so that costs nothing.
- */
 export async function moderateMessage(message: MessageResponse | undefined): Promise<ModerationOutcome> {
   const text = message?.text?.trim() ?? "";
   const authorId = message?.user?.id;

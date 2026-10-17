@@ -5,14 +5,6 @@ import { PROVIDERS, isProviderId, type ProviderCaps, type ProviderId } from "@/l
 import { findProviderLedgersSince, sumProviderTokensSince } from "@/lib/repositories/ai-usage";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * The breaker's state for every key, as an operator reads it — without
- * touching it. capacityBlock is a read too, but its first look in a month
- * seeds the token counter (SET NX); this does MGET and SELECTs only, so a
- * report can run with a read-only Redis token and a read-only database role,
- * and running it never changes what the next real call is allowed.
- */
-
 export interface KeySnapshot {
   /** As in AiUsage.provider: "google", "google#2", "google:embed". */
   ledger: string;
@@ -61,11 +53,6 @@ async function usageOf(
   return { usage: await ledgerUsage(ledger, caps, now), source: "ledger" };
 }
 
-/**
- * Every provider's first key, and every key and pool with ledger rows this
- * month — the ones the breaker has counted. `redis` is passed in, never taken
- * from the environment: the caller decides which (read-only) client it has.
- */
 export async function breakerSnapshot(redis: Redis | null, now = Date.now()): Promise<KeySnapshot[]> {
   const used = await findProviderLedgersSince(startOfMonthUtc(now));
   const ledgers = [...new Set([...(Object.keys(PROVIDERS) as ProviderId[]), ...used])].sort();

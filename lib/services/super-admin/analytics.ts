@@ -7,13 +7,6 @@ import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { median, PRICE_BANDS, STALE_AFTER_DAYS, type AnalyticsPeriod, type AnalyticsQuery } from "./analytics-options";
 import { periodWindows } from "./overview";
 
-/**
- * The super-admin Analytics page (canvas: Super admin analytics round 1, "1 ·
- * Report tabs"): four reports — the marketplace from listing to sale, the
- * dealerships, the buyers, and AI — each for a period and compared with the
- * period before. Only the open report is loaded.
- */
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TOP = 6;
 
@@ -137,11 +130,6 @@ async function ai(w: ReturnType<typeof analyticsWindows>) {
   };
 }
 
-/**
- * What the period's tokens would have cost at list prices — what leaving the
- * free tiers would cost. An estimate beside the billed cost, never instead of
- * it; calls on a model with no known price are counted, not guessed.
- */
 function atListPrices(models: ModelUsage[]) {
   let microUsd = 0;
   let unpricedCalls = 0;

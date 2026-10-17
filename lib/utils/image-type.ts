@@ -1,10 +1,3 @@
-/**
- * The image format bytes actually are, from their signature — or null.
- *
- * A file's declared type and name are whatever the sender claimed. Anything
- * that decides how bytes are stored or sent on (the storage upload, the AI
- * call) reads the format from here instead.
- */
 export type ImageType = "image/jpeg" | "image/png" | "image/webp";
 
 export function sniffImageType(bytes: Buffer): ImageType | null {

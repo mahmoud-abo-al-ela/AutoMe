@@ -42,11 +42,6 @@ export async function setCarEmbedding(input: {
     WHERE "id" = ${input.id} AND "organizationId" = ${input.organizationId}`;
 }
 
-/**
- * Cars with no vector from this model — the backfill's next batch, oldest id
- * first. Platform maintenance across every tenant; each row carries its own
- * organizationId, and the write is scoped by it.
- */
 export function findCarsMissingEmbedding(model: string, take: number, after?: string) {
   return db.car.findMany({
     where: {

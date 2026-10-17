@@ -208,11 +208,6 @@ export async function countAssistantRatings(w: Window) {
   return { helpful: count(true), unhelpful: count(false) };
 }
 
-/**
- * The window's answers by the model and prompt version that wrote them, with
- * their ratings — what tells a prompt change or a fallback model apart. Rows
- * from before provenance was kept have neither, and group together.
- */
 export async function findAssistantQualityByModel(w: Window) {
   const rows = await db.assistantAnswer.groupBy({
     by: ["model", "promptVersion", "helpful"],

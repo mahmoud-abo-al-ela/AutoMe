@@ -26,11 +26,6 @@ export async function updateUser(id: string, userData: Prisma.UserUncheckedUpdat
   return serializeUser(user);
 }
 
-/**
- * Update the user with this Clerk id, if there is one; returns how many rows
- * changed (0 or 1). `updateMany` rather than `update`, which throws when no
- * row matches.
- */
 export async function updateUsersByClerkId(clerkId: string, data: Prisma.UserUpdateManyMutationInput) {
   const { count } = await db.user.updateMany({
     where: { clerkId },
@@ -46,12 +41,6 @@ export async function deleteUserByClerkId(clerkId: string) {
   });
 }
 
-/**
- * Move a user from one Clerk ID to another — for an account copied between
- * Clerk instances, whose new ID must take over the row (and with it every
- * membership, booking and saved car). True if a row moved. False if none had
- * the old ID, or the new ID already has a row (P2002): one person, one row.
- */
 export async function relinkClerkId(previousClerkId: string, clerkId: string): Promise<boolean> {
   try {
     const { count } = await db.user.updateMany({ where: { clerkId: previousClerkId }, data: { clerkId } });

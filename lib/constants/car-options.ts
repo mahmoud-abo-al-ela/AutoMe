@@ -18,15 +18,6 @@ export const STATUS_FORM_TO_DB = {
     Unavailable: CAR_STATUS.UNAVAILABLE,
 };
 
-/**
- * A car status in either spelling — the form's "Sold" or the database's
- * "SOLD" — as the database enum, or null for anything else.
- *
- * Both reach the server: the dealer form sends the form token, other callers
- * the enum. Each place used to accept only one of them, so adding a car from
- * the form was refused outright ("received 'Available'"), and a "SOLD" that
- * did get through was silently saved as AVAILABLE.
- */
 export function normalizeCarStatus(value: unknown): "AVAILABLE" | "UNAVAILABLE" | "SOLD" | null {
     if (value === "AVAILABLE" || value === "UNAVAILABLE" || value === "SOLD") return value;
     if (typeof value === "string" && value in STATUS_FORM_TO_DB) {
@@ -86,12 +77,6 @@ export const SORT_LABELS = {
     [SORT_OPTIONS.MILEAGE_ASC]: "Mileage: Lowest",
 };
 
-/**
- * The colours the vision model may answer with: one spelling per colour, each
- * a key of CAR_COLOR_HEX (lower-cased) and of `carAttributes.color`. Constraining
- * the model to these is what lets the site show the colour in the reader's
- * language — a free-text "Cognac Pearl" has no Arabic name to fall back on.
- */
 export const CAR_COLORS = [
     "Black",
     "White",
@@ -151,11 +136,4 @@ export const getCarColorHex = (color?: string | null): string => {
 /** Photos of one car the AI reads together to identify it. */
 export const MAX_AI_LISTING_PHOTOS = 3;
 
-// The home hero's "Under …" quick pick. It maps to a real filter rather than
-// free-text search, so it returns matching cars.
-//
-// The threshold is EGP, matching Car.price. Egyptian car prices sit far higher
-// than USD ones because of import duty and taxes, so it is pitched a little
-// under the real median. (It was once dollar-scale — 30,000 — which made
-// "Under" return almost nothing.)
 export const BUDGET_MAX_EGP = 1_500_000;

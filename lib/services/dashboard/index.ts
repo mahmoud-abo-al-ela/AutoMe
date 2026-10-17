@@ -34,12 +34,6 @@ export type AttentionReason =
   | { kind: "price"; percent: number }
   | { kind: "photos"; count: number };
 
-/**
- * Why an available car may not be selling, most serious first: listed for a
- * month with no test drive, priced above similar cars (the public gauge's
- * own band, lib/utils/price-verdict), or too few photos. One reason per car —
- * the first that applies — so the list says what to fix first.
- */
 function attentionFor(
   car: { createdAt: Date; testDrives: number; images: string[] },
   marketPercent: number | null,
@@ -56,11 +50,6 @@ const REASON_ORDER = { stale: 0, price: 1, photos: 2 } as const;
 const severity = (reason: AttentionReason) =>
   reason.kind === "stale" ? reason.days : reason.kind === "price" ? reason.percent : -reason.count;
 
-/**
- * Every available car that needs a look, with its one reason, most serious
- * first — the overview shows the first three, the Cars page's "Needs
- * attention" view all of them, from this one function so they never differ.
- */
 export async function carsNeedingAttention(organizationId: string, now = new Date()) {
   const candidates = await todayRepository.findAttentionCandidates(organizationId);
   const positions = await marketPositionsFor(candidates);
@@ -83,13 +72,6 @@ export async function carsNeedingAttention(organizationId: string, now = new Dat
 
 export type AttentionCar = Awaited<ReturnType<typeof carsNeedingAttention>>[number];
 
-/**
- * The dealer overview: what is waiting on them, today's test drives within
- * today's opening hours (Cairo), the last 30 days against the 30 before, and
- * the cars that need a look. The month boundary for "added this month" is
- * taken at UTC midnight, a couple of hours off Cairo's — immaterial for a
- * monthly count.
- */
 export async function getTodayBoard(userId: string, organizationId: string) {
   await verifyAccess(userId, organizationId);
   const now = new Date();
@@ -115,12 +97,6 @@ export async function getTodayBoard(userId: string, organizationId: string) {
 
 const dayKey = (date: Date) => date.toISOString().slice(0, 10);
 
-/**
- * The Insights page for a period of `days` (7, 30 or 90): four figures with
- * the period before for comparison, test drives per day, the buyer funnel,
- * the stock by status, and interest per car. Days are UTC calendar days, as
- * the overview's chart has always been.
- */
 export async function getInsights(userId: string, organizationId: string, days: number) {
   await verifyAccess(userId, organizationId);
   const now = new Date();
@@ -208,11 +184,6 @@ const EXPORT_LIMIT = 2000;
 
 type InventoryCar = Awaited<ReturnType<typeof inventoryRepository.findInventory>>["cars"][number];
 
-/**
- * A row of the Cars table: the car, its interest so far, where its price sits
- * among similar cars, and — for a car on sale — the one thing to fix first,
- * by the same rule as the overview and the "Needs attention" view.
- */
 async function toInventoryRows(cars: InventoryCar[], now: number) {
   const positions = await marketPositionsFor(cars);
   return cars.map((car) => {

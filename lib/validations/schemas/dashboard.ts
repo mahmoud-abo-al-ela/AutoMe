@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { carStatus } from "./fields";
 
-/**
- * The dealer's Cars table: one status view, the search and filters, the
- * column it is sorted by, and the page. "Needs attention" is not here — it is
- * a list of its own (getCarsNeedingAttention), not a filter of this one.
- */
 export const INVENTORY_VIEWS = ["all", "available", "unavailable", "sold"] as const;
 export const INVENTORY_SORTS = ["listed", "price", "saves", "drives"] as const;
 export const INVENTORY_PAGE_SIZE = 20;

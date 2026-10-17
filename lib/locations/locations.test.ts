@@ -9,14 +9,6 @@ import {
 import { cityName, countryName, governorateName, locationName, placeName } from "./names";
 import { normalizePlaceName } from "./normalize";
 
-/**
- * This dataset is the single source of truth for what a dealer can pick, what
- * gets stored, and how it renders in either language. These lock the
- * invariants that make that safe — most of which fail silently: a duplicate
- * slug quietly reassigns a dealership's city, and a missing Arabic name just
- * shows English on an Arabic page.
- */
-
 describe("the Egypt location dataset", () => {
   it("covers all 27 governorates", () => {
     expect(EGYPT_GOVERNORATES).toHaveLength(27);
@@ -117,11 +109,6 @@ describe("resolving a stored place for display", () => {
   });
 
   it("resolves every entry to itself, in both languages", () => {
-    // The lookup normalises loosely — it folds diacritics, the definite
-    // article and a trailing ta marbuta — so that live data spelled
-    // "Al Maḩallah al Kubrá" finds "El Mahalla El Kubra". Loose matching can
-    // merge two genuinely different places, which would silently render one as
-    // the other, so every entry is checked against itself.
     const wrong: string[] = [];
 
     for (const city of EGYPT_CITIES) {

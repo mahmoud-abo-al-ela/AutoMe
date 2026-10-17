@@ -1,11 +1,6 @@
 import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
-/**
- * Dealerships that get a weekly summary: active, not deleted, not opted out —
- * with their owners' addresses (owners only: owner's choice). A suspended or
- * deleted dealership never gets one.
- */
 export async function findDigestOrganizations() {
   return db.organization.findMany({
     where: { isActive: true, deletedAt: null, weeklyDigestEnabled: true },
@@ -25,12 +20,6 @@ export async function findDigestOrganizations() {
 
 export type DigestOrganization = Awaited<ReturnType<typeof findDigestOrganizations>>[number];
 
-/**
- * The week's numbers for one dealership, straight from the database — the
- * model only ever writes words around these. `start` inclusive, `end`
- * exclusive. "Now" figures (available cars, pending test drives, open
- * questions) are as of the moment of sending.
- */
 export async function countWeeklyActivity(organizationId: string, start: Date, end: Date) {
   const inWeek = { gte: start, lt: end };
   const [
@@ -70,11 +59,6 @@ export async function countWeeklyActivity(organizationId: string, start: Date, e
 
 export type WeeklyActivity = Awaited<ReturnType<typeof countWeeklyActivity>>;
 
-/**
- * Claim this dealership's summary for the week, before anything is sent.
- * False when it is already claimed — by an earlier run, or a concurrent one;
- * the unique (organizationId, weekStart) pair decides, not a read-then-write.
- */
 export async function claimDigestSend(organizationId: string, weekStart: Date): Promise<boolean> {
   try {
     await db.digestSend.create({ data: { organizationId, weekStart } });

@@ -14,23 +14,6 @@ import {
 import { aiSpan } from "@/lib/ai/tracing";
 import { ServiceUnavailableError } from "@/lib/utils/errors";
 
-/**
- * Text to vectors, for meaning-based retrieval (pgvector).
- *
- * **One model, no fallback chain** — unlike text generation. A vector is only
- * comparable with vectors from the same model, so a "fallback" model would
- * write vectors nothing can be searched against. Every stored vector records
- * its model (`embeddingModel`), every search filters on it, and when the model
- * is unavailable the caller degrades (no semantic ranking) or retries (a job).
- * Changing AI_EMBEDDING_MODEL means re-embedding: the backfill cron does it.
- *
- * Shares the client's guard rails: the breaker (in its own "embed" pool, so
- * embedding never spends the text models' allowance), a ledger row per
- * request, the response cache, a span, and the shared error classification.
- * Google returns no token counts for embeddings, so the rows say 0 — honest,
- * where a guess would read as real.
- */
-
 /** The column is vector(768); every vector stored or searched must be this long. */
 export const EMBEDDING_DIMENSIONS = 768;
 const DEFAULT_MODEL = "gemini-embedding-2";

@@ -3,13 +3,6 @@ import { BODY_TYPES, FUEL_TYPES, TRANSMISSIONS } from "@/lib/constants/car-optio
 import { SERVICE_HISTORY } from "@/lib/utils/car-disclosures";
 import { DEALERSHIP_LIST_LIMITS, MAX_COMPARED_CARS, PUBLIC_SEARCH_LIMITS, PUBLIC_SORTS } from "@/lib/services/public-catalog";
 
-/**
- * The public MCP tools' contracts. Inputs are strict and bounded — every list
- * capped, every string limited, every choice an allowlist. Outputs mirror the
- * public catalog's projections (lib/services/public-catalog/projections.ts)
- * field for field; the SDK checks each answer against them.
- */
-
 export const localeInput = z.enum(["en", "ar"]).default("en").describe("Language of titles, descriptions and labels: en or ar.");
 
 const choice = <T extends readonly [string, ...string[]]>(values: T, what: string) =>

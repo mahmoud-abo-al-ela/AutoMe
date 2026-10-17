@@ -4,18 +4,6 @@ import { findTransactionByReference } from "@/lib/services/paymob";
 import { NotFoundError, logError } from "@/lib/utils/errors";
 import { settlePayment } from "./settle";
 
-/**
- * Where a payment stands, for the page Paymob returns the buyer to.
- *
- * The buyer is often back before Paymob's callback arrives (and on localhost
- * it never arrives), so an unpaid payment is looked up with Paymob directly
- * and settled from the answer, exactly as the callback would. The query string
- * Paymob adds to the return URL is never read: it is unsigned.
- *
- * confirmPayment trusts its caller to have checked the payment is the
- * viewer's own; the two functions at the end of this file do that check.
- */
-
 export type PaymentState =
   | { state: "paid"; payment: PaymentSummary }
   /** Not paid yet, or Paymob has not said: the page waits and asks again. */

@@ -12,12 +12,6 @@ import {
   egyptianDialectWord,
 } from "@/lib/ai/evaluation/assertions";
 
-/**
- * The evaluation suite only runs against a real API key, so these assertions
- * would otherwise never be exercised in CI. An assertion that is wrong is worse
- * than no assertion: it reports a regressed feature as healthy.
- */
-
 describe("isPredominantlyArabic", () => {
   it("accepts a real Arabic listing sentence", () => {
     expect(

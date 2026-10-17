@@ -4,15 +4,6 @@ import { sendEmail } from "@/lib/resend";
 import { buildBillingEmail, type BillingEmail } from "@/lib/services/notification/billing-email-template";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * Billing emails to a dealership's owners, in the dealership's email
- * language. The daily job's emails are claimed once per period in the
- * BillingNotice ledger first (`once`), so a re-run never sends twice and a
- * send that reached nobody gives its claim back for the next run. Emails
- * that follow a payment need no ledger: only the settlement that wins marks
- * a payment paid or failed, so they go out once anyway.
- */
-
 /** Ledger kinds: one email of each per subscription period. */
 export type NoticeKind = "renewal_due" | "renewal_reminder" | "past_due" | "downgraded";
 

@@ -4,12 +4,6 @@ import { runTool, type PublicTool } from "../public/tool";
 import { listMyTestDrivesTool, listSavedCarsTool, saveCarTool, unsaveCarTool, type AccountCallerContext } from "./tools";
 import { cancelTestDriveTool, requestTestDriveTool } from "./test-drive-tools";
 
-/**
- * AutoMe's signed-in MCP server: the buyer's own account, for the MCP client
- * the buyer signed in to AutoMe with (app/api/mcp/account). A fresh server per
- * request, for one verified user; it never sees another's data.
- */
-
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 /** Changes the person's own list, repeatably; adding takes nothing away. */
 const SAVES = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;

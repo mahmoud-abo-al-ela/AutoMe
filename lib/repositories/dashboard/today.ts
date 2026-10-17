@@ -10,15 +10,6 @@ const DRIVE_SELECT = {
   car: { select: { make: true, model: true, year: true } },
 } as const;
 
-/**
- * What the dealer overview puts in front of a dealer, in one round of
- * parallel queries: the work waiting on them, today's test drives and the
- * hours they fall in, and the last 30 days against the 30 before.
- *
- * `today` is the Cairo calendar date as a UTC midnight, which is how
- * TestDrive.date (@db.Date) compares. `since`/`before` bound the two 30-day
- * windows; `monthStart` is the first of the current month.
- */
 export async function getTodayBoard(
   organizationId: string,
   {
@@ -93,11 +84,6 @@ export async function getTodayBoard(
   };
 }
 
-/**
- * The available cars, with what the "needs attention" rules read: age,
- * photos, how many test drives they have had, and what the market comparison
- * needs. Oldest first, capped — a dealership's whole stock fits.
- */
 export async function findAttentionCandidates(organizationId: string) {
   const cars = await db.car.findMany({
     where: { organizationId, status: "AVAILABLE" },

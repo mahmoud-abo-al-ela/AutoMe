@@ -1,19 +1,5 @@
 import { foldSearchCharacter, searchCharKind, searchWords } from "@/lib/utils/search-text";
 
-/**
- * Where a search's words are in a piece of text, for marking them — found the
- * way the search finds them. The search folds both sides (tashkeel and tatweel
- * gone, أ/إ/آ → ا, ة → ه, ى → ي, Arabic digits → ASCII, case, Latin accents),
- * so "سياره" matches "سيارة" and "corolla" matches "COROLLA"; the marks must
- * land on the text as written, not on its folded copy.
- *
- * So the text is folded a character at a time, keeping for every folded
- * character the span of the original it came from. Folding can drop a
- * character (a mark) or grow one ("İ" lowercases to two), so offsets in the
- * folded copy are not offsets in the text; the map is what makes the ranges
- * land on whole characters of the original — never inside a surrogate pair.
- */
-
 export interface TextRange {
   /** UTF-16 offsets into the original text, end exclusive. */
   start: number;
@@ -52,11 +38,6 @@ const spanOf = (map: FoldedText, from: number, to: number): TextRange => ({
   end: map.source[to - 1].end,
 });
 
-/**
- * The ranges of `text` that `words` match, as the search matches them: each
- * word (folded, as `searchWords` returns it) at the start of a word of the
- * text, by prefix — "cor" marks "Cor" in "Corolla". Sorted, overlaps merged.
- */
 export function highlightRanges(text: string, words: string[]): TextRange[] {
   const wanted = [...new Set(words.flatMap((word) => searchWords(word)))];
   if (!text || wanted.length === 0) return [];
@@ -93,11 +74,6 @@ export function splitByRanges(text: string, ranges: TextRange[]): { text: string
   return parts;
 }
 
-/**
- * A word as one of `texts` spells it — the whole word whose folded form is
- * `word` — or null when none has it. The vocabulary holds words folded for
- * search ("فتحه"); a buyer must read them as written ("فتحة").
- */
 export function writtenForm(word: string, texts: (string | null | undefined)[]): string | null {
   const [wanted] = searchWords(word);
   if (!wanted) return null;

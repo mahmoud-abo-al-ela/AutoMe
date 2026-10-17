@@ -26,11 +26,6 @@ export async function countSessions(where: Prisma.ImpersonationSessionWhereInput
   return db.impersonationSession.count({ where });
 }
 
-/**
- * Changes made during one support session. Every entry written while signed
- * in records the session it belongs to; the session's own start and end
- * entries are left out.
- */
 export async function countChangesDuring(sessionId: string) {
   return db.auditLog.count({
     where: {

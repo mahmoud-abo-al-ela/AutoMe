@@ -3,11 +3,6 @@ import { db } from "@/lib/prisma";
 
 /** Open questions older than this are deleted when the car is next asked about. */
 export const OPEN_QUESTION_RETENTION_DAYS = 90;
-/**
- * New distinct questions stop being recorded on a car with this many open.
- * Repeats still count. The endpoint is public, so this is what stops one
- * visitor filling a dealer's inbox; the Arcjet buckets only slow them down.
- */
 export const MAX_OPEN_QUESTIONS_PER_CAR = 50;
 
 export interface DeclinedQuestion {
@@ -20,13 +15,6 @@ export interface DeclinedQuestion {
   declineMessage?: string | null;
 }
 
-/**
- * Record a question the assistant declined, folding a repeat into its row.
- *
- * Both ids are server-sourced — the car's own row, never the request. A
- * repeat raises askCount and lastAskedAt without touching status, so a
- * question the dealer dismissed stays dismissed.
- */
 export async function recordDeclinedQuestion(input: DeclinedQuestion) {
   const retentionCutoff = new Date(Date.now() - OPEN_QUESTION_RETENTION_DAYS * 86_400_000);
 
@@ -62,11 +50,6 @@ export async function recordDeclinedQuestion(input: DeclinedQuestion) {
   });
 }
 
-/**
- * Answer, or re-answer, a question. Scoped by organization in the WHERE, so
- * an id from another dealership matches nothing rather than being checked
- * after the fact. Returns the number of rows changed: 0 means not yours.
- */
 export async function answerBuyerQuestion(input: {
   organizationId: string;
   id: string;

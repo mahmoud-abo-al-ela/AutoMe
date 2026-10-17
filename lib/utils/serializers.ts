@@ -17,11 +17,6 @@ interface OrgSummary extends Partial<DealershipTerms> {
   region?: string | null;
 }
 
-/**
- * A full car row with the organization relation optionally joined. The
- * serialized columns are widened because these helpers are idempotent and are
- * genuinely called with both raw Prisma rows and already-serialized cars.
- */
 type CarInput = Omit<Car, "price" | "createdAt" | "updatedAt" | "licenseValidUntil"> & {
   price: Car["price"] | number | string;
   licenseValidUntil?: Date | string | null;
@@ -92,11 +87,6 @@ function serializeCarInner(car: CarInput) {
   };
 }
 
-/**
- * Serialize a car row for the client. Overloaded so callers that already know
- * the row is present — the detail action throws NotFoundError before getting
- * here — keep a non-nullable car instead of an all-optional spread of `null`.
- */
 export function serializeCar(car: CarInput): ReturnType<typeof serializeCarInner>;
 export function serializeCar(car: null): null;
 export function serializeCar(
@@ -211,12 +201,6 @@ export function serializeUser(user: SerializableUser | null) {
   };
 }
 
-/**
- * A test drive row with car/user relations optionally joined. `date` is widened
- * to accept an already-serialized row (this helper is idempotent) but stays
- * non-nullable, as the column is — widening it to null gave every consumer a
- * phantom `date: string | null` to guard against.
- */
 type TestDriveInput = Omit<TestDrive, "date"> & {
   date: Date | string;
   car?: PartialCarInput | null;

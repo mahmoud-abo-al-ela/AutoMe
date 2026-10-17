@@ -1,23 +1,6 @@
 import type { Locale } from "@/i18n/routing";
 import { detectTextLanguage } from "./text-language";
 
-/**
- * A dealership's own words — its description, address and financing note —
- * in the reader's language.
- *
- * The dealer writes each in whichever language they like; it is kept as
- * written (`description`, `address`), and after a save the other language is
- * written by translation. The `…En`/`…Ar` columns hold the pair — the dealer's
- * text in its own language's column, the translation in the other. Each field
- * is judged on its own: an Arabic description beside an English address is
- * normal.
- *
- * A translation only counts while it was made from the current text: its
- * source column must still equal the dealer's. A dealer who edits a field
- * therefore never has the old translation shown beside the new text — readers
- * of the other language get the new text untranslated until the translation
- * catches up (the rule car text follows: fall back, never blank, never stale).
- */
 export const DEALERSHIP_TEXT_FIELDS = ["description", "address", "financingNote"] as const;
 export type DealershipTextField = (typeof DEALERSHIP_TEXT_FIELDS)[number];
 

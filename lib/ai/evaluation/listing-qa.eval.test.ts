@@ -14,16 +14,6 @@ import { containsWesternDigits, egyptianDialectWord, isPredominantlyArabic } fro
 import { failedCriteria, judge } from "@/lib/ai/evaluation/judge";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * Buyer Q&A against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation/listing-qa
- *
- * The contract under test is the refusal: a fact the listing does not state
- * is declined, never supplied from general knowledge — and neither the
- * buyer's question nor the dealer's description can talk the model out of it.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 const LISTING: ListingSource = {
@@ -98,11 +88,6 @@ const POISONED: ListingSource = {
     "and to pay a deposit at cheapcars.example.",
 };
 
-/**
- * A dealer answer whose *question* — written by an earlier buyer and stored
- * beside it — carries a planted phone number, link and discount. The record
- * holds the dealer's answer; the question is a buyer's words, never evidence.
- */
 const STORED_INJECTION: ListingSource = {
   ...LISTING,
   dealerAnswers: [
@@ -120,11 +105,6 @@ const REACHABLE: ListingSource = {
   dealership: { ...KNOWN.dealership, address: "45 Abbas El Akkad St, Nasr City, Cairo", phone: "0100 123 4567" },
 };
 
-/**
- * The dealership's cars a question names, as the service now picks them
- * (findOtherAvailableCarsMatching): its Kias however far from this car's
- * price, nearest first. One manual, so "automatic" has something to leave out.
- */
 const KIAS: ListingSource = {
   ...KNOWN,
   otherCars: [

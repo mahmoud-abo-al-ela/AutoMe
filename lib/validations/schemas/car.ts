@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { carStatus } from "./fields";
 
-/**
- * The per-language title and description columns, shared by the create and
- * full-update schemas so the two cannot drift.
- *
- * Nullable as well as optional: clearing a field in the dealer form sends null,
- * and that has to mean "remove it" rather than fail validation.
- */
 const bilingualCarText = {
   titleEn: z.string().max(200).optional().nullable(),
   titleAr: z.string().max(200).optional().nullable(),
@@ -36,12 +29,6 @@ const carDisclosureFields = {
 
 const MIN_DESCRIPTION = 10;
 
-/**
- * A listing needs a description in at least one language, not specifically in
- * English. A dealer on the Arabic dashboard only sees the Arabic field; the
- * English one is filled by translation when the plan allows it, and when it
- * does not, English readers get the Arabic with a "not translated" note.
- */
 function requireOneDescription(
   car: { description?: string | null; descriptionAr?: string | null },
   ctx: z.RefinementCtx

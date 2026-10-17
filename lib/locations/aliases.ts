@@ -4,33 +4,6 @@ import { normalizePlaceName } from "./normalize";
 import arPlaces from "@/messages/ar/places.json";
 import enPlaces from "@/messages/en/places.json";
 
-/**
- * Lets an Arabic reader search for what they can see.
- *
- * Place names and brands are stored as English values, so once the UI started
- * showing "القاهرة" a reader who typed it back got nothing — the word appears
- * nowhere in the data. The fix is to expand the query to the values the columns
- * actually hold before it reaches the database.
- *
- * ## Two buckets, because there are two kinds of column
- *
- * A term expands into values that must be compared by **equality** against a
- * canonical column (`Organization.region` holds "CAI", `Organization.city`
- * holds "maadi") and values that must be compared by **substring or prefix**
- * against free text (`Car.description`, `Car.location`, a dealership address).
- *
- * Returning one flat list and leaving callers to work out which is which is
- * what the previous version did, and it cost two heuristics — a length floor
- * and a code-set membership check — in three separate files, plus the bug they
- * were patching: a governorate code reaching a `contains` matched nearly every
- * row. Splitting them at the source means a caller cannot get it wrong, and the
- * heuristics are gone.
- *
- * The index is derived from the same message files and dataset the UI renders
- * from, so the two cannot drift: anything displayed in Arabic is searchable in
- * Arabic by construction.
- */
-
 export interface SearchVariants {
   /** Canonical column values. Compare with equality. */
   exact: string[];
@@ -98,24 +71,12 @@ for (const group of attributeGroups) {
   }
 }
 
-// Features are tags a dealer types into two lists — English in `features`,
-// Arabic in `featuresAr` — and a listing may carry only one of them (one
-// listed before translation, or never translated). So each feature the editor
-// offers reaches the other language's name too, both ways: "فتحة سقف" finds a
-// car tagged "Sunroof", and "sunroof" one tagged "فتحة سقف". The names are
-// whole phrases, so a word of one ("سقف") stays a word.
 for (const [english, arabic] of Object.entries(arCarAttributes.feature)) {
   if (english === arabic) continue;
   add(arabic, "text", english);
   add(english, "text", arabic);
 }
 
-/**
- * The search term, plus every stored value it stands for.
- *
- * `text` always leads with the reader's own term: it may be a dealership name,
- * an address or a model, none of which this module knows about.
- */
 export function expandSearchTerm(term: string): SearchVariants {
   const trimmed = term?.trim();
   if (!trimmed) return { exact: [], text: [] };
@@ -134,12 +95,6 @@ export function expandSearchTermForText(term: string): string[] {
   return expandSearchTerm(term).text;
 }
 
-/**
- * Every name a reader may type that the index knows — makes, attributes and
- * places, in both languages — as displayed. Typo correction proposes from
- * them: an Arabic make name appears in no listing, so the listings' own
- * vocabulary cannot offer it.
- */
 export function knownNames(): string[] {
   return [...SURFACES];
 }

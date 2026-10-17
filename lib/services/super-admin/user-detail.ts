@@ -3,13 +3,6 @@ import { getUserActivity } from "@/lib/services/audit/activity";
 import { addDays, cairoDate, cairoMidnight, dateOnlyToUtc } from "@/lib/utils/date-only";
 import { USER_DETAIL_PER_PAGE, type UserTab } from "./users-options";
 
-/**
- * One person for the super-admin (canvas: Super admin one user round 1, "A ·
- * Record with tabs"): who they are and what kind of account they have, then
- * tabs that follow that kind — a buyer's test drives, saved cars and reviews;
- * a team member's dealerships and activity; AutoMe staff's support sessions.
- */
-
 export type UserKind = "admin" | "staff" | "buyer";
 
 const RECENT_DAYS = 30;

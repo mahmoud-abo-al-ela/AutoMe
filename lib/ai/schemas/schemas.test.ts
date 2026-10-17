@@ -11,15 +11,6 @@ import { chatTranslationSchema } from "@/lib/ai/schemas/chat-translation";
 import { chatModerationSchema } from "@/lib/ai/schemas/chat-moderation";
 import { weeklySummarySchema } from "@/lib/ai/schemas/weekly-summary";
 
-/**
- * Every schema is sent to every model in its chain, Gemma included — and Gemma
- * is the last resort, reached only when everything else is busy. A schema it
- * rejects fails the whole request at exactly the worst moment.
- *
- * Measured 2026-09-28: Gemma 4 answers 400 "invalid argument" to an array that
- * has both an enum of 24 values and maxItems, and accepts either one alone.
- * So no enum-bearing array carries maxItems; lengths are enforced in code.
- */
 const SCHEMAS: Record<string, ZodType<unknown>> = {
   carListingSchema,
   imageAltsSchema,

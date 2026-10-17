@@ -2,12 +2,6 @@ import { createHmac } from "node:crypto";
 import { createMcpToolCall, pruneMcpToolCalls } from "@/lib/repositories/mcp/tool-calls";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * The public MCP server's measures: one McpToolCall row per tool call — which
- * tool, how long, how many results, which error. Never the query, the IP or a
- * user. The rows are what the pilot is judged on (plans/mcp, ROADMAP §Pilot).
- */
-
 export interface ToolCallRecord {
   tool: string;
   durationMs: number;
@@ -21,12 +15,7 @@ export interface ToolCallRecord {
 /** Prune about one write in this many — retention without a cron. */
 const PRUNE_ONE_IN = 50;
 
-/**
- * A salted hash of the caller's IP that changes daily: enough to count
- * distinct callers and spot one hammering within a day, never enough to
- * identify anyone or follow them across days. Null without a configured
- * secret — the measure is optional, the privacy is not.
- */
+// Salted and rotated daily so callers can be counted but never identified or followed across days.
 export function dailyIpHash(ip: string | null | undefined, now: Date = new Date()): string | null {
   const secret = process.env.MCP_IP_HASH_SECRET;
   if (!ip || !secret) return null;

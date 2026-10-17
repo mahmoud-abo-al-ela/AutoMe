@@ -25,14 +25,6 @@ vi.mock("@/lib/repositories/test-drive", () => ({
 import { editTestDrive, requestTestDrive } from "@/lib/services/test-drive/booking";
 import { ValidationError } from "@/lib/utils/errors";
 
-/**
- * The booking rules run inside bookSlot's lock (repositories/test-drive/
- * booking.ts): these pin that create and edit hand it the right slot and a
- * check that applies the dealership's real hours and the bookings found in
- * the lock. The rules themselves: lib/utils/booking-slots.test.ts; the lock
- * under real concurrency: test/test-drive-booking-concurrency.test.ts.
- */
-
 // Thursday 1 October 2026, 11:00 in Cairo. Saturday the 3rd is open 09-17,
 // Friday the 2nd is closed.
 const NOW = new Date("2026-10-01T08:00:00Z");

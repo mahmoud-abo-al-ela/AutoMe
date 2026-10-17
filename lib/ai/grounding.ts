@@ -1,16 +1,3 @@
-/**
- * Grounded context for features that answer rather than extract.
- *
- * The buyer Q&A may only say what one car's record says. This module decides
- * what "the record" is: a fixed set of named facts, built from the row, with
- * empty values left out. The names double as the enum the model cites in
- * `fieldsUsed`, so an answer can be checked against the facts it claims —
- * citing a fact this listing does not have is treated as no answer at all.
- *
- * The context is bounded: free text is truncated and lists are capped, so a
- * dealer pasting a novel into the description cannot inflate every call.
- */
-
 import type { CarDisclosures, DealershipTerms } from "@/lib/utils/car-disclosures";
 
 /** Every fact a listing answer may rest on. Order is the order the model sees. */
@@ -67,11 +54,6 @@ export interface ListingSource {
   featuresAr: string[];
   /** The date it was first listed, "YYYY-MM-DD". */
   listedOn: string | null;
-  /**
-   * What its photos show, one line per photo in display order, in the
-   * reader's language. Written by a model from the photos, so evidence of
-   * what is visible, not a verified fact about condition.
-   */
   photos: string[];
   dealership: {
     name: string;
@@ -129,12 +111,6 @@ export interface OtherCar {
   fuelType: string;
 }
 
-/**
- * Asking prices of comparable listings on AutoMe, reduced to what a buyer
- * can use. The comparison is computed here, not left to the model: "8%
- * below the median" is arithmetic, and a model doing it is a model that can
- * get it wrong in public.
- */
 export interface MarketPrices {
   listings: number;
   min: number;
@@ -157,12 +133,6 @@ export interface Comparison {
   years: [number, number];
 }
 
-/**
- * Tried in order until one finds enough listings: the same model close in
- * age, then the same model across more years, then the same make and body
- * type. Never wider — "SUVs from 2021 to 2025" spans prices too far apart to
- * say anything about one car.
- */
 export const COMPARISONS = [
   { by: "model", yearSpan: 1 },
   { by: "model", yearSpan: 3 },
@@ -208,11 +178,6 @@ export function summarizeMarketPrices(
   };
 }
 
-/**
- * The alternatives worth offering: the dealership's other cars closest in
- * price to this one, since "anything cheaper?" and "got it in black?" are
- * both asked by a buyer with this budget.
- */
 export function closestByPrice<T extends OtherCar>(cars: T[], price: number, limit = MAX_OTHER_CARS): T[] {
   return [...cars]
     .sort((a, b) => Math.abs(a.price - price) - Math.abs(b.price - price))
@@ -251,11 +216,6 @@ function dealerAnswers(answers: ListingSource["dealerAnswers"]) {
   return kept.length > 0 ? kept : undefined;
 }
 
-/**
- * The facts a question about this listing may be answered from. A key is
- * present only when the row has a value for it — absence is what lets the
- * caller reject an answer that cites a fact the listing never stated.
- */
 export function buildListingFacts(source: ListingSource): ListingFacts {
   const facts: ListingFacts = {
     make: source.make,
@@ -342,11 +302,6 @@ export function buildListingFacts(source: ListingSource): ListingFacts {
   return facts;
 }
 
-/**
- * Whether an answer's citations hold up: at least one fact, and every one of
- * them present in this listing. An answer citing nothing, or citing a fact
- * the listing lacks, is an answer the record cannot back.
- */
 export function citationsHold(facts: ListingFacts, cited: readonly ListingFactKey[]): boolean {
   return cited.length > 0 && cited.every((key) => key in facts);
 }

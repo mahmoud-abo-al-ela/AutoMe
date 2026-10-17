@@ -20,12 +20,6 @@ vi.mock("@/lib/jobs/search-terms", () => ({ searchTermsChanged: vi.fn() }));
 import { updateCarFull } from "@/lib/services/car/crud";
 import type { UpdateCarFullInput } from "@/lib/validations/schemas";
 
-/**
- * A full edit's photos: each one is either a photo this car already has, by
- * its stored URL, or a new upload. The plan's limit counts both. Nothing is
- * deleted or uploaded until the whole list has passed.
- */
-
 const ORG = "org-x";
 const STORED = ["https://cdn.test/cars/car-1/a.jpg", "https://cdn.test/cars/car-1/b.jpg"];
 const OTHER_TENANTS = "https://cdn.test/cars/someone-elses-car/x.jpg";

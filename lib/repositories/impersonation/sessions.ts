@@ -121,11 +121,6 @@ export async function findSessionSuperAdminId(sessionId: string) {
   return session?.superAdminId;
 }
 
-/**
- * A session with exactly what deciding on it needs: whether it is still open,
- * who runs it (their Clerk id and platform role, checked against the signed-in
- * caller) and who and where it targets.
- */
 export async function findSessionForAuthorization(sessionId: string) {
   return db.impersonationSession.findUnique({
     where: { id: sessionId },

@@ -13,15 +13,6 @@ import * as cache from "@/lib/ai/cache";
 import { containsArabic, containsWesternDigits, isPredominantlyArabic } from "@/lib/ai/evaluation/assertions";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * The listing-quality coach's advice, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation
- *
- * The rules decide what is weak; this checks that the advice for it arrives
- * for every flagged issue and in the dealer's language.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 const WEAK_LISTING = {

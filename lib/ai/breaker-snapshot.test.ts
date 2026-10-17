@@ -19,11 +19,6 @@ import { minuteKey, monthKey } from "@/lib/ai/breaker-windows";
 
 const NOW = new Date("2026-10-10T10:00:05Z").getTime();
 
-/**
- * A Redis that answers MGET from a Map and records every command it is sent
- * — any one, so a write the snapshot was not meant to make shows up here
- * whatever its name.
- */
 function recordingRedis(store: Record<string, number> = {}) {
   const calls: string[] = [];
   const redis = new Proxy(

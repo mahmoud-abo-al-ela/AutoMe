@@ -4,14 +4,6 @@ import { reportSignal, reportUnexpected } from "@/lib/observability/report";
 
 export type MessageParams = Record<string, string | number>;
 
-/**
- * How a thrown error names its user-facing text without choosing a language.
- *
- * Server actions run per-request but their responses are cached and shared, so
- * an English sentence baked into one is wrong for the next reader. The key and
- * params travel instead, and the client translates them; `message` stays as the
- * developer-facing fallback that logs and Sentry already rely on.
- */
 export interface ErrorI18n {
     key?: string;
     params?: MessageParams;
@@ -110,12 +102,7 @@ export class RateLimitError extends AppError {
     }
 }
 
-/**
- * A protection layer could not reach a verdict, so the request is refused
- * rather than allowed through unchecked. Used by the Arcjet guards, which fail
- * closed: an unreachable Arcjet or an unconfigured key must not silently
- * disable shield, bot detection and rate limiting.
- */
+// Protection layers fail closed: an unreachable guard refuses the request rather than letting it through unchecked.
 export class ServiceUnavailableError extends AppError {
     constructor(
         message = "Service temporarily unavailable. Please try again.",
@@ -170,13 +157,6 @@ export function isOperationalError(error: unknown): boolean {
     return false;
 }
 
-/**
- * Log an error at its level, and tell Sentry what someone must look at
- * (lib/observability/report.ts): every error that is not an expected, typed
- * one, and every refused access — one refusal is a stale tab, a run of them is
- * someone trying ids that are not theirs. Other expected errors (validation,
- * plan limits, rate limits) stay in the log.
- */
 export function logError(errorOrMessage: unknown, ...args: unknown[]): void {
     let actualError: unknown = errorOrMessage;
     let context: string | undefined = undefined;

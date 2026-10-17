@@ -1,12 +1,6 @@
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 
-/**
- * One person as the super-admin sees them: their account, their dealerships,
- * what they did as a buyer and, for AutoMe staff, their support sessions.
- * Across every dealership by design — only platform admins reach it.
- */
-
 export async function findUser(id: string) {
   return db.user.findUnique({
     where: { id },

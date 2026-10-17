@@ -4,21 +4,6 @@ import { publicCarWhere } from "@/lib/repositories/car/visibility";
 import { runInTransaction } from "@/lib/repositories/transaction";
 import { serializeTestDrive } from "@/lib/utils/serializers";
 
-/**
- * A slot is a range of time on one car's day, and bookings may span several
- * of the grid's slots; two bookings clash when their ranges overlap. Every
- * write that puts a booking on a day — a new request, an edit — runs here:
- * inside one transaction that first takes a lock on that car's day, then
- * re-reads what it decides on. Two requests for the same car and day so run
- * one after the other, and the second sees the first; the overlap check can
- * no longer pass for both (it could before: it ran outside any transaction).
- *
- * The lock is Postgres's transaction-scoped advisory lock: released at commit
- * or rollback, never held by a connection, so it is safe behind a transaction
- * pooler. It guards only what goes through bookSlot — which is why nothing
- * else may insert a booking or move one onto a day.
- */
-
 /** Statuses that hold a slot; CANCELLED and COMPLETED free it. */
 export const OCCUPYING_STATUSES: readonly TestDriveStatus[] = ["PENDING", "CONFIRMED"];
 
@@ -58,11 +43,6 @@ async function lockCarDay(tx: Prisma.TransactionClient, carId: string, day: stri
   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${carId}:${day}`}, 0))::text AS "locked"`;
 }
 
-/**
- * Take, or move to, a slot on a car's day. Returns the booking — for a new
- * request by the same user for the same car and range that is already held,
- * the one already there: a repeated submission books once.
- */
 export async function bookSlot(request: SlotRequest, write: SlotWrite, check: SlotCheck) {
   return runInTransaction(async (tx) => {
     await lockCarDay(tx, request.carId, request.day);

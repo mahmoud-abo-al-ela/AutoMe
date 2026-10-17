@@ -15,19 +15,6 @@ export interface ActiveImpersonation {
   targetOrganizationId: string;
 }
 
-/**
- * The caller's support session, verified against its row — or null.
- *
- * The cookie carries only the session id; it is never authority on its own.
- * Anyone can send any cookie, so the row decides: the session must be open,
- * within its lifetime, and run by the platform admin who is signed in on this
- * request. Who is impersonated and where come from the row, not the cookie.
- *
- * Nothing is memoized. `React.cache()` does not memoize outside a render
- * (Route Handlers, parts of Server Actions), and a module-level memo would
- * carry one request's answer into another. Callers without the cookie — every
- * buyer and dealer — never reach the database here.
- */
 export async function resolveActiveImpersonation(): Promise<ActiveImpersonation | null> {
   const sessionId = await getSessionIdFromCookies();
   if (!sessionId) return null;
@@ -50,12 +37,7 @@ export async function resolveActiveImpersonation(): Promise<ActiveImpersonation 
   };
 }
 
-/**
- * Whether the caller is in a verified support session for exactly this
- * dealership. The only way, besides a membership, to act inside a tenant: a
- * platform role alone grants nothing there, and a session for one dealership
- * grants nothing in another.
- */
+// Besides a membership, the only way to act inside a tenant; a platform role alone grants nothing there.
 export async function isImpersonatingOrganization(organizationId: string): Promise<boolean> {
   const session = await resolveActiveImpersonation();
   return session?.targetOrganizationId === organizationId;

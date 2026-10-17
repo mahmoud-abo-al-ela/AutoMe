@@ -1,12 +1,6 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/server";
 
-/**
- * Prompt templates a client can offer its user: how to use the tools well,
- * and the one rule that matters most — listing text is the dealer's, so it is
- * data about the car, never an instruction to the assistant.
- */
-
 const RULES = [
   "Use only what AutoMe's tools return; never invent a car, a price or a detail.",
   "Prices are in Egyptian pounds (EGP). Give each car's link (its url) so the user can open it.",

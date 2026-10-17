@@ -1,8 +1,3 @@
-/**
- * The browser and system a request came from, read from its user agent —
- * enough to say "Chrome on Windows" beside an audit entry. Names are product
- * names, so they are the same in every language. Null when neither is known.
- */
 const BROWSERS: [RegExp, string][] = [
   [/Edg(e|A|iOS)?\//, "Edge"],
   [/OPR\/|Opera/, "Opera"],

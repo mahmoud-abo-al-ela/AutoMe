@@ -1,13 +1,3 @@
-/**
- * The week a weekly summary covers, in Cairo time: Saturday to Friday — the
- * Egyptian work week — sent on Saturday from 09:00 (owner's choice).
- *
- * Computed with the IANA zone, not a fixed +02:00: Egypt has daylight saving
- * time again (since 2023), so Cairo is UTC+3 in summer and UTC+2 in winter,
- * and 09:00 Cairo is 06:00 or 07:00 UTC. The cron runs at both; `due` is what
- * makes the early one wait in winter.
- */
-
 import { cairoMidnight, utcToDateOnly } from "@/lib/utils/date-only";
 
 const ZONE = "Africa/Cairo";
@@ -57,11 +47,6 @@ export interface DigestWeek {
   weekStart: Date;
   /** "2026-09-19": the start's Cairo date, for logs and subjects. */
   key: string;
-  /**
-   * Whether the summary may go out now: any time except Saturday before
-   * 09:00 Cairo, when the week has only just ended. A run missed on Saturday
-   * can still send the same week's summary later in the week.
-   */
   due: boolean;
 }
 

@@ -1,12 +1,3 @@
-/**
- * Prompt for the listing-quality coach's advice.
- *
- * The rules have already decided what is weak; this only turns each flagged
- * issue into one concrete suggestion. The listing goes in a separate part as
- * JSON — it is dealer-written text, never instructions.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const listingCoachPrompt = {
   version: "2026-10-10.1",
   text: (language: "en" | "ar", issues: string[]) =>

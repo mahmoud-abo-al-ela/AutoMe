@@ -1,12 +1,6 @@
 import type { BillingPeriod, Prisma } from "@/lib/generated/prisma";
 import type { PeriodBounds } from "./periods";
 
-/**
- * The two whole-subscription states billing moves a dealership into, written
- * one way by everything that moves it: settling a payment, the owner's own
- * changes, and the daily renewals job.
- */
-
 type SubscriptionWrite = Prisma.SubscriptionUncheckedUpdateInput;
 
 /** Nothing waiting, nothing owed: what any paid or free period starts from. */

@@ -9,13 +9,6 @@ import {
   type PlatformActivityQuery,
 } from "./platform-activity-options";
 
-/**
- * The super-admin Activity page (canvas: Super admin activity round 1, "2 ·
- * Data table"): every change across AutoMe, newest first, filtered by who
- * made it, what kind of thing it was, the dealership and the period — each
- * with who made it, where, and what it was before and after.
- */
-
 const KIND_TYPES: Record<Exclude<PlatformActivityKind, "all">, EntityType[]> = {
   cars: ["CAR"],
   drives: ["TEST_DRIVE"],

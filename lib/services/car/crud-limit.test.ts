@@ -22,12 +22,6 @@ vi.mock("@/lib/jobs/search-terms", () => ({ searchTermsChanged: vi.fn() }));
 import { createCar } from "@/lib/services/car/crud";
 import type { CarInput } from "@/lib/validations/schemas";
 
-/**
- * The car limit is decided at the insert, under the dealership's lock — the
- * gate before it is only the fast refusal. A save that loses the last place
- * is refused, and the photos it already uploaded are removed.
- */
-
 const ORG = "org-1";
 const input = { title: "Corolla", make: "Toyota", model: "Corolla", year: 2020, price: 1, mileage: 1, images: ["data:image/png;base64,AA=="] } as unknown as CarInput;
 

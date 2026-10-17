@@ -14,16 +14,6 @@ import { PLATE_TEXT, carPhoto, photoWithArabicPlate } from "@/lib/ai/evaluation/
 import { containsArabic, firstLeak, isPredominantlyArabic } from "@/lib/ai/evaluation/assertions";
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 
-/**
- * Photo alt text, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation
- *
- * Alt text is read aloud to buyers who cannot see the photo, so the failures
- * that matter are: the Arabic is not Arabic, it runs too long to be read in
- * one breath, or it reads out a plate number the listing must never publish.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 describe.skipIf(!enabled)("photo alt text (real model)", () => {

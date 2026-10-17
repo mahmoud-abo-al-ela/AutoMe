@@ -4,12 +4,6 @@ import { formatWorkingHours } from "@/lib/utils/working-hours";
 import { DEFAULT_DEALERSHIP_SORT } from "@/lib/constants/dealership-options";
 import type { PlanType } from "@/lib/generated/prisma";
 
-/**
- * The dealership listing filter set. Declared here rather than in the
- * repository because lib/repositories/dealership/queries/listing.js is still
- * JavaScript (its where-builder is deferred); move this there on conversion.
- * Numeric bounds arrive as query-string values and are coerced below.
- */
 export interface DealershipFilters {
     search?: string;
     planType?: PlanType;
@@ -27,11 +21,6 @@ export interface DealershipPagination {
     limit?: number;
 }
 
-/**
- * The listing row this service reshapes. Only the fields read below are
- * declared; the repository still being JS means this is the contract between
- * the two until it converts.
- */
 interface DealershipListRow {
     id: string;
     name: string;
@@ -156,13 +145,6 @@ export async function searchDealerships(
     );
 }
 
-/**
- * Get available filter options.
- *
- * City/region facet counts are cross-filtered against the currently active
- * filters (so counts reflect what selecting them would return); platform stats
- * are global and independent of filters.
- */
 export async function getDealershipFilters(filters: DealershipFilters = {}) {
     const [facets, stats] = await Promise.all([
         dealershipRepo.getDealershipFacetCounts(filters),

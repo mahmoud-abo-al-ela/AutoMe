@@ -3,13 +3,6 @@ import * as aiTraceRepository from "@/lib/repositories/ai-trace";
 import { NotFoundError } from "@/lib/utils/errors";
 import { OPS_LIMITS } from "./usage";
 
-/**
- * AI traces for an operator: what a call was sent and what came back, kept
- * 14 days (repositories/ai-trace). Stored redacted, and redacted again on the
- * way out — a pattern added to redact.ts since a trace was written still
- * applies to it — then capped, so one large reply cannot flood a listing.
- */
-
 type StoredTrace = Awaited<ReturnType<typeof aiTraceRepository.findTraceById>> & {};
 
 function cap(text: string, chars: number): string {

@@ -1,11 +1,5 @@
 import type { TokenUsage } from "@/lib/ai/models";
 
-/**
- * The vendor-neutral shapes every provider speaks. Nothing above
- * `lib/ai/provider/` names a vendor type — which is what lets one chain mix
- * Gemini's SDK with any OpenAI-compatible API.
- */
-
 /** A content part: text, or an image as base64 bytes plus its MIME type. */
 export type AiPart =
   | { text: string }
@@ -22,21 +16,11 @@ export function textPart(text: string): AiPart {
 
 export interface ProviderRequest {
   model: string;
-  /**
-   * The instructions, sent in the provider's system role — apart from the
-   * user content, which is data. A model without a system role gets them as
-   * the first user part instead; see each provider.
-   */
   system?: string;
   parts: AiPart[];
   /** JSON Schema for the reply. Every reply this client asks for is JSON. */
   responseJsonSchema?: unknown;
   temperature?: number;
-  /**
-   * "low" for structured extraction and translation: the answer is constrained
-   * by the schema, and default thinking was most of the latency — and bills at
-   * the output rate. Each provider maps it to its own control, or ignores it.
-   */
   thinking?: "low";
   /** Hard ceiling on the reply, thinking included. */
   maxOutputTokens?: number;
@@ -54,15 +38,6 @@ export interface ProviderResult {
   usage: TokenUsage;
 }
 
-/**
- * One provider: one call, made with the key the client chose. No retry, no
- * metering, no key selection — a provider may have several keys, and which one
- * to spend is the client's decision (see keysFor in lib/ai/providers).
- */
-/**
- * What a vector is for. Retrieval models embed a short question and the
- * longer text that answers it differently, so each side says which it is.
- */
 export type EmbeddingTask = "query" | "document" | "similarity";
 
 export interface EmbedRequest {
@@ -80,11 +55,6 @@ export interface EmbedResult {
 }
 
 export interface AiProvider {
-  /**
-   * Must throw errors carrying a numeric `status` for HTTP failures, so the
-   * shared classification in ./errors decides retry and fallback identically
-   * for every provider.
-   */
   generate(req: ProviderRequest, apiKey: string): Promise<ProviderResult>;
   /** Text to vectors, where the provider offers it; same error contract as generate. */
   embed?(req: EmbedRequest, apiKey: string): Promise<EmbedResult>;

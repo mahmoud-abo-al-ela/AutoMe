@@ -1,13 +1,3 @@
-/**
- * Prompt for writing a dealer's listing in the other language.
- *
- * The listing itself is NOT interpolated here: it goes in a separate part, as
- * JSON. It is dealer-written text, and keeping it out of the instructions means
- * a description that happens to read like an instruction is translated rather
- * than obeyed.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const listingTranslationPrompt = {
   version: "2026-10-10.1",
   toArabic: `You are writing the Arabic version of a car listing for an Egyptian

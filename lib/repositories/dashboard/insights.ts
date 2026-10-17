@@ -1,14 +1,5 @@
 import { db } from "@/lib/prisma";
 
-/**
- * Everything the Insights page reads for one period, in one round of
- * parallel queries: what happened in the period and in the one before it
- * (for the comparisons), who did it (for the buyer funnel), the stock as it
- * stands, and per-car interest for the table.
- *
- * Buyers are counted once per step however many cars they saved or booked.
- * Buyer questions carry no buyer, so they count questions, not people.
- */
 export async function getInsightRows(
   organizationId: string,
   { since, before }: { since: Date; before: Date },

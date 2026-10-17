@@ -3,13 +3,6 @@ import type { Prisma } from "@/lib/generated/prisma";
 import { cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { USERS_PER_PAGE, USER_VIEWS, type UserQuery, type UserSort, type UserView } from "./users-options";
 
-/**
- * The super-admin users list (canvas: Super admin users round 1, "1 · Data
- * table"): views by kind of account with their counts, search, a dealership
- * filter and a sort, and a page of people with what kind of account each is,
- * their dealership, and what they have done as a buyer.
- */
-
 const ORDER_BY: Record<UserSort, Prisma.UserOrderByWithRelationInput[]> = {
   newest: [{ createdAt: "desc" }],
   oldest: [{ createdAt: "asc" }],

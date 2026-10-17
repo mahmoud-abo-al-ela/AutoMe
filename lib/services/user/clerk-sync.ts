@@ -7,11 +7,6 @@ import { logError } from "@/lib/utils/errors";
  * (app/api/webhooks/clerk verifies the signature, then hands the event here).
  */
 
-/**
- * The subset of Clerk's user.* webhook payload this reads. The signature
- * check proves the body is authentically from Clerk but cannot type it: the
- * shape is Clerk's contract.
- */
 export type ClerkUserEvent = {
   type: string;
   data: {
@@ -28,16 +23,7 @@ export type ClerkUserEvent = {
 
 type ClerkUserData = ClerkUserEvent["data"];
 
-/**
- * Give an account copied into this Clerk instance (the one-off move to the
- * production instance, 2026-10-14; the copy script is in git history:
- * scripts/clerk/migrate-users.ts)
- * the row it had under its old ID. The copy carries that ID as its
- * external_id, which only AutoMe sets — through Clerk's Backend API with the
- * secret key — so a user cannot claim someone else's row with it. True if
- * the row was moved to `clerkId`. Called wherever a new Clerk ID would
- * otherwise get a new row: the user.created webhook and checkUser.
- */
+// Safe because only AutoMe sets external_id, through Clerk's Backend API with the secret key.
 export async function relinkMigratedUser(clerkId: string, externalId: string | null | undefined): Promise<boolean> {
   if (!externalId || externalId === clerkId) return false;
   return userRepository.relinkClerkId(externalId, clerkId);
@@ -62,12 +48,6 @@ async function handleUserCreated(data: ClerkUserData) {
     return;
   }
 
-  // Clerk can legitimately deliver a user.created with no email address at
-  // all — phone-only and some passwordless signups. `User.email` is nullable
-  // for exactly that reason, so the row is created either way and stays in
-  // step with Clerk. No placeholder address is synthesised: it would occupy
-  // the unique index, reach audit logs and pending-owner lookups, and could
-  // be delivered to.
   await userRepository.createUser({
     clerkId: data.id,
     name: displayName(data),
@@ -77,16 +57,9 @@ async function handleUserCreated(data: ClerkUserData) {
 }
 
 async function handleUserUpdated(data: ClerkUserData) {
-  // A miss is not an error: user.updated can arrive for a Clerk user we never
-  // saw created (webhook configured after signup, a replayed event, a purged
-  // row); checkUser() creates the row on the user's first authenticated
-  // request.
-  //
-  // `email: undefined` when Clerk sends none leaves the column alone rather
-  // than nulling it: a partial update must not wipe a known address just
-  // because this event did not carry one.
   const count = await userRepository.updateUsersByClerkId(data.id, {
     name: displayName(data),
+    // undefined leaves the column alone: a partial event must not wipe a known address.
     email: data.email_addresses?.[0]?.email_address,
     imageUrl: data.image_url,
   });
@@ -102,12 +75,6 @@ async function handleUserDeleted(clerkId: string) {
   await userRepository.deleteUserByClerkId(clerkId);
 }
 
-/**
- * Apply one verified Clerk event, once. `eventId` (Svix's message id) is
- * stable across retries of the same event, so a retry of a processed event is
- * a "duplicate"; if applying fails, the claim is released before the error is
- * rethrown, so Svix's retry can process the event again.
- */
 export async function applyClerkUserEvent(eventId: string, event: ClerkUserEvent): Promise<"processed" | "duplicate"> {
   const claimed = await claimWebhookEvent({ id: eventId, provider: "clerk", type: event.type });
   if (!claimed) return "duplicate";

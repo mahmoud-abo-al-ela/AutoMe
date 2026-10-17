@@ -2,12 +2,6 @@ import * as plansRepo from "@/lib/repositories/super-admin/plans-page";
 import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { monthlyIncome } from "./overview";
 
-/**
- * The super-admin plans page (canvas: Super admin plans round 1, "1 ·
- * Comparison table"): every plan with what it costs and includes, and who is
- * on it — paying, on a trial, overdue — with what each brings in a month.
- */
-
 const TRIAL_WARNING_DAYS = 7;
 
 /** A plan's monthly price, or a twelfth of its yearly one, for a subscription. */

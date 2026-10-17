@@ -9,12 +9,6 @@ import { displayNameFor } from "@/lib/utils/userHelpers";
 import { cairoNow } from "@/lib/utils/datetime";
 import { logError } from "@/lib/utils/errors";
 
-/**
- * The emails a test drive sends. Each is fire-and-forget: the booking or the
- * status change has already succeeded and shows in the app, so a failed email
- * is logged, never thrown.
- */
-
 const carTitle = (car: { title: string | null; make: string; model: string; year: number }) =>
   car.title || `${car.make} ${car.model} ${car.year}`;
 

@@ -8,13 +8,6 @@ import {
   SUBDOMAIN_REDIRECT_TO_HOME_ROUTES,
 } from "../route-policy";
 
-/**
- * Every mistake here is silent: a matcher that stops matching does not throw,
- * the route just quietly stops being guarded. The cases below were checked
- * against Clerk's createRouteMatcher before it was replaced (2026-10-14), so
- * they pin the behaviour the middleware has always had.
- */
-
 describe("pathMatcher", () => {
   const isApi = pathMatcher(["/api(.*)", "/trpc(.*)"]);
   const isCrawlerFile = pathMatcher(["/sitemap.xml", "/robots.txt"]);

@@ -91,14 +91,6 @@ describe("expandSearchTerm", () => {
 });
 
 describe("the split between exact and text variants", () => {
-  /**
-   * The invariant that replaced two heuristics. The previous version returned
-   * one flat list, so every caller had to guess which entries were safe to
-   * substring-match — and the guesses were a length floor and a set membership
-   * check, spread across three files. A canonical value reaching a `contains`
-   * is what made searching "القاهرة" return every dealership with a "c" in its
-   * description.
-   */
   it("never offers a governorate code or a city slug as text", () => {
     const canonical = new Set([
       ...EGYPT_GOVERNORATES.map((governorate) => governorate.code),

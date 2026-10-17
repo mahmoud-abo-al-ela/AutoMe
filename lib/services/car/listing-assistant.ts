@@ -25,12 +25,6 @@ import type { Trace } from "@/lib/utils/dev-trace";
 import { telHref } from "@/lib/utils/phone";
 
 /**
- * The buyer assistant on a public listing: whether a listing offers it, and
- * asking it. Public and unauthenticated, but billed to the dealer who owns
- * the car — so the dealer's plan decides, never anything the buyer sends.
- */
-
-/**
  * What a buyer is shown. A decline may carry the model's own wording for it,
  * already checked by declineText; without one the page shows fixed copy.
  */
@@ -79,13 +73,6 @@ interface Allowance {
   priority: CapacityPriority;
 }
 
-/**
- * Whether this dealer's plan offers the assistant. There is no monthly cap on
- * answers (the owner's decision, 2026-09-28): a buyer asking questions is the
- * point, and the dealer should never find the assistant switched off halfway
- * through a month. Abuse and cost are bounded elsewhere — Arcjet per IP and per
- * car, the no-model replies for greetings and noise, and each provider's caps.
- */
 async function allowanceFor(organizationId: string): Promise<Allowance> {
   const subscription = await billingRepository.findActiveSubscription(organizationId);
   const plan = await planInEffect({ id: organizationId, subscription });
@@ -103,16 +90,7 @@ export async function isListingAssistantOffered(organizationId: string): Promise
   return (await allowanceFor(organizationId)).offered;
 }
 
-/**
- * Answer a buyer's question about one car.
- *
- * `currentOrganizationId` is the dealership subdomain being browsed, if any,
- * from getCurrentOrganization — never client input. On a subdomain a car of
- * another dealer is not found, exactly as the detail page treats it.
- *
- * The plan is re-checked here rather than trusted from page render: the page
- * may have been open for an hour.
- */
+// currentOrganizationId comes from getCurrentOrganization, never client input; the plan is re-checked here, not trusted from render.
 export async function askAboutListing(
   carId: string,
   question: string,
@@ -250,12 +228,6 @@ export async function askAboutListing(
 /** How long a page may refer back to a reply; a conversation, not an archive. */
 const HISTORY_WINDOW_MS = 2 * 60 * 60_000;
 
-/**
- * The earlier exchanges the page names, read back from what the server kept
- * — never text the page sends, which anyone could write. A reply shown as the
- * page's fixed copy has no stored wording; the model is told what it said.
- * Context only, so a failed read answers without it rather than failing.
- */
 async function pastExchanges(carId: string, ids: string[]): Promise<PastExchange[]> {
   if (ids.length === 0) return [];
   try {
@@ -276,11 +248,6 @@ async function pastExchanges(carId: string, ids: string[]): Promise<PastExchange
   }
 }
 
-/**
- * The dealer's answers, or none. They improve an answer but are not needed
- * for one, so a failed read — or a deploy that reached production before its
- * migration did — answers from the listing alone instead of failing.
- */
 async function dealerAnswersFor(carId: string, organizationId: string, question: string) {
   try {
     return await dealerAnswersForQuestion({ carId, organizationId, question });
@@ -319,16 +286,6 @@ const toOtherCar = ({ images, ...car }: AlternativeRow): OtherCarRow => ({
   image: images?.[0] ?? null,
 });
 
-/**
- * The dealership's other cars worth showing the model: the ones the question
- * names when it names any ("عندكم كيا؟" — wherever they are in price), and
- * otherwise those closest in price to this one ("anything cheaper?").
- *
- * Null — not an empty list — when the cars could not be read: "none for
- * sale" is a claim, and only a successful read can make it. A failed match
- * falls back to the closest in price: alternatives are worth more than
- * strictly matching ones.
- */
 async function otherCarsFor(organizationId: string, carId: string, price: number, question: string): Promise<OtherCars> {
   const [matching, recent] = await Promise.all([
     carRepository
@@ -346,11 +303,6 @@ async function otherCarsFor(organizationId: string, carId: string, price: number
   return { cars: recent && closestByPrice(recent.map(toOtherCar), price), matched: false };
 }
 
-/**
- * A button's target, from the dealer's own row — never from the model, which
- * only chose that the button fits. answerListingQuestion already dropped any
- * button the row cannot back; this re-checks, since it builds the href.
- */
 function actionFor(
   kind: ListingAction,
   car: { id: string; status: string },
@@ -378,15 +330,6 @@ function suggestedCar(row: OtherCarRow, currency: string): SuggestedCar {
   return { id, year, make, model, price, currency, image };
 }
 
-/**
- * Put a declined question in the dealer's inbox. Awaited — a detached write
- * can be killed when the function returns — but never allowed to fail the
- * buyer's request: they still get "ask the dealer" either way.
- */
-/**
- * Keep a reply — an answer so the buyer can rate it. Best effort: without an
- * id the reply is still shown, an answer just without 👍/👎.
- */
 async function keepAnswer(input: assistantAnswerRepository.AnswerToKeep): Promise<string | null> {
   try {
     return await assistantAnswerRepository.recordAssistantAnswer(input);
@@ -396,12 +339,6 @@ async function keepAnswer(input: assistantAnswerRepository.AnswerToKeep): Promis
   }
 }
 
-/**
- * A buyer rates an answer. Rated once: a repeat, or an id that does not
- * exist, changes nothing. A 👎 files the question in the dealer's inbox, as a
- * declined one would be — the dealer's answer then becomes a fact the
- * assistant cites instead.
- */
 export async function rateListingAnswer(answerId: string, helpful: boolean): Promise<void> {
   const rated = await assistantAnswerRepository.rateAssistantAnswer(answerId, helpful);
   if (!rated || helpful) return;

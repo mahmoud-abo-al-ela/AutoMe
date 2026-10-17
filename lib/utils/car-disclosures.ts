@@ -1,14 +1,3 @@
-/**
- * What a dealer states about a car's history and a dealership's terms — the
- * facts buyers ask about before anything else.
- *
- * **Null means "not stated", never "no".** A listing silent about accidents is
- * not a listing claiming there were none. Every reader of these fields — the
- * listing page, the buyer assistant — shows or cites only what was stated.
- *
- * Pure (its one import, dealership-text, is too): the dealer form, the server schema, the listing
- * page and the assistant's grounding all read it.
- */
 import type { Locale } from "@/i18n/routing";
 import { resolveDealershipText } from "./dealership-text";
 
@@ -81,11 +70,6 @@ export function triStateFromForm(value: string | undefined): boolean | null {
   return value === "yes" ? true : value === "no" ? false : null;
 }
 
-/**
- * "YYYY-MM" from a stored date (a Date from Prisma, an ISO string once
- * serialized) or a month string. Read in UTC: the column is a bare date, and a
- * local-time read east of UTC would never shift it, but west of it would.
- */
 export function licenseMonth(value: Date | string | null | undefined): string | null {
   if (!value) return null;
   if (typeof value === "string" && /^\d{4}-\d{2}$/.test(value)) return value;
@@ -147,12 +131,6 @@ export function statedDisclosures(car: Partial<CarDisclosures>): Partial<CarDisc
   return stated;
 }
 
-/**
- * The terms the dealer stated. With a locale, the financing note is in that
- * reader's language (the dealer's own words until a translation exists) and
- * the per-language columns are dropped; without one — a car serialized before
- * anyone knows who reads it — the columns ride along for the page to resolve.
- */
 export function statedTerms(terms: Partial<DealershipTerms>, locale?: Locale): Partial<DealershipTerms> {
   const stated: Partial<DealershipTerms> = {};
   for (const key of DEALERSHIP_TERM_FLAGS) {

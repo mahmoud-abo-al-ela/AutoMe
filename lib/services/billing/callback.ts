@@ -8,22 +8,6 @@ import {
 import { logError } from "@/lib/utils/errors";
 import { settlePayment } from "./settle";
 
-/**
- * Paymob's transaction callback, framework-free so it can be tested without
- * Next: the route hands over the parsed body and the `hmac` query parameter.
- *
- *   - Unconfigured → 500, nothing read (fails closed).
- *   - Bad or missing signature → 401, nothing written.
- *   - A pending transaction → 200, nothing written: the final state follows
- *     as its own callback.
- *   - Each (transaction, outcome) is claimed once in WebhookEvent; a repeat
- *     delivery → 200 without re-running. A transaction's outcome is part of
- *     the key because Paymob can report one transaction twice (pending, then
- *     final).
- *   - Settlement fails → the claim is released and 500 returned, so Paymob's
- *     retry runs it again.
- */
-
 export interface CallbackResponse {
   status: number;
   body: Record<string, unknown>;

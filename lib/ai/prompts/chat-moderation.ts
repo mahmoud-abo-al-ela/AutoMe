@@ -1,19 +1,5 @@
 import type { ChatSender } from "@/lib/ai/prompts/chat-translation";
 
-/**
- * Prompt for judging one chat message between a car buyer and a dealership in
- * Egypt. The message is NOT interpolated: it goes in a separate part as a JSON
- * string, so a message that tells the model to call it safe is judged, not
- * obeyed.
- *
- * The line it has to hold is between the trade and the con. Dealers take
- * reservation deposits (عربون) and share their WhatsApp and address; buyers
- * haggle and ask about down payments (مقدم). A verdict of "scam" only puts a
- * warning on the message, so a close call leans to it; "abuse" hides the
- * message behind a tap, so it needs real insult, threat or harassment.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const chatModerationPrompt = {
   version: "2026-10-10.1",
   text: (sender: ChatSender | null) => `You review one message from a chat between a car buyer and a car dealership in

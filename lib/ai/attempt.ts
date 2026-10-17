@@ -14,12 +14,6 @@ import { ServiceUnavailableError, ValidationError, logError } from "@/lib/utils/
 import type { AiCallerContext, AiProgressEvent } from "@/lib/ai/client";
 
 /**
- * One model, driven to a validated reply: the per-attempt timeouts, the
- * retries, and the ledger row, trace and failure record each attempt leaves.
- * lib/ai/client.ts decides which model and key to try; this tries it.
- */
-
-/**
  * A model accepted the request but had not started answering by the
  * first-token deadline — it is queued, not broken. Walks the chain like a 503.
  */
@@ -32,11 +26,6 @@ export class QueueTimeoutError extends Error {
   }
 }
 
-/**
- * The key's slot could not be reserved: in-flight requests took the last of
- * its cap since the chain was checked. Nothing was sent and nothing billed;
- * the next key, or the next provider's, may have room.
- */
 export class KeyCappedError extends Error {
   readonly code = "KEY_CAPPED";
 
@@ -52,13 +41,6 @@ function timeoutError(): Error {
   return error;
 }
 
-/**
- * Run one provider call under a wall-clock budget.
- *
- * The abort signal is the right mechanism, but the race is kept as well so the
- * budget holds even if the SDK declines to honour the signal — a hung call
- * otherwise pins a serverless invocation until the platform ceiling.
- */
 async function callWithTimeout(
   provider: AiProvider,
   apiKey: string,
@@ -152,15 +134,6 @@ export function isUnreadableReply(error: unknown): boolean {
   return error instanceof ValidationError && error.messageKey === "errors.ai.unreadable";
 }
 
-/**
- * The least budget worth starting a follow-up request with — a retry, the
- * next key, the next model. No model answers a structured request in less;
- * starting one would spend a request (billed, metered, rate-limited) whose
- * answer cannot arrive. Checking only for "any time left" let a follow-up
- * start with a millisecond or two to spare, when our own budget timer fired
- * a hair before the clock read the deadline. The first attempt of a call
- * needs only some time left: the caller asked for that one.
- */
 export const MIN_FOLLOW_UP_MS = 1_000;
 
 /** Whether a follow-up request is still worth starting before `deadline`. */
@@ -179,15 +152,6 @@ function budgetExhausted(): Error {
   });
 }
 
-/**
- * Drive one model to a validated result, retrying only genuine transients.
- *
- * Throws the *original* error rather than a mapped one, so the caller can still
- * tell a retired model from a broken request and move down the chain.
- *
- * Returns the ledger row of the attempt that answered alongside the reply, so
- * what the reply is later judged on can be traced to the call that wrote it.
- */
 export async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T; usageId: string | null }> {
   const { provider: providerId, model } = input.entry;
   const provider = PROVIDERS[providerId].provider;
@@ -367,11 +331,6 @@ export async function attemptModel<T>(input: AttemptInput<T>): Promise<{ data: T
   });
 }
 
-/**
- * Which model answered, in the dev server's terminal — so a developer trying
- * a feature can see it. Never in production: the AiUsage ledger records every
- * attempt there, and a line per call would only be noise.
- */
 export function devLog(message: string) {
   if (process.env.NODE_ENV === "development") console.info(`[ai] ${message}`);
 }

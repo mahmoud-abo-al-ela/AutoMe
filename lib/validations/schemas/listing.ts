@@ -1,21 +1,12 @@
 import { z } from "zod";
 import { MAX_COMPARE_CARS } from "@/lib/utils";
 
-/**
- * The public cars listing's input (getCars, getCarsFilters): only what a
- * buyer can choose. Anything else a request carries is dropped — above all
- * the scope: `organizationId`, `status` and `onlyAvailable` decide which cars
- * may be seen at all, and from the client they would list another dealer's
- * hidden and sold cars. The server sets the scope (the storefront's dealership
- * on a subdomain; public listings everywhere else), and the search's meaning
- * is computed there too.
- */
-
 const word = z.string().trim().max(60);
 /** A multi-select: one value or several, as the URL and the filter panel send it. */
 const choice = z.union([word, z.array(word).max(30)]).optional();
 const amount = z.number().finite().min(0).optional();
 
+// Only what a buyer can choose: scope fields (organizationId, status) are dropped and set by the server.
 export const carListingFiltersSchema = z.object({
   search: z.string().max(200).optional(),
   dealership: word.optional(),

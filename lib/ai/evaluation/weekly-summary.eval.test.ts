@@ -15,17 +15,6 @@ import { containsArabic, isPredominantlyArabic } from "@/lib/ai/evaluation/asser
 import { CALL_TIMEOUT, EVAL_CALLER, isCapacityFailure } from "@/lib/ai/evaluation/harness";
 import { numbersHold } from "@/lib/utils/digest-numbers";
 
-/**
- * The weekly summary paragraph, against the real model.
- *
- *   AI_EVAL=1 npx vitest run lib/ai/evaluation/weekly-summary
- *
- * The failure that matters is a number: "12 test drives" when there were 2 is
- * what a dealer acts on. numbersHold guards it in production — a summary that
- * fails it is dropped — so here it measures how often the model gets it right,
- * because a dropped paragraph is a worse email.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 const BUSY = {

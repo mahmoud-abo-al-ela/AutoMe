@@ -20,19 +20,6 @@ import * as settingsLogs from "./settings";
  * Supports automatic retention based on organization plan
  */
 
-/**
- * Create an audit log entry
- * @param {Object} params
- * @param {string} params.action - AuditAction enum value
- * @param {string} params.entityType - EntityType enum value
- * @param {string} params.entityId - ID of the affected entity
- * @param {string} params.organizationId - Organization ID (optional for super admin actions)
- * @param {string} params.userId - User performing the action
- * @param {string} params.userEmail - Email of the user
- * @param {Object} params.oldValue - Previous state (for updates)
- * @param {Object} params.newValue - New state
- * @param {Object} params.metadata - Additional context (IP, userAgent, reason, etc.)
- */
 interface CreateAuditLogParams {
   action: AuditAction;
   entityType: EntityType;
@@ -91,14 +78,6 @@ export async function createAuditLog({
   }
 }
 
-/**
- * Record a super-admin action, with the request's IP and user agent.
- *
- * Unlike createAuditLog, the entry never expires: a dealership's plan sets
- * how long its own activity is kept, but what the platform did to that
- * dealership is the platform's record. As with createAuditLog, a failed write
- * is logged, never thrown — the change it records has already been saved.
- */
 export async function recordAdminAuditEntry(entry: Prisma.AuditLogUncheckedCreateInput) {
   try {
     const { ipAddress, userAgent } = await getRequestMetadata();

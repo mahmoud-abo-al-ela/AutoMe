@@ -1,36 +1,7 @@
-/**
- * Validation for post-authentication redirect targets.
- *
- * The sign-in and sign-up pages read `?redirect_url=` straight off the query
- * string and handed it to Clerk's `forceRedirectUrl`. Anything that reached
- * that prop was somewhere the user got sent *after authenticating*, which is
- * the classic open-redirect shape: a link to
- * `https://autome.com/sign-in?redirect_url=https://evil.example/login` shows a
- * genuine, correctly-certificated AutoMe sign-in page and then lands the
- * freshly-authenticated user on an attacker's page — ideal for credential
- * phishing and for leaking whatever the next page puts in the URL.
- *
- * Only same-origin paths are allowed through, and only ones we can prove are
- * paths.
- */
-
 /** Where to send someone when the requested destination is not trustworthy. */
 export const DEFAULT_REDIRECT = "/";
 
-/**
- * Narrow an untrusted redirect target to a safe internal path.
- *
- * Returns `DEFAULT_REDIRECT` for anything not provably local. Rejects:
- *  - absolute URLs on any origin (`https://evil.example/x`), including ones
- *    whose host merely starts with ours (`https://autome.com.evil.example`)
- *  - scheme-relative URLs (`//evil.example`), which browsers treat as absolute
- *  - backslash variants (`/\evil.example`, `\\evil.example`) that some parsers
- *    and older browsers normalise to `//`
- *  - non-http schemes, notably `javascript:` and `data:`
- *  - control characters and whitespace used to smuggle the above past naive
- *    prefix checks (`/\tjavascript:alert(1)`)
- *  - anything that fails to parse as a URL at all
- */
+// Guards post-sign-in redirects against open redirects: only provable same-origin paths pass.
 export function safeRedirectPath(
     target: string | null | undefined,
     fallback: string = DEFAULT_REDIRECT

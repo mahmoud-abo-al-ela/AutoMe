@@ -1,27 +1,5 @@
 import type { Locale } from "@/i18n/routing";
 
-/**
- * Prompt for translating one chat message between a buyer and a dealership.
- *
- * The message itself is NOT interpolated here: it goes in a separate part, as
- * JSON. It is text someone typed to someone else, and keeping it out of the
- * instructions means a message that reads like an instruction is translated
- * rather than obeyed.
- *
- * The glossary exists because Stream's built-in translation, measured on
- * 2026-09-29, turned "العربية" (Egyptian for "the car") into "Arabica" and
- * "the Arabic version", and "الفتيس بينتر" (the gearbox jerks) into "in
- * neutral". The "add nothing" rule exists because a model asked for natural
- * Egyptian Arabic added "فبريكا" (original paint) to a sentence that never
- * said it — a claim about a car the dealer did not make.
- *
- * Who wrote the message is stated as a fact, from the channel: "We can do
- * 600k cash" came back as "we can PAY 600k" — from Stream and from our own
- * model alike — until the model knew the dealership, the seller, wrote it.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
-
 /** Who wrote the message, from the channel — never from the caller. */
 export type ChatSender = "buyer" | "dealership";
 

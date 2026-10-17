@@ -22,19 +22,6 @@ import { logError } from "@/lib/utils/errors";
 /** An Arcjet decision, as returned by `protect`. */
 type ArcjetDecision = Awaited<ReturnType<typeof aj.protect>>;
 
-/**
- * Map an Arcjet decision onto a typed error, failing **closed**.
- *
- * Call sites used to check `isDenied()` only. An errored decision — Arcjet
- * unreachable, key rejected, request timed out — is neither denied nor allowed,
- * so it fell through and the action ran completely unprotected, which is the
- * exact moment protection matters most. Errors now refuse the request in
- * production; locally they are logged and allowed so an offline dev is not
- * blocked.
- *
- * Exported so the inline `aj.protect` call sites in `actions/` enforce the same
- * rules as `enforceRateLimit` without restating them.
- */
 export function assertArcjetAllowed(
   decision: ArcjetDecision,
   deniedMessage = "Rate limit exceeded. Please try again later."
@@ -79,11 +66,6 @@ export function assertArcjetConfigured() {
   }
 }
 
-/**
- * Run an Arcjet decision for the current request against `instance` and throw a
- * typed error if denied. Shared by the enforcers below so every call site
- * rate-limits and maps errors identically.
- */
 async function enforce(instance: typeof aj, requested: number) {
   assertArcjetConfigured();
   if (!arcjetConfigured) return;
@@ -94,21 +76,10 @@ async function enforce(instance: typeof aj, requested: number) {
   assertArcjetAllowed(decision);
 }
 
-/**
- * Enforce the shared Arcjet bucket (uploads, the public photo search, payments,
- * team and other dealer actions — dealer AI has its own, enforceDealerAiLimit).
- * Call at the top of an abuse-prone or costly server action, before doing any
- * work. `requested` is the number of tokens to consume (default 1).
- */
 export async function enforceRateLimit(requested = 1) {
   return enforce(aj, requested);
 }
 
-/**
- * Enforce the dealer-AI bucket (see ajDealerAi): photo reads, translation
- * and the listing coach. Separate from the shared bucket so a run of AI work
- * cannot lock a dealer out of everything else for an hour.
- */
 export async function enforceDealerAiLimit(requested = 1) {
   return enforce(ajDealerAi, requested);
 }
@@ -121,20 +92,10 @@ export async function enforceSuggestLimit() {
   return enforce(ajSearchSuggest, 1);
 }
 
-/**
- * Enforce the search-meaning bucket (see ajSearchMeaning): one token per new
- * phrase embedded for a public search. Callers degrade on a refusal — the
- * search runs on its words — rather than refuse the search.
- */
 export async function enforceSearchMeaningLimit() {
   return enforce(ajSearchMeaning, 1);
 }
 
-/**
- * Enforce the buyer-question buckets: per IP and per car. `carId` must be the
- * validated id — it is the rate-limit key, so an unvalidated one would let a
- * caller mint a fresh bucket per request.
- */
 export async function enforceListingQuestionLimit(carId: string) {
   assertArcjetConfigured();
   if (!arcjetConfigured) return;
@@ -145,11 +106,6 @@ export async function enforceListingQuestionLimit(carId: string) {
   assertArcjetAllowed(decision, "Too many questions. Please try again later.");
 }
 
-/**
- * Enforce the chat-translation bucket (see ajChatTranslation). `userId` is the
- * signed-in user's database id — the bucket key, so it must never come from
- * the request.
- */
 export async function enforceChatTranslationLimit(userId: string) {
   assertArcjetConfigured();
   if (!arcjetConfigured) return;
@@ -160,11 +116,6 @@ export async function enforceChatTranslationLimit(userId: string) {
   assertArcjetAllowed(decision, "Too many translations. Please try again later.");
 }
 
-/**
- * Enforce the public MCP endpoint's limits (see ajMcpPublic): per IP, and a
- * ceiling across every caller together. Called by the route before it reads
- * the body.
- */
 export async function enforceMcpPublicLimit() {
   assertArcjetConfigured();
   if (!arcjetConfigured) return;
@@ -187,11 +138,6 @@ export async function enforceMcpCostlyLimit() {
   assertArcjetAllowed(decision);
 }
 
-/**
- * Enforce the signed-in MCP endpoint's limit (see ajMcpAccount), per AutoMe
- * user. Called after the access token is verified, on top of the per-address
- * public limit.
- */
 export async function enforceMcpAccountLimit(userId: string) {
   assertArcjetConfigured();
   if (!arcjetConfigured) return;

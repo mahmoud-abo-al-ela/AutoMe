@@ -2,12 +2,6 @@ import type { AuditAction, EntityType } from "@/lib/generated/prisma";
 import { createAuditLog } from "./audit";
 import type { AuditActor } from "./car";
 
-/**
- * A dealership setting changed: its profile, opening hours or terms for
- * buyers. Only the keys whose value changed are stored, before and after, so
- * the Activity page can show "Wednesday closes 9 PM → 10 PM" rather than the
- * whole record. Nothing is logged when a save changed nothing.
- */
 export async function logSettingsChanged({
   action,
   entityType,

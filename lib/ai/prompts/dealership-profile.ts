@@ -1,14 +1,3 @@
-/**
- * Prompt for writing a dealership's own words — its description, address and
- * financing note — in the other language.
- *
- * The text itself is NOT interpolated here: it goes in a separate part, as
- * JSON. It is dealer-written text, and keeping it out of the instructions
- * means a description that happens to read like an instruction is translated
- * rather than obeyed.
- *
- * Bump `version` on any text change — it is part of the response cache key.
- */
 export const dealershipProfilePrompt = {
   version: "2026-10-15.1",
   toArabic: `You are writing the Arabic version of an Egyptian car dealership's

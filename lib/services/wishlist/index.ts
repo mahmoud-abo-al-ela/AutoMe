@@ -17,13 +17,6 @@ export async function getUserWishlist(userId: string, pagination: { page?: numbe
   return await userRepository.getUserWishlist(user.id, pagination, organizationId);
 }
 
-/**
- * Toggle car in wishlist.
- *
- * `viewer` is the session user, checked against the buyer policy. Removing is
- * always allowed (outside impersonation) so an account that may no longer save
- * can still clear what it saved before.
- */
 export async function toggleWishlist(carId: string, userId: string, viewer: BuyerViewerSource) {
   assertNotImpersonating(viewer);
 
@@ -78,14 +71,6 @@ export async function getWishlistCarIds(userId: string) {
   return await userRepository.getUserWishlistCarIds(user.id);
 }
 
-/**
- * Save or unsave a car — a state, not a toggle, so a repeated request leaves
- * it as asked rather than flipping it back (the MCP tools; the site toggles).
- * The same rules as toggleWishlist: saving needs a car the public may open
- * and a viewer the buyer policy allows; unsaving is always allowed, so a car
- * whose dealership was suspended can still be cleared. Never under
- * impersonation. `changed` is false when it already was as asked.
- */
 export async function setCarSaved(carId: string, userId: string, viewer: BuyerViewerSource, saved: boolean) {
   assertNotImpersonating(viewer);
 

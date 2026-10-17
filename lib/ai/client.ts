@@ -59,11 +59,6 @@ export type AiProgressEvent =
 export interface GenerateStructuredInput<T> {
   feature: AiFeature;
   task: ModelTask;
-  /**
-   * The prompt: instructions, sent in the system role. `parts` is then only
-   * data — the listing, the question, the photos — which no text inside can
-   * promote to an instruction.
-   */
   system?: string;
   parts: AiPart[];
   /** Validates the reply *and* generates the schema sent to the provider. */
@@ -90,24 +85,7 @@ export interface GenerateStructuredInput<T> {
   thinking?: "low";
   /** Reply-length cap; DEFAULT_MAX_OUTPUT_TOKENS unless a feature writes more. */
   maxOutputTokens?: number;
-  /**
-   * How long a model may take to START answering before it is treated as
-   * queued and the next model in the chain is tried. Applies to every model
-   * but the last, which keeps whatever budget is left.
-   *
-   * Measured on the free tier: a busy model either answers 503 in seconds or
-   * accepts the request and queues it for minutes before the first byte — and
-   * once it starts, the reply arrives in about a second. So the first byte is
-   * the signal that separates "queued" from "working".
-   */
   firstTokenTimeoutMs?: number;
-  /**
-   * How long to wait for capacity when every key is at our own cap, instead
-   * of failing "AI busy" at once. For batch work nobody is watching — the
-   * evaluation suites, a backfill — where a per-minute cap clears on its own.
-   * Never for a request a person is waiting on. Defaults to
-   * AI_WAIT_FOR_CAPACITY_MS, which production leaves unset (no wait).
-   */
   waitForCapacityMs?: number;
   /**
    * Called with real progress. Setting it also streams the provider reply, so
@@ -116,28 +94,8 @@ export interface GenerateStructuredInput<T> {
   onProgress?: (event: AiProgressEvent) => void;
 }
 
-/**
- * Per-attempt ceiling. Measured worst case against the real API is ~17s
- * (gemini-3.5-flash on the bilingual prompt, which spends ~2000 thinking
- * tokens), so 20s leaves headroom without letting one slow model eat a budget
- * that has two more models to fund.
- */
 const DEFAULT_TIMEOUT_MS = 20_000;
 
-/**
- * Wall-clock budget for the entire call — every model in the chain and every
- * retry inside them.
- *
- * Per-attempt timeouts alone do not bound anything useful: three models at 20s
- * each is a minute, and the platform kills the function long before that. A
- * platform kill is the worst available outcome, because the `finally` that
- * writes the ledger row never runs — the request is spent, invisible to the
- * breaker, and the user gets a bare 504 instead of a typed error. So the budget
- * has to expire *inside* the process, comfortably before the function does.
- *
- * 45s sits under the 60s `maxDuration` the AI route segments declare, leaving
- * room for the upload, the DB writes and the response.
- */
 const DEFAULT_BUDGET_MS = 45_000;
 
 /** How often a call waiting for capacity looks again. */
@@ -166,13 +124,6 @@ function budgetFromEnv(): number {
  */
 const DEFAULT_MAX_ATTEMPTS = 2;
 
-/**
- * Most replies this client asks for are small JSON objects. The ceiling exists
- * for the model that loops: gemma-4-26b-a4b ran 11.6 minutes and wrote 176 KB
- * of unterminated JSON when measured on 2026-09-24. Capped, the same failure
- * costs seconds. A feature that writes more passes its own `maxOutputTokens`
- * — the photo read, at 2,000–3,400 tokens by 2026-09-29, was being cut off.
- */
 const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
 
 /** Derived JSON Schemas are stable per Zod schema, so derive each one once. */
@@ -361,11 +312,6 @@ async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ da
     const { attemptTimeoutMs, streamsIncrementally } = PROVIDERS[entry.provider];
 
     let error: unknown = null;
-    // The same model on each of the provider's keys, in order, until one
-    // answers. Only a key-shaped refusal moves to the next key: a rejected key
-    // or a spent allowance (dead for the rest of this request), or a rate
-    // limit (that key's own). Anything else is about the model or the
-    // request, and another key would meet it too.
     for (const keyIndex of liveKeys(entry.provider)) {
       const attemptStarted = Date.now();
       try {
@@ -419,12 +365,6 @@ async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ da
       }
     }
 
-    // What earns the next link in the chain: a retired model, a saturated
-    // one, a provider whose keys all refused us, or a reply that is not JSON
-    // at all (cut off or garbled) — each a statement about *this* model that
-    // another may not share. A malformed request fails identically
-    // everywhere, and so does a well-formed reply the schema rejects (a photo
-    // that is not a car): walking the chain would only spend the quota again.
     const anotherModelMightWork =
       isModelUnavailableError(error) ||
       isCapacityError(error) ||
@@ -432,11 +372,6 @@ async function runStructured<T>(input: GenerateStructuredInput<T>): Promise<{ da
       error instanceof KeyCappedError ||
       isUnreadableReply(error) ||
       error instanceof QueueTimeoutError;
-    // A timeout is never retried on the same model — the provider still bills
-    // the abandoned work — but it walks on to the next model, even one behind
-    // the same gateway: CodeCraft sends each model to a different upstream
-    // vendor, and one slow model says nothing about the next (measured: GPT-5.6
-    // Luna starts answering ~3 s sooner than Gemini 3.7 Flash).
     const next = anotherModelMightWork || isAbortError(error) ? nextUsable(index) : -1;
     // Falling back is only worth it if there is time to hear the answer —
     // a useful margin, not a sliver (see MIN_FOLLOW_UP_MS).

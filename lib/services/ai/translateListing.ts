@@ -10,13 +10,6 @@ import { textPart } from "@/lib/ai/provider/types";
 
 export type ListingText = ListingTranslation;
 
-/**
- * Write a listing's text in the other language.
- *
- * Metered and cached through the one AI client like every other call; the
- * source text and direction are the cache key, so saving the same listing
- * twice without edits does not spend a second request.
- */
 export async function translateListing(
   source: ListingText,
   from: Locale,

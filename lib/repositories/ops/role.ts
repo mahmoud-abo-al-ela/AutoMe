@@ -2,12 +2,6 @@
 import type { PrismaClient } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
-/**
- * What the role this process connected as is allowed to do, read from the
- * database itself rather than from whatever the connection string claims.
- * The ops server checks it at startup (lib/mcp/ops/guard.ts) and refuses to
- * serve as anything but a role that can only read.
- */
 export interface RolePosture {
   /** The session starts read-only (`default_transaction_read_only` on the role). */
   readOnly: boolean;

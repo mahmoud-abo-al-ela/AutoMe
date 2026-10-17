@@ -10,23 +10,6 @@ import {
 } from "./data";
 import { normalizePlaceName } from "./normalize";
 
-/**
- * Resolving a stored place to a display name.
- *
- * `Organization.region` holds a governorate code and `Organization.city` holds
- * a city slug, so the usual lookup is by key. `Car.location` is free text a
- * dealer typed — "Cairo, Egypt" — so a name has to resolve too, in either
- * language and however it was spelled. Every lookup therefore falls through:
- *
- *   1. the code or slug, which is what the structured columns hold;
- *   2. the normalized name, for free text and for anything hand-entered;
- *   3. the value itself, so a place nobody anticipated still renders as typed
- *      rather than vanishing or showing a key path.
- *
- * Kept free of React so the search layer, which runs on the server, shares the
- * same index rather than keeping a second copy that could drift.
- */
-
 type Entry = { en: string; ar: string };
 
 interface Index<T extends Entry> {
@@ -64,12 +47,6 @@ const cities = buildIndex<EgyptCity & { governorate: string }>(
   (row) => row.slug
 );
 
-/**
- * Countries stay in the message files: there is no cascade to hang them off,
- * and they appear only inside free text. Keyed by the English name, which is
- * what `Car.location` holds — except Egypt, which is also stored as a code on
- * the organization.
- */
 const countries = buildIndex<Entry & { key: string }>(
   Object.entries(enPlaces.countries).map(([key, en]) => ({
     key,
@@ -125,12 +102,6 @@ export function placeName(value: string | null | undefined, locale: Locale) {
   return trimmed;
 }
 
-/**
- * A dealership's place as "city، governorate" in the reader's language, from
- * the structured columns (governorate code, city slug). The governorate is
- * dropped when the city already names it, so Cairo reads "القاهرة", not
- * "القاهرة، القاهرة".
- */
 export function dealershipPlaceName(
   org: { city?: string | null; region?: string | null } | null | undefined,
   locale: Locale
@@ -143,11 +114,6 @@ export function dealershipPlaceName(
   return unique.join(locale === "ar" ? "، " : ", ");
 }
 
-/**
- * `Car.location` is one free-text field holding a composed place — "Cairo,
- * Egypt". Each part is resolved on its own and rejoined with the locale's
- * comma, so an unmapped part still shows as typed.
- */
 export function locationName(value: string | null | undefined, locale: Locale) {
   if (!value) return "";
 

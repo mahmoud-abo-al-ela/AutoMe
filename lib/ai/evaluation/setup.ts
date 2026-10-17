@@ -1,14 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { subscribeAiCalls, type AiCallRecord } from "@/lib/ai/client";
 
-/**
- * Setup for the evaluation run (vitest.eval.config.mjs): records which model
- * answered every call, so the report can tell a regression from a fallback.
- *
- * Calls made inside a test are that test's; calls made in a `beforeAll` —
- * which is where most suites spend their requests — belong to the file.
- */
-
 declare module "vitest" {
   interface TaskMeta {
     aiCalls?: AiCallRecord[];

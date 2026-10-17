@@ -1,11 +1,5 @@
 import { StreamChat, type ChannelData } from "stream-chat";
 
-/** The Stream user payload assembled from a local User row. */
-/**
- * A Stream user: how a person appears in chat, and nothing more. Stream hands
- * every channel member's user object — custom fields included — to every
- * other member, so no email, Clerk id or platform role goes here.
- */
 export interface StreamUserInput {
     id: string;
     name?: string | null;

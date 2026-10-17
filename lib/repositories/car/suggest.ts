@@ -16,11 +16,6 @@ export interface MakeModelCount {
   count: number;
 }
 
-/**
- * Every make and model listed publicly, with how many cars. One grouped scan:
- * there are far fewer pairs than cars, and the suggestions match them in
- * memory, by name in either language.
- */
 export function countPublicMakeModels(): Promise<MakeModelCount[]> {
   return db.$queryRaw<MakeModelCount[]>(Prisma.sql`
     SELECT c."make", c."model", count(*)::int AS "count"
@@ -35,17 +30,6 @@ export interface SpecCount {
   count: number;
 }
 
-/**
- * How many public cars each spec leads to — counted the way choosing it
- * filters or searches, so a count is what the buyer then sees:
- *
- * - body type, fuel and gearbox by the stored value (the filters are exact);
- * - a colour by "contains", as the colour filter matches (`ILIKE %value%`);
- * - a feature by the search's own query for its name, synonyms included —
- *   the cars its search finds by words.
- *
- * Global counts: not narrowed by what was typed or by any filter.
- */
 export async function countPublicSpecs(colors: string[], features: string[]): Promise<SpecCount[]> {
   const featureQueries = features.flatMap((name) => {
     const [term] = searchTerms(name);

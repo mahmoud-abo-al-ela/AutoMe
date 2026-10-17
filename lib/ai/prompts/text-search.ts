@@ -1,12 +1,5 @@
 import { BODY_TYPES, FUEL_TYPES, TRANSMISSIONS } from "@/lib/constants/car-options";
 
-/**
- * Prompt for turning what a buyer typed into the hero search into filters.
- *
- * The buyer's text arrives as the user message, a JSON string, and is
- * untrusted. Bump `version` on any text change — it is part of the response
- * cache key.
- */
 export const textSearchPrompt = {
   version: "2026-10-12.1",
   text: `You turn what a buyer typed into a car marketplace's search box into search filters.

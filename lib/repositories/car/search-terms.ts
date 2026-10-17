@@ -3,12 +3,6 @@
 import { Prisma } from "@/lib/generated/prisma";
 import { db } from "@/lib/prisma";
 
-/**
- * The lowest similarity a caller may ask for. `word % token` is what lets the
- * trigram index answer, and it only passes words at or above pg_trgm's own
- * threshold (0.3 unless the session changes it), so a lower floor would
- * silently behave as 0.3.
- */
 const MIN_WORD_SIMILARITY = 0.3;
 
 /** A known word near one the buyer typed. */
@@ -20,11 +14,6 @@ export interface SimilarWord {
   ndoc: number;
 }
 
-/**
- * Recompute the vocabulary. CONCURRENTLY, so searches keep reading the old
- * one meanwhile; a second refresh waits for the first rather than failing.
- * Recomputes everything, so running it twice is harmless.
- */
 export async function refreshSearchTerms(): Promise<void> {
   await db.$transaction([
     // Bounded here rather than by the connection: the pooler may hand any
@@ -34,12 +23,6 @@ export async function refreshSearchTerms(): Promise<void> {
   ]);
 }
 
-/**
- * For each token (already folded, as `searchWords` returns them), the known
- * words most like it by spelling, best first — then the more common word.
- * Only proposals: whether a word is in the searcher's scope is for the search
- * to check.
- */
 export async function findSimilarWords(
   tokens: string[],
   { minSimilarity, perToken }: { minSimilarity: number; perToken: number }
@@ -64,12 +47,6 @@ export async function findSimilarWords(
   return rows;
 }
 
-/**
- * The same, among names the caller knows rather than the vocabulary — the
- * alias index's makes and attributes — measured by the same pg_trgm
- * similarity, so one threshold means one thing. `ndoc` is 0: these are not
- * counted in cars.
- */
 export async function findSimilarNames(
   tokens: string[],
   names: string[],

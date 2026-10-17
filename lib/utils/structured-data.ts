@@ -2,17 +2,6 @@ import type { Locale } from "@/i18n/routing";
 import type { DayOfWeek } from "@/lib/generated/prisma";
 import { localizedUrl, mainOrigin } from "./seo-meta";
 
-/**
- * JSON-LD documents for search engines, one builder per page type. Pure (no
- * JSX — `StructuredData` in `seo.tsx` renders them) so metadata code and the
- * node tests load them directly.
- *
- * Every URL is absolute and carries the page's locale: a relative or
- * locale-less URL is a redirect, or another language's page, to a crawler.
- * Fields the listing does not state are left out, never sent as null, 0 or
- * "" — structured data that claims a price of 0 is worse than none.
- */
-
 type Doc = Record<string, unknown>;
 
 const SCHEMA = "https://schema.org";
@@ -66,12 +55,6 @@ const AVAILABILITY: Record<string, string> = {
   UNAVAILABLE: `${SCHEMA}/OutOfStock`,
 };
 
-/**
- * A listing as schema.org `Car` with its `Offer`: what makes a car page
- * eligible for price and availability in results. `name` and `description`
- * are the page's own resolved title and meta description, so the markup says
- * what the page says.
- */
 export function carStructuredData(
   car: StructuredDataCar,
   locale: Locale,

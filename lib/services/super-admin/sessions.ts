@@ -3,13 +3,6 @@ import type { Prisma } from "@/lib/generated/prisma";
 import { addDays, cairoDate, cairoMidnight } from "@/lib/utils/date-only";
 import { SESSIONS_PER_PAGE, SESSION_VIEWS, type SessionQuery, type SessionView } from "./sessions-options";
 
-/**
- * The super-admin support sessions list (canvas: Super admin support
- * sessions round 1, "1 · Data table"): views with their counts — open now,
- * mine, this week — search, an admin filter and a period, and a page of
- * sessions, each with how many changes were made while it was open.
- */
-
 function viewWhere(view: SessionView, adminId: string, now: Date): Prisma.ImpersonationSessionWhereInput {
   switch (view) {
     case "open":

@@ -1,11 +1,5 @@
 import * as aiUsageRepository from "@/lib/repositories/ai-usage";
 
-/**
- * AI usage as an operator reads it, platform-wide: per feature, per model,
- * per error code, and the latest failed calls. Aggregates and call metadata
- * only — no organization or user is named, so no tenant can be singled out.
- */
-
 /** How far back, and how much, an ops read may go. */
 export const OPS_LIMITS = {
   maxDays: 31,

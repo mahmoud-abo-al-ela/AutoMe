@@ -14,18 +14,6 @@ import { carEmbeddingText } from "@/lib/services/car/embedding-text";
 import { CARS, QUERIES } from "@/lib/ai/evaluation/search-fixtures";
 import { SEMANTIC_MIN_SIMILARITY, SEMANTIC_WITHIN_BEST } from "@/lib/search/hybrid";
 
-/**
- * Meaning-based car search, against the real embedding model.
- *
- *   AI_EVAL=1 pnpm eval lib/ai/evaluation/search
- *
- * A small catalogue of the listings Egyptian dealers write, and what buyers
- * type looking for them — in English, Modern Standard Arabic and Egyptian
- * Arabic, often in words the listing never uses. Two requests: the cars as
- * documents, the queries as queries. Sets SEMANTIC_MIN_SIMILARITY in
- * lib/search/hybrid.ts: every run logs the distribution to set it by.
- */
-
 const enabled = Boolean(process.env.AI_EVAL) && Boolean(process.env.GEMINI_API_KEY);
 
 const carIds = Object.keys(CARS) as (keyof typeof CARS)[];
