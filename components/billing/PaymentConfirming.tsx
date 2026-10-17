@@ -10,12 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 const INTERVAL_MS = 3_000;
 const MAX_ATTEMPTS = 20;
 
-/**
- * Shown while Paymob has not confirmed a payment yet. Re-renders the server
- * page every few seconds; the page itself asks Paymob and swaps this out once
- * the payment is paid or declined. After about a minute it stops and lets the
- * buyer check again by hand.
- */
 export function PaymentConfirming({
   title,
   body,

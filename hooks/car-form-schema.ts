@@ -11,32 +11,12 @@ import { SERVICE_HISTORY, UNSET } from "@/lib/utils/car-disclosures";
 /** A yes / no / not-stated select, as the form holds it. */
 const triState = z.enum([UNSET, "yes", "no"]).default(UNSET);
 
-/**
- * A translator scoped to `org.carForm.validation`, plus the number formatter
- * for the limits its messages quote.
- *
- * The schema is a factory rather than a module constant because its messages
- * are translated: a module-level schema would freeze whichever locale loaded
- * the module first. Same arrangement as the onboarding schemas.
- *
- * `n` is passed rather than left to ICU because next-intl formats numeric
- * arguments against the bare `ar` tag, whose numbering system is Western — a
- * limit rendered that way would read "1900" beside Arabic digits everywhere
- * else on the form.
- */
 type Translate = (
     key: string,
     values?: Record<string, string | number | Date>
 ) => string;
 type FormatNumber = (value: number, options?: Intl.NumberFormatOptions) => string;
 
-/**
- * The form shows the listing text of the dashboard's language only; the other
- * language is written by translation when the car is saved. So the description
- * required is the one on screen — unless the car already carries one in the
- * other language (an older listing opened in edit mode), which is enough to
- * save and gets translated across.
- */
 const describedIn = (
     t: Translate,
     n: FormatNumber,
@@ -126,21 +106,10 @@ export const createCarFormSchema = (
 /** The form's validated shape, inferred from the schema factory. */
 export type CarFormValues = z.infer<ReturnType<typeof createCarFormSchema>>;
 
-/**
- * Pre-fill for the form: any subset of the form fields, plus the loose
- * string-shaped values the AI extraction path supplies (price and features
- * arrive as strings and are coerced in the effect below).
- */
 export type CarFormInitialData = Partial<
   Record<keyof CarFormValues, unknown>
 >;
 
-/**
- * The editor's steps, in order (canvas: Car editor — round 1, B · Guided
- * steps), and the fields each one asks for. A step's fields are what it
- * validates before moving on, and where a failed save sends the dealer back
- * to. The labels live in `org.carForm.editor.steps`, keyed by id.
- */
 export const CAR_STEPS = ["photos", "car", "history", "publish"] as const;
 export type CarStep = (typeof CAR_STEPS)[number];
 

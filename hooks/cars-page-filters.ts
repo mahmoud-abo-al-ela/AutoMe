@@ -129,12 +129,6 @@ export function buildCarsUrl(
   return qs ? `/cars?${qs}` : "/cars";
 }
 
-/**
- * Everything `buildActiveFilterChips` needs to render a label in the active
- * locale. Injected rather than imported so this module stays React-free and
- * directly testable — the formatters come from `useFormatters` at the call
- * site, and the attribute labels from `useCarAttributes`.
- */
 export interface ChipFormatters {
   /** Translated stand-in for an open-ended range bound. */
   any: string;
@@ -189,11 +183,6 @@ export function buildActiveFilterChips(
   return chips;
 }
 
-/**
- * The filters with a chosen suggestion applied. Its filters join the buyer's —
- * a make or body type is added to those already chosen, a colour becomes the
- * colour — and its text replaces what was typed. Nothing else changes.
- */
 export function withSuggestion(
   filters: CarPageFilters,
   chosen: { filters?: SuggestionFilters; search?: string }

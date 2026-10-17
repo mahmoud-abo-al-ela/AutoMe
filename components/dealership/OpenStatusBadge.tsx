@@ -8,12 +8,6 @@ import { formatClockTime } from "@/lib/utils/datetime";
 import type { Locale } from "@/i18n/routing";
 import type { WorkingHoursEntry } from "@/lib/utils/working-hours";
 
-/**
- * Turn a status into its sentence. The status itself is computed in
- * lib/utils/open-status, which knows nothing about language — it hands back a
- * key and its parameters so both this badge and the working-hours card can word
- * it in the reader's locale.
- */
 export const useOpenStatusMessage = () => {
     const t = useTranslations("dealerships");
     const locale = useLocale() as Locale;

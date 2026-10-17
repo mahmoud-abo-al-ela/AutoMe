@@ -1,11 +1,6 @@
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * Fractional 5-star display. Renders a muted 5-star base with a gold overlay
- * clipped to (rating / 5), so half/quarter ratings show precisely. Decorative
- * only — callers should surface the numeric rating as text for screen readers.
- */
 export const StarRating = ({
   rating = 0,
   size = 16,

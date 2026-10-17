@@ -15,14 +15,6 @@ export function carChatReturnPath(carId: string): string {
   return `/cars/${carId}?${OPEN_CHAT_PARAM}=1`;
 }
 
-/**
- * Finishes a "chat with the dealer" click that had to go through sign-in: the
- * car page comes back with `?chat=1`, and this opens that car's chat once the
- * reader is signed in — then drops the parameter, so a refresh or a shared
- * link does not reopen it. Before, the click went to /messages, whose own
- * sign-in redirect carried no return address, and the reader landed on the
- * home page with neither the car nor the chat.
- */
 export function OpenChatFromLink({ carId }: { carId: string }) {
   const searchParams = useSearchParams();
   const { isSignedIn } = useUser();

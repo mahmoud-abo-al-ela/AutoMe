@@ -9,12 +9,6 @@ import { cn } from "@/lib/utils";
 
 type Tab = "all" | "unread";
 
-/**
- * All / Unread above a conversation list. Unread is a filter over the
- * conversations already loaded, not a new query — cheap, and it updates live
- * as messages arrive. The open conversation stays listed after it is read, so
- * it does not vanish from under the reader.
- */
 export function useInboxTabs() {
   const t = useTranslations("chat.tabs");
   const { channel: active } = useChatContext();

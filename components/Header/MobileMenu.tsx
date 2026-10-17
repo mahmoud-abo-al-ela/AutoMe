@@ -13,17 +13,6 @@ import { cn } from "@/lib/utils";
 
 type Row = { href: string; label: string };
 
-/**
- * The phone "More" sheet, opened from the bottom tab bar: the pages that are
- * not one of the viewer's tabs (mobileTabs), in groups — the viewer's own
- * activity, the marketplace, help — with the pitch to dealers as its own card
- * at the foot rather than one more row. The account and the language are in
- * the top bar, one of each; this sheet used to repeat both.
- *
- * A Radix sheet rather than the hand-rolled panel it replaces, so focus is
- * trapped, Escape closes it, focus returns to the More tab, and scroll lock
- * is handled — none of which the old panel did.
- */
 export default function MobileMenu({
   open,
   onOpenChange,

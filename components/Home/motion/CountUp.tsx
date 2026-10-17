@@ -3,14 +3,6 @@
 import { animate, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-/**
- * A live number that counts up the first time it scrolls into view.
- *
- * The server renders the real value, so the page is right without JavaScript
- * and for crawlers. On hydration, a number already on screen keeps its value
- * (resetting it would visibly flash); one below the fold drops to zero out of
- * sight, then counts up as it arrives. Reduced motion: the value, unmoving.
- */
 export function CountUp({ value, format }: { value: number; format: (n: number) => string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });

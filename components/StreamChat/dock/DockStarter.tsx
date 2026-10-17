@@ -6,11 +6,6 @@ import { Loader2, MessageSquare, Send } from "lucide-react";
 import type { CarDetail } from "@/app/[locale]/(site)/cars/[id]/_lib/car-detail-types";
 import { QuickQuestions } from "./QuickQuestions";
 
-/**
- * The dock before a conversation exists: an invitation, one-tap questions and
- * a box. The first message sent here creates the conversation, after which
- * Stream's own list and input take over.
- */
 export function DockStarter({
   car,
   sending,

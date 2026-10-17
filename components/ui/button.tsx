@@ -20,11 +20,6 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        // Public-site variants (Figma: Button). Their colour tokens exist only
-        // under the site theme, so they are not for use in the dashboards.
-        //
-        // marker — the one "do this next" action per view: road-marking yellow,
-        // asphalt border and the hard key shadow, which presses flat on click.
         marker:
           "border-2 border-border-strong bg-marker font-semibold text-marker-foreground shadow-key hover:bg-marker-hover active:translate-y-0.5 active:shadow-key-pressed disabled:border-border disabled:bg-muted disabled:text-disabled-foreground disabled:opacity-100 disabled:shadow-none",
         inverse:

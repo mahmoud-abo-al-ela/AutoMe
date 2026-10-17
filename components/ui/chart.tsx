@@ -11,11 +11,6 @@ const THEMES = {
   dark: ".dark"
 } as const
 
-/**
- * Per-series display config. A series carries either a flat `color` or a
- * per-theme `theme` map, never both — ChartStyle emits one CSS variable per
- * key from whichever is present.
- */
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode

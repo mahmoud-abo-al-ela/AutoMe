@@ -11,11 +11,6 @@ import { useHeaderAccess } from "./use-header-access";
 import { mobileTabs } from "./mobile-tabs";
 import { cn } from "@/lib/utils";
 
-/**
- * Pages that are a single focused task with their own bottom bar (a car's
- * contact bar, the chat composer, the onboarding wizard) — the tab bar would
- * cover it, so it steps aside there.
- */
 const HIDDEN_ON = [/^\/cars\/[^/]+$/, /^\/messages(\/|$)/, /^\/onboarding(\/|$)/];
 
 /** The tab bar's height, safe area included. Exported for anything that must clear it. */
@@ -64,16 +59,6 @@ function Tab({
   );
 }
 
-/**
- * Phone navigation (Figma: BottomTabBar). Asphalt bar, the current tab in a
- * marker pill. Its tabs depend on who is looking (mobileTabs): browsing for a
- * guest, saved cars and messages for a buyer, the dashboard for a dealer;
- * everything else is under More. Flex order follows the page direction, so Home sits at the
- * reading start in both languages without a separate RTL layout.
- *
- * Renders an in-flow spacer as well as the fixed bar, so the end of every
- * page scrolls clear of it without each page knowing it exists.
- */
 export default function BottomTabBar({
   user,
   organizationSlug,

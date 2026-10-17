@@ -11,17 +11,6 @@ import {
 } from "@/lib/auth/buyer-policy";
 import { mainSiteUrl } from "@/lib/utils/tenant-host";
 
-/**
- * The storefront's half of the buyer policy (lib/auth/buyer-policy): which
- * buyer buttons this viewer gets on a given dealership's pages. The server
- * actions enforce the same rule; this only keeps the page from offering what
- * the action would refuse.
- *
- * The (site) layout already has the session user, so it answers once with the
- * few facts the policy reads. A page that is about one dealership (a car, a
- * dealership) names it with BuyerTargetProvider, so the buttons deep inside it
- * need no props; a list of cards from many dealerships passes each card's own.
- */
 const ViewerContext = createContext<{ viewer: BuyerViewer | null; onSubdomain: boolean }>({
   viewer: null,
   onSubdomain: false,
@@ -66,11 +55,6 @@ export function BuyerTargetProvider({
   return <TargetContext.Provider value={target}>{children}</TargetContext.Provider>;
 }
 
-/**
- * What the viewer may do on `target`'s pages (or the BuyerTargetProvider's
- * dealership). With no target either way, nothing is blocked: the server
- * action still decides.
- */
 export function useBuyerAccess(target?: BuyerTarget | null) {
   const { viewer: serverViewer, onSubdomain } = useContext(ViewerContext);
   const contextTarget = useContext(TargetContext);

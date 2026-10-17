@@ -8,12 +8,6 @@ import { cn } from "@/lib/utils";
 import type { BuyerAction } from "@/lib/auth/buyer-policy";
 import { useBuyerAccess, type BuyerTarget } from "./BuyerAccessProvider";
 
-/**
- * Stands in for buyer buttons the viewer may not use: why, and where to go
- * instead (the dealership's admin record, or the dealer's own dashboard).
- * Renders nothing when `action` is allowed, so it can sit beside the buttons
- * it replaces.
- */
 export function BuyerAccessNotice({
   action,
   target,

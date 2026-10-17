@@ -6,12 +6,6 @@ import { shrinkForAi } from "@/lib/utils/shrink-image";
 import type { ErrorResponse } from "@/lib/utils/response";
 import type { CarListingStreamEvent } from "@/app/api/ai/car-listing/events";
 
-/**
- * Where an AI photo extraction actually is. Every value here comes from a real
- * event — bytes the browser has sent, a request the server sent to a model, a
- * field the model has written. The one stretch with no signal is Google's
- * queue ("waiting"), and it is shown as that, with a clock, not as a fake %.
- */
 export interface CarListingProgress {
   phase: "uploading" | "waiting" | "writing" | "done";
   /** 0–1, bytes of the photo sent. */
@@ -43,17 +37,6 @@ export class CarListingStreamError extends Error {
 
 const ENDPOINT = "/api/ai/car-listing";
 
-/**
- * Stream a car listing out of a photo.
- *
- * XMLHttpRequest rather than fetch: it is the only browser API that reports
- * UPLOAD progress, and it exposes the response as it grows, which is all a
- * newline-delimited stream needs.
- *
- * `organizationSlug` is the dealership whose dashboard asks: the route's own
- * URL (/api/…) names none, and a user of several dealerships must be read for
- * this one. The server still requires a membership in it.
- */
 export function useCarListingStream(organizationSlug: string) {
   const [progress, setProgress] = useState<CarListingProgress | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);

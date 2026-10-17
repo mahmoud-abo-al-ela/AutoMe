@@ -3,12 +3,6 @@
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * Accessible, tenant-themable filter chip. Renders a real <button> with
- * aria-checked so it is keyboard reachable and announced. Selected state uses
- * the --primary design token, so it follows per-tenant branding. Optionally
- * shows a facet count and disables itself when that count is zero.
- */
 export type FilterChipProps = {
   label: string;
   count?: number;

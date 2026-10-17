@@ -1,13 +1,6 @@
 import { Toaster } from "sonner";
 import { localeDirection, type Locale } from "@/i18n/routing";
 
-/**
- * Toasts in the site's design (Figma: Toast): asphalt, one action, icon and
- * words. Shared by the public site and the dealer dashboard.
- *
- * `mobileOffset` lifts them above whatever sits on a phone's bottom edge —
- * the public site's tab bar (84px incl. safe area).
- */
 export function SiteToaster({
   locale,
   position = "bottom-right",

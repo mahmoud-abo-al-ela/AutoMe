@@ -29,12 +29,6 @@ interface ToggleState {
   toggle: () => void;
 }
 
-/**
- * The toggle sits inside the bubble, under the text, where the reader is
- * looking. It is rendered through `renderText`, which Stream memoises on the
- * text alone — so it reads its state from this context instead of props, or
- * it would never re-render.
- */
 const ToggleContext = createContext<ToggleState | null>(null);
 
 function TranslateToggle() {
@@ -71,12 +65,6 @@ function TranslateToggle() {
   );
 }
 
-/**
- * The inside of the other person's bubble: a safety warning if the message is
- * flagged, the text in its own direction (English in an Arabic page, and the
- * reverse) or hidden if abusive, and the translate toggle. Each part reads
- * its state from context — see ToggleContext.
- */
 function withChrome(text?: string, mentioned?: UserResponse[], options?: RenderTextOptions): ReactNode {
   return (
     <>
@@ -89,20 +77,6 @@ function withChrome(text?: string, mentioned?: UserResponse[], options?: RenderT
   );
 }
 
-/**
- * Every chat message, as this app draws it on top of Stream's own:
- *
- * - "Translate" under a message written in the other language — Egyptian
- *   Arabic for a reader browsing in English, English for one browsing in
- *   Arabic. Nothing is translated until someone taps (owner's decision); the
- *   translation is saved on the message by the server, so the next tap, by
- *   either member, is instant. The original is always one tap away.
- * - A dealership's replies shown to the buyer under the dealership's name and
- *   logo, not the staff member's (useDealershipSender).
- * - A message moderation flagged: a warning over a scam or spam message, an
- *   abusive one hidden behind "Show message" (MessageSafety). Only for the
- *   reader — the sender sees their own message as sent.
- */
 export function ChatMessage(props: MessageUIComponentProps) {
   const { message, isMyMessage } = useMessageContext("ChatMessage");
   const { userLanguage } = useTranslationContext("ChatMessage");
@@ -144,16 +118,6 @@ export function ChatMessage(props: MessageUIComponentProps) {
     [showing, translation, translate]
   );
 
-  // Stream's MessageText shows i18n[<reader's language>_text] over the text.
-  // `text` is swapped too: Stream memoises each message and re-renders it only
-  // when fields like `text` or `updated_at` change — never `i18n` — so with
-  // i18n alone the label changed and the words did not. This copy is only
-  // what is drawn; the message itself is untouched.
-  //
-  // Attachments are dropped from every drawn message: chat is text only
-  // (owner's decision), and the one kind Stream still attaches on its own —
-  // a link-preview card — put a spam link above its own warning. Link
-  // previews are also off on the channel type; this covers older messages.
   const shown = useMemo(
     () =>
       asSeen({

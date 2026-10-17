@@ -19,11 +19,6 @@ async function fetchSuggestions(query: string, locale: string, signal: AbortSign
   return body.suggestions ?? [];
 }
 
-/**
- * The suggestions for what has been typed so far, in the reader's language.
- * None for an empty query or one past the route's limit; the previous list
- * stays while the next one loads, so the box does not flicker.
- */
 export function useSearchSuggestions(query: string): SearchSuggestion[] {
   const locale = useLocale();
   const [settled, setSettled] = useState(query);

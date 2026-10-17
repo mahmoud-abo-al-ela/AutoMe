@@ -1,12 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * The dashboard's form pieces, shared by the car editor and Settings: 44px
- * fields with the strong field border and the focus ring, and a field wrapper
- * that ties the label, hint and error to the control.
- */
-
 /** A text input or select trigger: 44px, the strong field border, the focus ring. */
 export const inputClass = (state: { error?: boolean; ai?: boolean } = {}) =>
   cn(
@@ -16,11 +10,6 @@ export const inputClass = (state: { error?: boolean; ai?: boolean } = {}) =>
     state.error ? "border-destructive" : state.ai ? "border-[#1d4e9e] bg-[#f5f8fd]" : "border-[#8c8170]",
   );
 
-/**
- * One field: a visible label (with an optional mark beside it), the control,
- * then its error — or, with none, its hint. The error is tied to the control
- * by id so a screen reader reads it with the field.
- */
 export function Field({
   id,
   label,

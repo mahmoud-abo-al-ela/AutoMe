@@ -9,12 +9,6 @@ import { useChatCar } from "@/hooks/use-chat-car";
 import { CarContactActions } from "./CarContactActions";
 import { ChatCarSummary, ChatCarSummarySkeleton } from "./ChatCarSummary";
 
-/**
- * Which side of a conversation the reader is on. A dealership conversation is
- * opened by the buyer (createCarInquiryChannel), so its creator is the buyer
- * and every other member is the dealership — the rule the translation service
- * uses too. The old check, "has a user_role", was true for every user.
- */
 export function useConversationSide(channel: StreamChannel) {
   const { client } = useChatContext();
   const creatorId = channel.data?.created_by?.id;
@@ -25,11 +19,6 @@ export function useConversationSide(channel: StreamChannel) {
   return { isDealer, buyer, other };
 }
 
-/**
- * The top of an inbox conversation: back to the list on a phone, then the car
- * as it is now with the ways to act on it — or, for a conversation not about
- * one car, who it is with.
- */
 export function ConversationHeader({ channel }: { channel: StreamChannel }) {
   const t = useTranslations("chat.window");
   const { setActiveChannel } = useChatContext();

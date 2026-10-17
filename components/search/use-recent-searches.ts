@@ -3,17 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SearchSuggestion, SuggestionFilters } from "@/lib/search/suggest";
 
-/**
- * The buyer's last few committed searches, shown when the search field is
- * focused and empty — kept in this browser's localStorage, so they are this
- * device's and this browser's only: not an account's history, and gone with
- * the site's data. Without storage (a private window, blocked site data) there
- * are none, and nothing else changes.
- *
- * Only committed searches are kept — a submitted query, a chosen suggestion —
- * never the letters typed on the way.
- */
-
 const STORAGE_KEY = "autome:recent-searches";
 export const MAX_RECENT_SEARCHES = 5;
 

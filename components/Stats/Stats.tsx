@@ -1,13 +1,5 @@
 import { getTranslations } from "next-intl/server";
 
-/**
- * Headline figures (Figma: Stat).
- *
- * ⚠️ PLACEHOLDER CONTENT — owner decision 2026-10-02. These are the site's
- * existing marketing figures, not measured values, and they disagree with the
- * live counts in the hero eyebrow beside them. They stay until real numbers
- * are chosen; the translated values in home.stats are the only thing to edit.
- */
 const STATS = ["customers", "vehicles", "dealerships", "rating"] as const;
 
 export default async function Stats() {

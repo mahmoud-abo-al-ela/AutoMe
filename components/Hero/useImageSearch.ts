@@ -11,11 +11,6 @@ import { useActionError } from "@/hooks/use-action-error";
 
 const MAX_IMAGE_MB = 10;
 
-/**
- * Owns the "search by photo" flow for the hero: file selection (picker + drag),
- * client-side validation, preview, the AI mutation, and the detected-filters
- * redirect. HeroSearch stays a thin composition over what this returns.
- */
 export function useImageSearch() {
   const t = useTranslations("home.hero");
   const fmt = useFormatters();

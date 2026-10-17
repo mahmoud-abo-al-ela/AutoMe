@@ -6,21 +6,7 @@ import { plateBandFor, showsDealerPitch } from "@/lib/org/client";
 import type { HeaderUser } from "./MainHeader";
 import type { Viewer } from "./mobile-tabs";
 
-/**
- * Who is looking at the site chrome, and what that entitles them to see.
- *
- * MainHeader and MobileMenu each derived this on their own, line for line;
- * the bottom tab bar would have been a third copy. One hook, one answer.
- */
 export function useHeaderAccess(user: HeaderUser | undefined, organizationSlug?: string | null) {
-  // Sign-out is a client event; `user` is the server's answer from the last
-  // render, so a moment after signing out the prop still describes a member.
-  // That is how the dashboard button came to sit beside "Sign in" — Clerk's
-  // live state has to gate anything derived from the prop.
-  //
-  // While Clerk is still loading, the server's answer stands: a signed-out
-  // visitor has no `user` to derive anything from anyway, so trusting it costs
-  // nothing and spares a signed-in one a flicker.
   const { isLoaded, isSignedIn } = useAuth();
   const signedIn = !isLoaded || isSignedIn === true;
   const pathname = usePathname();

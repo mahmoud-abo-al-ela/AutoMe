@@ -8,25 +8,6 @@ import { routing, localeLabels, type Locale } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/**
- * Language switcher.
- *
- * With exactly two locales a dropdown is one interaction too many, so this is
- * a direct toggle: it names the language you would switch *to*, not the one
- * you are already reading. Reading "English" while the page is Arabic is the
- * affordance — a control labelled with the current language tells you nothing
- * you cannot already see. If a third locale is ever added this has to go back
- * to being a menu; `otherLocale` will throw that into relief rather than
- * silently hiding a locale.
- *
- * `usePathname` here is next-intl's, which returns the path *without* the
- * locale prefix — that is what makes switching stay on the current page
- * instead of dropping the reader on the home page. `router.replace` rather
- * than `push` so the switch does not add a history entry: pressing Back after
- * changing language should leave the page you came from, not bounce you
- * between translations of the same one. The query string is carried over so
- * a filtered car list stays filtered in the other language.
- */
 export default function LanguageSwitcher({
   className,
   showLabel = true,

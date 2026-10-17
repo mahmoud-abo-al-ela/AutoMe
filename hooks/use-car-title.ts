@@ -40,11 +40,6 @@ async function flush() {
   }
 }
 
-/**
- * One car's title row, fetched together with every other title asked for in
- * the same moment — a conversation list renders its rows in one pass, so a
- * list of twenty is one request, not twenty queued server actions.
- */
 function loadCarTitle(id: string): Promise<CarTitleRow | null> {
   return new Promise((resolve) => {
     const waiting = pending.get(id);
@@ -54,13 +49,6 @@ function loadCarTitle(id: string): Promise<CarTitleRow | null> {
   });
 }
 
-/**
- * A car's title in the reader's language, for a conversation list. The
- * channel's saved snapshot holds only the English title; this reads the car
- * itself. `loading` is true until it arrives — callers draw a placeholder
- * rather than the English snapshot, which then flashed into Arabic. The
- * snapshot is only a fallback for a car that is gone.
- */
 export function useCarTitle(carId: string | null | undefined, fallback: string) {
   const locale = useLocale() as Locale;
   const fmt = useFormatters();

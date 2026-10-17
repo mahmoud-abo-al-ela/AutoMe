@@ -30,13 +30,6 @@ export type DriveChange =
   | { status: "COMPLETED"; toast: "COMPLETED" }
   | { status: "CANCELLED"; toast: "declined" | "cancelled" | "noShow" };
 
-/**
- * The Test drives calendar (canvas: calendar round 2, C · Month and day): the
- * month shown, the day chosen (kept in the address, so a refresh or a shared
- * link opens the same day), that day's drives and free time, and every drive
- * still needing an outcome. Cairo's clock ticks here each minute, so "now"
- * and which drives are over stay right while the page is open.
- */
 export function useSchedule(initialDate: string) {
   const t = useTranslations("org.testDrives.toasts");
   const actionError = useActionError();

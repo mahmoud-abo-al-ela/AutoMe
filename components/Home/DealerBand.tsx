@@ -4,19 +4,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { StartFreeButton } from "./StartFreeButton";
 
-/**
- * The dealership pitch as one band (Figma: Home — For dealers band). Marker
- * yellow with asphalt text — the site's loudest surface, used once per page.
- *
- * - `home`: closes the buyer's home page and points dealers to /for-dealers,
- *   where the plans are.
- * - `page`: the closing call to action on /for-dealers itself, with a way to
- *   talk to us first.
- *
- * Links styled as buttons with buttonVariants, not <Button asChild>: in a
- * Server Component the i18n Link suspends on the locale and Radix Slot
- * renders nothing for it.
- */
 export async function DealerBand({ variant = "home" }: { variant?: "home" | "page" }) {
   const t = await getTranslations("home.dealerBand");
   const tPage = await getTranslations("forDealers.cta");

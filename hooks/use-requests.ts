@@ -13,11 +13,6 @@ import type { ActionResponse } from "@/lib/utils/response";
 
 export type RequestsView = "all" | "drives" | "questions";
 
-/**
- * A pending test drive as the list action returns it. serializeTestDrive is
- * typed loosely (a nullable row, the car as a plain record), so the fields
- * this inbox reads are named here; findManyTestDrives selects every one.
- */
 export type DriveRequest = {
   id: string;
   organizationId: string;
@@ -37,13 +32,6 @@ function unwrap<T>(response: ActionResponse<T>): T {
   return response.data;
 }
 
-/**
- * The dealer's Requests inbox (canvas: Round 3 — Requests): what buyers are
- * waiting on — test drives to confirm and buyer questions to answer — acted
- * on in place. Built on the same actions as the Test drives and Buyer
- * questions pages, and invalidating their caches too, so a confirmation here
- * shows there at once and the other way round.
- */
 export function useRequests() {
   const t = useTranslations("org.requests.toasts");
   const actionError = useActionError();

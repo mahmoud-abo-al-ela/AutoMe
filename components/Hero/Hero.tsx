@@ -18,24 +18,6 @@ export interface HeroSummary {
 /** A CSS custom property for the entrance timing (globals.css: .hero-*). */
 const cssVar = (name: string, value: string | number) => ({ [name]: value }) as CSSProperties;
 
-/**
- * Home hero, "Street level" (Figma: Home — hero B). The hero photo across the
- * full width, the headline set low on it, and the plate search docked on its
- * bottom edge.
- *
- * The overlay is built from the site's palette: a plate-blue wash, asphalt
- * rising behind the words so the headline reads on any photo, and a low
- * marker-yellow glow like a street lamp. The quick picks sit below, on the
- * page, to keep the photo uncluttered.
- *
- * Motion: the photo settles from a slow zoom and drifts in parallax, the
- * headline's words rise in one by one, a road-paint stroke paints in under the
- * accent clause, and the rest follows; the glow breathes. The entrance is CSS so the headline — the page's largest paint —
- * never waits for JavaScript; all of it stops under reduced motion.
- *
- * The live count is stated once, on the search's plate band, from computed
- * numbers only; when they could not be read the band falls back to a label.
- */
 export default async function Hero({ summary }: { summary: HeroSummary | null }) {
   const t = await getTranslations("home.hero");
   const locale = (await getLocale()) as Locale;

@@ -5,13 +5,6 @@ import { useRecentSearches } from "./use-recent-searches";
 import { useSearchSuggestions } from "./use-search-suggestions";
 import { useSuggestionCombobox } from "./use-suggestion-combobox";
 
-/**
- * Everything a search field's list needs, for both search boxes: suggestions
- * while the buyer types, their recent searches while the field is empty, and
- * the combobox over whichever is showing. A chosen option is remembered as a
- * recent search before `onPick` applies it; a submitted query is remembered
- * with `remember`.
- */
 export function useSearchBox(query: string, onPick: (suggestion: SearchSuggestion) => void) {
   const recent = useRecentSearches();
   const suggestions = useSearchSuggestions(query);

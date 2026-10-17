@@ -15,30 +15,11 @@ import CarCardActions from "./CarCardActions";
 import type { SerializedCar } from "@/lib/utils/serializers";
 import type { MarketPosition } from "@/lib/services/car/market-price";
 
-/**
- * Cards are rendered from several sources (featured, listings, wishlist), which
- * agree on the serialized car but differ on what rode along — the wishlist
- * flag and the market position — so both are optional here rather than part
- * of SerializedCar.
- */
 type CarCardCar = SerializedCar & {
   isWishlisted?: boolean;
   marketPosition?: MarketPosition | null;
 };
 
-/**
- * Listing card (Figma: CarCard, Grid and Compact).
- *
- * Responsive by CSS rather than by prop: below `sm` it is the 2-up phone card
- * (4:3 photo, two-line title, year · km, no compare), from `sm` the full card.
- * Doing it in CSS keeps one server render valid at every width — a JS
- * breakpoint would hydrate the wrong card first.
- *
- * The photo stays clean except for the two things that belong on it: the
- * price plate at the reading start and Save/Compare at the end. The whole
- * card is one link (the title's stretched ::after); the action buttons sit
- * above it as siblings, never nested inside the link.
- */
 const CarCard = ({
   car,
   onWishlistChange,

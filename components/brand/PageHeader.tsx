@@ -1,19 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * The header of a content page (About, Contact, FAQ, legal).
- *
- * - `inverse`: an asphalt panel like the home hero, but shorter and without
- *   the search. For marketing pages that open the visit. Pass `aside` to fill
- *   the panel's second column (the home hero has its photo there) — without
- *   one the copy keeps a reading width and the panel stays compact.
- * - `plain`: the title over a hairline, the same shape as the Browse and
- *   Dealerships headers. For reference pages people arrive at to read.
- *
- * `accent` is the clause set in marker yellow (inverse) or primary (plain),
- * kept as its own message so a translation can place it anywhere in the line.
- */
 export function PageHeader({
   eyebrow,
   title,

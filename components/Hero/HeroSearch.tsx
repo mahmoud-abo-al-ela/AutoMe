@@ -16,19 +16,6 @@ import { useSearchBox } from "@/components/search/use-search-box";
 import { useImageSearch } from "./useImageSearch";
 import ImageSearchPanel from "./ImageSearchPanel";
 
-/**
- * The hero search, drawn as a licence plate (Figma: Plate search): the light-
- * blue band carries the live count, the body holds the field, and the yellow
- * key is the page's one primary action.
- *
- * A short query goes straight to /cars?search=… as it always has; one that
- * reads like a description ("automatic SUV under 1.5 million") is first turned
- * into filters by the model (describeSearch). If that fails or finds no filter,
- * it is the plain text search after all — the buyer is never stopped. A photo
- * (picked or dropped anywhere on the field) runs the AI photo search in
- * useImageSearch. As the buyer types, makes, models and words are suggested
- * under the field; choosing one goes straight to its cars.
- */
 const HeroSearch = ({ bandLabel }: { bandLabel: string }) => {
   const t = useTranslations("home.hero");
   const tActions = useTranslations("common.actions");

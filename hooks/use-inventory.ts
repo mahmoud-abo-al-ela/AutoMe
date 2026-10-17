@@ -35,12 +35,6 @@ function unwrap<T>(response: ActionResponse<T>): T {
   return response.data;
 }
 
-/**
- * The dealer's Cars table (canvas: Cars — round 1, Ledger): one status view
- * from the URL, and here the search, filters, sort, page and selection, with
- * the changes made from it. Search, filters and sort reset the page and the
- * selection, so a selection never hides rows the dealer can no longer see.
- */
 export function useInventory(view: InventoryView, initial: Inventory | null = null) {
   const t = useTranslations("org.cars.ledger.toasts");
   const fmt = useFormatters();

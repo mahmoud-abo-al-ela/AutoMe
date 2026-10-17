@@ -6,11 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-/**
- * A filter dropdown trigger + popover. The trigger shows the filter label and,
- * when active, a count/label badge and a primary-tinted state. Radix supplies
- * aria-expanded/haspopup; we add an aria-label so the active count is announced.
- */
 type FilterPopoverProps = {
   label: string;
   activeCount?: number;

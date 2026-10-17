@@ -21,11 +21,6 @@ function unwrap<T>(response: ActionResponse<T>): T {
   return response.data;
 }
 
-/**
- * The dealer's buyer-question inbox: one view at a time, most-asked first.
- * Every write invalidates the whole inbox, because answering moves a
- * question between views and changes every view's count.
- */
 export function useBuyerQuestions() {
   const t = useTranslations("org.buyerQuestions.toasts");
   const actionError = useActionError();

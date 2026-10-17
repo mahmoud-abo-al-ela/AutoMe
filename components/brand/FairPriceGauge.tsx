@@ -10,12 +10,6 @@ export { priceVerdict, type PriceVerdict };
 /** The gauge spans ±SCALE % around the median; anything further pins to the end. */
 const SCALE = 20;
 
-/**
- * How a listing price sits against comparable listings. `percent` is this
- * car against their median (−6 = 6% below); null when there were too few
- * comparables to say anything — the gauge then shows an empty track rather
- * than guessing.
- */
 export interface MarketPositionProps {
   percent: number | null;
   /** How many comparable listings the median came from. */
@@ -43,16 +37,6 @@ export function usePriceVerdictText(percent: number | null) {
   return { verdict, text: t(verdict, { value }) };
 }
 
-/**
- * Direction B's signature, set in the Cairo Plate palette (Figma:
- * FairPriceGauge). A band from −20% to +20% around the market median, split
- * below / fair / above, with a needle at this car's price.
- *
- * Laid out with logical properties only, so the scale mirrors in Arabic
- * (below-market on the right, at the reading start) without a second code
- * path. Colour is never the only signal: the verdict text sits beside it,
- * and the whole thing is labelled for screen readers.
- */
 export function FairPriceGauge({
   percent,
   variant = "mini",
@@ -134,11 +118,6 @@ export function FairPriceGauge({
   );
 }
 
-/**
- * The verdict line: a coloured dot and the words, then how many comparables
- * they rest on. `countClassName` lets a card drop the count on the 2-up phone
- * layout (`max-sm:hidden`) without a second component.
- */
 export function PriceVerdictLine({
   percent,
   listings,

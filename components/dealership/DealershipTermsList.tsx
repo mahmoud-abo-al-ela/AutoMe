@@ -26,11 +26,6 @@ export function DisclosureList({ lines, stacked = false }: { lines: DisclosureLi
   );
 }
 
-/**
- * A dealership's terms as buyers read them on every listing — only the ones
- * stated. Shared by the car page and the dealer's own settings preview, so the
- * preview is the listing's wording, not a copy of it.
- */
 export function DealershipTermsList({
   terms,
   stacked,

@@ -8,13 +8,6 @@ import { logError } from "@/lib/utils/errors";
 
 const SORT: ChannelSort = [{ last_message_at: -1 }];
 
-/**
- * The signed-in buyer's conversation about one car.
- *
- * Finds an existing conversation, or none: the channel is created by the first
- * message, not by opening the chat, so a buyer who opens it and leaves does
- * not put an empty conversation in the dealer's inbox.
- */
 export function useCarConversation(carId: string | null) {
   const { client } = useChatContext();
   const [channel, setChannel] = useState<Channel | null>(null);

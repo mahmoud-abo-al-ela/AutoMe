@@ -8,15 +8,6 @@ import { Reveal, RevealItem } from "./motion/Reveal";
 import { Tilt } from "./motion/Tilt";
 import { CountUp } from "./motion/CountUp";
 
-/**
- * Body-type shortcuts with live counts (Figma: Home — Browse by body). The
- * count is the tile's headline: it answers "is there anything for me here?"
- * before the click. Phones scroll the row sideways rather than stacking five
- * tiles into a tall block.
- *
- * Motion: the tiles arrive one after another, their counts run up as they
- * do, and each leans toward the pointer on hover (components/Home/motion).
- */
 export function BodyTypeTiles({ items }: { items: { value: string; count: number }[] }) {
   const t = useTranslations("home.body");
   const attr = useCarAttributes();

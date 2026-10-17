@@ -28,22 +28,6 @@ const LAST = SCENES.length - 1;
 // right under it.
 const headerOffset = () => (window.matchMedia("(min-width: 768px)").matches ? 72 : 56);
 
-/**
- * "What you get on AutoMe", told as a story of four steps (GSAP).
- *
- * The section pins under the header and fills the screen, and scrolling —
- * wheel or touch — moves between steps: one scroll forward is the next step,
- * one back the previous, settling on each. A step plays on its own once it is
- * shown: the price needle swings into "fair", a question gets an instant
- * answer, a message flips to the other language, a test drive is booked and
- * the car drives off. The road fills as you go; its stops jump to a step.
- *
- * Two columns from lg; below that the stage sits on top with the step under
- * it, the frame fitting between the header and the phone tab bar
- * (globals.css: .story-frame). Reduced motion gets the steps stacked, each
- * scene shown finished (.story-pinned / .story-static, decided in CSS so the
- * right layout paints before JavaScript).
- */
 export function ScrollStory() {
   const t = useTranslations("home.features");
   const fmt = useFormatters();

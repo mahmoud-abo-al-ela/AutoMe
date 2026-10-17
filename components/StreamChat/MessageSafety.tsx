@@ -11,12 +11,6 @@ interface FlagState {
   reveal: () => void;
 }
 
-/**
- * The flag on the message being drawn, for the pieces rendered through
- * Stream's `renderText` — which Stream memoises on the text alone, while the
- * flag arrives later on the same text. Read from context, they redraw anyway
- * (the same reason the translate toggle does).
- */
 const FlagContext = createContext<FlagState | null>(null);
 
 export function useFlagState(category: FlagCategory | null): FlagState | null {
@@ -35,11 +29,6 @@ export function useFlagHidesText(): boolean {
   return Boolean(flag && flagDisplay(flag.category) === "hide" && !flag.revealed);
 }
 
-/**
- * Above a scam or spam message: a warning, the message still readable
- * beneath it (owner's choice — a wrong flag must never cost the reader a real
- * message).
- */
 export function FlagNotice() {
   const t = useTranslations("chat.safety");
   const flag = useContext(FlagContext);
@@ -52,14 +41,6 @@ export function FlagNotice() {
   );
 }
 
-/**
- * A flagged message's text. Abuse is hidden until the reader chooses to see
- * it. Any flagged message — once shown — is drawn as plain text, links not
- * clickable: a scam or spam link was the one thing in the bubble a reader
- * could act on, and it sat above its own warning. `plain` is the raw text;
- * `children` is Stream's rendering (markdown, clickable links) for everything
- * that is not flagged.
- */
 export function FlaggedText({ children, plain }: { children: ReactNode; plain: string }) {
   const t = useTranslations("chat.safety");
   const flag = useContext(FlagContext);

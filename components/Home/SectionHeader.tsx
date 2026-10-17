@@ -2,11 +2,6 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-/**
- * A home-page section heading: title, optional one-line subtitle, optional
- * "see all" link at the far end. Left-aligned on purpose — the centred
- * badge-title-subtitle stack this replaces was the template look.
- */
 export function SectionHeader({
   id,
   title,

@@ -36,13 +36,6 @@ function useUnread(channel: StreamChannel | null): number {
   return count;
 }
 
-/**
- * Motion. The window grows out of its corner — where the bubble sits — with a
- * soft overshoot, and shrinks back into it; on a phone, where it is the whole
- * screen, it slides up and down instead. `motion-safe:` drops all of it for a
- * reader who asked their system for less motion, and `useExit` then acts at
- * once rather than waiting for an animation that will not play.
- */
 const SPRING = "ease-[cubic-bezier(0.16,1,0.3,1)]";
 const WINDOW_ENTER = `motion-safe:animate-in fade-in duration-300 ${SPRING} max-sm:slide-in-from-bottom-10 sm:zoom-in-90 sm:slide-in-from-bottom-6`;
 const WINDOW_EXIT =
@@ -50,12 +43,6 @@ const WINDOW_EXIT =
 const BUBBLE_ENTER =
   "motion-safe:animate-in fade-in zoom-in-75 slide-in-from-bottom-2 duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]";
 const BUBBLE_EXIT = "motion-safe:animate-out fade-out zoom-out-75 duration-150 ease-in pointer-events-none";
-/**
- * Holds the exit's last frame. Inline, not the `fill-mode-forwards` class:
- * Tailwind emits `motion-safe:animate-out` after it, and that rule's
- * `animation` shorthand resets the fill mode — so the window snapped back to
- * full size for a frame before the bubble replaced it.
- */
 const HOLD_LAST_FRAME = { animationFillMode: "forwards" } as const;
 /** In case `animationend` never comes (a tab in the background, say). */
 const EXIT_FALLBACK_MS = 400;
@@ -100,13 +87,6 @@ function useExit() {
   return { leaving, exit, onAnimationEnd };
 }
 
-/**
- * The floating chat about one car — Messenger-style: a window docked in the
- * reading-start corner (left in English, right in Arabic — the owner's choice)
- * on larger screens, so the buyer keeps looking at the car while they
- * talk, and the whole screen on a phone. Minimised it becomes a pill with the
- * unread count; it stays open across pages until closed.
- */
 export function ChatDock() {
   const { carId, close } = useChatDock();
   const pathname = usePathname();

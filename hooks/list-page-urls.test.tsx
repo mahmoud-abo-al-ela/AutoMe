@@ -22,13 +22,6 @@ vi.mock("@/actions/dealerships", () => ({
 import { useCarsPage } from "./use-cars-page";
 import { useDealershipsPage } from "./use-dealerships-page";
 
-/**
- * The cars and dealerships lists keep their filters in the address with
- * history.pushState. The path must keep the reader's language: the site has
- * no language detection, so "/cars?make=Kia" reloads — or opens for whoever
- * it is shared with — in English, whatever language it was filtered in.
- */
-
 type Locale = "en" | "ar";
 const MESSAGES = {
   en: { cars: enCars, carAttributes: enAttributes, dealerships: enDealerships },
