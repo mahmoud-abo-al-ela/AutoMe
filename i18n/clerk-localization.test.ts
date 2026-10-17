@@ -2,15 +2,6 @@ import { describe, expect, it } from "vitest";
 import { arSA, enUS } from "@clerk/localizations";
 import { clerkLocalization } from "./clerk-localization";
 
-/**
- * These assertions exist to survive a `@clerk/localizations` upgrade.
- *
- * The corrections below patch strings inside a third-party bundle, addressed by
- * path. An upgrade can silently do two things: fix the string upstream (making
- * our override redundant) or move the key (making it a no-op that leaves the
- * wrong Arabic on screen). Both are invisible without a test, because a stale
- * override neither throws nor fails to compile.
- */
 describe("clerkLocalization", () => {
   const ar = clerkLocalization.ar as Record<string, never>;
   const at = (path: string, source: object): unknown =>

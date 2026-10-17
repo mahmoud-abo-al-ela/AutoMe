@@ -5,42 +5,11 @@ import { APP_TIME_ZONE } from "@/lib/utils/intl-locale";
 import type { Locale } from "./routing";
 import arTranslations from "./stream-chat-ar.json";
 
-/**
- * Stream Chat ships its own translation bundle — eleven languages, none of them
- * Arabic — so its UI stays English however the rest of the page is set. This is
- * the Clerk-shaped problem again: a vendor's copy, translated through the
- * vendor's own mechanism rather than through next-intl.
- *
- * Its keys ARE the English sentences, so anything `stream-chat-ar.json` does
- * not cover renders in English rather than as a raw key. That is the intended
- * fallback for the features this product does not enable — polls, live
- * location, voice recording, AI generation — which is most of what is missing.
- * `i18n/chat-messages.test.ts` guards the other direction: a key we translated
- * that the library no longer has would fall back forever without anyone
- * noticing.
- */
-
 type StreamI18nOptions = NonNullable<ConstructorParameters<typeof Streami18n>[0]>;
 type DayjsLocaleConfig = NonNullable<
   StreamI18nOptions["dayjsLocaleConfigForLanguage"]
 >;
 
-/**
- * Stream formats dates with dayjs, which has no Arabic locale loaded until
- * something registers one.
- *
- * `import "dayjs/locale/ar"` is the documented way and does not work here:
- * dayjs is a transitive dependency of stream-chat-react, so under pnpm's
- * strict layout this package cannot import from it. Streami18n's other
- * supported route is to hand it the locale config, which it merges over the
- * English one — so anything omitted below still resolves.
- *
- * This is the fallback path. Everything Stream renders through a
- * `timestamp/…` translation key goes through the formatters below instead,
- * which use the app's own helpers. Digits here stay Western: dayjs applies a
- * locale's `postformat` only with a plugin this build does not extend, which
- * is the other half of why the formatters exist.
- */
 const AR_DAYJS_LOCALE = {
   name: "ar",
   weekdays: "الأحد_الإثنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت".split("_"),
@@ -92,15 +61,6 @@ const AR_DAYJS_LOCALE = {
   meridiem: (hour: number) => (hour > 12 ? "م" : "ص"),
 } as unknown as DayjsLocaleConfig;
 
-/**
- * Formatters replace the dayjs and raw-number paths with the app's own
- * helpers, so a timestamp inside the message list reads the same as one in the
- * channel list beside it — same zone, same phrasing, and the same numerals.
- *
- * Arabic renders Eastern digits, but only under `ar-EG`; bare `ar` is `latn`,
- * and `lng` here is the bare tag. Both of these pass the app locale through
- * `intlLocale` rather than trusting it. See lib/utils/intl-locale.
- */
 function formatters(locale: Locale): StreamI18nOptions["formatters"] {
   return {
     timestampFormatter: () => (value, _lng, options) =>
@@ -121,11 +81,6 @@ export function createStreamI18n(locale: Locale) {
     language: locale,
     ...(isArabic
       ? {
-          // Layered over the English bundle rather than replacing it, so an
-          // untranslated key keeps its real English value. Several of them
-          // are not sentences at all but formatter templates — the
-          // "timestamp/…" and "duration/…" keys — which have to survive
-          // intact or the component renders the key name where a date goes.
           translationsForLanguage: { ...enTranslations, ...arTranslations },
           dayjsLocaleConfigForLanguage: AR_DAYJS_LOCALE,
         }

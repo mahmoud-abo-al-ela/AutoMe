@@ -12,12 +12,6 @@ import { listMyTestDrives, listSavedCars, resolveAccountCaller, saveCar, unsaveC
 import { AuthorizationError, NotFoundError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
 
-/**
- * The signed-in MCP endpoint's reads, on Postgres: a buyer sees their own
- * saved cars and test drives — never another buyer's, never a car the public
- * may no longer see, never their notes or contact details.
- */
-
 const ORG = "org_test_mcp_account";
 const SUSPENDED = "org_test_mcp_account_suspended";
 const A = "user_test_mcp_account_a";

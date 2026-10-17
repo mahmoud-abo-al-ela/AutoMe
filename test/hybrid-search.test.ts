@@ -12,12 +12,6 @@ import { searchCarsRanked } from "@/lib/repositories/car/search";
 import { setCarEmbedding } from "@/lib/repositories/car/embedding";
 import { db } from "@/lib/prisma";
 
-/**
- * Words and meaning fused (pgvector + full text), which only real Postgres
- * with the extension can run. Vectors are synthetic: axis-aligned, so which
- * car is "close" to a query is set by the test, not a model.
- */
-
 const ORG = "org_test_hybrid";
 const MODEL = "gemini-embedding-2";
 

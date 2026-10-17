@@ -14,12 +14,6 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : undefined;
 
-// On Vercel, `next build` skips its own type check and lint. CI runs both as
-// separate steps (pnpm typecheck, pnpm lint) on every pull request before the
-// merge that deploys, so these are repeats, and the repeat is what ran Vercel's
-// build container out of memory once Zod 4 was in: the build compiled, then was
-// killed (SIGKILL, OOM) during "Linting and checking validity of types"
-// (2026-10-14). Local and CI builds still check.
 const onVercel = process.env.VERCEL === "1";
 
 const nextConfig = {
@@ -84,19 +78,6 @@ const nextConfig = {
   },
 };
 
-/**
- * Sentry is wrapped only for real builds.
- *
- * withSentryConfig + instrumentation.ts cost ~10.5s of compile at every
- * `next dev` boot: the Node and Edge SDKs are bundled into /instrumentation
- * (1083 modules) *before* the server reports ready, and a local machine reports
- * nothing anyone reads. Set SENTRY_ENABLE_DEV=1 to opt back in when you are
- * specifically debugging Sentry itself.
- *
- * The condition is duplicated in lib/sentry-enabled.ts rather than imported:
- * this file is loaded by Node before any TS exists, so it cannot import one.
- * Keep the two in sync.
- */
 const withSentry = (config) =>
   withSentryConfig(config, {
     org: "mahmoud-ali-re",

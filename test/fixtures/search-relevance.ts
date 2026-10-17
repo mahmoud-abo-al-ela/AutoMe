@@ -1,19 +1,3 @@
-/**
- * The keyword relevance catalogue: one dealership's inventory, written the way
- * Egyptian dealers write it, with the competition a real search has to rank
- * through — several Toyotas, an X5 beside an X3 and a Kia sold as "X5-like",
- * a Kia that is "better than a Corolla", a sunroof tagged on some cars and only
- * mentioned in prose on others, and generic words ("عربية", "car") in some
- * descriptions but not others.
- *
- * Every car has its own createdAt, so a tie in rank orders the same way on
- * every run: the measurements are exact, not noisy.
- *
- * Unlike lib/ai/evaluation/search-fixtures.ts (one car per model, written for
- * the meaning evaluation against a live model), this is for the words alone and
- * runs offline against real Postgres.
- */
-
 export type RelevanceCar = {
   make: string;
   model: string;
@@ -90,11 +74,6 @@ const where = (predicate: (car: RelevanceCar) => boolean): CarKey[] =>
 const SEDANS = where((c) => c.bodyType === "Sedan");
 const TOYOTAS = where((c) => c.make === "Toyota");
 const HYUNDAIS = where((c) => c.make === "Hyundai");
-/**
- * Every car with a sunroof, however it says so: tagged in English ("Sunroof"),
- * in Arabic ("فتحة سقف"), or only mentioned in its description. A buyer who
- * asks for one in either language wants them all.
- */
 const SUNROOFS: CarKey[] = ["corolla20", "camry", "x5", "civic", "landCruiser", "tucson", "eClass"];
 
 export type RelevanceQuery = {

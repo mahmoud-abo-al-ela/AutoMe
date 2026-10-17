@@ -29,13 +29,6 @@ import { getCars } from "@/lib/services/car/listing";
 import { db } from "@/lib/prisma";
 import { CARS, HIDDEN_TENANT_CARS, OTHER_TENANT_CARS, type RelevanceCar } from "@/test/fixtures/search-relevance";
 
-/**
- * How a search's words match — all of them, some, none (meaning) — judged by
- * the cars in scope rather than a word list, and bounded in every tier by the
- * tenant, the listing's visibility and the buyer's filters. Real Postgres: the
- * judging is SQL.
- */
-
 const ORG = "org_test_tiers";
 const PLAIN_ORG = "org_test_tiers_plain";
 const OTHER_ORG = "org_test_tiers_other";

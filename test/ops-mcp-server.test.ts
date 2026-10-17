@@ -14,13 +14,6 @@ const hasTestDb = Boolean(process.env.TEST_DATABASE_URL);
 
 import { db } from "@/lib/prisma";
 
-/**
- * The ops server end to end, as a developer's MCP client runs it: the real
- * entry script over stdio, as a role holding exactly the documented grants
- * (SELECT on AiUsage and AiTrace). Every database tool must work within
- * them — a query reaching another table would fail here, not in use.
- */
-
 const ROLE = "autome_ops_ro_e2e";
 const PASSWORD = randomBytes(12).toString("hex");
 const FEATURE = "ops_e2e_feature";

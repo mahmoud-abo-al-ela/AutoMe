@@ -1,15 +1,3 @@
-/**
- * Compare an evaluation run with the committed baseline.
- *
- *   pnpm eval:compare                    # eval-report.json vs the baseline
- *   pnpm eval:compare --update-baseline  # accept this run as the new baseline
- *
- * Exits 1 on a regression — a case that passed in the baseline and fails now —
- * or a baseline case a suite that ran no longer reports — and when there is no
- * baseline at all, since then nothing could be caught. A case no model could answer is inconclusive and never fails the run —
- * a quota-starved night is not a quality regression. Paths can be overridden
- * with AI_EVAL_REPORT and AI_EVAL_BASELINE.
- */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
   allCases,

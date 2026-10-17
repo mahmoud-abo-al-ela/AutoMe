@@ -144,11 +144,6 @@ model Organization {
   logo        String?
   email       String?
   phone       String?
-  /// The address and description are kept as the dealer wrote them, in
-  /// whichever language. The En/Ar pairs are what the storefront shows per
-  /// locale: the dealer's text in its own language's column, a translation in
-  /// the other, written after a profile save (lib/services/dealership/
-  /// profile-translation; lib/utils/dealership-text resolves them).
   address     String?
   addressEn   String?
   addressAr   String?
@@ -158,13 +153,6 @@ model Organization {
   descriptionAr String?
   isActive    Boolean   @default(true)
 
-  // Location fields for platform discovery and filtering.
-  //
-  // Canonical values from lib/locations, never display names: `region` holds an
-  // egydata governorate code ("CAI"), `city` an English-derived slug ("maadi"),
-  // `country` an ISO country code. They are compared by equality and rendered
-  // through lib/locations/names, so a dealer switching the site to Arabic sees
-  // their own address change language.
   city        String?
   region      String?
   country     String?   @default("EG")
@@ -439,11 +427,6 @@ model Car {
   model         String
   year          Int
   price         Decimal
-  // Currency of record for `price`. AutoMe is Egypt-only, so this is always
-  // "EGP" today and nothing converts it — the column exists so that a listing
-  // carries its own currency rather than inheriting one from a global
-  // assumption. Backfilling it after the fact is the expensive part; the column
-  // itself is near-free now. See lib/utils/currency.ts.
   priceCurrency String         @default("EGP")
   mileage       Int
   fuelType      String
@@ -457,14 +440,6 @@ model Car {
   title         String?
   description   String?
 
-  // Bilingual listing copy, written by the vision model at extraction time and
-  // editable by the dealer. Nullable and additive: `title`/`description` above
-  // stay the source of record, so a car created before this existed still
-  // renders. `resolveCarTitle`/`resolveCarDescription` in lib/utils/car-text.ts
-  // pick per locale and fall back rather than showing a reader a blank.
-  //
-  // All four feed the searchVector — see the 20260922160000 migration. Text
-  // that is not an argument to car_search_document cannot be searched.
   titleEn       String?
   titleAr       String?
   descriptionEn String?
@@ -476,12 +451,6 @@ model Car {
   // of record). Written by the vision model, editable by the dealer; resolved
   // per locale by `resolveCarFeatures`. Feeds the searchVector too.
   featuresAr    String[]
-  // Alt text per image, written by the model after a save, in both languages:
-  // { [imageUrl]: { en, ar } }. Keyed by URL, not by position — updateCarFull
-  // reorders and deletes images, which would silently misalign a parallel
-  // array. Absent for a URL means "not described yet"; the gallery then falls
-  // back to "Make Model — image n". Not searchable by design: it describes
-  // photos, and matching "rear view" in search would be noise.
   imageAlts     Json?
 
   // What a buyer asks before anything else, stated by the dealer. Every one is
@@ -503,13 +472,6 @@ model Car {
   // is declared Unsupported and populated entirely by the database.
   searchVector  Unsupported("tsvector")?
 
-  // The listing's meaning as a vector (pgvector), from its bilingual title,
-  // description, features and specs — what lets "a family car that's cheap to
-  // run" find a car whose words never say that. Written by the car-embedding
-  // job on save; only comparable within one model (embeddingModel), so every
-  // search filters on it. embeddingHash fingerprints the text it was made
-  // from, so a save that changed none of it costs no request. Raw SQL only,
-  // and deliberately unindexed — see BuyerQuestion.embedding.
   embedding      Unsupported("vector(768)")?
   embeddingModel String?
   embeddingHash  String?
@@ -617,12 +579,6 @@ model OnboardingSession {
 
 // ============ PAYMENTS ============
 
-// One row per checkout attempt through Paymob; the PAID rows are the
-// dealership's invoice history. `id` is sent to Paymob as `special_reference`
-// and comes back on the transaction callback as `merchant_order_id`.
-//
-// Nothing here cascades away: a payment is a financial record and outlives
-// the dealership, the onboarding session and the user who paid.
 model Payment {
   id String @id @default(uuid())
 
@@ -704,12 +660,6 @@ model WebhookEvent {
 
 // ============ AI USAGE ============
 
-// One row per AI provider call (Gemini today). Replaces the fake
-// AuditLog(action="CAR_CREATED") proxy that plan-limits.js counted as AI usage.
-//
-// `organizationId` is nullable by design: public marketplace search has no tenant
-// (mirrors AuditLog.organizationId). It is always sourced server-side from ctx /
-// getCurrentOrganization(), never from client input.
 model AiUsage {
   id             String        @id @default(uuid())
   organizationId String?
@@ -746,12 +696,6 @@ model AiUsage {
   @@index([provider, createdAt])
 }
 
-// What one AI call was given and what it replied, for debugging a bad answer —
-// a 👎 links here through AssistantAnswer.aiUsageId. Sampled (every listing
-// assistant answer, a share of the rest), redacted (emails and phone numbers
-// replaced), and kept 14 days. The prompt itself is not stored: promptVersion
-// names it in git. Photos are a digest, never bytes. Private chat features are
-// never traced.
 model AiTrace {
   id            String   @id @default(uuid())
   aiUsageId     String?  // the attempt's ledger row; no relation, like AssistantAnswer
@@ -779,13 +723,6 @@ enum BuyerQuestionStatus {
   DISMISSED
 }
 
-// A question a buyer asked the listing assistant that the listing could not
-// answer. The dealer sees it in their inbox; their answer becomes a fact the
-// assistant cites for every later buyer ("the dealer says…").
-//
-// No buyer identity is stored — no user, no IP. Repeats of the same question
-// on the same car fold into one row (questionKey) and raise askCount, which is
-// what tells the dealer which gaps matter.
 model BuyerQuestion {
   id             String       @id @default(uuid())
   organizationId String
@@ -819,14 +756,6 @@ model BuyerQuestion {
   // when the page showed its fixed copy, or the question came from a 👎.
   declineMessage    String?
 
-  // The question's meaning as a vector (pgvector), written by the
-  // question-embedding job — what folds a rephrased repeat into this row, ranks
-  // the dealer's answers against a new question, and suggests this answer on
-  // another car. Only comparable with vectors from the same model, so the model
-  // is kept beside it and every search filters on it. Read and written with raw
-  // SQL (Unsupported). Deliberately unindexed: searches filter to one car or
-  // dealership first, and an approximate vector index would filter after
-  // choosing candidates platform-wide, silently missing a dealer's own rows.
   embedding      Unsupported("vector(768)")?
   embeddingModel String?
 
@@ -838,11 +767,6 @@ model BuyerQuestion {
   @@index([organizationId, status, appliesToAllCars]) // dealership-wide answers
 }
 
-// An answer the listing assistant gave a buyer, kept so the buyer can rate it.
-// A 👎 also files the question in the dealer's Buyer Questions inbox, where
-// the dealer's answer becomes a fact the assistant cites next time. No buyer
-// identity is stored; rows older than 90 days are pruned on the next answer
-// for the same car.
 model AssistantAnswer {
   id             String       @id @default(uuid())
   organizationId String

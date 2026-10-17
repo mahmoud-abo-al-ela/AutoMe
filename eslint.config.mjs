@@ -7,13 +7,6 @@ const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
-// Only lib/repositories touches the database. Everything else reaches data
-// through a repository, so the Prisma client and the generated client's runtime
-// values (the `Prisma` namespace, enum objects) are off limits outside it.
-// `import type` stays allowed everywhere: model and enum types cost nothing at
-// runtime and are how the rest of the app names the data's shape. No file is
-// exempt (every query outside a repository was moved, 2026-10-11): a new one
-// is an error — add or reuse a repository function instead.
 const PRISMA_BOUNDARY = {
   paths: [
     {
@@ -40,11 +33,6 @@ const PRISMA_BOUNDARY = {
   ],
 };
 
-// The layers' import direction: app → actions → services → repositories, never
-// back. Expressed with no-restricted-syntax (a rule separate from the Prisma
-// boundary's, so the two legacy lists cannot override each other) and limited
-// to runtime imports — `import type` crosses layers freely, at no cost.
-// (esquery regexes cannot contain "/", so "." stands in for the path separator.)
 const runtimeImportOf = (pattern, message) => ({
   selector: `ImportDeclaration[importKind!='type'][source.value=${pattern}]`,
   message,

@@ -1,11 +1,5 @@
 import type { ModelKey } from "./photos";
 
-/**
- * The demo dealerships: fictional names, one per region, each with its own
- * stock. Prices are October 2026 used-market levels in EGP (whole pounds, as
- * Car.price stores them), mileage about 15–20,000 km a year. No phone numbers
- * and only example.com addresses: a demo must never ring a real person.
- */
 export type StockItem = {
   model: ModelKey;
   year: number;

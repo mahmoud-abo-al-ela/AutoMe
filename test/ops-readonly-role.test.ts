@@ -18,14 +18,6 @@ import { checkRolePosture } from "@/lib/mcp/ops/guard";
 import { readRolePosture } from "@/lib/repositories/ops/role";
 import { db } from "@/lib/prisma";
 
-/**
- * The ops server's read-only role (plans/mcp D-10), made on the test database
- * with exactly the grants the setup asks for, then used: the database itself
- * must refuse every write, the guard must accept it, and must refuse the
- * test database's own (superuser) login. The server is started for real,
- * as a developer would, to see the checks hold end to end.
- */
-
 const ROLE = "autome_ops_ro_test";
 const PASSWORD = randomBytes(12).toString("hex");
 let roleUrl = "";

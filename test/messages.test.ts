@@ -3,15 +3,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { routing } from "@/i18n/routing";
 
-/**
- * Structural guard on the message files.
- *
- * A missing key does not throw at build time — next-intl renders the key path
- * itself, so an untranslated string ships as "nav.browseCars" in the UI and
- * nobody notices until an Arabic reader does. With ~800 keys planned, that has
- * to be caught mechanically rather than by review.
- */
-
 const MESSAGES_DIR = path.join(process.cwd(), "messages");
 
 /** Flatten {a: {b: "x"}} to ["a.b"]. */

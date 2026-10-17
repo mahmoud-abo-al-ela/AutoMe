@@ -17,13 +17,6 @@ import { cairoNow } from "@/lib/utils/datetime";
 import { ValidationError } from "@/lib/utils/errors";
 import { db } from "@/lib/prisma";
 
-/**
- * Test-drive booking under real concurrency, on Postgres: requests and edits
- * for overlapping slots of one car arrive at the same moment, and at most one
- * may hold the time. Before bookSlot's car-day lock, every one of them passed
- * the overlap check — each read the day before any had written.
- */
-
 const ORG = "org_test_booking_race";
 const OTHER = "org_test_booking_race_suspended";
 const OWNER = "user_test_booking_owner";

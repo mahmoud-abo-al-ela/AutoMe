@@ -5,18 +5,6 @@ import enChat from "@/messages/en/chat.json";
 import arChat from "@/messages/ar/chat.json";
 import arStream from "@/i18n/stream-chat-ar.json";
 
-/**
- * Chat is two translation problems in one file.
- *
- * The app's own copy around the chat — page headers, the channel previews, the
- * enquiry chat — lives in `messages/{en,ar}/chat.json` like every other
- * namespace. Stream Chat's UI copy does not: the library ships its own bundle
- * in eleven languages, none of them Arabic, keyed by the English sentence.
- * `stream-chat-ar.json` fills that in, and the risk there is the opposite of a
- * missing key: a key the library has renamed or dropped still parses, still
- * loads, and silently renders English forever.
- */
-
 // Read off disk rather than imported: the package's `exports` map does not
 // expose its translation files, and pulling the library's entry point into a
 // node test drags the whole React bundle with it.

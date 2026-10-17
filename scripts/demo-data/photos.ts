@@ -1,10 +1,3 @@
-/**
- * Photos of each model, from Wikimedia Commons — every one checked by eye to
- * show that make, model and generation (2026-10-15), two of the same car where
- * Commons had them. Free licences that ask for credit: the credit goes into the
- * description of every demo car that uses the photo (./cars.ts).
- * Served from thumb.wikimedia.org, allowed in next.config.mjs.
- */
 export type Photo = { url: string; credit: string; page: string };
 
 export const PHOTOS = {

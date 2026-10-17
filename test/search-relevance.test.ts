@@ -22,37 +22,6 @@ import {
   type RelevanceQuery,
 } from "@/test/fixtures/search-relevance";
 
-/**
- * How well the words alone rank one dealership's inventory, measured.
- *
- *   TEST_DATABASE_URL=… pnpm vitest run test/search-relevance
- *
- * Every query in test/fixtures/search-relevance.ts is run against real
- * Postgres and scored:
- *
- * - P@k — of the first k results, the share the buyer was looking for, with
- *   k = min(5, how many such cars exist), so a perfect search scores 1.
- * - recall@10 — the share of what the buyer was looking for that made the top
- *   10 (of at most 10): a search that hides most of the right cars scores low.
- * - MRR — 1 / the rank of the first such car (0 when none is in the top 10).
- * - irrelevant rate — the share of the top 10 that is neither what was asked
- *   nor a fair thing to show.
- * - target rank — for a navigational query ("bmw x5"), where its one car lands.
- *
- * The averages, overall and per language, must not fall below the committed
- * baseline (search-relevance.baseline.json), and no target may drop: the
- * database is deterministic, so the comparison is exact. A change that moves
- * them up re-records the baseline in the same commit:
- *
- *   SEARCH_EVAL_UPDATE_BASELINE=1 pnpm vitest run test/search-relevance
- *
- * SEARCH_EVAL_REPORT=<file> also writes every query's results and scores.
- *
- * Words only: meaning (pgvector) needs a model to embed the query, which CI
- * must not call. Fusion is covered by test/hybrid-search.test.ts, and meaning
- * by the manual AI evaluation.
- */
-
 const REL_ORG = "org_test_relevance";
 const OTHER_ORG = "org_test_relevance_other";
 const HIDDEN_ORG = "org_test_relevance_hidden";

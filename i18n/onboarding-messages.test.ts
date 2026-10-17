@@ -8,17 +8,6 @@ import { STEPS } from "@/app/[locale]/(site)/onboarding/_components/wizard/const
 import { DAYS } from "@/app/[locale]/(site)/onboarding/_components/working-hours/constants";
 import { PLAN_CONFIG } from "@/app/[locale]/(site)/onboarding/_components/plan-selection/constants";
 
-/**
- * Message-shape checks for the two namespaces the onboarding wizard renders
- * from. The wizard is entirely client-side and sits behind sign-in, so a
- * missing key reaches the page as visible text that no reviewer is likely to
- * see first.
- *
- * The constants are imported rather than restated: every step, day and plan
- * tier now looks its copy up by key, and a key added to one without the other
- * is exactly the failure worth catching.
- */
-
 type Flat = [string, string][];
 
 const flatten = (obj: Record<string, unknown>, prefix = ""): Flat =>

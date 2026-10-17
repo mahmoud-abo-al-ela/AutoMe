@@ -12,12 +12,6 @@ import { findOtherAvailableCarsMatching } from "@/lib/repositories/car/assistant
 import { db } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 
-/**
- * The listing assistant's alternatives: the dealership's cars a buyer's
- * question names, however far from the viewed car's price — its own cars
- * only, on sale only, never the car being viewed. Real Postgres.
- */
-
 const OWN = "org_test_alternatives_own";
 const OTHER = "org_test_alternatives_other";
 const keyOf = new Map<string, string>();

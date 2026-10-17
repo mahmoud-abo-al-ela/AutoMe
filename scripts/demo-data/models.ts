@@ -1,10 +1,5 @@
 import type { ModelKey } from "./photos";
 
-/**
- * The models the demo dealerships sell: what Egyptian lots actually carry, the
- * generation the photos show, and the colour of the car in those photos — a
- * listing's colour field must match its pictures.
- */
 export type ModelSpec = {
   make: string;
   model: string;

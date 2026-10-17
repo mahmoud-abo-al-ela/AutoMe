@@ -1,13 +1,3 @@
-/**
- * The public MCP pilot's numbers for a window (plans/mcp, ROADMAP §Pilot).
- * Read-only: counts and percentiles from McpToolCall and McpReferral.
- *
- *   pnpm mcp:pilot-report              # the last 7 days
- *   pnpm mcp:pilot-report --days 28
- *   pnpm mcp:pilot-report --since 2026-10-13 --until 2026-11-10
- *
- * Reads the database DATABASE_URL points at — check which one before running.
- */
 import { pilotReport } from "@/lib/services/mcp/pilot-report";
 import { db } from "@/lib/prisma";
 

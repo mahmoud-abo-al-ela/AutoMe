@@ -117,14 +117,6 @@ describe.skipIf(!hasTestDb)("findManyCars plain-listing branch (real Postgres)",
 });
 
 
-// The whole Arabic search story rests on one claim: `foldSearchText` in
-// TypeScript and `fold_search_text` in SQL do the same thing. The query is
-// built through the first and the stored `searchVector` through the second, so
-// if they ever disagree the index answers questions nobody asked — results stop
-// being merely incomplete and start being arbitrary.
-//
-// Two implementations in two languages against two string APIs cannot be kept
-// in step by reading them. This runs the same fixtures through both.
 describe.skipIf(!hasTestDb)("the search fold agrees across TS and SQL", () => {
   afterAll(async () => {
     await db.$disconnect();
@@ -168,12 +160,6 @@ describe.skipIf(!hasTestDb)("the search fold agrees across TS and SQL", () => {
   });
 });
 
-// Bilingual listing copy only helps if it is reachable. `searchVector` is a
-// STORED generated column, so a column that is not an argument to
-// car_search_document is invisible to search however it is indexed — a dealer's
-// Arabic description would land in a column nobody could query. That is the
-// same class of bug 20260922120000 fixed, arriving through a different door,
-// so it gets the same kind of test.
 describe.skipIf(!hasTestDb)("bilingual listing text (real Postgres)", () => {
   const BILINGUAL_ORG = "org_test_bilingual";
 

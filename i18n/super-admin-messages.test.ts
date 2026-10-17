@@ -5,14 +5,6 @@ import enOrg from "@/messages/en/org.json";
 import arOrg from "@/messages/ar/org.json";
 import { ADMIN_SECTIONS } from "@/app/[locale]/(super-admin)/super-admin/_components/admin-sections";
 
-/**
- * Message-shape checks for the super-admin dashboard.
- *
- * Staff-only, so a missing key here is seen by few people and fixed late —
- * these catch it at test time instead. The top bar's `ADMIN_SECTIONS` is imported
- * rather than restated, so a nav entry added without its label fails here.
- */
-
 type Flat = [string, string][];
 
 const flatten = (obj: Record<string, unknown>, prefix = ""): Flat =>

@@ -3,14 +3,6 @@ import { createTranslator } from "next-intl";
 import en from "@/messages/en/dealerships.json";
 import ar from "@/messages/ar/dealerships.json";
 
-/**
- * Message-shape checks for the dealerships namespace.
- *
- * These exist because the surface is rendered entirely client-side, so an
- * unfilled placeholder or a missing Arabic plural form reaches the page as
- * visible text rather than as an error anything would catch.
- */
-
 const LOCALES = { en, ar } as const;
 
 type Flat = [string, string][];

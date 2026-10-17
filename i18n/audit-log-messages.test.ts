@@ -4,17 +4,6 @@ import { describe, it, expect } from "vitest";
 import enOrg from "@/messages/en/org.json";
 import arOrg from "@/messages/ar/org.json";
 
-/**
- * The audit table renders database enum members: the stored token stays
- * English and only the label is translated, keyed by the token itself.
- *
- * Both enums are read out of `schema.prisma` rather than restated here, and
- * rather than imported from the generated client — importing that would drag
- * the Prisma runtime into a message test. A member added to the schema
- * without a label then fails here, instead of showing a dealer a raw
- * `org.auditLogs.actions.…` key in a badge nobody on this side ever looks at.
- */
-
 const schema = readFileSync(
   path.join(process.cwd(), "prisma", "schema.prisma"),
   "utf8"

@@ -2,15 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it, expect } from "vitest";
 
-/**
- * A key written twice in one object is not a JSON error: the parser keeps the
- * last one and drops the first without a word. Every other message test reads
- * the parsed object, so it never sees the lost copy. This one reads the text.
- *
- * It has happened: `superAdmin.organizations.form.basic.description` was both
- * a card subtitle and a field label, and the subtitle rendered "Description".
- */
-
 const MESSAGES = path.join(process.cwd(), "messages");
 
 /** Dotted paths of keys that repeat within the same object. */

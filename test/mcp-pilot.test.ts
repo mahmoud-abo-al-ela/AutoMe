@@ -12,12 +12,6 @@ import { pilotReport } from "@/lib/services/mcp/pilot-report";
 import { recordMcpReferral } from "@/lib/services/mcp/referrals";
 import { db } from "@/lib/prisma";
 
-/**
- * The pilot report's numbers from real rows (migrations 20261014120000 and
- * 20261014140000). The window is in 2099 so no other suite's rows — or its
- * retention prune, which takes the oldest — can meet this one's.
- */
-
 const DAY = (n: number) => new Date(Date.UTC(2099, 0, n, 12));
 const SINCE = new Date(Date.UTC(2099, 0, 1));
 const UNTIL = new Date(Date.UTC(2099, 0, 8));

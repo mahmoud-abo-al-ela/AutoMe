@@ -1,38 +1,13 @@
-/**
- * Custom fields this app stores on Stream channels.
- *
- * Stream types channel data as a closed shape plus a `CustomChannelData`
- * interface it expects consumers to augment. Without this, every read of
- * `channel.data?.car_data` needs its own cast, and nothing checks that the
- * writer in actions/stream-chat and the readers in components/StreamChat
- * agree on the shape.
- */
 import "stream-chat";
 
 declare module "stream-chat" {
-  /**
-   * Custom user fields. `upsertStreamUser` spreads these flat onto the user
-   * object, so they are read flat too — not under a `custom` key. Reading
-   * `user.custom.user_role` (as the chat header did) always yielded undefined.
-   */
   interface CustomUserData {
     clerk_id?: string;
     user_role?: string | null;
   }
 
-  /**
-   * Translations of a message, written by the server when a member taps
-   * "Translate" (lib/services/chat/translation). Each keeps the text it was
-   * made from, so an edited message is never shown an old translation.
-   */
   interface CustomMessageData {
     translations?: Partial<Record<"ar" | "en", { text: string; source: string }>>;
-    /**
-     * Set by the server when moderation flags the message (lib/services/chat/
-     * moderation); absent on a clean one. Keeps the text it judged, like a
-     * translation, so an edit is judged afresh. Not named `moderation`:
-     * Stream reserves that field for its own moderation product.
-     */
     safety_flag?: { category: "scam" | "spam" | "abuse"; source: string };
   }
 
