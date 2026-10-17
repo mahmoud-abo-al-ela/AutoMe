@@ -9,13 +9,6 @@ import {
 import { createSuccessResponse } from "@/lib/utils/response";
 import * as inbox from "@/lib/services/buyer-question/inbox";
 
-/**
- * The dealer's inbox of questions the listing assistant could not answer
- * (lib/services/buyer-question/inbox.ts). Any member may answer: the people
- * who talk to buyers are rarely the owner. Not rate-limited — these are
- * authenticated writes to the dealer's own rows and call no provider.
- */
-
 const PAGE_SIZE = 20;
 
 export const getBuyerQuestions = withOrgAuth(async (ctx, input: unknown) => {

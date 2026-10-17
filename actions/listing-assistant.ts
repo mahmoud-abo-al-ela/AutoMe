@@ -10,18 +10,6 @@ import { classifyBuyerMessage } from "@/lib/utils/buyer-message";
 import type { AssistantReply } from "@/lib/services/car/listing-assistant";
 import { startTrace } from "@/lib/utils/dev-trace";
 
-/**
- * A buyer asks about a car on its public page.
- *
- * Unauthenticated by design — a buyer should not need an account to ask what
- * colour a car is — and billed to the dealer who owns it. So nothing the
- * caller sends decides who pays or whether it is allowed: the car's owner,
- * its plan and its allowance all come from the database, and the subdomain
- * from middleware.
- *
- * Validated before rate-limiting, the reverse of the usual order, because the
- * per-car bucket is keyed on the car id and must only ever see a real one.
- */
 export const askListingAssistant = withErrorHandling(async (input: unknown) => {
   const { carId, question, locale, historyIds } = validateAction(listingQuestionSchema, input);
   // Dev-only: every step of this question, in the dev server's terminal.
@@ -53,14 +41,6 @@ export const askListingAssistant = withErrorHandling(async (input: unknown) => {
   }
 });
 
-/**
- * A buyer rates an answer 👍 or 👎.
- *
- * Unauthenticated, like asking. Not rate-limited on its own: a rating needs
- * the id of an answer not yet rated, only a rate-limited question creates
- * one, and each is rated once — so ratings can never outnumber questions.
- * Spending the question bucket here would cost the buyer questions instead.
- */
 export const rateListingAssistantAnswer = withErrorHandling(async (input: unknown) => {
   const { answerId, helpful } = validateAction(listingAnswerRatingSchema, input);
   await rateListingAnswer(answerId, helpful);

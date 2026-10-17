@@ -18,11 +18,6 @@ import {
   type CarListingInput,
 } from "@/lib/validations/schemas";
 
-/**
- * Public: anyone may list cars. The input is validated down to what a buyer
- * can choose (carListingInputSchema) — the scope of what may be seen at all is
- * the server's to set, never the request's.
- */
 export const getCars = withErrorHandling(async (input: CarListingInput) => {
   const filters = validateAction(carListingInputSchema, input);
   const { userId } = await auth();
@@ -106,23 +101,12 @@ export const getWishlist = withAuth(
   return createSuccessResponse(result);
 });
 
-/**
- * Titles for the cars in a chat conversation list, in both languages, keyed
- * by id — one request for the whole list instead of one per conversation
- * (server actions from one tab run one at a time). Public listing fields
- * only; unknown ids are simply absent.
- */
 export const getCarTitles = withErrorHandling(async (input: unknown) => {
   const carIds = validateAction(carTitlesRequestSchema, input);
   const rows = await carService.getCarTitles(carIds);
   return createSuccessResponse(Object.fromEntries(rows.map((row) => [row.id, row])));
 });
 
-/**
- * The site's live numbers (cars on sale, dealerships, cities, median price,
- * last update) — the market readout and the hero's eyebrow. Public listing
- * data only, scoped to the dealership on its subdomain.
- */
 export const getMarketSummary = withErrorHandling(async () => {
   const organization = await getCurrentOrganization();
   const summary = await carService.getMarketSummary(organization?.id ?? null);
