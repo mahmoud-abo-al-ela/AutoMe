@@ -1,29 +1,46 @@
+import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, MAX_COMPARE_CARS } from "@/lib/utils";
 import { specCategories } from "./utils";
 
 const OnMuted = ({ className }: { className?: string }) => <Skeleton className={cn("bg-foreground/10", className)} />;
 
+const Words = ({ children, className }: { children: ReactNode; className?: string }) => (
+    <span className={cn("animate-pulse rounded-md bg-accent box-decoration-clone leading-[inherit] text-transparent", className)}>{children}</span>
+);
+
 /** The rows of the first tab, which is the one the comparison opens on. */
 const FIRST_TAB = specCategories[0];
 
 const ComparePageSkeleton = () => {
+    const t = useTranslations("compare.header");
     return (
         <div>
-            {/* ── Header, as ComparePageHeader; bar heights are its line heights ────────────────────────────────── */}
-            <div className="mb-6 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+            {/* As ComparePageHeader, with its own words hidden inside, so lines wrap where the header's do at any width. */}
+            <div aria-hidden className="mb-6 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                        <Skeleton className="h-[46px] w-72 max-w-[60vw]" />
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="text-h1 font-extrabold">
+                            <Words>{t("title")}</Words>
+                        </div>
                         <Skeleton className="h-[25px] w-14 rounded-full" />
                     </div>
-                    <Skeleton className="h-[26px] w-[34rem] max-w-full" />
+                    <p className="text-body">
+                        <Words>{t("subtitle", { max: MAX_COMPARE_CARS })}</Words>
+                    </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Skeleton className="me-2 h-5 w-44 max-sm:w-10" />
-                    <Skeleton className="size-10 rounded-control" />
-                    <Skeleton className="size-10 rounded-control" />
-                    <Skeleton className="h-10 w-28 rounded-control" />
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="me-2 flex items-center gap-2 text-caption font-medium">
+                        <Skeleton className="h-[1.15rem] w-8 rounded-full" />
+                        <Words className="max-sm:sr-only">{t("highlightDifferencesLabel")}</Words>
+                    </div>
+                    <Skeleton className="size-10 shrink-0 rounded-control" />
+                    <Skeleton className="size-10 shrink-0 rounded-control" />
+                    <Skeleton className="flex h-10 shrink-0 items-center gap-2 rounded-control px-3.5 text-sm font-medium text-transparent">
+                        <span className="size-4" />
+                        {t("clearAll")}
+                    </Skeleton>
                 </div>
             </div>
 
@@ -79,38 +96,52 @@ const ComparePageSkeleton = () => {
                 </div>
             </div>
 
-            {/* ── Car cards skeleton (mobile) ─────────────────────────────────── */}
+            {/* As MobileCompareTable: toggle bar, car carousel, then the active car's specs. */}
             <div className="md:hidden">
-                <div className="bg-card rounded-lg overflow-hidden">
-                    {Array.from({ length: 2 }).map((_, i) => (
-                        <div key={`mobile-card-${i}`} className="p-4 border-b last:border-b-0">
-                            <div className="flex gap-3">
-                                {/* Image */}
-                                <div className="w-1/3">
-                                    <Skeleton className="aspect-[4/3] w-full rounded-md" />
-                                </div>
-                                {/* Info */}
-                                <div className="w-2/3 space-y-2">
-                                    <Skeleton className="h-4 w-3/4" />
-                                    <div className="flex items-center gap-2">
-                                        <Skeleton className="h-5 w-16 rounded-full" />
-                                        <Skeleton className="h-5 w-10 rounded-full" />
-                                    </div>
-                                    <Skeleton className="h-8 w-full rounded-md" />
-                                </div>
-                            </div>
-
-                            {/* Spec rows preview */}
-                            <div className="mt-4 pt-4 border-t space-y-2">
-                                {Array.from({ length: 4 }).map((_, j) => (
-                                    <div key={`mobile-spec-${i}-${j}`} className="flex justify-between">
-                                        <Skeleton className="h-3 w-16" />
-                                        <Skeleton className="h-3 w-24" />
-                                    </div>
-                                ))}
-                            </div>
+                <div className="overflow-hidden rounded-lg bg-card">
+                    <div className="flex items-center justify-between border-b bg-muted/80 px-4 py-2">
+                        <div className="flex items-center gap-2">
+                            <OnMuted className="size-3.5" />
+                            <OnMuted className="h-4 w-24" />
+                            <OnMuted className="h-[1.15rem] w-8 scale-75 rounded-full" />
                         </div>
-                    ))}
+                        <div className="flex items-center gap-1.5">
+                            <OnMuted className="h-2 w-4 rounded-full" />
+                            <OnMuted className="size-2 rounded-full" />
+                        </div>
+                    </div>
+
+                    {/* One card at 85% and the edge of the next, as the carousel opens. */}
+                    <div className="overflow-hidden">
+                        <div className="-ms-2 flex">
+                            {Array.from({ length: 2 }).map((_, i) => (
+                                <div key={`mobile-card-${i}`} className="min-w-0 shrink-0 grow-0 basis-[85%] ps-2">
+                                    <div className="flex gap-3 p-3">
+                                        <Skeleton className="aspect-[4/3] w-1/3 rounded-plate" />
+                                        <div className="flex w-2/3 flex-col items-start gap-2">
+                                            <Skeleton className="h-[21px] w-full" />
+                                            <Skeleton className="h-[41px] w-28 rounded-plate" />
+                                            <Skeleton className="mt-1 h-10 w-full rounded-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="border-t">
+                        <div className="border-b bg-muted px-3 py-2">
+                            <OnMuted className="h-4 w-24" />
+                        </div>
+                        <div className="divide-y">
+                            {FIRST_TAB.specs.map((spec) => (
+                                <div key={`mobile-${spec.key}`} className="flex items-center justify-between px-3 py-2">
+                                    <Skeleton className="h-4 w-20" />
+                                    <Skeleton className="h-4 w-16" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
